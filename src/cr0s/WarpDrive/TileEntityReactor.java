@@ -4,8 +4,6 @@
  */
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.tile.IEnergySink;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,7 +16,8 @@ import net.minecraft.world.World;
  */
 public class TileEntityReactor extends TileEntity implements IEnergySink {
 
-    TileEntityReactor(World var1) {
+    public TileEntityReactor(World var1) {
+        //super();
         worldObj = var1;
     }
     // = Настройки ядра =
@@ -96,7 +95,21 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     // = Энергия =
     int currentEnergyValue = 0;        // Текущее значение энергии
     int maxEnergyValue = 10000000; // 10 миллионов eU
+    private final int ENERGY_PER_BLOCK_MODE1 = 1; // eU
+    private final int ENERGY_PER_DISTANCE_MODE1 = 10; // eU
 
+    private final int ENERGY_PER_BLOCK_MODE2 = 100; // eU
+    private final int ENERGY_PER_DISTANCE_MODE2 = 100; // eU    
+    
+    private final byte MODE_BASIC_JUMP = 1; // Ближний прыжок 0-128
+    private final byte MODE_LONG_JUMP = 2;  // Дальний прыжок 0-12800
+    
+    private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
+    
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 7000;  // Максимальный объем корабля для прыжков не в космосе
+    
+    private final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
+    
     int cooldownTime = 0;
     private final int MINIMUM_COOLDOWN_TIME = 5;
     private final int TICK_INTERVAL = 1;
@@ -112,12 +125,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         
         readAllStates();
         
-        if (!canJump() && launchState) {
+        /*if (!canJump() && launchState) {
             setRedPowerStates(false, true);
             System.out.println("[TE-WC] Cooldown time: " + cooldownTime);
             cooldownTime--;
             return;
-        } 
+        }*/ 
 
         // 5. Вычисление пространственных параметров корабля
         int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
@@ -166,17 +179,43 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         minY = yCoord - shipDown;
         maxY = yCoord + shipUp;
-        
+
         // Подготовка к прыжку
-        if (launchState && (cooldownTime <= 0)) {
-            System.out.println("[WP-TE] Current mode: " + currentMode);
+        if (launchState && (cooldownTime <= 0) && (currentMode == 1 || currentMode == 2)) {
+            // Проверка размеров корабля
+            if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE) {
+                setRedPowerStates(false, true);
+                System.out.println("[WP-TE] Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")");
+                return;                
+            }
+            
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
+            System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
+            
+            // Подсчёт необходимого количества энергии для прыжка
+            if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0) {
+                setRedPowerStates(false, true);
+                System.out.println("[WP-TE] Insufficient energy to jump");
+                return;
+            }
         
+            // Потребить энергию
+            this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
+            
             System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
             System.out.println((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
             System.out.println((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
         
+            // Получаем расстояние для прыжка
             distance = readCounterMax(lengthCounter);
+            
+            distance = Math.min(MAX_JUMP_DISTANCE_BY_COUNTER, distance);
+            
+            // Дальний прыжок
+            if (currentMode == 2) {
+                distance *= 100;
+            }
+            
             System.out.println((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
         
             // public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz)
@@ -208,11 +247,26 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             jump.on = true;
             
             System.out.println("[TE-WC] Calling onUpdate()...");
-            //jump.onUpdate();
+            jump.onUpdate();
             //worldObj.updateEntities();
         }
     }
 
+    public int calculateRequiredEnergy(int shipVolume, int jumpDistance) {
+        int energyValue = 0;
+        
+        switch (currentMode) {
+            case MODE_BASIC_JUMP:
+                energyValue = (ENERGY_PER_BLOCK_MODE1 * shipVolume) + (ENERGY_PER_DISTANCE_MODE1 * jumpDistance);
+                break;
+            case MODE_LONG_JUMP:
+                energyValue = (ENERGY_PER_BLOCK_MODE2 * shipVolume) + (ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
+                break;
+        }
+        
+        return energyValue;
+    }
+    
     public void readAllStates() {
         // 1. Ищем кабель RedPower (шина данных для управления ядром)
         redPowerCable = findRedpowerCable();
@@ -244,6 +298,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         modeCounter = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
         if (modeCounter == null || !modeCounter.toString().contains("LogicStorage")) {
             invalidAssembly = true;
+            setRedPowerStates(false, true);
             return;
         }
 
@@ -251,6 +306,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         if (!searchParametersCounters()) {
             invalidAssembly = true;
+            setRedPowerStates(false, true);
             return;
         }
 
@@ -274,7 +330,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     }
     
     public void setRedPowerStates(boolean launch, boolean error) {
-        if (redPowerCable == null) return;
+        if (redPowerCable == null) {
+            return;
+        }
         NBTTagCompound tag = new NBTTagCompound();
         redPowerCable.writeToNBT(tag);
 
@@ -528,15 +586,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
-        super.readFromNBT(tag);
+        //super.readFromNBT(tag);
         currentEnergyValue = tag.getInteger("energy");
-        System.out.println("Energy value from NBT: " + currentEnergyValue);
+        //System.out.println("Energy value from NBT: " + currentEnergyValue);
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        super.writeToNBT(tag);
+        //super.writeToNBT(tag);
         tag.setInteger("energy", currentEnergyValue);
-        System.out.println("Energy value written to NBT: " + currentEnergyValue);
+        //System.out.println("Energy value written to NBT: " + currentEnergyValue);
     }
 }
