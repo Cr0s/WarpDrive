@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -13,14 +12,15 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
+import ic2.api.Items;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "0.0.1")
 @NetworkMod(clientSideRequired = false, serverSideRequired = true)
@@ -53,10 +53,15 @@ public class WarpDrive {
 
     @Init
     public void load(FMLInitializationEvent event) {
+        
+        
+        MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
+        
+        
         LanguageRegistry.addName(warpCore, "Warp-drive Reactor Core");
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
-
+        
         proxy.registerRenderers();
         proxy.registerJumpEntity();
 
@@ -71,11 +76,14 @@ public class WarpDrive {
     @PostInit
     public void postInit(FMLPostInitializationEvent event) {
         space = DimensionManager.getWorld(spaceDimID);
+        
+        GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
+        'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));
     }
 
     //@SideOnly(Side.SERVER)
     private void registerSpaceDimension() {
-        spaceBiome = (new BiomeSpace(23)).setColor(9286496).setDisableRain().setBiomeName("Space");
+        spaceBiome = (new BiomeSpace(23)).setColor(0).setDisableRain().setBiomeName("Space");
         this.spaceProviderID = 14;
 
         DimensionManager.registerProviderType(this.spaceProviderID, SpaceProvider.class, true);

@@ -12,7 +12,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 
 public class EntityJump extends Entity {
@@ -48,6 +47,11 @@ public class EntityJump extends Entity {
     public JumpBlock ship[];
     public TileEntityReactor reactor;
 
+    boolean isJumping = false;
+    int currentIndexInShip = 0;
+    
+    private final int BLOCKS_PER_TICK = 500;
+    
     public EntityJump(World world) {
         super(world);
     }
@@ -78,6 +82,8 @@ public class EntityJump extends Entity {
         System.out.println("[JE] Entity created");
 
         this.reactor = parReactor;
+        
+        this.isJumping = false;
     }
 
     public void killEntity(String reason) {
@@ -92,18 +98,37 @@ public class EntityJump extends Entity {
     @SideOnly(Side.SERVER)
     @Override
     public void onUpdate() {
-        if (worldObj.editingBlocks || !on || minY < 0 || maxY > 255) {
+        if (!on || minY < 0 || maxY > 255) {
             killEntity("Entity is disabled or Y-coord error! Cannot jump.");
             return;
         }
-
-        System.out.println("[JUMP] onUpdate() called");
-
-        // Блокируем мир
-        worldObj.editingBlocks = true;
-
+        
+        if (!isJumping) {
+            System.out.println("[JE] Preparing to jump...");
+            prepareToJump();
+        } else {
+            System.out.println("[JE] Moving ship part: " + ((int)ship.length / BLOCKS_PER_TICK) + "/" + ((int)currentIndexInShip / BLOCKS_PER_TICK) + ", [" + ship.length + ", " + currentIndexInShip + "]");
+            if (currentIndexInShip >= ship.length-1) {
+                isJumping = false;
+                finishJump();
+            } else {
+                moveShip();    
+            }
+        }
+    }
+    
+    public void prepareToJump() {
+        // Блокируем миры
+        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = true;
+        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+            DimensionManager.getWorld(0).editingBlocks = true;
+        } else {
+            worldObj.editingBlocks = true;
+        }
+        
         distance = getPossibleJumpDistance();
-        if (distance <= 0) {
+        if (distance <= 0 && (dir != -1 && worldObj.provider.dimensionId != 0)) {
             killEntity("Not enough space for jump.");
             return;
         }
@@ -116,24 +141,34 @@ public class EntityJump extends Entity {
         int shipSize = getRealShipSize();
 
         saveShip(shipSize, false);
-
-        removeShip();
-
-        moveShip();
-
+        
+        isJumping = true;
+        this.currentIndexInShip = 0;       
+    }
+    
+    /**
+     * Закончить прыжок: переместить Entity, разблокировать мир и удалить себя
+     */
+    public void finishJump() {
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
         boolean fromSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID && minY - distance < 0 && dir == -2);
         boolean toSpace = (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID && maxY >= 255);
         moveEntity(axisalignedbb, distance, dir, toSpace, fromSpace);
 
-        // Разблокируем мир
-        worldObj.editingBlocks = false;
+        // Разблокируем миры
+        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = false;
+        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+            DimensionManager.getWorld(0).editingBlocks = false;
+        } else {
+            worldObj.editingBlocks = false;
+        }
 
         // Прыжок окончен
         killEntity("");
-        on = false;
+        on = false;        
     }
-
+    
     /**
      * Удаление корабля из мира
      */
@@ -202,28 +237,25 @@ public class EntityJump extends Entity {
      * Перемещение корабля
      */
     public void moveShip() {
-        // 1. Прыжок в космос
-        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
-            System.out.println("[JUMP] Jumping TO SPACE");
-            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = true;
-            for (int indexInShip = 0; indexInShip <= ship.length - 1; indexInShip++) {
-                moveBlockToSpace(indexInShip, distance, dir);
+            // 1. Прыжок в космос
+            if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+                for (int index = 0; index < Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip - 1); index++) {
+                    this.currentIndexInShip++;
+                    moveBlockToSpace(currentIndexInShip, distance, dir);
+                }
+            // 2. Прыжок из космоса
+            } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+                for (int index = 0; index < Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip - 1); index++) {
+                    this.currentIndexInShip++;
+                    moveBlockFromSpace(currentIndexInShip, distance, dir);
+                }
+            // 3. Обычный прыжок
+            } else {            
+                for (int index = 0; index < Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip - 1); index++) {
+                    this.currentIndexInShip++;
+                    moveBlock(currentIndexInShip, distance, dir);
+                }
             }
-            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = false;
-        // 2. Прыжок из космоса
-        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            System.out.println("[JUMP] Jumping from SPACE");
-            DimensionManager.getWorld(0).editingBlocks = true;
-            for (int indexInShip = 0; indexInShip <= ship.length - 1; indexInShip++) {
-                moveBlockFromSpace(indexInShip, distance, dir);
-            }  
-            DimensionManager.getWorld(0).editingBlocks = false;
-        // 3. Обычный прыжок
-        } else {            
-            for (int indexInShip = 0; indexInShip <= ship.length - 1; indexInShip++) {
-                moveBlock(indexInShip, distance, dir);
-            }
-        }
     }
 
     /**
@@ -254,7 +286,6 @@ public class EntityJump extends Entity {
         }
 
         // Взрываем точку столкновения с препятствием, если это явно не стыковка
-        // Сила взрыва: TNT * длинну прыжка - (расстояние до препятствия - 5)
         if (blowPoints > 5 && this.dir != -1) {
             worldObj.createExplosion((Entity) null, blowX, blowY, blowZ, Math.min(4F * 30, 4F * (distance / 2)), true);
         }
@@ -322,9 +353,13 @@ public class EntityJump extends Entity {
                 if (obj == null || !(obj instanceof Entity)) {
                     continue;
                 }
-
+                
                 Entity entity = (Entity) obj;
 
+                if (entity instanceof EntityJump) {
+                    continue;
+                }
+                
                 int oldEntityX = (int) entity.posX;
                 int oldEntityY = (int) entity.posY;
                 int oldEntityZ = (int) entity.posZ;

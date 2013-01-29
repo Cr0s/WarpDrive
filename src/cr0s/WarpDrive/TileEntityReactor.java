@@ -247,7 +247,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             jump.on = true;
             
             System.out.println("[TE-WC] Calling onUpdate()...");
-            jump.onUpdate();
+            
+            worldObj.spawnEntityInWorld(jump);
+            
+            //jump.onUpdate();
             //worldObj.updateEntities();
         }
     }

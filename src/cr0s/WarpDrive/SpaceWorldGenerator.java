@@ -21,7 +21,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     public final int MOON_RADIUS = 32;
     
     // Радиус звезды
-    public final int STAR_RADIUS = 64;
+    public final int STAR_RADIUS = 80;
     
     // Выше 128 по Y почти ничего не будет сгенерировано
     public final int Y_LIMIT = 128;
@@ -83,6 +83,12 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             
             // Ядро астероида из алмаза
             world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);
+        }        
+
+        // Ледяные астероиды
+        if (random.nextInt(2000) == 1) {
+            System.out.println("Generating ice asteroid at " + x + " " + y + " " + z);
+            generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.ice.blockID);
         }        
         
         // Алмазные астероиды
@@ -260,34 +266,38 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
                     
                     // Ставим блоки по всем осям в текущей точке
-                    int blockID;
+                    int blockID, meta = 0;
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {
                         blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        world.setBlock(xCoord + x, yCoord + y, zCoord + z, blockID);
-                        world.setBlock(xCoord - x, yCoord + y, zCoord + z, blockID);
+                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlockAndMetadata(xCoord + x, yCoord + y, zCoord + z, blockID, meta);
+                        world.setBlockAndMetadata(xCoord - x, yCoord + y, zCoord + z, blockID, meta);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        world.setBlock(xCoord + x, yCoord - y, zCoord + z, blockID);
-                        world.setBlock(xCoord + x, yCoord + y, zCoord - z, blockID);
+                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlockAndMetadata(xCoord + x, yCoord - y, zCoord + z, blockID, meta);
+                        world.setBlockAndMetadata(xCoord + x, yCoord + y, zCoord - z, blockID, meta);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        world.setBlock(xCoord - x, yCoord - y, zCoord + z, blockID);
-                        world.setBlock(xCoord + x, yCoord - y, zCoord - z, blockID);
+                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlockAndMetadata(xCoord - x, yCoord - y, zCoord + z, blockID, meta);
+                        world.setBlockAndMetadata(xCoord + x, yCoord - y, zCoord - z, blockID, meta);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        world.setBlock(xCoord - x, yCoord + y, zCoord - z, blockID);
-                         world.setBlock(xCoord - x, yCoord - y, zCoord - z, blockID);
+                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlockAndMetadata(xCoord - x, yCoord + y, zCoord - z, blockID, meta);
+                        world.setBlockAndMetadata(xCoord - x, yCoord - y, zCoord - z, blockID, meta);
                     }
                 }
             }
@@ -308,15 +318,35 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             Block.oreCoal.blockID,
             Block.oreEmerald.blockID,
             Block.oreLapis.blockID,
-            Block.oreRedstoneGlowing.blockID,};
+            Block.oreRedstoneGlowing.blockID, 
+            
+            // IC ores
+            4093, // Uranium
+            4094, // Tin
+            4095, // Copper ore
+            4095, // Copper ore
+        };
+        
+        int redPowerOreBlockID = 242;
+        int[] redPowerOres = {
+            0, 1, 2, 3, 4, 5, 6, 7 // Рубины -- Николит
+        };
+        
 
         int blockID = Block.stone.blockID;
         if (corrupted) {
             blockID = Block.cobblestone.blockID;
         }
 
-        if (random.nextInt(15) == 1) {
-            blockID = ores[random.nextInt(ores.length - 1)];
+        if (random.nextInt(10) == 1) {
+            switch (random.nextInt(2)) {
+                case 0:
+                    blockID = ores[random.nextInt(ores.length - 1)];
+                    break;
+                case 1: // OREM -- ORE (Руда), M - метаданные
+                    blockID = Integer.parseInt(new StringBuilder().append(redPowerOreBlockID).append(redPowerOres[random.nextInt(redPowerOres.length - 1)]).toString());
+            }
+            
         } else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;
         }

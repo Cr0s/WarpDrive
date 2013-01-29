@@ -4,7 +4,6 @@
  */
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.registry.GameRegistry;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.EnumCreatureType;
@@ -15,13 +14,11 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.Event;
-import net.minecraftforge.event.terraingen.ChunkProviderEvent;
 
 public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvider {
 
     private Random rand;
+    private BiomeGenBase[] biomesForGeneration = new BiomeGenBase[1];
 
     /**
      * Reference to the World object.
@@ -42,7 +39,8 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
         byte[] var3 = new byte[32768];
         generateTerrain(par1, par2, var3);
         //this.caveGenerator.generate(this, this.worldObj, par1, par2, var3);
-
+        this.biomesForGeneration[0] = WarpDrive.spaceBiome;
+        
         Chunk var4 = new Chunk(this.worldObj, var3, par1, par2);
 
         var4.generateSkylightMap();
@@ -70,6 +68,8 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
 
     @Override
     public void generateTerrain(int par1, int par2, byte[] par3ArrayOfByte) {
+        this.biomesForGeneration[0] = WarpDrive.spaceBiome;
+        
        // if (!"Space".equals(worldObj.provider.getDimensionName())) {
        // }
         
@@ -79,7 +79,7 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
         int var7 = var4 + 1;
         byte var8 = 17;
         int var9 = var4 + 1;
-       // this.biomesForGeneration[0] = WarpDrive.spaceBiome;
+        this.biomesForGeneration[0] = WarpDrive.spaceBiome;
         this.noiseArray = this.initializeNoiseField(this.noiseArray, par1 * var4, 0, par2 * var4, var7, var8, var9);
 
         for (int var10 = 0; var10 < var4; ++var10) {

@@ -8,25 +8,30 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldProvider;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraftforge.client.IRenderHandler;
 
 public class SpaceProvider extends WorldProvider {
 
-    @Override
-    public String getDimensionName() {
-        return "Space";
-    }
     public int exitXCoord;
     public int exitYCoord;
     public int exitZCoord;
     public int exitDimID;
-
+    
     public SpaceProvider() {
-        this.hasNoSky = true;
+        this.worldChunkMgr = new WorldChunkManagerHell(WarpDrive.spaceBiome, 0.0F, 0.0F);
+        this.hasNoSky = false;
     }
 
+    @Override
+    public String getDimensionName() {
+        return "Space";
+    }
+    
     @Override
     public boolean canRespawnHere() {
         return true;
@@ -51,6 +56,12 @@ public class SpaceProvider extends WorldProvider {
     }    
 
     @Override
+    public BiomeGenBase getBiomeGenForCoords(int x, int z)
+    {
+        return WarpDrive.spaceBiome;
+    }    
+    
+    @Override
     public void setAllowedSpawnTypes(boolean allowHostile, boolean allowPeaceful) {
         super.setAllowedSpawnTypes(false, false);
 
@@ -58,7 +69,7 @@ public class SpaceProvider extends WorldProvider {
 
     @Override
     public float calculateCelestialAngle(long par1, float par3) {
-        return 180;
+        return 0.3F;
     }
     
     @Override
@@ -77,7 +88,7 @@ public class SpaceProvider extends WorldProvider {
         {
             float var3 = 1.0F - (float)var2 / 15.0F;
             this.lightBrightnessTable[var2] = (1.0F - var3) / (var3 * 3.0F + 1.0F) * (1.0F - var1) + var1;
-        }        
+        } 
     }    
 
     @SideOnly(Side.CLIENT)
@@ -107,14 +118,12 @@ public class SpaceProvider extends WorldProvider {
     public Vec3 getSkyColor(Entity cameraEntity, float partialTicks) {
         setCloudRenderer(new CloudRenderBlank());
         return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0, (double) 0, (double) 0);
-
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public Vec3 getFogColor(float par1, float par2) {
-        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) .2, (double) .2, (double) .2);
-
+        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0, (double) 0, (double) 0);
     }
 
     @SideOnly(Side.CLIENT)
@@ -129,13 +138,6 @@ public class SpaceProvider extends WorldProvider {
     {
         return null;
     }    
-    
-    @SideOnly(Side.CLIENT)
-    @Override
-    public IRenderHandler getSkyRenderer()
-    {
-        return null;
-    }
     
     @Override
     public String getWelcomeMessage()
@@ -174,6 +176,20 @@ public class SpaceProvider extends WorldProvider {
 
         if (worldObj.isAirBlock(var5.posX, var5.posY, var5.posZ)) {
             worldObj.setBlockWithNotify(var5.posX, var5.posY, var5.posZ, Block.stone.blockID);
+            
+            worldObj.setBlockWithNotify(var5.posX + 1, var5.posY + 1, var5.posZ, Block.glass.blockID);
+            worldObj.setBlockWithNotify(var5.posX + 1, var5.posY + 2, var5.posZ, Block.glass.blockID);
+            
+            worldObj.setBlockWithNotify(var5.posX - 1, var5.posY + 1, var5.posZ, Block.glass.blockID);
+            worldObj.setBlockWithNotify(var5.posX - 1, var5.posY + 2, var5.posZ, Block.glass.blockID);  
+            
+            worldObj.setBlockWithNotify(var5.posX, var5.posY + 1, var5.posZ + 1, Block.glass.blockID);
+            worldObj.setBlockWithNotify(var5.posX, var5.posY + 2, var5.posZ + 1, Block.glass.blockID);   
+            
+            worldObj.setBlockWithNotify(var5.posX, var5.posY + 1, var5.posZ - 1, Block.glass.blockID);
+            worldObj.setBlockWithNotify(var5.posX, var5.posY + 2, var5.posZ - 1, Block.glass.blockID);   
+            
+            worldObj.setBlockWithNotify(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID); 
         }
         return var5;
     }
@@ -185,7 +201,7 @@ public class SpaceProvider extends WorldProvider {
     
     @Override
     public boolean isDaytime() {
-        return false;
+        return true;
     }
     
     @Override
