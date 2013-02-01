@@ -37,6 +37,8 @@ public class SpaceEventHandler {
                 // Отправить назад на Землю
                 if (pme.newY < -50.0D) {
                     ((EntityPlayerMP)pme.entityPlayer).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) pme.entityPlayer), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(pme.newX), 255, MathHelper.floor_double(pme.newZ)));
+                    ((EntityPlayerMP)pme.entityPlayer).setFire(30);
+                    ((EntityPlayerMP)pme.entityPlayer).setPositionAndUpdate(pme.newX, 256D, pme.newZ);
                     return;
                 }
             }

@@ -69,7 +69,7 @@ public class SpaceProvider extends WorldProvider {
 
     @Override
     public float calculateCelestialAngle(long par1, float par3) {
-        return 0.3F;
+        return 0F;
     }
     
     @Override

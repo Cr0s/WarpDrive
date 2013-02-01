@@ -68,12 +68,14 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         if (random.nextInt(200) == 1) {
             System.out.println("Generating asteroid at " + x + " " + y + " " + z);
             generateAsteroid(world, x, y, z, 6, 11);
+            return;
         }
 
         // Железные астероиды
         if (random.nextInt(2000) == 1) {
             System.out.println("Generating iron asteroid at " + x + " " + y + " " + z);
             generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.oreIron.blockID);
+            return;
         }        
 
         // Обсидиановые астероиды
@@ -83,12 +85,24 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             
             // Ядро астероида из алмаза
             world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);
+            
+            return;
         }        
 
         // Ледяные астероиды
         if (random.nextInt(2000) == 1) {
             System.out.println("Generating ice asteroid at " + x + " " + y + " " + z);
             generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.ice.blockID);
+            
+            return;
+        }        
+        
+        // Астероидные поля
+        if (random.nextInt(3000) == 1) {
+            System.out.println("Generating asteroid field at " + x + " " + y + " " + z);
+            generateAsteroidField(world, x, y, z);
+            
+            return;
         }        
         
         // Алмазные астероиды
@@ -97,14 +111,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             generateAsteroidOfBlock(world, x, y, z, 4, 6, Block.oreDiamond.blockID);
             
             // Ядро астероида из алмаза
-            world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);            
+            world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);     
+            
+            return;
         }        
-        
-        // Астероидные поля
-        if (random.nextInt(3000) == 1) {
-            System.out.println("Generating asteroid field at " + x + " " + y + " " + z);
-            generateAsteroidField(world, x, y, z);
-        }
     }
 
     
