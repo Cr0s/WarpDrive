@@ -8,15 +8,19 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.tile.IEnergySink;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -27,10 +31,11 @@ import net.minecraftforge.common.DimensionManager;
  */
 public class TileEntityReactor extends TileEntity implements IEnergySink {
 
-    public TileEntityReactor(World var1) {
-        //super();
-        worldObj = var1;
-    }
+    //public TileEntityReactor(World var1) {
+    //    super();
+    //    worldObj = var1;
+    //}
+    
     // = Настройки ядра =
     // Счётчики габаритов, переключатель режимов, переключатель длинны прыжка
     TileEntity gabarits1, gabarits2, modeCounter, lengthCounter;
@@ -59,8 +64,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
      * Blue     -- Прыжок вперёд    (С) 
      * Yellow   -- Прыжок назад     (Ж) 
      * 
-     * Red      -- Прыжок влево     (К)  
-     * Green    -- Прыжок вправо    (З) 
+     * Red      -- Прыжок вправо    (К)  
+     * Green    -- Прыжок влево     (З) 
      * 
      * White    -- Прыжок вверх     (Б)
      * Black    -- Прыжок вниз      (Ч)
@@ -101,23 +106,34 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     int shipVolume; // Примерный объем корабля (проиведение 3 измерений)
     // Текущий режим ядра
     int currentMode = 0;
+    
     // = Энергия =
     int currentEnergyValue = 0;        // Текущее значение энергии
     int maxEnergyValue = 10000000; // 10 миллионов eU
+    
+    // = Константы =
     private final int ENERGY_PER_BLOCK_MODE1 = 1; // eU
     private final int ENERGY_PER_DISTANCE_MODE1 = 10; // eU
     private final int ENERGY_PER_BLOCK_MODE2 = 100; // eU
     private final int ENERGY_PER_DISTANCE_MODE2 = 100; // eU    
-    private final int ENERGY_PER_ENTITY_TO_SPACE = 10000; // eU
+    private final int ENERGY_PER_ENTITY_TO_SPACE = 100000; // eU
     private final byte MODE_BASIC_JUMP = 1; // Ближний прыжок 0-128
     private final byte MODE_LONG_JUMP = 2;  // Дальний прыжок 0-12800
+    private final byte MODE_COLLECT_PLAYERS = 3; // Сбор привязанных к ядру игроков
+    private final byte MODE_TELEPORT = 9;   // Телепортация игроков в космос
     private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 7000;  // Максимальный объем корабля для прыжков не в космосе
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе
     private final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
     int cooldownTime = 0;
     private final int MINIMUM_COOLDOWN_TIME = 5;
     private final int TICK_INTERVAL = 1;
 
+    // = Привязка игроков =
+    public ArrayList<String> players = new ArrayList();
+    public String playersString = "";
+    
+    public String coreState = "";
+    
     @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
@@ -127,9 +143,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         ticks = 0;
 
         readAllStates();
-
+        
         // Телепортер в космос
-        if (currentMode == 9 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+        if (currentMode == MODE_TELEPORT && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
             if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
                 AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(xCoord - 5, yCoord - 5, zCoord - 5, xCoord + 5, yCoord + 5, zCoord + 5);
                 List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
@@ -176,11 +192,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                         entity.travelToDimension(WarpDrive.instance.spaceDimID);
                     }
                 }
-
-                worldObj.setBlock(xCoord, yCoord, zCoord, 0);
-                worldObj.createExplosion((Entity) null, xCoord, yCoord, zCoord, 4F * 2, true);
-                EntityItem coreItem = new EntityItem(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), xCoord, 256, yCoord, new ItemStack(WarpDrive.warpCore));
-                DimensionManager.getWorld(WarpDrive.instance.spaceDimID).spawnEntityInWorld(coreItem);
             }
         }
 
@@ -238,17 +249,83 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         minY = yCoord - shipDown;
         maxY = yCoord + shipUp;
+        
+        this.shipSize = 0;
+        
+        switch (this.direction) {
+            case 0:
+            case 180:
+                this.shipSize = this.shipBack + this.shipFront;
+                break;
+            case 90:
+            case 270: 
+                this.shipSize = this.shipLeft + shipRight;
+                break;
+                
+            case -1:
+            case -2:
+                this.shipSize = this.shipDown + this.shipUp;
+                break;              
+        }
 
+       
+        // Проверка размеров корабля
+        if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE) {
+            setIOXState(this.IOX_SHIP_IS_TOO_BIG);
+            setRedPowerStates(false, true);
+            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
+            this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
+            System.out.println(coreState);
+            return;            
+        }
+        
+        this.shipVolume = getRealShipVolume();
+        
+        if (shipVolume > MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+            setIOXState(this.IOX_SHIP_IS_TOO_BIG);
+            setRedPowerStates(false, true);
+            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
+            this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
+            //System.out.println(coreState);
+            return;
+        }   
+        
+        // Сбор игроков
+        if (currentMode == MODE_COLLECT_PLAYERS && launchState) {
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+            
+            for (int i = 0; i < players.size(); i++) {
+                String nick = players.get(i);
+                EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(nick);
+                
+                if (player != null) {
+                    if (!testBB(aabb, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)) && (this.currentEnergyValue - this.ENERGY_PER_ENTITY_TO_SPACE >= 0)) {
+                        player.setPositionAndUpdate(xCoord + dx, yCoord, zCoord + dz);
+                        
+                        if (player.dimension != worldObj.provider.dimensionId) {
+                            player.mcServer.getConfigurationManager().transferPlayerToDimension(player, this.worldObj.provider.dimensionId, new SpaceTeleporter(DimensionManager.getWorld(this.worldObj.provider.dimensionId), 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
+                        }
+                        
+                        this.currentEnergyValue -= this.ENERGY_PER_ENTITY_TO_SPACE;
+                        player.sendChatToPlayer("[WarpCore] Welcome aboard, " + player.username + ".");
+                    }
+                }
+            }
+            
+            setRedPowerStates(false, false);
+            return;
+        }        
+        
+        if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP) && !invalidAssembly && !launchState) {
+            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
+            coreState += "* Need " + Math.max(0, calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";                
+        } else if (currentMode == 9) {
+            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
+            coreState += "* Is possible to teleport " + (currentEnergyValue / this.ENERGY_PER_ENTITY_TO_SPACE) + " players to space";
+        }
+        
         // Подготовка к прыжку
         if (launchState && (cooldownTime <= 0) && (currentMode == 1 || currentMode == 2)) {
-            // Проверка размеров корабля
-            if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE) {
-                setIOXState(this.IOX_SHIP_IS_TOO_BIG);
-                setRedPowerStates(false, true);
-                System.out.println("[WP-TE] Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")");
-                return;
-            }
-
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
             System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
@@ -257,6 +334,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 setIOXState(this.IOX_LOW_POWER);
                 setRedPowerStates(false, true);
                 System.out.println("[WP-TE] Insufficient energy to jump");
+                coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
+                coreState += "* LOW POWER. Need " + (calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";
                 return;
             }
 
@@ -268,12 +347,16 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             System.out.println((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
 
             // Получаем расстояние для прыжка
-            distance = readCounterMax(lengthCounter);
-
+            distance = readCounterMax(lengthCounter);            
             distance = Math.min(MAX_JUMP_DISTANCE_BY_COUNTER, distance);
 
+            //System.out.println("[WC-TE] Distance: " + distance + "; shipSize: " + shipSize);
+            if (this.currentMode == this.MODE_BASIC_JUMP) {
+                distance += shipSize;       
+            }            
+            
             // Дальний прыжок в космосе в 100 раз дальше
-            if (currentMode == 2 && (direction != -1 && direction != -2)) {
+            if (currentMode == this.MODE_LONG_JUMP && (direction != -1 && direction != -2)) {
                 if (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
                     distance *= 100;
                 } else if (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
@@ -299,8 +382,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             jump.shipRight = shipRight;
             jump.shipUp = shipUp;
             jump.shipDown = shipDown;
-            jump.shipLength = 0;
-
+            jump.shipLength = this.shipSize;
+            
             this.cooldownTime = 60;
 
             setRedPowerStates(false, false);
@@ -314,12 +397,21 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             System.out.println("[TE-WC] Calling onUpdate()...");
 
             worldObj.spawnEntityInWorld(jump);
-
-            //jump.onUpdate();
-            //worldObj.updateEntities();
+            coreState = "";
         }
     }
+    
+    /*
+     * Проверка на вхождение точки в область (bounding-box)
+     */
+    public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z) {
+        return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
+    }    
 
+    public String getCoreState() {
+        return "[WarpCore] " + this.coreState;
+    }
+    
     public int calculateRequiredEnergy(int shipVolume, int jumpDistance) {
         int energyValue = 0;
 
@@ -334,7 +426,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         return energyValue;
     }
-
+    
     public void readAllStates() {
         // 1. Ищем кабель RedPower (шина данных для управления ядром) и IO-Expander
         redPowerCable = findRedpowerCableAndIOX();
@@ -358,6 +450,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 return;
             }
         } else {
+            this.coreState = "ASSEMBLING ERROR: RedPower bundled cable is not connected.";
             invalidAssembly = true;
             return;
         }
@@ -365,6 +458,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         // 2. Ищем счетчик режимов (стоит над ядром, (x, y+1,z))
         modeCounter = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
         if (modeCounter == null || !modeCounter.toString().contains("LogicStorage")) {
+            this.coreState = "ASSEMBLING ERROR: \"modes\" counter is not installed.";
             invalidAssembly = true;
             setIOXState(IOX_ASSEMBLY_FAILURE);
             setRedPowerStates(false, true);
@@ -374,6 +468,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         currentMode = readCounterMax(modeCounter);
 
         if (!searchParametersCounters()) {
+            this.coreState = "ASSEMBLING ERROR: Parameters counters is not installed.";
             invalidAssembly = true;
             setIOXState(IOX_ASSEMBLY_FAILURE);
             setRedPowerStates(false, true);
@@ -395,12 +490,34 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         shipVolume = shipLength * shipWidth * shipHeight;
 
-
-
         // 4. Вычисление направления движения
         direction = calculateJumpDirection();
+        
+        invalidAssembly = false;
     }
 
+    /*
+     * Получить реальное количество блоков, из которых состоит корабль 
+     */
+    public int getRealShipVolume() {
+        int shipVol = 0;
+
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    int blockID = worldObj.getBlockId(x, y, z);
+
+                    // Пропускаем пустые блоки воздуха
+                    if (blockID != 0) {
+                        shipVol++;
+                    }
+                }
+            }
+        }
+
+        return shipVol;
+    }    
+    
     public void setRedPowerStates(boolean launch, boolean error) {
         if (redPowerCable == null) {
             return;
@@ -453,11 +570,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         int result = 0;
 
         /*
-         *              0
-         *            front
-         * 270 left     X     right 90
-         *            back
-         *             180
+         *              0                      -1
+         *            front                    up
+         * 270 left     X     right 90         X
+         *            back                     down
+         *             180                     -2
          */
 
         if (up) {
@@ -609,15 +726,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         Boolean[] locCableStates = new Boolean[16];
 
-        String s = "", ss = "";
+        String s = "";//, ss = "";
         for (int i = 0; i < 16; i++) {
             locCableStates[i] = (states[i] != 0);
             s += (states[i] != 0) ? "1" : "0";
-            ss += String.valueOf(states[i]) + " ";
+            //ss += String.valueOf(states[i]) + " ";
         }
-
-        //System.out.println("[WP-TE] Cable states: " + s);
-        //System.out.println("[WP-TE] Non-logical : " + ss);
 
         return locCableStates;
     }
@@ -685,15 +799,74 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
     @Override
     public void readFromNBT(NBTTagCompound tag) {
-        //super.readFromNBT(tag);
+        super.readFromNBT(tag);
         currentEnergyValue = tag.getInteger("energy");
-        //System.out.println("Energy value from NBT: " + currentEnergyValue);
+        playersString = tag.getString("players");
+        updatePlayersList();
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
-        //super.writeToNBT(tag);
+        super.writeToNBT(tag);
         tag.setInteger("energy", currentEnergyValue);
-        //System.out.println("Energy value written to NBT: " + currentEnergyValue);
+        
+        updatePlayersString();
+        tag.setString("players", playersString);
+    }
+    
+    public void attachPlayer(EntityPlayer ep) {
+        for (int i = 0; i < players.size(); i++) {
+            String nick = players.get(i);
+            
+            if (ep.username.equals(nick)) {
+                ep.sendChatToPlayer("[WarpCore] Detached.");
+                players.remove(i);
+                return;
+            }
+        }
+        
+        ep.attackEntityFrom(DamageSource.generic, 1);
+        ep.sendChatToPlayer("[WarpCore] Successfully attached.");
+        players.add(ep.username);
+        updatePlayersString();
+    }
+    
+    public void updatePlayersString() {
+        String nick;
+        this.playersString = "";
+        
+        for (int i = 0; i < players.size(); i++) {
+            nick = players.get(i);
+            
+            this.playersString += nick + "|";
+        }
+    }
+    
+    public void updatePlayersList() {
+        String[] playersArray = playersString.split("\\|");
+
+        for (int i = 0; i < playersArray.length; i++) {
+            String nick = playersArray[i];
+            
+            if (!nick.isEmpty()) {
+                players.add(nick);
+            }
+        }
+    }
+    
+    public String getAttachedPlayersList() {
+        String list = "";
+        
+        for (int i = 0; i < this.players.size(); i++) {
+            String nick = this.players.get(i);
+            
+            list += nick + ((i == this.players.size() - 1)? "" : ", ");
+        }
+        
+        if (players.isEmpty()) {
+            list = "<nobody>";
+        }
+        
+        return list;
     }
 }

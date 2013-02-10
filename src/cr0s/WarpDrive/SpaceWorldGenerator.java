@@ -49,20 +49,21 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
 
         // Установка луны
-        if (random.nextInt(10000) == 1) {
+        if (random.nextInt(8000) == 1) {
             System.out.println("Generating moon at " + x + " " + y + " " + z);
             generateSphere2(world, x, y, z, MOON_RADIUS, false, 0, false);
             return;
         }
 
         // Установка звезды
-        if (random.nextInt(10000) == 1) {
+        // DISABLED DUE LAG
+        /*if (random.nextInt(10000) == 1) {
             System.out.println("Generating star at " + x + " " + y + " " + z);
             generateSphere2(world, x, y, z, STAR_RADIUS, false, Block.glowStone.blockID, true);
             generateSphere2(world, x, y, z, STAR_RADIUS -1, false, Block.glowStone.blockID, true);
             generateSphere2(world, x, y, z, STAR_RADIUS -2, false, Block.glowStone.blockID, true);
             return;
-        }        
+        }*/        
         
         // Простые астероиды
         if (random.nextInt(200) == 1) {
@@ -78,6 +79,20 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }        
 
+        // Медные астероиды
+        if (random.nextInt(2000) == 1) {
+            System.out.println("Generating copper asteroid at " + x + " " + y + " " + z);
+            generateAsteroidOfBlock(world, x, y, z, 6, 11, 4095);
+            return;
+        }
+        
+        // Оловяные астероиды
+        if (random.nextInt(2000) == 1) {
+            System.out.println("Generating tin asteroid at " + x + " " + y + " " + z);
+            generateAsteroidOfBlock(world, x, y, z, 6, 11,  4094);
+            return;
+        }        
+        
         // Обсидиановые астероиды
         if (random.nextInt(2000) == 1) {
             System.out.println("Generating obsidian asteroid at " + x + " " + y + " " + z);
@@ -329,6 +344,12 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             Block.oreEmerald.blockID,
             Block.oreLapis.blockID,
             Block.oreRedstoneGlowing.blockID, 
+            
+            // MFFS Monazit ore
+            688,
+            
+            // Ruby ore
+            242,
             
             // IC ores
             4093, // Uranium

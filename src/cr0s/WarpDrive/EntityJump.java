@@ -6,8 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.ModLoader;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -51,9 +55,15 @@ public class EntityJump extends Entity {
     boolean isJumping = false;
     int currentIndexInShip = 0;
     
-    private final int BLOCKS_PER_TICK = 500;
+    private final int BLOCKS_PER_TICK = 1000;
     
     private List entityOnShip;
+    
+    AxisAlignedBB axisalignedbb;
+    
+    private boolean fromSpace, toSpace;
+    
+    private EntityPlayer fakePlayer;
     
     public EntityJump(World world) {
         super(world);
@@ -105,51 +115,180 @@ public class EntityJump extends Entity {
             killEntity("Entity is disabled or Y-coord error! Cannot jump.");
             return;
         }
+               
+        // Пропустить тик, ожидая генерации чанков
+        //if (!checkForChunksGeneratedIn(getTargetWorld())) {
+        //    return;
+        //}
         
         if (!isJumping) {
             System.out.println("[JE] Preparing to jump...");
+            axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
+            this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
+            this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
+        
             prepareToJump();
         } else {
             if (currentIndexInShip >= ship.length-1) {
                 isJumping = false;
                 finishJump();
-            } else {
-                moveShip();    
+            } else { 
+                moveEntitys(axisalignedbb, distance, dir, true);                
+                moveShip();                   
+            }
+        }
+    }
+    
+    public World getTargetWorld() {        
+        if (toSpace) {
+            return DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
+        } else if (fromSpace) {
+            return DimensionManager.getWorld(0);
+        } else {
+            return this.worldObj;
+        }
+    }
+    
+    public void lockWorlds() {
+        getTargetWorld().editingBlocks = true;
+        
+        // При прыжках между измерениями необходимо блокировать текущий мир
+        // Для предотвращения рассыпания проводов на корабле
+        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+            worldObj.editingBlocks = true;
+        }
+    }
+    
+    public void unlockWorlds() {
+        getTargetWorld().editingBlocks = false;
+        
+        // При прыжках между измерениями необходимо блокировать оба мира
+        // Для предотвращения рассыпания проводов на корабле
+        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+            worldObj.editingBlocks = false;
+        }        
+    }
+    
+    
+    /**
+     * Установка или удаление блоков под игроками для предотвращения их падения
+     * @param removeBlocks удалять блоки
+     */
+    public void setBlocksUnderPlayers(boolean removeBlocks) {
+        List list = this.entityOnShip;
+
+        if (list != null) {
+            for (Object obj : list) {
+                if (!(obj instanceof MovingEntity)) {
+                    continue;
+                }
+                
+                MovingEntity me = (MovingEntity)obj;
+                Entity entity = me.entity;
+                
+                if (entity instanceof EntityPlayer) {
+                    if (!removeBlocks) {
+                        worldObj.setBlock(me.oldX, me.oldY - 2, me.oldZ, Block.dirt.blockID);
+                    } else
+                    {
+                        if (worldObj.getBlockId(me.oldX, me.oldY - 2, me.oldZ) == Block.dirt.blockID) {
+                            worldObj.setBlock(me.oldX, me.oldY - 2, me.oldZ, 0);
+                        }
+                    }
+                }
+            }
+        }        
+    }
+    
+    /**
+     * Проверка на существование чанков в точке назначения прыжка
+     * Если чанки не загружены или не существуют, то происходит их загрузка или генерация
+     * @param world Мир, в котором осуществляется проверка
+     * @return Результат проверки
+     */
+    public boolean checkForChunksGeneratedIn(World w) {
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = Xmin; x <= Xmax; x++) {
+                for (int z = Zmin; z <= Zmax; z++) {
+                    final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
+                    final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);    
+                    
+                    int chunkX = newX >> 4;
+                    int chunkZ = newZ >> 4;
+                    
+                    if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+                        System.out.println("[JE] Need to generate chunk at (" + chunkX + "; " + chunkZ + "). Creating fake player");
+                        w.getChunkProvider().provideChunk(chunkX, chunkZ);
+                        
+                        return false;
+                    }
+                }
+            }
+        }        
+        
+        return true;
+    }
+    
+    public void messageToAllPlayersOnShip(String msg) {
+        List list = this.entityOnShip;
+
+        if (list != null) {
+            for (Object obj : list) {
+                if (!(obj instanceof MovingEntity)) {
+                    continue;
+                }
+                
+                MovingEntity me = (MovingEntity)obj;
+                Entity entity = me.entity;
+                
+                if (entity instanceof EntityPlayer) {
+                    ((EntityPlayer)entity).sendChatToPlayer("[WarpCore] " + msg);
+                }
             }
         }
     }
     
     public void prepareToJump() {
-        // Блокируем миры
-        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
-            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = true;
-        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            System.out.println("[JE] Jump FROM SPACE (" + (minY - distance) + ")");
-            DimensionManager.getWorld(0).editingBlocks = true;
-        } else {
-            worldObj.editingBlocks = true;
+        boolean betweenWorlds = false;
+        
+        // Блокируем мир
+        lockWorlds();
+
+        betweenWorlds = fromSpace || toSpace;
+        
+        saveEntitys(axisalignedbb);
+        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");        
+        
+        if (dir != -2 && dir != -1) {
+            messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
+        } else if (dir == -1) {
+            messageToAllPlayersOnShip("Jumping UP to distance " + distance + " blocks ");
+        } else if (dir == -2) {
+            messageToAllPlayersOnShip("Jumping DOWN to distance " + distance + " blocks ");
         }
         
-        distance = getPossibleJumpDistance();
-        if (distance <= 0 && (dir != -1 && worldObj.provider.dimensionId != 0) && (dir != -2 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID)) {
+        if (!betweenWorlds) {
+            distance = getPossibleJumpDistance();
+        } else {
+            distance = 0;
+        }
+        
+        if (distance <= this.shipLength && (!fromSpace && !toSpace)) {
             killEntity("Not enough space for jump.");
+            messageToAllPlayersOnShip("Not enough space for jump!");
             return;
         }
 
         if (!checkForBedrockOnShip()) {
             killEntity("Is bedrock on the ship. Aborting.");
+            messageToAllPlayersOnShip("Is bedrock on the ship. Aborting.");
             return;
         }
 
         int shipSize = getRealShipSize();
-
         saveShip(shipSize);
-        
-        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
-        saveEntitys(axisalignedbb);
-        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");
-        
         removeShip();
+        setBlocksUnderPlayers(false);
         
         isJumping = true;
         this.currentIndexInShip = 0;       
@@ -159,20 +298,11 @@ public class EntityJump extends Entity {
      * Закончить прыжок: переместить Entity, разблокировать мир и удалить себя
      */
     public void finishJump() {
-        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
-        boolean fromSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID && minY - distance < 0 && dir == -2);
-        boolean toSpace = (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID && maxY >= 255);
-        moveEntitys(axisalignedbb, distance, dir, toSpace, fromSpace);
-
-        // Разблокируем миры
-        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
-            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).editingBlocks = false;
-        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            DimensionManager.getWorld(0).editingBlocks = false;
-        } else {
-            worldObj.editingBlocks = false;
-        }
-
+        moveEntitys(axisalignedbb, distance, dir, false);
+        setBlocksUnderPlayers(true);
+        
+        // Разблокируем мир
+        unlockWorlds();
         
         // Прыжок окончен
         killEntity("");
@@ -232,7 +362,6 @@ public class EntityJump extends Entity {
         }
 
         System.out.println((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
-
     }
     
     /**
@@ -244,22 +373,22 @@ public class EntityJump extends Entity {
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
         // 1. Прыжок в космос
-        if (dir == -1 && maxY >= 255 && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
+        if (toSpace) {
             for (int index = 0; index < blocksToMove; index++) {
-                this.currentIndexInShip++;
                 moveBlockToSpace(currentIndexInShip, distance, dir);
+                this.currentIndexInShip++;
             }
         // 2. Прыжок из космоса
-        } else if (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+        } else if (fromSpace) {
             for (int index = 0; index < blocksToMove; index++) {
-                this.currentIndexInShip++;
                 moveBlockFromSpace(currentIndexInShip, distance, dir);
+                this.currentIndexInShip++;
             }
         // 3. Обычный прыжок
         } else {            
             for (int index = 0; index < blocksToMove; index++) {
-                this.currentIndexInShip++;
                 moveBlock(currentIndexInShip, distance, dir);
+                this.currentIndexInShip++;
             }
         }
     }
@@ -277,10 +406,7 @@ public class EntityJump extends Entity {
         int blowPoints = 0; // Вероятность взрыва ядра реактора
 
         while (true) {
-            if (testDistance <= this.shipLength) {
-                break;
-            }
-
+            // Проверка, достаточно ли места в точке назначения прыжка
             canJump = checkMovement(testDistance);
 
             if (canJump) {
@@ -290,9 +416,10 @@ public class EntityJump extends Entity {
             blowPoints++;
             testDistance--;
         }
-
-        // Взрываем точку столкновения с препятствием, если это явно не стыковка или прыжок на землю из космоса
-        if (blowPoints > 5 && this.dir != -1 && !(this.dir == -2 && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID)) {
+        
+        // Взрываем точку столкновения с препятствием, если это явно не стыковка или прыжок в вертикальной плоскости
+        if (blowPoints > 5 && (this.dir != -1 && this.dir != -2)) {
+            messageToAllPlayersOnShip(" [COLLISION] at (" + blowX + "; " + blowY + "; " + blowZ + ")");
             worldObj.createExplosion((Entity) null, blowX, blowY, blowZ, Math.min(4F * 30, 4F * (distance / 2)), true);
         }
 
@@ -361,13 +488,21 @@ public class EntityJump extends Entity {
             Entity entity = (Entity)o;
 
             MovingEntity movingentity = new MovingEntity(entity, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
-            
+                        
             // Добавим в список Entity
             entityOnShip.add(movingentity);
         }
     }
     
-    public boolean moveEntitys(AxisAlignedBB axisalignedbb, int distance, int direction, boolean toSpace, boolean fromSpace) {
+    /**
+     * Перемещение сущностей вместе с кораблем
+     * @param axisalignedbb область корабля
+     * @param distance расстояние перемещения
+     * @param direction направление перемещения
+     * @param restorePositions восстановление старых позиций для предотвращения выпадения, либо перемещение на новую
+     * @return 
+     */
+    public boolean moveEntitys(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
         List list = this.entityOnShip;
 
         if (list != null) {
@@ -387,17 +522,23 @@ public class EntityJump extends Entity {
                 int oldEntityZ = me.oldZ;
 
                 int newEntityX, newEntityY, newEntityZ;
+
+                newEntityX = oldEntityX;
+                newEntityY = oldEntityY;
+                newEntityZ = oldEntityZ;                
                 
-                if (!toSpace && !fromSpace) 
+                if (!restorePositions && !toSpace) 
                 {
-                    newEntityX = getNewXCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
-                    newEntityY = getNewYCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
-                    newEntityZ = getNewZCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);    
-                } else
-                {
-                    newEntityX = oldEntityX;
-                    newEntityY = oldEntityY;
-                    newEntityZ = oldEntityZ;
+                    if (!fromSpace) 
+                    {
+                        newEntityX = getNewXCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
+                        newEntityY = getNewYCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
+                        newEntityZ = getNewZCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);    
+                    } else {
+                        newEntityX = oldEntityX;
+                        newEntityY = 255 - this.shipDown - this.shipUp + oldEntityY - this.yCoord -1;
+                        newEntityZ = oldEntityZ;                    
+                    }
                 }
                 
                 //System.out.println("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
@@ -417,21 +558,23 @@ public class EntityJump extends Entity {
                 }
 
                 ((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
+                
+                if (restorePositions) { continue; }
+                
                 if (toSpace) {
                     if (entity instanceof EntityPlayerMP) {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ)));
-                        if (!((EntityPlayerMP) entity).capabilities.isCreativeMode) {
-                            ((EntityPlayerMP) entity).capabilities.allowFlying = true;
-                        }
+                        //((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
+                        //if (!((EntityPlayerMP) entity).capabilities.isCreativeMode) {
+                        //    ((EntityPlayerMP) entity).capabilities.allowFlying = true;
+                        //}
                     } else {
                         entity.travelToDimension(WarpDrive.instance.spaceDimID);
                     }
                 } else if (fromSpace) {
                     if (entity instanceof EntityPlayerMP) {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(0), 0, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ)));
-                        if (!((EntityPlayerMP) entity).capabilities.isCreativeMode) {
-                            ((EntityPlayerMP) entity).capabilities.allowFlying = false;
-                        }
+                        //((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
                     } else {
                         entity.travelToDimension(0);
                     }
@@ -442,7 +585,7 @@ public class EntityJump extends Entity {
         return true;
     }
 
-    /*
+    /**
      * Проверка на вхождение точки в область (bounding-box)
      */
     public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z) {
@@ -697,12 +840,12 @@ public class EntityJump extends Entity {
      * @return true, если корабль уместился на новом месте
      */
     public boolean checkMovement(int testDistance) {
-        if (dir == -1 && maxY + testDistance > 255) {
+        if ((dir == -1 && maxY + testDistance > 255) && !toSpace) {
             System.out.println("[JUMP] Reactor will blow due +high limit");
             return false;
         }
 
-        if (dir == -2 && minY - testDistance <= 8) {
+        if ((dir == -2 && minY - testDistance <= 8) && !fromSpace) {
             blowY = minY - testDistance;
             blowX = xCoord;
             blowZ = zCoord;
@@ -729,7 +872,7 @@ public class EntityJump extends Entity {
                         return false;
                     }
 
-                    if (blockOnShipID != 0 && blockID != 0 && blockID != 9 && blockID != 8 && blockID != 18) {
+                    if (blockOnShipID != 0 && blockID != 0 /*&& blockID != 9 && blockID != 8*/ && blockID != 18) {
                         blowX = x;
                         blowY = y;
                         blowZ = z;
@@ -779,7 +922,7 @@ public class EntityJump extends Entity {
      * @return 
      */
     public boolean moveBlockFromSpace(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, true, false);
+        return moveBlockSimple(indexInShip, distance, direction, false, true);
     }    
     
     /**
@@ -792,7 +935,7 @@ public class EntityJump extends Entity {
      */
     public boolean moveBlockSimple(int indexInShip, int distance, int direction, boolean toSpace, boolean fromSpace) {
         try {
-            // OutOfBound workaround
+            // OutOfBounds workaround
             if (indexInShip == ship.length) {
                 indexInShip--;
             }
@@ -813,13 +956,15 @@ public class EntityJump extends Entity {
             
             if (!toSpace && !fromSpace) 
             {
-                newY = getNewYCoord(oldX, oldY, oldZ, distance, direction);
                 newX = getNewXCoord(oldX, oldY, oldZ, distance, direction);
+                newY = getNewYCoord(oldX, oldY, oldZ, distance, direction);
                 newZ = getNewZCoord(oldX, oldY, oldZ, distance, direction);
             } else {
                 // Если прыжок из космоса, то нужно поднять корабль до неба
+                distance = 0;
+                
                 if (fromSpace) {
-                    newY = 254 - oldY;
+                    newY =  255 - this.shipDown - this.shipUp + oldY - this.yCoord -1;
                 } else {
                     newY = oldY;
                 }
@@ -831,7 +976,7 @@ public class EntityJump extends Entity {
             int blockID = shipBlock.blockID;
             int blockMeta = shipBlock.blockMeta;
 
-            if (!toSpace)
+            if (!toSpace && !fromSpace)
             {
                 worldObj.setBlockAndMetadataWithNotify(newX, newY, newZ, blockID, blockMeta);
             } else if (toSpace)
@@ -848,7 +993,7 @@ public class EntityJump extends Entity {
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
                 
-                if (!toSpace) {
+                if (!toSpace && !fromSpace) {
                     newTileEntity = worldObj.getBlockTileEntity(newX, newY, newZ);     
                 } else if (toSpace) {
                     newTileEntity = spaceWorld.getBlockTileEntity(newX, newY, newZ); 
@@ -861,7 +1006,7 @@ public class EntityJump extends Entity {
                     return false; // PIZDEC!!!
                 }
                 newTileEntity.readFromNBT(oldnbt);
-                if (!toSpace)
+                if (!toSpace && !fromSpace)
                 {
                     worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
                 } else if (toSpace)

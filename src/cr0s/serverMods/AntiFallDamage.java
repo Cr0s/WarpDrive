@@ -1,6 +1,3 @@
-/*
- * Гашение урона при падении с джетпаком или квантовыми бутсами
- */
 package cr0s.serverMods;
 
 import net.minecraft.entity.EntityLiving;
@@ -10,7 +7,7 @@ import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 
 /**
- *
+ * Гашение урона при падении с джетпаком или квантовыми бутсами
  * @author Cr0s
  */
 public class AntiFallDamage {
@@ -28,7 +25,6 @@ public class AntiFallDamage {
 
             int check = MathHelper.ceiling_float_int(distance - 3.0F);
             if (check > 0) { // Падение может нанести урон
-                
                 // Проверяем наличие защиты
                 if ((player.getCurrentArmor(0) != null && player.getCurrentArmor(0).itemID == QUANTUM_BOOTS_ID) ||
                         (player.getCurrentArmor(2) != null && player.getCurrentArmor(2).itemID == JETPACK_ID) ||

@@ -171,7 +171,7 @@ public class SpaceProvider extends WorldProvider {
         {
             var5.posX += this.worldObj.rand.nextInt(spawnFuzz) - spawnFuzzHalf;
             var5.posZ += this.worldObj.rand.nextInt(spawnFuzz) - spawnFuzzHalf;
-            var5.posY = 254;
+            var5.posY = 250;
         }
 
         if (worldObj.isAirBlock(var5.posX, var5.posY, var5.posZ)) {
