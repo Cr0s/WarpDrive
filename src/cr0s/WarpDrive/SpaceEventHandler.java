@@ -33,6 +33,7 @@ public class SpaceEventHandler {
     public void onPlayerMove(PlayerMoveEvent pme) {
         final int HELMET_ID_SKUBA = 30082;
         final int HELMET_ID_QUANTUM = 30174;
+        final int HELMET_HEAD = 397;
         //System.out.println("onPlayerMove(): event called.");
         
         // Движение происходит в космическом пространстве
@@ -41,7 +42,8 @@ public class SpaceEventHandler {
                 
                 if (isEntityInVacuum(pme.entity)) {
                     if (!(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_ID_SKUBA) &&
-                            !(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_ID_QUANTUM)) {
+                            !(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_ID_QUANTUM) && 
+                            !(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_HEAD)) {
                         pme.entity.attackEntityFrom(DamageSource.drown, 3);    
                     }
                 }

@@ -10,8 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
-public class BlockReactor extends BlockContainer {    
-    BlockReactor(int id, int texture, Material material) {
+public class BlockProtocol extends BlockContainer {    
+    BlockProtocol(int id, int texture, Material material) {
         super(id, texture, material);
     }
        
@@ -22,7 +22,7 @@ public class BlockReactor extends BlockContainer {
     
     @Override
     public TileEntity createNewTileEntity(World var1) {
-        return new TileEntityReactor();
+        return new TileEntityProtocol();
     }
     
     /**
@@ -41,8 +41,7 @@ public class BlockReactor extends BlockContainer {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    }  
-    
+    } 
     /**
      * Called upon block activation (right click on the block.)
      */
@@ -50,19 +49,14 @@ public class BlockReactor extends BlockContainer {
     @Override
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
-        return false;
-    }  
-    
-     /**
-     * Called when the block is clicked by a player. Args: x, y, z, entityPlayer
-     */
-    //@SideOnly(Side.SERVER)
-    @Override
-    public void onBlockClicked(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer) {        
-        TileEntityReactor reactor = (TileEntityReactor)par1World.getBlockTileEntity(par2, par3, par4);
-        
-        if (reactor != null){ 
-            par5EntityPlayer.sendChatToPlayer(reactor.getCoreState());
+        if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+            TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
+
+            if (controller != null){ 
+                controller.attachPlayer(par5EntityPlayer);
+                par5EntityPlayer.sendChatToPlayer("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
+            }
         }
-    }   
+        return true;
+    }      
 }

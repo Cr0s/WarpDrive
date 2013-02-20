@@ -30,9 +30,16 @@ import ic2.api.Items;
 public class WarpDrive {
 
     public final static int WARP_CORE_BLOCKID = 500;
-    public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.ground)
+    public final static int PROTOCOL_BLOCK_BLOCKID = 501;
+    
+    public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
             .setBlockName("warpCore").setCreativeTab(CreativeTabs.tabRedstone);
+    
+    public final static Block protocolBlock = new BlockProtocol(PROTOCOL_BLOCK_BLOCKID, 0, Material.rock)
+            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+            .setBlockName("protocolBlock").setCreativeTab(CreativeTabs.tabRedstone);
+    
     /**
      *
      */
@@ -62,6 +69,10 @@ public class WarpDrive {
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
         
+        LanguageRegistry.addName(protocolBlock, "Warp core controller block");
+        GameRegistry.registerBlock(protocolBlock, "protocolBlock");
+        GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");        
+        
         proxy.registerRenderers();
         proxy.registerJumpEntity();
 
@@ -79,6 +90,9 @@ public class WarpDrive {
         
         GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
         'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));
+        
+        GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
+            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));        
     }
 
     //@SideOnly(Side.SERVER)

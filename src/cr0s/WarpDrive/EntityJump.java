@@ -100,19 +100,37 @@ public class EntityJump extends Entity {
     }
 
     public void killEntity(String reason) {
+        if (!on) { return; }
+        on = false;
+        
+        System.out.println("[K] Killing jump entity...");
+        
         if (!reason.isEmpty()) {
             System.out.println("[JUMP] Killed: " + reason);
         }
 
-        worldObj.editingBlocks = false;
-        worldObj.setEntityDead(this);
+        unlockWorlds();
+        
+        try {
+            if (!this.fromSpace && !this.toSpace)  { worldObj.setEntityDead(this); }
+            //this.getTargetWorld().setEntityDead(this);
+            //this.setDead();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @SideOnly(Side.SERVER)
     @Override
     public void onUpdate() {
-        if (!on || minY < 0 || maxY > 255) {
-            killEntity("Entity is disabled or Y-coord error! Cannot jump.");
+        if (!on) {
+            unlockWorlds();
+            this.setDead();
+            return; 
+        }
+        
+        if (minY < 0 || maxY > 255) {
+            this.killEntity("Y-coord error!");
             return;
         }
                
@@ -249,7 +267,7 @@ public class EntityJump extends Entity {
     }
     
     public void prepareToJump() {
-        boolean betweenWorlds = false;
+        boolean betweenWorlds;
         
         // Блокируем мир
         lockWorlds();
@@ -270,10 +288,10 @@ public class EntityJump extends Entity {
         if (!betweenWorlds) {
             distance = getPossibleJumpDistance();
         } else {
-            distance = 0;
+            distance = 1;
         }
         
-        if (distance <= this.shipLength && (!fromSpace && !toSpace)) {
+        if (distance <= this.shipLength && !betweenWorlds) {
             killEntity("Not enough space for jump.");
             messageToAllPlayersOnShip("Not enough space for jump!");
             return;
@@ -287,7 +305,7 @@ public class EntityJump extends Entity {
 
         int shipSize = getRealShipSize();
         saveShip(shipSize);
-        removeShip();
+        //removeShip();
         setBlocksUnderPlayers(false);
         
         isJumping = true;
@@ -301,12 +319,10 @@ public class EntityJump extends Entity {
         moveEntitys(axisalignedbb, distance, dir, false);
         setBlocksUnderPlayers(true);
         
-        // Разблокируем мир
-        unlockWorlds();
+        removeShip();
         
         // Прыжок окончен
-        killEntity("");
-        on = false;        
+        killEntity("");    
     }
     
     /**
@@ -1003,6 +1019,7 @@ public class EntityJump extends Entity {
                    
                              
                 if (newTileEntity == null) {
+                    System.out.println("PIZDEC!!!");
                     return false; // PIZDEC!!!
                 }
                 newTileEntity.readFromNBT(oldnbt);

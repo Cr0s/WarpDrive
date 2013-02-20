@@ -19,6 +19,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
     // Радиус простой луны
     public final int MOON_RADIUS = 32;
+    public final int MOON_CORE_RADIUS = 5;
     
     // Радиус звезды
     public final int STAR_RADIUS = 80;
@@ -52,6 +53,11 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         if (random.nextInt(8000) == 1) {
             System.out.println("Generating moon at " + x + " " + y + " " + z);
             generateSphere2(world, x, y, z, MOON_RADIUS, false, 0, false);
+            
+            // Генерация ядра луны
+            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Лавовое ядро
+            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.obsidian.blockID, false);  // Обсидиановая оболочка
+            
             return;
         }
 
@@ -72,37 +78,9 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }
 
-        // Железные астероиды
         if (random.nextInt(2000) == 1) {
-            System.out.println("Generating iron asteroid at " + x + " " + y + " " + z);
-            generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.oreIron.blockID);
-            return;
-        }        
-
-        // Медные астероиды
-        if (random.nextInt(2000) == 1) {
-            System.out.println("Generating copper asteroid at " + x + " " + y + " " + z);
-            generateAsteroidOfBlock(world, x, y, z, 6, 11, 4095);
-            return;
-        }
-        
-        // Оловяные астероиды
-        if (random.nextInt(2000) == 1) {
-            System.out.println("Generating tin asteroid at " + x + " " + y + " " + z);
-            generateAsteroidOfBlock(world, x, y, z, 6, 11,  4094);
-            return;
-        }        
-        
-        // Обсидиановые астероиды
-        if (random.nextInt(2000) == 1) {
-            System.out.println("Generating obsidian asteroid at " + x + " " + y + " " + z);
-            generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.obsidian.blockID);
-            
-            // Ядро астероида из алмаза
-            world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);
-            
-            return;
-        }        
+            generateRandomAsteroid(world, x, y, z, 6, 11);
+        } 
 
         // Ледяные астероиды
         if (random.nextInt(2000) == 1) {
@@ -132,7 +110,15 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }        
     }
 
-    
+    private void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
+        Random random = new Random();
+        
+        if (random.nextInt(100) == 1) {
+            generateAsteroidOfBlock(world, x, y, z, asteroidSizeMax, centerRadiusMax, getRandomSurfaceBlockID(random, false));    
+        } else {
+            generateAsteroid(world, x, y, z, asteroidSizeMax, centerRadiusMax);
+        }
+    }
     
     /**
      * Генератор поля астероидов
@@ -157,7 +143,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             
             // Создаём астероид
-            generateAsteroid(world, aX, aY, aZ, 4, 6);
+            generateRandomAsteroid(world, aX, aY, aZ, 4, 6);
         }
 
         // Разброс маленьких астероидов
@@ -167,7 +153,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             
             // Создаём астероид
-            generateAsteroid(world, aX, aY, aZ, 2, 2);
+            generateRandomAsteroid(world, aX, aY, aZ, 2, 2);
         }    
     }
 
@@ -344,10 +330,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             Block.oreEmerald.blockID,
             Block.oreLapis.blockID,
             Block.oreRedstoneGlowing.blockID, 
-            
-            // MFFS Monazit ore
-            688,
-            
+                        
             // Ruby ore
             242,
             
@@ -380,6 +363,8 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             
         } else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;
+        } else if (random.nextInt(5000) == 1) {
+            blockID = 688;
         }
 
         return blockID;
