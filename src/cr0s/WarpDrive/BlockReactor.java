@@ -12,13 +12,13 @@ import net.minecraft.world.World;
 
 public class BlockReactor extends BlockContainer {    
     BlockReactor(int id, int texture, Material material) {
-        super(id, texture, material);
+        super(id, material);
     }
        
-    @Override
-    public String getTextureFile () {
-            return CommonProxy.BLOCK_TEXTURE;
-    }
+  //  @Override
+  //  public String getTextureFile () {
+  //          return CommonProxy.BLOCK_TEXTURE;
+  //  }
     
     @Override
     public TileEntity createNewTileEntity(World var1) {

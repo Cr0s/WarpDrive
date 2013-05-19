@@ -34,13 +34,16 @@ public class SpaceTeleporter extends Teleporter {
         //player.setWorld(world);
         //player.setPositionAndUpdate(x, y, z);
     }
-
+    
     @Override
-    public boolean func_85188_a(Entity par1Entity) {
-        return true;
-    }
-
+    public boolean makePortal(Entity par1Entity)
+    {
+        return false;
+    }   
+    
     @Override
-    public void func_85189_a(long par1) {
-    }
+    public boolean placeInExistingPortal(Entity par1Entity, double par2, double par4, double par6, float par8)
+    {
+        return false;
+    }    
 }

@@ -29,6 +29,7 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
     public SpaceGenerator(World par1World, long par2) {
         super(par1World, par2, false);
 
+        rand = new Random();
         this.worldObj = par1World;
     }
 
@@ -140,12 +141,6 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
         /*ChunkProviderEvent.ReplaceBiomeBlocks event = new ChunkProviderEvent.ReplaceBiomeBlocks(this, par1, par2, par3ArrayOfByte, par4ArrayOfBiomeGenBase);
         MinecraftForge.EVENT_BUS.post(event);
         if (event.getResult() == Event.Result.DENY) return;    */
-    }
-    
-    @Override
-    public boolean unload100OldestChunks() {
-        // TODO Auto-generated method stub
-        return super.unload100OldestChunks();
     }
 
     @Override

@@ -10,8 +10,10 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
+import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import ic2.api.item.Items;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -19,10 +21,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
-import ic2.api.Items;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "0.0.1")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.0")
 @NetworkMod(clientSideRequired = false, serverSideRequired = true)
 /**
  * @author Cr0s
@@ -34,11 +34,11 @@ public class WarpDrive {
     
     public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setBlockName("warpCore").setCreativeTab(CreativeTabs.tabRedstone);
+            .setCreativeTab(CreativeTabs.tabRedstone);
     
     public final static Block protocolBlock = new BlockProtocol(PROTOCOL_BLOCK_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setBlockName("protocolBlock").setCreativeTab(CreativeTabs.tabRedstone);
+            .setCreativeTab(CreativeTabs.tabRedstone);
     
     /**
      *
@@ -61,10 +61,6 @@ public class WarpDrive {
     @Init
     public void load(FMLInitializationEvent event) {
         
-        
-        MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
-        
-        
         LanguageRegistry.addName(warpCore, "Warp-drive Reactor Core");
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
@@ -74,6 +70,8 @@ public class WarpDrive {
         GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");        
         
         proxy.registerRenderers();
+        
+        EntityRegistry.registerModEntity(EntitySphereGen.class, "EntitySphereGenerator", 1, WarpDrive.instance, 100, 1, false);
         proxy.registerJumpEntity();
 
         //if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {

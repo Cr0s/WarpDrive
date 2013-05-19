@@ -12,9 +12,11 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.DimensionManager;
@@ -80,14 +82,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public String coreState = "";
     
     public TileEntityProtocol controller;
+    private TileEntityChest TileEntityChest;
     
     @SideOnly(Side.SERVER)
     @Override
-    public void updateEntity() {
-        //if (ticks++ < 20 * TICK_INTERVAL) {
-        //    return;
-        //}
-        
+    public void updateEntity() {        
         TileEntity c = findControllerBlock();
         
         if (c != null) {
@@ -97,6 +96,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             if (this.controller.isSummonAllFlag()) {
                 summonPlayers();
                 controller.setSummonAllFlag(false);
+            } else if (!this.controller.getToSummon().isEmpty()) {
+                summonSinglePlayer(this.controller.getToSummon());
+                this.controller.setToSummon("");
             }
         } else {
             invalidAssembly = true;
@@ -104,12 +106,25 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         
         switch (currentMode) {
             case MODE_TELEPORT:
-                teleportPlayersToSpace();
+                if (isChestSummonMode()) {
+                    if (ticks++ < 20) {
+                        return;
+                    }       
+                    
+                    if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
+                        summonPlayersByChestCode();
+                        ticks = 0;
+                    }
+                } else {
+                    teleportPlayersToSpace();
+                }
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
                 if (controller == null) { return; }
+                coreState = "Energy: " + currentEnergyValue;
+                
                 if (controller.isJumpFlag()) {
-                    System.out.println("Jumping!");
+                    System.out.println("[W-C] Jumping!");
                     prepareToJump();
                     doJump(currentMode == MODE_LONG_JUMP);
                     controller.setJumpFlag(false);
@@ -127,21 +142,35 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(nick);
 
             if (player != null && !testBB(aabb, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ))) {
-                summonPlayer(player);
+                summonPlayer(player, xCoord + dx, yCoord, zCoord + dz);
             }
         }
     }
     
-    public void summonPlayer(EntityPlayerMP player) {
+    public void summonSinglePlayer(String nickname) {
+        calculateSpatialShipParameters();
+        AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+
+        for (int i = 0; i < controller.players.size(); i++) {
+            String nick = controller.players.get(i);
+            EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(nick);
+
+            if (player != null && nick.equals(nickname) && !testBB(aabb, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ))) {
+                summonPlayer(player, xCoord + dx, yCoord, zCoord + dz);
+                return;
+            }
+        }        
+    }
+    
+    public void summonPlayer(EntityPlayerMP player, int x, int y, int z) {
         if (this.currentEnergyValue - this.ENERGY_PER_ENTITY_TO_SPACE >= 0) {
-             player.setPositionAndUpdate(xCoord + dx, yCoord, zCoord + dz);
+             player.setPositionAndUpdate(x, y, z);
 
              if (player.dimension != worldObj.provider.dimensionId) {
                  player.mcServer.getConfigurationManager().transferPlayerToDimension(player, this.worldObj.provider.dimensionId, new SpaceTeleporter(DimensionManager.getWorld(this.worldObj.provider.dimensionId), 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
              }
 
              this.currentEnergyValue -= this.ENERGY_PER_ENTITY_TO_SPACE;
-             player.sendChatToPlayer("[WarpCore] Welcome aboard, " + player.username + ".");
          }        
     }
     
@@ -245,11 +274,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }        
     }
 
-    public void doJump(boolean longjump) {
+    public void doJump(boolean longjump) {   
         if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP) && !invalidAssembly) {
             coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
             coreState += "* Need " + Math.max(0, calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";                
-        }
+        }        
         
         // Подготовка к прыжку
         if ((cooldownTime <= 0) && (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP)) {
@@ -288,7 +317,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
             System.out.println((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
 
-            // public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz)
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, distance, direction, dx, dz, this);
 
             jump.Xmax = maxX;
@@ -314,7 +342,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
             jump.on = true;
 
-            System.out.println("[TE-WC] Calling onUpdate()...");
+            //System.out.println("[TE-WC] Calling onUpdate()...");
 
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
@@ -338,37 +366,101 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     int x = MathHelper.floor_double(entity.posX);
                     int z = MathHelper.floor_double(entity.posZ);
 
+                    //int y = MathHelper.floor_double(entity.posY);
+                    
+                    final int WOOL_BLOCK_ID = 35;
+                    
+                    int newY;
+                    
+                    for (newY = 254; newY > 0; newY--) {
+                        if (DimensionManager.getWorld(WarpDrive.instance.spaceDimID).getBlockId(x, newY, z) == WOOL_BLOCK_ID) {
+                            break;
+                        }
+                    }
+                    
+                    if (newY <= 0) { newY = 254; }
+                    
                     if (entity instanceof EntityPlayerMP) {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, x, 256, z));
 
                         // Создаём платформу
-                        if (DimensionManager.getWorld(WarpDrive.instance.spaceDimID).isAirBlock(x, 254, z)) {
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x, 254, z, Block.stone.blockID);
+                        if (DimensionManager.getWorld(WarpDrive.instance.spaceDimID).isAirBlock(x, newY, z)) {
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x + 1, 254, z, Block.stone.blockID);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x - 1, 254, z, Block.stone.blockID);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z, Block.stone.blockID, 0, 2);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x, 254, z + 1, Block.stone.blockID);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x, 254, z - 1, Block.stone.blockID);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z + 1, Block.stone.blockID, 0, 2);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z - 1, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x + 1, 254, z + 1, Block.stone.blockID);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x - 1, 254, z - 1, Block.stone.blockID);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z + 1, Block.stone.blockID, 0, 2);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z - 1, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x + 1, 254, z - 1, Block.stone.blockID);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlockWithNotify(x - 1, 254, z + 1, Block.stone.blockID);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z - 1, Block.stone.blockID, 0, 2);
+                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
                         }
 
                         // Перемещаем на платформу
-                        ((EntityPlayerMP) entity).setPositionAndUpdate(x, 256, z);
-
-                        // Делаем лётчиком
-                        if (!((EntityPlayerMP) entity).capabilities.isCreativeMode) {
-                            ((EntityPlayerMP) entity).capabilities.allowFlying = true;
-                        }
+                        ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
                     }
                 }
             }
         }        
+    }
+    
+    public void summonPlayersByChestCode() {
+        if (worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord) == null) { return; }
+        TileEntityChest chest = (TileEntityChest)worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
+        EntityPlayerMP player;
+        
+        for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); i++)
+        {
+            player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
+            
+            if (checkPlayerInventory(chest, player)) {
+                System.out.println("[P] Summoning " + player.username);
+                summonPlayer(player, xCoord, yCoord + 2, zCoord);
+            }
+        }        
+    } 
+    
+    public boolean checkPlayerInventory(TileEntityChest chest, EntityPlayerMP player) {
+        Boolean result = false;
+        final int MIN_KEY_LENGTH = 5;
+        
+        int keyLength = 0;
+        
+        for (int index = 0; index < chest.getSizeInventory(); index++) {
+            ItemStack chestItem = chest.getStackInSlot(index);
+            ItemStack playerItem = player.inventory.getStackInSlot(9 + index);
+
+            if (chestItem == null || playerItem == null) { continue; }
+
+            //System.out.println(player.username + " " + index + " -> " + chestItem + " = " + playerItem);
+
+            if (chestItem.itemID != playerItem.itemID || chestItem.getItemDamage() != playerItem.getItemDamage() || chestItem.stackSize != playerItem.stackSize) {
+                return false;
+            } else { result = true; }
+            
+            keyLength++;
+        }    
+        
+        if (keyLength < MIN_KEY_LENGTH) { 
+            System.out.println("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
+            return false; 
+        }
+        
+        return result;
+    }
+    
+    public Boolean isChestSummonMode() {
+        TileEntity te = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
+        
+        if (te != null) {
+            return (te instanceof TileEntityChest);
+        }
+        
+        return false;
     }
     
     /*

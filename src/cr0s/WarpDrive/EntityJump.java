@@ -2,6 +2,7 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dan200.computer.api.IPeripheral;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
@@ -100,6 +101,7 @@ public class EntityJump extends Entity {
     }
 
     public void killEntity(String reason) {
+        System.out.println("[JE] Tick:");
         if (!on) { return; }
         on = false;
         
@@ -112,7 +114,7 @@ public class EntityJump extends Entity {
         unlockWorlds();
         
         try {
-            if (!this.fromSpace && !this.toSpace)  { worldObj.setEntityDead(this); }
+            if (!this.fromSpace && !this.toSpace)  { worldObj.removeEntity(this); }
             //this.getTargetWorld().setEntityDead(this);
             //this.setDead();
         } catch (Exception e) {
@@ -125,7 +127,7 @@ public class EntityJump extends Entity {
     public void onUpdate() {
         if (!on) {
             unlockWorlds();
-            this.setDead();
+            worldObj.removeEntity(this);
             return; 
         }
         
@@ -133,18 +135,19 @@ public class EntityJump extends Entity {
             this.killEntity("Y-coord error!");
             return;
         }
-               
+                
         // Пропустить тик, ожидая генерации чанков
-        //if (!checkForChunksGeneratedIn(getTargetWorld())) {
-        //    return;
-        //}
+        if ((getTargetWorld().provider.dimensionId == worldObj.provider.dimensionId) && !checkForChunksGeneratedIn(getTargetWorld())) {
+            return;
+        }
         
         if (!isJumping) {
+            this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
+            this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);               
+            
             System.out.println("[JE] Preparing to jump...");
             axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
-            this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
-            this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
-        
+            
             prepareToJump();
         } else {
             if (currentIndexInShip >= ship.length-1) {
@@ -168,22 +171,24 @@ public class EntityJump extends Entity {
     }
     
     public void lockWorlds() {
-        getTargetWorld().editingBlocks = true;
+        System.out.println("Locking worlds...");
+        getTargetWorld().isRemote = true;
         
         // При прыжках между измерениями необходимо блокировать текущий мир
         // Для предотвращения рассыпания проводов на корабле
         if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
-            worldObj.editingBlocks = true;
+            worldObj.isRemote = true; 
         }
     }
     
     public void unlockWorlds() {
-        getTargetWorld().editingBlocks = false;
+        System.out.println("Unlocking worlds..");
+        getTargetWorld().isRemote = false;
         
         // При прыжках между измерениями необходимо блокировать оба мира
         // Для предотвращения рассыпания проводов на корабле
         if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
-            worldObj.editingBlocks = false;
+            worldObj.isRemote = false;
         }        
     }
     
@@ -235,8 +240,8 @@ public class EntityJump extends Entity {
                     int chunkZ = newZ >> 4;
                     
                     if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
-                        System.out.println("[JE] Need to generate chunk at (" + chunkX + "; " + chunkZ + "). Creating fake player");
-                        w.getChunkProvider().provideChunk(chunkX, chunkZ);
+                        messageToAllPlayersOnShip("Generating chunks...");
+                        int blockID = w.getBlockId(newX, 128, newZ);
                         
                         return false;
                     }
@@ -286,7 +291,10 @@ public class EntityJump extends Entity {
         }
         
         if (!betweenWorlds) {
-            distance = getPossibleJumpDistance();
+            // Не проверять при дальних прыжках
+            if (this.distance < 256) {
+                distance = getPossibleJumpDistance();
+            }
         } else {
             distance = 1;
         }
@@ -335,7 +343,7 @@ public class EntityJump extends Entity {
             }
 
             //System.out.println("[EJ] Removing block: " + jb.x + " " + jb.y + " " + jb.z + " " + jb.blockID);
-            worldObj.setBlockAndMetadata(jb.x, jb.y, jb.z, 0, 0);
+            worldObj.setBlockToAir(jb.x, jb.y, jb.z);
         }
     }
 
@@ -416,6 +424,7 @@ public class EntityJump extends Entity {
      * прыжок невозможен в принципе
      */
     public int getPossibleJumpDistance() {
+        System.out.println("[JUMP] Calculating possible jump distance...");
         int testDistance = this.distance;
         boolean canJump;
 
@@ -994,12 +1003,12 @@ public class EntityJump extends Entity {
 
             if (!toSpace && !fromSpace)
             {
-                worldObj.setBlockAndMetadataWithNotify(newX, newY, newZ, blockID, blockMeta);
+                worldObj.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
             } else if (toSpace)
             {
-                spaceWorld.setBlockAndMetadataWithNotify(newX, newY, newZ, blockID, blockMeta);
+                spaceWorld.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
             } else if (fromSpace) {
-                surfaceWorld.setBlockAndMetadataWithNotify(newX, newY, newZ, blockID, blockMeta);
+                surfaceWorld.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
             }
 
             NBTTagCompound oldnbt = new NBTTagCompound();
@@ -1008,21 +1017,39 @@ public class EntityJump extends Entity {
             if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145) {
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
+               
+                oldnbt.setInteger("x", newX);
+                oldnbt.setInteger("y", newY);
+                oldnbt.setInteger("z", newZ);
                 
-                if (!toSpace && !fromSpace) {
+                newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
+                newTileEntity.invalidate();
+                /*if (!toSpace && !fromSpace) {
                     newTileEntity = worldObj.getBlockTileEntity(newX, newY, newZ);     
                 } else if (toSpace) {
                     newTileEntity = spaceWorld.getBlockTileEntity(newX, newY, newZ); 
                 } else if (fromSpace) {
                     newTileEntity = surfaceWorld.getBlockTileEntity(newX, newY, newZ); 
-                }
+                }*/
                    
                              
                 if (newTileEntity == null) {
                     System.out.println("PIZDEC!!!");
                     return false; // PIZDEC!!!
                 }
+                /*
+                newTileEntity.invalidate();
+                
                 newTileEntity.readFromNBT(oldnbt);
+                
+                newTileEntity.xCoord = newX;
+                newTileEntity.yCoord = newY;
+                newTileEntity.zCoord = newZ;
+                */
+                newTileEntity.worldObj = getTargetWorld();
+                
+                newTileEntity.validate();
+                
                 if (!toSpace && !fromSpace)
                 {
                     worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
@@ -1035,7 +1062,13 @@ public class EntityJump extends Entity {
                     surfaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);                    
                 }
                 
-                worldObj.removeBlockTileEntity(oldX, oldY, oldZ);             
+                worldObj.removeBlockTileEntity(oldX, oldY, oldZ);  
+                
+                
+                if (newTileEntity.getClass().getName().contains("TileEntityComputer") && newTileEntity instanceof IPeripheral)
+                {
+                    System.out.println(((IPeripheral)newTileEntity).getMethodNames());
+                }
             }
         } catch (Exception exception) {
             exception.printStackTrace();

@@ -116,7 +116,6 @@ public class LoginHookClass implements IConnectionHandler {
         if (kickReason.isEmpty()) {
             // Удалить пароль из имени пользователя
             netHandler.clientUsername = netHandler.clientUsername.split("\\.")[0];
-            netHandler.getPlayer().skinUrl = "http://koprokubach.servegame.com/getskin.php?user=" + netHandler.clientUsername;
         }
         
         return kickReason;

@@ -1,36 +1,30 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.IWorldGenerator;
 import java.util.Random;
-import java.util.Vector;
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 
 /**
- *
- * @author user
+ * @author Cr0s
  */
 public class SpaceWorldGenerator implements IWorldGenerator {
 
-    // Радиус простой луны
+    // Radius of simple moon
     public final int MOON_RADIUS = 32;
-    public final int MOON_CORE_RADIUS = 5;
+    public final int MOON_CORE_RADIUS = 10;
     
-    // Радиус звезды
+    // Star radius
     public final int STAR_RADIUS = 80;
     
-    // Выше 128 по Y почти ничего не будет сгенерировано
+    // Upper than 128 almost nothing will be generated
     public final int Y_LIMIT = 128;
-    // Лимит по Y снизу
+    // Lower limit
     public final int Y_LIMIT_DOWN = 55;
 
     /**
-     * Генерация для чанка
+     * Generator for chunk
      * @param random
      * @param chunkX
      * @param chunkZ
@@ -49,40 +43,44 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
         int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
 
-        // Установка луны
+        // Moon setup
         if (random.nextInt(8000) == 1) {
             System.out.println("Generating moon at " + x + " " + y + " " + z);
             generateSphere2(world, x, y, z, MOON_RADIUS, false, 0, false);
             
-            // Генерация ядра луны
-            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Лавовое ядро
-            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.obsidian.blockID, false);  // Обсидиановая оболочка
+            // Generate moon's core
+            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Lava core
+            generateSphere2(world, x, y, z, MOON_CORE_RADIUS + 1, false, Block.obsidian.blockID, true);  // Obsidian shell
             
             return;
         }
 
-        // Установка звезды
-        // DISABLED DUE LAG
-        /*if (random.nextInt(10000) == 1) {
-            System.out.println("Generating star at " + x + " " + y + " " + z);
-            generateSphere2(world, x, y, z, STAR_RADIUS, false, Block.glowStone.blockID, true);
-            generateSphere2(world, x, y, z, STAR_RADIUS -1, false, Block.glowStone.blockID, true);
-            generateSphere2(world, x, y, z, STAR_RADIUS -2, false, Block.glowStone.blockID, true);
+        // FIXME: Star setup
+        /*if (random.nextInt(250) == 1) {
+            EntitySphereGen esg = new EntitySphereGen(world, x, y, z, 1);
+            esg.xCoord = x;
+            esg.yCoord = y;
+            esg.zCoord = z;
+            
+            esg.on = true;
+            
+            world.spawnEntityInWorld(esg);
+                     
             return;
-        }*/        
+        }*/       
         
-        // Простые астероиды
+        // Simple asteroids
         if (random.nextInt(200) == 1) {
             System.out.println("Generating asteroid at " + x + " " + y + " " + z);
             generateAsteroid(world, x, y, z, 6, 11);
             return;
         }
 
-        if (random.nextInt(2000) == 1) {
+        if (random.nextInt(1000) == 1) {
             generateRandomAsteroid(world, x, y, z, 6, 11);
         } 
 
-        // Ледяные астероиды
+        // Ice asteroid
         if (random.nextInt(2000) == 1) {
             System.out.println("Generating ice asteroid at " + x + " " + y + " " + z);
             generateAsteroidOfBlock(world, x, y, z, 6, 11, Block.ice.blockID);
@@ -90,7 +88,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }        
         
-        // Астероидные поля
+        // Asteroid field
         if (random.nextInt(3000) == 1) {
             System.out.println("Generating asteroid field at " + x + " " + y + " " + z);
             generateAsteroidField(world, x, y, z);
@@ -98,30 +96,31 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }        
         
-        // Алмазные астероиды
+        // Diamond asteroid
         if (random.nextInt(10000) == 1) {
             System.out.println("Generating diamond asteroid at " + x + " " + y + " " + z);
             generateAsteroidOfBlock(world, x, y, z, 4, 6, Block.oreDiamond.blockID);
             
-            // Ядро астероида из алмаза
-            world.setBlockWithNotify(x, y, z, Block.blockDiamond.blockID);     
+            // Diamond block core
+            world.setBlock(x, y, z, Block.blockDiamond.blockID, 0, 2);     
             
-            return;
+           // return;
         }        
     }
 
     private void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
         Random random = new Random();
         
-        if (random.nextInt(100) == 1) {
-            generateAsteroidOfBlock(world, x, y, z, asteroidSizeMax, centerRadiusMax, getRandomSurfaceBlockID(random, false));    
+        if (random.nextInt(30) == 1) {
+            System.out.println("Generating random asteroid of block at " + x + "; " + y + "; " + z);
+            generateAsteroidOfBlock(world, x, y, z, asteroidSizeMax, centerRadiusMax, getRandomSurfaceBlockID(random, false, true));    
         } else {
             generateAsteroid(world, x, y, z, asteroidSizeMax, centerRadiusMax);
         }
     }
     
     /**
-     * Генератор поля астероидов
+     * Asteroid field generator
      * @param world мир
      * @param x координата центра поля
      * @param y координата центра поля
@@ -130,41 +129,41 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     private void generateAsteroidField(World world, int x, int y, int z) {
         int numOfAsteroids = 15 + world.rand.nextInt(30);
         
-        // Минимальное расстояние между астероидами в поле
+        // Minimal distance between asteroids in field
         final int FIELD_ASTEROID_MIN_DISTANCE = 5;
         
-        // Максимальное расстояние между астероидами
+        // Maximum distance
         final int FIELD_ASTEROID_MAX_DISTANCE = 100;
         
-        // Разброс больших астероидов
+        // Setting up of big asteroids
         for (int i = 1; i <= numOfAsteroids; i++) {
             int aX = x + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             int aY = y + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             
-            // Создаём астероид
+            // Place an asteroid
             generateRandomAsteroid(world, aX, aY, aZ, 4, 6);
         }
 
-        // Разброс маленьких астероидов
+        // Setting up small asteroids
         for (int i = 1; i <= numOfAsteroids; i++) {
             int aX = x + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             int aY = y + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             
-            // Создаём астероид
+            // Placing
             generateRandomAsteroid(world, aX, aY, aZ, 2, 2);
         }    
     }
 
     /**
-     * Генератор астероидов одного типа. Создаёт астероид в точке.
+     * Asteroid of block generator
      *
-     * @param x координата центра астероида
-     * @param y координата центра астероида
-     * @param z координата центра астероида
-     * @param asteroidSizeMax максимальный размер астероида (по количеству составляющих его сфер)
-     * @param centerRadiusMax максимальный радиус центральной сферы
+     * @param x x-coord of center
+     * @param y center
+     * @param z center
+     * @param asteroidSizeMax maximum asteroid size (by number of balls it consists)
+     * @param centerRadiusMax maximum radius of central ball
      */
     private void generateAsteroidOfBlock(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax, int blockID) {
         int asteroidSize = 1 + world.rand.nextInt(6);
@@ -179,12 +178,12 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }          
         
         
-        final int CENTER_SHIFT = 2; // Смещение от центральной сферы
+        final int CENTER_SHIFT = 2; // Offset from center of central ball
 
-        // Центр астероида
+        // Asteroid's center
         generateSphere2(world, x, y, z, centerRadius, true, blockID, false);
 
-        // Бугры астероида
+        // Asteroids knolls
         for (int i = 1; i <= asteroidSize; i++) {
             int radius = 2 + world.rand.nextInt(centerRadius);
 
@@ -197,13 +196,13 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }    
     
     /**
-     * Генератор простых астероидов. Создаёт астероид в точке.
+     * Asteroid generator
      *
-     * @param x координата центра астероида
-     * @param y координата центра астероида
-     * @param z координата центра астероида
-     * @param asteroidSizeMax максимальный размер астероида (по количеству составляющих его сфер)
-     * @param centerRadiusMax максимальный радиус центральной сферы
+     * @param x x-coord of center
+     * @param y center
+     * @param z center
+     * @param asteroidSizeMax maximum asteroid size (by number of balls it consists)
+     * @param centerRadiusMax maximum radius of central ball
      */
     private void generateAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
         int asteroidSize = 1 + world.rand.nextInt(6);
@@ -218,12 +217,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }          
         
         
-        final int CENTER_SHIFT = 2; // Смещение от центральной сферы
+        final int CENTER_SHIFT = 2; 
 
-        // Центр астероида
         generateSphere2(world, x, y, z, centerRadius, true, 0, false);
 
-        // Бугры астероида
         for (int i = 1; i <= asteroidSize; i++) {
             int radius = 2 + world.rand.nextInt(centerRadius);
 
@@ -236,39 +233,36 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
 
     /**
-     * Генератор сферических объектов
-     * @param world мир, в котором будет сгенерирована сфера/шар
-     * @param xCoord координата центра
-     * @param yCoord координата центра
-     * @param zCoord координата центра
-     * @param radius радиус сферы/шара
-     * @param corrupted пропускать случайные блоки при генерации
-     * @param forcedID генерировать сферу из определённых блоков, 0 если блоки случайные
+     * Sphere generator
+     * @param world target world
+     * @param xCoord center
+     * @param yCoord center
+     * @param zCoord center
+     * @param radius sphere radius
+     * @param corrupted skip random blocks when generating (corrupted effect)
+     * @param forcedID sphere of specified blocks or random blocks if not specified
      * @return 
      */
     public void generateSphere2(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, boolean hollow) {
-        // FIXME: блокировка мира обязательна?
-        //world.editingBlocks = true;
         
-        radius += 0.5D; // Отмеряем радиус от центра блока
-        double radiusSq = radius * radius; // Возведение радиуса в квадрат в целях оптимизации (избавлпние от кв. корней)
-        double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // Квадратный радиус для пустой сферы
+        radius += 0.5D; // Radius from center of block
+        double radiusSq = radius * radius; // Optimization to avoid sqrts...
+        double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow sphere
 
-        int ceilRadius = (int) Math.ceil(radius); // Округляем радиус
+        int ceilRadius = (int) Math.ceil(radius);
         
-        // Обходим куб со стороной, равной радиусу
-        // (проверка точек на удовлетворение уравнению сферы x^2 + y^2 + z^2 = r^2)
+        // Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
         for (int x = 0; x <= ceilRadius; x++) {
             for (int y = 0; y <= ceilRadius; y++) {
                 for (int z = 0; z <= ceilRadius; z++) {
-                    double dSq = lengthSq(x, y, z); // Расстояние от центра до точки
+                    double dSq = lengthSq(x, y, z); // Distance from current position to center
 
-                    // Пропускать блоки, которые удалены от центра больше, чем на радиус
+                    // Skip too far blocks
                     if (dSq > radiusSq) {
                         continue;
                     }
 
-                    // Генерация полой сферы
+                    // Hollow sphere condition
                     if ((hollow) && (
                           (dSq < radius1Sq) || ((lengthSq(x + 1, y, z) <= radiusSq) && (lengthSq(x, y + 1, z) <= radiusSq) && (lengthSq(x, y, z + 1) <= radiusSq))))
                     {
@@ -276,53 +270,50 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     }
 
                     
-                    // Ставим блоки по всем осям в текущей точке
+                    // Place blocks
                     int blockID, meta = 0;
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
-                        world.setBlockAndMetadata(xCoord + x, yCoord + y, zCoord + z, blockID, meta);
-                        world.setBlockAndMetadata(xCoord - x, yCoord + y, zCoord + z, blockID, meta);
+                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlock(xCoord + x, yCoord + y, zCoord + z, blockID, meta, 2);
+                        world.setBlock(xCoord - x, yCoord + y, zCoord + z, blockID, meta, 2);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
-                        world.setBlockAndMetadata(xCoord + x, yCoord - y, zCoord + z, blockID, meta);
-                        world.setBlockAndMetadata(xCoord + x, yCoord + y, zCoord - z, blockID, meta);
+                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlock(xCoord + x, yCoord - y, zCoord + z, blockID, meta, 2);
+                        world.setBlock(xCoord + x, yCoord + y, zCoord - z, blockID, meta, 2);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
-                        world.setBlockAndMetadata(xCoord - x, yCoord - y, zCoord + z, blockID, meta);
-                        world.setBlockAndMetadata(xCoord + x, yCoord - y, zCoord - z, blockID, meta);
+                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlock(xCoord - x, yCoord - y, zCoord + z, blockID, meta, 2);
+                        world.setBlock(xCoord + x, yCoord - y, zCoord - z, blockID, meta, 2);
                     }
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted) : forcedID;
-                        if (blockID > 2000 && blockID < 2500) { meta = blockID % 10; blockID = blockID / 10; }
-                        world.setBlockAndMetadata(xCoord - x, yCoord + y, zCoord - z, blockID, meta);
-                        world.setBlockAndMetadata(xCoord - x, yCoord - y, zCoord - z, blockID, meta);
+                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        world.setBlock(xCoord - x, yCoord + y, zCoord - z, blockID, meta, 2);
+                        world.setBlock(xCoord - x, yCoord - y, zCoord - z, blockID, meta, 2);
                     }
                 }
             }
         }
-
-        // Разблокируем мир
-        //world.editingBlocks = false;
     }
 
     private static double lengthSq(double x, double y, double z) {
         return (x * x) + (y * y) + (z * z);
     }
 
-    private int getRandomSurfaceBlockID(Random random, boolean corrupted) {
+    private int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
         int[] ores = {
             Block.oreIron.blockID,
             Block.oreGold.blockID,
@@ -331,41 +322,34 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             Block.oreLapis.blockID,
             Block.oreRedstoneGlowing.blockID, 
                         
-            // Ruby ore
-            242,
+            // ICBM
+            3880,
+            3970,
+            39701, // 3970:1
             
-            // IC ores
-            4093, // Uranium
-            4094, // Tin
-            4095, // Copper ore
-            4095, // Copper ore
+            // IC2 ores
+            247,
+            248,
+            249
+            
         };
         
-        int redPowerOreBlockID = 242;
-        int[] redPowerOres = {
-            0, 1, 2, 3, 4, 5, 6, 7 // Рубины -- Николит
-        };
-        
-
         int blockID = Block.stone.blockID;
         if (corrupted) {
             blockID = Block.cobblestone.blockID;
         }
 
-        if (random.nextInt(10) == 1) {
-            switch (random.nextInt(2)) {
-                case 0:
-                    blockID = ores[random.nextInt(ores.length - 1)];
-                    break;
-                case 1: // OREM -- ORE (Руда), M - метаданные
-                    blockID = Integer.parseInt(new StringBuilder().append(redPowerOreBlockID).append(redPowerOres[random.nextInt(redPowerOres.length - 1)]).toString());
-            }
-            
-        } else if (random.nextInt(500) == 1) {
-            blockID = Block.oreDiamond.blockID;
-        } else if (random.nextInt(5000) == 1) {
-            blockID = 688;
+        if (random.nextInt(10) == 1 || nocobble) {
+            blockID = ores[random.nextInt(ores.length - 1)];   
+        } 
+        else if (random.nextInt(350) == 1) {
+            blockID = 902; // quarz (AE)
         }
+        else if (random.nextInt(500) == 1) {
+            blockID = Block.oreDiamond.blockID;
+        }/* else if (random.nextInt(5000) == 1) {
+            blockID = 688;
+        }*/
 
         return blockID;
     }

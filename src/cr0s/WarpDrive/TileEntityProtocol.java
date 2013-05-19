@@ -6,35 +6,21 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dan200.computer.api.IComputerAccess;
 import java.util.ArrayList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 
+import dan200.computer.api.IPeripheral;
+
 /**
  * Protocol block tile entity
  * @author Cr0s
  */
-public class TileEntityProtocol extends TileEntity {
-    public Boolean[] bits;
-    
-    public ArrayList<Integer> input;
-    public ArrayList<Integer> output;
-    
-    public boolean RX, TX, RST;
-    
-    //TileEntityReactor warpCore; // Warp core entity
-    TileEntity dataCable;       // Data cable entity
-    
-    private int ticks = 0;
-    
-    
-    
-    private final int UPDATE_TIMEOUT = 5; // seconds
-    private final int TRANSFER_RATE = 1;  // ticks
-    private final int MAX_INPUT_BUFFER_SIZE = 25; // 25 bytes per packet
-    
+public class TileEntityProtocol extends TileEntity implements IPeripheral {
+
     // Variables
     private int distance = 0;
     private int direction = 0;
@@ -54,189 +40,18 @@ public class TileEntityProtocol extends TileEntity {
     
     boolean ready = false;                // Ready to operate (valid assembly)
     
+    public String[] methodsArray = { 
+                               "dim_getp", "dim_setp",                                        // 0, 1
+                               "dim_getn", "dim_setn",                                        // 2, 3
+                               "set_mode", "set_distance", "set_direction",                   // 4, 5, 6
+                               "get_attached_players", "summon", "summon_all",                // 7, 8, 9
+                               "get_x", "get_y", "get_z",                                     // 10, 11, 12
+                               "get_energy_level", "do_jump", "get_ship_size"                 // 13, 14, 15
+        };
+    
     @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
-        ticks++;
-        
-        ready = dataCable != null;
-        
-        if (ticks == UPDATE_TIMEOUT) {
-            this.dataCable = searchRedPowerCable(); 
-            
-            ticks = 0;
-        }
-        
-        if (!ready) { 
-            return; 
-        }
-
-        bits = readCableStates();
-
-        if (dataCable == null || bits == null || bits[8] == null || bits.length == 0) {
-            return;
-        }
-        
-        RX  = bits[8];
-        TX  = bits[9];
-        RST = bits[11];
-        
-        if (input == null) {
-            input = new ArrayList<Integer>();
-        }
-
-        if (output == null) {
-            output = new ArrayList<Integer>();
-        }        
-        
-        if (RST) {
-            System.out.println("RST RECV");
-            if (TX) { analyzeInputData(); } else if (RX) { /* sendOutputData();*/ }
-            input.clear();
-            RST = false;
-            resetCableStates();
-        } else if (TX) {
-            int byteFromCable = readByte();
-            System.out.println("Byte from cable: " + byteFromCable + "");
-            input.add(byteFromCable);
-            
-            if (input.size() > MAX_INPUT_BUFFER_SIZE) {
-                System.out.println("[!] Buffer overflow.");
-            }
-            
-            resetCableStates();
-        } else if (RX) {
-            
-        }
-    }
-    
-    public TileEntity searchRedPowerCable() {
-        TileEntity result;
-
-        result = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
-        if (result != null && result.toString().contains("TileCable")) {
-            return result;
-        }
-
-        result = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
-        if (result != null && result.toString().contains("TileCable")) {
-            return result;
-        }
-
-        result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
-        if (result != null && result.toString().contains("TileCable")) {
-            return result;
-        }
-
-        result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
-        if (result != null && result.toString().contains("TileCable")) {
-             return result;
-        }
-
-        return null;
-    }
-
-    public Boolean[] readCableStates() {
-        if (dataCable == null) { return null; }
-        
-        NBTTagCompound tag = new NBTTagCompound();
-        dataCable.writeToNBT(tag);
-
-        byte states[] = tag.getByteArray("pwrs"); // Получить массив состояний кабеля
-        if (states == null) {
-            return null;
-        }
-
-        Boolean[] locCableStates = new Boolean[16];
-
-        for (int i = 0; i < 16; i++) {
-            locCableStates[i] = (states[i] != 0);
-        }
-        
-/*        
-        if (RX || TX) {
-            System.out.println("[C] Cable bits: " + s);
-        }
-*/        
-        return locCableStates;        
-    }
-    
-    private int readByte() {
-        int result = 0;
-        
-        //String binaryString = "";
-        Boolean[] states = readCableStates();
-        
-        // Get first 8 bits
-        for (int i = 0; i < 8; i++) {
-            result += ((states[i]) ? 1 : 0) * Math.pow((int)2, i);
-        }
-        
-        return result;
-    }
-    
-    private void analyzeInputData() {
-        Integer packetID;
-        
-        if (input == null || input.isEmpty()) {
-            return;
-        }
-        
-        packetID = this.input.get(0);
-        
-        System.out.println("---- PACKET RECV ----");
-        System.out.println("PacketID: " + packetID);
-        System.out.print("Data (" + (input.size() - 1) + " bytes): ");
-        for (int i = 1; i < input.size(); i++) {
-            System.out.print(input.get(i));
-        }
-        System.out.print("\n");
-        System.out.println("---- ----");
-        
-        switch (packetID) {
-            case 0xFF:
-                    doJump();
-                break;
-            case 0xFE:
-                    setSummonAllFlag(true);
-                    break;
-                
-            case 0x00:   // SETDST
-                if (input.size() == 2) {
-                    setJumpDistance(input.get(1));
-                }
-                break;
-            case 0x01:  // SETDIR
-                if (input.size() == 2) {
-                    setDirection(input.get(1));
-                }
-                break;
-            case 0x02:  // SETMODE
-                if (input.size() == 2) {
-                    setMode(input.get(1));
-                }
-                break;
-                
-            case 0x03: // SETPST
-                if (input.size() == 4) {
-                    System.out.println("Setting positive gabarits: f: " + input.get(1) + " r: " + input.get(2) + " u: " + input.get(3));
-                    setFront(input.get(1));
-                    setRight(input.get(2));
-                    setUp(input.get(3));
-                }
-                break;
-            case 0x04: // SETNEG
-                if (input.size() == 4) {
-                    System.out.println("Setting negative gabarits: f: " + input.get(1) + " r: " + input.get(2) + " u: " + input.get(3));
-                    setBack(input.get(1));
-                    setLeft(input.get(2));
-                    setDown(input.get(3));
-                }
-                break;                
-                
-        }
-        
-        input.clear();
     }
     
     private void setJumpDistance(int distance) {
@@ -258,19 +73,6 @@ public class TileEntityProtocol extends TileEntity {
     private void doJump() {
         //System.out.println("Jumping!");
         setJumpFlag(true);
-    }
-    
-    private void resetCableStates() {
-        if (dataCable == null) {
-            return;
-        }
-        NBTTagCompound tag = new NBTTagCompound();
-        dataCable.writeToNBT(tag);
-
-        byte states[] = new byte[16];
-
-        tag.setByteArray("pwrs", states);
-        dataCable.readFromNBT(tag);        
     }
     
     @Override
@@ -501,5 +303,156 @@ public class TileEntityProtocol extends TileEntity {
      */
     public void setSummonAllFlag(boolean summonFlag) {
         this.summonFlag = summonFlag;
+    }
+
+    @Override
+    public String getType() {
+        return "warpcore";
+    }
+
+    @Override
+    public String[] getMethodNames() {
+        return (methodsArray);
+    }
+
+    @Override
+    public Object[] callMethod(IComputerAccess computer, int method, Object[] arguments) throws Exception {
+        //System.out.println("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
+
+        switch (method)
+        {
+            case 0: // dim_getp ()
+                return new Integer[] { getFront(), getRight(), getUp() };            
+            
+            case 1: // dim_setp (front, right, up)
+                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0)) {
+                    return new Integer[] { -1 };
+                }
+
+                System.out.println("Setting positive gabarits: f: " + ((Double)arguments[0]).intValue() + " r: " + ((Double)arguments[1]).intValue() + " u: " + ((Double)arguments[2]).intValue());
+                setFront(((Double)arguments[0]).intValue());
+                setRight(((Double)arguments[1]).intValue());
+                setUp(((Double)arguments[2]).intValue());
+                
+                break;
+
+
+                
+            case 2: // dim_getn ()
+                return new Integer[] { getBack(), getLeft(), getDown() };  
+                
+            case 3: // dim_setn (back, left, down)
+                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0)) {
+                    return new Integer[] { -1 };
+                }
+
+                System.out.println("Setting negative gabarits: b: " + ((Double)arguments[0]).intValue() + " l: " + ((Double)arguments[1]).intValue() + " d: " + ((Double)arguments[2]).intValue());
+                setBack(((Double)arguments[0]).intValue());
+                setLeft(((Double)arguments[1]).intValue());
+                setDown(((Double)arguments[2]).intValue());
+                
+                break;   
+                
+ 
+                
+            case 4: // set_mode (mode)
+                if (arguments.length != 1) {
+                    return new Integer[] { -1 };    
+                }
+
+                setMode(((Double)arguments[0]).intValue());
+                break;
+           
+            case 5: // set_distance (distance)
+                if (arguments.length != 1) {
+                    return new Integer[] { -1 };    
+                }
+
+                setJumpDistance(((Double)arguments[0]).intValue());
+                break;    
+           
+            case 6: // set_direction (dir)
+                if (arguments.length != 1) {
+                    return new Integer[] { -1 };    
+                }
+
+                setDirection(((Double)arguments[0]).intValue());
+                break;
+                
+            case 7: // get_attached_players
+                String list = "";
+
+                for (int i = 0; i < this.players.size(); i++) {
+                    String nick = this.players.get(i);
+
+                    list += nick + ((i == this.players.size() - 1)? "" : "\n");
+                }
+
+                if (players.isEmpty()) {
+                    list = "";
+                }
+                
+                return new Object[] { (String)list };
+            
+            case 8: // summon
+                if (arguments.length != 1) {
+                    return new Integer[] { -1 };
+                }
+                
+                int playerID = ((Double)arguments[0]).intValue();
+                
+                if (playerID >= 0 && playerID < players.size()) {
+                    setToSummon(players.get(playerID));
+                }
+                
+                break;
+                
+            case 9: // summon_all
+                this.setSummonAllFlag(true);
+                
+            case 10: // get_x
+                return new Object[] { (Integer)xCoord };
+
+            case 11: // get_y
+                return new Object[] { (Integer)yCoord };
+                
+            case 12: // get_z
+                return new Object[] { (Integer)zCoord };                
+                
+            case 14: // do_jump
+                doJump();
+                break;
+        }
+        
+        return new Integer[] { 0 };
+    }
+
+    @Override
+    public boolean canAttachToSide(int side) {
+        return true;
+    }
+
+    @Override
+    public void attach(IComputerAccess computer) {
+        
+    }
+
+    @Override
+    public void detach(IComputerAccess computer) {
+        
+    }
+
+    /**
+     * @return the toSummon
+     */
+    public String getToSummon() {
+        return toSummon;
+    }
+
+    /**
+     * @param toSummon the toSummon to set
+     */
+    public void setToSummon(String toSummon) {
+        this.toSummon = toSummon;
     }
 }

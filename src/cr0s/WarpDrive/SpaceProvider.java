@@ -93,12 +93,6 @@ public class SpaceProvider extends WorldProvider {
 
     @SideOnly(Side.CLIENT)
     @Override
-    public int getMoonPhase(long par1, float par3) {
-        return 4;
-    }
-
-    @SideOnly(Side.CLIENT)
-    @Override
     public String getSaveFolder() {
         return (dimensionId == 0 ? null : "WarpDrive/Space" + dimensionId);
     }
@@ -171,25 +165,25 @@ public class SpaceProvider extends WorldProvider {
         {
             var5.posX += this.worldObj.rand.nextInt(spawnFuzz) - spawnFuzzHalf;
             var5.posZ += this.worldObj.rand.nextInt(spawnFuzz) - spawnFuzzHalf;
-            var5.posY = 250;
+            var5.posY = 200;
         }
 
         if (worldObj.isAirBlock(var5.posX, var5.posY, var5.posZ)) {
-            worldObj.setBlockWithNotify(var5.posX, var5.posY, var5.posZ, Block.stone.blockID);
+            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, Block.stone.blockID, 0, 2);
             
-            worldObj.setBlockWithNotify(var5.posX + 1, var5.posY + 1, var5.posZ, Block.glass.blockID);
-            worldObj.setBlockWithNotify(var5.posX + 1, var5.posY + 2, var5.posZ, Block.glass.blockID);
+            worldObj.setBlock(var5.posX + 1, var5.posY + 1, var5.posZ, Block.glass.blockID, 0, 2);
+            worldObj.setBlock(var5.posX + 1, var5.posY + 2, var5.posZ, Block.glass.blockID, 0, 2);
             
-            worldObj.setBlockWithNotify(var5.posX - 1, var5.posY + 1, var5.posZ, Block.glass.blockID);
-            worldObj.setBlockWithNotify(var5.posX - 1, var5.posY + 2, var5.posZ, Block.glass.blockID);  
+            worldObj.setBlock(var5.posX - 1, var5.posY + 1, var5.posZ, Block.glass.blockID, 0, 2);
+            worldObj.setBlock(var5.posX - 1, var5.posY + 2, var5.posZ, Block.glass.blockID, 0, 2);  
             
-            worldObj.setBlockWithNotify(var5.posX, var5.posY + 1, var5.posZ + 1, Block.glass.blockID);
-            worldObj.setBlockWithNotify(var5.posX, var5.posY + 2, var5.posZ + 1, Block.glass.blockID);   
+            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ + 1, Block.glass.blockID, 0, 2);
+            worldObj.setBlock(var5.posX, var5.posY + 2, var5.posZ + 1, Block.glass.blockID, 0, 2);   
             
-            worldObj.setBlockWithNotify(var5.posX, var5.posY + 1, var5.posZ - 1, Block.glass.blockID);
-            worldObj.setBlockWithNotify(var5.posX, var5.posY + 2, var5.posZ - 1, Block.glass.blockID);   
+            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ - 1, Block.glass.blockID, 0, 2);
+            worldObj.setBlock(var5.posX, var5.posY + 3, var5.posZ - 1, Block.glass.blockID, 0, 2);   
             
-            worldObj.setBlockWithNotify(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID); 
+            //worldObj.setBlockWithNotify(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID); 
         }
         return var5;
     }
