@@ -32,7 +32,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public Boolean ready;
     // Ядро собрано неправильно
     public Boolean invalidAssembly = false;
-    // Состояние бита запуска (Розовый шнур)
+    // Состояние бита запуска
     public Boolean launchState = false;
     // Счётчик тиков
     int ticks;
@@ -69,6 +69,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     private final byte MODE_BASIC_JUMP = 1; // Ближний прыжок 0-128
     private final byte MODE_LONG_JUMP = 2;  // Дальний прыжок 0-12800
     private final byte MODE_COLLECT_PLAYERS = 3; // Сбор привязанных к ядру игроков
+    private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_TELEPORT = 0;   // Телепортация игроков в космос
     private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
     private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе
@@ -120,6 +121,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 }
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
+            case MODE_BEACON_JUMP:
                 if (controller == null) { return; }
                 coreState = "Energy: " + currentEnergyValue;
                 
@@ -274,7 +276,95 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }        
     }
 
-    public void doJump(boolean longjump) {   
+    private void doBeaconJump() {
+        if (currentEnergyValue != maxEnergyValue)
+        {
+            System.out.println("[WP-TE] Insufficient energy to jump");
+            this.controller.setJumpFlag(false);
+            return;
+        }
+        
+        // Search beacon coordinates
+        String freq = controller.getBeaconFrequency();
+        int beaconX = 0, beaconZ = 0;
+        boolean isBeaconFound = false;
+        
+        EntityPlayerMP player;
+        for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); i++)
+        {
+            player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
+            
+            // Skip players from other dimensions
+            if (player.dimension != worldObj.provider.dimensionId) {
+                continue;
+            }
+            
+            TileEntity te = worldObj.getBlockTileEntity(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY) - 1, MathHelper.floor_double(player.posZ));
+            
+            if (te != null && (te instanceof TileEntityProtocol))
+            {
+                if (((TileEntityProtocol)te).getBeaconFrequency().equals(freq))
+                {
+                    beaconX = te.xCoord;
+                    beaconZ = te.zCoord;
+                    isBeaconFound = true;
+                    break;
+                }
+            }
+        }
+        
+        // Now make jump to a beacon
+        if (isBeaconFound)
+        {
+            // Consume all energy
+            currentEnergyValue = 0;
+            
+            System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
+            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
+
+            jump.Xmax = maxX;
+            jump.Xmin = minX;
+            jump.Zmax = maxZ;
+            jump.Zmin = minZ;
+            jump.maxY = maxY;
+            jump.minY = minY;
+
+            jump.shipFront = shipFront;
+            jump.shipBack = shipBack;
+            jump.shipLeft = shipLeft;
+            jump.shipRight = shipRight;
+            jump.shipUp = shipUp;
+            jump.shipDown = shipDown;
+            jump.shipLength = this.shipSize;
+            
+            this.cooldownTime = 60;
+            
+            jump.xCoord = xCoord;
+            jump.yCoord = yCoord;
+            jump.zCoord = zCoord;
+     
+            jump.isCoordJump = true; // is jump to a beacon
+            jump.destX = beaconX;
+            jump.destZ = beaconZ;
+            
+            jump.on = true;
+
+            worldObj.spawnEntityInWorld(jump);
+            coreState = "";            
+        } else
+        {
+            System.out.println("[TE-WC] Beacon not found.");
+        }
+    }    
+    
+    public void doJump(boolean longjump) {  
+        if (currentMode == this.MODE_BEACON_JUMP)
+        {
+            System.out.println("[TE-WC] Performing beacon jump...");
+            doBeaconJump();
+            return;
+        }
+        
         if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP) && !invalidAssembly) {
             coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
             coreState += "* Need " + Math.max(0, calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";                
@@ -336,13 +426,13 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             
             this.cooldownTime = 60;
             
+            jump.isCoordJump = false;
+            
             jump.xCoord = xCoord;
             jump.yCoord = yCoord;
             jump.zCoord = zCoord;
-
+     
             jump.on = true;
-
-            //System.out.println("[TE-WC] Calling onUpdate()...");
 
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
@@ -484,6 +574,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             case MODE_LONG_JUMP:
                 energyValue = (ENERGY_PER_BLOCK_MODE2 * shipVolume) + (ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
                 break;
+            case MODE_BEACON_JUMP:
+                energyValue = this.maxEnergyValue;
         }
 
         return energyValue;

@@ -9,10 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemInWorldManager;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.ModLoader;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
@@ -44,11 +41,9 @@ public class EntityJump extends Entity {
     public int minY;
     public int dx;
     public int dz;
-    // Координаты места взрыва при столкновении
+    // Collision point coordinates
     public int blowX, blowY, blowZ;
-    // Флаг, обозначающий возможность взрыва
     boolean needToExplode = false;
-    // public World worldObj;
     public boolean on = false;
     public JumpBlock ship[];
     public TileEntityReactor reactor;
@@ -56,15 +51,16 @@ public class EntityJump extends Entity {
     boolean isJumping = false;
     int currentIndexInShip = 0;
     
-    private final int BLOCKS_PER_TICK = 1000;
+    private final int BLOCKS_PER_TICK = 1250;
     
     private List entityOnShip;
     
     AxisAlignedBB axisalignedbb;
     
     private boolean fromSpace, toSpace;
-    
-    private EntityPlayer fakePlayer;
+
+    int destX, destZ;
+    boolean isCoordJump; 
     
     public EntityJump(World world) {
         super(world);
@@ -91,8 +87,6 @@ public class EntityJump extends Entity {
         this.dz = _dz;
         Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
 
-        // this.worldObj = world;
-
         System.out.println("[JE] Entity created");
 
         this.reactor = parReactor;
@@ -115,8 +109,6 @@ public class EntityJump extends Entity {
         
         try {
             if (!this.fromSpace && !this.toSpace)  { worldObj.removeEntity(this); }
-            //this.getTargetWorld().setEntityDead(this);
-            //this.setDead();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,7 +128,7 @@ public class EntityJump extends Entity {
             return;
         }
                 
-        // Пропустить тик, ожидая генерации чанков
+        // Skip tick, awaiting chunk generation
         if ((getTargetWorld().provider.dimensionId == worldObj.provider.dimensionId) && !checkForChunksGeneratedIn(getTargetWorld())) {
             return;
         }
@@ -174,8 +166,7 @@ public class EntityJump extends Entity {
         System.out.println("Locking worlds...");
         getTargetWorld().isRemote = true;
         
-        // При прыжках между измерениями необходимо блокировать текущий мир
-        // Для предотвращения рассыпания проводов на корабле
+        // When warping between dimensions is need to lock both worlds
         if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = true; 
         }
@@ -185,8 +176,6 @@ public class EntityJump extends Entity {
         System.out.println("Unlocking worlds..");
         getTargetWorld().isRemote = false;
         
-        // При прыжках между измерениями необходимо блокировать оба мира
-        // Для предотвращения рассыпания проводов на корабле
         if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = false;
         }        
@@ -194,8 +183,8 @@ public class EntityJump extends Entity {
     
     
     /**
-     * Установка или удаление блоков под игроками для предотвращения их падения
-     * @param removeBlocks удалять блоки
+     * Setting/removing crap blocks under players to prevent them to fall
+     * @param removeBlocks
      */
     public void setBlocksUnderPlayers(boolean removeBlocks) {
         List list = this.entityOnShip;
@@ -224,10 +213,10 @@ public class EntityJump extends Entity {
     }
     
     /**
-     * Проверка на существование чанков в точке назначения прыжка
-     * Если чанки не загружены или не существуют, то происходит их загрузка или генерация
-     * @param world Мир, в котором осуществляется проверка
-     * @return Результат проверки
+     * Check to chunk existence in destination point
+     * If chunks not loaded or does not exists, they will
+     * @param world
+     * @return
      */
     public boolean checkForChunksGeneratedIn(World w) {
         for (int y = minY; y <= maxY; y++) {
@@ -241,7 +230,7 @@ public class EntityJump extends Entity {
                     
                     if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
                         messageToAllPlayersOnShip("Generating chunks...");
-                        int blockID = w.getBlockId(newX, 128, newZ);
+                        w.getBlockId(newX, 128, newZ);
                         
                         return false;
                     }
@@ -274,7 +263,6 @@ public class EntityJump extends Entity {
     public void prepareToJump() {
         boolean betweenWorlds;
         
-        // Блокируем мир
         lockWorlds();
 
         betweenWorlds = fromSpace || toSpace;
@@ -282,16 +270,21 @@ public class EntityJump extends Entity {
         saveEntitys(axisalignedbb);
         System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");        
         
-        if (dir != -2 && dir != -1) {
-            messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
-        } else if (dir == -1) {
-            messageToAllPlayersOnShip("Jumping UP to distance " + distance + " blocks ");
-        } else if (dir == -2) {
-            messageToAllPlayersOnShip("Jumping DOWN to distance " + distance + " blocks ");
+        if (!isCoordJump) {
+            if (dir != -2 && dir != -1) {
+                messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
+            } else if (dir == -1) {
+                messageToAllPlayersOnShip("Jumping UP to distance " + distance + " blocks ");
+            } else if (dir == -2) {
+                messageToAllPlayersOnShip("Jumping DOWN to distance " + distance + " blocks ");
+            }
+        } else
+        {
+            messageToAllPlayersOnShip("Jumping to beacon at (" + destX + "; " + yCoord + "; " + destZ + ")!");
         }
         
-        if (!betweenWorlds) {
-            // Не проверять при дальних прыжках
+        if (!betweenWorlds && !isCoordJump) {
+            // Do not check in long jumps
             if (this.distance < 256) {
                 distance = getPossibleJumpDistance();
             }
@@ -299,7 +292,7 @@ public class EntityJump extends Entity {
             distance = 1;
         }
         
-        if (distance <= this.shipLength && !betweenWorlds) {
+        if (distance <= this.shipLength && !betweenWorlds && !isCoordJump) {
             killEntity("Not enough space for jump.");
             messageToAllPlayersOnShip("Not enough space for jump!");
             return;
@@ -313,7 +306,6 @@ public class EntityJump extends Entity {
 
         int shipSize = getRealShipSize();
         saveShip(shipSize);
-        //removeShip();
         setBlocksUnderPlayers(false);
         
         isJumping = true;
@@ -321,7 +313,7 @@ public class EntityJump extends Entity {
     }
     
     /**
-     * Закончить прыжок: переместить Entity, разблокировать мир и удалить себя
+     * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
         moveEntitys(axisalignedbb, distance, dir, false);
@@ -334,7 +326,8 @@ public class EntityJump extends Entity {
     }
     
     /**
-     * Удаление корабля из мира
+     * Removing ship from world
+     * 
      */
     public void removeShip() {
         for (JumpBlock jb : ship) {
@@ -348,10 +341,10 @@ public class EntityJump extends Entity {
     }
 
     /**
-     * Сохранение корабля в память
+     * Saving ship to memory
      *
-     * @param shipSize размер корабля (число блоков для перемещения)
-     * @param deleteShip удалять ли блоки корабля сразу после сохранения
+     * @param shipSize
+     * @param deleteShip
      */
     public void saveShip(int shipSize) {
         ship = new JumpBlock[shipSize];
@@ -369,7 +362,7 @@ public class EntityJump extends Entity {
                     int blockMeta = worldObj.getBlockMetadata(x, y, z);
                     TileEntity tileentity = worldObj.getBlockTileEntity(x, y, z);
 
-                    // Пустые блоки пропускаются
+                    // Skip air blocks
                     if (blockID == 0) {
                         continue;
                     }
@@ -389,26 +382,26 @@ public class EntityJump extends Entity {
     }
     
     /**
-     * Перемещение корабля
+     *Ship moving
      */
     public void moveShip() {
         int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - this.currentIndexInShip);
         
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
-        // 1. Прыжок в космос
+        // 1. Jump to space
         if (toSpace) {
             for (int index = 0; index < blocksToMove; index++) {
                 moveBlockToSpace(currentIndexInShip, distance, dir);
                 this.currentIndexInShip++;
             }
-        // 2. Прыжок из космоса
+        // 2. Jump from space
         } else if (fromSpace) {
             for (int index = 0; index < blocksToMove; index++) {
                 moveBlockFromSpace(currentIndexInShip, distance, dir);
                 this.currentIndexInShip++;
             }
-        // 3. Обычный прыжок
+        // 3. Basic jump
         } else {            
             for (int index = 0; index < blocksToMove; index++) {
                 moveBlock(currentIndexInShip, distance, dir);
@@ -418,20 +411,19 @@ public class EntityJump extends Entity {
     }
 
     /**
-     * Проверка возможности прыжка и взрыв при столкновении
+     * Checking jump possibility
      *
-     * @return Возвращает новую длинну прыжка (для стыковки), либо -1, если
-     * прыжок невозможен в принципе
+     * @return possible jump distance or -1
      */
     public int getPossibleJumpDistance() {
         System.out.println("[JUMP] Calculating possible jump distance...");
         int testDistance = this.distance;
         boolean canJump;
 
-        int blowPoints = 0; // Вероятность взрыва ядра реактора
+        int blowPoints = 0;
 
         while (true) {
-            // Проверка, достаточно ли места в точке назначения прыжка
+            // Is place enough in destination point?
             canJump = checkMovement(testDistance);
 
             if (canJump) {
@@ -442,7 +434,7 @@ public class EntityJump extends Entity {
             testDistance--;
         }
         
-        // Взрываем точку столкновения с препятствием, если это явно не стыковка или прыжок в вертикальной плоскости
+        // Make a explosion in collisoon point
         if (blowPoints > 5 && (this.dir != -1 && this.dir != -2)) {
             messageToAllPlayersOnShip(" [COLLISION] at (" + blowX + "; " + blowY + "; " + blowZ + ")");
             worldObj.createExplosion((Entity) null, blowX, blowY, blowZ, Math.min(4F * 30, 4F * (distance / 2)), true);
@@ -452,10 +444,8 @@ public class EntityJump extends Entity {
     }
 
     /**
-     * Проверка на наличие запрещённых блоков на корабле (бедрок)
+     * Check for frobidden blocks on ship (bedrock)
      *
-     * Применяется для предотвращения возможности зацепить варп-полем корабля
-     * бедрок и оторвать его
      */
     public boolean checkForBedrockOnShip() {
         for (int y = minY; y <= maxY; y++) {
@@ -463,12 +453,10 @@ public class EntityJump extends Entity {
                 for (int z = Zmin; z <= Zmax; z++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
-                    // Пропускаем пустые блоки воздуха
                     if (blockID == 0) {
                         continue;
                     }
 
-                    // Проверка блока
                     if (blockID == Block.bedrock.blockID) {
                         return false;
                     }
@@ -641,7 +629,9 @@ public class EntityJump extends Entity {
             result += moveX;
         }
 
-        //System.out.println("moveX: " + moveX);
+        if (this.isCoordJump) {
+            result = destX + (xCoord - oldX);
+        }        
 
         return result;
     }
@@ -700,7 +690,9 @@ public class EntityJump extends Entity {
             result += moveZ;
         }
 
-        //System.out.println("moveZ: " + moveZ);
+        if (this.isCoordJump) {
+            result = destZ + (zCoord - oldZ);
+        }
 
         return result;
     }

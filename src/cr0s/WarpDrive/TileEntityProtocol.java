@@ -38,6 +38,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     public ArrayList<String> players = new ArrayList();
     public String playersString = "";
     
+    private String beaconFrequency = "";
+    
     boolean ready = false;                // Ready to operate (valid assembly)
     
     public String[] methodsArray = { 
@@ -46,7 +48,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                                "set_mode", "set_distance", "set_direction",                   // 4, 5, 6
                                "get_attached_players", "summon", "summon_all",                // 7, 8, 9
                                "get_x", "get_y", "get_z",                                     // 10, 11, 12
-                               "get_energy_level", "do_jump", "get_ship_size"                 // 13, 14, 15
+                               "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
+                               "set_beacon_frequency",                                        // 16
         };
     
     @SideOnly(Side.SERVER)
@@ -92,7 +95,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
         setDistance(tag.getInteger("distance"));
         
         playersString = tag.getString("players");
-        updatePlayersList();        
+        updatePlayersList();      
+        
+        setBeaconFrequency(tag.getString("bfreq"));
     }
 
     @Override
@@ -113,6 +118,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
         tag.setInteger("down", this.down);
         
         tag.setInteger("distance", this.distance);
+        
+        tag.setString("bfreq", getBeaconFrequency());
     }  
     
     public void attachPlayer(EntityPlayer ep) {
@@ -417,10 +424,36 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 return new Object[] { (Integer)yCoord };
                 
             case 12: // get_z
-                return new Object[] { (Integer)zCoord };                
+                return new Object[] { (Integer)zCoord };     
+                
+            case 13:
+                TileEntity te1 = findCoreBlock();
+                
+                if (te1 != null) 
+                {
+                    return new Object[] { (Integer)((TileEntityReactor)te1).currentEnergyValue };
+                }
+                break;                
                 
             case 14: // do_jump
                 doJump();
+                break;
+                
+            case 15: // get_ship_size
+                TileEntity te2 = findCoreBlock();
+                
+                if (te2 != null) 
+                {
+                    ((TileEntityReactor)te2).calculateSpatialShipParameters();
+                    return new Object[] { (Integer)((TileEntityReactor)te2).getRealShipVolume() };
+                }
+                break;
+                
+            case 16:
+                if (arguments.length == 1)
+                {
+                    setBeaconFrequency((String)arguments[0]);
+                }
                 break;
         }
         
@@ -455,4 +488,45 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     public void setToSummon(String toSummon) {
         this.toSummon = toSummon;
     }
+
+    /**
+     * @return the beaconFrequency
+     */
+    public String getBeaconFrequency() {
+        return beaconFrequency;
+    }
+
+    /**
+     * @param beaconFrequency the beaconFrequency to set
+     */
+    public void setBeaconFrequency(String beaconFrequency) {
+        System.out.println("Setting beacon freqency: " + beaconFrequency);
+        this.beaconFrequency = beaconFrequency;
+    }
+    
+    public TileEntity findCoreBlock() {
+        TileEntity result;
+
+        result = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+        if (result != null && result instanceof TileEntityReactor) {
+            return result;
+        }
+
+        result = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+        if (result != null && result instanceof TileEntityReactor) {
+            return result;
+        }
+
+        result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+        if (result != null && result instanceof TileEntityReactor) {
+            return result;
+        }
+
+        result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+        if (result != null && result instanceof TileEntityReactor) {
+            return result;
+        }
+
+        return null;
+    }    
 }
