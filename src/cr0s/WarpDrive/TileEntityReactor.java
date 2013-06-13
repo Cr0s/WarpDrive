@@ -8,12 +8,16 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.tile.IEnergySink;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -72,18 +76,16 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_TELEPORT = 0;   // Телепортация игроков в космос
     private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 50000;  // Максимальный объем корабля для прыжков не в космосе (50k блоков)
     private final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
     int cooldownTime = 0;
-    private final int MINIMUM_COOLDOWN_TIME = 5;
-    private final int TICK_INTERVAL = 1;
+    private final int COOLDOWN_INTERVAL_SECONDS = 5;
 
     // = Привязка игроков =
     
     public String coreState = "";
     
     public TileEntityProtocol controller;
-    private TileEntityChest TileEntityChest;
     
     @SideOnly(Side.SERVER)
     @Override
@@ -103,6 +105,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             }
         } else {
             invalidAssembly = true;
+            return;
         }
         
         switch (currentMode) {
@@ -121,17 +124,52 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 }
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
-            case MODE_BEACON_JUMP:
+            case MODE_BEACON_JUMP:               
                 if (controller == null) { return; }
                 coreState = "Energy: " + currentEnergyValue;
                 
                 if (controller.isJumpFlag()) {
+                    // Set up activated animation
+                    if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 0)
+                    {
+                        worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2); // Set block state to "active"   
+                        makePlayersOnShipDrunk();
+                    }
+                    
+                    // Awaiting cooldown time
+                    if (cooldownTime++ < COOLDOWN_INTERVAL_SECONDS * 20)
+                    {
+                        return;
+                    }
+                    
+                    cooldownTime = 0; // Reset cooldown
+                    
                     System.out.println("[W-C] Jumping!");
-                    prepareToJump();
+                    
+                    //prepareToJump();
                     doJump(currentMode == MODE_LONG_JUMP);
+                    
                     controller.setJumpFlag(false);
+                } else
+                {
+                    worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2); // Deactivate block animation
                 }
                 break;
+        }
+    }
+   
+    public void makePlayersOnShipDrunk() {
+        prepareToJump();
+        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+        
+        List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);  
+        for (Object o : list) {
+            if (o == null || !(o instanceof EntityPlayer)) {
+                continue;
+            }
+            
+            // Set "drunk" effect
+            ((EntityPlayer)o).addPotionEffect(new PotionEffect(Potion.confusion.id, 180, 0, true));
         }
     }
     
@@ -337,8 +375,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             jump.shipDown = shipDown;
             jump.shipLength = this.shipSize;
             
-            this.cooldownTime = 60;
-            
             jump.xCoord = xCoord;
             jump.yCoord = yCoord;
             jump.zCoord = zCoord;
@@ -371,7 +407,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }        
         
         // Подготовка к прыжку
-        if ((cooldownTime <= 0) && (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP)) {
+        if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP)) {
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
             System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
@@ -423,9 +459,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             jump.shipUp = shipUp;
             jump.shipDown = shipDown;
             jump.shipLength = this.shipSize;
-            
-            this.cooldownTime = 60;
-            
+
             jump.isCoordJump = false;
             
             jump.xCoord = xCoord;
@@ -602,14 +636,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         return shipVol;
     }    
-    
-    public void setCooldownTime(int time) {
-        this.cooldownTime = Math.max(MINIMUM_COOLDOWN_TIME, time);
-    }
-
-    public boolean canJump() {
-        return (cooldownTime <= 0);
-    }
 
     public TileEntity findControllerBlock() {
         TileEntity result;

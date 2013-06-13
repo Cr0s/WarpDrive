@@ -52,9 +52,23 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                                "set_beacon_frequency",                                        // 16
         };
     
+    private int ticks = 0;
+    private final int BLOCK_UPDATE_INTERVAL = 15; // 15 ticks
+    
     @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
+        if (++ticks >= BLOCK_UPDATE_INTERVAL){
+            if (findCoreBlock() != null) {
+                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, this.mode, 1 + 2);  // Activated
+            } else
+            {
+                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);  // Inactive
+            }        
+
+            ticks = 0;
+        }
+
     }
     
     private void setJumpDistance(int distance) {
@@ -392,7 +406,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 for (int i = 0; i < this.players.size(); i++) {
                     String nick = this.players.get(i);
 
-                    list += nick + ((i == this.players.size() - 1)? "" : "\n");
+                    list += nick + ((i == this.players.size() - 1)? "" : ",");
                 }
 
                 if (players.isEmpty()) {

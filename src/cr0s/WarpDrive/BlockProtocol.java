@@ -1,24 +1,69 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.ITickHandler;
+import cpw.mods.fml.common.TickType;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.EnumSet;
 import java.util.Random;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockProtocol extends BlockContainer {    
+public class BlockProtocol extends BlockContainer implements ITickHandler { 
+    private Icon[] iconBuffer;
+    
+    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
+    //private final int ANIMATION_
+    //private int currentTexture;
+    
     BlockProtocol(int id, int texture, Material material) {
         super(id, material);
     }
+        
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void registerIcons(IconRegister par1IconRegister)
+    {
+        iconBuffer = new Icon[7];
        
-   // @Override
-   // public String getTextureFile () {
-   //         return CommonProxy.BLOCK_TEXTURE;
-   // }
+        // Solid textures
+        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
+        iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
+        iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:contTop");
+        
+        // Animated textures
+        iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:contSideActive1");
+        iconBuffer[ICON_SIDE_ACTIVATED + 1] = par1IconRegister.registerIcon("warpdrive:contSideActive2");
+        iconBuffer[ICON_SIDE_ACTIVATED + 2] = par1IconRegister.registerIcon("warpdrive:contSideActive3");
+        iconBuffer[ICON_SIDE_ACTIVATED + 3] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
+    }
+    
+    @Override
+    public Icon getIcon(int side, int metadata)
+    {
+        if (side == 0) {
+            return iconBuffer[ICON_BOTTOM];
+        } else
+        if (side == 1) {
+            return iconBuffer[ICON_TOP];
+        }
+        
+        if (metadata == 0) // Inactive state
+        {
+            return iconBuffer[ICON_INACTIVE_SIDE];
+        } else
+        if (metadata > 0) { // Activated, in metadata stored mode number
+            return iconBuffer[ICON_SIDE_ACTIVATED + metadata - 1];
+        }
+        
+        return null;
+    }
     
     @Override
     public TileEntity createNewTileEntity(World var1) {
@@ -45,8 +90,8 @@ public class BlockProtocol extends BlockContainer {
     /**
      * Called upon block activation (right click on the block.)
      */
-    @SideOnly(Side.SERVER)
     @Override
+    @SideOnly(Side.SERVER)
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
         if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
@@ -59,4 +104,27 @@ public class BlockProtocol extends BlockContainer {
         }
         return true;
     }      
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void tickStart(EnumSet<TickType> type, Object... tickData) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void tickEnd(EnumSet<TickType> type, Object... tickData) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public EnumSet<TickType> ticks() {
+        return EnumSet.of(TickType.CLIENT);
+    }
+
+    @Override
+    public String getLabel() {
+        return null;
+    }
 }
