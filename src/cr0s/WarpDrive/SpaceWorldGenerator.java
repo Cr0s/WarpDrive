@@ -49,9 +49,16 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             generateSphere2(world, x, y, z, MOON_RADIUS, false, 0, false);
             
             // Generate moon's core
-            generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Lava core
-            generateSphere2(world, x, y, z, MOON_CORE_RADIUS + 1, false, Block.obsidian.blockID, true);  // Obsidian shell
-            
+            if (random.nextInt(10) > 3)
+            {
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Lava core
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS + 1, false, Block.obsidian.blockID, true);  // Obsidian shell
+            } else
+            {
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, 0, false);
+                generateSmallShip(world, x, y, z);
+                
+            }
             return;
         }
 
@@ -70,12 +77,13 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }*/       
         
         // Simple asteroids
-        if (random.nextInt(200) == 1) {
+        if (random.nextInt(500) == 1) {
             System.out.println("Generating asteroid at " + x + " " + y + " " + z);
             generateAsteroid(world, x, y, z, 6, 11);
             return;
         }
 
+        // Random asteroid of block
         if (random.nextInt(1000) == 1) {
             generateRandomAsteroid(world, x, y, z, 6, 11);
         } 
@@ -89,7 +97,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }        
         
         // Asteroid field
-        if (random.nextInt(3000) == 1) {
+        if (random.nextInt(3500) == 1) {
             System.out.println("Generating asteroid field at " + x + " " + y + " " + z);
             generateAsteroidField(world, x, y, z);
             
@@ -105,9 +113,19 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             world.setBlock(x, y, z, Block.blockDiamond.blockID, 0, 2);     
             
            // return;
-        }        
+        } 
     }
 
+    private void generateSmallShip(World world, int x, int y, int z) {
+        x = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(10));
+        y = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(10));
+        z = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(10));
+            
+        System.out.println("Generating small ship at " + x + " " + y + " " + z);
+        
+        new WorldGenSmallShip(world.rand.nextBoolean()).generate(world, world.rand, x, y, z);
+    }
+    
     private void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
         Random random = new Random();
         
@@ -144,7 +162,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             // Place an asteroid
             generateRandomAsteroid(world, aX, aY, aZ, 4, 6);
         }
-
+      
         // Setting up small asteroids
         for (int i = 1; i <= numOfAsteroids; i++) {
             int aX = x + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
@@ -152,7 +170,11 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
             
             // Placing
-            generateRandomAsteroid(world, aX, aY, aZ, 2, 2);
+            if (world.rand.nextInt(100) != 0) {
+                generateRandomAsteroid(world, aX, aY, aZ, 2, 2);
+            } else {
+                generateSmallShip(world, aX, aY, aZ);
+            }
         }    
     }
 

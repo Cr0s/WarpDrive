@@ -137,7 +137,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     }
                     
                     // Awaiting cooldown time
-                    if (cooldownTime++ < COOLDOWN_INTERVAL_SECONDS * 20)
+                    if ((currentMode != MODE_BASIC_JUMP) && cooldownTime++ < COOLDOWN_INTERVAL_SECONDS * 20)
                     {
                         return;
                     }
@@ -146,7 +146,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     
                     System.out.println("[W-C] Jumping!");
                     
-                    //prepareToJump();
+                    prepareToJump();
                     doJump(currentMode == MODE_LONG_JUMP);
                     
                     controller.setJumpFlag(false);

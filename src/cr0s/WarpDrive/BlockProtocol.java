@@ -21,6 +21,7 @@ public class BlockProtocol extends BlockContainer implements ITickHandler {
     private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
     //private final int ANIMATION_
     //private int currentTexture;
+
     
     BlockProtocol(int id, int texture, Material material) {
         super(id, material);
