@@ -3,6 +3,7 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import java.util.ArrayList;
 import java.util.Random;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -12,34 +13,29 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockProtocol extends BlockContainer { 
+public class BlockRadar extends BlockContainer {
     private Icon[] iconBuffer;
     
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
-    //private final int ANIMATION_
-    //private int currentTexture;
-
+    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_ACTIVATED_SCAN = 4;    
     
-    BlockProtocol(int id, int texture, Material material) {
+    private ArrayList<TileEntityReactor> searchResults;
+    
+    public BlockRadar(int id, int texture, Material material) {
         super(id, material);
     }
-        
+
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[7];
+        iconBuffer = new Icon[5];
        
-        // Solid textures
-        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
+        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:radarSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:contTop");
         
-        // Animated textures
-        iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:contSideActive1");
-        iconBuffer[ICON_SIDE_ACTIVATED + 1] = par1IconRegister.registerIcon("warpdrive:contSideActive2");
-        iconBuffer[ICON_SIDE_ACTIVATED + 2] = par1IconRegister.registerIcon("warpdrive:contSideActive3");
-        iconBuffer[ICON_SIDE_ACTIVATED + 3] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
+        iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:radarSideActive");
+        iconBuffer[ICON_SIDE_ACTIVATED_SCAN] = par1IconRegister.registerIcon("warpdrive:radarSideActiveScan");
     }
     
     @Override
@@ -55,17 +51,18 @@ public class BlockProtocol extends BlockContainer {
         if (metadata == 0) // Inactive state
         {
             return iconBuffer[ICON_INACTIVE_SIDE];
-        } else
-        if (metadata > 0) { // Activated, in metadata stored mode number
-            return iconBuffer[ICON_SIDE_ACTIVATED + metadata - 1];
+        } else if (metadata == 1) { // Attached state
+            return iconBuffer[ICON_SIDE_ACTIVATED];
+        } else if (metadata == 2) { // Scanning state
+            return iconBuffer[ICON_SIDE_ACTIVATED_SCAN];
         }
-        
+         
         return null;
-    }
+    }        
     
     @Override
     public TileEntity createNewTileEntity(World var1) {
-        return new TileEntityProtocol();
+        return new TileEntityRadar();
     }
     
     /**
@@ -84,22 +81,22 @@ public class BlockProtocol extends BlockContainer {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    } 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
+    }    
+    
     @Override
     @SideOnly(Side.SERVER)
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
         if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-            TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
+            TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
 
-            if (controller != null){ 
-                controller.attachPlayer(par5EntityPlayer);
-                par5EntityPlayer.sendChatToPlayer("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
+            if (radar != null){ 
+                par5EntityPlayer.sendChatToPlayer("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
             }
         }
+
+        WarpDrive.instance.registry.printRegistry();
+        
         return true;
-    }
+    }    
 }

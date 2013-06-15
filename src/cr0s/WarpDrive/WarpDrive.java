@@ -31,15 +31,19 @@ public class WarpDrive {
 
     public final static int WARP_CORE_BLOCKID = 500;
     public final static int PROTOCOL_BLOCK_BLOCKID = 501;
+    public final static int RADAR_BLOCK_BLOCKID = 502;
     
     public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone);
+            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Core");
     
     public final static Block protocolBlock = new BlockProtocol(PROTOCOL_BLOCK_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone);
-    
+            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Controller");
+
+    public final static Block radarBlock = new BlockRadar(RADAR_BLOCK_BLOCKID, 0, Material.rock)
+            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");    
     /**
      *
      */
@@ -52,6 +56,8 @@ public class WarpDrive {
     public static WarpDrive instance;
     @SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
     public static CommonProxy proxy;
+    
+    public WarpCoresRegistry registry;
 
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
@@ -61,13 +67,17 @@ public class WarpDrive {
     @Init
     public void load(FMLInitializationEvent event) {
         
-        LanguageRegistry.addName(warpCore, "Warp-drive Reactor Core");
+        LanguageRegistry.addName(warpCore, "Warp Core");
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
         
-        LanguageRegistry.addName(protocolBlock, "Warp core controller block");
+        LanguageRegistry.addName(protocolBlock, "Warp Controller");
         GameRegistry.registerBlock(protocolBlock, "protocolBlock");
         GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");        
+        
+        LanguageRegistry.addName(radarBlock, "W-Radar");
+        GameRegistry.registerBlock(radarBlock, "radarBlock");
+        GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");         
         
         proxy.registerRenderers();
         
@@ -90,7 +100,12 @@ public class WarpDrive {
         'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));
         
         GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
-            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));        
+            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));   
+        
+        GameRegistry.addRecipe(new ItemStack(radarBlock), "ifi", "imi", "imi",
+            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'f', Items.getItem("frequencyTransmitter"));   
+        
+        registry = new WarpCoresRegistry();
     }
 
     //@SideOnly(Side.SERVER)

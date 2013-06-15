@@ -7,13 +7,12 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
+import dan200.computer.api.IPeripheral;
 import java.util.ArrayList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-
-import dan200.computer.api.IPeripheral;
 
 /**
  * Protocol block tile entity
@@ -49,7 +48,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                                "get_attached_players", "summon", "summon_all",                // 7, 8, 9
                                "get_x", "get_y", "get_z",                                     // 10, 11, 12
                                "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
-                               "set_beacon_frequency", "get_dx", "get_dz"                     // 16, 17, 18
+                               "set_beacon_frequency", "get_dx", "get_dz",                    // 16, 17, 18
+                               "set_core_frequency",                                          // 19
         };
     
     private int ticks = 0;
@@ -81,7 +81,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     }
 
     private void setMode(int mode) {
-        System.out.println("Setting mode: " + mode);
+       // System.out.println("Setting mode: " + mode);
         this.mode = mode;
     }    
     
@@ -437,19 +437,19 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 
             case 10: // get_x
                 if (core == null) {
-                    break;
+                    return null;
                 }
                 return new Object[] { (Integer)core.xCoord };
 
             case 11: // get_y
                 if (core == null) {
-                    break;
+                    return null;
                 }
                 return new Object[] { (Integer)core.yCoord };
                 
             case 12: // get_z
                 if (core == null) {
-                    break;
+                    return null;
                 }                   
                 return new Object[] { (Integer)core.zCoord };     
                 
@@ -458,7 +458,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 {
                     return new Object[] { (Integer)((TileEntityReactor)core).currentEnergyValue };
                 }
-                break;                
+                
+                return null;            
                 
             case 14: // do_jump
                 doJump();
@@ -489,7 +490,14 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 if (core != null && core instanceof TileEntityReactor) {
                     return new Object[] { (Integer)(((TileEntityReactor)core).dz) }; 
                 }
-                break;        
+                break;  
+
+            case 19: // set_core_frequency
+                if (arguments.length == 1 && (core != null && core instanceof TileEntityReactor))
+                {
+                    ((TileEntityReactor)core).coreFrequency = ((String)arguments[0]);
+                }
+                break;                
         }
         
         return new Integer[] { 0 };
@@ -535,7 +543,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
      * @param beaconFrequency the beaconFrequency to set
      */
     public void setBeaconFrequency(String beaconFrequency) {
-        System.out.println("Setting beacon freqency: " + beaconFrequency);
+        //System.out.println("Setting beacon freqency: " + beaconFrequency);
         this.beaconFrequency = beaconFrequency;
     }
     

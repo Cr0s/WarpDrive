@@ -81,6 +81,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     int cooldownTime = 0;
     private final int COOLDOWN_INTERVAL_SECONDS = 5;
 
+    private final int CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+    private int registryUpdateTicks = 0;
+    
+    public String coreFrequency = "default";
+    
     // = Привязка игроков =
     
     public String coreState = "";
@@ -89,7 +94,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     
     @SideOnly(Side.SERVER)
     @Override
-    public void updateEntity() {        
+    public void updateEntity() { 
+        // Update warp core in cores registry
+        if (registryUpdateTicks++ > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
+            registryUpdateTicks = 0;
+            
+            WarpDrive.instance.registry.addToRegistry(this);
+        }
+        
+        
         TileEntity c = findControllerBlock();
         
         if (c != null) {
@@ -717,11 +730,30 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         currentEnergyValue = tag.getInteger("energy");
+        coreFrequency = tag.getString("corefrequency");
+        
+        WarpDrive.instance.registry.addToRegistry(this);
     }
 
     @Override
     public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         tag.setInteger("energy", currentEnergyValue);
+        
+        tag.setString("corefrequency", coreFrequency);
+    }
+    
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        
+        WarpDrive.instance.registry.removeFromRegistry(this);
+    }
+    
+    @Override
+    public void validate() {
+        super.validate();
+        
+        WarpDrive.instance.registry.addToRegistry(this);
     }
 }
