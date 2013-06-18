@@ -49,7 +49,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                                "get_x", "get_y", "get_z",                                     // 10, 11, 12
                                "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
                                "set_beacon_frequency", "get_dx", "get_dz",                    // 16, 17, 18
-                               "set_core_frequency",                                          // 19
+                               "set_core_frequency", "is_in_space",                           // 19, 20
         };
     
     private int ticks = 0;
@@ -92,7 +92,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     }
     
     private void doJump() {
-        //System.out.println("Jumping!");
+        if (core != null && core instanceof TileEntityReactor) {
+            ((TileEntityReactor)core).randomCooldownAddition = worldObj.rand.nextInt(60); // Adding random ticks to cooldown            
+        }
         setJumpFlag(true);
     }
     
@@ -497,7 +499,11 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 {
                     ((TileEntityReactor)core).coreFrequency = ((String)arguments[0]);
                 }
-                break;                
+                break;        
+                
+            case 20: // is_in_space
+                return new Boolean[] { worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID };
+                
         }
         
         return new Integer[] { 0 };

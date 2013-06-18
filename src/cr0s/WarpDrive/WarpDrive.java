@@ -32,6 +32,7 @@ public class WarpDrive {
     public final static int WARP_CORE_BLOCKID = 500;
     public final static int PROTOCOL_BLOCK_BLOCKID = 501;
     public final static int RADAR_BLOCK_BLOCKID = 502;
+    public final static int ISOLATION_BLOCKID = 503;
     
     public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
@@ -44,6 +45,10 @@ public class WarpDrive {
     public final static Block radarBlock = new BlockRadar(RADAR_BLOCK_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
             .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");    
+
+    public final static Block isolationBlock = new BlockWarpIsolation(ISOLATION_BLOCKID, 0, Material.rock)
+            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp-Field Isolation Block");      
     /**
      *
      */
@@ -78,6 +83,9 @@ public class WarpDrive {
         LanguageRegistry.addName(radarBlock, "W-Radar");
         GameRegistry.registerBlock(radarBlock, "radarBlock");
         GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");         
+
+        LanguageRegistry.addName(isolationBlock, "Warp-Field Isolation Block");
+        GameRegistry.registerBlock(isolationBlock, "isolationBlock");         
         
         proxy.registerRenderers();
         
@@ -103,7 +111,10 @@ public class WarpDrive {
             'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));   
         
         GameRegistry.addRecipe(new ItemStack(radarBlock), "ifi", "imi", "imi",
-            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'f', Items.getItem("frequencyTransmitter"));   
+            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'f', Items.getItem("frequencyTransmitter")); 
+        
+        GameRegistry.addRecipe(new ItemStack(isolationBlock), "iii", "idi", "iii",
+            'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'd', Block.blockDiamond);         
         
         registry = new WarpCoresRegistry();
     }

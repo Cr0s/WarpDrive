@@ -17,11 +17,13 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     private int currentEnergyValue = 0;
     
     private String[] methodsArray = { 
-                                        "scanRay",                // 0
-                                        "scanRadiusW",            // 1
-                                        "getResultsCountW",       // 2
-                                        "getResultW",             // 3
-                                        "getEnergyLevel"          // 4
+                                        "scanRay",                             // 0
+                                        "scanRadiusW",                         // 1
+                                        "getResultsCountW",                    // 2
+                                        "getResultW",                          // 3
+                                        "getEnergyLevel",                      // 4
+            
+                                        "getRadarX", "getRadarY", "getRadarZ", // 5, 6, 7
                                     };
     
     private ArrayList<TileEntityReactor> results;
@@ -38,15 +40,18 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
-        if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
-            if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
-                //System.out.println("Scanning...");
-                results = WarpDrive.instance.registry.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
-                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
-                
-                cooldownTime = 0;
+        try {
+            if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
+                if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
+                    //System.out.println("Scanning...");
+                    WarpDrive.instance.registry.removeDeadCores();
+                    results = WarpDrive.instance.registry.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
+                    worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+
+                    cooldownTime = 0;
+                }
             }
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
     
     @Override
@@ -128,8 +133,17 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
                     }
                 }
                 
-            case 4:
+            case 4: // getEnergyLevel
                 return new Integer[] { this.getCurrentEnergyValue()};
+                
+            case 5: // getRadarX
+                return new Integer[] { this.xCoord };
+                
+            case 6: // getRadarY
+                return new Integer[] { this.yCoord };
+                
+            case 7: // getRadarZ
+                return new Integer[] { this.zCoord };
                 
         }
         

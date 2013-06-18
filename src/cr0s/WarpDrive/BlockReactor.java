@@ -98,5 +98,15 @@ public class BlockReactor extends BlockContainer {
         if (reactor != null){ 
             par5EntityPlayer.sendChatToPlayer(reactor.getCoreState());
         }
-    }   
+    }  
+    
+    @Override
+    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
+    {
+        TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+        
+        if (te instanceof TileEntityReactor) {
+            WarpDrive.instance.registry.removeFromRegistry((TileEntityReactor)te);
+        }
+    }
 }

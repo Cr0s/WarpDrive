@@ -15,6 +15,8 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 
 public class EntityJump extends Entity {
@@ -51,7 +53,7 @@ public class EntityJump extends Entity {
     boolean isJumping = false;
     int currentIndexInShip = 0;
     
-    private final int BLOCKS_PER_TICK = 1250;
+    private final int BLOCKS_PER_TICK = 3000;
     
     private List entityOnShip;
     
@@ -61,6 +63,8 @@ public class EntityJump extends Entity {
 
     int destX, destZ;
     boolean isCoordJump; 
+    
+    long msCounter = 0;
     
     public EntityJump(World world) {
         super(world);
@@ -87,15 +91,15 @@ public class EntityJump extends Entity {
         this.dz = _dz;
         Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
 
+        
         System.out.println("[JE] Entity created");
-
+        
         this.reactor = parReactor;
         
         this.isJumping = false;
     }
 
     public void killEntity(String reason) {
-        System.out.println("[JE] Tick:");
         if (!on) { return; }
         on = false;
         
@@ -117,14 +121,14 @@ public class EntityJump extends Entity {
     @SideOnly(Side.SERVER)
     @Override
     public void onUpdate() {
-        if (!on) {
+        if (!on || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID) {
             unlockWorlds();
             worldObj.removeEntity(this);
             return; 
         }
         
-        if (minY < 0 || maxY > 255) {
-            this.killEntity("Y-coord error!");
+        if (minY < 0 || maxY > 256) {
+            killEntity("Y-coord error!");
             return;
         }
                 
@@ -200,11 +204,11 @@ public class EntityJump extends Entity {
                 
                 if (entity instanceof EntityPlayer) {
                     if (!removeBlocks) {
-                        worldObj.setBlock(me.oldX, me.oldY - 2, me.oldZ, Block.dirt.blockID);
+                        mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, Block.dirt.blockID, 0, 1 + 2);
                     } else
                     {
                         if (worldObj.getBlockId(me.oldX, me.oldY - 2, me.oldZ) == Block.dirt.blockID) {
-                            worldObj.setBlock(me.oldX, me.oldY - 2, me.oldZ, 0);
+                            mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, 0, 0, 1 + 2);
                         }
                     }
                 }
@@ -309,7 +313,9 @@ public class EntityJump extends Entity {
         setBlocksUnderPlayers(false);
         
         isJumping = true;
-        this.currentIndexInShip = 0;       
+        this.currentIndexInShip = 0;   
+        
+        msCounter = System.currentTimeMillis();
     }
     
     /**
@@ -320,6 +326,8 @@ public class EntityJump extends Entity {
         setBlocksUnderPlayers(true);
         
         removeShip();
+        
+        System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
         
         // Прыжок окончен
         killEntity("");    
@@ -386,7 +394,7 @@ public class EntityJump extends Entity {
      */
     public void moveShip() {
         int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - this.currentIndexInShip);
-        
+
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
         // 1. Jump to space
@@ -995,51 +1003,60 @@ public class EntityJump extends Entity {
 
             if (!toSpace && !fromSpace)
             {
-                worldObj.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
+                mySetBlock(worldObj, newX, newY, newZ, blockID, blockMeta, 2);
             } else if (toSpace)
             {
-                spaceWorld.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
+                mySetBlock(spaceWorld, newX, newY, newZ, blockID, blockMeta, 2);
             } else if (fromSpace) {
-                surfaceWorld.setBlock(newX, newY, newZ, blockID, blockMeta, 2);
+                mySetBlock(surfaceWorld, newX, newY, newZ, blockID, blockMeta, 2);
             }
 
             NBTTagCompound oldnbt = new NBTTagCompound();
 
 
             if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145) {
+                
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
-               
-                oldnbt.setInteger("x", newX);
-                oldnbt.setInteger("y", newY);
-                oldnbt.setInteger("z", newZ);
+                // CC's computers and turtles moving workaround
+                if (blockID == 1225 || blockID == 1227 || blockID == 1228) {
+                    oldnbt.setInteger("x", newX);
+                    oldnbt.setInteger("y", newY);
+                    oldnbt.setInteger("z", newZ);
                 
-                newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-                newTileEntity.invalidate();
-                /*if (!toSpace && !fromSpace) {
-                    newTileEntity = worldObj.getBlockTileEntity(newX, newY, newZ);     
-                } else if (toSpace) {
-                    newTileEntity = spaceWorld.getBlockTileEntity(newX, newY, newZ); 
-                } else if (fromSpace) {
-                    newTileEntity = surfaceWorld.getBlockTileEntity(newX, newY, newZ); 
-                }*/
-                   
-                             
-                if (newTileEntity == null) {
-                    System.out.println("PIZDEC!!!");
-                    return false; // PIZDEC!!!
+                    newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
+                    newTileEntity.invalidate();
+                } else {
+                    if (!toSpace && !fromSpace) {
+                        newTileEntity = worldObj.getBlockTileEntity(newX, newY, newZ);     
+                    } else if (toSpace) {
+                        newTileEntity = spaceWorld.getBlockTileEntity(newX, newY, newZ); 
+                    } else if (fromSpace) {
+                        newTileEntity = surfaceWorld.getBlockTileEntity(newX, newY, newZ); 
+                    }
+                    
+                    if (newTileEntity == null) {
+                        System.out.println("[EJ] Error moving tileEntity! TE is null");
+                        return false;
+                    }
+                    
+                    newTileEntity.invalidate();
+                    
+                    newTileEntity.readFromNBT(oldnbt);
+                    if (!toSpace && !fromSpace)
+                    {
+                        worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+                    } else if (toSpace)
+                    {
+                        //newTileEntity.worldObj = spaceWorld;
+                        spaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+                    } else if (fromSpace) {
+                        //newTileEntity.worldObj = surfaceWorld;
+                        surfaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);                    
+                    }                    
                 }
-                /*
-                newTileEntity.invalidate();
-                
-                newTileEntity.readFromNBT(oldnbt);
-                
-                newTileEntity.xCoord = newX;
-                newTileEntity.yCoord = newY;
-                newTileEntity.zCoord = newZ;
-                */
-                newTileEntity.worldObj = getTargetWorld();
-                
+
+                newTileEntity.worldObj = getTargetWorld();    
                 newTileEntity.validate();
                 
                 if (!toSpace && !fromSpace)
@@ -1047,20 +1064,12 @@ public class EntityJump extends Entity {
                     worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
                 } else if (toSpace)
                 {
-                    //newTileEntity.worldObj = spaceWorld;
                     spaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
                 } else if (fromSpace) {
-                    //newTileEntity.worldObj = surfaceWorld;
                     surfaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);                    
                 }
                 
                 worldObj.removeBlockTileEntity(oldX, oldY, oldZ);  
-                
-                
-                if (newTileEntity.getClass().getName().contains("TileEntityComputer") && newTileEntity instanceof IPeripheral)
-                {
-                    System.out.println(((IPeripheral)newTileEntity).getMethodNames());
-                }
             }
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -1075,26 +1084,150 @@ public class EntityJump extends Entity {
     }
 
     @Override
-    protected void entityInit() {
-        //onUpdate();
+    protected void entityInit() {        
+
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound var1) {
     }
-    /*
-     @Override
-     protected void entityInit() {
-     throw new UnsupportedOperationException("Not supported yet.");
-     }
 
-     @Override
-     protected void readEntityFromNBT(NBTTagCompound var1) {
-     throw new UnsupportedOperationException("Not supported yet.");
-     }
+    // Own implementation of setting blocks withow light recalculation in optimization purposes
+    public boolean mySetBlock(World w, int par1, int par2, int par3, int par4, int par5, int par6)
+    {
+        if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
+        {
+            if (par2 < 0)
+            {
+                return false;
+            }
+            else if (par2 >= 256)
+            {
+                return false;
+            }
+            else
+            {
+                w.markBlockForUpdate(par1, par2, par3);
+                Chunk chunk = w.getChunkFromChunkCoords(par1 >> 4, par3 >> 4);
 
-     @Override
-     protected void writeEntityToNBT(NBTTagCompound var1) {
-     throw new UnsupportedOperationException("Not supported yet.");
-     }*/
+                return myChunkSBIDWMT(chunk, par1 & 15, par2, par3 & 15, par4, par5);
+            }
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    // Incapsulation violation warning:
+    // field Chunk.storageArrays has been turned from private to public in class Chunk.java
+    public boolean myChunkSBIDWMT(Chunk c, int par1, int par2, int par3, int par4, int par5)
+    {
+        int j1 = par3 << 4 | par1;
+
+        if (par2 >= c.precipitationHeightMap[j1] - 1)
+        {
+            c.precipitationHeightMap[j1] = -999;
+        }
+
+        int k1 = c.heightMap[j1];
+        int l1 = c.getBlockID(par1, par2, par3);
+        int i2 = c.getBlockMetadata(par1, par2, par3);
+
+        if (l1 == par4 && i2 == par5)
+        {
+            return false;
+        }
+        else
+        {
+            ExtendedBlockStorage extendedblockstorage = c.storageArrays[par2 >> 4];
+
+            if (extendedblockstorage == null)
+            {
+                if (par4 == 0)
+                {
+                    return false;
+                }
+
+                extendedblockstorage = c.storageArrays[par2 >> 4] = new ExtendedBlockStorage(par2 >> 4 << 4, !c.worldObj.provider.hasNoSky);
+            }
+
+            int j2 = c.xPosition * 16 + par1;
+            int k2 = c.zPosition * 16 + par3;
+
+            extendedblockstorage.setExtBlockID(par1, par2 & 15, par3, par4);
+
+            if (l1 != 0)
+            {
+                if (!c.worldObj.isRemote)
+                {
+                    Block.blocksList[l1].breakBlock(c.worldObj, j2, par2, k2, l1, i2);
+                }
+                else if (Block.blocksList[l1] != null && Block.blocksList[l1].hasTileEntity(i2))
+                {
+                    TileEntity te = worldObj.getBlockTileEntity(j2, par2, k2);
+                    if (te != null && te.shouldRefresh(l1, par4, i2, par5, worldObj, j2, par2, k2))
+                    {
+                        c.worldObj.removeBlockTileEntity(j2, par2, k2);
+                    }
+                }
+            }
+
+            if (extendedblockstorage.getExtBlockID(par1, par2 & 15, par3) != par4)
+            {
+                return false;
+            }
+            else
+            {
+                extendedblockstorage.setExtBlockMetadata(par1, par2 & 15, par3, par5);
+
+                // Removed light recalcalations
+                /*if (flag)
+                {
+                    c.generateSkylightMap();
+                }
+                else
+                {
+                    if (c.getBlockLightOpacity(par1, par2, par3) > 0)
+                    {
+                        if (par2 >= k1)
+                        {
+                            c.relightBlock(par1, par2 + 1, par3);
+                        }
+                    }
+                    else if (par2 == k1 - 1)
+                    {
+                        c.relightBlock(par1, par2, par3);
+                    }
+
+                    c.propagateSkylightOcclusion(par1, par3);
+                }*/
+
+                TileEntity tileentity;
+
+                if (par4 != 0)
+                {
+                    if (Block.blocksList[par4] != null && Block.blocksList[par4].hasTileEntity(par5))
+                    {
+                        tileentity = c.getChunkBlockTileEntity(par1, par2, par3);
+
+                        if (tileentity == null)
+                        {
+                            tileentity = Block.blocksList[par4].createTileEntity(c.worldObj, par5);
+                            c.worldObj.setBlockTileEntity(j2, par2, k2, tileentity);
+                        }
+
+                        if (tileentity != null)
+                        {
+                            tileentity.updateContainingBlockInfo();
+                            tileentity.blockMetadata = par5;
+                        }
+                    }
+                }
+
+                c.isModified = true;
+                return true;
+            }
+        }
+    }    
 }

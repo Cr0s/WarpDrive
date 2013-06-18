@@ -76,32 +76,37 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_TELEPORT = 0;   // Телепортация игроков в космос
     private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 50000;  // Максимальный объем корабля для прыжков не в космосе (50k блоков)
-    private final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе (10k блоков)
+    public final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
     int cooldownTime = 0;
-    private final int COOLDOWN_INTERVAL_SECONDS = 5;
-
+    private final int COOLDOWN_INTERVAL_SECONDS = 3;
+    public int randomCooldownAddition = 0;
+    
     private final int CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
     private int registryUpdateTicks = 0;
-    
     public String coreFrequency = "default";
     
-    // = Привязка игроков =
-    
-    public String coreState = "";
-    
+    public int isolationBlocksCount = 0;
+    public int isolationUpdateTicks = 0;
+    private final int ISOLATION_UPDATE_INTARVAL_SECONDS = 10;
+            
+    public String coreState = ""; 
     public TileEntityProtocol controller;
     
     @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() { 
         // Update warp core in cores registry
-        if (registryUpdateTicks++ > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
+        if (++registryUpdateTicks > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
             registryUpdateTicks = 0;
             
-            WarpDrive.instance.registry.addToRegistry(this);
+            WarpDrive.instance.registry.updateInRegistry(this);
         }
         
+        if (++isolationUpdateTicks > ISOLATION_UPDATE_INTARVAL_SECONDS * 20) {
+            isolationUpdateTicks = 0;
+            updateIsolationState();
+        }
         
         TileEntity c = findControllerBlock();
         
@@ -145,34 +150,108 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     // Set up activated animation
                     if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 0)
                     {
+                        // TODO: check for "warpcore turns into dirt" bug
                         worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2); // Set block state to "active"   
                         makePlayersOnShipDrunk();
                     }
-                    
+                                        
                     // Awaiting cooldown time
-                    if ((currentMode != MODE_BASIC_JUMP) && cooldownTime++ < COOLDOWN_INTERVAL_SECONDS * 20)
+                    if (currentMode != MODE_BASIC_JUMP && cooldownTime++ < ((COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
                     {
                         return;
                     }
                     
-                    cooldownTime = 0; // Reset cooldown
+                    cooldownTime = 0;
+                                        
+                    if (!prepareToJump()) {
+                        return; 
+                    }
+                    
+                    if (WarpDrive.instance.registry.isWarpCoreIntersectsWithOthers(this)) {
+                        this.controller.setJumpFlag(false);
+                        messageToAllPlayersOnShip("Warp field intersects with other ship's field. Cannot jump.");
+                        return;                        
+                    }
                     
                     System.out.println("[W-C] Jumping!");
-                    
-                    prepareToJump();
+
                     doJump(currentMode == MODE_LONG_JUMP);
                     
                     controller.setJumpFlag(false);
                 } else
                 {
+                    // TODO: check to "warpcore turns into dirt" bug
                     worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2); // Deactivate block animation
                 }
                 break;
         }
     }
    
+    public void messageToAllPlayersOnShip(String msg) {
+        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+        
+        List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);  
+        for (Object o : list) {
+            if (o == null || !(o instanceof EntityPlayer)) {
+                continue;
+            }
+            
+            // Set "drunk" effect
+            ((EntityPlayer)o).sendChatToPlayer("[WarpCore] " + msg);
+        }
+    }    
+    
+    public void updateIsolationState() {
+        // Search block in cube around core with side 10
+        int xmax, ymax, zmax, x1, x2, z1, z2;
+        int xmin, ymin, zmin;
+
+        final int ISOLATION_CUBE_SIDE = 6;
+        
+        x1 = xCoord + ((ISOLATION_CUBE_SIDE / 2) -1);
+        x2 = xCoord - ((ISOLATION_CUBE_SIDE / 2) -1);
+        
+        if (x1 < x2) {
+            xmin = x1;
+            xmax = x2;
+        } else
+        {
+            xmin = x2;
+            xmax = x1;
+        }
+
+        z1 = zCoord + ((ISOLATION_CUBE_SIDE / 2) -1);
+        z2 = zCoord - ((ISOLATION_CUBE_SIDE / 2) -1);
+        
+        if (z1 < z2) {
+            zmin = z1;
+            zmax = z2;
+        } else
+        {
+            zmin = z2;
+            zmax = z1;
+        }
+
+        ymax = yCoord + ((ISOLATION_CUBE_SIDE / 2) -1);
+        ymin = yCoord - ((ISOLATION_CUBE_SIDE / 2) -1);
+        
+        this.isolationBlocksCount = 0;
+        
+        // Search for warp isolation blocks
+        for (int y = ymin; y <= ymax; y++) {
+            for (int x = xmin; x <= xmax; x++) {
+                for (int z = zmin; z <= zmax; z++) {
+                    if (worldObj.getBlockId(x, y, z) == WarpDrive.ISOLATION_BLOCKID) {
+                        this.isolationBlocksCount++;
+                    }
+                }
+            }
+        }
+    }
+    
     public void makePlayersOnShipDrunk() {
-        prepareToJump();
+        if (!prepareToJump()) { return; }
+        
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
         
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);  
@@ -227,7 +306,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
          }        
     }
     
-    public void prepareToJump() {
+    public boolean prepareToJump() {
         this.direction = controller.getDirection();
         
         this.shipFront = controller.getFront();
@@ -238,13 +317,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         this.shipLeft  = controller.getLeft();
         this.shipDown  = controller.getDown();
         
-        this.distance  = Math.min(128, controller.getDistance());
+        this.distance  = Math.min(this.MAX_JUMP_DISTANCE_BY_COUNTER, controller.getDistance());
         
-        calculateSpatialShipParameters();
+        return calculateSpatialShipParameters();
     }
     
     
-    public void calculateSpatialShipParameters() {
+    public boolean calculateSpatialShipParameters() {
+        boolean res = false;
+        
         int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
 
         if (Math.abs(dx) > 0) {
@@ -316,7 +397,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
             System.out.println(coreState);
             this.controller.setJumpFlag(false);
-            return;            
+            return false;            
         }
         
         this.shipVolume = getRealShipVolume();
@@ -324,7 +405,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         if (shipVolume > MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
             coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
             this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
-        }        
+            this.controller.setJumpFlag(false);
+            return false;
+        }    
+        
+        return true;
     }
 
     private void doBeaconJump() {
@@ -688,6 +773,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     // Сколько нужно энергии
     @Override
     public int demandsEnergy() {
+        if (this.controller != null && controller.getMode() == 0) {
+            return 0;
+        }
+        
         return (maxEnergyValue - currentEnergyValue);
     }
 
@@ -731,8 +820,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         super.readFromNBT(tag);
         currentEnergyValue = tag.getInteger("energy");
         coreFrequency = tag.getString("corefrequency");
-        
-        WarpDrive.instance.registry.addToRegistry(this);
+        isolationBlocksCount = tag.getInteger("isolation");
+        WarpDrive.instance.registry.updateInRegistry(this);
     }
 
     @Override
@@ -741,6 +830,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         tag.setInteger("energy", currentEnergyValue);
         
         tag.setString("corefrequency", coreFrequency);
+        
+        tag.setInteger("isolation", this.isolationBlocksCount);
     }
     
     @Override
@@ -754,6 +845,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public void validate() {
         super.validate();
         
-        WarpDrive.instance.registry.addToRegistry(this);
+        WarpDrive.instance.registry.updateInRegistry(this);
     }
 }
