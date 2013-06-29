@@ -5,12 +5,12 @@ import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.Mod.PostInit;
 import cpw.mods.fml.common.Mod.PreInit;
-import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import net.minecraftforge.common.MinecraftForge;
+import cr0s.WarpDrive.SpaceEventHandler;
 
 @Mod(modid="ServerMods", name="ServerMods", version="0.0.1")
 @NetworkMod(clientSideRequired = false, serverSideRequired = true, connectionHandler = LoginHookClass.class)
@@ -24,10 +24,6 @@ public class ServerMods {
         @Instance("ServerMods")
         public static ServerMods instance;
        
-        // Says where the client and server 'proxy' code is loaded.
-        @SidedProxy(clientSide="cr0s.serverMods.ClientProxy", serverSide="cr0s.serverMods.CommonProxy")
-        public static CommonProxy proxy;
-       
         @PreInit
         public void preInit(FMLPreInitializationEvent event) {
                 // Stub Method
@@ -40,6 +36,7 @@ public class ServerMods {
             
             // Снять урон от падения с джетпаком и крузис-тапками
             MinecraftForge.EVENT_BUS.register(new AntiFallDamage());
+            MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
         }
        
         @PostInit

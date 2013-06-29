@@ -87,12 +87,12 @@ public class BlockRadar extends BlockContainer {
     @SideOnly(Side.SERVER)
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
-        if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-            TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return false;
+        TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
 
-            if (radar != null){ 
-                par5EntityPlayer.sendChatToPlayer("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
-            }
+        if (radar != null){ 
+            par5EntityPlayer.sendChatToPlayer("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
         }
 
         WarpDrive.instance.registry.printRegistry();

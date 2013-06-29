@@ -21,6 +21,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.0")
 @NetworkMod(clientSideRequired = false, serverSideRequired = true)
@@ -59,7 +60,7 @@ public class WarpDrive {
     public SpaceWorldGenerator spaceWorldGenerator;
     @Instance("WarpDrive")
     public static WarpDrive instance;
-    @SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
+    @SidedProxy(clientSide = "cr0s.WarpDrive.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
     public static CommonProxy proxy;
     
     public WarpCoresRegistry registry;
@@ -87,17 +88,14 @@ public class WarpDrive {
         LanguageRegistry.addName(isolationBlock, "Warp-Field Isolation Block");
         GameRegistry.registerBlock(isolationBlock, "isolationBlock");         
         
-        proxy.registerRenderers();
-        
         EntityRegistry.registerModEntity(EntitySphereGen.class, "EntitySphereGenerator", 1, WarpDrive.instance, 100, 1, false);
         proxy.registerJumpEntity();
 
-        //if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
         spaceWorldGenerator = new SpaceWorldGenerator();
         GameRegistry.registerWorldGenerator(spaceWorldGenerator);
         
         registerSpaceDimension();
-        //}
+        MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
     }
 
     @PostInit
