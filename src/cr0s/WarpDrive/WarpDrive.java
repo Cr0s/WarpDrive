@@ -117,7 +117,6 @@ public class WarpDrive {
         registry = new WarpCoresRegistry();
     }
 
-    //@SideOnly(Side.SERVER)
     private void registerSpaceDimension() {
         spaceBiome = (new BiomeSpace(23)).setColor(0).setDisableRain().setBiomeName("Space");
         this.spaceProviderID = 14;

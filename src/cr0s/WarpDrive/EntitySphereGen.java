@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -76,9 +77,10 @@ public final class EntitySphereGen extends Entity {
         worldObj.removeEntity(this);
     }
 
-    @SideOnly(Side.SERVER)
     @Override
     public void onUpdate() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         if (!on)
         {
             System.out.println("[SGEN] onUpdate(): entity disabled.");

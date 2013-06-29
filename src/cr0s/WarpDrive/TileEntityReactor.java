@@ -4,6 +4,7 @@
  */
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
@@ -93,9 +94,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public String coreState = ""; 
     public TileEntityProtocol controller;
     
-    @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() { 
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         // Update warp core in cores registry
         if (++registryUpdateTicks > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
             registryUpdateTicks = 0;

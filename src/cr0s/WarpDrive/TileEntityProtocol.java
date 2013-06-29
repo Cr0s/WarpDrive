@@ -4,6 +4,7 @@
  */
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
@@ -57,9 +58,10 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
 
     private TileEntity core;    
     
-    @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         if (++ticks >= BLOCK_UPDATE_INTERVAL){
             findCoreBlock();
             

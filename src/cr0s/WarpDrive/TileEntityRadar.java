@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
@@ -37,9 +38,10 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
         return ((getCurrentEnergyValue() - needEnergy) > 0);
     }
     
-    @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         try {
             if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
                 if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
