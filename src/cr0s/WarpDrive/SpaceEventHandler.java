@@ -3,9 +3,8 @@
  */
 package cr0s.WarpDrive;
 
-import keepcalm.mods.events.events.LiquidFlowEvent;
-import keepcalm.mods.events.events.PlayerMoveEvent;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
@@ -13,12 +12,15 @@ import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.common.ForgeHooks;
 
 /**
  * Обработчик событий в мире Space
  * @author Cr0s
  */
 public class SpaceEventHandler {    
+/*
     @ForgeSubscribe
     public void onBlockFlow(LiquidFlowEvent lfe) {
         // В космосе жидкости не текут, так что событие отменяется
@@ -28,52 +30,37 @@ public class SpaceEventHandler {
             lfe.setCanceled(true);
         }
     }
-    
+*/
     @ForgeSubscribe
-    public void onPlayerMove(PlayerMoveEvent pme) {
+    public void livingUpdate(LivingUpdateEvent event) {
+	EntityLiving entity = event.entityLiving;
+
         final int HELMET_ID_SKUBA = 30082;
         final int HELMET_ID_QUANTUM = 30174;
+        final int HELMET_ID_ADV_SOLAR = 30832;
+        final int HELMET_ID_HYB_SOLAR = 30833;
+        final int HELMET_ID_ULT_SOLAR = 30834;
         final int HELMET_HEAD = 397;
-        //System.out.println("onPlayerMove(): event called.");
         
         // Движение происходит в космическом пространстве
-        if (pme.entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            if (pme.entity instanceof EntityPlayer) {
+        if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+            if (entity instanceof EntityPlayerMP) {
                 
-                if (isEntityInVacuum(pme.entity)) {
-                    if (!(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_ID_SKUBA) &&
-                            !(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_ID_QUANTUM) && 
-                            !(pme.entityPlayer.getCurrentArmor(3) != null && pme.entityPlayer.getCurrentArmor(3).itemID == HELMET_HEAD)) {
-                        pme.entity.attackEntityFrom(DamageSource.drown, 3);    
+                if (isEntityInVacuum(entity)) {
+                    if (!(entity.getCurrentArmor(3) != null && (entity.getCurrentArmor(3).itemID == HELMET_ID_SKUBA || entity.getCurrentArmor(3).itemID == HELMET_ID_QUANTUM || entity.getCurrentArmor(3).itemID == HELMET_HEAD
+ || entity.getCurrentArmor(3).itemID == HELMET_ID_ADV_SOLAR || entity.getCurrentArmor(3).itemID == HELMET_ID_HYB_SOLAR || entity.getCurrentArmor(3).itemID == HELMET_ID_ULT_SOLAR))) {
+                        entity.attackEntityFrom(DamageSource.drown, 3);    
                     }
                 }
                 
                 // Отправить назад на Землю
-                if (pme.newY < -50.0D) {
-                    ((EntityPlayerMP)pme.entityPlayer).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) pme.entityPlayer), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(pme.newX), 5000, MathHelper.floor_double(pme.newZ)));
-                    ((EntityPlayerMP)pme.entityPlayer).setFire(30);
-                    ((EntityPlayerMP)pme.entityPlayer).setPositionAndUpdate(pme.newX, 5000D, pme.newZ);
+                if (entity.posY < -50.0D) {
+                    ((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
+                    ((EntityPlayerMP)entity).setFire(30);
+                    ((EntityPlayerMP)entity).setPositionAndUpdate(entity.posX, 250D, entity.posZ);
                     return;
                 }
             }
-            /*
-            // Если это игрок в режиме Creative, то игнорируем
-            if (pme.entity instanceof EntityPlayer && ((EntityPlayer)pme.entity).capabilities.isCreativeMode) {
-                return;
-            }
-            
-            //System.out.println("onPlayerMove(): oldY: " + pme.oldY + " newY: " + pme.newY);
-            // Происходит падение
-            if (pme.oldY > pme.newY && pme.flying) {
-                //System.out.println("onPlayerMove(): [blocking falling]");
-                if (pme.entity instanceof EntityPlayer) { 
-                    pme.entityPlayer.setPositionAndUpdate(pme.oldX, pme.oldY, pme.oldZ);
-                } else {
-                    pme.entity.setPosition(pme.oldX, pme.oldY, pme.oldZ);
-                }
-                
-                pme.setCanceled(true); // Предотвращаем падение
-            }*/
         }
     }
     

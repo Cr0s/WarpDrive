@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IPeripheral;
@@ -118,9 +119,10 @@ public class EntityJump extends Entity {
         }
     }
 
-    @SideOnly(Side.SERVER)
     @Override
     public void onUpdate() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         if (!on || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID) {
             unlockWorlds();
             worldObj.removeEntity(this);

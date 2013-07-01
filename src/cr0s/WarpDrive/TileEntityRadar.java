@@ -1,17 +1,22 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.IPeripheral;
 import ic2.api.Direction;
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import java.util.ArrayList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-
+import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergySink {
+    
+    public boolean addedToEnergyNet;
     
     private final int MAX_ENERGY_VALUE = 100 * (1000 * 1000); // 100 000 000 Eu
     private int currentEnergyValue = 0;
@@ -37,9 +42,14 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
         return ((getCurrentEnergyValue() - needEnergy) > 0);
     }
     
-    @SideOnly(Side.SERVER)
     @Override
     public void updateEntity() {
+        if (!addedToEnergyNet && !worldObj.isRemote) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
+        }
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         try {
             if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
                 if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
@@ -168,7 +178,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     // IEnergySink methods implementation
     @Override
     public int demandsEnergy() {
-        return (MAX_ENERGY_VALUE - this.getCurrentEnergyValue());
+        return (MAX_ENERGY_VALUE - currentEnergyValue);
     }
 
     @Override
@@ -197,7 +207,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 
     @Override
     public boolean isAddedToEnergyNet() {
-        return true;
+        return addedToEnergyNet;
     }
 
     /**
@@ -206,5 +216,14 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     public int getCurrentEnergyValue() {
         return currentEnergyValue;
     }
-    
+
+    @Override
+    public void invalidate() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }
+        super.invalidate();
+    }
+
 }

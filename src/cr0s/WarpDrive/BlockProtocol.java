@@ -89,16 +89,15 @@ public class BlockProtocol extends BlockContainer {
      * Called upon block activation (right click on the block.)
      */
     @Override
-    @SideOnly(Side.SERVER)
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
-        if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-            TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return false;
+        TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
 
-            if (controller != null){ 
-                controller.attachPlayer(par5EntityPlayer);
-                par5EntityPlayer.sendChatToPlayer("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
-            }
+        if (controller != null){ 
+            controller.attachPlayer(par5EntityPlayer);
+            par5EntityPlayer.sendChatToPlayer("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
         }
         return true;
     }
