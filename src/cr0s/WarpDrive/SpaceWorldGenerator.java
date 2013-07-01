@@ -1,7 +1,10 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.IWorldGenerator;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -336,33 +339,32 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
 
     private int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
-        int[] ores = {
-            Block.oreIron.blockID,
-            Block.oreGold.blockID,
-            Block.oreCoal.blockID,
-            Block.oreEmerald.blockID,
-            Block.oreLapis.blockID,
-            Block.oreRedstoneGlowing.blockID, 
-                        
-            // ICBM
-            3880,
-            3970,
-            39701, // 3970:1
-            
-            // IC2 ores
-            247,
-            248,
-            249
-            
-        };
-        
+        List<Integer> ores = new ArrayList<Integer>();
+        ores.add(Block.oreIron.blockID);
+        ores.add(Block.oreGold.blockID);
+        ores.add(Block.oreCoal.blockID);
+        ores.add(Block.oreEmerald.blockID);
+        ores.add(Block.oreLapis.blockID);
+        ores.add(Block.oreRedstoneGlowing.blockID);
+        if (Loader.isModLoaded("ICBM|Explosion"))
+        {
+            ores.add(3880);
+            ores.add(3970);
+            ores.add(39701);
+        }
+        if (Loader.isModLoaded("IC2"))
+        {
+            ores.add(247);
+            ores.add(248);
+            ores.add(249);
+        }
         int blockID = Block.stone.blockID;
         if (corrupted) {
             blockID = Block.cobblestone.blockID;
         }
 
         if (random.nextInt(10) == 1 || nocobble) {
-            blockID = ores[random.nextInt(ores.length - 1)];   
+            blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
         else if (random.nextInt(350) == 1) {
             blockID = 902; // quarz (AE)
