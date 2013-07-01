@@ -346,17 +346,14 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         ores.add(Block.oreEmerald.blockID);
         ores.add(Block.oreLapis.blockID);
         ores.add(Block.oreRedstoneGlowing.blockID);
+        ores.add(247);//IC2
+        ores.add(248);
+        ores.add(249);
         if (Loader.isModLoaded("ICBM|Explosion"))
         {
             ores.add(3880);
             ores.add(3970);
             ores.add(39701);
-        }
-        if (Loader.isModLoaded("IC2"))
-        {
-            ores.add(247);
-            ores.add(248);
-            ores.add(249);
         }
         int blockID = Block.stone.blockID;
         if (corrupted) {
@@ -366,7 +363,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         if (random.nextInt(10) == 1 || nocobble) {
             blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
-        else if (random.nextInt(350) == 1) {
+        else if (random.nextInt(350) == 1 && Loader.isModLoaded("AppliedEnergistics")) {
             blockID = 902; // quarz (AE)
         }
         else if (random.nextInt(500) == 1) {
