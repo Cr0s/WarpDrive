@@ -8,6 +8,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +27,16 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
 
 /**
  *
  * @author Cr0s
  */
 public class TileEntityReactor extends TileEntity implements IEnergySink {
+
+    public boolean addedToEnergyNet;
+    
     // = Настройки ядра =
 
     // Готовность к исполнению режима (прыжок и пр.)
@@ -95,7 +101,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public TileEntityProtocol controller;
     
     @Override
-    public void updateEntity() { 
+    public void updateEntity() {
+        if (!addedToEnergyNet && !worldObj.isRemote) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
+        }
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
         // Update warp core in cores registry
@@ -814,7 +824,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     // Блок является составляющим энергосети
     @Override
     public boolean isAddedToEnergyNet() {
-        return true;
+        return addedToEnergyNet;
     }
 
     @Override
@@ -838,6 +848,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     
     @Override
     public void invalidate() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }
         super.invalidate();
         
         WarpDrive.instance.registry.removeFromRegistry(this);
