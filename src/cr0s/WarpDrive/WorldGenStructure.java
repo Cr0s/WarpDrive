@@ -7,7 +7,7 @@ public class WorldGenStructure {
    public static int getStoneBlock(boolean corrupted, Random rand) {
        int res = Items.getItem("reinforcedStone").itemID;
        
-       if (corrupted && (rand.nextInt(30) == 1)) {
+       if (corrupted && (rand.nextInt(15) == 1)) {
            res = 0;
        }       
        

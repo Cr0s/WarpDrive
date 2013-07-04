@@ -20,17 +20,6 @@ import net.minecraftforge.common.ForgeHooks;
  * @author Cr0s
  */
 public class SpaceEventHandler {    
-/*
-    @ForgeSubscribe
-    public void onBlockFlow(LiquidFlowEvent lfe) {
-        // В космосе жидкости не текут, так что событие отменяется
-        System.out.println("onLiquidFlow: liquid is flowing");
-        if (lfe.world.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            System.out.println("onLiquidFlow: [blocking flow]");
-            lfe.setCanceled(true);
-        }
-    }
-*/
     @ForgeSubscribe
     public void livingUpdate(LivingUpdateEvent event) {
 	EntityLiving entity = event.entityLiving;
@@ -54,11 +43,10 @@ public class SpaceEventHandler {
                 }
                 
                 // Отправить назад на Землю
-                if (entity.posY < -50.0D) {
+                if (entity.posY < -10.0D) {
                     ((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
                     ((EntityPlayerMP)entity).setFire(30);
                     ((EntityPlayerMP)entity).setPositionAndUpdate(entity.posX, 250D, entity.posZ);
-                    return;
                 }
             }
         }
@@ -90,25 +78,5 @@ public class SpaceEventHandler {
         }        
         
         return true;
-    }
-    
-    @ForgeSubscribe
-    public void onEntityJoinedWorld(EntityJoinWorldEvent ejwe) {
-        if (!(ejwe.entity instanceof EntityPlayer)) {
-            return;
-        }
-        
-        if (ejwe.world.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            ((EntityPlayer)ejwe.entity).capabilities.allowFlying = true;
-        } else
-        {
-            ((EntityPlayer)ejwe.entity).capabilities.allowFlying = false;
-        }
-        
-        if (((EntityPlayer)ejwe.entity).username.contains(".")) {
-            ((EntityPlayer)ejwe.entity).username = ((EntityPlayer)ejwe.entity).username.split("\\.")[0];
-        }
-        
-        ((EntityPlayer)ejwe.entity).skinUrl = "http://koprokubach.servegame.com/getskin.php?user=" + ((EntityPlayer)ejwe.entity).username;
     }
 }

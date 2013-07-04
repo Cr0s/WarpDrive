@@ -10,8 +10,13 @@ import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergySink {
@@ -48,8 +53,9 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
+        }
         try {
             if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
                 if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
@@ -103,11 +109,15 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
                         radius = ((Double)arguments[0]).intValue();
                     } catch (Exception e) { radius = 0; }
                     
+                    if (radius < 0 || radius > 10000) {
+                        scanRadius = 0;
+                        return new Object[] { 0 };
+                    }
+                    
                     if (radius != 0 && isEnergyEnoughForScanRadiusW(radius)) {
                         // Consume energy
                         this.currentEnergyValue -= radius * radius;
                         
-                        //System.out.println("Start scanning...");
                         // Begin searching
                         scanRadius = radius;
                         cooldownTime = 0;

@@ -36,7 +36,6 @@ public class ServerMods {
             
             // Снять урон от падения с джетпаком и крузис-тапками
             MinecraftForge.EVENT_BUS.register(new AntiFallDamage());
-            MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
         }
        
         @PostInit

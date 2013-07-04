@@ -26,6 +26,9 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     // Lower limit
     public final int Y_LIMIT_DOWN = 55;
 
+    public boolean isICBMLoaded = false;
+    public boolean isAELoaded = false;
+    
     /**
      * Generator for chunk
      * @param random
@@ -41,6 +44,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }
 
+        // Check for mods is present
+        isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
+        isAELoaded = Loader.isModLoaded("AppliedEnergistics");
+        
         int x = (chunkX * 16) + (5 - random.nextInt(10));
         int z = (chunkZ * 16) + (5 - random.nextInt(10));
 
@@ -349,7 +356,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         ores.add(247);//IC2
         ores.add(248);
         ores.add(249);
-        if (Loader.isModLoaded("ICBM|Explosion"))
+        if (isICBMLoaded)
         {
             ores.add(3880);
             ores.add(3970);
@@ -363,14 +370,12 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         if (random.nextInt(10) == 1 || nocobble) {
             blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
-        else if (random.nextInt(350) == 1 && Loader.isModLoaded("AppliedEnergistics")) {
+        else if (random.nextInt(350) == 1 && isAELoaded) {
             blockID = 902; // quarz (AE)
         }
         else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;
-        }/* else if (random.nextInt(5000) == 1) {
-            blockID = 688;
-        }*/
+        }
 
         return blockID;
     }

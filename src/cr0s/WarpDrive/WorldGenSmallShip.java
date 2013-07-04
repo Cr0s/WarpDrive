@@ -15,9 +15,14 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 public class WorldGenSmallShip extends WorldGenerator
 {
         private boolean corrupted;
+        private boolean isICBMLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false;
         
 	public WorldGenSmallShip (boolean corrupted) { 
             this.corrupted = corrupted; 
+            
+            isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
+            isAELoaded = Loader.isModLoaded("AppliedEnergistics");
+            isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
         }
 
         @Override
@@ -590,7 +595,7 @@ public class WorldGenSmallShip extends WorldGenerator
    private ItemStack getRandomBonus(Random rand) {
        ItemStack res = null;
        boolean isDone = false;
-       while (!isDone) {    //Через жопу костылем, но сойдет
+       while (!isDone) {
            switch (rand.nextInt(14)) {
                case 0:
                    res = Items.getItem("massFabricator");
@@ -603,11 +608,11 @@ public class WorldGenSmallShip extends WorldGenerator
                    isDone = true;
                    break;
                case 2: // Quantum armor bonuses
-                   isDone = true;
-                   break;// skipped
                case 3:
                case 4:            
                case 5:
+                   isDone = true;
+                   break;// skipped
                case 6:
                    res = Items.getItem("glassFiberCableItem");
                    res.stackSize = 2 + rand.nextInt(63);
@@ -623,35 +628,35 @@ public class WorldGenSmallShip extends WorldGenerator
                    break;// skipped
                // AE Quarz
                case 9:
-                   if (Loader.isModLoaded("AppliedEnergistics")) {
+                   if (isAELoaded) {
                        res = new ItemStack(4362, 2 + rand.nextInt(63), 6);
                        isDone = true;
                    }
                    break;
                // AE improved processor
                case 10:
-                   if (Loader.isModLoaded("AppliedEnergistics")) {
+                   if (isAELoaded) {
                        res = new ItemStack(4362, 2 + rand.nextInt(15), 19);               
                        isDone = true;
                    }
                    break;
                // Rocket launcher platform Tier3
                case 11:
-                   if (Loader.isModLoaded("ICBM|Explosion")) {
+                   if (isICBMLoaded) {
                        res = new ItemStack(3884, 2 + rand.nextInt(1), 2);
                        isDone = true;
                    }
                    break;
                // Missles from conventional to hypersonic
                case 12:
-                   if (Loader.isModLoaded("ICBM|Explosion")) {
+                   if (isICBMLoaded) {
                        res = new ItemStack(4159, 2 + rand.nextInt(1), rand.nextInt(21));    
                        isDone = true;
                    }
                    break;
                // Advanced solar panels
                case 13:
-                   if (Loader.isModLoaded("AdvancedSolarPanel")) {
+                   if (isAdvSolPanelLoaded) {
                        res = new ItemStack(194, 2 + rand.nextInt(1), rand.nextInt(3));
                        isDone = true;
                    }
