@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.Loader;
 import ic2.api.item.Items;
 import java.util.Random;
 import net.minecraft.block.Block;
@@ -588,63 +589,75 @@ public class WorldGenSmallShip extends WorldGenerator
    
    private ItemStack getRandomBonus(Random rand) {
        ItemStack res = null;
-       
-       switch (rand.nextInt(14)) {
-           case 0:
-               res = Items.getItem("massFabricator");
-               res.stackSize = 1 + rand.nextInt(2);
-               return res;
-           
-           case 1:
-               res = Items.getItem("nuke");
-               res.stackSize = 1 + rand.nextInt(64);
-               return res;
-           
-           case 2: // Quantum armor bonuses
-               // skipped
-               
-           case 3:
-           case 4:            
-           case 5:
-           case 6:
-               res = Items.getItem("glassFiberCableItem");
-               res.stackSize = 2 + rand.nextInt(63);
-               return res;
-               
-           case 7:
-               res = Items.getItem("matter");
-               res.stackSize = 2 + rand.nextInt(63);
-               return res;
-               
-           case 8:
-               // skipped
-           
-           // AE Quarz
-           case 9:
-               res = new ItemStack(4362, 2 + rand.nextInt(63), 6);
-               return res;
-
-           // AE improved processor
-           case 10:
-               res = new ItemStack(4362, 2 + rand.nextInt(15), 19);
-               return res;               
-               
-           // Rocket launcher platform Tier3
-           case 11:
-               res = new ItemStack(3884, 2 + rand.nextInt(1), 2);
-               return res;
-
-           // Missles from conventional to hypersonic
-           case 12:
-               res = new ItemStack(4159, 2 + rand.nextInt(1), rand.nextInt(21));
-               return res;    
-               
-           // Advanced solar panels
-           case 13:
-               res = new ItemStack(194, 2 + rand.nextInt(1), rand.nextInt(3));
-               return res;
+       boolean isDone = false;
+       while (!isDone) {    //Через жопу костылем, но сойдет
+           switch (rand.nextInt(14)) {
+               case 0:
+                   res = Items.getItem("massFabricator");
+                   res.stackSize = 1 + rand.nextInt(2);
+                   isDone = true;
+                   break;
+               case 1:
+                   res = Items.getItem("nuke");
+                   res.stackSize = 1 + rand.nextInt(64);
+                   isDone = true;
+                   break;
+               case 2: // Quantum armor bonuses
+                   isDone = true;
+                   break;// skipped
+               case 3:
+               case 4:            
+               case 5:
+               case 6:
+                   res = Items.getItem("glassFiberCableItem");
+                   res.stackSize = 2 + rand.nextInt(63);
+                   isDone = true;
+                   break;
+               case 7:
+                   res = Items.getItem("matter");
+                   res.stackSize = 2 + rand.nextInt(63);
+                   isDone = true;
+                   break;
+               case 8:
+                   isDone = true;
+                   break;// skipped
+               // AE Quarz
+               case 9:
+                   if (Loader.isModLoaded("AppliedEnergistics")) {
+                       res = new ItemStack(4362, 2 + rand.nextInt(63), 6);
+                       isDone = true;
+                   }
+                   break;
+               // AE improved processor
+               case 10:
+                   if (Loader.isModLoaded("AppliedEnergistics")) {
+                       res = new ItemStack(4362, 2 + rand.nextInt(15), 19);               
+                       isDone = true;
+                   }
+                   break;
+               // Rocket launcher platform Tier3
+               case 11:
+                   if (Loader.isModLoaded("ICBM|Explosion")) {
+                       res = new ItemStack(3884, 2 + rand.nextInt(1), 2);
+                       isDone = true;
+                   }
+                   break;
+               // Missles from conventional to hypersonic
+               case 12:
+                   if (Loader.isModLoaded("ICBM|Explosion")) {
+                       res = new ItemStack(4159, 2 + rand.nextInt(1), rand.nextInt(21));    
+                       isDone = true;
+                   }
+                   break;
+               // Advanced solar panels
+               case 13:
+                   if (Loader.isModLoaded("AdvancedSolarPanel")) {
+                       res = new ItemStack(194, 2 + rand.nextInt(1), rand.nextInt(3));
+                       isDone = true;
+                   }
+                   break;
+           }
        }
-       
        return res;
    }        
 }

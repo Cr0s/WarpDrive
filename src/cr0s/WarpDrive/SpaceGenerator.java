@@ -34,7 +34,6 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
     }
 
     @Override
-    //@SideOnly(Side.SERVER)
     public Chunk provideChunk(int par1, int par2) {
         this.rand.setSeed((long) par1 * 341873128712L + (long) par2 * 132897987541L);
         byte[] var3 = new byte[32768];
