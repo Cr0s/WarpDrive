@@ -392,28 +392,13 @@ public class EntityJump extends Entity {
      *Ship moving
      */
     public void moveShip() {
-        int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - this.currentIndexInShip);
+        int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
-        // 1. Jump to space
-        if (toSpace) {
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlockToSpace(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
-        // 2. Jump from space
-        } else if (fromSpace) {
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlockFromSpace(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
-        // 3. Basic jump
-        } else {            
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlock(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
+        for (int index = 0; index < blocksToMove; index++) {
+            moveBlockSimple(currentIndexInShip, distance, dir, toSpace, fromSpace);
+            currentIndexInShip++;
         }
     }
 
@@ -924,31 +909,6 @@ public class EntityJump extends Entity {
         return x >= Xmin && x <= Xmax && y >= minY && y <= maxY && z >= Zmin && z <= Zmax;
     }
 
-    public boolean moveBlock(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, false, false);
-    }    
-
-    /**
-     * Перемещение одиночного блока из обычного мира в космос 
-     * @param indexInShip
-     * @param distance
-     * @param direction
-     * @return 
-     */
-    public boolean moveBlockToSpace(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, true, false);
-    }
-    
-    /**
-     * Перемещение одиночного блока из космоса в обычный мир
-     * @param indexInShip
-     * @param distance
-     * @param direction
-     * @return 
-     */
-    public boolean moveBlockFromSpace(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, false, true);
-    }    
     
     /**
      * Перемещение одиночного блока на новое место
