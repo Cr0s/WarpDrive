@@ -154,7 +154,7 @@ public class EntityJump extends Entity {
                 isJumping = false;
                 finishJump();
             } else { 
-                moveEntitys(axisalignedbb, distance, dir, true);
+                moveEntities(axisalignedbb, distance, dir, true);
                 moveShip();
             }
         }
@@ -271,9 +271,9 @@ public class EntityJump extends Entity {
             targetWorld = this.worldObj;
         }
 
-        saveEntitys(axisalignedbb);
-        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");        
-        
+        saveEntities(axisalignedbb);
+        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");
+
         if (!isCoordJump) {
             if (dir != -2 && dir != -1) {
                 messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
@@ -321,7 +321,7 @@ public class EntityJump extends Entity {
      * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
-        moveEntitys(axisalignedbb, distance, dir, false);
+        moveEntities(axisalignedbb, distance, dir, false);
         setBlocksUnderPlayers(true);
 
         removeShip();
@@ -496,7 +496,7 @@ public class EntityJump extends Entity {
         return shipSize;
     }
 
-    public void saveEntitys(AxisAlignedBB axisalignedbb) {
+    public void saveEntities(AxisAlignedBB axisalignedbb) {
         this.entityOnShip = new ArrayList();
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
         
@@ -522,7 +522,7 @@ public class EntityJump extends Entity {
      * @param restorePositions восстановление старых позиций для предотвращения выпадения, либо перемещение на новую
      * @return 
      */
-    public boolean moveEntitys(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
+    public boolean moveEntities(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
         List list = this.entityOnShip;
 
         if (list != null) {
