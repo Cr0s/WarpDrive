@@ -44,6 +44,7 @@ public class EntityJump extends Entity {
     public int minY;
     public int dx;
     public int dz;
+    public World targetWorld;
     // Collision point coordinates
     public int blowX, blowY, blowZ;
     boolean needToExplode = false;
@@ -134,7 +135,7 @@ public class EntityJump extends Entity {
         }
 
         // Skip tick, awaiting chunk generation
-        if ((getTargetWorld().provider.dimensionId == worldObj.provider.dimensionId) && !checkForChunksGeneratedIn(getTargetWorld())) {
+        if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
             return;
         }
 
@@ -159,31 +160,21 @@ public class EntityJump extends Entity {
         }
     }
     
-    public World getTargetWorld() {        
-        if (toSpace) {
-            return DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
-        } else if (fromSpace) {
-            return DimensionManager.getWorld(0);
-        } else {
-            return this.worldObj;
-        }
-    }
-    
     public void lockWorlds() {
         System.out.println("Locking worlds...");
-        getTargetWorld().isRemote = true;
+        targetWorld.isRemote = true;
         
         // When warping between dimensions is need to lock both worlds
-        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+        if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = true; 
         }
     }
     
     public void unlockWorlds() {
         System.out.println("Unlocking worlds..");
-        getTargetWorld().isRemote = false;
+        targetWorld.isRemote = false;
         
-        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+        if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = false;
         }        
     }
@@ -274,6 +265,14 @@ public class EntityJump extends Entity {
 
         betweenWorlds = fromSpace || toSpace;
         
+        if (toSpace) {
+            targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
+        } else if (fromSpace) {
+            targetWorld = DimensionManager.getWorld(0);
+        } else {
+            targetWorld = this.worldObj;
+        }
+
         saveEntitys(axisalignedbb);
         System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");        
         
@@ -1058,7 +1057,7 @@ public class EntityJump extends Entity {
                     }                    
                 }
 
-                newTileEntity.worldObj = getTargetWorld();    
+                newTileEntity.worldObj = targetWorld;
                 newTileEntity.validate();
                 
                 if (!toSpace && !fromSpace)
