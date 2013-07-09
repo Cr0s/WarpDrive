@@ -87,7 +87,6 @@ public class EntityJump extends Entity {
         this.dir = _direction;
 
         shipLeft = shipRight = shipFront = shipBack = shipDown = shipUp = shipLength = 0;
-        this.dx = this.dz = 0;
         this.dx = _dx;
         this.dz = _dz;
         Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
@@ -128,32 +127,34 @@ public class EntityJump extends Entity {
             worldObj.removeEntity(this);
             return; 
         }
-        
+
         if (minY < 0 || maxY > 256) {
             killEntity("Y-coord error!");
             return;
         }
-                
+
         // Skip tick, awaiting chunk generation
         if ((getTargetWorld().provider.dimensionId == worldObj.provider.dimensionId) && !checkForChunksGeneratedIn(getTargetWorld())) {
             return;
         }
-        
+
         if (!isJumping) {
             this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
             this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);               
-            
+
             System.out.println("[JE] Preparing to jump...");
             axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
-            
+
             prepareToJump();
+
+            isJumping = true;
         } else {
             if (currentIndexInShip >= ship.length-1) {
                 isJumping = false;
                 finishJump();
             } else { 
-                moveEntitys(axisalignedbb, distance, dir, true);                
-                moveShip();                   
+                moveEntitys(axisalignedbb, distance, dir, true);
+                moveShip();
             }
         }
     }
@@ -314,27 +315,26 @@ public class EntityJump extends Entity {
         saveShip(shipSize);
         setBlocksUnderPlayers(false);
         
-        isJumping = true;
         this.currentIndexInShip = 0;   
         
         msCounter = System.currentTimeMillis();
     }
-    
+
     /**
      * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
         moveEntitys(axisalignedbb, distance, dir, false);
         setBlocksUnderPlayers(true);
-        
+
         removeShip();
-        
+
         System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
-        
+
         // Прыжок окончен
-        killEntity("");    
+        killEntity("");
     }
-    
+
     /**
      * Removing ship from world
      * 
