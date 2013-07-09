@@ -217,25 +217,23 @@ public class EntityJump extends Entity {
      * @return
      */
     public boolean checkForChunksGeneratedIn(World w) {
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
-                    final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
-                    final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);    
-                    
-                    int chunkX = newX >> 4;
-                    int chunkZ = newZ >> 4;
-                    
-                    if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
-                        messageToAllPlayersOnShip("Generating chunks...");
-                        w.getBlockId(newX, 128, newZ);
-                        
-                        return false;
-                    }
+        // TODO: ходить не по координатам, а по координатам чанков, так быстрее.
+        for (int x = Xmin; x <= Xmax; x++) {
+            for (int z = Zmin; z <= Zmax; z++) {
+                final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
+                final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);
+
+                int chunkX = newX >> 4;
+                int chunkZ = newZ >> 4;
+
+                if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+                    messageToAllPlayersOnShip("Generating chunks...");
+                    w.getBlockId(newX, 128, newZ);
+
+                    return false;
                 }
             }
-        }        
-        
+        }
         return true;
     }
     
@@ -247,10 +245,10 @@ public class EntityJump extends Entity {
                 if (!(obj instanceof MovingEntity)) {
                     continue;
                 }
-                
+
                 MovingEntity me = (MovingEntity)obj;
                 Entity entity = me.entity;
-                
+
                 if (entity instanceof EntityPlayer) {
                     ((EntityPlayer)entity).sendChatToPlayer("[WarpCore] " + msg);
                 }
