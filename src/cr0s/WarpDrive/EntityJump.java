@@ -1053,24 +1053,24 @@ public class EntityJump extends Entity {
     }
 
     // Own implementation of setting blocks withow light recalculation in optimization purposes
-    public boolean mySetBlock(World w, int par1, int par2, int par3, int par4, int par5, int par6)
+    public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
     {
-        if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
+        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
         {
-            if (par2 < 0)
+            if (y < 0)
             {
                 return false;
             }
-            else if (par2 >= 256)
+            else if (y >= 256)
             {
                 return false;
             }
             else
             {
-                w.markBlockForUpdate(par1, par2, par3);
-                Chunk chunk = w.getChunkFromChunkCoords(par1 >> 4, par3 >> 4);
+                w.markBlockForUpdate(x, y, z);
+                Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
 
-                return myChunkSBIDWMT(chunk, par1 & 15, par2, par3 & 15, par4, par5);
+                return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
             }
         }
         else
@@ -1081,65 +1081,65 @@ public class EntityJump extends Entity {
     
     // Incapsulation violation warning:
     // field Chunk.storageArrays has been turned from private to public in class Chunk.java
-    public boolean myChunkSBIDWMT(Chunk c, int par1, int par2, int par3, int par4, int par5)
+    public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
     {
-        int j1 = par3 << 4 | par1;
+        int j1 = z << 4 | x;
 
-        if (par2 >= c.precipitationHeightMap[j1] - 1)
+        if (y >= c.precipitationHeightMap[j1] - 1)
         {
             c.precipitationHeightMap[j1] = -999;
         }
 
         int k1 = c.heightMap[j1];
-        int l1 = c.getBlockID(par1, par2, par3);
-        int i2 = c.getBlockMetadata(par1, par2, par3);
+        int l1 = c.getBlockID(x, y, z);
+        int i2 = c.getBlockMetadata(x, y, z);
 
-        if (l1 == par4 && i2 == par5)
+        if (l1 == blockId && i2 == blockMeta)
         {
             return false;
         }
         else
         {
-            ExtendedBlockStorage extendedblockstorage = c.storageArrays[par2 >> 4];
+            ExtendedBlockStorage extendedblockstorage = c.storageArrays[y >> 4];
 
             if (extendedblockstorage == null)
             {
-                if (par4 == 0)
+                if (blockId == 0)
                 {
                     return false;
                 }
 
-                extendedblockstorage = c.storageArrays[par2 >> 4] = new ExtendedBlockStorage(par2 >> 4 << 4, !c.worldObj.provider.hasNoSky);
+                extendedblockstorage = c.storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
             }
 
-            int j2 = c.xPosition * 16 + par1;
-            int k2 = c.zPosition * 16 + par3;
+            int j2 = c.xPosition * 16 + x;
+            int k2 = c.zPosition * 16 + z;
 
-            extendedblockstorage.setExtBlockID(par1, par2 & 15, par3, par4);
+            extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
 
             if (l1 != 0)
             {
                 if (!c.worldObj.isRemote)
                 {
-                    Block.blocksList[l1].breakBlock(c.worldObj, j2, par2, k2, l1, i2);
+                    Block.blocksList[l1].breakBlock(c.worldObj, j2, y, k2, l1, i2);
                 }
                 else if (Block.blocksList[l1] != null && Block.blocksList[l1].hasTileEntity(i2))
                 {
-                    TileEntity te = worldObj.getBlockTileEntity(j2, par2, k2);
-                    if (te != null && te.shouldRefresh(l1, par4, i2, par5, worldObj, j2, par2, k2))
+                    TileEntity te = worldObj.getBlockTileEntity(j2, y, k2);
+                    if (te != null && te.shouldRefresh(l1, blockId, i2, blockMeta, worldObj, j2, y, k2))
                     {
-                        c.worldObj.removeBlockTileEntity(j2, par2, k2);
+                        c.worldObj.removeBlockTileEntity(j2, y, k2);
                     }
                 }
             }
 
-            if (extendedblockstorage.getExtBlockID(par1, par2 & 15, par3) != par4)
+            if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
             {
                 return false;
             }
             else
             {
-                extendedblockstorage.setExtBlockMetadata(par1, par2 & 15, par3, par5);
+                extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
 
                 // Removed light recalcalations
                 /*if (flag)
@@ -1165,22 +1165,22 @@ public class EntityJump extends Entity {
 
                 TileEntity tileentity;
 
-                if (par4 != 0)
+                if (blockId != 0)
                 {
-                    if (Block.blocksList[par4] != null && Block.blocksList[par4].hasTileEntity(par5))
+                    if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta))
                     {
-                        tileentity = c.getChunkBlockTileEntity(par1, par2, par3);
+                        tileentity = c.getChunkBlockTileEntity(x, y, z);
 
                         if (tileentity == null)
                         {
-                            tileentity = Block.blocksList[par4].createTileEntity(c.worldObj, par5);
-                            c.worldObj.setBlockTileEntity(j2, par2, k2, tileentity);
+                            tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
+                            c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
                         }
 
                         if (tileentity != null)
                         {
                             tileentity.updateContainingBlockInfo();
-                            tileentity.blockMetadata = par5;
+                            tileentity.blockMetadata = blockMeta;
                         }
                     }
                 }
