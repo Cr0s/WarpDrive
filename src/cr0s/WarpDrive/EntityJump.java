@@ -691,119 +691,41 @@ public class EntityJump extends Entity {
     }
 
     // Получение вектора в зависимости от направления прыжка
-    // (3,14здец, конечно)
     public int[] getVector(int i) {
-        int ai[] = {
+        int v[] = {
             0, 0, 0
         };
 
-        if (dz == 1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
+        switch(i) {
+            case -1:
+                v[1] = 1;
+                break;
 
-                case 90:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
+            case -2:
+                v[1] = -1;
+                break;
 
-                case 180:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
+            case 0:
+                v[0] = dx;
+                v[2] = dz;
+                break;
 
-                case 270:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-            }
-        } else if (dz == -1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
+            case 180:
+                v[0] = -dx;
+                v[2] = -dz;
+                break;
 
-                case 90:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
+            case 90:
+                v[0] = dz;
+                v[2] = -dx;
+                break;
 
-                case 180:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-
-                case 270:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-            }
-        } else if (dx == 1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 90:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
-
-                case 180:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 270:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-            }
-        } else if (dx == -1) {
-            switch (i) {
-                case 0:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 90:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-
-                case 180:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 270:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
-            }
+            case 270:
+                v[0] = -dz;
+                v[2] = dx;
         }
 
-        return ai;
+        return v;
     }
 
     /**
