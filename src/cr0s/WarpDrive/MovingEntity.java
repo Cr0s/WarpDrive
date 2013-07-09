@@ -11,13 +11,13 @@ import net.minecraft.entity.Entity;
  * @author user
  */
 public class MovingEntity {
-    public int oldX;
-    public int oldY;
-    public int oldZ;
+    public double oldX;
+    public double oldY;
+    public double oldZ;
     
     public Entity entity;
     
-    public MovingEntity(Entity e, int x, int y, int z) {
+    public MovingEntity(Entity e, double x, double y, double z) {
         this.entity = e;
         
         this.oldX = x;

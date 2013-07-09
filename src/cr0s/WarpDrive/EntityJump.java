@@ -198,11 +198,11 @@ public class EntityJump extends Entity {
                 
                 if (entity instanceof EntityPlayer) {
                     if (!removeBlocks) {
-                        mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, Block.dirt.blockID, 0, 1 + 2);
+                        mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, Block.dirt.blockID, 0, 1 + 2);
                     } else
                     {
-                        if (worldObj.getBlockId(me.oldX, me.oldY - 2, me.oldZ) == Block.dirt.blockID) {
-                            mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, 0, 0, 1 + 2);
+                        if (worldObj.getBlockId((int)me.oldX, (int)me.oldY - 2, (int)me.oldZ) == Block.dirt.blockID) {
+                            mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, 0, 0, 1 + 2);
                         }
                     }
                 }
@@ -507,7 +507,7 @@ public class EntityJump extends Entity {
             
             Entity entity = (Entity)o;
 
-            MovingEntity movingentity = new MovingEntity(entity, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
+            MovingEntity movingentity = new MovingEntity(entity, entity.posX, entity.posY, entity.posZ);
                         
             // Добавим в список Entity
             entityOnShip.add(movingentity);
@@ -537,9 +537,10 @@ public class EntityJump extends Entity {
                 
                 if (me == null) { continue; }
                 
-                int oldEntityX = me.oldX;
-                int oldEntityY = me.oldY;
-                int oldEntityZ = me.oldZ;
+                // TODO: пересчитывать всё в вещественных координатах
+                int oldEntityX = (int)me.oldX;
+                int oldEntityY = (int)me.oldY;
+                int oldEntityZ = (int)me.oldZ;
 
                 int newEntityX, newEntityY, newEntityZ;
 
