@@ -690,42 +690,6 @@ public class EntityJump extends Entity {
         return result;
     }
 
-    public int rotsincos(int i, boolean flag) {
-        // sin
-        if (flag) {
-            switch (i) {
-                case 0:
-                    return 0;
-
-                case 90:
-                    return 1;
-
-                case 180:
-                    return 0;
-
-                case 270:
-                    return -1;
-            }
-        } // cos
-        else {
-            switch (i) {
-                case 0:
-                    return 1;
-
-                case 90:
-                    return 0;
-
-                case 180:
-                    return -1;
-
-                case 270:
-                    return 0;
-            }
-        }
-
-        return 0;
-    }
-
     // Получение вектора в зависимости от направления прыжка
     // (3,14здец, конечно)
     public int[] getVector(int i) {
