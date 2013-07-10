@@ -446,21 +446,20 @@ public class EntityJump extends Entity {
      */
     public int getRealShipSize() {
         int shipSize = 0;
-        
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
                     if (blockID != 0) {
                         shipSize++;
-                    }
 
-                    if (blockID == Block.bedrock.blockID) {
-                        bedrockOnShip = true;
-                        return shipSize;
+                        if (blockID == Block.bedrock.blockID) {
+                            bedrockOnShip = true;
+                            return shipSize;
+                        }
                     }
                 }
             }
