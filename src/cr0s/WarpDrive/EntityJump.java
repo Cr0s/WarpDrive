@@ -70,6 +70,8 @@ public class EntityJump extends Entity {
     
     public EntityJump(World world) {
         super(world);
+
+        targetWorld = worldObj;
     }
 
     public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz, TileEntityReactor parReactor) {
@@ -92,7 +94,8 @@ public class EntityJump extends Entity {
         this.dz = _dz;
         Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
 
-        
+        targetWorld = worldObj;
+
         System.out.println("[JE] Entity created");
         
         this.reactor = parReactor;
@@ -258,11 +261,9 @@ public class EntityJump extends Entity {
     
     public void prepareToJump() {
         boolean betweenWorlds;
-        
-        lockWorlds();
 
         betweenWorlds = fromSpace || toSpace;
-        
+
         if (toSpace) {
             targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
         } else if (fromSpace) {
@@ -270,6 +271,8 @@ public class EntityJump extends Entity {
         } else {
             targetWorld = this.worldObj;
         }
+
+        lockWorlds();
 
         saveEntities(axisalignedbb);
         System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");
