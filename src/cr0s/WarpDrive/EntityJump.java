@@ -36,11 +36,11 @@ public class EntityJump extends Entity {
     public int shipDown;
     public int shipUp;
     public int shipLength;
-    public int Xmax;
-    public int Zmax;
+    public int maxX;
+    public int maxZ;
     public int maxY;
-    public int Xmin;
-    public int Zmin;
+    public int minX;
+    public int minZ;
     public int minY;
     public int dx;
     public int dz;
@@ -93,7 +93,7 @@ public class EntityJump extends Entity {
         shipLeft = shipRight = shipFront = shipBack = shipDown = shipUp = shipLength = 0;
         this.dx = _dx;
         this.dz = _dz;
-        Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
+        maxX = maxZ = maxY = minX = minZ = minY = 0;
 
         targetWorld = worldObj;
 
@@ -148,7 +148,7 @@ public class EntityJump extends Entity {
             this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);               
 
             System.out.println("[JE] Preparing to jump...");
-            axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
+            axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
             prepareToJump();
 
@@ -222,8 +222,8 @@ public class EntityJump extends Entity {
      */
     public boolean checkForChunksGeneratedIn(World w) {
         // TODO: ходить не по координатам, а по координатам чанков, так быстрее.
-        for (int x = Xmin; x <= Xmax; x++) {
-            for (int z = Zmin; z <= Zmax; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
                 final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
                 final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);
 
@@ -364,8 +364,8 @@ public class EntityJump extends Entity {
         int index = 0;
 
         for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     if (ship == null) {
                         killEntity("ship is null!");
                         return;
@@ -446,10 +446,11 @@ public class EntityJump extends Entity {
      */
     public int getRealShipSize() {
         int shipSize = 0;
+        
 
         for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
@@ -738,8 +739,8 @@ public class EntityJump extends Entity {
         }
 
         for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     int newX = getNewXCoord(x, y, z, testDistance, dir);
                     int newY = getNewYCoord(x, y, z, testDistance, dir);
                     int newZ = getNewZCoord(x, y, z, testDistance, dir);
@@ -779,7 +780,7 @@ public class EntityJump extends Entity {
      * @return true, если находится
      */
     public boolean isBlockInShip(int x, int y, int z) {
-        return x >= Xmin && x <= Xmax && y >= minY && y <= maxY && z >= Zmin && z <= Zmax;
+        return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
     }
 
     
