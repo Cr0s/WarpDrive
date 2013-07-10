@@ -49,6 +49,7 @@ public class EntityJump extends Entity {
     public int blowX, blowY, blowZ;
     boolean needToExplode = false;
     public boolean on = false;
+    public boolean bedrockOnShip = false;
     public JumpBlock ship[];
     public TileEntityReactor reactor;
 
@@ -305,13 +306,15 @@ public class EntityJump extends Entity {
             return;
         }
 
-        if (!checkForBedrockOnShip()) {
-            killEntity("Is bedrock on the ship. Aborting.");
-            messageToAllPlayersOnShip("Is bedrock on the ship. Aborting.");
+        bedrockOnShip = false;
+        int shipSize = getRealShipSize(); // sets bedrockOnShip
+
+        if (bedrockOnShip) {
+            killEntity("Bedrock is on the ship. Aborting.");
+            messageToAllPlayersOnShip("Bedrock is on the ship. Aborting.");
             return;
         }
 
-        int shipSize = getRealShipSize();
         saveShip(shipSize);
         setBlocksUnderPlayers(false);
         
@@ -438,30 +441,6 @@ public class EntityJump extends Entity {
         return testDistance;
     }
 
-    /**
-     * Check for frobidden blocks on ship (bedrock)
-     *
-     */
-    public boolean checkForBedrockOnShip() {
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
-                    int blockID = worldObj.getBlockId(x, y, z);
-
-                    if (blockID == 0) {
-                        continue;
-                    }
-
-                    if (blockID == Block.bedrock.blockID) {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
     /*
      * Получить реальное количество блоков, из которых состоит корабль 
      */
@@ -476,6 +455,11 @@ public class EntityJump extends Entity {
                     // Пропускаем пустые блоки воздуха
                     if (blockID != 0) {
                         shipSize++;
+                    }
+
+                    if (blockID == Block.bedrock.blockID) {
+                        bedrockOnShip = true;
+                        return shipSize;
                     }
                 }
             }
