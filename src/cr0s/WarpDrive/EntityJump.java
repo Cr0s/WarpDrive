@@ -357,15 +357,14 @@ public class EntityJump extends Entity {
      * Saving ship to memory
      *
      * @param shipSize
-     * @param deleteShip
      */
     public void saveShip(int shipSize) {
         ship = new JumpBlock[shipSize];
         int index = 0;
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     if (ship == null) {
                         killEntity("ship is null!");
                         return;
@@ -393,7 +392,7 @@ public class EntityJump extends Entity {
 
         System.out.println((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
     }
-    
+
     /**
      *Ship moving
      */
