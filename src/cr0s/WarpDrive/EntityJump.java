@@ -4,6 +4,9 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IPeripheral;
+import dan200.turtle.api.ITurtleAccess;
+import dan200.turtle.api.TurtleSide;
+
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
@@ -158,7 +161,7 @@ public class EntityJump extends Entity {
                 isJumping = false;
                 finishJump();
             } else { 
-                moveEntities(axisalignedbb, distance, dir, true);
+                //moveEntities(axisalignedbb, distance, dir, true);
                 moveShip();
             }
         }
@@ -621,7 +624,7 @@ public class EntityJump extends Entity {
         }
 
         if (this.isCoordJump) {
-            result = destX + (xCoord - oldX);
+            result = oldX + (destX - xCoord);
         }        
 
         return result;
@@ -682,7 +685,7 @@ public class EntityJump extends Entity {
         }
 
         if (this.isCoordJump) {
-            result = destZ + (zCoord - oldZ);
+            result = oldZ + (destZ - zCoord);
         }
 
         return result;
@@ -793,6 +796,22 @@ public class EntityJump extends Entity {
         return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
     }
 
+    public void turnOffModem(IPeripheral p) {
+        if (p.getType() == "modem") {
+            String[] methods = p.getMethodNames();
+            for(int i = 0; i < methods.length; i++) {
+                if (methods[i] == "closeAll") {
+                    try {
+                        p.callMethod(null, i, null);
+                    } catch (Exception e) {
+                        // ignore iy
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
     
     /**
      * Перемещение одиночного блока на новое место
@@ -859,6 +878,18 @@ public class EntityJump extends Entity {
 
 
             if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145) {
+                // Turn off modems
+                if (shipBlock.blockTileEntity instanceof IPeripheral) {
+                    IPeripheral p = (IPeripheral)shipBlock.blockTileEntity;
+                    turnOffModem(p);
+                }
+                if (shipBlock.blockTileEntity instanceof ITurtleAccess) {
+                    ITurtleAccess a = (ITurtleAccess)shipBlock.blockTileEntity;
+                    IPeripheral pl = a.getPeripheral(TurtleSide.Left);
+                    if (pl != null) turnOffModem(pl);
+                    IPeripheral pr = a.getPeripheral(TurtleSide.Right);
+                    if (pr != null) turnOffModem(pr);
+                }
                 
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
