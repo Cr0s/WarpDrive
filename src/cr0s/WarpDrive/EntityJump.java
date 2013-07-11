@@ -261,6 +261,7 @@ public class EntityJump extends Entity {
     }
     
     public void prepareToJump() {
+        LocalProfiler.start("EntityJump.prepareToJump");
         boolean betweenWorlds;
 
         betweenWorlds = fromSpace || toSpace;
@@ -303,6 +304,7 @@ public class EntityJump extends Entity {
         if (distance <= this.shipLength && !betweenWorlds && !isCoordJump) {
             killEntity("Not enough space for jump.");
             messageToAllPlayersOnShip("Not enough space for jump!");
+            LocalProfiler.stop();
             return;
         }
 
@@ -312,6 +314,7 @@ public class EntityJump extends Entity {
         if (bedrockOnShip) {
             killEntity("Bedrock is on the ship. Aborting.");
             messageToAllPlayersOnShip("Bedrock is on the ship. Aborting.");
+            LocalProfiler.stop();
             return;
         }
 
@@ -321,6 +324,7 @@ public class EntityJump extends Entity {
         this.currentIndexInShip = 0;   
         
         msCounter = System.currentTimeMillis();
+        LocalProfiler.stop();
     }
 
     /**
@@ -359,6 +363,7 @@ public class EntityJump extends Entity {
      * @param shipSize
      */
     public void saveShip(int shipSize) {
+        LocalProfiler.start("EntityJump.saveShip");
         ship = new JumpBlock[shipSize];
         int index = 0;
 
@@ -367,6 +372,7 @@ public class EntityJump extends Entity {
                 for (int y = minY; y <= maxY; y++) {
                     if (ship == null) {
                         killEntity("ship is null!");
+                        LocalProfiler.stop();
                         return;
                     }
 
@@ -391,12 +397,14 @@ public class EntityJump extends Entity {
         }
 
         System.out.println((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
+        LocalProfiler.stop();
     }
 
     /**
      *Ship moving
      */
     public void moveShip() {
+        LocalProfiler.start("EntityJump.moveShip");
         int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
@@ -405,6 +413,7 @@ public class EntityJump extends Entity {
             moveBlockSimple(currentIndexInShip, distance, dir, toSpace, fromSpace);
             currentIndexInShip++;
         }
+        LocalProfiler.stop();
     }
 
     /**
@@ -444,6 +453,7 @@ public class EntityJump extends Entity {
      * Получить реальное количество блоков, из которых состоит корабль 
      */
     public int getRealShipSize() {
+        LocalProfiler.start("EntityJump.getRealShipSize");
         int shipSize = 0;
 
         for (int x = minX; x <= maxX; x++) {
@@ -457,6 +467,7 @@ public class EntityJump extends Entity {
 
                         if (blockID == Block.bedrock.blockID) {
                             bedrockOnShip = true;
+                            LocalProfiler.stop();
                             return shipSize;
                         }
                     }
@@ -464,6 +475,7 @@ public class EntityJump extends Entity {
             }
         }
 
+        LocalProfiler.stop();
         return shipSize;
     }
 
