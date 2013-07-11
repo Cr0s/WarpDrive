@@ -624,7 +624,7 @@ public class EntityJump extends Entity {
         }
 
         if (this.isCoordJump) {
-            result = destX + (xCoord - oldX);
+            result = oldX + (destX - xCoord);
         }        
 
         return result;
@@ -685,7 +685,7 @@ public class EntityJump extends Entity {
         }
 
         if (this.isCoordJump) {
-            result = destZ + (zCoord - oldZ);
+            result = oldZ + (destZ - zCoord);
         }
 
         return result;
