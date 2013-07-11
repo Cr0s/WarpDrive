@@ -36,18 +36,20 @@ public class EntityJump extends Entity {
     public int shipDown;
     public int shipUp;
     public int shipLength;
-    public int Xmax;
-    public int Zmax;
+    public int maxX;
+    public int maxZ;
     public int maxY;
-    public int Xmin;
-    public int Zmin;
+    public int minX;
+    public int minZ;
     public int minY;
     public int dx;
     public int dz;
+    public World targetWorld;
     // Collision point coordinates
     public int blowX, blowY, blowZ;
     boolean needToExplode = false;
     public boolean on = false;
+    public boolean bedrockOnShip = false;
     public JumpBlock ship[];
     public TileEntityReactor reactor;
 
@@ -69,6 +71,8 @@ public class EntityJump extends Entity {
     
     public EntityJump(World world) {
         super(world);
+
+        targetWorld = worldObj;
     }
 
     public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz, TileEntityReactor parReactor) {
@@ -87,12 +91,12 @@ public class EntityJump extends Entity {
         this.dir = _direction;
 
         shipLeft = shipRight = shipFront = shipBack = shipDown = shipUp = shipLength = 0;
-        this.dx = this.dz = 0;
         this.dx = _dx;
         this.dz = _dz;
-        Xmax = Zmax = maxY = Xmin = Zmin = minY = 0;
+        maxX = maxZ = maxY = minX = minZ = minY = 0;
 
-        
+        targetWorld = worldObj;
+
         System.out.println("[JE] Entity created");
         
         this.reactor = parReactor;
@@ -128,61 +132,53 @@ public class EntityJump extends Entity {
             worldObj.removeEntity(this);
             return; 
         }
-        
+
         if (minY < 0 || maxY > 256) {
             killEntity("Y-coord error!");
             return;
         }
-                
+
         // Skip tick, awaiting chunk generation
-        if ((getTargetWorld().provider.dimensionId == worldObj.provider.dimensionId) && !checkForChunksGeneratedIn(getTargetWorld())) {
+        if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
             return;
         }
-        
+
         if (!isJumping) {
             this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
             this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);               
-            
+
             System.out.println("[JE] Preparing to jump...");
-            axisalignedbb = AxisAlignedBB.getBoundingBox(Xmin, minY, Zmin, Xmax, maxY, Zmax);
-            
+            axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+
             prepareToJump();
+
+            isJumping = true;
         } else {
             if (currentIndexInShip >= ship.length-1) {
                 isJumping = false;
                 finishJump();
             } else { 
-                moveEntitys(axisalignedbb, distance, dir, true);                
-                moveShip();                   
+                moveEntities(axisalignedbb, distance, dir, true);
+                moveShip();
             }
-        }
-    }
-    
-    public World getTargetWorld() {        
-        if (toSpace) {
-            return DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
-        } else if (fromSpace) {
-            return DimensionManager.getWorld(0);
-        } else {
-            return this.worldObj;
         }
     }
     
     public void lockWorlds() {
         System.out.println("Locking worlds...");
-        getTargetWorld().isRemote = true;
+        targetWorld.isRemote = true;
         
         // When warping between dimensions is need to lock both worlds
-        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+        if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = true; 
         }
     }
     
     public void unlockWorlds() {
         System.out.println("Unlocking worlds..");
-        getTargetWorld().isRemote = false;
+        targetWorld.isRemote = false;
         
-        if (getTargetWorld().provider.dimensionId != worldObj.provider.dimensionId) {
+        if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
             worldObj.isRemote = false;
         }        
     }
@@ -206,11 +202,11 @@ public class EntityJump extends Entity {
                 
                 if (entity instanceof EntityPlayer) {
                     if (!removeBlocks) {
-                        mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, Block.dirt.blockID, 0, 1 + 2);
+                        mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, Block.dirt.blockID, 0, 1 + 2);
                     } else
                     {
-                        if (worldObj.getBlockId(me.oldX, me.oldY - 2, me.oldZ) == Block.dirt.blockID) {
-                            mySetBlock(worldObj, me.oldX, me.oldY - 2, me.oldZ, 0, 0, 1 + 2);
+                        if (worldObj.getBlockId((int)me.oldX, (int)me.oldY - 2, (int)me.oldZ) == Block.dirt.blockID) {
+                            mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, 0, 0, 1 + 2);
                         }
                     }
                 }
@@ -225,25 +221,23 @@ public class EntityJump extends Entity {
      * @return
      */
     public boolean checkForChunksGeneratedIn(World w) {
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
-                    final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
-                    final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);    
-                    
-                    int chunkX = newX >> 4;
-                    int chunkZ = newZ >> 4;
-                    
-                    if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
-                        messageToAllPlayersOnShip("Generating chunks...");
-                        w.getBlockId(newX, 128, newZ);
-                        
-                        return false;
-                    }
+        // TODO: ходить не по координатам, а по координатам чанков, так быстрее.
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
+                final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);
+
+                int chunkX = newX >> 4;
+                int chunkZ = newZ >> 4;
+
+                if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+                    messageToAllPlayersOnShip("Generating chunks...");
+                    w.getBlockId(newX, 128, newZ);
+
+                    return false;
                 }
             }
-        }        
-        
+        }
         return true;
     }
     
@@ -255,10 +249,10 @@ public class EntityJump extends Entity {
                 if (!(obj instanceof MovingEntity)) {
                     continue;
                 }
-                
+
                 MovingEntity me = (MovingEntity)obj;
                 Entity entity = me.entity;
-                
+
                 if (entity instanceof EntityPlayer) {
                     ((EntityPlayer)entity).sendChatToPlayer("[WarpCore] " + msg);
                 }
@@ -267,15 +261,24 @@ public class EntityJump extends Entity {
     }
     
     public void prepareToJump() {
+        LocalProfiler.start("EntityJump.prepareToJump");
         boolean betweenWorlds;
-        
-        lockWorlds();
 
         betweenWorlds = fromSpace || toSpace;
-        
-        saveEntitys(axisalignedbb);
-        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");        
-        
+
+        if (toSpace) {
+            targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
+        } else if (fromSpace) {
+            targetWorld = DimensionManager.getWorld(0);
+        } else {
+            targetWorld = this.worldObj;
+        }
+
+        lockWorlds();
+
+        saveEntities(axisalignedbb);
+        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");
+
         if (!isCoordJump) {
             if (dir != -2 && dir != -1) {
                 messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
@@ -301,40 +304,44 @@ public class EntityJump extends Entity {
         if (distance <= this.shipLength && !betweenWorlds && !isCoordJump) {
             killEntity("Not enough space for jump.");
             messageToAllPlayersOnShip("Not enough space for jump!");
+            LocalProfiler.stop();
             return;
         }
 
-        if (!checkForBedrockOnShip()) {
-            killEntity("Is bedrock on the ship. Aborting.");
-            messageToAllPlayersOnShip("Is bedrock on the ship. Aborting.");
+        bedrockOnShip = false;
+        int shipSize = getRealShipSize(); // sets bedrockOnShip
+
+        if (bedrockOnShip) {
+            killEntity("Bedrock is on the ship. Aborting.");
+            messageToAllPlayersOnShip("Bedrock is on the ship. Aborting.");
+            LocalProfiler.stop();
             return;
         }
 
-        int shipSize = getRealShipSize();
         saveShip(shipSize);
         setBlocksUnderPlayers(false);
         
-        isJumping = true;
         this.currentIndexInShip = 0;   
         
         msCounter = System.currentTimeMillis();
+        LocalProfiler.stop();
     }
-    
+
     /**
      * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
-        moveEntitys(axisalignedbb, distance, dir, false);
+        moveEntities(axisalignedbb, distance, dir, false);
         setBlocksUnderPlayers(true);
-        
+
         removeShip();
-        
+
         System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
-        
+
         // Прыжок окончен
-        killEntity("");    
+        killEntity("");
     }
-    
+
     /**
      * Removing ship from world
      * 
@@ -354,17 +361,18 @@ public class EntityJump extends Entity {
      * Saving ship to memory
      *
      * @param shipSize
-     * @param deleteShip
      */
     public void saveShip(int shipSize) {
+        LocalProfiler.start("EntityJump.saveShip");
         ship = new JumpBlock[shipSize];
         int index = 0;
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     if (ship == null) {
                         killEntity("ship is null!");
+                        LocalProfiler.stop();
                         return;
                     }
 
@@ -389,35 +397,23 @@ public class EntityJump extends Entity {
         }
 
         System.out.println((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
+        LocalProfiler.stop();
     }
-    
+
     /**
      *Ship moving
      */
     public void moveShip() {
-        int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - this.currentIndexInShip);
+        LocalProfiler.start("EntityJump.moveShip");
+        int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
-        // 1. Jump to space
-        if (toSpace) {
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlockToSpace(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
-        // 2. Jump from space
-        } else if (fromSpace) {
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlockFromSpace(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
-        // 3. Basic jump
-        } else {            
-            for (int index = 0; index < blocksToMove; index++) {
-                moveBlock(currentIndexInShip, distance, dir);
-                this.currentIndexInShip++;
-            }
+        for (int index = 0; index < blocksToMove; index++) {
+            moveBlockSimple(currentIndexInShip, distance, dir, toSpace, fromSpace);
+            currentIndexInShip++;
         }
+        LocalProfiler.stop();
     }
 
     /**
@@ -453,53 +449,37 @@ public class EntityJump extends Entity {
         return testDistance;
     }
 
-    /**
-     * Check for frobidden blocks on ship (bedrock)
-     *
-     */
-    public boolean checkForBedrockOnShip() {
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
-                    int blockID = worldObj.getBlockId(x, y, z);
-
-                    if (blockID == 0) {
-                        continue;
-                    }
-
-                    if (blockID == Block.bedrock.blockID) {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
     /*
      * Получить реальное количество блоков, из которых состоит корабль 
      */
     public int getRealShipSize() {
+        LocalProfiler.start("EntityJump.getRealShipSize");
         int shipSize = 0;
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
                     if (blockID != 0) {
                         shipSize++;
+
+                        if (blockID == Block.bedrock.blockID) {
+                            bedrockOnShip = true;
+                            LocalProfiler.stop();
+                            return shipSize;
+                        }
                     }
                 }
             }
         }
 
+        LocalProfiler.stop();
         return shipSize;
     }
 
-    public void saveEntitys(AxisAlignedBB axisalignedbb) {
+    public void saveEntities(AxisAlignedBB axisalignedbb) {
         this.entityOnShip = new ArrayList();
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
         
@@ -510,7 +490,7 @@ public class EntityJump extends Entity {
             
             Entity entity = (Entity)o;
 
-            MovingEntity movingentity = new MovingEntity(entity, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ));
+            MovingEntity movingentity = new MovingEntity(entity, entity.posX, entity.posY, entity.posZ);
                         
             // Добавим в список Entity
             entityOnShip.add(movingentity);
@@ -525,7 +505,7 @@ public class EntityJump extends Entity {
      * @param restorePositions восстановление старых позиций для предотвращения выпадения, либо перемещение на новую
      * @return 
      */
-    public boolean moveEntitys(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
+    public boolean moveEntities(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
         List list = this.entityOnShip;
 
         if (list != null) {
@@ -540,9 +520,10 @@ public class EntityJump extends Entity {
                 
                 if (me == null) { continue; }
                 
-                int oldEntityX = me.oldX;
-                int oldEntityY = me.oldY;
-                int oldEntityZ = me.oldZ;
+                // TODO: пересчитывать всё в вещественных координатах
+                int oldEntityX = (int)me.oldX;
+                int oldEntityY = (int)me.oldY;
+                int oldEntityZ = (int)me.oldZ;
 
                 int newEntityX, newEntityY, newEntityZ;
 
@@ -707,156 +688,42 @@ public class EntityJump extends Entity {
         return result;
     }
 
-    public int rotsincos(int i, boolean flag) {
-        // sin
-        if (flag) {
-            switch (i) {
-                case 0:
-                    return 0;
-
-                case 90:
-                    return 1;
-
-                case 180:
-                    return 0;
-
-                case 270:
-                    return -1;
-            }
-        } // cos
-        else {
-            switch (i) {
-                case 0:
-                    return 1;
-
-                case 90:
-                    return 0;
-
-                case 180:
-                    return -1;
-
-                case 270:
-                    return 0;
-            }
-        }
-
-        return 0;
-    }
-
     // Получение вектора в зависимости от направления прыжка
-    // (3,14здец, конечно)
     public int[] getVector(int i) {
-        int ai[] = {
+        int v[] = {
             0, 0, 0
         };
 
-        if (dz == 1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
+        switch(i) {
+            case -1:
+                v[1] = 1;
+                break;
 
-                case 90:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
+            case -2:
+                v[1] = -1;
+                break;
 
-                case 180:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
+            case 0:
+                v[0] = dx;
+                v[2] = dz;
+                break;
 
-                case 270:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-            }
-        } else if (dz == -1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
+            case 180:
+                v[0] = -dx;
+                v[2] = -dz;
+                break;
 
-                case 90:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
+            case 90:
+                v[0] = dz;
+                v[2] = -dx;
+                break;
 
-                case 180:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-
-                case 270:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-            }
-        } else if (dx == 1) {
-            switch (i) {
-                case 0:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 90:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
-
-                case 180:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 270:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-            }
-        } else if (dx == -1) {
-            switch (i) {
-                case 0:
-                    ai[0] = -1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 90:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = 1;
-                    break;
-
-                case 180:
-                    ai[0] = 1;
-                    ai[1] = 0;
-                    ai[2] = 0;
-                    break;
-
-                case 270:
-                    ai[0] = 0;
-                    ai[1] = 0;
-                    ai[2] = -1;
-                    break;
-            }
+            case 270:
+                v[0] = -dz;
+                v[2] = dx;
         }
 
-        return ai;
+        return v;
     }
 
     /**
@@ -882,8 +749,8 @@ public class EntityJump extends Entity {
         }
 
         for (int y = minY; y <= maxY; y++) {
-            for (int x = Xmin; x <= Xmax; x++) {
-                for (int z = Zmin; z <= Zmax; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
                     int newX = getNewXCoord(x, y, z, testDistance, dir);
                     int newY = getNewYCoord(x, y, z, testDistance, dir);
                     int newZ = getNewZCoord(x, y, z, testDistance, dir);
@@ -923,34 +790,9 @@ public class EntityJump extends Entity {
      * @return true, если находится
      */
     public boolean isBlockInShip(int x, int y, int z) {
-        return x >= Xmin && x <= Xmax && y >= minY && y <= maxY && z >= Zmin && z <= Zmax;
+        return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
     }
 
-    public boolean moveBlock(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, false, false);
-    }    
-
-    /**
-     * Перемещение одиночного блока из обычного мира в космос 
-     * @param indexInShip
-     * @param distance
-     * @param direction
-     * @return 
-     */
-    public boolean moveBlockToSpace(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, true, false);
-    }
-    
-    /**
-     * Перемещение одиночного блока из космоса в обычный мир
-     * @param indexInShip
-     * @param distance
-     * @param direction
-     * @return 
-     */
-    public boolean moveBlockFromSpace(int indexInShip, int distance, int direction) {
-        return moveBlockSimple(indexInShip, distance, direction, false, true);
-    }    
     
     /**
      * Перемещение одиночного блока на новое место
@@ -1058,7 +900,7 @@ public class EntityJump extends Entity {
                     }                    
                 }
 
-                newTileEntity.worldObj = getTargetWorld();    
+                newTileEntity.worldObj = targetWorld;
                 newTileEntity.validate();
                 
                 if (!toSpace && !fromSpace)
@@ -1095,24 +937,24 @@ public class EntityJump extends Entity {
     }
 
     // Own implementation of setting blocks withow light recalculation in optimization purposes
-    public boolean mySetBlock(World w, int par1, int par2, int par3, int par4, int par5, int par6)
+    public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
     {
-        if (par1 >= -30000000 && par3 >= -30000000 && par1 < 30000000 && par3 < 30000000)
+        if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
         {
-            if (par2 < 0)
+            if (y < 0)
             {
                 return false;
             }
-            else if (par2 >= 256)
+            else if (y >= 256)
             {
                 return false;
             }
             else
             {
-                w.markBlockForUpdate(par1, par2, par3);
-                Chunk chunk = w.getChunkFromChunkCoords(par1 >> 4, par3 >> 4);
+                w.markBlockForUpdate(x, y, z);
+                Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
 
-                return myChunkSBIDWMT(chunk, par1 & 15, par2, par3 & 15, par4, par5);
+                return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
             }
         }
         else
@@ -1123,65 +965,65 @@ public class EntityJump extends Entity {
     
     // Incapsulation violation warning:
     // field Chunk.storageArrays has been turned from private to public in class Chunk.java
-    public boolean myChunkSBIDWMT(Chunk c, int par1, int par2, int par3, int par4, int par5)
+    public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
     {
-        int j1 = par3 << 4 | par1;
+        int j1 = z << 4 | x;
 
-        if (par2 >= c.precipitationHeightMap[j1] - 1)
+        if (y >= c.precipitationHeightMap[j1] - 1)
         {
             c.precipitationHeightMap[j1] = -999;
         }
 
         int k1 = c.heightMap[j1];
-        int l1 = c.getBlockID(par1, par2, par3);
-        int i2 = c.getBlockMetadata(par1, par2, par3);
+        int l1 = c.getBlockID(x, y, z);
+        int i2 = c.getBlockMetadata(x, y, z);
 
-        if (l1 == par4 && i2 == par5)
+        if (l1 == blockId && i2 == blockMeta)
         {
             return false;
         }
         else
         {
-            ExtendedBlockStorage extendedblockstorage = c.storageArrays[par2 >> 4];
+            ExtendedBlockStorage extendedblockstorage = c.storageArrays[y >> 4];
 
             if (extendedblockstorage == null)
             {
-                if (par4 == 0)
+                if (blockId == 0)
                 {
                     return false;
                 }
 
-                extendedblockstorage = c.storageArrays[par2 >> 4] = new ExtendedBlockStorage(par2 >> 4 << 4, !c.worldObj.provider.hasNoSky);
+                extendedblockstorage = c.storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
             }
 
-            int j2 = c.xPosition * 16 + par1;
-            int k2 = c.zPosition * 16 + par3;
+            int j2 = c.xPosition * 16 + x;
+            int k2 = c.zPosition * 16 + z;
 
-            extendedblockstorage.setExtBlockID(par1, par2 & 15, par3, par4);
+            extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
 
             if (l1 != 0)
             {
                 if (!c.worldObj.isRemote)
                 {
-                    Block.blocksList[l1].breakBlock(c.worldObj, j2, par2, k2, l1, i2);
+                    Block.blocksList[l1].breakBlock(c.worldObj, j2, y, k2, l1, i2);
                 }
                 else if (Block.blocksList[l1] != null && Block.blocksList[l1].hasTileEntity(i2))
                 {
-                    TileEntity te = worldObj.getBlockTileEntity(j2, par2, k2);
-                    if (te != null && te.shouldRefresh(l1, par4, i2, par5, worldObj, j2, par2, k2))
+                    TileEntity te = worldObj.getBlockTileEntity(j2, y, k2);
+                    if (te != null && te.shouldRefresh(l1, blockId, i2, blockMeta, worldObj, j2, y, k2))
                     {
-                        c.worldObj.removeBlockTileEntity(j2, par2, k2);
+                        c.worldObj.removeBlockTileEntity(j2, y, k2);
                     }
                 }
             }
 
-            if (extendedblockstorage.getExtBlockID(par1, par2 & 15, par3) != par4)
+            if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
             {
                 return false;
             }
             else
             {
-                extendedblockstorage.setExtBlockMetadata(par1, par2 & 15, par3, par5);
+                extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
 
                 // Removed light recalcalations
                 /*if (flag)
@@ -1207,22 +1049,22 @@ public class EntityJump extends Entity {
 
                 TileEntity tileentity;
 
-                if (par4 != 0)
+                if (blockId != 0)
                 {
-                    if (Block.blocksList[par4] != null && Block.blocksList[par4].hasTileEntity(par5))
+                    if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta))
                     {
-                        tileentity = c.getChunkBlockTileEntity(par1, par2, par3);
+                        tileentity = c.getChunkBlockTileEntity(x, y, z);
 
                         if (tileentity == null)
                         {
-                            tileentity = Block.blocksList[par4].createTileEntity(c.worldObj, par5);
-                            c.worldObj.setBlockTileEntity(j2, par2, k2, tileentity);
+                            tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
+                            c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
                         }
 
                         if (tileentity != null)
                         {
                             tileentity.updateContainingBlockInfo();
-                            tileentity.blockMetadata = par5;
+                            tileentity.blockMetadata = blockMeta;
                         }
                     }
                 }

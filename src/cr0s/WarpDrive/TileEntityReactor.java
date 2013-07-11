@@ -470,10 +470,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
 
-            jump.Xmax = maxX;
-            jump.Xmin = minX;
-            jump.Zmax = maxZ;
-            jump.Zmin = minZ;
+            jump.maxX = maxX;
+            jump.minX = minX;
+            jump.maxZ = maxZ;
+            jump.minZ = minZ;
             jump.maxY = maxY;
             jump.minY = minY;
 
@@ -555,10 +555,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, distance, direction, dx, dz, this);
 
-            jump.Xmax = maxX;
-            jump.Xmin = minX;
-            jump.Zmax = maxZ;
-            jump.Zmin = minZ;
+            jump.maxX = maxX;
+            jump.minX = minX;
+            jump.maxZ = maxZ;
+            jump.minZ = minZ;
             jump.maxY = maxY;
             jump.minY = minY;
 
