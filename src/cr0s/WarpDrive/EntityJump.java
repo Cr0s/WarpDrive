@@ -158,7 +158,7 @@ public class EntityJump extends Entity {
                 isJumping = false;
                 finishJump();
             } else { 
-                moveEntities(axisalignedbb, distance, dir, true);
+                //moveEntities(axisalignedbb, distance, dir, true);
                 moveShip();
             }
         }
