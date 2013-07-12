@@ -59,7 +59,10 @@ public class EntityJump extends Entity {
     public JumpBlock ship[];
     public TileEntityReactor reactor;
 
-    boolean isJumping = false;
+    public final static int STATE_IDLE = 0;
+    public final static int STATE_JUMPING = 1;
+    public final static int STATE_REMOVING = 2;
+    int state = STATE_IDLE;
     int currentIndexInShip = 0;
     
     private final int BLOCKS_PER_TICK = 3000;
@@ -106,8 +109,6 @@ public class EntityJump extends Entity {
         System.out.println("[JE] Entity created");
         
         this.reactor = parReactor;
-        
-        this.isJumping = false;
     }
 
     public void killEntity(String reason) {
@@ -133,7 +134,7 @@ public class EntityJump extends Entity {
     public void onUpdate() {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
-        if (!on || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID) {
+        if (!on/* || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID */) {
             unlockWorlds();
             worldObj.removeEntity(this);
             return; 
@@ -144,24 +145,35 @@ public class EntityJump extends Entity {
             return;
         }
 
-        if (!isJumping) {
+        if (state == STATE_IDLE) {
             System.out.println("[JE] Preparing to jump...");
 
             prepareToJump();
 
-            isJumping = true;
-        } else {
+            state = STATE_JUMPING;
+        } else if(state == STATE_JUMPING) {
             // Skip tick, awaiting chunk generation
             if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
                 return;
             }
 
             if (currentIndexInShip >= ship.length-1) {
-                isJumping = false;
-                finishJump();
+                moveEntities(false);
+
+                currentIndexInShip = 0;
+
+                state = STATE_REMOVING;
             } else { 
                 //moveEntities(true);
                 moveShip();
+            }
+        } else if (state == STATE_REMOVING) {
+            removeShip();
+
+            if (currentIndexInShip >= ship.length-1) {
+                finishJump();
+
+                state = STATE_IDLE;
             }
         }
     }
@@ -330,10 +342,6 @@ public class EntityJump extends Entity {
      * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
-        moveEntities(false);
-
-        removeShip();
-
         System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
 
         // Прыжок окончен
@@ -345,14 +353,25 @@ public class EntityJump extends Entity {
      * 
      */
     public void removeShip() {
-        for (JumpBlock jb : ship) {
+        LocalProfiler.start("EntityJump.removeShip");
+        int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
+
+        System.out.println("[JE] Removing ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
+
+        for (int index = 0; index < blocksToMove; index++) {
+            if (currentIndexInShip >= ship.length) break;
+            JumpBlock jb = ship[currentIndexInShip];
+
             if (jb.blockTileEntity != null) {
                 worldObj.removeBlockTileEntity(jb.x, jb.y, jb.z);
             }
 
             //System.out.println("[EJ] Removing block: " + jb.x + " " + jb.y + " " + jb.z + " " + jb.blockID);
             worldObj.setBlockToAir(jb.x, jb.y, jb.z);
+
+            currentIndexInShip++;
         }
+        LocalProfiler.stop();
     }
 
     /**
