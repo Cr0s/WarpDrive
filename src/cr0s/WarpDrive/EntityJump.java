@@ -20,6 +20,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 
@@ -222,18 +223,17 @@ public class EntityJump extends Entity {
      * @return
      */
     public boolean checkForChunksGeneratedIn(World w) {
-        // TODO: ходить не по координатам, а по координатам чанков, так быстрее.
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                final int newX = x + moveX;
-                final int newZ = z + moveZ;
+        IChunkProvider chunkProvider = w.getChunkProvider();
+        int x1 = (minX + moveX) >> 4;
+        int x2 = (maxX + moveX) >> 4;
+        int z1 = (minZ + moveZ) >> 4;
+        int z2 = (maxZ + moveZ) >> 4;
 
-                int chunkX = newX >> 4;
-                int chunkZ = newZ >> 4;
-
-                if (!w.getChunkProvider().chunkExists(chunkX, chunkZ)) {
+        for (int x = x1; x <= x2; x++) {
+            for (int z = z1; z <= z2; z++) {
+                if (!chunkProvider.chunkExists(x, z)) {
                     messageToAllPlayersOnShip("Generating chunks...");
-                    w.getBlockId(newX, 128, newZ);
+                    chunkProvider.provideChunk(x, z);
 
                     return false;
                 }
