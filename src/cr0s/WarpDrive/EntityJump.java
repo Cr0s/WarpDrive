@@ -382,33 +382,40 @@ public class EntityJump extends Entity {
     public void saveShip(int shipSize) {
         LocalProfiler.start("EntityJump.saveShip");
         ship = new JumpBlock[shipSize];
+        if (ship == null) {
+            killEntity("ship is null!");
+            LocalProfiler.stop();
+            return;
+        }
         int index = 0;
 
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
+        int xc1 = minX >> 4;
+        int xc2 = maxX >> 4;
+        int zc1 = minZ >> 4;
+        int zc2 = maxZ >> 4;
+
+        for (int xc = xc1; xc <= xc2; xc++) {
+            int x1 = Math.max(minX, xc << 4);
+            int x2 = Math.min(maxX, (xc << 4) + 15);
+            for(int zc = zc1; zc <= zc2; zc++) {
+                int z1 = Math.max(minZ, zc << 4);
+                int z2 = Math.min(maxZ, (zc << 4) + 15);
                 for (int y = minY; y <= maxY; y++) {
-                    if (ship == null) {
-                        killEntity("ship is null!");
-                        LocalProfiler.stop();
-                        return;
+                    for(int x = x1; x <= x2; x++) {
+                        for(int z = z1; z <= z2; z++) {
+                            int blockID = worldObj.getBlockId(x, y, z);
+                            // Skip air blocks
+                            if (blockID == 0) {
+                                continue;
+                            }
+
+                            int blockMeta = worldObj.getBlockMetadata(x, y, z);
+                            TileEntity tileentity = worldObj.getBlockTileEntity(x, y, z);
+
+                            ship[index] = new JumpBlock(blockID, blockMeta, tileentity, x, y, z);
+                            index++;
+                        }
                     }
-
-                    int blockID = worldObj.getBlockId(x, y, z);
-                    int blockMeta = worldObj.getBlockMetadata(x, y, z);
-                    TileEntity tileentity = worldObj.getBlockTileEntity(x, y, z);
-
-                    // Skip air blocks
-                    if (blockID == 0) {
-                        continue;
-                    }
-
-                    if (tileentity != null) {
-                        ship[index] = new JumpBlock(blockID, blockMeta, tileentity, x, y, z);
-                    } else {
-                        ship[index] = new JumpBlock(blockID, blockMeta, x, y, z);
-                    }
-
-                    index++;
                 }
             }
         }
