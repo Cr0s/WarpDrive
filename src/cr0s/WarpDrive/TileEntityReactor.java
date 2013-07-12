@@ -153,6 +153,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 } else {
                     teleportPlayersToSpace();
                 }
+                break;
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
             case MODE_BEACON_JUMP:               
