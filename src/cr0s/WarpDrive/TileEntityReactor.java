@@ -734,9 +734,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public int getRealShipVolume() {
         int shipVol = 0;
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
@@ -748,7 +748,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }
 
         return shipVol;
-    }    
+    }
 
     public TileEntity findControllerBlock() {
         TileEntity result;
