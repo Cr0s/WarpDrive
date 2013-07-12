@@ -501,16 +501,16 @@ public class EntityJump extends Entity {
     public void saveEntities(AxisAlignedBB axisalignedbb) {
         entitiesOnShip = new ArrayList<MovingEntity>();
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
-        
+
         for (Object o : list) {
             if (o == null || !(o instanceof Entity) || (o instanceof EntityJump)) {
                 continue;
             }
-            
+
             Entity entity = (Entity)o;
 
-            MovingEntity movingEntity = new MovingEntity(entity, entity.posX, entity.posY, entity.posZ);
-                        
+            MovingEntity movingEntity = new MovingEntity(entity);
+
             // Добавим в список Entity
             entitiesOnShip.add(movingEntity);
         }

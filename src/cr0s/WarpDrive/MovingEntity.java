@@ -17,11 +17,11 @@ public class MovingEntity {
     
     public Entity entity;
     
-    public MovingEntity(Entity e, double x, double y, double z) {
-        this.entity = e;
+    public MovingEntity(Entity e) {
+        entity = e;
         
-        this.oldX = x;
-        this.oldY = y;
-        this.oldZ = z;
+        oldX = e.posX;
+        oldY = e.posY;
+        oldZ = e.posZ;
     }
 }
