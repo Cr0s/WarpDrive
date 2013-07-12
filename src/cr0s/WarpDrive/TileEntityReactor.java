@@ -195,7 +195,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     
                     System.out.println("[W-C] Jumping!");
 
-                    doJump(currentMode == MODE_LONG_JUMP);
+                    doJump();
                     
                     controller.setJumpFlag(false);
                 } else
@@ -511,7 +511,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }
     }    
     
-    public void doJump(boolean longjump) {  
+    public void doJump() {
         if (currentMode == this.MODE_BEACON_JUMP)
         {
             System.out.println("[TE-WC] Performing beacon jump...");
