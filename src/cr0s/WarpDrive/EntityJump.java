@@ -993,9 +993,7 @@ public class EntityJump extends Entity {
             return false;
         }
     }
-    
-    // Incapsulation violation warning:
-    // field Chunk.storageArrays has been turned from private to public in class Chunk.java
+
     public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
     {
         int j1 = z << 4 | x;
@@ -1015,7 +1013,8 @@ public class EntityJump extends Entity {
         }
         else
         {
-            ExtendedBlockStorage extendedblockstorage = c.storageArrays[y >> 4];
+            ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
+            ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
 
             if (extendedblockstorage == null)
             {
@@ -1024,7 +1023,7 @@ public class EntityJump extends Entity {
                     return false;
                 }
 
-                extendedblockstorage = c.storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
+                extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
             }
 
             int j2 = c.xPosition * 16 + x;
