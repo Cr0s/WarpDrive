@@ -573,41 +573,35 @@ public class EntityJump extends Entity {
 
                 //System.out.println("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
 
-                if (!(entity instanceof EntityPlayerMP)) {
+                // Travel to another dimension if needed
+                if(betweenWorlds && !restorePositions) {
+                    if (entity instanceof EntityPlayerMP) {
+                        EntityPlayerMP player = (EntityPlayerMP) entity;
+
+                        SpaceTeleporter teleporter = new SpaceTeleporter(DimensionManager.getWorld(targetWorld.provider.dimensionId), 0, MathHelper.floor_double(newEntityX), MathHelper.floor_double(newEntityY), MathHelper.floor_double(newEntityZ));
+                        player.mcServer.getConfigurationManager().transferPlayerToDimension(player, targetWorld.provider.dimensionId, teleporter);
+                    } else {
+                        entity.travelToDimension(targetWorld.provider.dimensionId);
+                    }
+                }
+
+                // Update position
+                if (entity instanceof EntityPlayerMP) {
+                    EntityPlayerMP player = (EntityPlayerMP) entity;
+
+                    // Если на корабле есть кровать, то передвинуть точку спауна игрока
+                    ChunkCoordinates bedLocation = player.getBedLocation();
+                    if (bedLocation != null && testBB(axisalignedbb, bedLocation.posX, bedLocation.posY, bedLocation.posZ)) {
+                        bedLocation.posX = bedLocation.posX + moveX;
+                        bedLocation.posY = bedLocation.posY + moveY;
+                        bedLocation.posZ = bedLocation.posZ + moveZ;
+                        player.setSpawnChunk(bedLocation, false);
+                    }
+
+                    player.setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
+                } else {
                     entity.moveEntity(newEntityX, newEntityY, newEntityZ);
                     continue;
-                }
-
-                // Если на корабле есть кровать, то передвинуть точку спауна игрока
-                ChunkCoordinates bedLocation = ((EntityPlayerMP) entity).getBedLocation();
-                if (bedLocation != null && testBB(axisalignedbb, bedLocation.posX, bedLocation.posY, bedLocation.posZ)) {
-                    bedLocation.posX = bedLocation.posX + moveX;
-                    bedLocation.posY = bedLocation.posY + moveY;
-                    bedLocation.posZ = bedLocation.posZ + moveZ;
-                    ((EntityPlayerMP) entity).setSpawnChunk(bedLocation, false);
-                }
-
-                ((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
-                
-                if (restorePositions) { continue; }
-                
-                if (toSpace) {
-                    if (entity instanceof EntityPlayerMP) {
-                        ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ)));
-                        //((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
-                        //if (!((EntityPlayerMP) entity).capabilities.isCreativeMode) {
-                        //    ((EntityPlayerMP) entity).capabilities.allowFlying = true;
-                        //}
-                    } else {
-                        entity.travelToDimension(WarpDrive.instance.spaceDimID);
-                    }
-                } else if (fromSpace) {
-                    if (entity instanceof EntityPlayerMP) {
-                        ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(0), 0, MathHelper.floor_double(entity.posX), MathHelper.floor_double(entity.posY), MathHelper.floor_double(entity.posZ)));
-                        //((EntityPlayerMP) entity).setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
-                    } else {
-                        entity.travelToDimension(0);
-                    }
                 }
             }
         }
