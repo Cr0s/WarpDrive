@@ -443,13 +443,11 @@ public class EntityJump extends Entity {
     public int getPossibleJumpDistance() {
         System.out.println("[JUMP] Calculating possible jump distance...");
         int testDistance = this.distance;
-        boolean canJump;
-
         int blowPoints = 0;
 
-        while (true) {
-            // Is place enough in destination point?
-            canJump = checkMovement(testDistance);
+        while (testDistance >= 0) {
+            // Is there enough space in destination point?
+            boolean canJump = checkMovement(testDistance);
 
             if (canJump) {
                 break;
