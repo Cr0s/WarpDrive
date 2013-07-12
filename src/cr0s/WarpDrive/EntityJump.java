@@ -24,9 +24,11 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 
 public class EntityJump extends Entity {
-
+    // Jump vector
     private int moveX;
+    private int moveY;
     private int moveZ;
+
     public int xCoord;
     public int yCoord;
     public int zCoord;
@@ -65,7 +67,7 @@ public class EntityJump extends Entity {
     
     AxisAlignedBB axisalignedbb;
     
-    private boolean fromSpace, toSpace;
+    private boolean fromSpace, toSpace, betweenWorlds;
 
     int destX, destZ;
     boolean isCoordJump; 
@@ -141,11 +143,6 @@ public class EntityJump extends Entity {
             return;
         }
 
-        // Skip tick, awaiting chunk generation
-        if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
-            return;
-        }
-
         if (!isJumping) {
             System.out.println("[JE] Preparing to jump...");
 
@@ -153,6 +150,11 @@ public class EntityJump extends Entity {
 
             isJumping = true;
         } else {
+            // Skip tick, awaiting chunk generation
+            if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
+                return;
+            }
+
             if (currentIndexInShip >= ship.length-1) {
                 isJumping = false;
                 finishJump();
@@ -223,8 +225,8 @@ public class EntityJump extends Entity {
         // TODO: ходить не по координатам, а по координатам чанков, так быстрее.
         for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
-                final int newX = getNewXCoord(x, 0, z, this.distance, this.dir);
-                final int newZ = getNewZCoord(x, 0, z, this.distance, this.dir);
+                final int newX = x + moveX;
+                final int newZ = z + moveZ;
 
                 int chunkX = newX >> 4;
                 int chunkZ = newZ >> 4;
@@ -265,7 +267,7 @@ public class EntityJump extends Entity {
         toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
         fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
 
-        boolean betweenWorlds = fromSpace || toSpace;
+        betweenWorlds = fromSpace || toSpace;
 
         if (toSpace) {
             targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
@@ -276,6 +278,48 @@ public class EntityJump extends Entity {
         }
 
         axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+
+        // Calculate jump vector
+        if (isCoordJump) {
+            moveX = destX - xCoord;
+            moveZ = destZ - zCoord;
+            moveY = 0;
+            distance = 0;
+        } else {
+            if (betweenWorlds) {
+                moveX = moveY = 0;
+                if (fromSpace) {
+                    moveY = 245 - maxY;
+                }
+                if (toSpace) {
+                    moveY = 0;
+                }
+            } else {
+                // Do not check in long jumps
+                if (distance < 256) {
+                    distance = getPossibleJumpDistance();
+                }
+                if (distance <= shipLength) {
+                    killEntity("Not enough space for jump.");
+                    messageToAllPlayersOnShip("Not enough space for jump!");
+                    LocalProfiler.stop();
+                    return;
+                }
+
+                int movementVector[] = getVector(dir);
+                moveX = movementVector[0] * distance;
+                moveY = movementVector[1] * distance;
+                moveZ = movementVector[2] * distance;
+
+                // Нужно не упереться в пол мира и потолок космоса
+                if ((maxY + moveY) > 255) {
+                    moveY = 255 - maxY;
+                }
+                if ((minY + moveY) < 5) {
+                    moveY = 5 - minY;
+                }
+            }
+        }
 
         lockWorlds();
 
@@ -293,22 +337,6 @@ public class EntityJump extends Entity {
         } else
         {
             messageToAllPlayersOnShip("Jumping to beacon at (" + destX + "; " + yCoord + "; " + destZ + ")!");
-        }
-        
-        if (!betweenWorlds && !isCoordJump) {
-            // Do not check in long jumps
-            if (this.distance < 256) {
-                distance = getPossibleJumpDistance();
-            }
-        } else {
-            distance = 1;
-        }
-        
-        if (distance <= this.shipLength && !betweenWorlds && !isCoordJump) {
-            killEntity("Not enough space for jump.");
-            messageToAllPlayersOnShip("Not enough space for jump!");
-            LocalProfiler.stop();
-            return;
         }
 
         bedrockOnShip = false;
@@ -443,7 +471,7 @@ public class EntityJump extends Entity {
             testDistance--;
         }
         
-        // Make a explosion in collisoon point
+        // Make an explosion in collision point
         if (blowPoints > 5 && (this.dir != -1 && this.dir != -2)) {
             messageToAllPlayersOnShip(" [COLLISION] at (" + blowX + "; " + blowY + "; " + blowZ + ")");
             worldObj.createExplosion((Entity) null, blowX, blowY, blowZ, Math.min(4F * 30, 4F * (distance / 2)), true);
@@ -522,32 +550,25 @@ public class EntityJump extends Entity {
                 Entity entity = me.entity;
                 
                 if (me == null) { continue; }
-                
-                // TODO: пересчитывать всё в вещественных координатах
-                int oldEntityX = (int)me.oldX;
-                int oldEntityY = (int)me.oldY;
-                int oldEntityZ = (int)me.oldZ;
 
-                int newEntityX, newEntityY, newEntityZ;
+                double oldEntityX = me.oldX;
+                double oldEntityY = me.oldY;
+                double oldEntityZ = me.oldZ;
 
-                newEntityX = oldEntityX;
-                newEntityY = oldEntityY;
-                newEntityZ = oldEntityZ;                
-                
-                if (!restorePositions && !toSpace) 
-                {
-                    if (!fromSpace) 
-                    {
-                        newEntityX = getNewXCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
-                        newEntityY = getNewYCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);
-                        newEntityZ = getNewZCoord(oldEntityX, oldEntityY, oldEntityZ, distance, direction);    
-                    } else {
-                        newEntityX = oldEntityX;
-                        newEntityY = 255 - this.shipDown - this.shipUp + oldEntityY - this.yCoord -1;
-                        newEntityZ = oldEntityZ;                    
-                    }
+                double newEntityX;
+                double newEntityY;
+                double newEntityZ;
+
+                if (restorePositions) {
+                    newEntityX = oldEntityX;
+                    newEntityY = oldEntityY;
+                    newEntityZ = oldEntityZ;
+                } else {
+                    newEntityX = oldEntityX + moveX;
+                    newEntityY = oldEntityY + moveY;
+                    newEntityZ = oldEntityZ + moveZ;
                 }
-                
+
                 //System.out.println("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
 
                 if (!(entity instanceof EntityPlayerMP)) {
@@ -558,9 +579,9 @@ public class EntityJump extends Entity {
                 // Если на корабле есть кровать, то передвинуть точку спауна игрока
                 ChunkCoordinates bedLocation = ((EntityPlayerMP) entity).getBedLocation();
                 if (bedLocation != null && testBB(axisalignedbb, bedLocation.posX, bedLocation.posY, bedLocation.posZ)) {
-                    bedLocation.posX = getNewXCoord(bedLocation.posX, bedLocation.posY, bedLocation.posZ, distance, direction);
-                    bedLocation.posY = getNewYCoord(bedLocation.posX, bedLocation.posY, bedLocation.posZ, distance, direction);
-                    bedLocation.posZ = getNewZCoord(bedLocation.posX, bedLocation.posY, bedLocation.posZ, distance, direction);
+                    bedLocation.posX = bedLocation.posX + moveX;
+                    bedLocation.posY = bedLocation.posY + moveY;
+                    bedLocation.posZ = bedLocation.posZ + moveZ;
                     ((EntityPlayerMP) entity).setSpawnChunk(bedLocation, false);
                 }
 
@@ -597,98 +618,6 @@ public class EntityJump extends Entity {
      */
     public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z) {
         return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
-    }
-
-    /**
-     * Получение новой координаты X (сдвиг)
-     *
-     * @param oldX старая координата X
-     * @param oldY старая координата Y
-     * @param oldZ старая координата Z
-     * @param distance расстояние для перемещения
-     * @param direction направление пермещения
-     */
-    public int getNewXCoord(int oldX, int oldY, int oldZ, int distance, int direction) {
-        moveX = 0;
-        moveZ = 0;
-        // System.out.println("old: (" + oldX + "; " + oldZ + ") dis: " + distance + " dir: " + direction);
-        int movementVector[] = getVector(direction);
-        // System.out.println("Vector: (" + movementVector[0] + "; 0; " + movementVector[2]);
-
-        moveX = movementVector[0] * distance;
-        moveZ = movementVector[2] * distance;
-        int result = oldX;
-
-        if (direction != -1 && direction != -2) {
-            result += moveX;
-        }
-
-        if (this.isCoordJump) {
-            result = oldX + (destX - xCoord);
-        }        
-
-        return result;
-    }
-
-    /**
-     * Получение новой координаты Y (сдвиг)
-     *
-     * @param oldX старая координата X
-     * @param oldY старая координата Y
-     * @param oldZ старая координата Z
-     * @param distance расстояние для перемещения
-     * @param direction направление пермещения
-     */
-    public int getNewYCoord(int i, int oldY, int k, int distance, int direction) {
-        int result = oldY;
-
-        if (direction == -1 || direction == -2) {
-            if (direction == -1) {
-                result += distance;
-            } else {
-                result -= distance;
-            }
-        }
-
-        if (result >= 255) {
-            result = 255;
-        }
-
-        if (result <= 0) {
-            result = 3;
-        }
-
-        return result;
-    }
-
-    /**
-     * Получение новой координаты Z (сдвиг)
-     *
-     * @param oldX старая координата X
-     * @param oldY старая координата Y
-     * @param oldZ старая координата Z
-     * @param distance расстояние для перемещения
-     * @param direction направление пермещения
-     */
-    public int getNewZCoord(int oldX, int oldY, int oldZ, int distance, int direction) {
-        moveX = 0;
-        moveZ = 0;
-        // System.out.println("old: (" + oldX + "; " + oldZ + ") dis: " + distance + " dir: " + direction);
-        int movementVector[] = getVector(direction);
-        // System.out.println("Vector: (" + movementVector[0] + "; 0; " + movementVector[2]);
-        moveX = movementVector[0] * distance;
-        moveZ = movementVector[2] * distance;
-        int result = oldZ;
-
-        if (direction != -1 && direction != -2) {
-            result += moveZ;
-        }
-
-        if (this.isCoordJump) {
-            result = oldZ + (destZ - zCoord);
-        }
-
-        return result;
     }
 
     // Получение вектора в зависимости от направления прыжка
@@ -751,12 +680,17 @@ public class EntityJump extends Entity {
             return false;
         }
 
+        int movementVector[] = getVector(dir);
+        int moveX = movementVector[0] * testDistance;
+        int moveY = movementVector[1] * testDistance;
+        int moveZ = movementVector[2] * testDistance;
+
         for (int y = minY; y <= maxY; y++) {
             for (int x = minX; x <= maxX; x++) {
                 for (int z = minZ; z <= maxZ; z++) {
-                    int newX = getNewXCoord(x, y, z, testDistance, dir);
-                    int newY = getNewYCoord(x, y, z, testDistance, dir);
-                    int newZ = getNewZCoord(x, y, z, testDistance, dir);
+                    int newX = x + moveX;
+                    int newY = y + moveY;
+                    int newZ = z + moveZ;
 
                     if (isBlockInShip(newX, newY, newZ)) {
                         continue;
@@ -841,26 +775,11 @@ public class EntityJump extends Entity {
             World spaceWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
             World surfaceWorld = DimensionManager.getWorld(0);
             int newY, newX, newZ;
-            
-            if (!toSpace && !fromSpace) 
-            {
-                newX = getNewXCoord(oldX, oldY, oldZ, distance, direction);
-                newY = getNewYCoord(oldX, oldY, oldZ, distance, direction);
-                newZ = getNewZCoord(oldX, oldY, oldZ, distance, direction);
-            } else {
-                // Если прыжок из космоса, то нужно поднять корабль до неба
-                distance = 0;
-                
-                if (fromSpace) {
-                    newY =  255 - this.shipDown - this.shipUp + oldY - this.yCoord -1;
-                } else {
-                    newY = oldY;
-                }
-                
-                newX = oldX;
-                newZ = oldZ;
-            }
-            
+
+            newX = oldX + moveX;
+            newY = oldY + moveY;
+            newZ = oldZ + moveZ;
+
             int blockID = shipBlock.blockID;
             int blockMeta = shipBlock.blockMeta;
 
