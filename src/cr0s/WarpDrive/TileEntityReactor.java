@@ -126,6 +126,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         if (c != null) {
             this.controller = (TileEntityProtocol)c;
             this.currentMode = controller.getMode();
+            shipFront = controller.getFront();
+            shipRight = controller.getRight();
+            shipUp = controller.getUp();
+            shipBack = controller.getBack();
+            shipLeft = controller.getLeft();
+            shipDown = controller.getDown();
             
             if (this.controller.isSummonAllFlag()) {
                 summonPlayers();
