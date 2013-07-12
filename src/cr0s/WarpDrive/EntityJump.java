@@ -147,11 +147,7 @@ public class EntityJump extends Entity {
         }
 
         if (!isJumping) {
-            this.toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
-            this.fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);               
-
             System.out.println("[JE] Preparing to jump...");
-            axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
             prepareToJump();
 
@@ -265,9 +261,11 @@ public class EntityJump extends Entity {
     
     public void prepareToJump() {
         LocalProfiler.start("EntityJump.prepareToJump");
-        boolean betweenWorlds;
 
-        betweenWorlds = fromSpace || toSpace;
+        toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
+        fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
+
+        boolean betweenWorlds = fromSpace || toSpace;
 
         if (toSpace) {
             targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
@@ -276,6 +274,8 @@ public class EntityJump extends Entity {
         } else {
             targetWorld = this.worldObj;
         }
+
+        axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
         lockWorlds();
 
