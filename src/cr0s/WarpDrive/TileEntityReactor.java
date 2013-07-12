@@ -26,6 +26,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
@@ -125,6 +126,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         if (c != null) {
             this.controller = (TileEntityProtocol)c;
             this.currentMode = controller.getMode();
+            shipFront = controller.getFront();
+            shipRight = controller.getRight();
+            shipUp = controller.getUp();
+            shipBack = controller.getBack();
+            shipLeft = controller.getLeft();
+            shipDown = controller.getDown();
             
             if (this.controller.isSummonAllFlag()) {
                 summonPlayers();
@@ -152,6 +159,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 } else {
                     teleportPlayersToSpace();
                 }
+                break;
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
             case MODE_BEACON_JUMP:               
@@ -187,7 +195,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     
                     System.out.println("[W-C] Jumping!");
 
-                    doJump(currentMode == MODE_LONG_JUMP);
+                    doJump();
                     
                     controller.setJumpFlag(false);
                 } else
@@ -503,7 +511,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }
     }    
     
-    public void doJump(boolean longjump) {  
+    public void doJump() {
         if (currentMode == this.MODE_BEACON_JUMP)
         {
             System.out.println("[TE-WC] Performing beacon jump...");
@@ -618,20 +626,21 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, x, 256, z));
 
                         // Создаём платформу
-                        if (DimensionManager.getWorld(WarpDrive.instance.spaceDimID).isAirBlock(x, newY, z)) {
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z, Block.stone.blockID, 0, 2);
+                        WorldServer space = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
+                        if (space.isAirBlock(x, newY, z)) {
+                            space.setBlock(x, newY, z, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z, Block.stone.blockID, 0, 2);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z, Block.stone.blockID, 0, 2);
+                            space.setBlock(x + 1, newY, z, Block.stone.blockID, 0, 2);
+                            space.setBlock(x - 1, newY, z, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z + 1, Block.stone.blockID, 0, 2);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x, newY, z - 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x, newY, z + 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x, newY, z - 1, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z + 1, Block.stone.blockID, 0, 2);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z - 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x + 1, newY, z + 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x - 1, newY, z - 1, Block.stone.blockID, 0, 2);
 
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x + 1, newY, z - 1, Block.stone.blockID, 0, 2);
-                            DimensionManager.getWorld(WarpDrive.instance.spaceDimID).setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x + 1, newY, z - 1, Block.stone.blockID, 0, 2);
+                            space.setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
                         }
 
                         // Перемещаем на платформу
@@ -731,9 +740,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public int getRealShipVolume() {
         int shipVol = 0;
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
@@ -745,7 +754,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }
 
         return shipVol;
-    }    
+    }
 
     public TileEntity findControllerBlock() {
         TileEntity result;
