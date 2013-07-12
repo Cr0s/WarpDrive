@@ -260,6 +260,8 @@ public class EntityJump extends Entity {
 
         axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
+        turnOffModems();
+
         // Calculate jump vector
         if (isCoordJump) {
             moveX = destX - xCoord;
@@ -719,7 +721,11 @@ public class EntityJump extends Entity {
         return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
     }
 
-    public void turnOffModem(IPeripheral p) {
+    /**
+     * Выключение модема, если периферийное устройство является модемом
+     * @param p - периферийное устройство
+     */
+    private void turnOffModem(IPeripheral p) {
         if (p.getType() == "modem") {
             String[] methods = p.getMethodNames();
             for(int i = 0; i < methods.length; i++) {
@@ -735,13 +741,40 @@ public class EntityJump extends Entity {
         }
     }
 
+    /**
+     * Выключение всех модемов на корабле
+     */
+    private void turnOffModems() {
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    int blockID = worldObj.getBlockId(x, y, z);
+                    if (blockID == 0) continue;
+
+                    TileEntity tileEntity = worldObj.getBlockTileEntity(x, y, z);
+                    if (tileEntity == null) continue;
+
+                    if (tileEntity instanceof IPeripheral) {
+                        IPeripheral p = (IPeripheral)tileEntity;
+                        turnOffModem(p);
+                    }
+                    if (tileEntity instanceof ITurtleAccess) {
+                        ITurtleAccess a = (ITurtleAccess)tileEntity;
+                        IPeripheral pl = a.getPeripheral(TurtleSide.Left);
+                        if (pl != null) turnOffModem(pl);
+                        IPeripheral pr = a.getPeripheral(TurtleSide.Right);
+                        if (pr != null) turnOffModem(pr);
+                    }
+                }
+            }
+        }
+    }
+
     
     /**
      * Перемещение одиночного блока на новое место
      *
      * @param indexInShip индекс блока в сохранённом в памяти корабле
-     * @param distance расстояние для перемещения
-     * @param direction направление перемещения
      * @return состояние перемещения
      */
     public boolean moveBlockSimple(int indexInShip) {
@@ -772,19 +805,6 @@ public class EntityJump extends Entity {
 
 
             if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145) {
-                // Turn off modems
-                if (shipBlock.blockTileEntity instanceof IPeripheral) {
-                    IPeripheral p = (IPeripheral)shipBlock.blockTileEntity;
-                    turnOffModem(p);
-                }
-                if (shipBlock.blockTileEntity instanceof ITurtleAccess) {
-                    ITurtleAccess a = (ITurtleAccess)shipBlock.blockTileEntity;
-                    IPeripheral pl = a.getPeripheral(TurtleSide.Left);
-                    if (pl != null) turnOffModem(pl);
-                    IPeripheral pr = a.getPeripheral(TurtleSide.Right);
-                    if (pr != null) turnOffModem(pr);
-                }
-                
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
                 // CC's computers and turtles moving workaround
