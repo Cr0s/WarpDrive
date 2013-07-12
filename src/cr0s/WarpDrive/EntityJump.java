@@ -1,8 +1,6 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
@@ -67,7 +65,7 @@ public class EntityJump extends Entity {
     
     private final int BLOCKS_PER_TICK = 3000;
     
-    private List entityOnShip;
+    private List<MovingEntity> entitiesOnShip;
     
     AxisAlignedBB axisalignedbb;
     
@@ -224,15 +222,8 @@ public class EntityJump extends Entity {
     }
     
     public void messageToAllPlayersOnShip(String msg) {
-        List list = this.entityOnShip;
-
-        if (list != null) {
-            for (Object obj : list) {
-                if (!(obj instanceof MovingEntity)) {
-                    continue;
-                }
-
-                MovingEntity me = (MovingEntity)obj;
+        if (entitiesOnShip != null) {
+            for (MovingEntity me : entitiesOnShip) {
                 Entity entity = me.entity;
 
                 if (entity instanceof EntityPlayer) {
@@ -307,7 +298,7 @@ public class EntityJump extends Entity {
         lockWorlds();
 
         saveEntities(axisalignedbb);
-        System.out.println("[JE] Saved " + entityOnShip.size() + " entities from ship");
+        System.out.println("[JE] Saved " + entitiesOnShip.size() + " entities from ship");
 
         if (!isCoordJump) {
             if (dir != -2 && dir != -1) {
@@ -508,7 +499,7 @@ public class EntityJump extends Entity {
     }
 
     public void saveEntities(AxisAlignedBB axisalignedbb) {
-        this.entityOnShip = new ArrayList();
+        entitiesOnShip = new ArrayList<MovingEntity>();
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
         
         for (Object o : list) {
@@ -518,10 +509,10 @@ public class EntityJump extends Entity {
             
             Entity entity = (Entity)o;
 
-            MovingEntity movingentity = new MovingEntity(entity, entity.posX, entity.posY, entity.posZ);
+            MovingEntity movingEntity = new MovingEntity(entity, entity.posX, entity.posY, entity.posZ);
                         
             // Добавим в список Entity
-            entityOnShip.add(movingentity);
+            entitiesOnShip.add(movingEntity);
         }
     }
     
@@ -534,19 +525,11 @@ public class EntityJump extends Entity {
      * @return 
      */
     public boolean moveEntities(boolean restorePositions) {
-        List list = this.entityOnShip;
-
-        if (list != null) {
-            for (Object obj : list) {
-                if (!(obj instanceof MovingEntity)) {
-                    continue;
-                }
-                
-                MovingEntity me = (MovingEntity)obj;
-                
+        if (entitiesOnShip != null) {
+            for (MovingEntity me : entitiesOnShip) {
                 Entity entity = me.entity;
                 
-                if (me == null) { continue; }
+                if (entity == null) { continue; }
 
                 double oldEntityX = me.oldX;
                 double oldEntityY = me.oldY;
@@ -788,9 +771,6 @@ public class EntityJump extends Entity {
             int oldX = shipBlock.x;
             int oldY = shipBlock.y;
             int oldZ = shipBlock.z;
-            
-            World spaceWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
-            World surfaceWorld = DimensionManager.getWorld(0);
 
             int newX = oldX + moveX;
             int newY = oldY + moveY;
@@ -893,7 +873,7 @@ public class EntityJump extends Entity {
             c.precipitationHeightMap[j1] = -999;
         }
 
-        int k1 = c.heightMap[j1];
+        //int k1 = c.heightMap[j1];
         int l1 = c.getBlockID(x, y, z);
         int i2 = c.getBlockMetadata(x, y, z);
 
