@@ -774,24 +774,15 @@ public class EntityJump extends Entity {
             
             World spaceWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
             World surfaceWorld = DimensionManager.getWorld(0);
-            int newY, newX, newZ;
 
-            newX = oldX + moveX;
-            newY = oldY + moveY;
-            newZ = oldZ + moveZ;
+            int newX = oldX + moveX;
+            int newY = oldY + moveY;
+            int newZ = oldZ + moveZ;
 
             int blockID = shipBlock.blockID;
             int blockMeta = shipBlock.blockMeta;
 
-            if (!toSpace && !fromSpace)
-            {
-                mySetBlock(worldObj, newX, newY, newZ, blockID, blockMeta, 2);
-            } else if (toSpace)
-            {
-                mySetBlock(spaceWorld, newX, newY, newZ, blockID, blockMeta, 2);
-            } else if (fromSpace) {
-                mySetBlock(surfaceWorld, newX, newY, newZ, blockID, blockMeta, 2);
-            }
+            mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
 
             NBTTagCompound oldnbt = new NBTTagCompound();
 
@@ -821,49 +812,25 @@ public class EntityJump extends Entity {
                     newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
                     newTileEntity.invalidate();
                 } else {
-                    if (!toSpace && !fromSpace) {
-                        newTileEntity = worldObj.getBlockTileEntity(newX, newY, newZ);     
-                    } else if (toSpace) {
-                        newTileEntity = spaceWorld.getBlockTileEntity(newX, newY, newZ); 
-                    } else if (fromSpace) {
-                        newTileEntity = surfaceWorld.getBlockTileEntity(newX, newY, newZ); 
-                    }
-                    
+                    newTileEntity = targetWorld.getBlockTileEntity(newX, newY, newZ);
                     if (newTileEntity == null) {
                         System.out.println("[EJ] Error moving tileEntity! TE is null");
                         return false;
                     }
-                    
+
                     newTileEntity.invalidate();
-                    
+
                     newTileEntity.readFromNBT(oldnbt);
-                    if (!toSpace && !fromSpace)
-                    {
-                        worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-                    } else if (toSpace)
-                    {
-                        //newTileEntity.worldObj = spaceWorld;
-                        spaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-                    } else if (fromSpace) {
-                        //newTileEntity.worldObj = surfaceWorld;
-                        surfaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);                    
-                    }                    
+
+                    //newTileEntity.worldObj = targetWorld;
+                    targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
                 }
 
                 newTileEntity.worldObj = targetWorld;
                 newTileEntity.validate();
                 
-                if (!toSpace && !fromSpace)
-                {
-                    worldObj.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-                } else if (toSpace)
-                {
-                    spaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-                } else if (fromSpace) {
-                    surfaceWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);                    
-                }
-                
-                worldObj.removeBlockTileEntity(oldX, oldY, oldZ);  
+                targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+                worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
             }
         } catch (Exception exception) {
             exception.printStackTrace();
