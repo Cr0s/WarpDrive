@@ -160,7 +160,7 @@ public class EntityJump extends Entity {
                 isJumping = false;
                 finishJump();
             } else { 
-                //moveEntities(axisalignedbb, distance, dir, true);
+                //moveEntities(true);
                 moveShip();
             }
         }
@@ -362,7 +362,7 @@ public class EntityJump extends Entity {
      * Finish jump: move entities, unlock worlds and delete self
      */
     public void finishJump() {
-        moveEntities(axisalignedbb, distance, dir, false);
+        moveEntities(false);
         setBlocksUnderPlayers(true);
 
         removeShip();
@@ -441,7 +441,9 @@ public class EntityJump extends Entity {
         System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
         
         for (int index = 0; index < blocksToMove; index++) {
-            moveBlockSimple(currentIndexInShip, distance, dir, toSpace, fromSpace);
+            if (currentIndexInShip >= ship.length) break;
+
+            moveBlockSimple(currentIndexInShip);
             currentIndexInShip++;
         }
         LocalProfiler.stop();
@@ -536,7 +538,7 @@ public class EntityJump extends Entity {
      * @param restorePositions восстановление старых позиций для предотвращения выпадения, либо перемещение на новую
      * @return 
      */
-    public boolean moveEntities(AxisAlignedBB axisalignedbb, int distance, int direction, boolean restorePositions) {
+    public boolean moveEntities(boolean restorePositions) {
         List list = this.entityOnShip;
 
         if (list != null) {
@@ -755,13 +757,8 @@ public class EntityJump extends Entity {
      * @param direction направление перемещения
      * @return состояние перемещения
      */
-    public boolean moveBlockSimple(int indexInShip, int distance, int direction, boolean toSpace, boolean fromSpace) {
+    public boolean moveBlockSimple(int indexInShip) {
         try {
-            // OutOfBounds workaround
-            if (indexInShip == ship.length) {
-                indexInShip--;
-            }
-            
             JumpBlock shipBlock = ship[indexInShip];
 
             if (shipBlock == null) {
