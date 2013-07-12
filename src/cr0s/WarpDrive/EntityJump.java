@@ -184,38 +184,7 @@ public class EntityJump extends Entity {
             worldObj.isRemote = false;
         }        
     }
-    
-    
-    /**
-     * Setting/removing crap blocks under players to prevent them to fall
-     * @param removeBlocks
-     */
-    public void setBlocksUnderPlayers(boolean removeBlocks) {
-        List list = this.entityOnShip;
 
-        if (list != null) {
-            for (Object obj : list) {
-                if (!(obj instanceof MovingEntity)) {
-                    continue;
-                }
-                
-                MovingEntity me = (MovingEntity)obj;
-                Entity entity = me.entity;
-                
-                if (entity instanceof EntityPlayer) {
-                    if (!removeBlocks) {
-                        mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, Block.dirt.blockID, 0, 1 + 2);
-                    } else
-                    {
-                        if (worldObj.getBlockId((int)me.oldX, (int)me.oldY - 2, (int)me.oldZ) == Block.dirt.blockID) {
-                            mySetBlock(worldObj, (int)me.oldX, (int)me.oldY - 2, (int)me.oldZ, 0, 0, 1 + 2);
-                        }
-                    }
-                }
-            }
-        }        
-    }
-    
     /**
      * Check to chunk existence in destination point
      * If chunks not loaded or does not exists, they will
@@ -350,7 +319,6 @@ public class EntityJump extends Entity {
         }
 
         saveShip(shipSize);
-        setBlocksUnderPlayers(false);
         
         this.currentIndexInShip = 0;   
         
@@ -363,7 +331,6 @@ public class EntityJump extends Entity {
      */
     public void finishJump() {
         moveEntities(false);
-        setBlocksUnderPlayers(true);
 
         removeShip();
 
