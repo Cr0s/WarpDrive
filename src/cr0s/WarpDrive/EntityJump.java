@@ -643,8 +643,7 @@ public class EntityJump extends Entity {
 
                     player.setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
                 } else {
-                    entity.moveEntity(newEntityX, newEntityY, newEntityZ);
-                    continue;
+                    entity.setPosition(newEntityX, newEntityY, newEntityZ);
                 }
             }
         }
