@@ -159,11 +159,6 @@ public class EntityJump extends Entity {
 
             state = STATE_JUMPING;
         } else if(state == STATE_JUMPING) {
-            // Skip tick, awaiting chunk generation
-            if ((targetWorld == worldObj) && !checkForChunksGeneratedIn(targetWorld)) {
-                return;
-            }
-
             if (currentIndexInShip >= ship.length-1) {
                 moveEntities(false);
 
@@ -262,32 +257,6 @@ public class EntityJump extends Entity {
         }        
     }
 
-    /**
-     * Check to chunk existence in destination point
-     * If chunks not loaded or does not exists, they will
-     * @param world
-     * @return
-     */
-    public boolean checkForChunksGeneratedIn(World w) {
-        IChunkProvider chunkProvider = w.getChunkProvider();
-        int x1 = (minX + moveX) >> 4;
-        int x2 = (maxX + moveX) >> 4;
-        int z1 = (minZ + moveZ) >> 4;
-        int z2 = (maxZ + moveZ) >> 4;
-
-        for (int x = x1; x <= x2; x++) {
-            for (int z = z1; z <= z2; z++) {
-                if (!chunkProvider.chunkExists(x, z)) {
-                    messageToAllPlayersOnShip("Generating chunks...");
-                    chunkProvider.provideChunk(x, z);
-
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    
     public void messageToAllPlayersOnShip(String msg) {
         if (entitiesOnShip != null) {
             for (MovingEntity me : entitiesOnShip) {
