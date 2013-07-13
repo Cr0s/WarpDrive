@@ -87,6 +87,8 @@ public class EntityJump extends Entity {
         super(world);
 
         targetWorld = worldObj;
+
+        System.out.println("[JE@"+this+"] Entity created (empty)");
     }
 
     public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz, TileEntityReactor parReactor) {
@@ -111,7 +113,7 @@ public class EntityJump extends Entity {
 
         targetWorld = worldObj;
 
-        System.out.println("[JE] Entity created");
+        System.out.println("[JE@"+this+"] Entity created");
         
         this.reactor = parReactor;
     }
@@ -120,7 +122,7 @@ public class EntityJump extends Entity {
         if (!on) { return; }
         on = false;
         
-        System.out.println("[JE] Killing jump entity...");
+        System.out.println("[JE@"+this+"] Killing jump entity...");
         
         if (!reason.isEmpty()) {
             System.out.println("[JUMP] Killed: " + reason);
@@ -138,6 +140,8 @@ public class EntityJump extends Entity {
 
     @Override
     public void onUpdate() {
+        System.out.println("[JE@"+this+"] onUpdate()");
+
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
         if (!on/* || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID */) {
@@ -185,7 +189,7 @@ public class EntityJump extends Entity {
     }
 
     private void forceChunks() {
-        System.out.println("[JE] Forcing chunks");
+        System.out.println("[JE@"+this+"] Forcing chunks");
         sourceWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, worldObj, Type.ENTITY);
         targetWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, targetWorld, Type.NORMAL);
         sourceWorldTicket.bindEntity(this);
@@ -212,7 +216,7 @@ public class EntityJump extends Entity {
     }
 
     private void unforceChunks() {
-        System.out.println("[JE] Unforcing chunks");
+        System.out.println("[JE@"+this+"] Unforcing chunks");
         if(sourceWorldTicket == null || targetWorldTicket == null) return;
 
         int x1 = minX >> 4;
@@ -243,7 +247,7 @@ public class EntityJump extends Entity {
     }
 
     public void lockWorlds() {
-        System.out.println("[JE] Locking worlds...");
+        System.out.println("[JE@"+this+"] Locking worlds...");
         targetWorld.isRemote = true;
         
         // When warping between dimensions is need to lock both worlds
@@ -253,7 +257,7 @@ public class EntityJump extends Entity {
     }
     
     public void unlockWorlds() {
-        System.out.println("[JE] Unlocking worlds..");
+        System.out.println("[JE@"+this+"] Unlocking worlds..");
         targetWorld.isRemote = false;
         
         if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
@@ -590,6 +594,7 @@ public class EntityJump extends Entity {
      * @return 
      */
     public boolean moveEntities(boolean restorePositions) {
+        System.out.println("[JE] Moving entities");
         if (entitiesOnShip != null) {
             for (MovingEntity me : entitiesOnShip) {
                 Entity entity = me.entity;
@@ -890,15 +895,17 @@ public class EntityJump extends Entity {
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+        System.out.println("[JE@"+this+"] readEntityFromNBT()");
     }
 
     @Override
-    protected void entityInit() {        
-
+    protected void entityInit() {
+        System.out.println("[JE@"+this+"] entityInit()");
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound var1) {
+        System.out.println("[JE@"+this+"] writeEntityToNBT()");
     }
 
     // Own implementation of setting blocks withow light recalculation in optimization purposes
