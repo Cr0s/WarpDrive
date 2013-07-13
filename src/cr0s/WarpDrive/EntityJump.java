@@ -131,11 +131,7 @@ public class EntityJump extends Entity {
         unlockWorlds();
         unforceChunks();
 
-        try {
-            if (!this.fromSpace && !this.toSpace)  { worldObj.removeEntity(this); }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        worldObj.removeEntity(this);
     }
 
     @Override
@@ -144,8 +140,7 @@ public class EntityJump extends Entity {
 
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
-        if (!on/* || worldObj.getBlockId(xCoord, yCoord, zCoord) != WarpDrive.WARP_CORE_BLOCKID */) {
-            unlockWorlds();
+        if (!on) {
             worldObj.removeEntity(this);
             return; 
         }
