@@ -1,5 +1,7 @@
 package cr0s.WarpDrive;
 
+import java.util.List;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -21,6 +23,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.0")
@@ -28,7 +33,7 @@ import net.minecraftforge.common.MinecraftForge;
 /**
  * @author Cr0s
  */
-public class WarpDrive {
+public class WarpDrive implements LoadingCallback {
 
     public final static int WARP_CORE_BLOCKID = 500;
     public final static int PROTOCOL_BLOCK_BLOCKID = 501;
@@ -91,6 +96,8 @@ public class WarpDrive {
         EntityRegistry.registerModEntity(EntitySphereGen.class, "EntitySphereGenerator", 1, WarpDrive.instance, 100, 1, false);
         proxy.registerJumpEntity();
 
+        ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
+
         spaceWorldGenerator = new SpaceWorldGenerator();
         GameRegistry.registerWorldGenerator(spaceWorldGenerator);
         
@@ -124,5 +131,12 @@ public class WarpDrive {
         DimensionManager.registerProviderType(this.spaceProviderID, SpaceProvider.class, true);
         this.spaceDimID = DimensionManager.getNextFreeDimId();
         DimensionManager.registerDimension(this.spaceDimID, this.spaceProviderID);
+    }
+
+    @Override
+    public void ticketsLoaded(List<Ticket> tickets, World world) {
+        for(Ticket ticket : tickets) {
+            ForgeChunkManager.releaseTicket(ticket);
+        }
     }
 }

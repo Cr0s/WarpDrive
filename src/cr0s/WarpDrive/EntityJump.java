@@ -16,11 +16,15 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.ForgeChunkManager.Type;
 
 public class EntityJump extends Entity {
     // Jump vector
@@ -49,6 +53,9 @@ public class EntityJump extends Entity {
     public int dx;
     public int dz;
     public World targetWorld;
+    private Ticket sourceWorldTicket;
+    private Ticket targetWorldTicket;
+
     // Collision point coordinates
     public int blowX, blowY, blowZ;
     boolean needToExplode = false;
@@ -113,14 +120,15 @@ public class EntityJump extends Entity {
         if (!on) { return; }
         on = false;
         
-        System.out.println("[K] Killing jump entity...");
+        System.out.println("[JE] Killing jump entity...");
         
         if (!reason.isEmpty()) {
             System.out.println("[JUMP] Killed: " + reason);
         }
 
         unlockWorlds();
-        
+        unforceChunks();
+
         try {
             if (!this.fromSpace && !this.toSpace)  { worldObj.removeEntity(this); }
         } catch (Exception e) {
@@ -175,9 +183,67 @@ public class EntityJump extends Entity {
             }
         }
     }
-    
+
+    private void forceChunks() {
+        System.out.println("[JE] Forcing chunks");
+        sourceWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, worldObj, Type.ENTITY);
+        targetWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, targetWorld, Type.NORMAL);
+        sourceWorldTicket.bindEntity(this);
+
+        int x1 = minX >> 4;
+        int x2 = maxX >> 4;
+        int z1 = minZ >> 4;
+        int z2 = maxZ >> 4;
+        for(int x = x1; x <= x2; x++) {
+            for(int z = z1; z <= z2; z++) {
+                ForgeChunkManager.forceChunk(sourceWorldTicket, new ChunkCoordIntPair(x, z));
+            }
+        }
+
+        x1 = (minX + moveX) >> 4;
+        x2 = (maxX + moveX) >> 4;
+        z1 = (minZ + moveZ) >> 4;
+        z2 = (maxZ + moveZ) >> 4;
+        for(int x = x1; x <= x2; x++) {
+            for(int z = z1; z <= z2; z++) {
+                ForgeChunkManager.forceChunk(targetWorldTicket, new ChunkCoordIntPair(x, z));
+            }
+        }
+    }
+
+    private void unforceChunks() {
+        System.out.println("[JE] Unforcing chunks");
+        if(sourceWorldTicket == null || targetWorldTicket == null) return;
+
+        int x1 = minX >> 4;
+        int x2 = maxX >> 4;
+        int z1 = minZ >> 4;
+        int z2 = maxZ >> 4;
+        for(int x = x1; x <= x2; x++) {
+            for(int z = z1; z <= z2; z++) {
+                ForgeChunkManager.unforceChunk(sourceWorldTicket, new ChunkCoordIntPair(x, z));
+            }
+        }
+
+        x1 = (minX + moveX) >> 4;
+        x2 = (maxX + moveX) >> 4;
+        z1 = (minZ + moveZ) >> 4;
+        z2 = (maxZ + moveZ) >> 4;
+        for(int x = x1; x <= x2; x++) {
+            for(int z = z1; z <= z2; z++) {
+                ForgeChunkManager.unforceChunk(targetWorldTicket, new ChunkCoordIntPair(x, z));
+            }
+        }
+
+        ForgeChunkManager.releaseTicket(sourceWorldTicket);
+        ForgeChunkManager.releaseTicket(targetWorldTicket);
+
+        sourceWorldTicket = null;
+        targetWorldTicket = null;
+    }
+
     public void lockWorlds() {
-        System.out.println("Locking worlds...");
+        System.out.println("[JE] Locking worlds...");
         targetWorld.isRemote = true;
         
         // When warping between dimensions is need to lock both worlds
@@ -187,7 +253,7 @@ public class EntityJump extends Entity {
     }
     
     public void unlockWorlds() {
-        System.out.println("Unlocking worlds..");
+        System.out.println("[JE] Unlocking worlds..");
         targetWorld.isRemote = false;
         
         if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId) {
@@ -295,6 +361,7 @@ public class EntityJump extends Entity {
             }
         }
 
+        forceChunks();
         lockWorlds();
 
         saveEntities(axisalignedbb);
