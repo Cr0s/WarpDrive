@@ -12,12 +12,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -618,13 +620,17 @@ public class EntityJump extends Entity {
 
                 // Travel to another dimension if needed
                 if(betweenWorlds && !restorePositions) {
+                    MinecraftServer server = MinecraftServer.getServer();
+                    WorldServer from = server.worldServerForDimension(worldObj.provider.dimensionId);
+                    WorldServer to = server.worldServerForDimension(targetWorld.provider.dimensionId);
+
+                    SpaceTeleporter teleporter = new SpaceTeleporter(to, 0, MathHelper.floor_double(newEntityX), MathHelper.floor_double(newEntityY), MathHelper.floor_double(newEntityZ));
+
                     if (entity instanceof EntityPlayerMP) {
                         EntityPlayerMP player = (EntityPlayerMP) entity;
-
-                        SpaceTeleporter teleporter = new SpaceTeleporter(DimensionManager.getWorld(targetWorld.provider.dimensionId), 0, MathHelper.floor_double(newEntityX), MathHelper.floor_double(newEntityY), MathHelper.floor_double(newEntityZ));
-                        player.mcServer.getConfigurationManager().transferPlayerToDimension(player, targetWorld.provider.dimensionId, teleporter);
+                        server.getConfigurationManager().transferPlayerToDimension(player, targetWorld.provider.dimensionId, teleporter);
                     } else {
-                        entity.travelToDimension(targetWorld.provider.dimensionId);
+                        server.getConfigurationManager().transferEntityToWorld(entity, worldObj.provider.dimensionId, from, to, teleporter);
                     }
                 }
 
