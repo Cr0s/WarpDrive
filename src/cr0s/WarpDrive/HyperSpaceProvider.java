@@ -13,21 +13,21 @@ import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 
-public class SpaceProvider extends WorldProvider {
+public class HyperSpaceProvider extends WorldProvider {
 
     public int exitXCoord;
     public int exitYCoord;
     public int exitZCoord;
     public int exitDimID;
     
-    public SpaceProvider() {
+    public HyperSpaceProvider() {
         this.worldChunkMgr = new WorldChunkManagerHell(WarpDrive.spaceBiome, 0.0F, 0.0F);
         this.hasNoSky = false;
     }
 
     @Override
     public String getDimensionName() {
-        return "Space";
+        return "Hyperspace";
     }
     
     @Override
@@ -39,9 +39,9 @@ public class SpaceProvider extends WorldProvider {
     @Override
     public float getStarBrightness(float par1)
     {
-        return 1.0F;
+        return 0F;
     } 
-  
+    
     @Override
     public boolean isSurfaceWorld()
     {
@@ -69,10 +69,7 @@ public class SpaceProvider extends WorldProvider {
     @Override
     public void updateWeather()
     {
-        this.worldObj.getWorldInfo().setRainTime(0);
-        this.worldObj.getWorldInfo().setRaining(false);
-        this.worldObj.getWorldInfo().setThunderTime(0);
-        this.worldObj.getWorldInfo().setThundering(false);
+        super.resetRainAndThunder();
     }    
 
     @Override
@@ -89,19 +86,12 @@ public class SpaceProvider extends WorldProvider {
 
     @Override
     public float calculateCelestialAngle(long par1, float par3) {
-        return 0F;
+        return 0.5F;
     }
     
     @Override
     protected void generateLightBrightnessTable()
     {
-        /*float var1 = 0.1F;
-
-        for (int var2 = 0; var2 <= 15; ++var2)
-        {
-            float var3 = 1.0F - (float)var2 / 15.0F;
-            this.lightBrightnessTable[var2] = (1.0F - var3) / (var3 * 3.0F + 1.0F) * (1.0F - var1) + var1;
-        }*/
         float var1 = 0.0F;
 
         for (int var2 = 0; var2 <= 15; ++var2)
@@ -114,7 +104,7 @@ public class SpaceProvider extends WorldProvider {
     @SideOnly(Side.CLIENT)
     @Override
     public String getSaveFolder() {
-        return (dimensionId == 0 ? null : "WarpDrive/Space" + dimensionId);
+        return (dimensionId == 0 ? null : "WarpDrive/HyperSpace" + dimensionId);
     }
 
     @Override
@@ -126,21 +116,21 @@ public class SpaceProvider extends WorldProvider {
     @Override
     public Vec3 getSkyColor(Entity cameraEntity, float partialTicks) {
         setCloudRenderer(new CloudRenderBlank());
-        //setSkyRenderer(new SpaceSkyRenderer());
-        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0, (double) 0, (double) 0);
+        setSkyRenderer(new CloudRenderBlank());
+        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 1, (double) 0, (double) 0);
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public Vec3 getFogColor(float par1, float par2) {
-        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0, (double) 0, (double) 0);
+        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0.1, (double) 0, (double) 0);
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public boolean isSkyColored()
     {
-        return false;
+        return true;
     }    
     
     @Override
@@ -150,19 +140,13 @@ public class SpaceProvider extends WorldProvider {
     }    
     
     @Override
-    public String getWelcomeMessage()
-    {
-        return "Gagarin: POEHALI!";
-    }
-    
-    @Override
     public int getRespawnDimension(EntityPlayerMP player) {
-        return WarpDrive.instance.spaceDimID;
+        return WarpDrive.instance.hyperSpaceDimID;
     }
 
     @Override
     public IChunkProvider createChunkGenerator() {
-        return new SpaceGenerator(worldObj, 45);
+        return new HyperSpaceGenerator(worldObj, 46);
     }
 
     @Override
@@ -175,7 +159,7 @@ public class SpaceProvider extends WorldProvider {
         ChunkCoordinates var5 = new ChunkCoordinates(this.worldObj.getSpawnPoint());
 
         //boolean isAdventure = worldObj.getWorldInfo().getGameType() == EnumGameType.ADVENTURE;
-        int spawnFuzz = 1000;
+        int spawnFuzz = 100;
         int spawnFuzzHalf = spawnFuzz / 2;
 
         {
@@ -197,9 +181,12 @@ public class SpaceProvider extends WorldProvider {
             worldObj.setBlock(var5.posX, var5.posY + 2, var5.posZ + 1, Block.glass.blockID, 0, 2);   
             
             worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ - 1, Block.glass.blockID, 0, 2);
-            worldObj.setBlock(var5.posX, var5.posY + 3, var5.posZ - 1, Block.glass.blockID, 0, 2);   
+            worldObj.setBlock(var5.posX, var5.posY + 2, var5.posZ - 1, Block.glass.blockID, 0, 2);   
             
-            //worldObj.setBlockWithNotify(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID); 
+            worldObj.setBlock(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID, 0, 2);
+            
+            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, WarpDrive.AIR_BLOCKID, 15, 2);  
+            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ, WarpDrive.AIR_BLOCKID, 15, 2);  
         }
         return var5;
     }
@@ -224,5 +211,5 @@ public class SpaceProvider extends WorldProvider {
     public boolean canDoRainSnowIce(Chunk chunk)
     {
         return false;
-    }
+    }  
 }

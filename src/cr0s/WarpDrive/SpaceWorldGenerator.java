@@ -19,7 +19,9 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     public final int MOON_CORE_RADIUS = 10;
     
     // Star radius
-    public final int STAR_RADIUS = 80;
+    public final int RED_DWARF_RADIUS = 42;
+    public final int YELLOW_GIANT_RADIUS = 64;
+    public final int YELLOW_SUPERGIANT_RADIUS = 80;
     
     // Upper than 128 almost nothing will be generated
     public final int Y_LIMIT = 128;
@@ -51,40 +53,17 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         int x = (chunkX * 16) + (5 - random.nextInt(10));
         int z = (chunkZ * 16) + (5 - random.nextInt(10));
 
-        int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
-
-        // Moon setup
-        if (random.nextInt(8000) == 1) {
-            System.out.println("Generating moon at " + x + " " + y + " " + z);
-            generateSphere2(world, x, y, z, MOON_RADIUS, false, 0, false);
-            
-            // Generate moon's core
-            if (random.nextInt(10) > 3)
-            {
-                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Lava core
-                generateSphere2(world, x, y, z, MOON_CORE_RADIUS + 1, false, Block.obsidian.blockID, true);  // Obsidian shell
-            } else
-            {
-                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, 0, false);
-                generateSmallShip(world, x, y, z);
-                
-            }
+        if (Math.abs(x) > WarpDrive.WORLD_LIMIT_BLOCKS || Math.abs(z) > WarpDrive.WORLD_LIMIT_BLOCKS) {
             return;
         }
-
-        // FIXME: Star setup
-        /*if (random.nextInt(250) == 1) {
-            EntitySphereGen esg = new EntitySphereGen(world, x, y, z, 1);
-            esg.xCoord = x;
-            esg.yCoord = y;
-            esg.zCoord = z;
-            
-            esg.on = true;
-            
-            world.spawnEntityInWorld(esg);
-                     
+        
+        int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
+        
+        // Moon setup
+        if (random.nextInt(8000) == 1) {
+            generateMoon(world, x, y, z);
             return;
-        }*/       
+        }    
         
         // Simple asteroids
         if (random.nextInt(500) == 1) {
@@ -96,6 +75,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         // Random asteroid of block
         if (random.nextInt(1000) == 1) {
             generateRandomAsteroid(world, x, y, z, 6, 11);
+            
+            if (random.nextBoolean()) {
+                generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
+            }
         } 
 
         // Ice asteroid
@@ -122,10 +105,119 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             // Diamond block core
             world.setBlock(x, y, z, Block.blockDiamond.blockID, 0, 2);     
             
-           // return;
+            if (random.nextBoolean()) {
+                generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
+            }
         } 
     }
 
+    public void generateMoon(World world, int x, int y, int z) {
+            System.out.println("Generating moon at " + x + " " + y + " " + z);
+            generateSphereEntity(world, x, y, z, MOON_RADIUS, false, 0, 0);
+            
+            // Generate moon's core
+            if (world.rand.nextInt(10) > 2)
+            {
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, Block.lavaStill.blockID, false); // Lava core
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS + 1, false, Block.obsidian.blockID, true);  // Obsidian shell
+            } else
+            {
+                generateSphere2(world, x, y, z, MOON_CORE_RADIUS, false, 0, false);
+                generateSmallShip(world, x, y, z);
+            }
+            
+            // Generate moon's atmosphere
+            if (world.rand.nextBoolean()) {
+                int gasColor = 1 + world.rand.nextInt(11);
+                generateGasSphereEntity(world, x, y, z, MOON_RADIUS + 5, true, gasColor);
+            }     
+            
+            // Place bedrock blocks
+            world.setBlock(x, y, z, Block.bedrock.blockID, 0, 0);            
+            world.setBlock(x + MOON_CORE_RADIUS, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x - MOON_CORE_RADIUS, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z + MOON_CORE_RADIUS, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z - MOON_CORE_RADIUS, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y + MOON_CORE_RADIUS, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y - MOON_CORE_RADIUS, z, Block.bedrock.blockID, 0, 0);
+
+            world.setBlock(x + MOON_RADIUS / 2, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x - MOON_RADIUS / 2, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z + MOON_RADIUS / 2, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z - MOON_RADIUS / 2, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y + MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y - MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);   
+            
+            world.setBlock(x + MOON_RADIUS - 5, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x - MOON_RADIUS - 5, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z + MOON_RADIUS - 5, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z - MOON_RADIUS - 5, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y + MOON_RADIUS - 5, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y - MOON_RADIUS - 5, z, Block.bedrock.blockID, 0, 0);             
+    }    
+    
+    
+    private void placeStarCore(World world, int x, int y, int z, int radius) {
+        EntityStarCore core = new EntityStarCore(world, x, y, z, radius);
+        core.xCoord = x;
+        core.yCoord = y;
+        core.zCoord = z;
+        
+        core.setPosition((double)x, (double)y, (double)z);
+        world.spawnEntityInWorld(core);
+    }
+    public void generateStar(World world, int x, int y, int z) {
+        int starClass =  world.rand.nextInt(3);
+        System.out.println("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
+       
+        switch (starClass) {
+            case 0: // red dwarf
+                generateSphereEntity(world, x, y, z, RED_DWARF_RADIUS, false, Block.blockRedstone.blockID, 0);
+                
+                // Heliosphere of red gas
+                generateGasSphereEntity(world, x, y, z, RED_DWARF_RADIUS + 6, true, 1);
+                
+                placeStarCore(world, x, y, z, RED_DWARF_RADIUS + 6);
+                break;
+                
+            case 1: // yellow giant
+                generateSphereEntity(world, x, y, z, YELLOW_GIANT_RADIUS, false, Block.glowStone.blockID, 0);
+                
+                // Heliosphere of yellow gas
+                generateGasSphereEntity(world, x, y, z, YELLOW_GIANT_RADIUS + 6, true, 3); 
+                placeStarCore(world, x, y, z, YELLOW_GIANT_RADIUS + 6);
+                break;
+            case 2:
+                generateSphereEntity(world, x, y, z, YELLOW_SUPERGIANT_RADIUS, false, Block.glowStone.blockID, 0);
+                
+                // Heliosphere of yellow gas
+                generateGasSphereEntity(world, x, y, z, YELLOW_SUPERGIANT_RADIUS + 6, true, 3);  
+                placeStarCore(world, x, y, z, YELLOW_SUPERGIANT_RADIUS + 6);
+                break;                
+        }     
+    }    
+ 
+    private void generateSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int blockID, int blockMeta) { 
+        boolean isSurface = (blockID == 0);
+        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, blockID, blockMeta, hollow, false, isSurface);
+        esg.xCoord = x;
+        esg.yCoord = y;
+        esg.zCoord = z;
+        
+        
+        world.spawnEntityInWorld(esg);        
+    }
+    
+    private void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) { 
+        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.GAS_BLOCKID, color, hollow, true, false);
+        esg.xCoord = x;
+        esg.yCoord = y;
+        esg.zCoord = z;
+        
+        
+        world.spawnEntityInWorld(esg);        
+    }    
+    
     private void generateSmallShip(World world, int x, int y, int z) {
         x = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(10));
         y = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(10));
@@ -154,8 +246,9 @@ public class SpaceWorldGenerator implements IWorldGenerator {
      * @param y координата центра поля
      * @param z координата центра поля
      */
-    private void generateAsteroidField(World world, int x, int y, int z) {
+    public void generateAsteroidField(World world, int x, int y, int z) {
         int numOfAsteroids = 15 + world.rand.nextInt(30);
+        int numOfClouds = 5 + world.rand.nextInt(10);
         
         // Minimal distance between asteroids in field
         final int FIELD_ASTEROID_MIN_DISTANCE = 5;
@@ -186,8 +279,61 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                 generateSmallShip(world, aX, aY, aZ);
             }
         }    
+        
+        int gasColor = world.rand.nextInt(12);
+        
+        // Setting up gas clouds
+        for (int i = 1; i <= numOfClouds; i++) {
+            int aX = x + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
+            int aY = y + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
+            int aZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * (FIELD_ASTEROID_MIN_DISTANCE + world.rand.nextInt(FIELD_ASTEROID_MAX_DISTANCE)));
+            
+            // Placing
+            if (world.rand.nextInt(10) != 0) {
+                generateGasCloudOfColor(world, aX, aY, aZ, 12, 15, gasColor);
+            }
+        }          
     }
 
+    /**
+     * Gas cloud generator
+     *
+     * @param x x-coord of center
+     * @param y center
+     * @param z center
+     * @param cloudSizeMax maximum gas cloud size (by number of balls it consists)
+     * @param centerRadiusMax maximum radius of central ball
+     */
+    public void generateGasCloudOfColor(World world, int x, int y, int z, int cloudSizeMax, int centerRadiusMax, int color) {
+        int cloudSize = 1 + world.rand.nextInt(20);
+        
+        if (cloudSizeMax != 0) {
+            cloudSize = Math.min(cloudSizeMax, cloudSize);
+        }        
+
+        int centerRadius = 1 + world.rand.nextInt(20);
+        if (centerRadiusMax != 0) {
+            centerRadius = Math.min(centerRadiusMax, centerRadius);
+        }          
+        
+        
+        final int CENTER_SHIFT = 2; // Offset from center of central ball
+
+        // Asteroid's center
+        generateGasSphereEntity(world, x, y, z, centerRadius, false, color);
+
+        // Asteroids knolls
+        for (int i = 1; i <= cloudSize; i++) {
+            int radius = 2 + world.rand.nextInt(centerRadius);
+
+            int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
+            int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
+            int newZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
+
+            generateGasSphereEntity(world, newX, newY, newZ, radius, false, color);
+        }
+    }    
+    
     /**
      * Asteroid of block generator
      *
@@ -236,7 +382,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
      * @param asteroidSizeMax maximum asteroid size (by number of balls it consists)
      * @param centerRadiusMax maximum radius of central ball
      */
-    private void generateAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
+    public void generateAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
         int asteroidSize = 1 + world.rand.nextInt(6);
         
         if (asteroidSizeMax != 0) {
@@ -251,7 +397,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         
         final int CENTER_SHIFT = 2; 
 
-        generateSphere2(world, x, y, z, centerRadius, true, 0, false);
+        generateSphere2(world, x, y, z, centerRadius, true, -1, false);
 
         for (int i = 1; i <= asteroidSize; i++) {
             int radius = 2 + world.rand.nextInt(centerRadius);
@@ -260,10 +406,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
             int newZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 
-            generateSphere2(world, newX, newY, newZ, radius, true, 0, false);
+            generateSphere2(world, newX, newY, newZ, radius, true, -1, false);
         }
     }
-
+       
     /**
      * Sphere generator
      * @param world target world
@@ -307,7 +453,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
                         if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
                         world.setBlock(xCoord + x, yCoord + y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord - x, yCoord + y, zCoord + z, blockID, meta, 2);
@@ -315,7 +461,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
                         if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
                         world.setBlock(xCoord + x, yCoord - y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord + x, yCoord + y, zCoord - z, blockID, meta, 2);
@@ -323,7 +469,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
                         if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
                         world.setBlock(xCoord - x, yCoord - y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord + x, yCoord - y, zCoord - z, blockID, meta, 2);
@@ -331,7 +477,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
-                        blockID = (forcedID == 0) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
+                        blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
                         if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
                         world.setBlock(xCoord - x, yCoord + y, zCoord - z, blockID, meta, 2);
                         world.setBlock(xCoord - x, yCoord - y, zCoord - z, blockID, meta, 2);
@@ -345,7 +491,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         return (x * x) + (y * y) + (z * z);
     }
 
-    private int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
+    public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
         List<Integer> ores = new ArrayList<Integer>();
         ores.add(Block.oreIron.blockID);
         ores.add(Block.oreGold.blockID);
@@ -353,6 +499,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         ores.add(Block.oreEmerald.blockID);
         ores.add(Block.oreLapis.blockID);
         ores.add(Block.oreRedstoneGlowing.blockID);
+        ores.add(Block.oreNetherQuartz.blockID);
         ores.add(247);//IC2
         ores.add(248);
         ores.add(249);
@@ -367,7 +514,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             blockID = Block.cobblestone.blockID;
         }
 
-        if (random.nextInt(10) == 1 || nocobble) {
+        if (random.nextInt(25) == 5 || nocobble) {
             blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
         else if (random.nextInt(350) == 1 && isAELoaded) {

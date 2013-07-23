@@ -18,8 +18,6 @@ public class BlockRadar extends BlockContainer {
     
     private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_ACTIVATED_SCAN = 4;    
     
-    private ArrayList<TileEntityReactor> searchResults;
-    
     public BlockRadar(int id, int texture, Material material) {
         super(id, material);
     }
@@ -91,7 +89,7 @@ public class BlockRadar extends BlockContainer {
         TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
 
         if (radar != null){ 
-            par5EntityPlayer.sendChatToPlayer("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
+            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
         }
 
         WarpDrive.instance.registry.printRegistry();

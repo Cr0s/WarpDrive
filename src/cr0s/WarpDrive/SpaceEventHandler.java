@@ -4,16 +4,13 @@
 package cr0s.WarpDrive;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.common.ForgeHooks;
 
 /**
  * Обработчик событий в мире Space
@@ -22,61 +19,57 @@ import net.minecraftforge.common.ForgeHooks;
 public class SpaceEventHandler {    
     @ForgeSubscribe
     public void livingUpdate(LivingUpdateEvent event) {
-	EntityLiving entity = event.entityLiving;
+	EntityLivingBase entity = event.entityLiving;
 
+        if (Math.abs(MathHelper.floor_double(entity.posX)) > WarpDrive.WORLD_LIMIT_BLOCKS || Math.abs(MathHelper.floor_double(entity.posZ)) > WarpDrive.WORLD_LIMIT_BLOCKS) {
+            entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
+            return;
+        }        
+        
         final int HELMET_ID_SKUBA = 30082;
         final int HELMET_ID_QUANTUM = 30174;
-        final int HELMET_ID_ADV_SOLAR = 30832;
-        final int HELMET_ID_HYB_SOLAR = 30833;
-        final int HELMET_ID_ULT_SOLAR = 30834;
-        final int HELMET_HEAD = 397;
+        final int HELMET_ID_HAZMAT = 14023;
+        final int HELMET_ID_NANO = 30178;
         
-        // Движение происходит в космическом пространстве
-        if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
-            if (entity instanceof EntityPlayerMP) {
-                
-                if (isEntityInVacuum(entity)) {
-                    if (!(entity.getCurrentArmor(3) != null && (entity.getCurrentArmor(3).itemID == HELMET_ID_SKUBA || entity.getCurrentArmor(3).itemID == HELMET_ID_QUANTUM || entity.getCurrentArmor(3).itemID == HELMET_HEAD
- || entity.getCurrentArmor(3).itemID == HELMET_ID_ADV_SOLAR || entity.getCurrentArmor(3).itemID == HELMET_ID_HYB_SOLAR || entity.getCurrentArmor(3).itemID == HELMET_ID_ULT_SOLAR))) {
-                        entity.attackEntityFrom(DamageSource.drown, 3);    
+        // Обновление происходит в космическом или гипер пространстве
+        if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
+            boolean inVacuum = isEntityInVacuum(entity);
+            
+            // Damage entity if in vacuum without protection
+            if (inVacuum) {
+                if (entity instanceof EntityPlayerMP) {   
+                    if (!(((EntityPlayerMP)entity).getCurrentArmor(3) != null && (((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_SKUBA || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_QUANTUM || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_NANO || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_HAZMAT))) {
+                        entity.attackEntityFrom(DamageSource.drown, 1);    
                     }
-                }
-                
-                // Отправить назад на Землю
-                if (entity.posY < -10.0D) {
-                    ((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
-                    ((EntityPlayerMP)entity).setFire(30);
-                    ((EntityPlayerMP)entity).setPositionAndUpdate(entity.posX, 250D, entity.posZ);
-                }
+                    // Отправить назад на Землю
+                    if (entity.posY < -10.0D) {
+                        ((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
+                        ((EntityPlayerMP)entity).setFire(30);
+                        ((EntityPlayerMP)entity).setPositionAndUpdate(entity.posX, 250D, entity.posZ);
+                    }
+                } else {
+                    entity.attackEntityFrom(DamageSource.drown, 1);
+                }                
             }
         }
     }
     
+
     /**
      * Проверка, находится ли Entity в открытом космосе
      * @param e
      * @return 
      */
     private boolean isEntityInVacuum(Entity e) {
-
+        
         int x = MathHelper.floor_double(e.posX);
         int y = MathHelper.floor_double(e.posY);
         int z = MathHelper.floor_double(e.posZ);
         
-        final int CHECK_DISTANCE = 10;
-        
-        if (e.onGround) { return false; }
-                
-        for (int ny = y; ny > (y - CHECK_DISTANCE); ny--) {
-            if (!e.worldObj.isAirBlock(x, ny, z)) {
-                return false;
-            }
+        if ((e.worldObj.getBlockId(x, y, z) == 0 || e.worldObj.getBlockId(x, y, z) == WarpDrive.GAS_BLOCKID) && (e.worldObj.getBlockId(x, y + 1, z) == 0 || e.worldObj.getBlockId(x, y + 1, z) == WarpDrive.GAS_BLOCKID)) {
+            return true;
         }
         
-        if (!e.worldObj.canBlockSeeTheSky(x, y, z) || !e.worldObj.canBlockSeeTheSky(x, y - 1, z) ) {         
-            return false; 
-        }        
-        
-        return true;
+        return false;
     }
 }

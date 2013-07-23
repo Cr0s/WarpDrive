@@ -28,7 +28,7 @@ public class BlockProtocol extends BlockContainer {
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[7];
+        iconBuffer = new Icon[8];
        
         // Solid textures
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
@@ -40,6 +40,7 @@ public class BlockProtocol extends BlockContainer {
         iconBuffer[ICON_SIDE_ACTIVATED + 1] = par1IconRegister.registerIcon("warpdrive:contSideActive2");
         iconBuffer[ICON_SIDE_ACTIVATED + 2] = par1IconRegister.registerIcon("warpdrive:contSideActive3");
         iconBuffer[ICON_SIDE_ACTIVATED + 3] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
+        iconBuffer[ICON_SIDE_ACTIVATED + 4] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
     }
     
     @Override
@@ -97,7 +98,7 @@ public class BlockProtocol extends BlockContainer {
 
         if (controller != null){ 
             controller.attachPlayer(par5EntityPlayer);
-            par5EntityPlayer.sendChatToPlayer("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
+            par5EntityPlayer.addChatMessage("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
         }
         return true;
     }

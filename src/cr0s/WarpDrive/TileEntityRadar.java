@@ -4,6 +4,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
+import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
@@ -96,7 +97,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     }
 
     @Override
-    public Object[] callMethod(IComputerAccess computer, int method, Object[] arguments) throws Exception {
+    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
         switch (method) {
             case 0: // scanRay (toX, toY, toZ)
                 return new Object[] { -1 };
@@ -235,5 +236,4 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
         }
         super.invalidate();
     }
-
 }

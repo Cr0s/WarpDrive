@@ -1,17 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -70,24 +63,27 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     
     // = Энергия =
     int currentEnergyValue = 0;        // Текущее значение энергии
-    int maxEnergyValue = 10000000; // 10 миллионов eU
+    int maxEnergyValue = 100000000; // 100 миллионов eU
     
     // = Константы =
-    private final int ENERGY_PER_BLOCK_MODE1 = 1; // eU
-    private final int ENERGY_PER_DISTANCE_MODE1 = 10; // eU
-    private final int ENERGY_PER_BLOCK_MODE2 = 100; // eU
-    private final int ENERGY_PER_DISTANCE_MODE2 = 100; // eU    
-    private final int ENERGY_PER_ENTITY_TO_SPACE = 100000; // eU
+    private final int ENERGY_PER_BLOCK_MODE1 = 10; // eU
+    private final int ENERGY_PER_DISTANCE_MODE1 = 100; // eU
+    private final int ENERGY_PER_BLOCK_MODE2 = 1000; // eU
+    private final int ENERGY_PER_DISTANCE_MODE2 = 1000; // eU    
+    private final int ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
     private final byte MODE_BASIC_JUMP = 1; // Ближний прыжок 0-128
     private final byte MODE_LONG_JUMP = 2;  // Дальний прыжок 0-12800
     private final byte MODE_COLLECT_PLAYERS = 3; // Сбор привязанных к ядру игроков
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
+    private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
     private final byte MODE_TELEPORT = 0;   // Телепортация игроков в космос
     private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
     private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе (10k блоков)
+    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 100; // Minimum ship volume value for 
+    
     public final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
     int cooldownTime = 0;
-    private final int COOLDOWN_INTERVAL_SECONDS = 3;
+    private final int COOLDOWN_INTERVAL_SECONDS = 4;
     public int randomCooldownAddition = 0;
     
     private final int CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
@@ -97,9 +93,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     public int isolationBlocksCount = 0;
     public int isolationUpdateTicks = 0;
     private final int ISOLATION_UPDATE_INTARVAL_SECONDS = 10;
-            
+    
     public String coreState = ""; 
     public TileEntityProtocol controller;
+    
+    private boolean soundPlayed = false;
     
     @Override
     public void updateEntity() {
@@ -109,6 +107,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
+
         // Update warp core in cores registry
         if (++registryUpdateTicks > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
             registryUpdateTicks = 0;
@@ -162,9 +161,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;
             case MODE_BASIC_JUMP:
             case MODE_LONG_JUMP:
-            case MODE_BEACON_JUMP:               
+            case MODE_BEACON_JUMP:     
+            case MODE_HYPERSPACE:
                 if (controller == null) { return; }
-                coreState = "Energy: " + currentEnergyValue;
+                coreState = "Energy level: " + currentEnergyValue + " Eu";
                 
                 if (controller.isJumpFlag()) {
                     // Set up activated animation
@@ -174,15 +174,20 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                         worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2); // Set block state to "active"   
                         makePlayersOnShipDrunk();
                     }
-                                        
+                    
+                    if (!soundPlayed) {
+                        worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:warp", 4F, 1F);
+                        this.soundPlayed = true;
+                    }
                     // Awaiting cooldown time
-                    if (currentMode != MODE_BASIC_JUMP && cooldownTime++ < ((COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
+                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
                     {
                         return;
                     }
                     
                     cooldownTime = 0;
-                                        
+                    soundPlayed = false;
+                    
                     if (!prepareToJump()) {
                         return; 
                     }
@@ -206,7 +211,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;
         }
     }
-   
+    
     public void messageToAllPlayersOnShip(String msg) {
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
         
@@ -216,8 +221,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 continue;
             }
             
-            // Set "drunk" effect
-            ((EntityPlayer)o).sendChatToPlayer("[WarpCore] " + msg);
+            ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
         }
     }    
     
@@ -518,14 +522,22 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             doBeaconJump();
             return;
         }
-        
+              
         if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP) && !invalidAssembly) {
             coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
             coreState += "* Need " + Math.max(0, calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";                
         }        
         
+        // Check ship size for hyperspace jump
+        if (currentMode == this.MODE_HYPERSPACE) {
+            if (shipVolume < MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
+                this.controller.setJumpFlag(false);
+                return;
+            }
+        }
+        
         // Подготовка к прыжку
-        if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP)) {
+        if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE) {
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
             System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
@@ -550,12 +562,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 distance += shipSize;       
             }            
             
-            // Дальний прыжок в космосе в 100 раз дальше
+            // Дальний прыжок в гиперпространстве в 100 раз дальше
             if (currentMode == this.MODE_LONG_JUMP && (direction != -1 && direction != -2)) {
-                if (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) {
+                if (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
                     distance *= 100;
-                } else if (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
-                    distance *= 10;
                 }
             }
 
@@ -580,10 +590,19 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
             jump.isCoordJump = false;
             
+            if (currentMode == MODE_HYPERSPACE) {
+                jump.toHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
+                jump.fromHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID);
+                
+                System.out.println("[JUMP] From HS: " + jump.fromHyperSpace + " | To HS: " + jump.fromHyperSpace);
+            }
+            
             jump.xCoord = xCoord;
             jump.yCoord = yCoord;
             jump.zCoord = zCoord;
      
+            jump.mode = currentMode;
+            
             jump.on = true;
 
             worldObj.spawnEntityInWorld(jump);
@@ -726,6 +745,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;
             case MODE_LONG_JUMP:
                 energyValue = (ENERGY_PER_BLOCK_MODE2 * shipVolume) + (ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
+                break;
+            case MODE_HYPERSPACE:
+                energyValue = this.maxEnergyValue / 2; // half of maximum
                 break;
             case MODE_BEACON_JUMP:
                 energyValue = this.maxEnergyValue;

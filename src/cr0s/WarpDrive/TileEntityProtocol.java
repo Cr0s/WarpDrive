@@ -8,6 +8,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
+import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
 import java.util.ArrayList;
 import net.minecraft.entity.player.EntityPlayer;
@@ -149,14 +150,14 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
             String nick = players.get(i);
             
             if (ep.username.equals(nick)) {
-                ep.sendChatToPlayer("[WarpCtrlr] Detached.");
+                ep.addChatMessage("[WarpCtrlr] Detached.");
                 players.remove(i);
                 return;
             }
         }
         
         ep.attackEntityFrom(DamageSource.generic, 1);
-        ep.sendChatToPlayer("[WarpCtrlr] Successfully attached.");
+        ep.addChatMessage("[WarpCtrlr] Successfully attached.");
         players.add(ep.username);
         updatePlayersString();
     }
@@ -345,7 +346,75 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     }
 
     @Override
-    public Object[] callMethod(IComputerAccess computer, int method, Object[] arguments) throws Exception {
+    public boolean canAttachToSide(int side) {
+        return true;
+    }
+
+    @Override
+    public void attach(IComputerAccess computer) {
+        
+    }
+
+    @Override
+    public void detach(IComputerAccess computer) {
+        
+    }
+
+    /**
+     * @return the toSummon
+     */
+    public String getToSummon() {
+        return toSummon;
+    }
+
+    /**
+     * @param toSummon the toSummon to set
+     */
+    public void setToSummon(String toSummon) {
+        this.toSummon = toSummon;
+    }
+
+    /**
+     * @return the beaconFrequency
+     */
+    public String getBeaconFrequency() {
+        return beaconFrequency;
+    }
+
+    /**
+     * @param beaconFrequency the beaconFrequency to set
+     */
+    public void setBeaconFrequency(String beaconFrequency) {
+        //System.out.println("Setting beacon freqency: " + beaconFrequency);
+        this.beaconFrequency = beaconFrequency;
+    }
+    
+    public TileEntity findCoreBlock() {
+        this.core = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+        if (this.core != null && this.core instanceof TileEntityReactor) {
+            return this.core;
+        }
+
+        this.core = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+        if (this.core != null && this.core instanceof TileEntityReactor) {
+            return this.core;
+        }
+
+        this.core = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+        if (this.core != null && this.core instanceof TileEntityReactor) {
+            return this.core;
+        }
+
+        this.core = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+        if (this.core != null && this.core instanceof TileEntityReactor) {
+            return this.core;
+        }
+
+        return null;
+    }    
+
+    @Override
+    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
         //System.out.println("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
 
         switch (method)
@@ -510,72 +579,4 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
         
         return new Integer[] { 0 };
     }
-
-    @Override
-    public boolean canAttachToSide(int side) {
-        return true;
-    }
-
-    @Override
-    public void attach(IComputerAccess computer) {
-        
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-        
-    }
-
-    /**
-     * @return the toSummon
-     */
-    public String getToSummon() {
-        return toSummon;
-    }
-
-    /**
-     * @param toSummon the toSummon to set
-     */
-    public void setToSummon(String toSummon) {
-        this.toSummon = toSummon;
-    }
-
-    /**
-     * @return the beaconFrequency
-     */
-    public String getBeaconFrequency() {
-        return beaconFrequency;
-    }
-
-    /**
-     * @param beaconFrequency the beaconFrequency to set
-     */
-    public void setBeaconFrequency(String beaconFrequency) {
-        //System.out.println("Setting beacon freqency: " + beaconFrequency);
-        this.beaconFrequency = beaconFrequency;
-    }
-    
-    public TileEntity findCoreBlock() {
-        this.core = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
-        if (this.core != null && this.core instanceof TileEntityReactor) {
-            return this.core;
-        }
-
-        this.core = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
-        if (this.core != null && this.core instanceof TileEntityReactor) {
-            return this.core;
-        }
-
-        this.core = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
-        if (this.core != null && this.core instanceof TileEntityReactor) {
-            return this.core;
-        }
-
-        this.core = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
-        if (this.core != null && this.core instanceof TileEntityReactor) {
-            return this.core;
-        }
-
-        return null;
-    }    
 }

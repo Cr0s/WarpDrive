@@ -1,6 +1,6 @@
 package cr0s.serverMods;
 
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -17,7 +17,7 @@ public class AntiFallDamage {
     
     @ForgeSubscribe
     public void livingFall(LivingFallEvent event) {
-        EntityLiving entity = event.entityLiving;
+        EntityLivingBase entity = event.entityLiving;
         float distance = event.distance;
 
         if (entity instanceof EntityPlayer) {

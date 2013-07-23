@@ -43,8 +43,12 @@ public class WorldGenSmallShip extends WorldGenerator
                     break;
             }
             
-            final int ADV_SOLAR_BLOCKID = 194;
+            int ADV_SOLAR_BLOCKID = 194;
             int solarType = rand.nextInt(2);
+            if (!isAdvSolPanelLoaded) {
+                ADV_SOLAR_BLOCKID = Items.getItem("solarPanel").itemID;
+                solarType = Items.getItem("solarPanel").getItemDamage();
+            }
             
 		world.setBlock(i + 0, j + 1, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 0, j + 1, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -290,6 +294,9 @@ public class WorldGenSmallShip extends WorldGenerator
 		world.setBlock(i + 9, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 6, cableType.itemID, cableType.getItemDamage(), 0);
 		world.setBlock(i + 9, j + 6, k + 7, ADV_SOLAR_BLOCKID, solarType, 0);
+                // Placing air generator
+                world.setBlock(i + 9, j + 5, k + 7, WarpDrive.AIRGEN_BLOCKID, 0, 0);
+                
 		world.setBlock(i + 9, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -328,6 +335,10 @@ public class WorldGenSmallShip extends WorldGenerator
 		world.setBlock(i + 10, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 6, cableType.itemID, cableType.getItemDamage(), 0);
 		world.setBlock(i + 10, j + 6, k + 7, ADV_SOLAR_BLOCKID, solarType, 0);
+                
+                // Placing air generator
+                world.setBlock(i + 10, j + 5, k + 7, WarpDrive.AIRGEN_BLOCKID, 0, 0);
+                
 		world.setBlock(i + 10, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));

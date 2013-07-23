@@ -4,7 +4,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
-
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
@@ -21,7 +20,6 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
@@ -54,6 +52,9 @@ public class EntityJump extends Entity {
     public int minY;
     public int dx;
     public int dz;
+    
+    public int mode;
+    
     public World targetWorld;
     private Ticket sourceWorldTicket;
     private Ticket targetWorldTicket;
@@ -72,13 +73,15 @@ public class EntityJump extends Entity {
     int state = STATE_IDLE;
     int currentIndexInShip = 0;
     
-    private final int BLOCKS_PER_TICK = 3000;
+    private final int BLOCKS_PER_TICK = 3500;
     
     private List<MovingEntity> entitiesOnShip;
     
     AxisAlignedBB axisalignedbb;
     
     private boolean fromSpace, toSpace, betweenWorlds;
+    public boolean toHyperSpace, fromHyperSpace;
+    private boolean isInHyperSpace;
 
     int destX, destZ;
     boolean isCoordJump; 
@@ -138,8 +141,6 @@ public class EntityJump extends Entity {
 
     @Override
     public void onUpdate() {
-        System.out.println("[JE@"+this+"] onUpdate()");
-
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;
         if (!on) {
@@ -263,7 +264,7 @@ public class EntityJump extends Entity {
                 Entity entity = me.entity;
 
                 if (entity instanceof EntityPlayer) {
-                    ((EntityPlayer)entity).sendChatToPlayer("[WarpCore] " + msg);
+                    ((EntityPlayer)entity).addChatMessage("[WarpCore] " + msg);
                 }
             }
         }
@@ -272,28 +273,36 @@ public class EntityJump extends Entity {
     public void prepareToJump() {
         LocalProfiler.start("EntityJump.prepareToJump");
 
-        toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID);
+        isInHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID);
+        
+        toSpace   = (dir == -1 && (maxY + distance > 255) && worldObj.provider.dimensionId == 0);
         fromSpace = (dir == -2 && (minY - distance < 0) && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
 
-        betweenWorlds = fromSpace || toSpace;
+        betweenWorlds = fromSpace || toSpace || toHyperSpace || fromHyperSpace;
 
-        if (toSpace) {
+        if (toSpace || fromHyperSpace) {
             targetWorld = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
         } else if (fromSpace) {
             targetWorld = DimensionManager.getWorld(0);
+        } else if (toHyperSpace) {
+            targetWorld = DimensionManager.getWorld(WarpDrive.instance.hyperSpaceDimID);
         } else {
             targetWorld = this.worldObj;
         }
 
         axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 
-        turnOffModems();
+        // FIXME
+        //turnOffModems();
 
         // Calculate jump vector
         if (isCoordJump) {
             moveX = destX - xCoord;
             moveZ = destZ - zCoord;
             moveY = 0;
+            distance = 0;
+        } else if (toHyperSpace || fromHyperSpace) {
+            moveX = moveY = moveZ = 0;
             distance = 0;
         } else {
             if (betweenWorlds) {
@@ -331,13 +340,17 @@ public class EntityJump extends Entity {
             }
         }
 
+        if (betweenWorlds) {
+            System.out.println("[JE] Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
+        }
+        
         forceChunks();
         lockWorlds();
 
         saveEntities(axisalignedbb);
         System.out.println("[JE] Saved " + entitiesOnShip.size() + " entities from ship");
 
-        if (!isCoordJump) {
+        if (!isCoordJump && !(toHyperSpace || fromHyperSpace)) {
             if (dir != -2 && dir != -1) {
                 messageToAllPlayersOnShip("Jumping in direction " + dir + " degrees to distance " + distance + " blocks ");
             } else if (dir == -1) {
@@ -345,9 +358,13 @@ public class EntityJump extends Entity {
             } else if (dir == -2) {
                 messageToAllPlayersOnShip("Jumping DOWN to distance " + distance + " blocks ");
             }
-        } else
+        } else if (toHyperSpace) {
+            messageToAllPlayersOnShip("Entering HYPERSPACE...");
+        } else if (fromHyperSpace) {
+            messageToAllPlayersOnShip("Leaving HYPERSPACE");
+        } else if (isCoordJump)
         {
-            messageToAllPlayersOnShip("Jumping to beacon at (" + destX + "; " + yCoord + "; " + destZ + ")!");
+            messageToAllPlayersOnShip("Jumping by coordinates to (" + destX + "; " + yCoord + "; " + destZ + ")!");
         }
 
         bedrockOnShip = false;
@@ -392,7 +409,7 @@ public class EntityJump extends Entity {
             if (currentIndexInShip >= ship.length) break;
             JumpBlock jb = ship[currentIndexInShip];
 
-            if (jb.blockTileEntity != null) {
+            if (jb != null && jb.blockTileEntity != null) {
                 worldObj.removeBlockTileEntity(jb.x, jb.y, jb.z);
             }
 
@@ -435,7 +452,7 @@ public class EntityJump extends Entity {
                         for(int z = z1; z <= z2; z++) {
                             int blockID = worldObj.getBlockId(x, y, z);
                             // Skip air blocks
-                            if (blockID == 0) {
+                            if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) {
                                 continue;
                             }
 
@@ -516,14 +533,16 @@ public class EntityJump extends Entity {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
-                    if (blockID != 0) {
-                        shipSize++;
+                    if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) { 
+                        continue; 
+                    }
+                    
+                    shipSize++;
 
-                        if (blockID == Block.bedrock.blockID) {
-                            bedrockOnShip = true;
-                            LocalProfiler.stop();
-                            return shipSize;
-                        }
+                    if (blockID == Block.bedrock.blockID) {
+                        bedrockOnShip = true;
+                        LocalProfiler.stop();
+                        return shipSize;
                     }
                 }
             }
@@ -694,6 +713,7 @@ public class EntityJump extends Entity {
         }
 
         int movementVector[] = getVector(dir);
+        // TODO: Disasm, plz fix it. Local variable hiding class global field
         int moveX = movementVector[0] * testDistance;
         int moveY = movementVector[1] * testDistance;
         int moveZ = movementVector[2] * testDistance;
@@ -716,7 +736,7 @@ public class EntityJump extends Entity {
                         return false;
                     }
 
-                    if (blockOnShipID != 0 && blockID != 0 /*&& blockID != 9 && blockID != 8*/ && blockID != 18) {
+                    if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.AIR_BLOCKID && blockID != WarpDrive.GAS_BLOCKID && blockID != 18) {
                         blowX = x;
                         blowY = y;
                         blowZ = z;
@@ -748,30 +768,34 @@ public class EntityJump extends Entity {
      * @param p - периферийное устройство
      */
     private void turnOffModem(IPeripheral p) {
-        if (p.getType() == "modem") {
+        // FIXME
+        /*if (p.getType() == "modem") {
             String[] methods = p.getMethodNames();
             for(int i = 0; i < methods.length; i++) {
                 if (methods[i] == "closeAll") {
                     try {
-                        p.callMethod(null, i, null);
+                        p.callMethod(null, i, null); // FIXME
                     } catch (Exception e) {
                         // ignore iy
                     }
                     return;
                 }
             }
-        }
+        }*/
     }
 
     /**
      * Выключение всех модемов на корабле
      */
     private void turnOffModems() {
-        for (int x = minX; x <= maxX; x++) {
+        // FIXME
+        /*for (int x = minX; x <= maxX; x++) {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
-                    if (blockID == 0) continue;
+                    if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) {
+                        continue;
+                    }
 
                     TileEntity tileEntity = worldObj.getBlockTileEntity(x, y, z);
                     if (tileEntity == null) continue;
@@ -789,7 +813,7 @@ public class EntityJump extends Entity {
                     }
                 }
             }
-        }
+        }*/
     }
 
     
@@ -827,7 +851,7 @@ public class EntityJump extends Entity {
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
                 // CC's computers and turtles moving workaround
-                if (blockID == 1225 || blockID == 1227 || blockID == 1228) {
+                if (blockID == 1225 || blockID == 1227 || blockID == 1228 || blockID == 1230) {
                     oldnbt.setInteger("x", newX);
                     oldnbt.setInteger("y", newY);
                     oldnbt.setInteger("z", newZ);
@@ -865,17 +889,17 @@ public class EntityJump extends Entity {
 
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-        System.out.println("[JE@"+this+"] readEntityFromNBT()");
+        //System.out.println("[JE@"+this+"] readEntityFromNBT()");
     }
 
     @Override
     protected void entityInit() {
-        System.out.println("[JE@"+this+"] entityInit()");
+        //System.out.println("[JE@"+this+"] entityInit()");
     }
 
     @Override
     protected void writeEntityToNBT(NBTTagCompound var1) {
-        System.out.println("[JE@"+this+"] writeEntityToNBT()");
+        //System.out.println("[JE@"+this+"] writeEntityToNBT()");
     }
 
     // Own implementation of setting blocks withow light recalculation in optimization purposes
@@ -966,7 +990,7 @@ public class EntityJump extends Entity {
             {
                 extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
 
-                // Removed light recalcalations
+                // Removed light recalculations
                 /*if (flag)
                 {
                     c.generateSkylightMap();
