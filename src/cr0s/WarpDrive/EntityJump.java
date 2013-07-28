@@ -73,7 +73,7 @@ public class EntityJump extends Entity {
     int state = STATE_IDLE;
     int currentIndexInShip = 0;
     
-    private final int BLOCKS_PER_TICK = 3500;
+    private static int BLOCKS_PER_TICK = 3500;
     
     private List<MovingEntity> entitiesOnShip;
     
@@ -452,7 +452,7 @@ public class EntityJump extends Entity {
                         for(int z = z1; z <= z2; z++) {
                             int blockID = worldObj.getBlockId(x, y, z);
                             // Skip air blocks
-                            if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) {
+                            if (blockID == 0 || blockID == WarpDrive.airBlock.blockID || blockID == WarpDrive.gasBlock.blockID) {
                                 continue;
                             }
 
@@ -533,7 +533,7 @@ public class EntityJump extends Entity {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Пропускаем пустые блоки воздуха
-                    if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) { 
+                    if (blockID == 0 || blockID == WarpDrive.airBlock.blockID || blockID == WarpDrive.gasBlock.blockID) {
                         continue; 
                     }
                     
@@ -736,7 +736,7 @@ public class EntityJump extends Entity {
                         return false;
                     }
 
-                    if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.AIR_BLOCKID && blockID != WarpDrive.GAS_BLOCKID && blockID != 18) {
+                    if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.airBlock.blockID && blockID != WarpDrive.gasBlock.blockID && blockID != 18) {
                         blowX = x;
                         blowY = y;
                         blowZ = z;
@@ -1038,5 +1038,9 @@ public class EntityJump extends Entity {
                 return true;
             }
         }
-    }    
+    }
+
+    public static void setBlocksPerTick(int value){
+        BLOCKS_PER_TICK = value;
+    }
 }

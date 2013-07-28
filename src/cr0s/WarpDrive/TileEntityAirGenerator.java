@@ -55,32 +55,32 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
     
     private void releaseAir() {
         if (worldObj.isAirBlock(xCoord + 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
         
         if (worldObj.isAirBlock(xCoord - 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
         
         if (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
         
         if (worldObj.isAirBlock(xCoord, yCoord - 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }          
         
         if (worldObj.isAirBlock(xCoord, yCoord, zCoord + 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
         
         if (worldObj.isAirBlock(xCoord, yCoord, zCoord - 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDrive.AIR_BLOCKID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDrive.airBlock.blockID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }      
     }

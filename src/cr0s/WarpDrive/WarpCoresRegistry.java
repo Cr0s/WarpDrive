@@ -139,7 +139,7 @@ public class WarpCoresRegistry {
     
     public void removeDeadCores() {
         for (TileEntityReactor c : registry) {
-            if (c != null && c.worldObj != null && c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.WARP_CORE_BLOCKID) {
+            if (c != null && c.worldObj != null && c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.warpCore.blockID) {
                 this.removeFromRegistry(c);
                 return;
             }

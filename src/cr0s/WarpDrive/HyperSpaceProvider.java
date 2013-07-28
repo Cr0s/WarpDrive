@@ -185,8 +185,8 @@ public class HyperSpaceProvider extends WorldProvider {
             
             worldObj.setBlock(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID, 0, 2);
             
-            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, WarpDrive.AIR_BLOCKID, 15, 2);  
-            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ, WarpDrive.AIR_BLOCKID, 15, 2);  
+            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, WarpDrive.airBlock.blockID, 15, 2);
+            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ, WarpDrive.airBlock.blockID, 15, 2);
         }
         return var5;
     }

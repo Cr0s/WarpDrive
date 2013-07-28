@@ -38,18 +38,13 @@ public final class EntitySphereGen extends Entity {
     
     private ArrayList<JumpBlock> blocks;
     
-    private boolean isICBMLoaded = false, isAELoaded = false;
     
     public EntitySphereGen(World world) {
         super(world);
     }
 
     public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere, boolean surfaceSphere) {
-        super(world);
-
-        // Check for mods is present
-        isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
-        isAELoaded = Loader.isModLoaded("AppliedEnergistics");        
+        super(world);    
         
         this.xCoord = x;
         this.posX = (double) x;
@@ -209,22 +204,9 @@ public final class EntitySphereGen extends Entity {
     }
     
     public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
-        List<Integer> ores = new ArrayList<Integer>();
-        ores.add(Block.oreIron.blockID);
-        ores.add(Block.oreGold.blockID);
-        ores.add(Block.oreCoal.blockID);
-        ores.add(Block.oreEmerald.blockID);
-        ores.add(Block.oreLapis.blockID);
-        ores.add(Block.oreRedstoneGlowing.blockID);
-        ores.add(247);//IC2
-        ores.add(248);
-        ores.add(249);
-        if (isICBMLoaded)
-        {
-            ores.add(3880);
-            ores.add(3970);
-            ores.add(39701);
-        }
+        List<Integer> ores = Configurator.oresForGeneration;
+
+
         int _blockID = Block.stone.blockID;
         if (corrupted) {
             _blockID = Block.cobblestone.blockID;
@@ -233,8 +215,8 @@ public final class EntitySphereGen extends Entity {
         if (random.nextInt(25) == 5 || nocobble) {
             _blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
-        else if (random.nextInt(350) == 1 && isAELoaded) {
-            _blockID = 902; // quarz (AE)
+        else if (random.nextInt(350) == 1 && Configurator.isAELoaded) {
+            _blockID = Configurator.oreCertusQuartzID; // quarz (AE)
         }
         else if (random.nextInt(500) == 1) {
             _blockID = Block.oreDiamond.blockID;
