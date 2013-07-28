@@ -37,39 +37,20 @@ import net.minecraftforge.common.MinecraftForge;
  */
 public class WarpDrive implements LoadingCallback {
 
-    public final static int WARP_CORE_BLOCKID = 500;
-    public final static int PROTOCOL_BLOCK_BLOCKID = 501;
-    public final static int RADAR_BLOCK_BLOCKID = 502;
-    public final static int ISOLATION_BLOCKID = 503;
-    public final static int AIR_BLOCKID = 504;
-    public final static int AIRGEN_BLOCKID = 505;
-    public final static int GAS_BLOCKID = 506;
-    
-        // World limits
+
+    // World limits
     public final static int WORLD_LIMIT_BLOCKS = 100000;
-    
-    public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Core");
-    
-    public final static Block protocolBlock = new BlockProtocol(PROTOCOL_BLOCK_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Controller");
 
-    public final static Block radarBlock = new BlockRadar(RADAR_BLOCK_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");    
+    public static Block warpCore;
+    public static Block protocolBlock;
+    public static Block radarBlock;
+    public static Block isolationBlock;
+    public static Block airgenBlock;
+    public static Block airBlock;
+    public static Block gasBlock;
 
-    public final static Block isolationBlock = new BlockWarpIsolation(ISOLATION_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp-Field Isolation Block");      
 
-    public final static Block airgenBlock = new BlockAirGenerator(AIRGEN_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Air Generator"); 
 
-    public final static Block airBlock = (new BlockAir(AIR_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Air block"); 
-    public final static Block gasBlock = (new BlockGas(GAS_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Gas block"); 
     
     public static BiomeGenBase spaceBiome;
     public World space;
@@ -91,6 +72,7 @@ public class WarpDrive implements LoadingCallback {
     
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
+        Configurator.initConfig(event);
         if(FMLCommonHandler.instance().getSide().isClient())
         {
             System.out.println("[WarpDrive] Registering sounds event handler...");
@@ -100,13 +82,38 @@ public class WarpDrive implements LoadingCallback {
 
     @Init
     public void load(FMLInitializationEvent event) {
-        
+        Configurator.determineOresForGeneration();
+
+        warpCore = new BlockReactor(Configurator.blockWarpCore.getInt(), 0, Material.rock)
+                .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+                .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Core");
+
+        protocolBlock = new BlockProtocol(Configurator.blockWarpController.getInt(), 0, Material.rock)
+                .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+                .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Controller");
+
+        radarBlock = new BlockRadar(Configurator.blockWRadar.getInt(), 0, Material.rock)
+                .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+                .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");
+
+        isolationBlock = new BlockWarpIsolation(Configurator.blockWarpFieldIsolation.getInt(), 0, Material.rock)
+                .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+                .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp-Field Isolation Block");
+
+        airgenBlock = new BlockAirGenerator(Configurator.blockAirGenerator.getInt(), 0, Material.rock)
+                .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+                .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Air Generator");
+
+        airBlock = (new BlockAir(Configurator.blockAir.getInt())).setHardness(0.0F).setUnlocalizedName("Air block");
+        gasBlock = (new BlockGas(Configurator.blockGas.getInt())).setHardness(0.0F).setUnlocalizedName("Gas block");
+
         LanguageRegistry.addName(warpCore, "Warp Core");
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
         
         LanguageRegistry.addName(protocolBlock, "Warp Controller");
         GameRegistry.registerBlock(protocolBlock, "protocolBlock");
+
         GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");        
         
         LanguageRegistry.addName(radarBlock, "W-Radar");
@@ -124,7 +131,15 @@ public class WarpDrive implements LoadingCallback {
         
         LanguageRegistry.addName(airgenBlock, "Air Generator");
         GameRegistry.registerBlock(airgenBlock, "airgenBlock");
-        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");         
+        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");
+
+        EntityJump.setBlocksPerTick(Configurator.blocksPerTickJump.getInt());
+
+        SpaceEventHandler.HELMET_ID_HAZMAT = Configurator.helmetHazmat.getInt();
+        SpaceEventHandler.HELMET_ID_NANO = Configurator.helmetNano.getInt();
+        SpaceEventHandler.HELMET_ID_QUANTUM = Configurator.helmetQuantum.getInt();
+        SpaceEventHandler.HELMET_ID_SKUBA = Configurator.helmetScuba.getInt();
+
         
         proxy.registerEntities();
 

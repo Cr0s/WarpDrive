@@ -28,8 +28,6 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     // Lower limit
     public final int Y_LIMIT_DOWN = 55;
 
-    public boolean isICBMLoaded = false;
-    public boolean isAELoaded = false;
     
     /**
      * Generator for chunk
@@ -46,9 +44,6 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             return;
         }
 
-        // Check for mods is present
-        isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
-        isAELoaded = Loader.isModLoaded("AppliedEnergistics");
         
         int x = (chunkX * 16) + (5 - random.nextInt(10));
         int z = (chunkZ * 16) + (5 - random.nextInt(10));
@@ -209,7 +204,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
     
     private void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) { 
-        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.GAS_BLOCKID, color, hollow, true, false);
+        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.gasBlock.blockID, color, hollow, true, false);
         esg.xCoord = x;
         esg.yCoord = y;
         esg.zCoord = z;
@@ -492,23 +487,9 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
 
     public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
-        List<Integer> ores = new ArrayList<Integer>();
-        ores.add(Block.oreIron.blockID);
-        ores.add(Block.oreGold.blockID);
-        ores.add(Block.oreCoal.blockID);
-        ores.add(Block.oreEmerald.blockID);
-        ores.add(Block.oreLapis.blockID);
-        ores.add(Block.oreRedstoneGlowing.blockID);
+        List<Integer> ores = Configurator.oresForGeneration
         ores.add(Block.oreNetherQuartz.blockID);
-        ores.add(247);//IC2
-        ores.add(248);
-        ores.add(249);
-        if (isICBMLoaded)
-        {
-            ores.add(3880);
-            ores.add(3970);
-            ores.add(39701);
-        }
+
         int blockID = Block.stone.blockID;
         if (corrupted) {
             blockID = Block.cobblestone.blockID;
@@ -517,8 +498,8 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         if (random.nextInt(25) == 5 || nocobble) {
             blockID = ores.get(random.nextInt(ores.size() - 1));
         } 
-        else if (random.nextInt(350) == 1 && isAELoaded) {
-            blockID = 902; // quarz (AE)
+        else if (random.nextInt(350) == 1 && Configurator.isAELoaded) {
+            blockID = Configurator.oreCertusQuartzID; // quarz (AE)
         }
         else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;

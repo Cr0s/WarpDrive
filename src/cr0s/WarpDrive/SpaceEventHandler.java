@@ -16,7 +16,11 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
  * Обработчик событий в мире Space
  * @author Cr0s
  */
-public class SpaceEventHandler {    
+public class SpaceEventHandler {
+    public static int HELMET_ID_SKUBA;
+    public static int HELMET_ID_QUANTUM;
+    public static int HELMET_ID_HAZMAT;
+    public static int HELMET_ID_NANO;
     @ForgeSubscribe
     public void livingUpdate(LivingUpdateEvent event) {
 	EntityLivingBase entity = event.entityLiving;
@@ -26,10 +30,7 @@ public class SpaceEventHandler {
             return;
         }        
         
-        final int HELMET_ID_SKUBA = 30082;
-        final int HELMET_ID_QUANTUM = 30174;
-        final int HELMET_ID_HAZMAT = 14023;
-        final int HELMET_ID_NANO = 30178;
+
         
         // Обновление происходит в космическом или гипер пространстве
         if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
@@ -66,7 +67,7 @@ public class SpaceEventHandler {
         int y = MathHelper.floor_double(e.posY);
         int z = MathHelper.floor_double(e.posZ);
         
-        if ((e.worldObj.getBlockId(x, y, z) == 0 || e.worldObj.getBlockId(x, y, z) == WarpDrive.GAS_BLOCKID) && (e.worldObj.getBlockId(x, y + 1, z) == 0 || e.worldObj.getBlockId(x, y + 1, z) == WarpDrive.GAS_BLOCKID)) {
+        if ((e.worldObj.getBlockId(x, y, z) == 0 || e.worldObj.getBlockId(x, y, z) == WarpDrive.gasBlock.blockID) && (e.worldObj.getBlockId(x, y + 1, z) == 0 || e.worldObj.getBlockId(x, y + 1, z) == WarpDrive.gasBlock.blockID)) {
             return true;
         }
         
