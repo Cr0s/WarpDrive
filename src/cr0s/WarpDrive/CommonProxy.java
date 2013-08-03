@@ -1,5 +1,9 @@
 package cr0s.WarpDrive;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+
+import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.EntityRegistry;
 
 public class CommonProxy {
@@ -13,7 +17,9 @@ public class CommonProxy {
 
     }
     
-    public void registerSound() {
     
-    }
+	public void renderBeam(World world, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
+	{
+		
+	}    
 }

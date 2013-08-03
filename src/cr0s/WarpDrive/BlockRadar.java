@@ -3,6 +3,7 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.WarpDrive;
 import java.util.ArrayList;
 import java.util.Random;
 import net.minecraft.block.BlockContainer;
@@ -84,6 +85,8 @@ public class BlockRadar extends BlockContainer {
     @Override
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
+
+    	
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return false;
         TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
@@ -92,8 +95,6 @@ public class BlockRadar extends BlockContainer {
             par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
         }
 
-        WarpDrive.instance.registry.printRegistry();
-        
         return true;
     }    
 }

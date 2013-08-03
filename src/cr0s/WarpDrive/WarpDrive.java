@@ -1,8 +1,6 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import java.util.List;
-
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
@@ -18,6 +16,7 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import ic2.api.item.Items;
+import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
@@ -30,8 +29,8 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.1")
-@NetworkMod(clientSideRequired = true, serverSideRequired = true)
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.3")
+@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels={"WarpDriveBeam"}, packetHandler = PacketHandler.class)
 /**
  * @author Cr0s
  */
@@ -44,6 +43,11 @@ public class WarpDrive implements LoadingCallback {
     public final static int AIR_BLOCKID = 504;
     public final static int AIRGEN_BLOCKID = 505;
     public final static int GAS_BLOCKID = 506;
+    
+    public final static int LASER_BLOCK_BLOCKID = 507;
+    public final static int MINING_LASER_BLOCK_BLOCKID = 508;
+    public final static int PARTICLE_BOOSTER_BLOCKID = 509;
+    public final static int LIFT_BLOCKID = 510;
     
         // World limits
     public final static int WORLD_LIMIT_BLOCKS = 100000;
@@ -67,7 +71,23 @@ public class WarpDrive implements LoadingCallback {
     public final static Block airgenBlock = new BlockAirGenerator(AIRGEN_BLOCKID, 0, Material.rock)
             .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
             .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Air Generator"); 
+    
+    public final static Block laserBlock = new BlockLaser(LASER_BLOCK_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter");        
 
+    public final static Block boosterBlock = new BlockParticleBooster(PARTICLE_BOOSTER_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Particle Booster");      
+
+    public final static Block miningLaserBlock = new BlockMiningLaser(MINING_LASER_BLOCK_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Mining Laser");       
+
+    public final static Block liftBlock = new BlockLift(LIFT_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser lift");      
+    
     public final static Block airBlock = (new BlockAir(AIR_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Air block"); 
     public final static Block gasBlock = (new BlockGas(GAS_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Gas block"); 
     
@@ -88,6 +108,7 @@ public class WarpDrive implements LoadingCallback {
     public static CommonProxy proxy;
     
     public WarpCoresRegistry registry;
+    public JumpGatesRegistry jumpGates;
     
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
@@ -124,7 +145,23 @@ public class WarpDrive implements LoadingCallback {
         
         LanguageRegistry.addName(airgenBlock, "Air Generator");
         GameRegistry.registerBlock(airgenBlock, "airgenBlock");
-        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");         
+        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");    
+        
+        LanguageRegistry.addName(laserBlock, "Laser Emitter");
+        GameRegistry.registerBlock(laserBlock, "laserBlock");
+        GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");          
+
+        LanguageRegistry.addName(miningLaserBlock, "Mining Laser");
+        GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
+        GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");           
+        
+        LanguageRegistry.addName(boosterBlock, "Particle Booster");
+        GameRegistry.registerBlock(boosterBlock, "boosterBlock");
+        GameRegistry.registerTileEntity(TileEntityParticleBooster.class, "boosterBlock");          
+
+        LanguageRegistry.addName(liftBlock, "Laser lift");
+        GameRegistry.registerBlock(liftBlock, "liftBlock");
+        GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");         
         
         proxy.registerEntities();
 
@@ -160,8 +197,25 @@ public class WarpDrive implements LoadingCallback {
         
         GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
             'l', Block.leaves, 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));         
+
+        GameRegistry.addRecipe(new ItemStack(laserBlock), "ccc", "asa", "cac",
+                'c', Items.getItem("energyCrystal"), 'a', Items.getItem("advancedAlloy"), 's', Items.getItem("advancedCircuit")); 
+        
+        GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "aka", "scs",
+                'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 's', Items.getItem("ovScanner"), 'k', Items.getItem("energyCrystal"));        
+
+        GameRegistry.addRecipe(new ItemStack(boosterBlock), "afc", "ama", "cfa",
+                'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 'f', Items.getItem("glassFiberCableItem"), 'm', Items.getItem("mfeUnit"));        
+                
+        GameRegistry.addRecipe(new ItemStack(liftBlock), "aca", "ama", "a#a",
+                'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 'm', Items.getItem("magnetizer"));        
+      
         
         registry = new WarpCoresRegistry();
+        
+        if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+            jumpGates = new JumpGatesRegistry();    
+        }
     }
 
     private void registerSpaceDimension() {

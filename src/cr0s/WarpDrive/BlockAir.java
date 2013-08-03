@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -12,7 +13,7 @@ public class BlockAir extends Block
 {
     private final boolean TRANSPARENT_AIR = true;
     
-    protected BlockAir(int par1)
+    public BlockAir(int par1)
     {
         super(par1, Material.air);
     }

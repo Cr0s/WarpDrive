@@ -12,7 +12,7 @@ import net.minecraft.network.packet.Packet1Login;
 import net.minecraft.server.MinecraftServer;
 
 /**
- * Авторизация ник.пароль
+ * РђРІС‚РѕСЂРёР·Р°С†РёСЏ РЅРёРє.РїР°СЂРѕР»СЊ
  * @author Cr0s
  */
 public class LoginHookClass implements IConnectionHandler {
@@ -31,12 +31,14 @@ public class LoginHookClass implements IConnectionHandler {
         BufferedReader bufferedreader = new BufferedReader(new FileReader(uFile));
 
         if (s.indexOf(".") == -1 || s.split("\\.").length != 2) {
-            kickReason = "Никнейм и пароль должны быть разделены точками.";
+            kickReason = "РќРёРєРЅРµР№Рј Рё РїР°СЂРѕР»СЊ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ СЂР°Р·РґРµР»РµРЅС‹ С‚РѕС‡РєР°РјРё.";
+            bufferedreader.close();
             return;
         }
 
         if (!s.matches("^[a-zA-Z0-9_.]+$")) {
-            kickReason = "Имя пользователя или пароль содержат недопустимые символы.";
+            kickReason = "Р�РјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РёР»Рё РїР°СЂРѕР»СЊ СЃРѕРґРµСЂР¶Р°С‚ РЅРµРґРѕРїСѓСЃС‚РёРјС‹Рµ СЃРёРјРІРѕР»С‹.";
+            bufferedreader.close();
             return;
         }
 
@@ -44,17 +46,20 @@ public class LoginHookClass implements IConnectionHandler {
         String s5 = s.split("\\.")[1].trim();
 
         if (s4.length() < 2 && !s4.equals("Q")) {
-            kickReason = "Имя пользователя слишком короткое.";
+            kickReason = "Р�РјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРѕРµ.";
+            bufferedreader.close();
             return;
         }
 
         if (s5.length() < 3) {
-            kickReason = "Пароль слишком короткий.";
+            kickReason = "РџР°СЂРѕР»СЊ СЃР»РёС€РєРѕРј РєРѕСЂРѕС‚РєРёР№.";
+            bufferedreader.close();
             return;
         }
 
         if (s4.length() > 15) {
             kickReason = "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u0434\u043B\u0438\u043D\u043D\u044B\u0439 \u043B\u043E\u0433\u0438\u043D! (>15)";
+            bufferedreader.close();
             return;
         }
 
@@ -69,12 +74,13 @@ public class LoginHookClass implements IConnectionHandler {
                 s3 = s1.split("\\.")[1];
             } catch (Exception exception) {
                 kickReason = "login.password error, database is corrupted.";
+                bufferedreader.close();
                 return;
             }
 
             if (s2.toLowerCase().equals(s4.toLowerCase())) {
                 if (!s3.equals(s5)) {
-                    kickReason = "Неправильный пароль!";
+                    kickReason = "РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РїР°СЂРѕР»СЊ!";
                     System.out.println((new StringBuilder()).append(netHandler.clientUsername).append(" failed to login (pwd: ").append(s3).append(")").toString());
                     bufferedreader.close();
                     return;
@@ -87,7 +93,7 @@ public class LoginHookClass implements IConnectionHandler {
 
         bufferedreader.close();
         
-        // Создаём новый аккаунт
+        // РЎРѕР·РґР°С‘Рј РЅРѕРІС‹Р№ Р°РєРєР°СѓРЅС‚
         PrintWriter printwriter = new PrintWriter(new FileWriter(uFile, true));
         printwriter.println(s);
         printwriter.close();
@@ -112,9 +118,9 @@ public class LoginHookClass implements IConnectionHandler {
             Logger.getLogger(LoginHookClass.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        // Не кикать
+        // РќРµ РєРёРєР°С‚СЊ
         if (kickReason.isEmpty()) {
-            // Удалить пароль из имени пользователя
+            // РЈРґР°Р»РёС‚СЊ РїР°СЂРѕР»СЊ РёР· РёРјРµРЅРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
             netHandler.clientUsername = netHandler.clientUsername.split("\\.")[0];
         }
         

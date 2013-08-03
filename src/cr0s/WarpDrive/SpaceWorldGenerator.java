@@ -2,6 +2,7 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.IWorldGenerator;
+import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
@@ -148,12 +149,12 @@ public class SpaceWorldGenerator implements IWorldGenerator {
             world.setBlock(x, y + MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);
             world.setBlock(x, y - MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);   
             
-            world.setBlock(x + MOON_RADIUS - 5, y, z, Block.bedrock.blockID, 0, 0);
-            world.setBlock(x - MOON_RADIUS - 5, y, z, Block.bedrock.blockID, 0, 0);
-            world.setBlock(x, y, z + MOON_RADIUS - 5, Block.bedrock.blockID, 0, 0);
-            world.setBlock(x, y, z - MOON_RADIUS - 5, Block.bedrock.blockID, 0, 0);
-            world.setBlock(x, y + MOON_RADIUS - 5, z, Block.bedrock.blockID, 0, 0);
-            world.setBlock(x, y - MOON_RADIUS - 5, z, Block.bedrock.blockID, 0, 0);             
+            world.setBlock(x + MOON_RADIUS - 10, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x - MOON_RADIUS - 10, y, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z + MOON_RADIUS - 10, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y, z - MOON_RADIUS - 10, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y + MOON_RADIUS - 10, z, Block.bedrock.blockID, 0, 0);
+            world.setBlock(x, y - MOON_RADIUS - 10, z, Block.bedrock.blockID, 0, 0);             
     }    
     
     
@@ -454,7 +455,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {
                         blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
-                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        if (blockID == 39701) { meta = 1; blockID = 3970; }
                         world.setBlock(xCoord + x, yCoord + y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord - x, yCoord + y, zCoord + z, blockID, meta, 2);
                     }
@@ -462,7 +463,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
-                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        if (blockID == 39701) { meta = 1; blockID = 3970; }
                         world.setBlock(xCoord + x, yCoord - y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord + x, yCoord + y, zCoord - z, blockID, meta, 2);
                     }
@@ -470,7 +471,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
-                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        if (blockID == 39701) { meta = 1; blockID = 3970; }
                         world.setBlock(xCoord - x, yCoord - y, zCoord + z, blockID, meta, 2);
                         world.setBlock(xCoord + x, yCoord - y, zCoord - z, blockID, meta, 2);
                     }
@@ -478,7 +479,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
                     if (!corrupted || world.rand.nextInt(10) != 1)
                     {                    
                         blockID = (forcedID == -1) ? getRandomSurfaceBlockID(world.rand, corrupted, false) : forcedID;
-                        if (blockID == 39701) { meta = blockID % 10; blockID = blockID / 10; }
+                        if (blockID == 39701) { meta = 1; blockID = 3970; }
                         world.setBlock(xCoord - x, yCoord + y, zCoord - z, blockID, meta, 2);
                         world.setBlock(xCoord - x, yCoord - y, zCoord - z, blockID, meta, 2);
                     }
@@ -492,17 +493,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
 
     public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
-        List<Integer> ores = new ArrayList<Integer>();
-        ores.add(Block.oreIron.blockID);
-        ores.add(Block.oreGold.blockID);
-        ores.add(Block.oreCoal.blockID);
-        ores.add(Block.oreEmerald.blockID);
-        ores.add(Block.oreLapis.blockID);
-        ores.add(Block.oreRedstoneGlowing.blockID);
-        ores.add(Block.oreNetherQuartz.blockID);
-        ores.add(247);//IC2
-        ores.add(248);
-        ores.add(249);
+        List<Integer> ores = TileEntityMiningLaser.valuableOres;
         if (isICBMLoaded)
         {
             ores.add(3880);
@@ -515,7 +506,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }
 
         if (random.nextInt(25) == 5 || nocobble) {
-            blockID = ores.get(random.nextInt(ores.size() - 1));
+            blockID = ores.get(random.nextInt(ores.size()));
         } 
         else if (random.nextInt(350) == 1 && isAELoaded) {
             blockID = 902; // quarz (AE)

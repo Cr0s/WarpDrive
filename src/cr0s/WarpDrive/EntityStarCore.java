@@ -18,8 +18,9 @@ public final class EntityStarCore extends Entity {
     
     private final int KILL_RADIUS = 40;
     private final int BURN_RADIUS = 80;
+    private final int ROCKET_INTERCEPT_RADIUS = 100;
 
-    private final int ENTITY_ACTION_INTERVAL = 20; // ticks
+    private final int ENTITY_ACTION_INTERVAL = 10; // ticks
    
     private int ticks = 0;
     
@@ -46,7 +47,7 @@ public final class EntityStarCore extends Entity {
         int xmax, ymax, zmax, x1, x2, z1, z2;
         int xmin, ymin, zmin;
 
-        final int CUBE_SIDE = this.radius + KILL_RADIUS + BURN_RADIUS;
+        final int CUBE_SIDE = this.radius + KILL_RADIUS + BURN_RADIUS + ROCKET_INTERCEPT_RADIUS;
         
         x1 = xCoord + CUBE_SIDE;
         x2 = xCoord - CUBE_SIDE;
@@ -99,6 +100,12 @@ public final class EntityStarCore extends Entity {
                 } else if (entity.getDistanceToEntity(this) <= (this.radius + BURN_RADIUS)) {
                     // burn entity to 100 seconds
                     entity.setFire(100);
+                }
+            } else { // Intercept ICBM rocket and kill
+                Entity entity = (Entity) o;
+                if (entity.getDistanceToEntity(this) <= (this.radius + ROCKET_INTERCEPT_RADIUS)) {
+                    System.out.println("[SC] Intercepted entity: " + entity.getEntityName());
+                    worldObj.removeEntity(entity);
                 }
             }
         }

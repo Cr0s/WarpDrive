@@ -1,8 +1,10 @@
 package cr0s.WarpDrive;
 
+import cr0s.WarpDrive.TileEntityReactor;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.WarpDrive;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
@@ -22,7 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergySink {
     
-    public boolean addedToEnergyNet;
+    public boolean addedToEnergyNet = false;
     
     private final int MAX_ENERGY_VALUE = 100 * (1000 * 1000); // 100 000 000 Eu
     private int currentEnergyValue = 0;
@@ -149,8 +151,8 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
                     if (index > -1 && index < results.size()) {
                     
                         TileEntityReactor res = results.get(index);
-
-                        return new Object[] { ((String)res.coreFrequency), ((Integer)res.xCoord), ((Integer)res.yCoord), ((Integer)res.zCoord) };
+                        int yAddition = (res.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID) ? 255 : (res.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) ? 512 : 0;
+                        return new Object[] { ((String)res.coreFrequency), ((Integer)res.xCoord), ((Integer)res.yCoord + yAddition), ((Integer)res.zCoord) };
                     }
                 }
                 
@@ -194,7 +196,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 
     @Override
     public int injectEnergy(Direction directionFrom, int amount) {
-        // Избыток энергии
+        // Р�Р·Р±С‹С‚РѕРє СЌРЅРµСЂРіРёРё
         int leftover = 0;
 
         currentEnergyValue += amount;

@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.IWorldGenerator;
+import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;

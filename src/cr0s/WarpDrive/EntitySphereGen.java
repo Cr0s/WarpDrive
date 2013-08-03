@@ -4,6 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.JumpBlock;
+import cr0s.WarpDrive.LocalProfiler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -40,6 +42,8 @@ public final class EntitySphereGen extends Entity {
     
     private boolean isICBMLoaded = false, isAELoaded = false;
     
+    private List<Integer> ores;
+    
     public EntitySphereGen(World world) {
         super(world);
     }
@@ -70,6 +74,14 @@ public final class EntitySphereGen extends Entity {
         this.state = STATE_SAVING;
         
         blocks = new ArrayList<JumpBlock>();
+        ores = (List<Integer>)TileEntityMiningLaser.valuableOres.clone();
+        
+        if (isICBMLoaded)
+        {
+            ores.add(3880);
+            ores.add(3970);
+            ores.add(39701);
+        }        
     }
 
     public void killEntity() {
@@ -205,39 +217,26 @@ public final class EntitySphereGen extends Entity {
             return;
         }
         
+        if (blocks == null) { return; }
         blocks.add(jb);
     }
     
     public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
-        List<Integer> ores = new ArrayList<Integer>();
-        ores.add(Block.oreIron.blockID);
-        ores.add(Block.oreGold.blockID);
-        ores.add(Block.oreCoal.blockID);
-        ores.add(Block.oreEmerald.blockID);
-        ores.add(Block.oreLapis.blockID);
-        ores.add(Block.oreRedstoneGlowing.blockID);
-        ores.add(247);//IC2
-        ores.add(248);
-        ores.add(249);
-        if (isICBMLoaded)
-        {
-            ores.add(3880);
-            ores.add(3970);
-            ores.add(39701);
-        }
         int _blockID = Block.stone.blockID;
         if (corrupted) {
             _blockID = Block.cobblestone.blockID;
         }
 
         if (random.nextInt(25) == 5 || nocobble) {
-            _blockID = ores.get(random.nextInt(ores.size() - 1));
+            _blockID = ores.get(random.nextInt(ores.size()));
         } 
         else if (random.nextInt(350) == 1 && isAELoaded) {
             _blockID = 902; // quarz (AE)
         }
         else if (random.nextInt(500) == 1) {
             _blockID = Block.oreDiamond.blockID;
+        } else if (random.nextInt(1000) == 1) {
+            _blockID = Block.bedrock.blockID;
         }
 
         return _blockID;

@@ -1,8 +1,6 @@
-/*
- * Невесомость и отключение текучести жидкостей
- */
 package cr0s.WarpDrive;
 
+import java.util.HashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -16,20 +14,31 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
  * Обработчик событий в мире Space
  * @author Cr0s
  */
-public class SpaceEventHandler {    
+public class SpaceEventHandler {   
+    private HashMap<String, Integer> vacuumPlayers;
+    
+    public SpaceEventHandler() {
+        vacuumPlayers = new HashMap<String, Integer>();
+    }
+    
     @ForgeSubscribe
     public void livingUpdate(LivingUpdateEvent event) {
 	EntityLivingBase entity = event.entityLiving;
-
+        
         if (Math.abs(MathHelper.floor_double(entity.posX)) > WarpDrive.WORLD_LIMIT_BLOCKS || Math.abs(MathHelper.floor_double(entity.posZ)) > WarpDrive.WORLD_LIMIT_BLOCKS) {
+            if (entity instanceof EntityPlayerMP) {
+                if (((EntityPlayerMP)entity).capabilities.isCreativeMode) {
+                    return;
+                }
+            }
             entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
             return;
         }        
         
         final int HELMET_ID_SKUBA = 30082;
-        final int HELMET_ID_QUANTUM = 30174;
         final int HELMET_ID_HAZMAT = 14023;
-        final int HELMET_ID_NANO = 30178;
+        final int HELMET_ID_QUANTUM = 30174;
+        final int AIR_CELL_ID = 30079;
         
         // Обновление происходит в космическом или гипер пространстве
         if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
@@ -38,9 +47,27 @@ public class SpaceEventHandler {
             // Damage entity if in vacuum without protection
             if (inVacuum) {
                 if (entity instanceof EntityPlayerMP) {   
-                    if (!(((EntityPlayerMP)entity).getCurrentArmor(3) != null && (((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_SKUBA || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_QUANTUM || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_NANO || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_HAZMAT))) {
-                        entity.attackEntityFrom(DamageSource.drown, 1);    
+                    if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && ((((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_SKUBA || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_HAZMAT) || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_QUANTUM)) {
+                        Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
+                        if (airValue == null) {
+                            vacuumPlayers.put(((EntityPlayerMP)entity).username, 300);
+                            airValue = 300;
+                        }
+                        
+                        if (airValue <= 0) {
+                            if (((EntityPlayerMP)entity).inventory.consumeInventoryItem(AIR_CELL_ID)) {
+                                setPlayerAirValue(entity, 300);
+                            } else {
+                                setPlayerAirValue(entity, 0);                               
+                                entity.attackEntityFrom(DamageSource.drown, 1);
+                            }
+                        } else {
+                            setPlayerAirValue(entity, airValue - 1);
+                        }
+                    } else {
+                        entity.attackEntityFrom(DamageSource.drown, 1);
                     }
+                    
                     // Отправить назад на Землю
                     if (entity.posY < -10.0D) {
                         ((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
@@ -52,6 +79,11 @@ public class SpaceEventHandler {
                 }                
             }
         }
+    }
+    
+    private void setPlayerAirValue(EntityLivingBase entity, Integer air) {
+                        vacuumPlayers.remove(((EntityPlayerMP)entity).username);
+                        vacuumPlayers.put(((EntityPlayerMP)entity).username, air);        
     }
     
 
@@ -66,10 +98,13 @@ public class SpaceEventHandler {
         int y = MathHelper.floor_double(e.posY);
         int z = MathHelper.floor_double(e.posZ);
         
-        if ((e.worldObj.getBlockId(x, y, z) == 0 || e.worldObj.getBlockId(x, y, z) == WarpDrive.GAS_BLOCKID) && (e.worldObj.getBlockId(x, y + 1, z) == 0 || e.worldObj.getBlockId(x, y + 1, z) == WarpDrive.GAS_BLOCKID)) {
-            return true;
+        int id1 = e.worldObj.getBlockId(x, y, z);
+        int id2 = e.worldObj.getBlockId(x, y + 1, z);
+        
+        if (id1 == WarpDrive.AIR_BLOCKID || id2 == WarpDrive.AIR_BLOCKID) {
+            return false;
         }
         
-        return false;
+        return true;
     }
 }

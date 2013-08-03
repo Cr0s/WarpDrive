@@ -28,7 +28,14 @@ public class SpaceTpCommand extends CommandBase {
         if (astring.length >= 1) {
             if ("hyper".equals(astring[0])) {
                 targetDim = WarpDrive.instance.hyperSpaceDimID;
+            } else {
+                notifyAdmins(icommandsender, "/space: teleporting player " + astring[0] + " to space", new Object[0]);
+                player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
             }
+        }
+        
+        if (player == null) {
+            return;
         }
         
         WorldServer to = server.worldServerForDimension(targetDim);        
@@ -39,7 +46,7 @@ public class SpaceTpCommand extends CommandBase {
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender) {
-        return "/space [hyper]";
+        return "/space [hyper|<player>]";
     }
     
 }

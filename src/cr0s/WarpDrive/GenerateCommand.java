@@ -25,7 +25,7 @@ public class GenerateCommand extends CommandBase {
     
     @Override
     public String getCommandUsage(ICommandSender par1ICommandSender) {
-        return "/" + getCommandName() + " <structure>\nPossible structures: moon, ship, asteroid, astfield, gascloud, star";
+        return "/" + getCommandName() + " <structure>\nPossible structures: moon, ship, asteroid, astfield, gascloud, star, jumpgate <name>";
     }
     
     @Override
@@ -54,14 +54,23 @@ public class GenerateCommand extends CommandBase {
             notifyAdmins(icommandsender, "/generate: generating asteroid at " + x + ", " + (y - 10) + ", " + z, new Object[0]);
             WarpDrive.instance.spaceWorldGenerator.generateAsteroid(player.worldObj, x, y - 10, z, 6, 11);         
         } else if (struct.equals("astfield")) {
-            notifyAdmins(icommandsender, "/generate: generating asteroid field at " + x + ", " + (y - 10) + ", " + z, new Object[0]);
+            notifyAdmins(icommandsender, "/generate: generating asteroid field at " + x + ", " + y + ", " + z, new Object[0]);
             WarpDrive.instance.spaceWorldGenerator.generateAsteroidField(player.worldObj, x, y, z);         
         } else if (struct.equals("gascloud")) {
-            notifyAdmins(icommandsender, "/generate: generating gas cloud at " + x + ", " + (y - 10) + ", " + z, new Object[0]);
+            notifyAdmins(icommandsender, "/generate: generating gas cloud at " + x + ", " + y + ", " + z, new Object[0]);
             WarpDrive.instance.spaceWorldGenerator.generateGasCloudOfColor(player.worldObj, x, y, z, 15, 20, player.worldObj.rand.nextInt(12));
         } else if (struct.equals("star")) {
-            notifyAdmins(icommandsender, "/generate: generating star at " + x + ", " + (y - 10) + ", " + z, new Object[0]);
+            notifyAdmins(icommandsender, "/generate: generating star at " + x + ", " + y + ", " + z, new Object[0]);
             WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z);        
+        } else if (struct.equals("jumpgate")) {
+            if (params.length == 2) {
+                notifyAdmins(icommandsender, "/generate: creating jumpgate at " + x + ", " + y + ", " + z, new Object[0]);
+                if (WarpDrive.instance.jumpGates.addGate(params[1], x, y, z)){
+                    JumpGateGenerator.generate(player.worldObj, x, y, z);
+                } else {
+                    notifyAdmins(icommandsender, "/generate: jumpgate '" + params[1] + "' already exists.", new Object[0]);
+                }
+            }
         }
     }
     

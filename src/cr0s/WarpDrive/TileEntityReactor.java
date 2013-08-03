@@ -1,10 +1,12 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.WarpDrive;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
+import ic2.api.network.NetworkHelper;
 import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -29,59 +31,59 @@ import net.minecraftforge.common.MinecraftForge;
  */
 public class TileEntityReactor extends TileEntity implements IEnergySink {
 
-    public boolean addedToEnergyNet;
+    public boolean addedToEnergyNet = false;
     
-    // = Настройки ядра =
+    // = РќР°СЃС‚СЂРѕР№РєРё СЏРґСЂР° =
 
-    // Готовность к исполнению режима (прыжок и пр.)
+    // Р“РѕС‚РѕРІРЅРѕСЃС‚СЊ Рє РёСЃРїРѕР»РЅРµРЅРёСЋ СЂРµР¶РёРјР° (РїСЂС‹Р¶РѕРє Рё РїСЂ.)
     public Boolean ready;
-    // Ядро собрано неправильно
+    // РЇРґСЂРѕ СЃРѕР±СЂР°РЅРѕ РЅРµРїСЂР°РІРёР»СЊРЅРѕ
     public Boolean invalidAssembly = false;
-    // Состояние бита запуска
+    // РЎРѕСЃС‚РѕСЏРЅРёРµ Р±РёС‚Р° Р·Р°РїСѓСЃРєР°
     public Boolean launchState = false;
-    // Счётчик тиков
+    // РЎС‡С‘С‚С‡РёРє С‚РёРєРѕРІ
     int ticks;
-    // = Ориентация в пространстве =
+    // = РћСЂРёРµРЅС‚Р°С†РёСЏ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ =
     public final int JUMP_UP = -1;
     public final int JUMP_DOWN = -2;
-    int dx, dz; // Горизонтальные векторы (1,0) (-1,0) (0,1) (0,-1) для определения носа корабля
-    int direction; // Направление прыжка (в градусах, или JUMP_UP, JUMP_DOWN)
-    int distance;  // Расстояние прыжка
-    // Параметры варп-прямоугольника
-    // Расчитываются из габаритов корабля
-    int maxX, maxY, maxZ;
-    int minX, minY, minZ;
-    // Габариты корабля
-    int shipFront, shipBack;
-    int shipLeft, shipRight;
-    int shipUp, shipDown;
-    int shipHeight, shipWidth, shipLength;
-    int shipSize = 0; // Длина корабля в направлении прыжка
-    int shipVolume; // Примерный объем корабля (проиведение 3 измерений)
-    // Текущий режим ядра
+    int dx, dz; // Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Рµ РІРµРєС‚РѕСЂС‹ (1,0) (-1,0) (0,1) (0,-1) РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РЅРѕСЃР° РєРѕСЂР°Р±Р»СЏ
+    int direction; // РќР°РїСЂР°РІР»РµРЅРёРµ РїСЂС‹Р¶РєР° (РІ РіСЂР°РґСѓСЃР°С…, РёР»Рё JUMP_UP, JUMP_DOWN)
+    int distance;  // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РїСЂС‹Р¶РєР°
+    // РџР°СЂР°РјРµС‚СЂС‹ РІР°СЂРї-РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР°
+    // Р Р°СЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ РёР· РіР°Р±Р°СЂРёС‚РѕРІ РєРѕСЂР°Р±Р»СЏ
+    public int maxX, maxY, maxZ;
+    public int minX, minY, minZ;
+    // Р“Р°Р±Р°СЂРёС‚С‹ РєРѕСЂР°Р±Р»СЏ
+    public int shipFront, shipBack;
+    public int shipLeft, shipRight;
+    public int shipUp, shipDown;
+    public int shipHeight, shipWidth, shipLength;
+    int shipSize = 0; // Р”Р»РёРЅР° РєРѕСЂР°Р±Р»СЏ РІ РЅР°РїСЂР°РІР»РµРЅРёРё РїСЂС‹Р¶РєР°
+    int shipVolume; // РџСЂРёРјРµСЂРЅС‹Р№ РѕР±СЉРµРј РєРѕСЂР°Р±Р»СЏ (РїСЂРѕРёРІРµРґРµРЅРёРµ 3 РёР·РјРµСЂРµРЅРёР№)
+    // РўРµРєСѓС‰РёР№ СЂРµР¶РёРј СЏРґСЂР°
     int currentMode = 0;
     
-    // = Энергия =
-    int currentEnergyValue = 0;        // Текущее значение энергии
-    int maxEnergyValue = 100000000; // 100 миллионов eU
+    // = Р­РЅРµСЂРіРёСЏ =
+    int currentEnergyValue = 0;        // РўРµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ СЌРЅРµСЂРіРёРё
+    int maxEnergyValue = 100000000; // 100 РјРёР»Р»РёРѕРЅРѕРІ eU
     
-    // = Константы =
+    // = РљРѕРЅСЃС‚Р°РЅС‚С‹ =
     private final int ENERGY_PER_BLOCK_MODE1 = 10; // eU
     private final int ENERGY_PER_DISTANCE_MODE1 = 100; // eU
     private final int ENERGY_PER_BLOCK_MODE2 = 1000; // eU
     private final int ENERGY_PER_DISTANCE_MODE2 = 1000; // eU    
     private final int ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
-    private final byte MODE_BASIC_JUMP = 1; // Ближний прыжок 0-128
-    private final byte MODE_LONG_JUMP = 2;  // Дальний прыжок 0-12800
-    private final byte MODE_COLLECT_PLAYERS = 3; // Сбор привязанных к ядру игроков
+    private final byte MODE_BASIC_JUMP = 1; // Р‘Р»РёР¶РЅРёР№ РїСЂС‹Р¶РѕРє 0-128
+    private final byte MODE_LONG_JUMP = 2;  // Р”Р°Р»СЊРЅРёР№ РїСЂС‹Р¶РѕРє 0-12800
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
-    private final byte MODE_TELEPORT = 0;   // Телепортация игроков в космос
-    private final int MAX_JUMP_DISTANCE_BY_COUNTER = 128; // Максимальное значение длинны прыжка с счётчика длинны
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;  // Максимальный объем корабля для прыжков не в космосе (10k блоков)
-    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 100; // Minimum ship volume value for 
+    private final byte MODE_TELEPORT = -1;       // РўРµР»РµРїРѕСЂС‚Р°С†РёСЏ РёРіСЂРѕРєРѕРІ РІ РєРѕСЃРјРѕСЃ
+    private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
+    private final int MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;   // Maximum ship mass to jump on earth (10k blocks)
+    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 5000; // Minimum ship volume value for 
     
-    public final int MAX_SHIP_SIDE = 100; // Максимальная длинна одного из измерений корабля (ширина, высота, длина)
+    public final int MAX_SHIP_SIDE = 100; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅРЅР° РѕРґРЅРѕРіРѕ РёР· РёР·РјРµСЂРµРЅРёР№ РєРѕСЂР°Р±Р»СЏ (С€РёСЂРёРЅР°, РІС‹СЃРѕС‚Р°, РґР»РёРЅР°)
     int cooldownTime = 0;
     private final int COOLDOWN_INTERVAL_SECONDS = 4;
     public int randomCooldownAddition = 0;
@@ -101,12 +103,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     
     @Override
     public void updateEntity() {
-        if (!addedToEnergyNet && !worldObj.isRemote) {
+        if (!addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-            return;
 
         // Update warp core in cores registry
         if (++registryUpdateTicks > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
@@ -114,6 +114,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             
             WarpDrive.instance.registry.updateInRegistry(this);
         }
+
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;        
         
         if (++isolationUpdateTicks > ISOLATION_UPDATE_INTARVAL_SECONDS * 20) {
             isolationUpdateTicks = 0;
@@ -163,6 +166,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             case MODE_LONG_JUMP:
             case MODE_BEACON_JUMP:     
             case MODE_HYPERSPACE:
+            case MODE_GATE_JUMP:
                 if (controller == null) { return; }
                 coreState = "Energy level: " + currentEnergyValue + " Eu";
                 
@@ -211,7 +215,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;
         }
     }
-    
+     
     public void messageToAllPlayersOnShip(String msg) {
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
         
@@ -221,6 +225,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 continue;
             }
             
+            System.out.println(msg);
             ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
         }
     }    
@@ -341,15 +346,13 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         this.shipLeft  = controller.getLeft();
         this.shipDown  = controller.getDown();
         
-        this.distance  = Math.min(this.MAX_JUMP_DISTANCE_BY_COUNTER, controller.getDistance());
+        this.distance  = Math.min(this.MAX_JUMP_DISTANCE, controller.getDistance());
         
         return calculateSpatialShipParameters();
     }
     
     
     public boolean calculateSpatialShipParameters() {
-        boolean res = false;
-        
         int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
 
         if (Math.abs(dx) > 0) {
@@ -415,20 +418,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;              
         }
   
-        // Проверка размеров корабля
+        // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂРѕРІ РєРѕСЂР°Р±Р»СЏ
         if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE) {
-            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
-            this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
-            System.out.println(coreState);
             this.controller.setJumpFlag(false);
             return false;            
         }
         
         this.shipVolume = getRealShipVolume();
         
-        if (shipVolume > MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID) {
-            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
-            this.coreState += "\n * Ship is too big (w: " + shipWidth + "; h: " + shipHeight + "; l: " + shipLength + ")";
+        if (shipVolume > MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0) {
             this.controller.setJumpFlag(false);
             return false;
         }    
@@ -437,7 +435,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     }
 
     private void doBeaconJump() {
-        if (currentEnergyValue != maxEnergyValue)
+        if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
             System.out.println("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
@@ -477,7 +475,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         if (isBeaconFound)
         {
             // Consume all energy
-            currentEnergyValue = 0;
+            currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
             
             System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
@@ -503,6 +501,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
      
             jump.isCoordJump = true; // is jump to a beacon
             jump.destX = beaconX;
+            jump.destY = yCoord;
             jump.destZ = beaconZ;
             
             jump.on = true;
@@ -514,43 +513,217 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
             System.out.println("[TE-WC] Beacon not found.");
         }
     }    
+
+    private boolean isShipInJumpgate(JumpGate jg) {       
+        AxisAlignedBB aabb = jg.getGateAABB();
+        
+        System.out.println("Gate AABB: " + aabb);
+        
+        int numBlocks = 0;
+        if (aabb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(maxX - minX, maxY - minY, maxZ - minZ))) {
+            return true;
+        }
+        
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    if (!worldObj.isAirBlock(x, y, z)) {
+                        if (aabb.minX <= x && aabb.maxX >=  x && aabb.minY <=  y && aabb.maxY >=  y && aabb.minZ <=  z && aabb.maxZ >=  z) {
+                            numBlocks++;
+                        }
+                    }
+                }
+            }
+        }        
+        
+        if (numBlocks == 0) {
+            return false;
+        }        
+        
+        System.out.println("[GATE] Ship volume: " + shipVolume + ", blocks in gate: " + numBlocks + ". Percentage: " + ((shipVolume / numBlocks) * 100));
+        
+        // At least 80% of ship must be inside jumpgate
+        if (shipVolume / numBlocks > 0.8F) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean isFreePlaceForShip(int destX, int destY, int destZ) {
+        int newX, newY, newZ;
+        
+        if (destY + shipUp > 255 || destY - shipDown < 5) {
+            return false;
+        }
+        
+        int moveX = destX - xCoord;
+        int moveY = destY - yCoord;
+        int moveZ = destZ - zCoord;
+        
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                for (int y = minY; y <= maxY; y++) {
+                    if (!worldObj.isAirBlock(x, y, z)) {
+                        newX = moveX + x;
+                        newY = moveY + y;
+                        newZ = moveZ + z;
+
+                        if (!worldObj.isAirBlock(newX, newY, newZ)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }    
+        
+        return true;
+    }
+    
+    private void doGateJump() {
+        if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
+        {
+            System.out.println("[WP-TE] Insufficient energy to jump");
+            this.controller.setJumpFlag(false);
+            return;
+        }
+        
+        // Search beacon coordinates
+        String gateName = controller.getTargetJumpgateName();
+        JumpGate jg = WarpDrive.instance.jumpGates.findGateByName(gateName);
+        
+        int gateX, gateY, gateZ;
+        int destX = 0, destY = 0, destZ = 0;
+        boolean isGateFound = (jg != null);
+        
+        // Now make jump to a beacon
+        if (isGateFound)
+        {
+            gateX = jg.xCoord;
+            gateY = jg.yCoord;
+            gateZ = jg.zCoord;
+             
+            destX = gateX;
+            destY = gateY;
+            destZ = gateZ;
+            JumpGate nearestGate = WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord);
+            
+            if (!isShipInJumpgate(nearestGate)) {
+                messageToAllPlayersOnShip("[GATE] Ship is not inside the jumpgate. Jump rejected. Nearest jumpgate: " + nearestGate.toNiceString());
+                this.controller.setJumpFlag(false);
+                return;
+            }
+            
+            // If gate is blocked by obstacle
+            if (!isFreePlaceForShip(gateX, gateY, gateZ)) {
+
+                // Randomize destination coordinates and check for collision with obstacles around jumpgate
+                // Try to find good place for ship
+                int numTries = 10; // num tries to check for collision
+                boolean placeFound = false;
+                for (; numTries > 0; numTries--) {
+                    // randomize dest. coordinates around jumpgate
+                    destX = gateX + ((worldObj.rand.nextBoolean())?-1:1) * (20 + worldObj.rand.nextInt(100));
+                    destZ = gateZ + ((worldObj.rand.nextBoolean())?-1:1) * (20 + worldObj.rand.nextInt(100));
+
+                    destY = gateY + ((worldObj.rand.nextBoolean())?-1:1) * (20 + worldObj.rand.nextInt(50));
+
+                    // check for collision
+                    if (isFreePlaceForShip(destX, destY, destZ)) {
+                        placeFound = true;
+                        break;
+                    } 
+                }
+
+                if (!placeFound) {
+                    messageToAllPlayersOnShip("[GATE] Destination gate is blocked by obstacles. Cannot jump.");
+                    this.controller.setJumpFlag(false);
+                    return;
+                }
+
+                System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
+            }
+            
+            // Consume all energy
+            currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
+            
+            System.out.println("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
+            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
+
+            jump.maxX = maxX;
+            jump.minX = minX;
+            jump.maxZ = maxZ;
+            jump.minZ = minZ;
+            jump.maxY = maxY;
+            jump.minY = minY;
+
+            jump.shipFront = shipFront;
+            jump.shipBack = shipBack;
+            jump.shipLeft = shipLeft;
+            jump.shipRight = shipRight;
+            jump.shipUp = shipUp;
+            jump.shipDown = shipDown;
+            jump.shipLength = this.shipSize;
+            
+            jump.xCoord = xCoord;
+            jump.yCoord = yCoord;
+            jump.zCoord = zCoord;
+     
+            jump.isCoordJump = true;
+            jump.destX = destX;
+            jump.destY = destY;
+            jump.destZ = destZ;
+            
+            jump.on = true;
+
+            worldObj.spawnEntityInWorld(jump);
+            coreState = "";            
+        } else
+        {
+            messageToAllPlayersOnShip("[GATE] Destination jumpgate is not found. Check jumpgate name.");
+            this.controller.setJumpFlag(false);         
+        }
+    }    
+    
     
     public void doJump() {
+        if (currentMode == this.MODE_GATE_JUMP) {
+            System.out.println("[TE-WC] Performing gate jump...");
+            doGateJump();
+            return;            
+        }
+        
         if (currentMode == this.MODE_BEACON_JUMP)
         {
             System.out.println("[TE-WC] Performing beacon jump...");
             doBeaconJump();
             return;
-        }
-              
-        if ((currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP) && !invalidAssembly) {
-            coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
-            coreState += "* Need " + Math.max(0, calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";                
-        }        
+        }       
         
         // Check ship size for hyperspace jump
         if (currentMode == this.MODE_HYPERSPACE) {
-            if (shipVolume < MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
-                this.controller.setJumpFlag(false);
-                return;
+            if (!isShipInJumpgate(WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord))) {              
+                if (shipVolume < MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
+                    this.messageToAllPlayersOnShip("Ship is too small (min: " + MIN_SHIP_VOLUME_FOR_HYPERSPACE + "). Insufficient ship mass to open hyperspace portal.");
+                    this.controller.setJumpFlag(false);
+                    return;
+                }
             }
         }
         
-        // Подготовка к прыжку
+        // РџРѕРґРіРѕС‚РѕРІРєР° Рє РїСЂС‹Р¶РєСѓ
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE) {
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
             System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
-            // Подсчёт необходимого количества энергии для прыжка
+            // РџРѕРґСЃС‡С‘С‚ РЅРµРѕР±С…РѕРґРёРјРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° СЌРЅРµСЂРіРёРё РґР»СЏ РїСЂС‹Р¶РєР°
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0) {
                 System.out.println("[WP-TE] Insufficient energy to jump");
-                coreState = "Energy: " + currentEnergyValue + "; Ship blocks: " + shipVolume + "\n";
-                coreState += "* LOW POWER. Need " + (calculateRequiredEnergy(shipVolume, distance) - currentEnergyValue) + " eU to jump";
                 this.controller.setJumpFlag(false);
                 return;
             }
 
-            // Потребить энергию
+            // РџРѕС‚СЂРµР±РёС‚СЊ СЌРЅРµСЂРіРёСЋ
             this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
 
             System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
@@ -562,7 +735,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 distance += shipSize;       
             }            
             
-            // Дальний прыжок в гиперпространстве в 100 раз дальше
+            // Р”Р°Р»СЊРЅРёР№ РїСЂС‹Р¶РѕРє РІ РіРёРїРµСЂРїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ РІ 100 СЂР°Р· РґР°Р»СЊС€Рµ
             if (currentMode == this.MODE_LONG_JUMP && (direction != -1 && direction != -2)) {
                 if (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
                     distance *= 100;
@@ -644,7 +817,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     if (entity instanceof EntityPlayerMP) {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, x, 256, z));
 
-                        // Создаём платформу
+                        // РЎРѕР·РґР°С‘Рј РїР»Р°С‚С„РѕСЂРјСѓ
                         WorldServer space = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
                         if (space.isAirBlock(x, newY, z)) {
                             space.setBlock(x, newY, z, Block.stone.blockID, 0, 2);
@@ -662,7 +835,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                             space.setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
                         }
 
-                        // Перемещаем на платформу
+                        // РџРµСЂРµРјРµС‰Р°РµРј РЅР° РїР»Р°С‚С„РѕСЂРјСѓ
                         ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
                     }
                 }
@@ -726,7 +899,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     }
     
     /*
-     * Проверка на вхождение точки в область (bounding-box)
+     * РџСЂРѕРІРµСЂРєР° РЅР° РІС…РѕР¶РґРµРЅРёРµ С‚РѕС‡РєРё РІ РѕР±Р»Р°СЃС‚СЊ (bounding-box)
      */
     public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z) {
         return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
@@ -747,17 +920,20 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 energyValue = (ENERGY_PER_BLOCK_MODE2 * shipVolume) + (ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
                 break;
             case MODE_HYPERSPACE:
-                energyValue = this.maxEnergyValue / 2; // half of maximum
+                energyValue = this.maxEnergyValue / 10; // 10% of maximum
                 break;
             case MODE_BEACON_JUMP:
-                energyValue = this.maxEnergyValue;
+                energyValue = this.maxEnergyValue / 2;  // half of maximum
+                break;
+            case MODE_GATE_JUMP:
+                energyValue = 2 * shipVolume;
         }
 
         return energyValue;
     }
     
     /*
-     * Получить реальное количество блоков, из которых состоит корабль 
+     * РџРѕР»СѓС‡РёС‚СЊ СЂРµР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р»РѕРєРѕРІ, РёР· РєРѕС‚РѕСЂС‹С… СЃРѕСЃС‚РѕРёС‚ РєРѕСЂР°Р±Р»СЊ 
      */
     public int getRealShipVolume() {
         int shipVol = 0;
@@ -767,7 +943,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
-                    // Пропускаем пустые блоки воздуха
+                    // РџСЂРѕРїСѓСЃРєР°РµРј РїСѓСЃС‚С‹Рµ Р±Р»РѕРєРё РІРѕР·РґСѓС…Р°
                     if (blockID != 0) {
                         shipVol++;
                     }
@@ -813,7 +989,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return null;
     }
 
-    // Сколько нужно энергии
+    // РЎРєРѕР»СЊРєРѕ РЅСѓР¶РЅРѕ СЌРЅРµСЂРіРёРё
     @Override
     public int demandsEnergy() {
         if (this.controller != null && controller.getMode() == 0) {
@@ -824,11 +1000,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     }
 
     /*
-     * Принятие энергии на вход
+     * РџСЂРёРЅСЏС‚РёРµ СЌРЅРµСЂРіРёРё РЅР° РІС…РѕРґ
      */
     @Override
     public int injectEnergy(Direction directionFrom, int amount) {
-        // Избыток энергии
+        // Р�Р·Р±С‹С‚РѕРє СЌРЅРµСЂРіРёРё
         int leftover = 0;
 
         currentEnergyValue += amount;
@@ -840,19 +1016,19 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return leftover;
     }
 
-    // Максимально возможный входной поток энергии, в нашем случае -- неограниченный
+    // РњР°РєСЃРёРјР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅС‹Р№ РІС…РѕРґРЅРѕР№ РїРѕС‚РѕРє СЌРЅРµСЂРіРёРё, РІ РЅР°С€РµРј СЃР»СѓС‡Р°Рµ -- РЅРµРѕРіСЂР°РЅРёС‡РµРЅРЅС‹Р№
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;
     }
 
-    // Принимать ли энергию
+    // РџСЂРёРЅРёРјР°С‚СЊ Р»Рё СЌРЅРµСЂРіРёСЋ
     @Override
     public boolean acceptsEnergyFrom(TileEntity emitter, Direction direction) {
-        return true; // Принимаем энергию отовсюду
+        return true; // РџСЂРёРЅРёРјР°РµРј СЌРЅРµСЂРіРёСЋ РѕС‚РѕРІСЃСЋРґСѓ
     }
 
-    // Блок является составляющим энергосети
+    // Р‘Р»РѕРє СЏРІР»СЏРµС‚СЃСЏ СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёРј СЌРЅРµСЂРіРѕСЃРµС‚Рё
     @Override
     public boolean isAddedToEnergyNet() {
         return addedToEnergyNet;

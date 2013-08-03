@@ -1,6 +1,8 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.LocalProfiler;
+import cr0s.WarpDrive.WarpDrive;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
@@ -83,7 +85,7 @@ public class EntityJump extends Entity {
     public boolean toHyperSpace, fromHyperSpace;
     private boolean isInHyperSpace;
 
-    int destX, destZ;
+    int destX, destY, destZ;
     boolean isCoordJump; 
     
     long msCounter = 0;
@@ -299,7 +301,7 @@ public class EntityJump extends Entity {
         if (isCoordJump) {
             moveX = destX - xCoord;
             moveZ = destZ - zCoord;
-            moveY = 0;
+            moveY = destY - yCoord;
             distance = 0;
         } else if (toHyperSpace || fromHyperSpace) {
             moveX = moveY = moveZ = 0;

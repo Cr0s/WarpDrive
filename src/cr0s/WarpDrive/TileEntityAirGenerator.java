@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.WarpDrive;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -11,7 +12,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
     
-    public boolean addedToEnergyNet;
+    public boolean addedToEnergyNet = false;
     
     private final int EU_PER_AIRBLOCK = 300;
     private final int MAX_ENERGY_VALUE = 36 * EU_PER_AIRBLOCK;
@@ -24,7 +25,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
 
     @Override
     public void updateEntity() {
-        if (!addedToEnergyNet && !worldObj.isRemote) {
+        if (!addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
@@ -107,7 +108,6 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
 
     @Override
     public int injectEnergy(Direction directionFrom, int amount) {
-        // Избыток энергии
         int leftover = 0;
 
         currentEnergyValue += amount;
@@ -143,11 +143,19 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
 
     @Override
     public void invalidate() {
-        if (addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-        super.invalidate();
+   	 if (addedToEnergyNet) {
+        MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        addedToEnergyNet = false;
+   	 }
+     
+   	 super.invalidate();
+    }
+    
+    @Override
+    public void validate() {
+    	 super.validate();
+		 MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this)); 
+		 addedToEnergyNet = true;
     }
 
 }

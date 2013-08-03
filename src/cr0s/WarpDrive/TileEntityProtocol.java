@@ -1,12 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
@@ -31,6 +25,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     private boolean summonFlag = false;
     private String toSummon = "";
     
+    private String targetJumpgateName = "";
+    
     // Gabarits
     private int front, right, up;
     private int back, left, down;
@@ -51,7 +47,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                                "get_x", "get_y", "get_z",                                     // 10, 11, 12
                                "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
                                "set_beacon_frequency", "get_dx", "get_dz",                    // 16, 17, 18
-                               "set_core_frequency", "is_in_space",                           // 19, 20
+                               "set_core_frequency", "is_in_space", "is_in_hyperspace",       // 19, 20, 21
+                               "set_target_jumpgate",                                         // 22
         };
     
     private int ticks = 0;
@@ -61,8 +58,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     
     @Override
     public void updateEntity() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-            return;
+       // if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+       //     return;
         if (++ticks >= BLOCK_UPDATE_INTERVAL){
             findCoreBlock();
             
@@ -574,9 +571,31 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 
             case 20: // is_in_space
                 return new Boolean[] { worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID };
+            case 21: // is_in_hyperspace
+                return new Boolean[] { worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID };
+            case 22: // set_target_jumpgate
+                if (arguments.length == 1)
+                {
+                    setTargetJumpgateName((String)arguments[0]);
+                }
+                break;                 
                 
         }
         
         return new Integer[] { 0 };
+    }
+
+    /**
+     * @return the targetJumpgateName
+     */
+    public String getTargetJumpgateName() {
+        return targetJumpgateName;
+    }
+
+    /**
+     * @param targetJumpgateName the targetJumpgateName to set
+     */
+    public void setTargetJumpgateName(String targetJumpgateName) {
+        this.targetJumpgateName = targetJumpgateName;
     }
 }

@@ -1,16 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package cr0s.WarpDrive;
 
+import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.TileEntityReactor;
+
 import java.util.ArrayList;
+
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 
 /**
- *
- * @author user
+ * @authorCr0s
  */
 public class WarpCoresRegistry {
     private ArrayList<TileEntityReactor> registry;
@@ -108,7 +108,7 @@ public class WarpCoresRegistry {
             }
             
             // Skip offline warp cores
-            if (c.controller == null || c.controller.getMode() == 0) {
+            if (c.controller == null || c.controller.getMode() == 0 || !c.prepareToJump()) {
                 continue;
             }
             // Search for nearest warp cores
@@ -145,4 +145,41 @@ public class WarpCoresRegistry {
             }
         }
     }
+    
+    // TODO: fix it to normal work in client
+    /*public boolean isEntityInsideAnyWarpField(Entity e) {
+        AxisAlignedBB aabb1, aabb2;
+        
+        double x = e.posX;
+        double y = e.posY;
+        double z = e.posZ;
+        
+        for (TileEntityReactor c : registry) {           
+            // Skip offline or disassembled warp cores
+            if (c.controller == null || !c.prepareToJump()) {
+            	System.out.println("Skipping " + c);
+            	if (c.controller == null) {
+            		System.out.println("Controller is null!");
+            		continue;
+            	}
+            	
+            	if (c.controller.getMode() == 0) {
+            		System.out.println("Mode is zero!");
+            		continue;
+            	}
+            	
+            	if (!c.prepareToJump()) {
+            		System.out.println("prepareToJump() returns false!");
+            		continue;
+            	}
+                continue;
+            }
+            
+            if (c.minX <= x && c.maxX >= x && c.minY <= y && c.maxY >= y && c.minZ <= z && c.maxZ >= z) {
+            	return true;
+            }
+        }
+        
+        return false;
+    }*/
 }

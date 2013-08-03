@@ -3,6 +3,7 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -17,7 +18,7 @@ public class BlockReactor extends BlockContainer {
     
     private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED= 3;    
     
-    BlockReactor(int id, int texture, Material material) {
+    public BlockReactor(int id, int texture, Material material) {
         super(id, material);
     }
 

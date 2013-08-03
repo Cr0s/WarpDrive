@@ -1,23 +1,23 @@
 package cr0s.WarpDrive;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.TileEntityProtocol;
-
 import java.util.Random;
-
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockWarpIsolation extends Block { 
+public class BlockMiningLaser extends BlockContainer { 
     private Icon[] iconBuffer;
+    
+    private final int ICON_SIDE = 0;
    
-    public BlockWarpIsolation(int id, int texture, Material material) {
+    public BlockMiningLaser(int id, int texture, Material material) {
         super(id, material);
     }
         
@@ -25,15 +25,27 @@ public class BlockWarpIsolation extends Block {
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[1];
+        iconBuffer = new Icon[2];
+       
+        // Solid textures
+        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:particleBoosterTopBottom");
         
-        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:warpIsolation");
+        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:miningLaserSide0");
     }
     
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        return iconBuffer[0];
+        if (side == 0 || side == 1) {
+            return iconBuffer[0];
+        }
+        
+        return iconBuffer[metadata + 1];
+    }
+    
+    @Override
+    public TileEntity createNewTileEntity(World var1) {
+        return new TileEntityMiningLaser();
     }
     
     /**
@@ -52,5 +64,5 @@ public class BlockWarpIsolation extends Block {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    }
+    } 
 }

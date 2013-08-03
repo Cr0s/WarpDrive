@@ -20,7 +20,7 @@ public class BlockProtocol extends BlockContainer {
     //private int currentTexture;
 
     
-    BlockProtocol(int id, int texture, Material material) {
+    public BlockProtocol(int id, int texture, Material material) {
         super(id, material);
     }
         
@@ -28,7 +28,7 @@ public class BlockProtocol extends BlockContainer {
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[8];
+        iconBuffer = new Icon[9];
        
         // Solid textures
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
@@ -40,7 +40,8 @@ public class BlockProtocol extends BlockContainer {
         iconBuffer[ICON_SIDE_ACTIVATED + 1] = par1IconRegister.registerIcon("warpdrive:contSideActive2");
         iconBuffer[ICON_SIDE_ACTIVATED + 2] = par1IconRegister.registerIcon("warpdrive:contSideActive3");
         iconBuffer[ICON_SIDE_ACTIVATED + 3] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
-        iconBuffer[ICON_SIDE_ACTIVATED + 4] = par1IconRegister.registerIcon("warpdrive:contSideActive4");
+        iconBuffer[ICON_SIDE_ACTIVATED + 4] = par1IconRegister.registerIcon("warpdrive:contSideActive5");
+        iconBuffer[ICON_SIDE_ACTIVATED + 5] = par1IconRegister.registerIcon("warpdrive:contSideActive6");
     }
     
     @Override

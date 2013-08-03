@@ -13,16 +13,10 @@ import net.minecraftforge.client.IRenderHandler;
 import org.lwjgl.opengl.GL11;
 import cpw.mods.fml.client.FMLClientHandler;
 
-/**
- * Copyright 2012-2013, micdoodle8
- * 
- * All rights reserved.
- * 
- */
 public class SpaceSkyRenderer extends IRenderHandler
 {
-    private static final ResourceLocation overworldTexture = new ResourceLocation("genericmod:textures/earth.png");
-    private static final ResourceLocation sunTexture = new ResourceLocation("genericmod:textures/sun.png");
+    private static final ResourceLocation overworldTexture = new ResourceLocation("warpdrive:textures/earth.png");
+    private static final ResourceLocation sunTexture = new ResourceLocation("warpdrive:textures/sun.png");
 
     public int starGLCallList = GLAllocation.generateDisplayLists(3);
     public int glSkyList;

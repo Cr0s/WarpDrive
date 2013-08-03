@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.Loader;
+import cr0s.WarpDrive.WarpDrive;
 import ic2.api.item.Items;
 import java.util.Random;
 import net.minecraft.block.Block;
@@ -27,19 +28,19 @@ public class WorldGenSmallShip extends WorldGenerator
 
         @Override
 	public boolean generate(World world, Random rand, int i, int j, int k) {
-            ItemStack cableType = Items.getItem("copperCableBlock");
+            ItemStack cableType = Items.getItem("copperCableBlock").copy();
             switch (rand.nextInt(4)) {
                 case 0:
-                    cableType = Items.getItem("glassFiberCableBlock");
+                    cableType = Items.getItem("glassFiberCableBlock").copy();
                     break;                    
                 case 1:
-                    cableType = Items.getItem("glassFiberCableBlock");
+                    cableType = Items.getItem("glassFiberCableBlock").copy();
                     break;
                 case 2:
-                    cableType = Items.getItem("insulatedGoldCableBlock");
+                    cableType = Items.getItem("insulatedGoldCableBlock").copy();
                     break;
                 case 3:
-                    cableType = Items.getItem("doubleInsulatedIronCableBlock");
+                    cableType = Items.getItem("doubleInsulatedIronCableBlock").copy();
                     break;
             }
             
@@ -609,12 +610,12 @@ public class WorldGenSmallShip extends WorldGenerator
        while (!isDone) {
            switch (rand.nextInt(14)) {
                case 0:
-                   res = Items.getItem("massFabricator");
+                   res = Items.getItem("massFabricator").copy();
                    res.stackSize = 1 + rand.nextInt(2);
                    isDone = true;
                    break;
                case 1:
-                   res = Items.getItem("nuke");
+                   res = Items.getItem("nuke").copy();
                    res.stackSize = 1 + rand.nextInt(64);
                    isDone = true;
                    break;
@@ -625,12 +626,12 @@ public class WorldGenSmallShip extends WorldGenerator
                    isDone = true;
                    break;// skipped
                case 6:
-                   res = Items.getItem("glassFiberCableItem");
+                   res = Items.getItem("glassFiberCableItem").copy();
                    res.stackSize = 2 + rand.nextInt(63);
                    isDone = true;
                    break;
                case 7:
-                   res = Items.getItem("matter");
+                   res = Items.getItem("matter").copy();
                    res.stackSize = 2 + rand.nextInt(63);
                    isDone = true;
                    break;
@@ -640,35 +641,35 @@ public class WorldGenSmallShip extends WorldGenerator
                // AE Quarz
                case 9:
                    if (isAELoaded) {
-                       res = new ItemStack(4362, 2 + rand.nextInt(63), 6);
+                       res = new ItemStack(4362, 2 + rand.nextInt(63), 6).copy();
                        isDone = true;
                    }
                    break;
                // AE improved processor
                case 10:
                    if (isAELoaded) {
-                       res = new ItemStack(4362, 2 + rand.nextInt(15), 19);               
+                       res = new ItemStack(4362, 2 + rand.nextInt(15), 19).copy();               
                        isDone = true;
                    }
                    break;
                // Rocket launcher platform Tier3
                case 11:
                    if (isICBMLoaded) {
-                       res = new ItemStack(3884, 2 + rand.nextInt(1), 2);
+                       res = new ItemStack(3884, 2 + rand.nextInt(1), 2).copy();
                        isDone = true;
                    }
                    break;
                // Missles from conventional to hypersonic
                case 12:
                    if (isICBMLoaded) {
-                       res = new ItemStack(4159, 2 + rand.nextInt(1), rand.nextInt(21));    
+                       res = new ItemStack(4159, 2 + rand.nextInt(1), rand.nextInt(21)).copy();    
                        isDone = true;
                    }
                    break;
                // Advanced solar panels
                case 13:
                    if (isAdvSolPanelLoaded) {
-                       res = new ItemStack(194, 2 + rand.nextInt(1), rand.nextInt(3));
+                       res = new ItemStack(194, 2 + rand.nextInt(1), rand.nextInt(3)).copy();
                        isDone = true;
                    }
                    break;
