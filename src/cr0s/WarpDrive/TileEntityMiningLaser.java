@@ -48,7 +48,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
                                         "startMining", "stop",       // 0, 1
                                         "isMining",                  // 2
                                         "startQuarry",				 // 3
-                                        "getMinerState"              // 4
+                                        "getMinerState",             // 4
+                                        "setStartLayerOffset"        // 5
                                     };
     
    public static final ArrayList<Integer> valuableOres = new ArrayList<Integer>(Arrays.asList(
@@ -81,10 +82,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    private final int SCAN_DELAY = 20 * 5;
    private int delayTicksScan = 0;
    
-   private final int MINE_DELAY = 25;
+   private final int MINE_DELAY = 10;
    private int delayTicksMine = 0;
    
-   private final int EU_PER_LAYER = 250;
+   private final int EU_PER_LAYER = 500;
       
    private int currentMode = 0; // 0 - scan next layer, 1 - collect valuables
    
@@ -94,12 +95,22 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    private ArrayList<Vector3> valuablesInLayer = new ArrayList<Vector3>();
    private int valuableIndex = 0;
    
-   Vector3 minerVector;
+   private int layerOffset = 1;
+   
+   private Vector3 minerVector;
    private long uid = 0;
 
     @Override
     public void updateEntity() {
     	if (isMining) {
+    		if (minerVector != null) {
+    			minerVector.x = xCoord;
+    			minerVector.y = yCoord - 1;
+    			minerVector.z = zCoord;
+    			
+    			minerVector = minerVector.add(0.5);
+    		}
+    		
     		if (currentMode == 0) {
     			if (++delayTicksScan > SCAN_DELAY) {
     				delayTicksScan = 0;
@@ -114,7 +125,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     				int blockMeta = worldObj.getBlockMetadata(xCoord, currentLayer, zCoord);
     				
     				// That block is too hard
-    				if (blockID != 0 && worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && Block.blocksList[blockID].blockHardness > Block.obsidian.blockHardness) {
+    				if (blockID == Block.bedrock.blockID) {
+    					isMining = false;
+    					return;
+    				}
+    				if (blockID != 0 && worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && Block.blocksList[blockID].blockResistance > Block.obsidian.blockResistance) {
     					isMining = false;
     					return;
     				}
@@ -146,7 +161,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     					int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
 
     					// Skip if block is too hard or its empty block
-    					if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && (worldObj.isAirBlock(valuable.intX(), valuable.intY(), valuable.intZ()) || Block.blocksList[blockID].blockHardness > Block.obsidian.blockHardness)) {
+    					if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && (worldObj.isAirBlock(valuable.intX(), valuable.intY(), valuable.intZ()) || Block.blocksList[blockID].blockResistance > Block.obsidian.blockResistance)) {
     						return;
     					}
     					
@@ -311,7 +326,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             for (int z = zmin; z <= zmax; z++) {
             	if (isQuarry) { // Quarry collects all blocks
              	   int blockID = worldObj.getBlockId(x, currentLayer, z);
-             	   if (!worldObj.isAirBlock(x, currentLayer, z) && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID && (Block.blocksList[blockID].blockHardness <= Block.obsidian.blockHardness))
+             	   if (blockID == Block.bedrock.blockID) {
+             		   continue;
+             	   }
+             	   if (!worldObj.isAirBlock(x, currentLayer, z) && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance))
              		   valuablesInLayer.add(new Vector3(x, currentLayer, z));
             	} else // Not-quarry collect only valuables blocks
                 if (valuableOres.contains((worldObj.getBlockId(x, currentLayer, z))) || otherValuables.contains((worldObj.getBlockId(x, currentLayer, z)))) {
@@ -480,7 +498,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             	currentMode = 0;
             	
             	minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
-            	currentLayer = yCoord - 1;
+            	currentLayer = yCoord - layerOffset;
                 
                 return new Object[] { 0 };
                                 
@@ -502,11 +520,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             	currentMode = 0;
             	
             	minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
-            	currentLayer = yCoord - 1;
+            	currentLayer = yCoord - layerOffset;
                 
                 return new Object[] { 0 };    
                 
-            // State is: state, energy, currentLayer, valuablesInLayer, valuablesMined = getMinerState()
+            // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
             case 4: // getMinerState()
             	String state = "not mining";
             	Integer valuablesInLayer, valuablesMined;
@@ -520,6 +538,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             	}
             	
             	return new Object[] {state, energy, currentLayer, 0, 0};
+            case 5: // setStartLayerOffset
+            	if (arguments.length == 1) {
+            		int a = ((Double)arguments[0]).intValue();
+            		if (a < 1) { a = 1; }
+            		
+            		layerOffset = a;
+            	}
         }
         
         return new Object[] { 0 };

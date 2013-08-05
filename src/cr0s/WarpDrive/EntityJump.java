@@ -454,7 +454,7 @@ public class EntityJump extends Entity {
                         for(int z = z1; z <= z2; z++) {
                             int blockID = worldObj.getBlockId(x, y, z);
                             // Skip air blocks
-                            if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) {
+                            if (blockID == 0 || blockID == WarpDrive.GAS_BLOCKID) {
                                 continue;
                             }
 
@@ -534,8 +534,8 @@ public class EntityJump extends Entity {
                 for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
-                    // Пропускаем пустые блоки воздуха
-                    if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) { 
+                    // Skipping air blocks
+                    if (blockID == 0 || blockID == WarpDrive.GAS_BLOCKID) { 
                         continue; 
                     }
                     
@@ -845,7 +845,13 @@ public class EntityJump extends Entity {
             int blockMeta = shipBlock.blockMeta;
 
             mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
-
+            // Re-schedule air blocks update
+            if (blockID == WarpDrive.AIR_BLOCKID) {
+            	targetWorld.markBlockForUpdate(newX, newY, newZ);
+            	targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 40 + targetWorld.rand.nextInt(20));
+            }
+            
+            
             NBTTagCompound oldnbt = new NBTTagCompound();
 
 
@@ -870,16 +876,13 @@ public class EntityJump extends Entity {
                     newTileEntity.invalidate();
 
                     newTileEntity.readFromNBT(oldnbt);
-
-                    //newTileEntity.worldObj = targetWorld;
-                    targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
                 }
 
                 newTileEntity.worldObj = targetWorld;
                 newTileEntity.validate();
-                
-                targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+
                 worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
+                targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
             }
         } catch (Exception exception) {
             exception.printStackTrace();

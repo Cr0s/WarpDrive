@@ -34,7 +34,7 @@ public class SpaceProvider extends WorldProvider {
     
     @Override
     public boolean canRespawnHere() {
-        return true;
+        return false;
     }
 
     @SideOnly(Side.CLIENT)
@@ -119,11 +119,11 @@ public class SpaceProvider extends WorldProvider {
         return (dimensionId == 0 ? null : "WarpDrive/Space" + dimensionId);
     }
 
-    @Override
+    /*@Override
     public boolean canCoordinateBeSpawn(int par1, int par2) {
         int var3 = this.worldObj.getFirstUncoveredBlock(par1, par2);
         return var3 != 0;
-    }
+    }*/
 
     @Override
     public Vec3 getSkyColor(Entity cameraEntity, float partialTicks) {
@@ -152,14 +152,8 @@ public class SpaceProvider extends WorldProvider {
     }    
     
     @Override
-    public String getWelcomeMessage()
-    {
-        return "Gagarin: POEHALI!";
-    }
-    
-    @Override
     public int getRespawnDimension(EntityPlayerMP player) {
-        return WarpDrive.instance.spaceDimID;
+        return 0; // respawn on Earth
     }
 
     @Override
@@ -171,7 +165,7 @@ public class SpaceProvider extends WorldProvider {
     public boolean canBlockFreeze(int x, int y, int z, boolean byWater) {
         return false;
     }
-
+/*
     @Override
     public ChunkCoordinates getRandomizedSpawnPoint() {
         ChunkCoordinates var5 = new ChunkCoordinates(this.worldObj.getSpawnPoint());
@@ -205,7 +199,7 @@ public class SpaceProvider extends WorldProvider {
         }
         return var5;
     }
-    
+*/    
     @Override
     public boolean getWorldHasVoidParticles() {
         return false;

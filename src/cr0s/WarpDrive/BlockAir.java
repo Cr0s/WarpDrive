@@ -252,7 +252,7 @@ public class BlockAir extends Block
     @Override
     public void onBlockAdded(World par1World, int par2, int par3, int par4)
     {
-        if (par1World.provider.dimensionId == WarpDrive.instance.spaceDimID)
+        if (par1World.provider.dimensionId == WarpDrive.instance.spaceDimID || par1World.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
         {
             par1World.scheduleBlockUpdate(par2, par3, par4, this.blockID, this.tickRate(par1World));
         } else

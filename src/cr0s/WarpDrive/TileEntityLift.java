@@ -52,14 +52,14 @@ public class TileEntityLift extends TileEntity implements IEnergySink {
             addedToEnergyNet = true;
         }
         
-        if (++ticks > 20) {
+        if (++ticks > 40) {
         	ticks = 0;
         	
         	// Switching mode
         	if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
-        		mode = 1;
+        		mode = 2; // down
         	} else {
-        		mode = 2;
+        		mode = 1; // up
         	}
         	
         	isEnabled = (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && worldObj.isAirBlock(xCoord, yCoord + 2, zCoord));
@@ -126,7 +126,7 @@ public class TileEntityLift extends TileEntity implements IEnergySink {
         
         // Lift up
         if (mode == 1) {     
-        	AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY, zmin, xmax, yCoord, zmax);
+        	AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + 0.3, firstUncoveredY, zmin + 0.3, xmax - 0.3, yCoord, zmax - 0.3);
         	
         	List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
         	if (list != null) { // up  		
@@ -143,7 +143,7 @@ public class TileEntityLift extends TileEntity implements IEnergySink {
         		}
         	}
         } else if (mode == 2) { // down
-        	AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, yCoord, zmin, xmax, yCoord + 2, zmax);
+        	AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + 0.3, yCoord, zmin + 0.3, xmax - 0.3, yCoord + 2, zmax - 0.3);
         	List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
         	if (list != null) {      		
         		for (Object o : list) {       			

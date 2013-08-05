@@ -89,7 +89,7 @@ public class BlockLift extends BlockContainer {
         TileEntityLift booster = (TileEntityLift)par1World.getBlockTileEntity(par2, par3, par4);
 
         if (booster != null){ 
-            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getCurrentEnergyValue());
         }
         return true;
     }    

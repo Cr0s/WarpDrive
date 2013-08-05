@@ -198,11 +198,11 @@ public class WarpDrive implements LoadingCallback {
         GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
             'l', Block.leaves, 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"));         
 
-        GameRegistry.addRecipe(new ItemStack(laserBlock), "ccc", "asa", "cac",
-                'c', Items.getItem("energyCrystal"), 'a', Items.getItem("advancedAlloy"), 's', Items.getItem("advancedCircuit")); 
+        GameRegistry.addRecipe(new ItemStack(laserBlock), "sss", "ama", "aaa",
+                'm', Items.getItem("advancedMachine"), 'a', Items.getItem("advancedAlloy"), 's', Items.getItem("advancedCircuit")); 
         
-        GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "aka", "scs",
-                'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 's', Items.getItem("ovScanner"), 'k', Items.getItem("energyCrystal"));        
+        GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "ama", "ccc",
+                'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 'm', Items.getItem("miner"));        
 
         GameRegistry.addRecipe(new ItemStack(boosterBlock), "afc", "ama", "cfa",
                 'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 'f', Items.getItem("glassFiberCableItem"), 'm', Items.getItem("mfeUnit"));        

@@ -39,6 +39,61 @@ public class FXBeam extends EntityFX
 	private float prevSize = 0.0F;
 	private int energy = 0;
 
+	boolean a = false;
+	
+	public FXBeam(World par1World, Vector3 position, float yaw, float pitch, float red, float green, float blue, int age, int energy) {
+		super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
+
+		a = true;
+		
+		this.setRGB(red, green, blue);
+
+		this.setSize(0.02F, 0.02F);
+		this.noClip = true;
+		this.motionX = 0.0D;
+		this.motionY = 0.0D;
+		this.motionZ = 0.0D;
+		
+		this.length = 200;
+		this.rotYaw = yaw;
+		this.rotPitch = pitch;
+		this.prevYaw = this.rotYaw;
+		this.prevPitch = this.rotPitch;
+
+		this.particleMaxAge = age;
+		this.energy = energy;
+
+		if (red == 1 && green == 0 && blue == 0) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_red.png");
+		} else if (red == 0 && green == 1 && blue == 0) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_green.png");
+		} else if (red == 0 && green == 0 && blue == 1) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy.png");			
+		} else if (red == 1 && green == 1 && blue == 0) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_yellow.png");
+		} else if (red == 1 && green == 0.5 && blue == 0) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_orange.png");
+		} else if (red == 0.5 && green == 0 && blue == 0.5) {
+			TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
+		}
+		
+		/**
+		 * Sets the particle age based on distance.
+		 */
+		EntityLivingBase renderentity = Minecraft.getMinecraft().renderViewEntity;
+
+		int visibleDistance = 300;
+
+		if (!Minecraft.getMinecraft().gameSettings.fancyGraphics)
+		{
+			visibleDistance = 100;
+		}
+		if (renderentity.getDistance(this.posX, this.posY, this.posZ) > visibleDistance)
+		{
+			this.particleMaxAge = 0;
+		}
+	}
+	
 	public FXBeam(World par1World, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
 	{
 		super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
@@ -111,6 +166,7 @@ public class FXBeam extends EntityFX
 		this.prevYaw = this.rotYaw;
 		this.prevPitch = this.rotPitch;
 
+		if (!a) {
 		float xd = (float) (this.posX - this.target.x);
 		float yd = (float) (this.posY - this.target.y);
 		float zd = (float) (this.posZ - this.target.z);
@@ -121,7 +177,8 @@ public class FXBeam extends EntityFX
 
 		this.rotYaw = ((float) (Math.atan2(xd, zd) * 180.0D / 3.141592653589793D));
 		this.rotPitch = ((float) (Math.atan2(yd, var7) * 180.0D / 3.141592653589793D));
-
+		}
+		
 		if (this.particleAge++ >= this.particleMaxAge)
 		{
 			setDead();

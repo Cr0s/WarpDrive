@@ -150,12 +150,4 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
      
    	 super.invalidate();
     }
-    
-    @Override
-    public void validate() {
-    	 super.validate();
-		 MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this)); 
-		 addedToEnergyNet = true;
-    }
-
 }

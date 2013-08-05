@@ -45,7 +45,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 	private int dx, dz, dy;
 	private float yaw, pitch; // laser direction
 	
-	private int frequency;    // beam frequency
+	private int frequency = -1;    // beam frequency
 	private float r, g, b;      // beam color (corresponds to frequency)
 	
 	private boolean isEmitting = false;
@@ -64,6 +64,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 
     @Override
     public void updateEntity() {
+    	// Frequency is not set
+    	if (frequency == -1) {
+    		return;
+    	}
+    	
     	if (isEmitting && ++delayTicks > 20 * 3) {
     		delayTicks = 0;
 			isEmitting = false;
@@ -116,12 +121,20 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
     	
     	Vector3 beamVector = new Vector3(this).add(0.5);
     	System.out.println("beamVector: " + beamVector);
-		Vector3 lookVector = beamVector.clone().getDeltaPositionFromRotation(yaw, pitch);
+        
+    	float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
+        float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
+        float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
+        float pitchvertical = MathHelper.sin(-pitch * 0.017453292F);
+        float directionx = yawx * pitchhorizontal;
+        float directionz = yawz * pitchhorizontal;
+        Vector3 lookVector = new Vector3((double) directionx, (double) pitchvertical, (double) directionz);
+		Vector3.translate(beamVector, lookVector);
+    	
 		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
+		
 		System.out.println("Look vector: " + lookVector);
 		System.out.println("reachPoint: " + reachPoint);
-		
-		Vector3.translate(beamVector, lookVector);
     	System.out.println("translatedBeamVector: " + beamVector);
     	Vector3 endPoint = reachPoint.clone();
     	
@@ -141,35 +154,47 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
     		MovingObjectPosition hit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), true, false);
     		
     		// FIXME entity ray-tracing
-			MovingObjectPosition entityHit = rayTraceEntities(beamVector.clone(), reachPoint.clone().toVec3(), true, beamLengthBlocks);
+			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
+			if (entityHit == null) {
+				System.out.println("Entity hit is null.");
+			} else {
+				System.out.println("Entity hit: " + entityHit);
+			}
+			
 	    	if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
-	    		if (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > entityHit.hitVec.distanceTo(beamVector.clone().toVec3())) {
-	    			((EntityLivingBase)entityHit.entityHit).setFire(100);
-	    			((EntityLivingBase)entityHit.entityHit).attackEntityFrom(DamageSource.inFire, 10);
-	    			endPoint = new Vector3(entityHit);
-	    			break;
-	    		} else if (hit == null) {
-	    			if (entityHit.hitVec.distanceTo(beamVector.clone().toVec3()) <= beamLengthBlocks) {
-		    			((EntityLivingBase)entityHit.entityHit).setFire(100);
-		    			((EntityLivingBase)entityHit.entityHit).attackEntityFrom(DamageSource.inFire, 10);
-		    			endPoint = new Vector3(entityHit);
+	    		EntityLivingBase e = (EntityLivingBase)entityHit.entityHit;
+	    		double distanceToEntity = entityHit.hitVec.distanceTo(beamVector.clone().toVec3());
+	    		if (hit == null || (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > distanceToEntity)) {
+	    			if (distanceToEntity <= beamLengthBlocks) {
+		    			((EntityLivingBase)e).setFire(100);
+		    			((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / 10000);
+		    			if (energy > 1000000) {
+		    				worldObj.newExplosion(null, e.posX, e.posY, e.posZ, 4F, true, true);	
+		    			}
+		    			
+		    			// consume energy
+		    			energy -= 10000 + (100 * distanceToEntity);
+		    			
+		    			endPoint = new Vector3(entityHit.hitVec);
 		    			break;
 	    			}
 	    		}
 	    	}
 	    	
-			if (hit == null) {
-				// Laser is missed
+	    	// Laser is missed
+			if (hit == null && entityHit == null) {
 				endPoint = reachPoint;	
 				break;
 			} else {
-				// We got a hit
+				// We got a hit block
 				int distance = (int) new Vector3(hit.hitVec).distanceTo(beamVector);
 				
 				// Laser gone too far
 				if (distance >= beamLengthBlocks) {
+					endPoint = reachPoint;
 					break;
 				}
+				
 				int blockID = worldObj.getBlockId(hit.blockX, hit.blockY, hit.blockZ);
 				int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
 				float resistance = Block.blocksList[blockID].blockResistance;
@@ -191,7 +216,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 				}
 				
 				if (Block.blocksList[blockID].blockMaterial == Material.glass) {
-					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
+					worldObj.destroyBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextInt(20) == 0));
 					endPoint = new Vector3(hit.hitVec);	
 				}
 				
@@ -207,7 +232,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, 4F * (2 + (energy / 500000)), true, true);
 					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Block.fire.blockID : 0);
 				} else{
-					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
+					worldObj.destroyBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextInt(20) == 0));
 				}
 			}
     	}
@@ -215,61 +240,53 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 		sendLaserPacket(beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);    	
     }
       
-	public MovingObjectPosition rayTraceEntities(Vector3 beamVector, Vec3 reachPoint, boolean collisionFlag, double reachDistance)
-	{
-		MovingObjectPosition pickedEntity = null;
-		Vec3 startingPosition = beamVector.toVec3();
-		double playerBorder = 1.1 * reachDistance;
-		AxisAlignedBB boxToScan = AxisAlignedBB.getAABBPool().getAABB(-playerBorder, -playerBorder, -playerBorder, playerBorder, playerBorder, playerBorder);
+    public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
 
-		@SuppressWarnings("unchecked")
-		List<Entity> entitiesHit = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
-		double closestEntity = reachDistance;
+        MovingObjectPosition pickedEntity = null;
+        Vec3 playerPosition = beamVec.toVec3();
+        Vec3 playerLook = lookVec.toVec3();
 
-		if (entitiesHit == null || entitiesHit.isEmpty())
-		{
-			System.out.println("There is no Entitys hits.");
-			return null;
-		}
-		for (Entity entityHit : entitiesHit)
-		{
-			if (entityHit != null && entityHit.canBeCollidedWith() && entityHit.boundingBox != null)
-			{
-				float border = entityHit.getCollisionBorderSize();
-				AxisAlignedBB aabb = entityHit.boundingBox.expand(border, border, border);
-				MovingObjectPosition hitMOP = aabb.calculateIntercept(startingPosition, reachPoint);
+        Vec3 playerViewOffset = Vec3.createVectorHelper(playerPosition.xCoord + playerLook.xCoord * reachDistance, playerPosition.yCoord
+                + playerLook.yCoord * reachDistance, playerPosition.zCoord + playerLook.zCoord * reachDistance);
 
-				if (hitMOP != null)
-				{
-					if (aabb.isVecInside(startingPosition))
-					{
-						if (0.0D < closestEntity || closestEntity == 0.0D)
-						{
-							pickedEntity = new MovingObjectPosition(entityHit);
-							if (pickedEntity != null)
-							{
-								pickedEntity.hitVec = hitMOP.hitVec;
-								closestEntity = 0.0D;
-							}
-						}
-					}
-					else
-					{
-						double distance = startingPosition.distanceTo(hitMOP.hitVec);
+        double playerBorder = 1.1 * reachDistance;
+        AxisAlignedBB boxToScan = WarpDrive.laserBlock.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder, playerBorder);
 
-						if (distance < closestEntity || closestEntity == 0.0D)
-						{
-							pickedEntity = new MovingObjectPosition(entityHit);
-							pickedEntity.hitVec = hitMOP.hitVec;
-							closestEntity = distance;
-						}
-					}
-				}
-			}
-		}
-		
-		return pickedEntity;
-	}    
+        List entitiesHit = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
+        double closestEntity = reachDistance;
+
+        if (entitiesHit == null || entitiesHit.isEmpty()) {
+            return null;
+        }
+        for (Entity entityHit : (Iterable<Entity>) entitiesHit) {
+            if (entityHit != null && entityHit.canBeCollidedWith() && entityHit.boundingBox != null) {            	
+                float border = entityHit.getCollisionBorderSize();
+                AxisAlignedBB aabb = entityHit.boundingBox.expand((double) border, (double) border, (double) border);
+                MovingObjectPosition hitMOP = aabb.calculateIntercept(playerPosition, playerViewOffset);
+
+                if (hitMOP != null) {
+                    if (aabb.isVecInside(playerPosition)) {
+                        if (0.0D < closestEntity || closestEntity == 0.0D) {
+                            pickedEntity = new MovingObjectPosition(entityHit);
+                            if (pickedEntity != null) {
+                                pickedEntity.hitVec = hitMOP.hitVec;
+                                closestEntity = 0.0D;
+                            }
+                        }
+                    } else {
+                        double distance = playerPosition.distanceTo(hitMOP.hitVec);
+
+                        if (distance < closestEntity || closestEntity == 0.0D) {
+                            pickedEntity = new MovingObjectPosition(entityHit);
+                            pickedEntity.hitVec = hitMOP.hitVec;
+                            closestEntity = distance;
+                        }
+                    }
+                }
+            }
+        }
+        return pickedEntity;
+    }    
     
     public int getFrequency() {
     	return frequency;
@@ -534,7 +551,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
             		
             		return info;
             	} else {
-            		return new Object[] { -1 };
+            		return new Object[] { -1, 0, 0, 0, 0, 0, -1 };
             	}
                 
         }
