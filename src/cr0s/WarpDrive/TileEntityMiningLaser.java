@@ -63,7 +63,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
 		Block.oreNetherQuartz.blockID,
 		247, // IC
 		248, // IC
-		249  // IC
+		249,  // IC
+		4095 // AS uranus
 	));
    
    public static final ArrayList<Integer> otherValuables = new ArrayList<Integer>(Arrays.asList(
@@ -144,7 +145,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     				if (energy > 0) {
     					scanLayer();
     				} else {
-    					System.out.println("[ML] Out of energy");
     					isMining = false;
     				}
     				
@@ -534,6 +534,9 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             		valuablesMined = this.valuableIndex;
             		
             		state = "mining" + ((isQuarry) ? " (quarry mode)" : ""); 
+            		if (energy < 0) 
+            			state = "out of energy";
+            		
             		return new Object[] {state, energy, currentLayer, valuablesMined, valuablesInLayer};
             	}
             	

@@ -54,7 +54,8 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
                                         "emitBeam",             // 0
                                         "getX", "getY", "getZ", // 1, 2, 3
                                         "setFrequency",         // 4
-                                        "getFirstHit"           // 5
+                                        "getFirstHit",          // 5
+                                        "getBoosterDXDZ"        // 6
                                     };
     
    private int delayTicks = 0;
@@ -173,7 +174,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 		    			}
 		    			
 		    			// consume energy
-		    			energy -= 10000 + (100 * distanceToEntity);
+		    			energy -= 10000 + (10 * distanceToEntity);
 		    			
 		    			endPoint = new Vector3(entityHit.hitVec);
 		    			break;
@@ -220,7 +221,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 					endPoint = new Vector3(hit.hitVec);	
 				}
 				
-				energy -=  100000 + (resistance * 2000) + (distance * 100);
+				energy -=  70000 + (resistance * 1000) + (distance * 10);
 				endPoint = new Vector3(hit.hitVec);	
 				
 				if (energy <= 0) {
@@ -553,6 +554,10 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
             	} else {
             		return new Object[] { -1, 0, 0, 0, 0, 0, -1 };
             	}
+            	
+            case 6: // getBoosterDXDZ
+            	findFirstBooster();
+            	return new Object[] { (Integer)dx, (Integer)dz };
                 
         }
         

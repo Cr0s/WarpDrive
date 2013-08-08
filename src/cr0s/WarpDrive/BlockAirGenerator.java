@@ -3,7 +3,9 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.Random;
+
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -93,5 +95,17 @@ public class BlockAirGenerator extends BlockContainer {
         }
 
         return true;
-    }    
+    }   
+    
+    @Override
+    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
+    {
+        TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+        
+        if (te != null) {
+        	te.invalidate();
+        }
+        
+        super.breakBlock(par1World, par2, par3, par4, par5, par6);
+    }      
 }

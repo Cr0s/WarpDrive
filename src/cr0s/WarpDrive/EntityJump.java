@@ -859,7 +859,7 @@ public class EntityJump extends Entity {
                 shipBlock.blockTileEntity.writeToNBT(oldnbt);
                 TileEntity newTileEntity = null;
                 // CC's computers and turtles moving workaround
-                if (blockID == 1225 || blockID == 1227 || blockID == 1228 || blockID == 1230) {
+                if (blockID == 1225 || blockID == 1226 || blockID == 1227 || blockID == 1228 || blockID == 1230) {
                     oldnbt.setInteger("x", newX);
                     oldnbt.setInteger("y", newY);
                     oldnbt.setInteger("z", newZ);

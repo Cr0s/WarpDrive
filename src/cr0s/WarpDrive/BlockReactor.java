@@ -99,8 +99,11 @@ public class BlockReactor extends BlockContainer {
     {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
         
-        if (te instanceof TileEntityReactor) {
+        if (te != null && te instanceof TileEntityReactor) {
             WarpDrive.instance.registry.removeFromRegistry((TileEntityReactor)te);
         }
+        
+        te.invalidate();
+    	super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }

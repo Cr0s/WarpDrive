@@ -14,7 +14,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
     
     public boolean addedToEnergyNet = false;
     
-    private final int EU_PER_AIRBLOCK = 300;
+    private final int EU_PER_AIRBLOCK = 10;
     private final int MAX_ENERGY_VALUE = 36 * EU_PER_AIRBLOCK;
     private int currentEnergyValue = 0;
 
@@ -25,12 +25,13 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
 
     @Override
     public void updateEntity() {
-        if (!addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
+        }
+        
+    	if (!addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
         }
         
         // Air generator works only in spaces

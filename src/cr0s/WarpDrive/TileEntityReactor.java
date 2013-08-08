@@ -103,7 +103,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     
     @Override
     public void updateEntity() {
-        if (!addedToEnergyNet) {
+        if (!FMLCommonHandler.instance().getEffectiveSide().isClient() && !addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }

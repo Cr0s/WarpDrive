@@ -122,7 +122,7 @@ public final class JumpGatesRegistry {
             
             float distance = MathHelper.sqrt_float(dx + dy + dz);
             
-            if (minDistance == -1 || distance < minDistance) {
+            if (minDistance == -1f || distance < minDistance) {
                 minDistance = distance;
                 res = jg;
             }

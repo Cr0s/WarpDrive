@@ -16,10 +16,13 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import ic2.api.item.Items;
+
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -210,6 +213,9 @@ public class WarpDrive implements LoadingCallback {
         GameRegistry.addRecipe(new ItemStack(liftBlock), "aca", "ama", "a#a",
                 'c', Items.getItem("advancedCircuit"), 'a', Items.getItem("advancedAlloy"), 'm', Items.getItem("magnetizer"));        
       
+        GameRegistry.addRecipe(new ItemStack(Item.enderPearl), "uuu", "uuu", "uuu",
+                'u', Items.getItem("uraniumDrop"));   
+        
         
         registry = new WarpCoresRegistry();
         
