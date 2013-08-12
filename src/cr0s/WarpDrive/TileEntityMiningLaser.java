@@ -89,8 +89,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    private final int EU_PER_LAYER = 500;
       
    private int currentMode = 0; // 0 - scan next layer, 1 - collect valuables
-   
-   private int energy;
+
    private int currentLayer;
    
    private ArrayList<Vector3> valuablesInLayer = new ArrayList<Vector3>();
@@ -100,7 +99,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    
    private Vector3 minerVector;
    private long uid = 0;
+   
+   TileEntityParticleBooster booster = null;
 
+   private final int MFFS_FIELD_BLOCKID = 1681;
+   
     @Override
     public void updateEntity() {
     	if (isMining) {
@@ -126,7 +129,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     				int blockMeta = worldObj.getBlockMetadata(xCoord, currentLayer, zCoord);
     				
     				// That block is too hard
-    				if (blockID == Block.bedrock.blockID) {
+    				if (blockID == Block.bedrock.blockID || blockID == MFFS_FIELD_BLOCKID || !canDigDown()) {
     					isMining = false;
     					return;
     				}
@@ -140,9 +143,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     				
     				harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
     				
-    				energy -= EU_PER_LAYER;
-    				
-    				if (energy > 0) {
+    				if (collectEnergyPacketFromBooster(EU_PER_LAYER)) {
     					scanLayer();
     				} else {
     					isMining = false;
@@ -176,6 +177,24 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     			}
     		}
     	}
+    }
+    
+    private boolean canDigDown() {
+    	for (int newY = yCoord - 1; newY > 0; newY--) {
+    		int blockID = worldObj.getBlockId(xCoord, newY, zCoord);
+    		
+    		if (!worldObj.isAirBlock(xCoord, newY, zCoord)) {
+	    		if (blockID == MFFS_FIELD_BLOCKID || (blockID != Block.bedrock.blockID && Block.blocksList[blockID] != null && Block.blocksList[blockID].blockResistance > Block.obsidian.blockResistance)) {
+	    			if (currentLayer > newY) {
+	    				currentLayer = newY;
+	    			}
+	    			
+	    			return false;
+	    		}
+    		}
+    	}
+    	
+    	return true;
     }
     
     private void harvestBlock(Vector3 valuable) {
@@ -326,7 +345,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             for (int z = zmin; z <= zmax; z++) {
             	if (isQuarry) { // Quarry collects all blocks
              	   int blockID = worldObj.getBlockId(x, currentLayer, z);
-             	   if (blockID == Block.bedrock.blockID) {
+             	   if (blockID == Block.bedrock.blockID || blockID == MFFS_FIELD_BLOCKID) {
              		   continue;
              	   }
              	   if (!worldObj.isAirBlock(x, currentLayer, z) && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance))
@@ -342,26 +361,16 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
         //System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
     	
     }
-    private int collectEnergyFromBoosters() {
+    private boolean collectEnergyPacketFromBooster(int packet) {
     	int energyCollected = 0;
+    	if (booster == null)
+    		booster = findFirstBooster();
     	
-    	if (findFirstBooster() != null) {
-    		for (int shift = 1; shift <= MAX_BOOSTERS_NUMBER; shift++) {
-    			int newX = xCoord + (dx * shift);
-    			int newY = yCoord + (dy * shift);
-    			int newZ = zCoord + (dz * shift);
-    			
-    			TileEntity te = worldObj.getBlockTileEntity(newX, newY, newZ);
-    			
-    			if (te != null && te instanceof TileEntityParticleBooster) {
-    				energyCollected += ((TileEntityParticleBooster)te).collectAllEnergy();
-    			} else {
-    				break;
-    			}
-    		}
+    	if (booster != null) {
+    		return booster.consumeEnergy(packet);
     	}
     	
-    	return energyCollected;
+    	return false;
     }
     
     private TileEntityParticleBooster findFirstBooster() {
@@ -461,7 +470,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
         isMining = tag.getBoolean("isMining");
         isQuarry = tag.getBoolean("isQuarry");
         currentLayer = tag.getInteger("currentLayer");
-        energy = tag.getInteger("energy");
         
         minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
     }
@@ -472,8 +480,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
         
         tag.setBoolean("isMining", isMining);
         tag.setBoolean("isQuarry", isQuarry);
-        tag.setInteger("currentLayer", currentLayer);
-        tag.setInteger("energy", energy);        
+        tag.setInteger("currentLayer", currentLayer);     
     }    
     
     // IPeripheral methods implementation
@@ -493,7 +500,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             case 0: // startMining()
             	isMining = true;
             	isQuarry = false;
-            	energy = collectEnergyFromBoosters();
             	delayTicksScan = 0;
             	currentMode = 0;
             	
@@ -515,7 +521,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
             	}
             	isMining = true;
             	isQuarry = true;
-            	energy = collectEnergyFromBoosters();
             	delayTicksScan = 0;
             	currentMode = 0;
             	
@@ -526,6 +531,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
                 
             // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
             case 4: // getMinerState()
+            	int energy = 0;
+            	if (booster != null) {
+            		energy = booster.getCurrentEnergyValue();
+            	}
+            	 
             	String state = "not mining";
             	Integer valuablesInLayer, valuablesMined;
             	

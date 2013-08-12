@@ -58,8 +58,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
     
     @Override
     public void updateEntity() {
-       // if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-       //     return;
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
         if (++ticks >= BLOCK_UPDATE_INTERVAL){
             findCoreBlock();
             

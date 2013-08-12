@@ -208,7 +208,8 @@ public final class EntitySphereGen extends Entity {
             }
         }
         
-        System.out.println("[ESG] Saved " + blocks.size() + " blocks");
+        if (blocks != null)
+        	System.out.println("[ESG] Saved " + blocks.size() + " blocks");
     }
     
     private void addBlock(JumpBlock jb) {

@@ -12,8 +12,10 @@ import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -101,6 +103,14 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
      */
     public int getCurrentEnergyValue() {
         return currentEnergyValue;
+    }
+    
+    public boolean consumeEnergy(int amount) {
+    	if (currentEnergyValue - amount < 0) 
+    		return false;
+    	
+    	currentEnergyValue -= amount;
+    	return true;
     }
     
     public int collectAllEnergy() {

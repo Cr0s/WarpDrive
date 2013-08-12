@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,8 +33,8 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.3")
-@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels={"WarpDriveBeam"}, packetHandler = PacketHandler.class)
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.0.5")
+@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels={"WarpDriveBeam", "WarpDriveFreq", "WarpDriveLaserT"}, packetHandler = PacketHandler.class)
 /**
  * @author Cr0s
  */
@@ -52,7 +53,13 @@ public class WarpDrive implements LoadingCallback {
     public final static int PARTICLE_BOOSTER_BLOCKID = 509;
     public final static int LIFT_BLOCKID = 510;
     
-        // World limits
+    public final static int LASER_BLOCKCAM_BLOCKID = 512;
+    public final static int CAMERA_BLOCKID = 513;
+    public final static int MONITOR_BLOCKID = 514;
+    
+    public final static int IRIDIUM_BLOCKID = 515;
+    
+    // World limits
     public final static int WORLD_LIMIT_BLOCKS = 100000;
     
     public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
@@ -79,6 +86,18 @@ public class WarpDrive implements LoadingCallback {
     .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
     .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter");        
 
+    public final static Block laserCamBlock = new BlockLaserCam(LASER_BLOCKCAM_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter + Camera");          
+
+    public final static Block cameraBlock = new BlockCamera(CAMERA_BLOCKID, 0, Material.rock)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Camera block");      
+
+    public final static Block monitorBlock = new BlockMonitor(MONITOR_BLOCKID)
+    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Monitor");     
+    
     public final static Block boosterBlock = new BlockParticleBooster(PARTICLE_BOOSTER_BLOCKID, 0, Material.rock)
     .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
     .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Particle Booster");      
@@ -93,6 +112,10 @@ public class WarpDrive implements LoadingCallback {
     
     public final static Block airBlock = (new BlockAir(AIR_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Air block"); 
     public final static Block gasBlock = (new BlockGas(GAS_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Gas block"); 
+
+    public final static Block iridiumBlock = new BlockIridium(IRIDIUM_BLOCKID)
+    .setHardness(0.8F).setResistance(150 * 4).setStepSound(Block.soundMetalFootstep)
+    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Block of Iridium");       
     
     public static BiomeGenBase spaceBiome;
     public World space;
@@ -112,6 +135,10 @@ public class WarpDrive implements LoadingCallback {
     
     public WarpCoresRegistry registry;
     public JumpGatesRegistry jumpGates;
+    
+    public CamRegistry cams;
+    public boolean isOverlayEnabled = false;
+    public int overlayType = 0;
     
     @PreInit
     public void preInit(FMLPreInitializationEvent event) {
@@ -154,6 +181,17 @@ public class WarpDrive implements LoadingCallback {
         GameRegistry.registerBlock(laserBlock, "laserBlock");
         GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");          
 
+        LanguageRegistry.addName(laserCamBlock, "Laser Emitter + Camera");
+        GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");      
+
+        LanguageRegistry.addName(cameraBlock, "Camera");
+        GameRegistry.registerBlock(cameraBlock, "cameraBlock");           
+        GameRegistry.registerTileEntity(TileEntityCamera.class, "cameraBlock");   
+        
+        LanguageRegistry.addName(monitorBlock, "Monitor");
+        GameRegistry.registerBlock(monitorBlock, "monitorBlock");   
+        GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");   
+        
         LanguageRegistry.addName(miningLaserBlock, "Mining Laser");
         GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
         GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");           
@@ -165,6 +203,9 @@ public class WarpDrive implements LoadingCallback {
         LanguageRegistry.addName(liftBlock, "Laser lift");
         GameRegistry.registerBlock(liftBlock, "liftBlock");
         GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");         
+
+        LanguageRegistry.addName(iridiumBlock, "Block of Iridium");
+        GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");         
         
         proxy.registerEntities();
 
@@ -179,6 +220,10 @@ public class WarpDrive implements LoadingCallback {
         registerSpaceDimension();
         registerHyperSpaceDimension();
         MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
+        
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        	MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
+        }
     }
 
     @PostInit
@@ -215,12 +260,26 @@ public class WarpDrive implements LoadingCallback {
       
         GameRegistry.addRecipe(new ItemStack(Item.enderPearl), "uuu", "uuu", "uuu",
                 'u', Items.getItem("uraniumDrop"));   
+
+        GameRegistry.addRecipe(new ItemStack(iridiumBlock), "iii", "iii", "iii",
+                'i', Items.getItem("iridiumPlate"));        
+        GameRegistry.addShapelessRecipe(new ItemStack(Items.getItem("iridiumPlate").getItem(), 9), new ItemStack(iridiumBlock));   
         
+        GameRegistry.addRecipe(new ItemStack(laserCamBlock), "imi", "cec", "#k#",
+        'i', Items.getItem("iridiumPlate"), 'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"), 'e', laserBlock, 'k', cameraBlock);        
+        
+        GameRegistry.addRecipe(new ItemStack(cameraBlock), "cgc", "gmg", "cgc",
+        'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"), 'g', Block.glass);        
+                
+        GameRegistry.addRecipe(new ItemStack(monitorBlock), "gcg", "gmg", "ggg",
+        'm', Items.getItem("advancedMachine"), 'c', Items.getItem("advancedCircuit"), 'g', Block.glass);        
         
         registry = new WarpCoresRegistry();
         
         if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
             jumpGates = new JumpGatesRegistry();    
+        } else {
+        	cams = new CamRegistry();
         }
     }
 
@@ -246,6 +305,7 @@ public class WarpDrive implements LoadingCallback {
     {
         event.registerServerCommand(new GenerateCommand());
         event.registerServerCommand(new SpaceTpCommand());
+        event.registerServerCommand(new InvisibleCommand());
     }
     
     @Override

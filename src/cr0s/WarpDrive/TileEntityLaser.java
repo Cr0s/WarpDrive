@@ -34,40 +34,60 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLaser extends TileEntity implements IPeripheral{
 	private final int MAX_BOOSTERS_NUMBER = 10;
-	private final int MAX_LASER_ENERGY = 2000000;
+	private final int MAX_LASER_ENERGY = 4000000;
 	
 	private int dx, dz, dy;
-	private float yaw, pitch; // laser direction
+	public float yaw, pitch; // laser direction
 	
 	private int frequency = -1;    // beam frequency
+	public int camFreq = -1;       // camera frequency
 	private float r, g, b;      // beam color (corresponds to frequency)
 	
-	private boolean isEmitting = false;
+	public boolean isEmitting = false;
 	
     private String[] methodsArray = { 
                                         "emitBeam",             // 0
                                         "getX", "getY", "getZ", // 1, 2, 3
                                         "setFrequency",         // 4
                                         "getFirstHit",          // 5
-                                        "getBoosterDXDZ"        // 6
+                                        "getBoosterDXDZ",       // 6
+                                        "setCamFrequency"       // 7
                                     };
     
-   private int delayTicks = 0;
+   public int delayTicks = 0;
    private int energyFromOtherBeams = 0;
    
    private MovingObjectPosition firstHit;
 
+   private int camUpdateTicks = 20;
+   private int registryUpdateTicks = 20 * 10;
+   
     @Override
     public void updateEntity() {
     	// Frequency is not set
     	if (frequency == -1) {
     		return;
+    	}
+    	
+    	if (isWithCamera()) {
+    		if (registryUpdateTicks-- == 0 && FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+    			registryUpdateTicks = 20 * 10;
+    			
+    			WarpDrive.instance.cams.updateInRegistry(new CamRegistryItem(this.camFreq, new ChunkPosition(xCoord, yCoord, zCoord), worldObj).setType(1));
+    		}
+    		
+    		if (camUpdateTicks-- == 0) {
+    			
+    			camUpdateTicks = 20 * 5; // 5 seconds
+    			sendFreqPacket();  // send own cam frequency to clients
+    		}
     	}
     	
     	if (isEmitting && ++delayTicks > 20 * 3) {
@@ -186,7 +206,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 			if (hit == null && entityHit == null) {
 				endPoint = reachPoint;	
 				break;
-			} else {
+			} else if (hit != null) {
 				// We got a hit block
 				int distance = (int) new Vector3(hit.hitVec).distanceTo(beamVector);
 				
@@ -206,7 +226,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 				}
 				
 				// Hit is a laser head
-				if (blockID == WarpDrive.instance.LASER_BLOCK_BLOCKID) {
+				if (blockID == WarpDrive.instance.LASER_BLOCK_BLOCKID || blockID == WarpDrive.instance.LASER_BLOCKCAM_BLOCKID) {
 					// Compare frequencies
 					TileEntityLaser tel = (TileEntityLaser)worldObj.getBlockTileEntity(hit.blockX, hit.blockY, hit.blockZ);
 					if (tel != null && tel.getFrequency() == frequency) {
@@ -288,6 +308,10 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
         }
         return pickedEntity;
     }    
+    
+    public boolean isWithCamera() {
+    	return (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.LASER_BLOCKCAM_BLOCKID);
+    }
     
     public int getFrequency() {
     	return frequency;
@@ -464,6 +488,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
         super.readFromNBT(tag);
         
         frequency = tag.getInteger("frequency");
+        camFreq = tag.getInteger("camfreq");
     }
 
     @Override
@@ -471,6 +496,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
         super.writeToNBT(tag);
         
         tag.setInteger("frequency", frequency);
+        tag.setInteger("camFreq", camFreq);
     }    
     
     // IPeripheral methods implementation
@@ -558,12 +584,45 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
             case 6: // getBoosterDXDZ
             	findFirstBooster();
             	return new Object[] { (Integer)dx, (Integer)dz };
+            	
+            case 7: // setCamFrequency (only for lasers with cam)
+            	if (arguments.length == 1) {
+            		if (isWithCamera()) {
+                		int freq = ((Double)arguments[0]).intValue();
+                		this.camFreq = freq;            			
+            		}
+            	}
                 
         }
         
         return new Object[] { 0 };
     }
 
+    // Camera frequency refresh to clients packet
+    public void sendFreqPacket() {              
+        Side side = FMLCommonHandler.instance().getEffectiveSide();
+        if (side == Side.SERVER) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+            DataOutputStream outputStream = new DataOutputStream(bos);
+            try {
+                // Write source vector
+            	outputStream.writeInt(xCoord);
+            	outputStream.writeInt(yCoord);
+            	outputStream.writeInt(zCoord);
+            	
+            	outputStream.writeInt(this.camFreq);
+            } catch (Exception ex) {
+                    ex.printStackTrace();
+            }
+            
+            Packet250CustomPayload packet = new Packet250CustomPayload();
+            packet.channel = "WarpDriveFreq";
+            packet.data = bos.toByteArray();
+            packet.length = bos.size();
+        	MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);		
+        }
+    }    
+    
     @Override
     public boolean canAttachToSide(int side) {
         return true;
