@@ -26,64 +26,56 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
 /**
- *
  * @author Cr0s
  */
 public class TileEntityReactor extends TileEntity implements IEnergySink {
 
     public boolean addedToEnergyNet = false;
-    
-    // = РќР°СЃС‚СЂРѕР№РєРё СЏРґСЂР° =
 
-    // Р“РѕС‚РѕРІРЅРѕСЃС‚СЊ Рє РёСЃРїРѕР»РЅРµРЅРёСЋ СЂРµР¶РёРјР° (РїСЂС‹Р¶РѕРє Рё РїСЂ.)
     public Boolean ready;
-    // РЇРґСЂРѕ СЃРѕР±СЂР°РЅРѕ РЅРµРїСЂР°РІРёР»СЊРЅРѕ
+
     public Boolean invalidAssembly = false;
-    // РЎРѕСЃС‚РѕСЏРЅРёРµ Р±РёС‚Р° Р·Р°РїСѓСЃРєР°
+
     public Boolean launchState = false;
-    // РЎС‡С‘С‚С‡РёРє С‚РёРєРѕРІ
+
     int ticks;
-    // = РћСЂРёРµРЅС‚Р°С†РёСЏ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ =
+
     public final int JUMP_UP = -1;
     public final int JUMP_DOWN = -2;
-    int dx, dz; // Р“РѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Рµ РІРµРєС‚РѕСЂС‹ (1,0) (-1,0) (0,1) (0,-1) РґР»СЏ РѕРїСЂРµРґРµР»РµРЅРёСЏ РЅРѕСЃР° РєРѕСЂР°Р±Р»СЏ
-    int direction; // РќР°РїСЂР°РІР»РµРЅРёРµ РїСЂС‹Р¶РєР° (РІ РіСЂР°РґСѓСЃР°С…, РёР»Рё JUMP_UP, JUMP_DOWN)
-    int distance;  // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РїСЂС‹Р¶РєР°
-    // РџР°СЂР°РјРµС‚СЂС‹ РІР°СЂРї-РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР°
-    // Р Р°СЃС‡РёС‚С‹РІР°СЋС‚СЃСЏ РёР· РіР°Р±Р°СЂРёС‚РѕРІ РєРѕСЂР°Р±Р»СЏ
+    int dx, dz; 
+    int direction; 
+    int distance; 
+
     public int maxX, maxY, maxZ;
     public int minX, minY, minZ;
-    // Р“Р°Р±Р°СЂРёС‚С‹ РєРѕСЂР°Р±Р»СЏ
+
     public int shipFront, shipBack;
     public int shipLeft, shipRight;
     public int shipUp, shipDown;
     public int shipHeight, shipWidth, shipLength;
-    int shipSize = 0; // Р”Р»РёРЅР° РєРѕСЂР°Р±Р»СЏ РІ РЅР°РїСЂР°РІР»РµРЅРёРё РїСЂС‹Р¶РєР°
-    int shipVolume; // РџСЂРёРјРµСЂРЅС‹Р№ РѕР±СЉРµРј РєРѕСЂР°Р±Р»СЏ (РїСЂРѕРёРІРµРґРµРЅРёРµ 3 РёР·РјРµСЂРµРЅРёР№)
-    // РўРµРєСѓС‰РёР№ СЂРµР¶РёРј СЏРґСЂР°
+    int shipSize = 0;
+    int shipVolume; 
     int currentMode = 0;
     
-    // = Р­РЅРµСЂРіРёСЏ =
-    int currentEnergyValue = 0;        // РўРµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ СЌРЅРµСЂРіРёРё
-    int maxEnergyValue = 100000000; // 100 РјРёР»Р»РёРѕРЅРѕРІ eU
+    int currentEnergyValue = 0; 
+    int maxEnergyValue = 100000000;
     
-    // = РљРѕРЅСЃС‚Р°РЅС‚С‹ =
     private final int ENERGY_PER_BLOCK_MODE1 = 10; // eU
     private final int ENERGY_PER_DISTANCE_MODE1 = 100; // eU
     private final int ENERGY_PER_BLOCK_MODE2 = 1000; // eU
     private final int ENERGY_PER_DISTANCE_MODE2 = 1000; // eU    
     private final int ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
-    private final byte MODE_BASIC_JUMP = 1; // Р‘Р»РёР¶РЅРёР№ РїСЂС‹Р¶РѕРє 0-128
-    private final byte MODE_LONG_JUMP = 2;  // Р”Р°Р»СЊРЅРёР№ РїСЂС‹Р¶РѕРє 0-12800
+    private final byte MODE_BASIC_JUMP = 1; // 0-128
+    private final byte MODE_LONG_JUMP = 2;  // 0-12800
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
-    private final byte MODE_TELEPORT = -1;       // РўРµР»РµРїРѕСЂС‚Р°С†РёСЏ РёРіСЂРѕРєРѕРІ РІ РєРѕСЃРјРѕСЃ
+    private final byte MODE_TELEPORT = -1;
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
     private final int MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 10000;   // Maximum ship mass to jump on earth (10k blocks)
+    private final int MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
     private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 5000; // Minimum ship volume value for 
     
-    public final int MAX_SHIP_SIDE = 100; // РњР°РєСЃРёРјР°Р»СЊРЅР°СЏ РґР»РёРЅРЅР° РѕРґРЅРѕРіРѕ РёР· РёР·РјРµСЂРµРЅРёР№ РєРѕСЂР°Р±Р»СЏ (С€РёСЂРёРЅР°, РІС‹СЃРѕС‚Р°, РґР»РёРЅР°)
+    public final int MAX_SHIP_SIDE = 100;
     int cooldownTime = 0;
     private final int COOLDOWN_INTERVAL_SECONDS = 4;
     public int randomCooldownAddition = 0;
@@ -209,7 +201,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     controller.setJumpFlag(false);
                 } else
                 {
-                    // TODO: check to "warpcore turns into dirt" bug
                     worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2); // Deactivate block animation
                 }
                 break;
@@ -418,7 +409,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 break;              
         }
   
-        // РџСЂРѕРІРµСЂРєР° СЂР°Р·РјРµСЂРѕРІ РєРѕСЂР°Р±Р»СЏ
+        // Ship side is too big
         if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE) {
             this.controller.setJumpFlag(false);
             return false;            
@@ -537,6 +528,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         }        
         
         if (numBlocks == 0) {
+        	System.out.println("[GATE] Is 0 blocks inside gate.");
             return false;
         }        
         
@@ -644,7 +636,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
             }
             
-            // Consume all energy
+            // Consume energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
             
             System.out.println("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
@@ -704,26 +696,23 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         if (currentMode == this.MODE_HYPERSPACE) {
             if (!isShipInJumpgate(WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord))) {              
                 if (shipVolume < MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
-                    this.messageToAllPlayersOnShip("Ship is too small (min: " + MIN_SHIP_VOLUME_FOR_HYPERSPACE + "). Insufficient ship mass to open hyperspace portal.");
+                    this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + MIN_SHIP_VOLUME_FOR_HYPERSPACE + "). Insufficient ship mass to open hyperspace portal.");
                     this.controller.setJumpFlag(false);
                     return;
                 }
             }
         }
         
-        // РџРѕРґРіРѕС‚РѕРІРєР° Рє РїСЂС‹Р¶РєСѓ
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE) {
             System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
             System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
-            // РџРѕРґСЃС‡С‘С‚ РЅРµРѕР±С…РѕРґРёРјРѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° СЌРЅРµСЂРіРёРё РґР»СЏ РїСЂС‹Р¶РєР°
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0) {
                 System.out.println("[WP-TE] Insufficient energy to jump");
                 this.controller.setJumpFlag(false);
                 return;
             }
 
-            // РџРѕС‚СЂРµР±РёС‚СЊ СЌРЅРµСЂРіРёСЋ
             this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
 
             System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
@@ -735,7 +724,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 distance += shipSize;       
             }            
             
-            // Р”Р°Р»СЊРЅРёР№ РїСЂС‹Р¶РѕРє РІ РіРёРїРµСЂРїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ РІ 100 СЂР°Р· РґР°Р»СЊС€Рµ
             if (currentMode == this.MODE_LONG_JUMP && (direction != -1 && direction != -2)) {
                 if (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID) {
                     distance *= 100;
@@ -817,7 +805,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                     if (entity instanceof EntityPlayerMP) {
                         ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, x, 256, z));
 
-                        // РЎРѕР·РґР°С‘Рј РїР»Р°С‚С„РѕСЂРјСѓ
                         WorldServer space = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
                         if (space.isAirBlock(x, newY, z)) {
                             space.setBlock(x, newY, z, Block.stone.blockID, 0, 2);
@@ -835,7 +822,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                             space.setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
                         }
 
-                        // РџРµСЂРµРјРµС‰Р°РµРј РЅР° РїР»Р°С‚С„РѕСЂРјСѓ
                         ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
                     }
                 }
@@ -871,8 +857,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
             if (chestItem == null || playerItem == null) { continue; }
 
-            //System.out.println(player.username + " " + index + " -> " + chestItem + " = " + playerItem);
-
             if (chestItem.itemID != playerItem.itemID || chestItem.getItemDamage() != playerItem.getItemDamage() || chestItem.stackSize != playerItem.stackSize) {
                 return false;
             } else { result = true; }
@@ -898,9 +882,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return false;
     }
     
-    /*
-     * РџСЂРѕРІРµСЂРєР° РЅР° РІС…РѕР¶РґРµРЅРёРµ С‚РѕС‡РєРё РІ РѕР±Р»Р°СЃС‚СЊ (bounding-box)
-     */
     public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z) {
         return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
     }    
@@ -932,9 +913,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return energyValue;
     }
     
-    /*
-     * РџРѕР»СѓС‡РёС‚СЊ СЂРµР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р»РѕРєРѕРІ, РёР· РєРѕС‚РѕСЂС‹С… СЃРѕСЃС‚РѕРёС‚ РєРѕСЂР°Р±Р»СЊ 
-     */
     public int getRealShipVolume() {
         int shipVol = 0;
 
@@ -943,7 +921,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
                 for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
 
-                    // РџСЂРѕРїСѓСЃРєР°РµРј РїСѓСЃС‚С‹Рµ Р±Р»РѕРєРё РІРѕР·РґСѓС…Р°
                     if (blockID != 0) {
                         shipVol++;
                     }
@@ -973,8 +950,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
 
         result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
         if (result != null && result instanceof TileEntityProtocol) {
-            //System.out.println("[WP-TE] (x y z+1) TileEntity: " + result.toString() + " metadata: " + worldObj.getBlockMetadata(xCoord, yCoord, zCoord +1));
-            dx = 0;
+        	dx = 0;
             dz = 1;
             return result;
         }
@@ -989,7 +965,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return null;
     }
 
-    // РЎРєРѕР»СЊРєРѕ РЅСѓР¶РЅРѕ СЌРЅРµСЂРіРёРё
     @Override
     public int demandsEnergy() {
         if (this.controller != null && controller.getMode() == 0) {
@@ -999,12 +974,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return (maxEnergyValue - currentEnergyValue);
     }
 
-    /*
-     * РџСЂРёРЅСЏС‚РёРµ СЌРЅРµСЂРіРёРё РЅР° РІС…РѕРґ
-     */
     @Override
     public int injectEnergy(Direction directionFrom, int amount) {
-        // Р�Р·Р±С‹С‚РѕРє СЌРЅРµСЂРіРёРё
         int leftover = 0;
 
         currentEnergyValue += amount;
@@ -1016,19 +987,16 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         return leftover;
     }
 
-    // РњР°РєСЃРёРјР°Р»СЊРЅРѕ РІРѕР·РјРѕР¶РЅС‹Р№ РІС…РѕРґРЅРѕР№ РїРѕС‚РѕРє СЌРЅРµСЂРіРёРё, РІ РЅР°С€РµРј СЃР»СѓС‡Р°Рµ -- РЅРµРѕРіСЂР°РЅРёС‡РµРЅРЅС‹Р№
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;
     }
 
-    // РџСЂРёРЅРёРјР°С‚СЊ Р»Рё СЌРЅРµСЂРіРёСЋ
     @Override
     public boolean acceptsEnergyFrom(TileEntity emitter, Direction direction) {
-        return true; // РџСЂРёРЅРёРјР°РµРј СЌРЅРµСЂРіРёСЋ РѕС‚РѕРІСЃСЋРґСѓ
+        return true;
     }
 
-    // Р‘Р»РѕРє СЏРІР»СЏРµС‚СЃСЏ СЃРѕСЃС‚Р°РІР»СЏСЋС‰РёРј СЌРЅРµСЂРіРѕСЃРµС‚Рё
     @Override
     public boolean isAddedToEnergyNet() {
         return addedToEnergyNet;

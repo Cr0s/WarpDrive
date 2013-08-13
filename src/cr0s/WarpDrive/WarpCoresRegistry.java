@@ -102,7 +102,12 @@ public class WarpCoresRegistry {
         AxisAlignedBB aabb1, aabb2;
        
         for (TileEntityReactor c : registry) {
-            // Skip self
+            // Skip cores in other worlds
+        	if (c.worldObj != core.worldObj) {
+        		continue;
+        	}
+        	
+        	// Skip self
             if(c.xCoord == core.xCoord && c.yCoord == core.yCoord && c.zCoord == core.zCoord) {
                 continue;
             }
