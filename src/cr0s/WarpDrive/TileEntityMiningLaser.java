@@ -86,7 +86,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    private final int MINE_DELAY = 10;
    private int delayTicksMine = 0;
    
-   private final int EU_PER_LAYER = 500;
+   private final int EU_PER_LAYER_SPACE = 500;
+   private final int EU_PER_LAYER_EARTH = 5000;
       
    private int currentMode = 0; // 0 - scan next layer, 1 - collect valuables
 
@@ -104,8 +105,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
 
    private final int MFFS_FIELD_BLOCKID = 1681;
    
+   private boolean isOnEarth = false;
+   
     @Override
     public void updateEntity() {
+        isOnEarth = (worldObj.provider.dimensionId == 0);
+        
     	if (isMining) {
     		if (minerVector != null) {
     			minerVector.x = xCoord;
@@ -143,7 +148,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
     				
     				harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
     				
-    				if (collectEnergyPacketFromBooster(EU_PER_LAYER)) {
+    				if (collectEnergyPacketFromBooster((isOnEarth) ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE)) {
     					scanLayer();
     				} else {
     					isMining = false;

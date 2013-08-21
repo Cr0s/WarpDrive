@@ -12,8 +12,10 @@ import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -52,7 +54,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
     
     @Override
     public void updateEntity() {
-        if (!addedToEnergyNet && !worldObj.isRemote) {
+        if (!addedToEnergyNet && !this.tileEntityInvalid) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
@@ -230,12 +232,21 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
         return currentEnergyValue;
     }
 
-    @Override
+    @Override 
+    public void onChunkUnload() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }	
+    }
+    
+    @Override 
     public void invalidate() {
         if (addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }
+        }	
+        
         super.invalidate();
-    }
+    }    
 }

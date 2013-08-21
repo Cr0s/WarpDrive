@@ -29,7 +29,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
             return;
         }
         
-    	if (!addedToEnergyNet) {
+    	if (!addedToEnergyNet && !this.tileEntityInvalid) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
@@ -142,13 +142,21 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
         return currentEnergyValue;
     }
 
-    @Override
+    @Override 
+    public void onChunkUnload() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }	
+    }
+    
+    @Override 
     public void invalidate() {
-   	 if (addedToEnergyNet) {
-        MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-        addedToEnergyNet = false;
-   	 }
-     
-   	 super.invalidate();
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }	
+        
+        super.invalidate();
     }
 }

@@ -429,6 +429,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 setRight(((Double)arguments[1]).intValue());
                 setUp(((Double)arguments[2]).intValue());
                 
+                WarpDrive.instance.registry.removeDeadCores();
                 break;
 
 
@@ -445,6 +446,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral {
                 setBack(((Double)arguments[0]).intValue());
                 setLeft(((Double)arguments[1]).intValue());
                 setDown(((Double)arguments[2]).intValue());
+                
+                WarpDrive.instance.registry.removeDeadCores();
                 
                 break;   
                 

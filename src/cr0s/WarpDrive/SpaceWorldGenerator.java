@@ -513,6 +513,8 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         }
         else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;
+        } else if (random.nextInt(10000) == 42) {
+            blockID = WarpDrive.IRIDIUM_BLOCKID;
         }
 
         return blockID;

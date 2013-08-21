@@ -238,6 +238,8 @@ public final class EntitySphereGen extends Entity {
             _blockID = Block.oreDiamond.blockID;
         } else if (random.nextInt(1000) == 1) {
             _blockID = Block.bedrock.blockID;
+        } else if (random.nextInt(10000) == 42) {
+            _blockID = WarpDrive.IRIDIUM_BLOCKID;
         }
 
         return _blockID;

@@ -143,12 +143,17 @@ public class WarpCoresRegistry {
     }
     
     public void removeDeadCores() {
+    	ArrayList<TileEntityReactor> oldRegistry = (ArrayList<TileEntityReactor>) registry.clone();
+    	
         for (TileEntityReactor c : registry) {
-            if (c != null && c.worldObj != null && c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.WARP_CORE_BLOCKID) {
-                this.removeFromRegistry(c);
+            if (c != null && c.worldObj != null && (c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.WARP_CORE_BLOCKID || (c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != null && c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()))) {
+                oldRegistry.remove(c);
                 return;
             }
         }
+        
+        // Update old registry to new witout dead cores
+        this.registry = (ArrayList<TileEntityReactor>) oldRegistry.clone();
     }
     
     // TODO: fix it to normal work in client

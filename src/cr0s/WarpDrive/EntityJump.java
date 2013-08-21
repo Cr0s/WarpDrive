@@ -6,8 +6,12 @@ import cr0s.WarpDrive.WarpDrive;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
+import ic2.api.energy.tile.IEnergyTile;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -415,6 +419,13 @@ public class EntityJump extends Entity {
                 worldObj.removeBlockTileEntity(jb.x, jb.y, jb.z);
             }
 
+            // Refresh IC2 machines and cables
+            int newX = jb.x + moveX;
+            int newY = jb.y + moveY;
+            int newZ = jb.z + moveZ;
+            
+            refreshIC2Tile(targetWorld, newX, newY, newZ);
+            
             //System.out.println("[EJ] Removing block: " + jb.x + " " + jb.y + " " + jb.z + " " + jb.blockID);
             worldObj.setBlockToAir(jb.x, jb.y, jb.z);
 
@@ -423,6 +434,43 @@ public class EntityJump extends Entity {
         LocalProfiler.stop();
     }
 
+    // Fix IC2 blocks after jump via reflection calls
+    public static void refreshIC2Tile(World world, int x, int y, int z) {
+	    TileEntity te = world.getBlockTileEntity(x, y, z);
+	    
+	    if (te != null && te instanceof IEnergyTile) {
+			Class c = te.getClass().getSuperclass();
+			
+	        // Cable
+			if (c.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock")) {
+				try {
+					Method method;
+					
+					method = c.getDeclaredMethod ("onUnloaded", new Class[0]);
+					method.invoke (te, new Object[0]);
+					
+					method = c.getDeclaredMethod ("onLoaded", new Class[0]);
+					method.invoke (te, new Object[0]);													
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else // Machine
+			if (c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator")) {
+				try {
+					Method method;
+					
+					method = c.getDeclaredMethod ("onUnloaded", new Class[0]);
+					method.invoke (te, new Object[0]);
+					
+					method = c.getDeclaredMethod ("onLoaded", new Class[0]);
+					method.invoke (te, new Object[0]);												
+				} catch (Exception e) {
+					e.printStackTrace();
+				}				
+			}
+	    }    	
+    }
+    
     /**
      * Saving ship to memory
      *
@@ -891,7 +939,7 @@ public class EntityJump extends Entity {
 
         return true;
     }
-
+    
     @Override
     protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
         //System.out.println("[JE@"+this+"] readEntityFromNBT()");

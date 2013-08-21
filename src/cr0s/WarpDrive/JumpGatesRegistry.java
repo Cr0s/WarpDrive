@@ -113,16 +113,21 @@ public final class JumpGatesRegistry {
     }
     
     public JumpGate findNearestGate(int x, int y, int z) {
-        float minDistance = -1f;
+        System.out.println(jumpGatesList());
+        
+        double minDistance = -1;
+        
         JumpGate res = null;
         for (JumpGate jg : gates) {
-            int dx = (jg.xCoord - x) * (jg.xCoord - x);
-            int dy = (jg.yCoord - y) * (jg.yCoord - y);
-            int dz = (jg.zCoord - z) * (jg.zCoord - z);
-            
-            float distance = MathHelper.sqrt_float(dx + dy + dz);
-            
-            if (minDistance == -1f || distance < minDistance) {
+            double d3 = jg.xCoord - x;
+            double d4 = jg.yCoord - y;
+            double d5 = jg.zCoord - z;
+
+            double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+            System.out.println("Checking gate: " + jg.name + ", distance: " + distance);
+                        
+            if (minDistance == -1 || distance < minDistance) {
+                System.out.println("Setting " + jg.name + " as nearest");
                 minDistance = distance;
                 res = jg;
             }

@@ -47,6 +47,6 @@ public class JumpGate {
     }
     
     public String toNiceString() {
-        return name + " (" + xCoord + "; " + zCoord + ")";
+        return name + " (" + xCoord + "; " +yCoord + "; " + zCoord + ")";
     }
 }

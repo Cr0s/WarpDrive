@@ -7,7 +7,9 @@ import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.network.NetworkHelper;
+
 import java.util.List;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -73,7 +75,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
     private final int MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
     private final int MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 5000; // Minimum ship volume value for 
+    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for 
     
     public final int MAX_SHIP_SIDE = 100;
     int cooldownTime = 0;
@@ -1021,13 +1023,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         tag.setInteger("isolation", this.isolationBlocksCount);
     }
     
-    @Override
-    public void invalidate() {
+    @Override 
+    public void onChunkUnload() {
         if (addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }
-        super.invalidate();
+        }	
         
         WarpDrive.instance.registry.removeFromRegistry(this);
     }
@@ -1038,4 +1039,14 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         
         WarpDrive.instance.registry.updateInRegistry(this);
     }
+    
+    @Override 
+    public void invalidate() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }	
+        
+        super.invalidate();
+    }     
 }

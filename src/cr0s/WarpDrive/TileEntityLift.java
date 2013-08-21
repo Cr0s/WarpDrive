@@ -47,7 +47,7 @@ public class TileEntityLift extends TileEntity implements IEnergySink {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
             return;    	
     	
-        if (!addedToEnergyNet) {
+        if (!addedToEnergyNet && !this.tileEntityInvalid) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
@@ -294,12 +294,21 @@ public class TileEntityLift extends TileEntity implements IEnergySink {
         return energy;
     }    
 
-    @Override
+    @Override 
+    public void onChunkUnload() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }	
+    }
+    
+    @Override 
     public void invalidate() {
         if (addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }
+        }	
+        
         super.invalidate();
-    }
+    }    
 }
