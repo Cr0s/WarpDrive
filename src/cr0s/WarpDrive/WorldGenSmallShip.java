@@ -296,7 +296,7 @@ public class WorldGenSmallShip extends WorldGenerator
 		world.setBlock(i + 9, j + 6, k + 6, cableType.itemID, cableType.getItemDamage(), 0);
 		world.setBlock(i + 9, j + 6, k + 7, ADV_SOLAR_BLOCKID, solarType, 0);
                 // Placing air generator
-                world.setBlock(i + 9, j + 5, k + 7, WarpDrive.AIRGEN_BLOCKID, 0, 0);
+                world.setBlock(i + 9, j + 5, k + 7, WarpDrive.instance.config.airgenID, 0, 0);
                 
 		world.setBlock(i + 9, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -338,7 +338,7 @@ public class WorldGenSmallShip extends WorldGenerator
 		world.setBlock(i + 10, j + 6, k + 7, ADV_SOLAR_BLOCKID, solarType, 0);
                 
                 // Placing air generator
-                world.setBlock(i + 10, j + 5, k + 7, WarpDrive.AIRGEN_BLOCKID, 0, 0);
+                world.setBlock(i + 10, j + 5, k + 7, WarpDrive.instance.config.airgenID, 0, 0);
                 
 		world.setBlock(i + 10, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -372,7 +372,7 @@ public class WorldGenSmallShip extends WorldGenerator
                 
                 // Place warp-controller
                 if (rand.nextBoolean()) {
-                    world.setBlock(i + 11, j + 3, k + 7, WarpDrive.PROTOCOL_BLOCK_BLOCKID);
+                    world.setBlock(i + 11, j + 3, k + 7, WarpDrive.instance.config.controllerID);
                 }
                 
 		world.setBlock(i + 11, j + 3, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));
@@ -427,7 +427,7 @@ public class WorldGenSmallShip extends WorldGenerator
 		
                 // Place warp-core
                 if (rand.nextBoolean()) {
-                    world.setBlock(i + 12, j + 3, k + 7, WarpDrive.WARP_CORE_BLOCKID);
+                    world.setBlock(i + 12, j + 3, k + 7, WarpDrive.instance.config.coreID);
                 }
 		
                 world.setBlock(i + 12, j + 3, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));

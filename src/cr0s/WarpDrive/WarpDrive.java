@@ -2,6 +2,7 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Init;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.Mod.PostInit;
@@ -19,6 +20,7 @@ import ic2.api.item.Items;
 
 import java.util.List;
 
+import shipmod.ShipModConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -27,6 +29,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
@@ -39,83 +42,26 @@ import net.minecraftforge.common.MinecraftForge;
  * @author Cr0s
  */
 public class WarpDrive implements LoadingCallback {
-
-    public final static int WARP_CORE_BLOCKID = 500;
-    public final static int PROTOCOL_BLOCK_BLOCKID = 501;
-    public final static int RADAR_BLOCK_BLOCKID = 502;
-    public final static int ISOLATION_BLOCKID = 503;
-    public final static int AIR_BLOCKID = 504;
-    public final static int AIRGEN_BLOCKID = 505;
-    public final static int GAS_BLOCKID = 506;
-    
-    public final static int LASER_BLOCK_BLOCKID = 507;
-    public final static int MINING_LASER_BLOCK_BLOCKID = 508;
-    public final static int PARTICLE_BOOSTER_BLOCKID = 509;
-    public final static int LIFT_BLOCKID = 510;
-    
-    public final static int LASER_BLOCKCAM_BLOCKID = 512;
-    public final static int CAMERA_BLOCKID = 513;
-    public final static int MONITOR_BLOCKID = 514;
-    
-    public final static int IRIDIUM_BLOCKID = 515;
-    
     // World limits
     public final static int WORLD_LIMIT_BLOCKS = 100000;
     
-    public final static Block warpCore = new BlockReactor(WARP_CORE_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Core");
+    public static Block warpCore;
+    public static Block protocolBlock;
+    public static Block radarBlock; 
+    public static Block isolationBlock;
+    public static Block airgenBlock;
+    public static Block laserBlock;      
+    public static Block laserCamBlock;         
+    public static Block cameraBlock;    
+    public static Block monitorBlock;   
+    public static Block boosterBlock;   
+    public static Block miningLaserBlock;      
+    public static Block liftBlock;    
     
-    public final static Block protocolBlock = new BlockProtocol(PROTOCOL_BLOCK_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Controller");
+    public static Block airBlock;
+    public static Block gasBlock; 
 
-    public final static Block radarBlock = new BlockRadar(RADAR_BLOCK_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");    
-
-    public final static Block isolationBlock = new BlockWarpIsolation(ISOLATION_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp-Field Isolation Block");      
-
-    public final static Block airgenBlock = new BlockAirGenerator(AIRGEN_BLOCKID, 0, Material.rock)
-            .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-            .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Air Generator"); 
-    
-    public final static Block laserBlock = new BlockLaser(LASER_BLOCK_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter");        
-
-    public final static Block laserCamBlock = new BlockLaserCam(LASER_BLOCKCAM_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter + Camera");          
-
-    public final static Block cameraBlock = new BlockCamera(CAMERA_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Camera block");      
-
-    public final static Block monitorBlock = new BlockMonitor(MONITOR_BLOCKID)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Monitor");     
-    
-    public final static Block boosterBlock = new BlockParticleBooster(PARTICLE_BOOSTER_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Particle Booster");      
-
-    public final static Block miningLaserBlock = new BlockMiningLaser(MINING_LASER_BLOCK_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Mining Laser");       
-
-    public final static Block liftBlock = new BlockLift(LIFT_BLOCKID, 0, Material.rock)
-    .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser lift");      
-    
-    public final static Block airBlock = (new BlockAir(AIR_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Air block"); 
-    public final static Block gasBlock = (new BlockGas(GAS_BLOCKID)).setHardness(0.0F).setUnlocalizedName("Gas block"); 
-
-    public final static Block iridiumBlock = new BlockIridium(IRIDIUM_BLOCKID)
-    .setHardness(0.8F).setResistance(150 * 4).setStepSound(Block.soundMetalFootstep)
-    .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Block of Iridium");       
+    public static Block iridiumBlock;     
     
     public static BiomeGenBase spaceBiome;
     public World space;
@@ -140,8 +86,14 @@ public class WarpDrive implements LoadingCallback {
     public boolean isOverlayEnabled = false;
     public int overlayType = 0;
     
-    @PreInit
+    public WarpDriveConfig config;
+    
+    @EventHandler
+    //@PreInit
     public void preInit(FMLPreInitializationEvent event) {
+    	this.config = new WarpDriveConfig(new Configuration(event.getSuggestedConfigurationFile()));
+    	this.config.loadAndSave();
+    	
         if(FMLCommonHandler.instance().getSide().isClient())
         {
             System.out.println("[WarpDrive] Registering sounds event handler...");
@@ -151,59 +103,114 @@ public class WarpDrive implements LoadingCallback {
 
     @Init
     public void load(FMLInitializationEvent event) {
-        
+    	// WARP CORE
+        this.warpCore = new BlockReactor(this.config.coreID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Core");
         LanguageRegistry.addName(warpCore, "Warp Core");
         GameRegistry.registerBlock(warpCore, "warpCore");
         GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
         
+        // CORE CONTROLLER
+        this.protocolBlock = new BlockProtocol(config.controllerID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp Controller");
         LanguageRegistry.addName(protocolBlock, "Warp Controller");
         GameRegistry.registerBlock(protocolBlock, "protocolBlock");
         GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");        
         
+        // WARP RADAR
+        this.radarBlock = new BlockRadar(config.radarID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("W-Radar");   
         LanguageRegistry.addName(radarBlock, "W-Radar");
         GameRegistry.registerBlock(radarBlock, "radarBlock");
         GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");         
 
+        // WARP ISOLATION
+        this.isolationBlock = new BlockWarpIsolation(config.isolationID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Warp-Field Isolation Block");  
         LanguageRegistry.addName(isolationBlock, "Warp-Field Isolation Block");
         GameRegistry.registerBlock(isolationBlock, "isolationBlock");         
         
+        // AIR GENERATOR
+        this.airgenBlock = new BlockAirGenerator(config.airgenID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Air Generator"); 
+        LanguageRegistry.addName(airgenBlock, "Air Generator");
+        GameRegistry.registerBlock(airgenBlock, "airgenBlock");
+        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");         
+        
+        // AIR BLOCK
+        this.airBlock = (new BlockAir(config.airID)).setHardness(0.0F).setUnlocalizedName("Air block"); 
         LanguageRegistry.addName(airBlock, "Air block");
         GameRegistry.registerBlock(airBlock, "airBlock");         
 
+        // GAS BLOCK
+        this.gasBlock = (new BlockGas(config.gasID)).setHardness(0.0F).setUnlocalizedName("Gas block");
         LanguageRegistry.addName(gasBlock, "Gas block");
-        GameRegistry.registerBlock(gasBlock, "gasBlock");         
+        GameRegistry.registerBlock(gasBlock, "gasBlock");            
         
-        LanguageRegistry.addName(airgenBlock, "Air Generator");
-        GameRegistry.registerBlock(airgenBlock, "airgenBlock");
-        GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");    
-        
+        // LASER EMITTER
+        this.laserBlock = new BlockLaser(config.laserID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter");  
         LanguageRegistry.addName(laserBlock, "Laser Emitter");
         GameRegistry.registerBlock(laserBlock, "laserBlock");
         GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");          
 
+        // LASER EMITTER WITH CAMERA
+        this.laserCamBlock = new BlockLaserCam(config.laserCamID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser Emitter + Camera"); 
         LanguageRegistry.addName(laserCamBlock, "Laser Emitter + Camera");
         GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");      
 
+        // CAMERA
+        this.cameraBlock = new BlockCamera(config.camID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Camera block");  
         LanguageRegistry.addName(cameraBlock, "Camera");
         GameRegistry.registerBlock(cameraBlock, "cameraBlock");           
         GameRegistry.registerTileEntity(TileEntityCamera.class, "cameraBlock");   
         
+        // MONITOR
+        this.monitorBlock = new BlockMonitor(config.monitorID)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Monitor");  
         LanguageRegistry.addName(monitorBlock, "Monitor");
         GameRegistry.registerBlock(monitorBlock, "monitorBlock");   
         GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");   
         
+        // MINING LASER
+        this.miningLaserBlock = new BlockMiningLaser(config.miningLaserID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Mining Laser"); 
         LanguageRegistry.addName(miningLaserBlock, "Mining Laser");
         GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
         GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");           
         
+        // PARTICLE BOOSTER
+        this.boosterBlock = new BlockParticleBooster(config.particleBoosterID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Particle Booster");   
         LanguageRegistry.addName(boosterBlock, "Particle Booster");
         GameRegistry.registerBlock(boosterBlock, "boosterBlock");
         GameRegistry.registerTileEntity(TileEntityParticleBooster.class, "boosterBlock");          
 
+        // RAY LIFT
+        this.liftBlock = new BlockLift(config.liftID, 0, Material.rock)
+        .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Laser lift");
         LanguageRegistry.addName(liftBlock, "Laser lift");
         GameRegistry.registerBlock(liftBlock, "liftBlock");
         GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");         
 
+        // IRIDIUM BLOCK
+        this.iridiumBlock = new BlockIridium(config.iridiumID)
+        .setHardness(0.8F).setResistance(150 * 4).setStepSound(Block.soundMetalFootstep)
+        .setCreativeTab(CreativeTabs.tabRedstone).setUnlocalizedName("Block of Iridium");  
         LanguageRegistry.addName(iridiumBlock, "Block of Iridium");
         GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");         
         

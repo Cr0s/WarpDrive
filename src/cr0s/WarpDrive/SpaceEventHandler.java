@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import java.util.HashMap;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -101,7 +102,7 @@ public class SpaceEventHandler {
         int id1 = e.worldObj.getBlockId(x, y, z);
         int id2 = e.worldObj.getBlockId(x, y + 1, z);
         
-        if (id1 == WarpDrive.AIR_BLOCKID || id2 == WarpDrive.AIR_BLOCKID) {
+        if (id1 == WarpDrive.instance.config.airID || id2 == WarpDrive.instance.config.airID) {
             return false;
         }
         

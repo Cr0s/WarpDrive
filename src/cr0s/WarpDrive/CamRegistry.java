@@ -25,7 +25,7 @@ public class CamRegistry {
 	
 	public boolean isCamAlive(CamRegistryItem i) {
 		if (i.worldObj != null) {
-			if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.CAMERA_BLOCKID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.LASER_BLOCKCAM_BLOCKID) {
+			if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.config.camID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.config.laserCamID) {
 				return false;
 			}
 			

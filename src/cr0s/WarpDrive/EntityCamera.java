@@ -90,7 +90,7 @@ public final class EntityCamera extends EntityLivingBase {
         	} else if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) && fireWaitTicks-- == 0) {
         		fireWaitTicks = 2;
         		// Make a shoot with camera-laser
-        		if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.LASER_BLOCKCAM_BLOCKID) {
+        		if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.instance.config.laserCamID) {
         			sendTargetPacket();
         		}
         	} else {

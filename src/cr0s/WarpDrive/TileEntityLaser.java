@@ -226,7 +226,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
 				}
 				
 				// Hit is a laser head
-				if (blockID == WarpDrive.instance.LASER_BLOCK_BLOCKID || blockID == WarpDrive.instance.LASER_BLOCKCAM_BLOCKID) {
+				if (blockID == WarpDrive.instance.config.laserID || blockID == WarpDrive.instance.config.laserCamID) {
 					// Compare frequencies
 					TileEntityLaser tel = (TileEntityLaser)worldObj.getBlockTileEntity(hit.blockX, hit.blockY, hit.blockZ);
 					if (tel != null && tel.getFrequency() == frequency) {
@@ -310,7 +310,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral{
     }    
     
     public boolean isWithCamera() {
-    	return (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.LASER_BLOCKCAM_BLOCKID);
+    	return (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.instance.config.laserCamID);
     }
     
     public int getFrequency() {

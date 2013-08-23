@@ -7,10 +7,15 @@ import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
 import ic2.api.energy.tile.IEnergyTile;
+import ic2.api.network.NetworkHelper;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -397,7 +402,20 @@ public class EntityJump extends Entity {
     public void finishJump() {
         System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
 
-        // Прыжок окончен
+        //FIXME TileEntity duplication workaround
+        System.out.println("Removing TE duplicates. Size before: " + targetWorld.loadedTileEntityList.size());
+        LocalProfiler.start("EntityJump.removeDuplicates()");
+        
+        try {
+        	targetWorld.loadedTileEntityList = this.removeDuplicates(targetWorld.loadedTileEntityList);
+        } catch (Exception e) {
+        	System.out.println("TE Duplicates removing exception: " + e.getMessage());
+        }
+        
+        LocalProfiler.stop();
+        
+        System.out.println("Removing TE duplicates. Size after: " + targetWorld.loadedTileEntityList.size());
+        
         killEntity("");
     }
 
@@ -452,9 +470,9 @@ public class EntityJump extends Entity {
 					method = c.getDeclaredMethod ("onLoaded", new Class[0]);
 					method.invoke (te, new Object[0]);													
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}
-			} else // Machine
+			} else // Machine/Generator
 			if (c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator")) {
 				try {
 					Method method;
@@ -465,8 +483,16 @@ public class EntityJump extends Entity {
 					method = c.getDeclaredMethod ("onLoaded", new Class[0]);
 					method.invoke (te, new Object[0]);												
 				} catch (Exception e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 				}				
+			}
+			
+			te.updateContainingBlockInfo();
+			
+			try {
+				NetworkHelper.updateTileEntityField(te, "facing");
+			} catch (Exception e) {
+				//e.printStackTrace();
 			}
 	    }    	
     }
@@ -502,7 +528,7 @@ public class EntityJump extends Entity {
                         for(int z = z1; z <= z2; z++) {
                             int blockID = worldObj.getBlockId(x, y, z);
                             // Skip air blocks
-                            if (blockID == 0 || blockID == WarpDrive.GAS_BLOCKID) {
+                            if (blockID == 0 || blockID == WarpDrive.instance.config.gasID) {
                                 continue;
                             }
 
@@ -583,7 +609,7 @@ public class EntityJump extends Entity {
                     int blockID = worldObj.getBlockId(x, y, z);
 
                     // Skipping air blocks
-                    if (blockID == 0 || blockID == WarpDrive.GAS_BLOCKID) { 
+                    if (blockID == 0 || blockID == WarpDrive.instance.config.gasID) { 
                         continue; 
                     }
                     
@@ -786,7 +812,7 @@ public class EntityJump extends Entity {
                         return false;
                     }
 
-                    if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.AIR_BLOCKID && blockID != WarpDrive.GAS_BLOCKID && blockID != 18) {
+                    if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.instance.config.airID && blockID != WarpDrive.instance.config.gasID && blockID != 18) {
                         blowX = x;
                         blowY = y;
                         blowZ = z;
@@ -843,7 +869,7 @@ public class EntityJump extends Entity {
             for (int z = minZ; z <= maxZ; z++) {
                 for (int y = minY; y <= maxY; y++) {
                     int blockID = worldObj.getBlockId(x, y, z);
-                    if (blockID == 0 || blockID == WarpDrive.AIR_BLOCKID || blockID == WarpDrive.GAS_BLOCKID) {
+                    if (blockID == 0 || blockID == WarpDrive.instance.config.airID || blockID == WarpDrive.instance.config.gasID) {
                         continue;
                     }
 
@@ -867,12 +893,6 @@ public class EntityJump extends Entity {
     }
 
     
-    /**
-     * Перемещение одиночного блока на новое место
-     *
-     * @param indexInShip индекс блока в сохранённом в памяти корабле
-     * @return состояние перемещения
-     */
     public boolean moveBlockSimple(int indexInShip) {
         try {
             JumpBlock shipBlock = ship[indexInShip];
@@ -894,7 +914,7 @@ public class EntityJump extends Entity {
 
             mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
             // Re-schedule air blocks update
-            if (blockID == WarpDrive.AIR_BLOCKID) {
+            if (blockID == WarpDrive.instance.config.airID) {
             	targetWorld.markBlockForUpdate(newX, newY, newZ);
             	targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 40 + targetWorld.rand.nextInt(20));
             }
@@ -930,6 +950,7 @@ public class EntityJump extends Entity {
                 newTileEntity.validate();
 
                 worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
+
                 targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
             }
         } catch (Exception exception) {
@@ -938,6 +959,24 @@ public class EntityJump extends Entity {
         }
 
         return true;
+    }
+    
+    public ArrayList<Object> removeDuplicates(List<TileEntity> l) {
+        Set<TileEntity> s = new TreeSet<TileEntity>(new Comparator<TileEntity>() {
+
+            @Override
+            public int compare(TileEntity o1, TileEntity o2) {
+                if (o1.xCoord == o2.xCoord && o1.yCoord == o2.yCoord && o1.zCoord == o2.zCoord) {
+                	System.out.println("Removed duplicated TE: " + o1 + ", " + o2);
+                	return 0;
+                } else {
+                	return 1;
+                }
+            }
+        });
+        
+        s.addAll(l);
+        return new ArrayList<Object>(Arrays.asList(s.toArray()));
     }
     
     @Override

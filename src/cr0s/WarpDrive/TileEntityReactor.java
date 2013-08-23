@@ -263,7 +263,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink {
         for (int y = ymin; y <= ymax; y++) {
             for (int x = xmin; x <= xmax; x++) {
                 for (int z = zmin; z <= zmax; z++) {
-                    if (worldObj.getBlockId(x, y, z) == WarpDrive.ISOLATION_BLOCKID) {
+                    if (worldObj.getBlockId(x, y, z) == WarpDrive.instance.config.isolationID) {
                         this.isolationBlocksCount++;
                     }
                 }

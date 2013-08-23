@@ -101,6 +101,8 @@ public class WarpCoresRegistry {
     public boolean isWarpCoreIntersectsWithOthers(TileEntityReactor core) {
         AxisAlignedBB aabb1, aabb2;
        
+        removeDeadCores();
+        
         for (TileEntityReactor c : registry) {
             // Skip cores in other worlds
         	if (c.worldObj != core.worldObj) {
@@ -143,10 +145,11 @@ public class WarpCoresRegistry {
     }
     
     public void removeDeadCores() {
+    	LocalProfiler.start("WCR.removeDeadCores()");
     	ArrayList<TileEntityReactor> oldRegistry = (ArrayList<TileEntityReactor>) registry.clone();
     	
         for (TileEntityReactor c : registry) {
-            if (c != null && c.worldObj != null && (c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.WARP_CORE_BLOCKID || (c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != null && c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()))) {
+            if (c != null && c.worldObj != null && (c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.instance.config.coreID|| (c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != null && c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()))) {
                 oldRegistry.remove(c);
                 return;
             }
@@ -154,6 +157,7 @@ public class WarpCoresRegistry {
         
         // Update old registry to new witout dead cores
         this.registry = (ArrayList<TileEntityReactor>) oldRegistry.clone();
+        LocalProfiler.stop();
     }
     
     // TODO: fix it to normal work in client

@@ -61,9 +61,9 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
 		Block.oreRedstoneGlowing.blockID,
 		Block.oreRedstone.blockID,
 		Block.oreNetherQuartz.blockID,
-		247, // IC
-		248, // IC
-		249,  // IC
+		Items.getItem("uraniumOre").itemID, // IC
+		Items.getItem("copperOre").itemID, // IC
+		Items.getItem("tinOre").itemID,  // IC
 		4095 // AS uranus
 	));
    
@@ -99,16 +99,25 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral{
    private int layerOffset = 1;
    
    private Vector3 minerVector;
-   private long uid = 0;
+   //private long uid = 0;
    
    TileEntityParticleBooster booster = null;
 
    private final int MFFS_FIELD_BLOCKID = 1681;
    
    private boolean isOnEarth = false;
-   
+   //int t = 20;
     @Override
     public void updateEntity() {
+    	/*if (uid == 0) {
+    		uid = worldObj.rand.nextInt(99999);
+    	}
+    	if (--t == 0) {
+    		t = 20;
+    		System.out.println("[MINER] Ticked: " + uid + " | " + xCoord + "; " + yCoord + "; " + zCoord);
+    	}*/
+    	
+    	
         isOnEarth = (worldObj.provider.dimensionId == 0);
         
     	if (isMining) {

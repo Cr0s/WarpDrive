@@ -210,7 +210,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
     }
     
     private void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) { 
-        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.GAS_BLOCKID, color, hollow, true, false);
+        EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.instance.config.gasID, color, hollow, true, false);
         esg.xCoord = x;
         esg.yCoord = y;
         esg.zCoord = z;
@@ -514,7 +514,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
         else if (random.nextInt(500) == 1) {
             blockID = Block.oreDiamond.blockID;
         } else if (random.nextInt(10000) == 42) {
-            blockID = WarpDrive.IRIDIUM_BLOCKID;
+            blockID = WarpDrive.instance.config.iridiumID;
         }
 
         return blockID;

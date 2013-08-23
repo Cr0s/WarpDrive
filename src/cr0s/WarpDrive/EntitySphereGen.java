@@ -6,9 +6,11 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.JumpBlock;
 import cr0s.WarpDrive.LocalProfiler;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
@@ -239,7 +241,7 @@ public final class EntitySphereGen extends Entity {
         } else if (random.nextInt(1000) == 1) {
             _blockID = Block.bedrock.blockID;
         } else if (random.nextInt(10000) == 42) {
-            _blockID = WarpDrive.IRIDIUM_BLOCKID;
+            _blockID = WarpDrive.instance.config.iridiumID;
         }
 
         return _blockID;
