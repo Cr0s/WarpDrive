@@ -12,6 +12,5 @@ public class CloudRenderBlank extends IRenderHandler
     @Override
     public void render(float partialTicks, WorldClient world, Minecraft mc)
     {
-    
     }
 }

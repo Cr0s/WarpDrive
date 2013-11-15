@@ -1,10 +1,8 @@
 package cr0s.WarpDrive;
 
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.TileEntityProtocol;
 
 import java.util.Random;
 
@@ -16,19 +14,20 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockParticleBooster extends BlockContainer { 
+public class BlockParticleBooster extends BlockContainer
+{
     private Icon[] iconBuffer;
-   
-    public BlockParticleBooster(int id, int texture, Material material) {
+
+    public BlockParticleBooster(int id, int texture, Material material)
+    {
         super(id, material);
     }
-        
+
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[12];
-        
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide0");
         iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide1");
         iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide2");
@@ -40,26 +39,31 @@ public class BlockParticleBooster extends BlockContainer {
         iconBuffer[8] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide8");
         iconBuffer[9] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide9");
         iconBuffer[10] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide10");
-        
         iconBuffer[11] = par1IconRegister.registerIcon("warpdrive:particleBoosterTopBottom");
     }
-    
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 0 || side == 1) {
+        if (side == 0 || side == 1)
+        {
             return iconBuffer[11];
         }
-        
-        if (metadata > 10) { metadata = 10; }
+
+        if (metadata > 10)
+        {
+            metadata = 10;
+        }
+
         return iconBuffer[metadata];
     }
-    
+
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1)
+    {
         return new TileEntityParticleBooster();
     }
-    
+
     /**
      * Returns the quantity of items to drop on block destruction.
      */
@@ -77,7 +81,7 @@ public class BlockParticleBooster extends BlockContainer {
     {
         return this.blockID;
     }
-    
+
     /**
      * Called upon block activation (right click on the block.)
      */
@@ -85,24 +89,30 @@ public class BlockParticleBooster extends BlockContainer {
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        {
             return false;
+        }
+
         TileEntityParticleBooster booster = (TileEntityParticleBooster)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (booster != null){ 
+        if (booster != null)
+        {
             par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getCurrentEnergyValue());
         }
+
         return true;
-    }    
-    
+    }
+
     @Override
     public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
     {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
-        
-        if (te != null) {
-        	te.invalidate();
+
+        if (te != null)
+        {
+            te.invalidate();
         }
-        
-    	super.breakBlock(par1World, par2, par3, par4, par5, par6);
-    }     
+
+        super.breakBlock(par1World, par2, par3, par4, par5, par6);
+    }
 }

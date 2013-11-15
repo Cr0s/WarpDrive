@@ -2,11 +2,11 @@ package cr0s.WarpDrive;
 
 import net.minecraft.world.biome.BiomeGenBase;
 
-public class BiomeSpace extends BiomeGenBase {
-
-    public BiomeSpace(int par1) {
+public class BiomeSpace extends BiomeGenBase
+{
+    public BiomeSpace(int par1)
+    {
         super(par1);
-        
         this.theBiomeDecorator.treesPerChunk = 0;
         //this.temperature = 1F;
         this.theBiomeDecorator.flowersPerChunk = 0;
@@ -15,17 +15,20 @@ public class BiomeSpace extends BiomeGenBase {
     }
 
     @Override
-    public float getSpawningChance() {
+    public float getSpawningChance()
+    {
         return 0;
     }
-    
+
     @Override
-    public boolean canSpawnLightningBolt() {
+    public boolean canSpawnLightningBolt()
+    {
         return false;
     }
-    
+
     @Override
-    public boolean getEnableSnow() {
+    public boolean getEnableSnow()
+    {
         return false;
     }
 }

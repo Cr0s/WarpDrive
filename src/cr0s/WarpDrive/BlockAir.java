@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -12,7 +11,7 @@ import net.minecraft.world.World;
 public class BlockAir extends Block
 {
     private final boolean TRANSPARENT_AIR = true;
-    
+
     public BlockAir(int par1)
     {
         super(par1, Material.air);
@@ -65,7 +64,7 @@ public class BlockAir extends Block
     {
         this.blockIcon = par1IconRegister.registerIcon("warpdrive:airBlock");
     }
-      
+
     @Override
     public int getMobilityFlag()
     {
@@ -77,7 +76,6 @@ public class BlockAir extends Block
     {
         return -1;
     }
-
 
     /**
      * Returns the quantity of items to drop on block destruction.
@@ -95,8 +93,8 @@ public class BlockAir extends Block
     public int tickRate(World par1World)
     {
         return 20;
-    }   
-    
+    }
+
     /**
      * Ticks the block if it's been scheduled
      */
@@ -105,18 +103,21 @@ public class BlockAir extends Block
     {
         int concentration = par1World.getBlockMetadata(x, y, z);
         boolean isInSpaceWorld = par1World.provider.dimensionId == WarpDrive.instance.spaceDimID || par1World.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID;
-        
+
         // Remove air block to vacuum block
-        if (concentration <= 0 || !isInSpaceWorld) {
+        if (concentration <= 0 || !isInSpaceWorld)
+        {
             //System.out.println("Killing air block");
             par1World.setBlock(x, y, z, 0, 0, 2); // replace our air block to vacuum block
-        } else {
+        }
+        else
+        {
             //System.out.println("Conc: current " + concentration + " new: " + (concentration - 1) + " to spread: " + (concentration - 2));
-            // Try to spread the air  
+            // Try to spread the air
             spreadAirBlock(par1World, x, y, z, concentration);
         }
-        
-        par1World.scheduleBlockUpdate(x, y, z, this.blockID, 20);        
+
+        par1World.scheduleBlockUpdate(x, y, z, this.blockID, 20);
     }
 
     @Override
@@ -167,73 +168,95 @@ public class BlockAir extends Block
                 return false;
             }
         }
-    }   
-    
-    private void spreadAirBlock(World worldObj, int x, int y, int z, int concentration) {
-        if (concentration <= 0) {
+    }
+
+    private void spreadAirBlock(World worldObj, int x, int y, int z, int concentration)
+    {
+        if (concentration <= 0)
+        {
             return;
         }
 
-	int mid_concentration;
-	int block_count = 1;
-
+        int mid_concentration;
+        int block_count = 1;
         final int K = 128;
-        
-	mid_concentration = worldObj.getBlockMetadata(x, y, z) * K;
-        
-	if(worldObj.isAirBlock(x + 1, y, z)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x + 1, y, z) * K;
-	}
-	if(worldObj.isAirBlock(x - 1, y, z)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x - 1, y, z) * K;
-	}
-	if(worldObj.isAirBlock(x, y + 1, z)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x, y + 1, z) * K;
-	}
-	if(worldObj.isAirBlock(x, y - 1, z)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x, y - 1, z) * K;
-	}
-	if(worldObj.isAirBlock(x, y, z + 1)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x, y, z + 1) * K;
-	}
-	if(worldObj.isAirBlock(x, y, z - 1)){
-		block_count++;
-		mid_concentration += worldObj.getBlockMetadata(x, y, z - 1) * K;
-	}
+        mid_concentration = worldObj.getBlockMetadata(x, y, z) * K;
 
-	mid_concentration = mid_concentration / block_count;
-       
-	SetAirBlockConcentration(worldObj, x, y, z, mid_concentration / K);
-        
-	if(worldObj.isAirBlock(x + 1, y, z) && (mid_concentration>worldObj.getBlockMetadata(x+1, y, z) * K)){
-		SetAirBlockConcentration(worldObj, x+1, y, z, mid_concentration / K);
-	}
-	if(worldObj.isAirBlock(x - 1, y, z) && (mid_concentration>worldObj.getBlockMetadata(x-1, y, z) * K)){
-		SetAirBlockConcentration(worldObj, x-1, y, z, mid_concentration / K);
-	}
-	if(worldObj.isAirBlock(x, y + 1, z) && (mid_concentration>worldObj.getBlockMetadata(x, y+1, z) * K)){
-		SetAirBlockConcentration(worldObj, x, y + 1, z, mid_concentration / K);
-	}
-	if(worldObj.isAirBlock(x, y - 1, z) && (mid_concentration>worldObj.getBlockMetadata(x, y-1, z) * K)){
-		SetAirBlockConcentration(worldObj, x, y - 1, z, mid_concentration  / K);
-	}
-	if(worldObj.isAirBlock(x, y, z + 1) && (mid_concentration>worldObj.getBlockMetadata(x, y, z+1) * K)){
-		SetAirBlockConcentration(worldObj, x, y, z + 1, mid_concentration / K);
-	}
-	if(worldObj.isAirBlock(x, y, z - 1) && (mid_concentration>worldObj.getBlockMetadata(x, y, z-1) * K)){
-		SetAirBlockConcentration(worldObj, x, y, z - 1, mid_concentration / K);
+        if (worldObj.isAirBlock(x + 1, y, z))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x + 1, y, z) * K;
+        }
+
+        if (worldObj.isAirBlock(x - 1, y, z))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x - 1, y, z) * K;
+        }
+
+        if (worldObj.isAirBlock(x, y + 1, z))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x, y + 1, z) * K;
+        }
+
+        if (worldObj.isAirBlock(x, y - 1, z))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x, y - 1, z) * K;
+        }
+
+        if (worldObj.isAirBlock(x, y, z + 1))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x, y, z + 1) * K;
+        }
+
+        if (worldObj.isAirBlock(x, y, z - 1))
+        {
+            block_count++;
+            mid_concentration += worldObj.getBlockMetadata(x, y, z - 1) * K;
+        }
+
+        mid_concentration = mid_concentration / block_count;
+        SetAirBlockConcentration(worldObj, x, y, z, mid_concentration / K);
+
+        if (worldObj.isAirBlock(x + 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x + 1, y, z) * K))
+        {
+            SetAirBlockConcentration(worldObj, x + 1, y, z, mid_concentration / K);
+        }
+
+        if (worldObj.isAirBlock(x - 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x - 1, y, z) * K))
+        {
+            SetAirBlockConcentration(worldObj, x - 1, y, z, mid_concentration / K);
+        }
+
+        if (worldObj.isAirBlock(x, y + 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y + 1, z) * K))
+        {
+            SetAirBlockConcentration(worldObj, x, y + 1, z, mid_concentration / K);
+        }
+
+        if (worldObj.isAirBlock(x, y - 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y - 1, z) * K))
+        {
+            SetAirBlockConcentration(worldObj, x, y - 1, z, mid_concentration  / K);
+        }
+
+        if (worldObj.isAirBlock(x, y, z + 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z + 1) * K))
+        {
+            SetAirBlockConcentration(worldObj, x, y, z + 1, mid_concentration / K);
+        }
+
+        if (worldObj.isAirBlock(x, y, z - 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z - 1) * K))
+        {
+            SetAirBlockConcentration(worldObj, x, y, z - 1, mid_concentration / K);
         }
     }
 
-    private void SetAirBlockConcentration(World worldObj, int x, int y, int z, int concentration) {
-	worldObj.setBlock(x, y, z, this.blockID, concentration, 2);
+    private void SetAirBlockConcentration(World worldObj, int x, int y, int z, int concentration)
+    {
+        worldObj.setBlock(x, y, z, this.blockID, concentration, 2);
     }
-    
+
     @Override
     public boolean func_82506_l()
     {
@@ -255,7 +278,8 @@ public class BlockAir extends Block
         if (par1World.provider.dimensionId == WarpDrive.instance.spaceDimID || par1World.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
         {
             par1World.scheduleBlockUpdate(par2, par3, par4, this.blockID, this.tickRate(par1World));
-        } else
+        }
+        else
         {
             par1World.setBlockToAir(par2, par3, par4);
         }

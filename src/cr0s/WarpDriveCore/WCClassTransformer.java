@@ -1,6 +1,5 @@
 package cr0s.WarpDriveCore;
 
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -17,14 +16,15 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTransformer {
+public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTransformer
+{
+    private HashMap<String, String> nodemap = new HashMap<String, String>();
 
-	private HashMap<String,String> nodemap = new HashMap<String, String>();
-	
-	private final String GRAVITY_MANAGER_CLASS = "cr0s/WarpDrive/GravityManager";
-	
-	public WCClassTransformer() {
-		// Obfuscated Notch methods
+    private final String GRAVITY_MANAGER_CLASS = "cr0s/WarpDrive/GravityManager";
+
+    public WCClassTransformer()
+    {
+        // Obfuscated Notch methods
         nodemap.put("worldClass", "abv");
         nodemap.put("playerMP", "ju");
         nodemap.put("netLoginHandler", "jx");
@@ -66,49 +66,61 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         nodemap.put("clickMiddleMouseButtonDesc", "()V");
         nodemap.put("itemRendererClass", "bfg");
         nodemap.put("renderOverlaysMethod", "b");
-        nodemap.put("renderOverlaysDesc", "(F)V");		
-	}
-	
-	@Override
-	public byte[] transform(String name, String transformedName, byte[] bytes) {
-		
-		if (nodemap == null) {
-			System.out.println("========= NODEMAP IS NULL!!! ========");
-			return bytes;
-		}
-		
-		if (name.replace('.', '/').equals(nodemap.get("entityLivingClass"))) {
-			bytes = transformEntityLiving(bytes);
-        } else
-    	if(name.replace('.', '/').equals(nodemap.get("entityItemClass"))) {
-            bytes = transformEntityItem(bytes);
-    	}
-		
-		return bytes;
-	}
+        nodemap.put("renderOverlaysDesc", "(F)V");
+    }
 
-	private byte[] transformEntityItem( byte[] bytes) {
+    @Override
+    public byte[] transform(String name, String transformedName, byte[] bytes)
+    {
+        if (nodemap == null)
+        {
+            System.out.println("========= NODEMAP IS NULL!!! ========");
+            return bytes;
+        }
+
+        if (name.replace('.', '/').equals(nodemap.get("entityLivingClass")))
+        {
+            bytes = transformEntityLiving(bytes);
+        }
+        else if (name.replace('.', '/').equals(nodemap.get("entityItemClass")))
+        {
+            bytes = transformEntityItem(bytes);
+        }
+
+        return bytes;
+    }
+
+    private byte[] transformEntityItem(byte[] bytes)
+    {
         ClassNode node = new ClassNode();
         ClassReader reader = new ClassReader(bytes);
         reader.accept(node, 0);
         int operationCount = 2;
         int injectionCount = 0;
         Iterator methods = node.methods.iterator();
+
         do
         {
-            if(!methods.hasNext())
+            if (!methods.hasNext())
+            {
                 break;
+            }
+
             MethodNode methodnode = (MethodNode)methods.next();
-            if(methodnode.name.equals(nodemap.get("onUpdateMethod")) && methodnode.desc.equals(nodemap.get("onUpdateDesc")))
+
+            if (methodnode.name.equals(nodemap.get("onUpdateMethod")) && methodnode.desc.equals(nodemap.get("onUpdateDesc")))
             {
                 int count = 0;
-                while(count < methodnode.instructions.size()) 
+
+                while (count < methodnode.instructions.size())
                 {
                     AbstractInsnNode list = methodnode.instructions.get(count);
-                    if(list instanceof LdcInsnNode)
+
+                    if (list instanceof LdcInsnNode)
                     {
                         LdcInsnNode nodeAt = (LdcInsnNode)list;
-                        if(nodeAt.cst.equals(Double.valueOf(0.039999999105930328D)))
+
+                        if (nodeAt.cst.equals(Double.valueOf(0.039999999105930328D)))
                         {
                             VarInsnNode beforeNode = new VarInsnNode(25, 0);
                             MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getItemGravity", (new StringBuilder()).append("(L").append((String)nodemap.get("entityItemClass")).append(";)D").toString());
@@ -116,7 +128,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
                             methodnode.instructions.set(nodeAt, overwriteNode);
                             injectionCount++;
                         }
-                        if(nodeAt.cst.equals(Double.valueOf(0.98000001907348633D)))
+
+                        if (nodeAt.cst.equals(Double.valueOf(0.98000001907348633D)))
                         {
                             VarInsnNode beforeNode = new VarInsnNode(25, 0);
                             MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getItemGravity2", (new StringBuilder()).append("(L").append((String)nodemap.get("entityItemClass")).append(";)D").toString());
@@ -125,39 +138,51 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
                             injectionCount++;
                         }
                     }
+
                     count++;
                 }
             }
-        } while(true);
+        }
+        while (true);
+
         ClassWriter writer = new ClassWriter(1);
         node.accept(writer);
         bytes = writer.toByteArray();
         System.out.println((new StringBuilder()).append("[WDCore] WarpDrive successfully injected bytecode into: ").append(node.name).append(" (").append(injectionCount).append(" / ").append(operationCount).append(")").toString());
         return bytes;
-	}
+    }
 
-	private byte[] transformEntityLiving(byte[] bytes) {
+    private byte[] transformEntityLiving(byte[] bytes)
+    {
         ClassNode node = new ClassNode();
         ClassReader reader = new ClassReader(bytes);
         reader.accept(node, 0);
         int operationCount = 1;
         int injectionCount = 0;
         Iterator methods = node.methods.iterator();
+
         do
         {
-            if(!methods.hasNext())
+            if (!methods.hasNext())
+            {
                 break;
+            }
+
             MethodNode methodnode = (MethodNode)methods.next();
-            if(methodnode.name.equals(nodemap.get("moveEntityMethod")) && methodnode.desc.equals(nodemap.get("moveEntityDesc")))
+
+            if (methodnode.name.equals(nodemap.get("moveEntityMethod")) && methodnode.desc.equals(nodemap.get("moveEntityDesc")))
             {
                 int count = 0;
-                while(count < methodnode.instructions.size()) 
+
+                while (count < methodnode.instructions.size())
                 {
                     AbstractInsnNode list = methodnode.instructions.get(count);
-                    if(list instanceof LdcInsnNode)
+
+                    if (list instanceof LdcInsnNode)
                     {
                         LdcInsnNode nodeAt = (LdcInsnNode)list;
-                        if(nodeAt.cst.equals(Double.valueOf(0.080000000000000002D)))
+
+                        if (nodeAt.cst.equals(Double.valueOf(0.080000000000000002D)))
                         {
                             VarInsnNode beforeNode = new VarInsnNode(25, 0);
                             MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getGravityForEntity", (new StringBuilder()).append("(L").append((String)nodemap.get("entityLivingClass")).append(";)D").toString());
@@ -166,14 +191,17 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
                             injectionCount++;
                         }
                     }
+
                     count++;
                 }
             }
-        } while(true);
+        }
+        while (true);
+
         ClassWriter writer = new ClassWriter(1);
         node.accept(writer);
         bytes = writer.toByteArray();
         System.out.println((new StringBuilder()).append("[WDCore] WarpDrive successfully injected bytecode into: ").append(node.name).append(" (").append(injectionCount).append(" / ").append(operationCount).append(")").toString());
         return bytes;
-	}
+    }
 }

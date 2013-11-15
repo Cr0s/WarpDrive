@@ -7,46 +7,53 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 
-
-public class SpaceTpCommand extends CommandBase {
-
+public class SpaceTpCommand extends CommandBase
+{
     @Override
-    public int getRequiredPermissionLevel() {
+    public int getRequiredPermissionLevel()
+    {
         return 2;
     }
-    
+
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "space";
     }
 
     @Override
-    public void processCommand(ICommandSender icommandsender, String[] astring) {
+    public void processCommand(ICommandSender icommandsender, String[] astring)
+    {
         EntityPlayerMP player = (EntityPlayerMP)icommandsender;
         MinecraftServer server = MinecraftServer.getServer();
         int targetDim = WarpDrive.instance.spaceDimID;
-        if (astring.length >= 1) {
-            if ("hyper".equals(astring[0])) {
+
+        if (astring.length >= 1)
+        {
+            if ("hyper".equals(astring[0]))
+            {
                 targetDim = WarpDrive.instance.hyperSpaceDimID;
-            } else {
+            }
+            else
+            {
                 notifyAdmins(icommandsender, "/space: teleporting player " + astring[0] + " to space", new Object[0]);
                 player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
             }
         }
-        
-        if (player == null) {
+
+        if (player == null)
+        {
             return;
         }
-        
-        WorldServer to = server.worldServerForDimension(targetDim);        
-        SpaceTeleporter teleporter = new SpaceTeleporter(to, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 
+        WorldServer to = server.worldServerForDimension(targetDim);
+        SpaceTeleporter teleporter = new SpaceTeleporter(to, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
         server.getConfigurationManager().transferPlayerToDimension(player, targetDim, teleporter);
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getCommandUsage(ICommandSender icommandsender)
+    {
         return "/space [hyper|<player>]";
     }
-    
 }

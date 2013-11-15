@@ -4,8 +4,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.JumpBlock;
-import cr0s.WarpDrive.LocalProfiler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,251 +17,340 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
-public final class EntitySphereGen extends Entity {
+public final class EntitySphereGen extends Entity
+{
     public int xCoord;
     public int yCoord;
     public int zCoord;
-    
+
     private int radius;
     private int blockID;
     private int blockMeta;
     private boolean hollow;
     private boolean fillingSphere; // new sphere blocks does not replace existing blocks (for gases)
-    private boolean surfaceSphere; // generate random surface blocks or fixed blockID 
-    
+    private boolean surfaceSphere; // generate random surface blocks or fixed blockID
+
     private final int BLOCKS_PER_TICK = 10000;
 
     private final int STATE_SAVING = 0;
     private final int STATE_SETUP = 1;
     private final int STATE_STOP = 2;
     private int state = STATE_SAVING;
-    
+
     private int currentIndex = 0;
-    
+
     private ArrayList<JumpBlock> blocks;
-    
+
     private boolean isICBMLoaded = false, isAELoaded = false;
-    
+
     private List<Integer> ores;
-    
-    public EntitySphereGen(World world) {
+
+    public EntitySphereGen(World world)
+    {
         super(world);
     }
 
-    public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere, boolean surfaceSphere) {
+    public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere, boolean surfaceSphere)
+    {
         super(world);
-
         // Check for mods is present
         isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
-        isAELoaded = Loader.isModLoaded("AppliedEnergistics");        
-        
+        isAELoaded = Loader.isModLoaded("AppliedEnergistics");
         this.xCoord = x;
         this.posX = (double) x;
-
         this.yCoord = y;
         this.posY = (double) y;
-
         this.zCoord = z;
         this.posZ = (double) z;
-        
         this.radius = radius;
         this.blockID = blockID;
         this.blockMeta = blockMeta;
         this.hollow = hollow;
         this.fillingSphere = fillingSphere;
         this.surfaceSphere = surfaceSphere;
-        
         this.state = STATE_SAVING;
-        
         blocks = new ArrayList<JumpBlock>();
         ores = (List<Integer>)TileEntityMiningLaser.valuableOres.clone();
-        
+
         if (isICBMLoaded)
         {
             ores.add(3880);
             ores.add(3970);
             ores.add(39701);
-        }        
+        }
     }
 
-    public void killEntity() {
+    public void killEntity()
+    {
         this.state = STATE_STOP;
         worldObj.removeEntity(this);
     }
 
     @Override
-    public void onUpdate() {
+    public void onUpdate()
+    {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        {
             return;
-        
-        switch (this.state) {
+        }
+
+        switch (this.state)
+        {
             case STATE_SAVING:
                 System.out.println("[ESG] Saving blocks...");
                 saveSphereBlocks();
                 this.state = STATE_SETUP;
                 break;
-            
+
             case STATE_SETUP:
-                if (currentIndex >= blocks.size()-1) {
+                if (currentIndex >= blocks.size() - 1)
+                {
                     currentIndex = 0;
                     killEntity();
-                } else {
+                }
+                else
+                {
                     setupBlocksTick();
                 }
         }
     }
-    
-    private void setupBlocksTick() {
+
+    private void setupBlocksTick()
+    {
         LocalProfiler.start("EntitySphereGen.setupBlocksTick");
         int blocksToMove = Math.min(BLOCKS_PER_TICK, blocks.size() - currentIndex);
-
         System.out.println("[ESG] Setting up blocks: " + currentIndex + "/" + blocks.size() + " [bts: " + blocksToMove + "]");
         int notifyFlag;
-        
-        for (int index = 0; index < blocksToMove; index++) {
-            if (currentIndex >= blocks.size()) break;
+
+        for (int index = 0; index < blocksToMove; index++)
+        {
+            if (currentIndex >= blocks.size())
+            {
+                break;
+            }
 
             notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
-            
             JumpBlock jb = blocks.get(currentIndex);
             mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.blockID, jb.blockMeta, notifyFlag);
-            
             currentIndex++;
         }
-        LocalProfiler.stop();        
+
+        LocalProfiler.stop();
     }
-    
-    private void saveSphereBlocks() {
+
+    private void saveSphereBlocks()
+    {
         radius += 0.5D; // Radius from center of block
         double radiusSq = radius * radius; // Optimization to avoid square roots
         double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow sphere
-
         int ceilRadius = (int) Math.ceil(radius);
-        
+
         // Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
-        for (int x = 0; x <= ceilRadius; x++) {
-            for (int y = 0; y <= ceilRadius; y++) {
-                for (int z = 0; z <= ceilRadius; z++) {
+        for (int x = 0; x <= ceilRadius; x++)
+        {
+            for (int y = 0; y <= ceilRadius; y++)
+            {
+                for (int z = 0; z <= ceilRadius; z++)
+                {
                     double dSq = lengthSq(x, y, z); // Distance from current position to center
 
                     // Skip too far blocks
-                    if (dSq > radiusSq) {
+                    if (dSq > radiusSq)
+                    {
                         continue;
                     }
 
                     // Hollow sphere condition
                     if ((hollow) && (
-                          (dSq < radius1Sq) || ((lengthSq(x + 1, y, z) <= radiusSq) && (lengthSq(x, y + 1, z) <= radiusSq) && (lengthSq(x, y, z + 1) <= radiusSq))))
+                                (dSq < radius1Sq) || ((lengthSq(x + 1, y, z) <= radiusSq) && (lengthSq(x, y + 1, z) <= radiusSq) && (lengthSq(x, y, z + 1) <= radiusSq))))
                     {
-                          continue;
+                        continue;
                     }
 
-                    if (surfaceSphere) {
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
                     }
+
                     // Add blocks to memory
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord + x, yCoord + y, zCoord + z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
                     }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord - x, yCoord + y, zCoord + z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord + x, yCoord - y, zCoord + z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord + x, yCoord + y, zCoord - z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord - x, yCoord - y, zCoord + z));
-                   
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord + x, yCoord - y, zCoord - z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord - x, yCoord + y, zCoord - z));
-                    
-                    if (surfaceSphere) {
+
+                    if (surfaceSphere)
+                    {
                         blockID = getRandomSurfaceBlockID(worldObj.rand, false, false);
-                        if (blockID == 39701) { blockMeta = blockID % 10; blockID = blockID / 10; }
-                    }                    
+
+                        if (blockID == 39701)
+                        {
+                            blockMeta = blockID % 10;
+                            blockID = blockID / 10;
+                        }
+                    }
+
                     addBlock(new JumpBlock(blockID, blockMeta, xCoord - x, yCoord - y, zCoord - z));
                 }
             }
         }
-        
+
         if (blocks != null)
-        	System.out.println("[ESG] Saved " + blocks.size() + " blocks");
+        {
+            System.out.println("[ESG] Saved " + blocks.size() + " blocks");
+        }
     }
-    
-    private void addBlock(JumpBlock jb) {
+
+    private void addBlock(JumpBlock jb)
+    {
         // Do not replace exitsting blocks if fillingSphere is true
-        if (fillingSphere && !worldObj.isAirBlock(jb.x, jb.y, jb.z)) {
+        if (fillingSphere && !worldObj.isAirBlock(jb.x, jb.y, jb.z))
+        {
             return;
         }
-        
-        if (blocks == null) { return; }
+
+        if (blocks == null)
+        {
+            return;
+        }
+
         blocks.add(jb);
     }
-    
-    public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble) {
+
+    public int getRandomSurfaceBlockID(Random random, boolean corrupted, boolean nocobble)
+    {
         int _blockID = Block.stone.blockID;
-        if (corrupted) {
+
+        if (corrupted)
+        {
             _blockID = Block.cobblestone.blockID;
         }
 
-        if (random.nextInt(25) == 5 || nocobble) {
+        if (random.nextInt(25) == 5 || nocobble)
+        {
             _blockID = ores.get(random.nextInt(ores.size()));
-        } 
-        else if (random.nextInt(350) == 1 && isAELoaded) {
+        }
+        else if (random.nextInt(350) == 1 && isAELoaded)
+        {
             _blockID = 902; // quarz (AE)
         }
-        else if (random.nextInt(500) == 1) {
+        else if (random.nextInt(500) == 1)
+        {
             _blockID = Block.oreDiamond.blockID;
-        } else if (random.nextInt(1000) == 1) {
+        }
+        else if (random.nextInt(1000) == 1)
+        {
             _blockID = Block.bedrock.blockID;
-        } else if (random.nextInt(10000) == 42) {
+        }
+        else if (random.nextInt(10000) == 42)
+        {
             _blockID = WarpDrive.instance.config.iridiumID;
         }
 
         return _blockID;
-    }    
-    
-    private static double lengthSq(double x, double y, double z) {
+    }
+
+    private static double lengthSq(double x, double y, double z)
+    {
         return (x * x) + (y * y) + (z * z);
-    }    
-    
-    @Override
-    protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
     }
 
     @Override
-    protected void entityInit() {
+    protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
+    {
     }
 
     @Override
-    protected void writeEntityToNBT(NBTTagCompound var1) {
+    protected void entityInit()
+    {
     }
-    
-        // Own implementation of setting blocks withow light recalculation in optimization purposes
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound var1)
+    {
+    }
+
+    // Own implementation of setting blocks withow light recalculation in optimization purposes
     public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
     {
         if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
@@ -280,7 +367,6 @@ public final class EntitySphereGen extends Entity {
             {
                 w.markBlockForUpdate(x, y, z);
                 Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
-
                 return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
             }
         }
@@ -324,7 +410,6 @@ public final class EntitySphereGen extends Entity {
 
             int j2 = c.xPosition * 16 + x;
             int k2 = c.zPosition * 16 + z;
-
             extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
 
             if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
@@ -334,7 +419,6 @@ public final class EntitySphereGen extends Entity {
             else
             {
                 extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
-
                 TileEntity tileentity;
 
                 if (blockId != 0)

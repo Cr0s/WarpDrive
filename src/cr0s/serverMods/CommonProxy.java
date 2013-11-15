@@ -1,8 +1,9 @@
 package cr0s.serverMods;
 
-public class CommonProxy {
+public class CommonProxy
+{
     // some code goes here
-    public void setupLoginHook() {
-        
+    public void setupLoginHook()
+    {
     }
 }

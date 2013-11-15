@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -11,9 +10,9 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockGas extends Block
-{   
+{
     private Icon[] gasIcons;
-    
+
     public BlockGas(int par1)
     {
         super(par1, Material.air);
@@ -65,27 +64,26 @@ public class BlockGas extends Block
     public void registerIcons(IconRegister par1IconRegister)
     {
         gasIcons = new Icon[12];
-        
         gasIcons[0] = par1IconRegister.registerIcon("warpdrive:gasBlockBlue");
-        gasIcons[1] = par1IconRegister.registerIcon("warpdrive:gasBlockRed"); 
+        gasIcons[1] = par1IconRegister.registerIcon("warpdrive:gasBlockRed");
         gasIcons[2] = par1IconRegister.registerIcon("warpdrive:gasBlockGreen");
-        gasIcons[3] = par1IconRegister.registerIcon("warpdrive:gasBlockYellow"); 
-        gasIcons[4] = par1IconRegister.registerIcon("warpdrive:gasBlockDark"); 
-        gasIcons[5] = par1IconRegister.registerIcon("warpdrive:gasBlockDarkness"); 
-        gasIcons[6] = par1IconRegister.registerIcon("warpdrive:gasBlockWhite"); 
-        gasIcons[7] = par1IconRegister.registerIcon("warpdrive:gasBlockMilk"); 
-        gasIcons[8] = par1IconRegister.registerIcon("warpdrive:gasBlockOrange"); 
-        gasIcons[9] = par1IconRegister.registerIcon("warpdrive:gasBlockSyren"); 
-        gasIcons[10] = par1IconRegister.registerIcon("warpdrive:gasBlockGray"); 
+        gasIcons[3] = par1IconRegister.registerIcon("warpdrive:gasBlockYellow");
+        gasIcons[4] = par1IconRegister.registerIcon("warpdrive:gasBlockDark");
+        gasIcons[5] = par1IconRegister.registerIcon("warpdrive:gasBlockDarkness");
+        gasIcons[6] = par1IconRegister.registerIcon("warpdrive:gasBlockWhite");
+        gasIcons[7] = par1IconRegister.registerIcon("warpdrive:gasBlockMilk");
+        gasIcons[8] = par1IconRegister.registerIcon("warpdrive:gasBlockOrange");
+        gasIcons[9] = par1IconRegister.registerIcon("warpdrive:gasBlockSyren");
+        gasIcons[10] = par1IconRegister.registerIcon("warpdrive:gasBlockGray");
         gasIcons[11] = par1IconRegister.registerIcon("warpdrive:gasBlockViolet");
     }
-      
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
         return gasIcons[metadata];
-    }     
-    
+    }
+
     @Override
     public int getMobilityFlag()
     {
@@ -97,7 +95,6 @@ public class BlockGas extends Block
     {
         return -1;
     }
-
 
     /**
      * Returns the quantity of items to drop on block destruction.
@@ -156,8 +153,8 @@ public class BlockGas extends Block
                 return false;
             }
         }
-    }   
-    
+    }
+
     @Override
     public boolean func_82506_l()
     {

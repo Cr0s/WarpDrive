@@ -12,36 +12,38 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockLaserCam extends BlockContainer { 
+public class BlockLaserCam extends BlockContainer
+{
     private Icon[] iconBuffer;
-    
+
     private final int ICON_SIDE = 0;
-   
-    public BlockLaserCam(int id, int texture, Material material) {
+
+    public BlockLaserCam(int id, int texture, Material material)
+    {
         super(id, material);
     }
-        
+
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[1];
-       
         // Solid textures
         iconBuffer[ICON_SIDE] = par1IconRegister.registerIcon("warpdrive:laserSideCam");
     }
-    
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
-    	return iconBuffer[ICON_SIDE];
+        return iconBuffer[ICON_SIDE];
     }
-    
+
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1)
+    {
         return new TileEntityLaser();
     }
-    
+
     /**
      * Returns the quantity of items to drop on block destruction.
      */
@@ -58,5 +60,5 @@ public class BlockLaserCam extends BlockContainer {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    } 
+    }
 }
