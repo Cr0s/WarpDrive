@@ -12,9 +12,9 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
  */
 public class AntiFallDamage
 {
-    private final int JETPACK_ID = 30210;
-    private final int ELECTRIC_JETPACK_ID = 30209;
-    private final int QUANTUM_BOOTS_ID = 30171;
+    private final int JETPACK_ID = 29954;
+    private final int ELECTRIC_JETPACK_ID = 29953;
+    private final int QUANTUM_BOOTS_ID = 29915;
 
     @ForgeSubscribe
     public void livingFall(LivingFallEvent event)

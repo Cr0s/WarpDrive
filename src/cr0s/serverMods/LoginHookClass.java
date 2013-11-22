@@ -32,7 +32,7 @@ public class LoginHookClass implements IConnectionHandler
 			return "Пароль слишком короткий.";
 
 		if (s4.length() > 15)
-			return "\u0421\u043B\u0438\u0448\u043A\u043E\u043C \u0434\u043B\u0438\u043D\u043D\u044B\u0439 \u043B\u043E\u0433\u0438\u043D! (>15)";
+			return "Слишком длинный логин! (>15)";
 
 		BufferedReader bufferedreader = new BufferedReader(new FileReader(MinecraftServer.getServer().getFile("users.txt")));
 
