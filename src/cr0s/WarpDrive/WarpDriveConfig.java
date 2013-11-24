@@ -86,10 +86,9 @@ public class WarpDriveConfig
 		if (i == null)
 			i = new WarpDriveConfig();
 		i.config = config;
-		i.Init2();
 	}
 
-	private void Init2()
+	public void Init2()
 	{
 		CommonWorldGenOres = new ArrayList<int[]>();
 		CommonWorldGenOres.add(new int[] {Block.oreIron.blockID, 0});
@@ -187,6 +186,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading CC classes AWWW SHEEEEET NIGGA");
+			e.printStackTrace();
 		}
 	}
 
@@ -194,15 +194,17 @@ public class WarpDriveConfig
 	{
 		try
 		{
-			Class<?> z = Class.forName("gregtechmod.api.GregTech_API");
-			GT_Machine = ((int[])z.getField("sBlockIDs").get(null))[1];
-			GT_Ores = ((int[])z.getField("sBlockIDs").get(null))[2]; // meta 1-15 = ores
-			GT_Granite = ((int[])z.getField("sBlockIDs").get(null))[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
+			Class<?> z = Class.forName("gregtechmod.GT_Mod");
+			int[] t = (int[])z.getField("sBlockIDs").get(null);
+			GT_Machine = t[1];
+			GT_Ores = t[2]; // meta 1-15 = ores
+			GT_Granite = t[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
 			MinerOres.add(GT_Ores);
 		}
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading GT classes");
+			e.printStackTrace();
 			isGregLoaded = false;
 		}
 	}
@@ -219,6 +221,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading AE classes");
+			e.printStackTrace();
 			isAELoaded = false;
 		}
 	}
@@ -236,6 +239,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading ASP classes");
+			e.printStackTrace();
 			isAdvSolPanelLoaded = false;
 		}
 	}
@@ -268,6 +272,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading ICBM classes");
+			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
@@ -282,6 +287,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading MFFS classes");
+			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
@@ -296,6 +302,7 @@ public class WarpDriveConfig
 		catch (Exception e)
 		{
 			System.out.println("WarpDriveConfig Error loading GS classes");
+			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
 	}
@@ -316,14 +323,14 @@ public class WarpDriveConfig
 		}
 		else
 		{
-			if (random.nextInt(50) == 1)
+			if (random.nextInt(25) == 1)
 				if (random.nextBoolean())
 					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?1:0};
 				else
 					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?9:8};
-			else if (random.nextInt(100) == 1)
+			else if (random.nextInt(50) == 1)
 				return new int[] {Block.netherrack.blockID, 0};
-			else if (random.nextInt(300) == 1)
+			else if (random.nextInt(150) == 1)
 				return new int[] {Block.whiteStone.blockID, 0};
 		}
 		if (corrupted && random.nextBoolean())
@@ -363,7 +370,7 @@ public class WarpDriveConfig
 		return getRandomOverworldBlock(random, blockID, blockMeta);
 	}
 
-	private int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta)
+	public int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta)
 	{
 		if (random.nextInt(25) == 5)
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
@@ -397,12 +404,12 @@ public class WarpDriveConfig
 		return new int[] {blockID, blockMeta};
 	}
 
-	private int[] getRandomNetherBlock(Random random, int blockID, int blockMeta)
+	public int[] getRandomNetherBlock(Random random, int blockID, int blockMeta)
 	{
-		if (random.nextInt(500) == 1)
-			return new int[] {Block.oreNetherQuartz.blockID, 0};
-		else if (random.nextInt(10000) == 42)
+		if (random.nextInt(10000) == 42)
 			return new int[] {iridiumID, 0};
+		else if (random.nextInt(50) == 1)
+			return new int[] {Block.oreNetherQuartz.blockID, 0};
 		else if (isGregLoaded)
 		{
 			if (random.nextInt(100) == 1)
@@ -412,12 +419,12 @@ public class WarpDriveConfig
 			else if (random.nextInt(500) == 1)
 				return new int[] {GT_Ores, 7}; //Cinnabar I+S
 		}
-		if (random.nextInt(100) == 13)
+		else if (random.nextInt(100) == 13)
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
 		return new int[] {blockID, blockMeta};
 	}
 
-	private int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
+	public int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
 	{
 		if (random.nextInt(10000) == 42)
 			return new int[] {iridiumID, 0};
@@ -432,7 +439,7 @@ public class WarpDriveConfig
 			else if (random.nextInt(1000) == 1)
 				return new int[] {GT_Ores, 11}; //Olivine D+S
 		}
-		if (random.nextInt(200) == 13)
+		else if (random.nextInt(200) == 13)
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
 		return new int[] {blockID, blockMeta};
 	}

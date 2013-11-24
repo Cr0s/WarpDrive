@@ -122,11 +122,11 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		world.setBlock(x, y + MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);
 		world.setBlock(x, y - MOON_RADIUS / 2, z, Block.bedrock.blockID, 0, 0);
 		world.setBlock(x + MOON_RADIUS - 10, y, z, Block.bedrock.blockID, 0, 0);
-		world.setBlock(x - MOON_RADIUS - 10, y, z, Block.bedrock.blockID, 0, 0);
+		world.setBlock(x - MOON_RADIUS + 10, y, z, Block.bedrock.blockID, 0, 0);
 		world.setBlock(x, y, z + MOON_RADIUS - 10, Block.bedrock.blockID, 0, 0);
-		world.setBlock(x, y, z - MOON_RADIUS - 10, Block.bedrock.blockID, 0, 0);
+		world.setBlock(x, y, z - MOON_RADIUS + 10, Block.bedrock.blockID, 0, 0);
 		world.setBlock(x, y + MOON_RADIUS - 10, z, Block.bedrock.blockID, 0, 0);
-		world.setBlock(x, y - MOON_RADIUS - 10, z, Block.bedrock.blockID, 0, 0);
+		world.setBlock(x, y - MOON_RADIUS + 10, z, Block.bedrock.blockID, 0, 0);
 	}
 
 	private void placeStarCore(World world, int x, int y, int z, int radius)
@@ -200,9 +200,16 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	{
 		if (world.rand.nextInt(30) == 1)
 		{
-			int[] t = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, 0, 0, false);
-			while(t[0] == 0)
-				t = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, 0, 0, false);
+			int[] t = new int[] {0, 0};
+			if (world.rand.nextInt(25) == 1)
+				while(t[0] == 0)
+					t = WarpDriveConfig.i.getRandomNetherBlock(world.rand, 0, 0);
+			else if (world.rand.nextInt(50) == 1)
+				while(t[0] == 0)
+					t = WarpDriveConfig.i.getRandomEndBlock(world.rand, 0, 0);
+			else
+				while(t[0] == 0)
+					t = WarpDriveConfig.i.getRandomOverworldBlock(world.rand, 0, 0);
 			generateAsteroidOfBlock(world, x, y, z, asteroidSizeMax, centerRadiusMax, t[0], t[1]);
 		}
 		else
@@ -307,7 +314,8 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			centerRadius = Math.min(centerRadiusMax, centerRadius);
 		final int CENTER_SHIFT = 2; // Offset from center of central ball
 		// Asteroid's center
-		generateSphere2(world, x, y, z, centerRadius, true, blockID, meta, false);
+		int[] t = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, true, false);
+		generateSphere2(world, x, y, z, centerRadius, true, blockID, meta, false, t);
 		// Asteroids knolls
 		for (int i = 1; i <= asteroidSize; i++)
 		{
@@ -315,7 +323,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
-			generateSphere2(world, newX, newY, newZ, radius, true, blockID, meta, false);
+			generateSphere2(world, newX, newY, newZ, radius, true, blockID, meta, false, t);
 		}
 	}
 
@@ -337,14 +345,15 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		if (centerRadiusMax != 0)
 			centerRadius = Math.min(centerRadiusMax, centerRadius);
 		final int CENTER_SHIFT = 2;
-		generateSphere2(world, x, y, z, centerRadius, true, -1, 0, false);
+		int[] t = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, true, false);
+		generateSphere2(world, x, y, z, centerRadius, true, -1, 0, false, t);
 		for (int i = 1; i <= asteroidSize; i++)
 		{
 			int radius = 2 + world.rand.nextInt(centerRadius);
 			int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
-			generateSphere2(world, newX, newY, newZ, radius, true, -1, 0, false);
+			generateSphere2(world, newX, newY, newZ, radius, true, -1, 0, false, t);
 		}
 	}
 
@@ -361,6 +370,14 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	 */
 	public void generateSphere2(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow)
 	{
+		if (forcedID == -1)
+			generateSphere2(world, xCoord, yCoord, zCoord, radius, corrupted, forcedID, meta, hollow, WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, corrupted, false));
+		else
+			generateSphere2(world, xCoord, yCoord, zCoord, radius, corrupted, forcedID, meta, hollow, new int[] {forcedID, meta});
+	}
+
+	public void generateSphere2(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow, int[] defaultBlock)
+	{
 		radius += 0.5D; // Radius from center of block
 		double radiusSq = radius * radius; // Optimization to avoid sqrts...
 		double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow sphere
@@ -370,13 +387,9 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		if (forcedID == 0)
 			blockID = new int[] {0, 0};
 		else if (forcedID == -1)
-		{
-			blockID = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, corrupted, false);
-			forcedID = blockID[0];
-			meta = blockID[1];
-		}
-		else // STUPID JAVA variable blockID might not have been initialized BLA BLA BLA
-			blockID = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, corrupted, false);
+			blockID = new int[] {forcedID, meta};//SRANYA JABA might not have been initialized
+		else
+			blockID = new int[] {forcedID, meta};
 		// Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
 		for (int x = 0; x <= ceilRadius; x++)
 			for (int y = 0; y <= ceilRadius; y++)
@@ -395,29 +408,29 @@ public class SpaceWorldGenerator implements IWorldGenerator
 					// Place blocks
 					if (!corrupted || world.rand.nextInt(10) != 1)
 					{
-						if (forcedID > 0)
-							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, forcedID, meta, false);
+						if (forcedID == -1)
+							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, defaultBlock[0], defaultBlock[1], false);
 						world.setBlock(xCoord + x, yCoord + y, zCoord + z, blockID[0], blockID[1], 2);
 						world.setBlock(xCoord - x, yCoord + y, zCoord + z, blockID[0], blockID[1], 2);
 					}
 					if (!corrupted || world.rand.nextInt(10) != 1)
 					{
-						if (forcedID > 0)
-							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, forcedID, meta, false);
+						if (forcedID == -1)
+							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, defaultBlock[0], defaultBlock[1], false);
 						world.setBlock(xCoord + x, yCoord - y, zCoord + z, blockID[0], blockID[1], 2);
 						world.setBlock(xCoord + x, yCoord + y, zCoord - z, blockID[0], blockID[1], 2);
 					}
 					if (!corrupted || world.rand.nextInt(10) != 1)
 					{
-						if (forcedID > 0)
-							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, forcedID, meta, false);
+						if (forcedID == -1)
+							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, defaultBlock[0], defaultBlock[1], false);
 						world.setBlock(xCoord - x, yCoord - y, zCoord + z, blockID[0], blockID[1], 2);
 						world.setBlock(xCoord + x, yCoord - y, zCoord - z, blockID[0], blockID[1], 2);
 					}
 					if (!corrupted || world.rand.nextInt(10) != 1)
 					{
-						if (forcedID > 0)
-							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, forcedID, meta, false);
+						if (forcedID == -1)
+							blockID = WarpDriveConfig.i.getRandomSurfaceBlock(world.rand, defaultBlock[0], defaultBlock[1], false);
 						world.setBlock(xCoord - x, yCoord + y, zCoord - z, blockID[0], blockID[1], 2);
 						world.setBlock(xCoord - x, yCoord - y, zCoord - z, blockID[0], blockID[1], 2);
 					}

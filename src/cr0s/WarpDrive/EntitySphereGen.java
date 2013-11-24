@@ -35,7 +35,8 @@ public final class EntitySphereGen extends Entity
 	private final int STATE_SAVING = 0;
 	private final int STATE_SETUP = 1;
 	private final int STATE_STOP = 2;
-	private int state = STATE_SAVING;
+	private final int STATE_DELETE = 3;
+	private int state = STATE_DELETE;
 
 	private int currentIndex = 0;
 
@@ -44,6 +45,7 @@ public final class EntitySphereGen extends Entity
 	public EntitySphereGen(World world)
 	{
 		super(world);
+System.out.println("ZLO EntitySphereGen THE FUCK create");
 	}
 
 	public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere)
@@ -56,7 +58,6 @@ public final class EntitySphereGen extends Entity
 		this.zCoord = z;
 		this.posZ = (double) z;
 		this.radius = radius;
-		this.block = new int[] {blockID, blockMeta};
 		this.hollow = hollow;
 		this.fillingSphere = fillingSphere;
 		this.surfaceSphere = (blockID == 0);
@@ -65,7 +66,7 @@ public final class EntitySphereGen extends Entity
 		if (surfaceSphere)
 			defaultBlock = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, world.rand.nextInt(10) > 8, true);
 		else
-			defaultBlock = new int[] {blockID, blockMeta};
+			this.block = new int[] {blockID, blockMeta};
 	}
 
 	public void killEntity()
@@ -89,17 +90,16 @@ public final class EntitySphereGen extends Entity
 				saveSphereBlocks();
 				this.state = STATE_SETUP;
 				break;
-
 			case STATE_SETUP:
 				if (currentIndex >= blocks.size() - 1)
-				{
-					currentIndex = 0;
-					killEntity();
-				}
+					this.state = STATE_DELETE;
 				else
-				{
 					setupBlocksTick();
-				}
+				break;
+			case STATE_DELETE:
+				currentIndex = 0;
+				killEntity();
+				break;
 		}
 	}
 
@@ -113,10 +113,7 @@ public final class EntitySphereGen extends Entity
 		for (int index = 0; index < blocksToMove; index++)
 		{
 			if (currentIndex >= blocks.size())
-			{
 				break;
-			}
-
 			notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
 			JumpBlock jb = blocks.get(currentIndex);
 			mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.blockID, jb.blockMeta, notifyFlag);
@@ -196,7 +193,7 @@ public final class EntitySphereGen extends Entity
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
+	protected void readEntityFromNBT(NBTTagCompound tag)
 	{
 	}
 
@@ -206,7 +203,7 @@ public final class EntitySphereGen extends Entity
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound var1)
+	protected void writeEntityToNBT(NBTTagCompound tag)
 	{
 	}
 

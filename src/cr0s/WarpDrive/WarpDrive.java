@@ -101,6 +101,7 @@ public class WarpDrive implements LoadingCallback
     @Init
     public void load(FMLInitializationEvent event)
     {
+	WarpDriveConfig.i.Init2();
         // WARP CORE
         this.warpCore = new BlockReactor(WarpDriveConfig.i.coreID, 0, Material.rock)
         .setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
