@@ -168,7 +168,7 @@ public class WarpCoresRegistry
 		ArrayList<TileEntityReactor> oldRegistry = (ArrayList<TileEntityReactor>) registry.clone();
 
 		for (TileEntityReactor c : registry)
-			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.instance.config.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid())
+			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.i.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid())
 				oldRegistry.remove(c);
 
 		// Update old registry to new witout dead cores

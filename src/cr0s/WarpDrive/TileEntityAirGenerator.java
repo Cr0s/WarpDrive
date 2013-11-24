@@ -65,37 +65,37 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink
     {
         if (worldObj.isAirBlock(xCoord + 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
 
         if (worldObj.isAirBlock(xCoord - 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
 
         if (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
 
         if (worldObj.isAirBlock(xCoord, yCoord - 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
 
         if (worldObj.isAirBlock(xCoord, yCoord, zCoord + 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
 
         if (worldObj.isAirBlock(xCoord, yCoord, zCoord - 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
         {
-            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
     }

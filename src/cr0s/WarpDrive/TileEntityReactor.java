@@ -297,7 +297,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             {
                 for (int z = zmin; z <= zmax; z++)
                 {
-                    if (worldObj.getBlockId(x, y, z) == WarpDrive.instance.config.isolationID)
+                    if (worldObj.getBlockId(x, y, z) == WarpDriveConfig.i.isolationID)
                     {
                         this.isolationBlocksCount++;
                     }
@@ -1170,6 +1170,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         super.validate();
         WarpDrive.instance.registry.updateInRegistry(this);
+        if (!addedToEnergyNet)
+        {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
+        }
     }
 
     @Override

@@ -43,11 +43,6 @@ public class SpaceEventHandler
             return;
         }
 
-        final int HELMET_ID_SKUBA = 30082;
-        final int HELMET_ID_HAZMAT = 14023;
-        final int HELMET_ID_QUANTUM = 30174;
-        final int AIR_CELL_ID = 30079;
-
         // Обновление происходит в космическом или гипер пространстве
         if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
         {
@@ -58,7 +53,8 @@ public class SpaceEventHandler
             {
                 if (entity instanceof EntityPlayerMP)
                 {
-                    if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && ((((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_SKUBA || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_HAZMAT) || ((EntityPlayerMP)entity).getCurrentArmor(3).itemID == HELMET_ID_QUANTUM))
+
+                    if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && WarpDriveConfig.i.SpaceHelmets.contains(((EntityPlayerMP)entity).getCurrentArmor(3).itemID))
                     {
                         Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
 
@@ -70,7 +66,7 @@ public class SpaceEventHandler
 
                         if (airValue <= 0)
                         {
-                            if (((EntityPlayerMP)entity).inventory.consumeInventoryItem(AIR_CELL_ID))
+                            if (((EntityPlayerMP)entity).inventory.consumeInventoryItem(WarpDriveConfig.i.IC2_Air))
                             {
                                 setPlayerAirValue(entity, 300);
                             }
@@ -125,7 +121,7 @@ public class SpaceEventHandler
         int id1 = e.worldObj.getBlockId(x, y, z);
         int id2 = e.worldObj.getBlockId(x, y + 1, z);
 
-        if (id1 == WarpDrive.instance.config.airID || id2 == WarpDrive.instance.config.airID)
+        if (id1 == WarpDriveConfig.i.airID || id2 == WarpDriveConfig.i.airID)
         {
             return false;
         }

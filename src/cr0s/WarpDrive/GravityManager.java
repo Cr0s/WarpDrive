@@ -12,9 +12,6 @@ public class GravityManager
     private static double SPACE_GRAVITY = 0.0001D;
     private static double SPACE_GRAVITY_SNEAK = 0.01D;
 
-    private static final int JETPACK_ID = 30210;
-    private static final int ELECTRIC_JETPACK_ID = 30209;
-
     public static double getGravityForEntity(EntityLivingBase entity)
     {
         // Is entity in space or hyper-space?
@@ -36,7 +33,7 @@ public class GravityManager
 
                     if (player.isSneaking())
                     {
-                        if (player.getCurrentArmor(2) != null && ((player.getCurrentArmor(2).itemID == JETPACK_ID) || player.getCurrentArmor(2).itemID == ELECTRIC_JETPACK_ID))
+                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.i.Jetpacks.contains(player.getCurrentArmor(2).itemID))
                         {
                             return SPACE_GRAVITY_SNEAK;
                         }

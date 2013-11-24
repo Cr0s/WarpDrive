@@ -4,7 +4,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
-import ic2.api.energy.tile.IEnergyTile;
 import ic2.api.network.NetworkHelper;
 
 import java.lang.reflect.Method;
@@ -86,6 +85,7 @@ public class EntityJump extends Entity
 	private final int BLOCKS_PER_TICK = 3500;
 
 	private List<MovingEntity> entitiesOnShip;
+	private List<TileEntity> ASTurbines;
 
 	AxisAlignedBB axisalignedbb;
 
@@ -187,11 +187,13 @@ public class EntityJump extends Entity
 		}
 		else if (state == STATE_REMOVING)
 		{
+			ASTurbines = new ArrayList<TileEntity>();
 			removeShip();
 
 			if (currentIndexInShip >= ship.length - 1)
 			{
 				finishJump();
+				FixASTurbines();
 				state = STATE_IDLE;
 			}
 		}
@@ -297,17 +299,9 @@ public class EntityJump extends Entity
 	public void messageToAllPlayersOnShip(String msg)
 	{
 		if (entitiesOnShip != null)
-		{
 			for (MovingEntity me : entitiesOnShip)
-			{
-				Entity entity = me.entity;
-
-				if (entity instanceof EntityPlayer)
-				{
-					((EntityPlayer)entity).addChatMessage("[WarpCore] " + msg);
-				}
-			}
-		}
+				if (me.entity instanceof EntityPlayer)
+					((EntityPlayer)me.entity).addChatMessage("[WarpCore] " + msg);
 	}
 
 	public void prepareToJump()
@@ -492,85 +486,48 @@ public class EntityJump extends Entity
 		LocalProfiler.start("EntityJump.removeShip");
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 		System.out.println("[JE] Removing ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
-
+		TileEntity te;
+		Class<?> c;
 		for (int index = 0; index < blocksToMove; index++)
 		{
 			if (currentIndexInShip >= ship.length)
-			{
 				break;
-			}
-
 			JumpBlock jb = ship[currentIndexInShip];
-
 			if (jb != null && jb.blockTileEntity != null)
-			{
 				worldObj.removeBlockTileEntity(jb.x, jb.y, jb.z);
-			}
-
-			// Refresh IC2 machines and cables
-			int newX = jb.x + moveX;
-			int newY = jb.y + moveY;
-			int newZ = jb.z + moveZ;
-			refreshIC2Tile(targetWorld, newX, newY, newZ);
-			//System.out.println("[EJ] Removing block: " + jb.x + " " + jb.y + " " + jb.z + " " + jb.blockID);
-			worldObj.setBlockToAir(jb.x, jb.y, jb.z);
-			currentIndexInShip++;
-		}
-
-		LocalProfiler.stop();
-	}
-
-	// Fix IC2 blocks after jump via reflection calls
-	public static void refreshIC2Tile(World world, int x, int y, int z)
-	{
-		TileEntity te = world.getBlockTileEntity(x, y, z);
-
-		if (te != null && te instanceof IEnergyTile)
-		{
-			Class c = te.getClass().getSuperclass();
-
-			// Cable
-			if (c.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock"))
+			te = worldObj.getBlockTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
+			if (te != null)
 			{
-				try
-				{
-					Method method;
-					method = c.getDeclaredMethod("onUnloaded", new Class[0]);
-					method.invoke(te, new Object[0]);
-					method = c.getDeclaredMethod("onLoaded", new Class[0]);
-					method.invoke(te, new Object[0]);
-				}
-				catch (Exception e)
-				{
-					//e.printStackTrace();
-				}
-			}
-			else   // Machine/Generator
-				if (c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator"))
+				c = te.getClass().getSuperclass();
+				if (c.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock") || c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator"))
 				{
 					try
 					{
 						Method method;
-						method = c.getDeclaredMethod("onUnloaded", new Class[0]);
-						method.invoke(te, new Object[0]);
-						method = c.getDeclaredMethod("onLoaded", new Class[0]);
-						method.invoke(te, new Object[0]);
+						method = c.getDeclaredMethod("onUnloaded", null);
+						method.invoke(te, null);
+						method = c.getDeclaredMethod("onLoaded", null);
+						method.invoke(te, null);
+					}
+					catch (Exception e) {}
+					te.updateContainingBlockInfo();
+				}
+				c = te.getClass();
+				if (c.getName().equals("atomicscience.jiqi.TTurbine"))
+					try
+					{
+						if (c.getField("shiDa").getBoolean(te))
+							ASTurbines.add(te);
 					}
 					catch (Exception e)
 					{
-						//e.printStackTrace();
+						e.printStackTrace();
 					}
-				}
-
-			te.updateContainingBlockInfo();
-			/*
-						try {
-							NetworkHelper.updateTileEntityField(te, "facing");
-						} catch (Exception e) {
-							//e.printStackTrace();
-						}
-			*/
+			}
+			worldObj.setBlockToAir(jb.x, jb.y, jb.z);
+			currentIndexInShip++;
 		}
+		LocalProfiler.stop();
 	}
 
 	/**
@@ -615,7 +572,7 @@ public class EntityJump extends Entity
 							int blockID = worldObj.getBlockId(x, y, z);
 
 							// Skip air blocks
-							if (blockID == 0 || blockID == WarpDrive.instance.config.gasID)
+							if (blockID == 0 || blockID == WarpDriveConfig.i.gasID)
 							{
 								continue;
 							}
@@ -709,7 +666,7 @@ public class EntityJump extends Entity
 					int blockID = worldObj.getBlockId(x, y, z);
 
 					// Skipping air blocks
-					if (blockID == 0 || blockID == WarpDrive.instance.config.gasID)
+					if (blockID == 0 || blockID == WarpDriveConfig.i.gasID)
 					{
 						continue;
 					}
@@ -942,7 +899,7 @@ public class EntityJump extends Entity
 						return false;
 					}
 
-					if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDrive.instance.config.airID && blockID != WarpDrive.instance.config.gasID && blockID != 18)
+					if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDriveConfig.i.airID && blockID != WarpDriveConfig.i.gasID && blockID != 18)
 					{
 						blowX = x;
 						blowY = y;
@@ -1002,7 +959,7 @@ public class EntityJump extends Entity
 			for (int z = minZ; z <= maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
 					int blockID = worldObj.getBlockId(x, y, z);
-					if (blockID == 0 || blockID == WarpDrive.instance.config.airID || blockID == WarpDrive.instance.config.gasID) {
+					if (blockID == 0 || blockID == WarpDriveConfig.i.airID || blockID == WarpDriveConfig.i.gasID) {
 						continue;
 					}
 
@@ -1047,7 +1004,7 @@ public class EntityJump extends Entity
 			mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
 
 			// Re-schedule air blocks update
-			if (blockID == WarpDrive.instance.config.airID)
+			if (blockID == WarpDriveConfig.i.airID)
 			{
 				targetWorld.markBlockForUpdate(newX, newY, newZ);
 				targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 40 + targetWorld.rand.nextInt(20));
@@ -1058,22 +1015,27 @@ public class EntityJump extends Entity
 			if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145)
 			{
 				shipBlock.blockTileEntity.writeToNBT(oldnbt);
+				oldnbt.setInteger("x", newX);
+				oldnbt.setInteger("y", newY);
+				oldnbt.setInteger("z", newZ);
 				TileEntity newTileEntity = null;
-
-				// CC's computers and turtles moving workaround && 4059 - GRECHKA TIME
-				if (blockID == 1225 || blockID == 1226 || blockID == 1227 || blockID == 1228 || blockID == 1230)
+				if (blockID == WarpDriveConfig.i.CC_Computer || blockID == WarpDriveConfig.i.CC_peripheral || blockID == WarpDriveConfig.i.CCT_Turtle || blockID == WarpDriveConfig.i.CCT_Upgraded || blockID == WarpDriveConfig.i.CCT_Advanced)
 				{
-					oldnbt.setInteger("x", newX);
-					oldnbt.setInteger("y", newY);
-					oldnbt.setInteger("z", newZ);
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
 				}
-				else if (blockID == 4059)
+				else if (blockID == WarpDriveConfig.i.GT_Machine)
+					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
+				else if (blockID == WarpDriveConfig.i.AS_Turbine)
 				{
-					oldnbt.setInteger("x", newX);
-					oldnbt.setInteger("y", newY);
-					oldnbt.setInteger("z", newZ);
+					if (oldnbt.hasKey("zhuYao"))
+					{
+						NBTTagCompound nbt1 = oldnbt.getCompoundTag("zhuYao");
+						nbt1.setDouble("x", newX);
+						nbt1.setDouble("y", newY);
+						nbt1.setDouble("z", newZ);
+						oldnbt.setTag("zhuYao", nbt1);
+					}
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				}
 				else
@@ -1087,7 +1049,6 @@ public class EntityJump extends Entity
 					newTileEntity.invalidate();
 					newTileEntity.readFromNBT(oldnbt);
 				}
-
 				newTileEntity.worldObj = targetWorld;
 				newTileEntity.validate();
 				worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
@@ -1276,5 +1237,22 @@ public class EntityJump extends Entity
 				return true;
 			}
 		}
+	}
+
+	private void FixASTurbines()
+	{
+		Class<?> c;
+		for (TileEntity t : ASTurbines)
+			try
+			{
+				c = t.getClass();
+				Method method = c.getDeclaredMethod("bianDa", null);
+				method.invoke(t, null);
+				method.invoke(t, null);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 	}
 }

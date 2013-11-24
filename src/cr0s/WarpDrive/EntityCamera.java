@@ -94,7 +94,7 @@ public final class EntityCamera extends EntityLivingBase
                 fireWaitTicks = 2;
 
                 // Make a shoot with camera-laser
-                if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDrive.instance.config.laserCamID)
+                if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID)
                 {
                     sendTargetPacket();
                 }

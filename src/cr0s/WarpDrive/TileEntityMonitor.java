@@ -34,131 +34,118 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityMonitor extends TileEntity implements IPeripheral
 {
-    private int frequency;
+	private int frequency;
 
-    private String[] methodsArray =
-    {
-        "setFrequency",             // 0
-        "getFrequency"
-    };
+	private String[] methodsArray =
+	{
+		"freq"
+	};
 
-    private int packetSendTicks = 20;
+	private int packetSendTicks = 20;
 
-    @Override
-    public void updateEntity()
-    {
-        if (FMLCommonHandler.instance().getEffectiveSide().isServer())
-        {
-            if (packetSendTicks-- == 0)
-            {
-                packetSendTicks = 20 * 5;
-                sendFreqPacket();
-            }
+	@Override
+	public void updateEntity()
+	{
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer())
+		{
+			if (packetSendTicks-- == 0)
+			{
+				packetSendTicks = 20 * 5;
+				sendFreqPacket();
+			}
 
-            return;
-        }
-    }
+			return;
+		}
+	}
 
-    public int getFrequency()
-    {
-        return frequency;
-    }
+	public int getFrequency()
+	{
+		return frequency;
+	}
 
-    public void setFrequency(int freq)
-    {
-        frequency = freq;
-    }
+	public void setFrequency(int freq)
+	{
+		frequency = freq;
+	}
 
-    @Override
-    public void readFromNBT(NBTTagCompound tag)
-    {
-        super.readFromNBT(tag);
-        frequency = tag.getInteger("frequency");
-    }
+	@Override
+	public void readFromNBT(NBTTagCompound tag)
+	{
+		super.readFromNBT(tag);
+		frequency = tag.getInteger("frequency");
+	}
 
-    @Override
-    public void writeToNBT(NBTTagCompound tag)
-    {
-        super.writeToNBT(tag);
-        tag.setInteger("frequency", frequency);
-    }
+	@Override
+	public void writeToNBT(NBTTagCompound tag)
+	{
+		super.writeToNBT(tag);
+		tag.setInteger("frequency", frequency);
+	}
 
-    // IPeripheral methods implementation
-    @Override
-    public String getType()
-    {
-        return "monitor";
-    }
+	// IPeripheral methods implementation
+	@Override
+	public String getType()
+	{
+		return "monitor";
+	}
 
-    @Override
-    public String[] getMethodNames()
-    {
-        return methodsArray;
-    }
+	@Override
+	public String[] getMethodNames()
+	{
+		return methodsArray;
+	}
 
-    @Override
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
-    {
-        switch (method)
-        {
-            case 0: // setFrequency
-                if (arguments.length == 1)
-                {
-                    frequency = ((Double)arguments[0]).intValue();
-                }
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
+	{
+		if (arguments.length == 1)
+			frequency = ((Double)arguments[0]).intValue();
+		return new Integer[] { frequency };
+	}
 
-                break;
+	public void sendFreqPacket()
+	{
+		Side side = FMLCommonHandler.instance().getEffectiveSide();
 
-            case 1:
-                return new Object[] { (Integer)frequency };
-        }
+		if (side == Side.SERVER)
+		{
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream outputStream = new DataOutputStream(bos);
 
-        return new Object[] { 0 };
-    }
+			try
+			{
+				// Write source vector
+				outputStream.writeInt(xCoord);
+				outputStream.writeInt(yCoord);
+				outputStream.writeInt(zCoord);
+				outputStream.writeInt(this.frequency);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 
-    public void sendFreqPacket()
-    {
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
+			Packet250CustomPayload packet = new Packet250CustomPayload();
+			packet.channel = "WarpDriveFreq";
+			packet.data = bos.toByteArray();
+			packet.length = bos.size();
+			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
+		}
+	}
 
-        if (side == Side.SERVER)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream = new DataOutputStream(bos);
+	@Override
+	public boolean canAttachToSide(int side)
+	{
+		return true;
+	}
 
-            try
-            {
-                // Write source vector
-                outputStream.writeInt(xCoord);
-                outputStream.writeInt(yCoord);
-                outputStream.writeInt(zCoord);
-                outputStream.writeInt(this.frequency);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
+	@Override
+	public void attach(IComputerAccess computer)
+	{
+	}
 
-            Packet250CustomPayload packet = new Packet250CustomPayload();
-            packet.channel = "WarpDriveFreq";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
-        }
-    }
-
-    @Override
-    public boolean canAttachToSide(int side)
-    {
-        return true;
-    }
-
-    @Override
-    public void attach(IComputerAccess computer)
-    {
-    }
-
-    @Override
-    public void detach(IComputerAccess computer)
-    {
-    }
+	@Override
+	public void detach(IComputerAccess computer)
+	{
+	}
 }

@@ -32,7 +32,7 @@ public class CamRegistry
     {
         if (i.worldObj != null)
         {
-            if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.config.camID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDrive.instance.config.laserCamID)
+            if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.i.camID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.i.laserCamID)
             {
                 return false;
             }

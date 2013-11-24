@@ -6,7 +6,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
-import ic2.api.item.Items;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -55,40 +54,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private String[] methodsArray =
 	{
-		"startMining", "stop",	   // 0, 1
-		"isMining",				  // 2
-		"startQuarry",				 // 3
-		"getMinerState",			 // 4
-		"setStartLayerOffset"		// 5
+		"mine",		//0
+		"stop",		//1
+		"isMining",	//2
+		"quarry",	//3
+		"state",	//4
+		"offset"	//5
 	};
-
-	public static final ArrayList<Integer> valuableOres = new ArrayList<Integer>(Arrays.asList(
-				Block.oreIron.blockID,
-				Block.oreGold.blockID,
-				Block.oreCoal.blockID,
-				Block.oreEmerald.blockID,
-				Block.oreLapis.blockID,
-				Block.oreRedstoneGlowing.blockID,
-				Block.oreRedstone.blockID,
-				Block.oreNetherQuartz.blockID,
-				Items.getItem("uraniumOre").itemID, // IC
-				Items.getItem("copperOre").itemID, // IC
-				Items.getItem("tinOre").itemID,  // IC
-				4095 // AS uranus
-			));
-
-	public static final ArrayList<Integer> otherValuables = new ArrayList<Integer>(Arrays.asList(
-				Block.wood.blockID,
-				Block.planks.blockID,
-				Items.getItem("rubberWood").itemID,
-				Block.rail.blockID,
-				902, // Quarz (AE),
-				Block.oreDiamond.blockID,
-				Block.obsidian.blockID,
-				Block.web.blockID,
-				Block.fence.blockID,
-				Block.torchWood.blockID
-			));
 
 	private final int SCAN_DELAY = 20 * 5;
 	private int delayTicksScan = 0;
@@ -112,8 +84,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	//private long uid = 0;
 
 	TileEntityParticleBooster booster = null;
-
-	private final int MFFS_FIELD_BLOCKID = 1681;
 
 	private boolean isOnEarth = false;
 	//int t = 20;
@@ -197,7 +167,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private boolean canDig(int blockID)
 	{
-		return (blockID != MFFS_FIELD_BLOCKID && blockID != Block.bedrock.blockID && Block.blocksList[blockID] != null && Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance);
+		return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID && Block.blocksList[blockID] != null && Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance);
 	}
 
 	private void harvestBlock(Vector3 valuable)
@@ -415,7 +385,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 							valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 					else   // Not-quarry collect only valuables blocks
-						if (valuableOres.contains((worldObj.getBlockId(x, currentLayer, z))) || otherValuables.contains((worldObj.getBlockId(x, currentLayer, z))))
+						if (WarpDriveConfig.i.MinerOres.contains(worldObj.getBlockId(x, currentLayer, z)))
 							valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 
@@ -579,16 +549,16 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		switch (method)
 		{
-			case 0: // startMining()
+			case 0: // Mine()
 				if (isMining)
-					return new Object[] { -1 };
+					return new Boolean[] { false };
 				isQuarry = false;
 				delayTicksScan = 0;
 				currentMode = 0;
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
-				return new Object[] { 0 };
+				return new Boolean[] { true };
 
 			case 1: // stop()
 				isMining = false;
@@ -596,9 +566,9 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 			case 2: // isMining()
 				return new Boolean[] { isMining };
-			case 3: // startQuarry()
+			case 3: // Quarry()
 				if (isMining)
-					return new Object[] { -1 };
+					return new Boolean[] { false };
 
 				isQuarry = true;
 				delayTicksScan = 0;
@@ -606,47 +576,36 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
-				return new Object[] { 0 };
+				return new Boolean[] { true };
 
-				// State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
-			case 4: // getMinerState()
+			case 4: // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
 				int energy = 0;
-
 				if (booster != null)
-				{
 					energy = booster.getCurrentEnergyValue();
-				}
-
 				String state = "not mining";
 				Integer valuablesInLayer, valuablesMined;
-
 				if (isMining)
 				{
 					valuablesInLayer = this.valuablesInLayer.size();
 					valuablesMined = this.valuableIndex;
 					state = "mining" + ((isQuarry) ? " (quarry mode)" : "");
-
 					if (energy < 0)
-					{
 						state = "out of energy";
-					}
-
 					return new Object[] {state, energy, currentLayer, valuablesMined, valuablesInLayer};
 				}
-
 				return new Object[] {state, energy, currentLayer, 0, 0};
 
-			case 5: // setStartLayerOffset
+			case 5: // Offset
 				if (arguments.length == 1)
 				{
-					int a = ((Double)arguments[0]).intValue();
-					if (a < 1)
-						a = 1;
-					layerOffset = a + 1;
+					int t = ((Double)arguments[0]).intValue();
+					if (t < 0)
+						t = 0;
+					layerOffset = t + 1;
 				}
+				return new Integer[] { layerOffset-1 };
 		}
-
-		return new Object[] { 0 };
+		return null;
 	}
 
 	@Override
