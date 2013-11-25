@@ -234,9 +234,9 @@ public class WarpDriveConfig
 		{
 			Class<?> z = Class.forName("advsolar.common.AdvancedSolarPanel");
 			ASP = z.getField("idAdv").getInt(null);
-			SpaceHelmets.add(z.getField("advSolarHelmetID").getInt(null));
-			SpaceHelmets.add(z.getField("hybridSolarHelmetID").getInt(null));
-			SpaceHelmets.add(z.getField("ultimateSolarHelmetID").getInt(null));
+			SpaceHelmets.add(((Item)z.getField("advancedSolarHelmet").get(null)).itemID);
+			SpaceHelmets.add(((Item)z.getField("hybridSolarHelmet").get(null)).itemID);
+			SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 		}
 		catch (Exception e)
 		{
@@ -299,7 +299,7 @@ public class WarpDriveConfig
 		try
 		{
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
-			SpaceHelmets.add(z.getField("ultimateSolarHelmetID").getInt(null));
+			SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 		}
 		catch (Exception e)
 		{
