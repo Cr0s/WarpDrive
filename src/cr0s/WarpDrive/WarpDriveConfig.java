@@ -200,6 +200,7 @@ public class WarpDriveConfig
 			GT_Ores = t[2]; // meta 1-15 = ores
 			GT_Granite = t[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
 			MinerOres.add(GT_Ores);
+			MinerOres.add(GT_Granite);
 		}
 		catch (Exception e)
 		{
@@ -408,7 +409,7 @@ public class WarpDriveConfig
 	{
 		if (random.nextInt(10000) == 42)
 			return new int[] {iridiumID, 0};
-		else if (random.nextInt(50) == 1)
+		else if (random.nextInt(25) == 1)
 			return new int[] {Block.oreNetherQuartz.blockID, 0};
 		else if (isGregLoaded)
 		{
