@@ -299,7 +299,8 @@ public class WarpDriveConfig
 		try
 		{
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
-			SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
+			if (z.getField("ultimateSolarHelmet").get(null) != null)
+				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 		}
 		catch (Exception e)
 		{
