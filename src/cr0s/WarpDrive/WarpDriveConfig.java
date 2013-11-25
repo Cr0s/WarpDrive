@@ -22,7 +22,8 @@ public class WarpDriveConfig
 //
 	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
-	public int IC2_Air = 0, CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public int[] IC2_Air;
+	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
 	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
@@ -164,7 +165,7 @@ public class WarpDriveConfig
 		SpaceHelmets.add(Items.getItem("quantumHelmet").itemID);
 		Jetpacks.add(Items.getItem("jetpack").itemID);
 		Jetpacks.add(Items.getItem("electricJetpack").itemID);
-		IC2_Air = Items.getItem("airCell").itemID;
+		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
