@@ -10,16 +10,17 @@ import net.minecraft.entity.Entity;
  * Класс объекта движущегося в корабле энтити
  * @author user
  */
-public class MovingEntity {
+public class MovingEntity
+{
     public double oldX;
     public double oldY;
     public double oldZ;
-    
+
     public Entity entity;
-    
-    public MovingEntity(Entity e) {
+
+    public MovingEntity(Entity e)
+    {
         entity = e;
-        
         oldX = e.posX;
         oldY = e.posY;
         oldZ = e.posZ;

@@ -7,40 +7,45 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 
-
-public class InvisibleCommand extends CommandBase {
-
+public class InvisibleCommand extends CommandBase
+{
     @Override
-    public int getRequiredPermissionLevel() {
+    public int getRequiredPermissionLevel()
+    {
         return 4;
     }
-    
+
     @Override
-    public String getCommandName() {
+    public String getCommandName()
+    {
         return "invisible";
     }
 
     @Override
-    public void processCommand(ICommandSender icommandsender, String[] astring) {
+    public void processCommand(ICommandSender icommandsender, String[] astring)
+    {
         EntityPlayerMP player = (EntityPlayerMP)icommandsender;
         MinecraftServer server = MinecraftServer.getServer();
         int targetDim = WarpDrive.instance.spaceDimID;
-        if (astring.length >= 1) {
-	        notifyAdmins(icommandsender, "/invisible: setting invisible to " + astring[0], new Object[0]);
-	        player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
+
+        if (astring.length >= 1)
+        {
+            notifyAdmins(icommandsender, "/invisible: setting invisible to " + astring[0], new Object[0]);
+            player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
         }
-        
-        if (player == null) {
+
+        if (player == null)
+        {
             return;
         }
-        
+
         // Toggle invisibility
         player.setInvisible(!player.isInvisible());
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender) {
+    public String getCommandUsage(ICommandSender icommandsender)
+    {
         return "/invisible [player]";
     }
-    
 }

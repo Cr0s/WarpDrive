@@ -12,11 +12,11 @@ import net.minecraftforge.client.IRenderHandler;
  *
  * @author user
  */
-public class HyperSpaceSkyRenderer extends IRenderHandler {
-
+public class HyperSpaceSkyRenderer extends IRenderHandler
+{
     @Override
-    public void render(float partialTicks, WorldClient world, Minecraft mc) {
+    public void render(float partialTicks, WorldClient world, Minecraft mc)
+    {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
 }

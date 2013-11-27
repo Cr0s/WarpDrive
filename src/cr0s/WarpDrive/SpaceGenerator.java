@@ -4,7 +4,6 @@
  */
 package cr0s.WarpDrive;
 
-import cr0s.WarpDrive.WarpDrive;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.EnumCreatureType;
@@ -16,8 +15,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 
-public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvider {
-
+public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvider
+{
     private Random rand;
     private BiomeGenBase[] biomesForGeneration = new BiomeGenBase[1];
 
@@ -26,54 +25,53 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
      */
     private World worldObj;
 
-
-    public SpaceGenerator(World par1World, long par2) {
+    public SpaceGenerator(World par1World, long par2)
+    {
         super(par1World, par2, false);
-
         rand = new Random();
         this.worldObj = par1World;
     }
 
     @Override
-    public Chunk provideChunk(int par1, int par2) {
+    public Chunk provideChunk(int par1, int par2)
+    {
         this.rand.setSeed((long) par1 * 341873128712L + (long) par2 * 132897987541L);
         byte[] var3 = new byte[32768];
         generateTerrain(par1, par2, var3);
         //this.caveGenerator.generate(this, this.worldObj, par1, par2, var3);
         this.biomesForGeneration[0] = WarpDrive.spaceBiome;
-        
         Chunk var4 = new Chunk(this.worldObj, var3, par1, par2);
-
         var4.generateSkylightMap();
         return var4;
     }
 
     @Override
-    public Chunk loadChunk(int var1, int var2) {
+    public Chunk loadChunk(int var1, int var2)
+    {
         // TODO Auto-generated method stub
         return this.provideChunk(var1, var2);
     }
 
     @Override
-    public void populate(IChunkProvider var1, int var2, int var3) {
+    public void populate(IChunkProvider var1, int var2, int var3)
+    {
         //super.populate(var1, var2, var3);
-        
         // Generate chunk population
-       // GameRegistry.generateWorld(var2, var3, worldObj, var1, var1);
+        // GameRegistry.generateWorld(var2, var3, worldObj, var1, var1);
     }
 
     @Override
-    public boolean saveChunks(boolean var1, IProgressUpdate var2) {
+    public boolean saveChunks(boolean var1, IProgressUpdate var2)
+    {
         return super.saveChunks(var1, var2);
     }
 
     @Override
-    public void generateTerrain(int par1, int par2, byte[] par3ArrayOfByte) {
+    public void generateTerrain(int par1, int par2, byte[] par3ArrayOfByte)
+    {
         this.biomesForGeneration[0] = WarpDrive.spaceBiome;
-        
-       // if (!"Space".equals(worldObj.provider.getDimensionName())) {
-       // }
-        
+        // if (!"Space".equals(worldObj.provider.getDimensionName())) {
+        // }
         /*byte var4 = 4;
         byte var5 = 16;
         byte var6 = 16;
@@ -144,39 +142,45 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
     }
 
     @Override
-    public boolean canSave() {
+    public boolean canSave()
+    {
         // TODO Auto-generated method stub
         return super.canSave();
     }
 
     @Override
-    public String makeString() {
+    public String makeString()
+    {
         // TODO Auto-generated method stub
         return super.makeString();
     }
 
     @Override
     public List getPossibleCreatures(EnumCreatureType var1, int var2, int var3,
-            int var4) {
+                                     int var4)
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
     public ChunkPosition findClosestStructure(World var1, String var2,
-            int var3, int var4, int var5) {
+            int var3, int var4, int var5)
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public int getLoadedChunkCount() {
+    public int getLoadedChunkCount()
+    {
         // TODO Auto-generated method stub
         return super.getLoadedChunkCount();
     }
 
     @Override
-    public void recreateStructures(int var1, int var2) {
+    public void recreateStructures(int var1, int var2)
+    {
         // TODO Auto-generated method stub
     }
 }

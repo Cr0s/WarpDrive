@@ -23,7 +23,7 @@ public class SpaceSkyRenderer extends IRenderHandler
     public int glSkyList2;
 
     private final boolean MORE_STARS = false;
-    
+
     public SpaceSkyRenderer()
     {
         GL11.glPushMatrix();
@@ -113,7 +113,6 @@ public class SpaceSkyRenderer extends IRenderHandler
         float var10;
         float var11;
         float var12;
-
         float var20 = 0;
 
         if (spaceProvider != null)
@@ -130,37 +129,30 @@ public class SpaceSkyRenderer extends IRenderHandler
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         GL11.glPushMatrix();
-
         GL11.glPopMatrix();
-
         GL11.glPushMatrix();
-
         GL11.glRotatef(-90.0F, 0.0F, 1.0F, 0.0F);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 5F);
         GL11.glRotatef(world.getCelestialAngle(partialTicks) * 360.0F, 1.0F, 0.0F, 0.0F);
         var12 = 30.0F;
-        FMLClientHandler.instance().getClient().renderEngine.func_110577_a(sunTexture);
+        FMLClientHandler.instance().getClient().renderEngine.bindTexture(sunTexture);
         var23.startDrawingQuads();
         var23.addVertexWithUV(-var12, 150.0D, -var12, 0.0D, 0.0D);
         var23.addVertexWithUV(var12, 150.0D, -var12, 1.0D, 0.0D);
         var23.addVertexWithUV(var12, 150.0D, var12, 1.0D, 1.0D);
         var23.addVertexWithUV(-var12, 150.0D, var12, 0.0D, 1.0D);
         var23.draw();
-
         GL11.glPopMatrix();
-
         GL11.glPushMatrix();
-
         GL11.glDisable(GL11.GL_BLEND);
-
         // HOME:
         var12 = 10.0F;
-        final float earthRotation = (float) (world.getSpawnPoint().posZ - mc.thePlayer.posZ) * 0.01F;
+        final float earthRotation = (float)(world.getSpawnPoint().posZ - mc.thePlayer.posZ) * 0.01F;
         GL11.glScalef(0.6F, 0.6F, 0.6F);
         GL11.glRotatef(earthRotation, 1.0F, 0.0F, 0.0F);
         GL11.glRotatef(200F, 1.0F, 0.0F, 0.0F);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1F);
-        FMLClientHandler.instance().getClient().renderEngine.func_110577_a(overworldTexture);
+        FMLClientHandler.instance().getClient().renderEngine.bindTexture(overworldTexture);
         world.getMoonPhase();
         var23.startDrawingQuads();
         var23.addVertexWithUV(-var12, -100.0D, var12, 0, 1);
@@ -168,7 +160,6 @@ public class SpaceSkyRenderer extends IRenderHandler
         var23.addVertexWithUV(var12, -100.0D, -var12, 1, 0);
         var23.addVertexWithUV(-var12, -100.0D, -var12, 0, 0);
         var23.draw();
-
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_ALPHA_TEST);
@@ -185,7 +176,7 @@ public class SpaceSkyRenderer extends IRenderHandler
             GL11.glCallList(this.glSkyList2);
             GL11.glPopMatrix();
             var10 = 1.0F;
-            var11 = -((float) (var25 + 65.0D));
+            var11 = -((float)(var25 + 65.0D));
             var12 = -var10;
             var23.startDrawingQuads();
             var23.setColorRGBA_I(0, 255);
@@ -213,9 +204,8 @@ public class SpaceSkyRenderer extends IRenderHandler
         }
 
         GL11.glColor3f(70F / 256F, 70F / 256F, 70F / 256F);
-
         GL11.glPushMatrix();
-        GL11.glTranslatef(0.0F, -((float) (var25 - 16.0D)), 0.0F);
+        GL11.glTranslatef(0.0F, -((float)(var25 - 16.0D)), 0.0F);
         GL11.glCallList(this.glSkyList2);
         GL11.glPopMatrix();
         GL11.glEnable(GL11.GL_TEXTURE_2D);

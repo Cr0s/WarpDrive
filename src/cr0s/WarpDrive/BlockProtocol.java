@@ -12,29 +12,28 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockProtocol extends BlockContainer { 
+public class BlockProtocol extends BlockContainer
+{
     private Icon[] iconBuffer;
-    
+
     private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
     //private final int ANIMATION_
     //private int currentTexture;
 
-    
-    public BlockProtocol(int id, int texture, Material material) {
+    public BlockProtocol(int id, int texture, Material material)
+    {
         super(id, material);
     }
-        
+
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[9];
-       
         // Solid textures
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:contTop");
-        
         // Animated textures
         iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:contSideActive1");
         iconBuffer[ICON_SIDE_ACTIVATED + 1] = par1IconRegister.registerIcon("warpdrive:contSideActive2");
@@ -43,33 +42,37 @@ public class BlockProtocol extends BlockContainer {
         iconBuffer[ICON_SIDE_ACTIVATED + 4] = par1IconRegister.registerIcon("warpdrive:contSideActive5");
         iconBuffer[ICON_SIDE_ACTIVATED + 5] = par1IconRegister.registerIcon("warpdrive:contSideActive6");
     }
-    
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 0) {
+        if (side == 0)
+        {
             return iconBuffer[ICON_BOTTOM];
-        } else
-        if (side == 1) {
+        }
+        else if (side == 1)
+        {
             return iconBuffer[ICON_TOP];
         }
-        
+
         if (metadata == 0) // Inactive state
         {
             return iconBuffer[ICON_INACTIVE_SIDE];
-        } else
-        if (metadata > 0) { // Activated, in metadata stored mode number
+        }
+        else if (metadata > 0)    // Activated, in metadata stored mode number
+        {
             return iconBuffer[ICON_SIDE_ACTIVATED + metadata - 1];
         }
-        
+
         return null;
     }
-    
+
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1)
+    {
         return new TileEntityProtocol();
     }
-    
+
     /**
      * Returns the quantity of items to drop on block destruction.
      */
@@ -86,7 +89,7 @@ public class BlockProtocol extends BlockContainer {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    } 
+    }
     /**
      * Called upon block activation (right click on the block.)
      */
@@ -94,13 +97,18 @@ public class BlockProtocol extends BlockContainer {
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        {
             return false;
+        }
+
         TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (controller != null){ 
+        if (controller != null)
+        {
             controller.attachPlayer(par5EntityPlayer);
             par5EntityPlayer.addChatMessage("[WarpCtrlr] Attached players: " + controller.getAttachedPlayersList());
         }
+
         return true;
     }
 }
