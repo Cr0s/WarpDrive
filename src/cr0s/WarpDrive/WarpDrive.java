@@ -230,13 +230,13 @@ public class WarpDrive implements LoadingCallback
         GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
                                'l', Block.leaves, 'm', WarpDriveConfig.i.getIC2Item("advancedMachine"), 'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
         GameRegistry.addRecipe(new ItemStack(laserBlock), "sss", "ama", "aaa",
-                               'm', WarpDriveConfig.i.getIC2Item("advancedMachine"), 'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"), 's', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
+                               'm', WarpDriveConfig.i.getIC2Item("advancedMachine"), 'a', WarpDriveConfig.i.Compot, 's', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
         GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "ama", "ccc",
-                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"), 'm', WarpDriveConfig.i.getIC2Item("miner"));
+                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.Compot, 'm', WarpDriveConfig.i.getIC2Item("miner"));
         GameRegistry.addRecipe(new ItemStack(boosterBlock), "afc", "ama", "cfa",
-                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"), 'f', WarpDriveConfig.i.getIC2Item("glassFiberCableItem"), 'm', WarpDriveConfig.i.getIC2Item("mfeUnit"));
+                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.Compot, 'f', WarpDriveConfig.i.getIC2Item("glassFiberCableItem"), 'm', WarpDriveConfig.i.getIC2Item("mfeUnit"));
         GameRegistry.addRecipe(new ItemStack(liftBlock), "aca", "ama", "a#a",
-                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"), 'm', WarpDriveConfig.i.getIC2Item("magnetizer"));
+                               'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'a', WarpDriveConfig.i.Compot, 'm', WarpDriveConfig.i.getIC2Item("magnetizer"));
         /*
                 GameRegistry.addRecipe(new ItemStack(Item.enderPearl), "uuu", "uuu", "uuu",
                         'u', WarpDriveConfig.i.getIC2Item("uraniumDrop"));

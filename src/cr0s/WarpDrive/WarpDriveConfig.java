@@ -9,6 +9,7 @@ import java.util.Random;
 import java.lang.reflect.*;
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,6 +25,7 @@ public class WarpDriveConfig
 //
 	public int[] IC2_Air;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public ItemStack Compot;
 	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
@@ -170,6 +172,7 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
+		Compot = Items.getItem("advancedAlloy");
 	}
 
 	private void LoadCC()
@@ -195,13 +198,18 @@ public class WarpDriveConfig
 	{
 		try
 		{
-			Class<?> z = Class.forName("gregtechmod.GT_Mod");
-			int[] t = (int[])z.getField("sBlockIDs").get(null);
+			int[] t = (int[])Class.forName("gregtechmod.GT_Mod").getField("sBlockIDs").get(null);
 			GT_Machine = t[1];
 			GT_Ores = t[2]; // meta 1-15 = ores
 			GT_Granite = t[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
 			MinerOres.add(GT_Ores);
 			MinerOres.add(GT_Granite);
+			ArrayList<ItemStack> t1 = new ArrayList<ItemStack>();
+			t1.addAll(OreDictionary.getOres("craftingPlateSteel"));
+			if (t1.size() >= 3)
+				Compot = t1.get(2);
+			else
+				System.out.println("WarpDriveConfig Error getting craftingPlateSteel " + t1.size());
 		}
 		catch (Exception e)
 		{
