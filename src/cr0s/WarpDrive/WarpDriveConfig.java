@@ -204,12 +204,14 @@ public class WarpDriveConfig
 			GT_Granite = t[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
 			MinerOres.add(GT_Ores);
 			MinerOres.add(GT_Granite);
+/*
 			ArrayList<ItemStack> t1 = new ArrayList<ItemStack>();
 			t1.addAll(OreDictionary.getOres("craftingPlateSteel"));
 			if (t1.size() >= 3)
 				Compot = t1.get(2);
 			else
 				System.out.println("WarpDriveConfig Error getting craftingPlateSteel " + t1.size());
+*/
 		}
 		catch (Exception e)
 		{
