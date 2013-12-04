@@ -90,10 +90,9 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	@Override
 	public void updateEntity()
 	{
-		isOnEarth = (worldObj.provider.dimensionId == 0);
-
 		if (isMining)
 		{
+			isOnEarth = (worldObj.provider.dimensionId == 0);
 			if (minerVector != null)
 			{
 				minerVector.x = xCoord;
@@ -107,36 +106,33 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				if (++delayTicksScan > SCAN_DELAY)
 				{
 					delayTicksScan = 0;
-					if (currentLayer <= 0)
-					{
-						isMining = false;
+					valuablesInLayer.clear();
+					valuableIndex = 0;
+					if (!collectEnergyPacketFromBooster(isOnEarth ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE, true))
 						return;
-					}
-
-					int blockID = worldObj.getBlockId(xCoord, currentLayer, zCoord);
-
-					if (blockID != 0)
-						if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && canDig(blockID))
+					while (currentLayer > 0)
+					{
+						scanLayer();
+						if (valuablesInLayer.size() > 0)
 						{
+							if (!collectEnergyPacketFromBooster(isOnEarth ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE, false))
+								return;
 							sendLaserPacket(minerVector, new Vector3(xCoord, currentLayer, zCoord).add(0.5), 0, 0, 1, 20, 0, 50);
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
-							harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
-						}
-						else
-						{
-							isMining = false;
+							int blockID = worldObj.getBlockId(xCoord, currentLayer, zCoord);
+							if (blockID != 0)
+								if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && canDig(blockID))
+									harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
+								else
+									isMining = false;
+							currentMode = 1;
 							return;
 						}
-
-					if (collectEnergyPacketFromBooster(isOnEarth ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE))
-						scanLayer();
-					else
-					{
-						isMining = false;
-						return;
+						else
+							--currentLayer;
 					}
-					if (valuablesInLayer.size() > 0)
-						currentMode = 1;
+					if (currentLayer <= 0)
+						isMining = false;
 				}
 			}
 			else
@@ -183,13 +179,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
 		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
-
 		if (blockID != Block.waterMoving.blockID && blockID != Block.waterStill.blockID && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID)
 		{
 			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
-
 			if (stacks != null)
-			{
 				for (ItemStack stack : stacks)
 				{
 					if (grid != null)
@@ -197,16 +190,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 					else
 						putInChest(findChest(), stack);
 				}
-			}
-
 			worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), blockID + (blockMeta << 12));
-			// Evaporate water
 		}
 		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
-		{
+		// Evaporate water
 			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
-		}
-
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 	}
 
@@ -254,12 +242,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	public List<ItemStack> getItemStackFromBlock(int i, int j, int k, int blockID, int blockMeta)
 	{
 		Block block = Block.blocksList[blockID];
-
 		if (block == null)
-		{
 			return null;
-		}
-
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, 0);
 	}
 
@@ -401,20 +385,16 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		valuableIndex = 0;
 		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
 	}
-	private boolean collectEnergyPacketFromBooster(int packet)
+
+	private boolean collectEnergyPacketFromBooster(int packet, boolean test)
 	{
-		int energyCollected = 0;
-
 		if (booster == null)
-		{
 			booster = findFirstBooster();
-		}
-
 		if (booster != null)
-		{
-			return booster.consumeEnergy(packet);
-		}
-
+			if (test)
+				return packet <= booster.getCurrentEnergyValue();
+			else
+				return booster.consumeEnergy(packet);
 		return false;
 	}
 

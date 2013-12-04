@@ -498,7 +498,18 @@ public class EntityJump extends Entity
 			te = worldObj.getBlockTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
 			if (te != null)
 			{
-				c = te.getClass().getSuperclass();
+				c = te.getClass();
+				if (c.getName().equals("atomicscience.jiqi.TTurbine"))
+					try
+					{
+						if (c.getField("shiDa").getBoolean(te))
+							ASTurbines.add(te);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+				c = c.getSuperclass();
 				if (c.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock") || c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator"))
 				{
 					try
@@ -511,18 +522,12 @@ public class EntityJump extends Entity
 					}
 					catch (Exception e) {}
 					te.updateContainingBlockInfo();
-				}
-				c = te.getClass();
-				if (c.getName().equals("atomicscience.jiqi.TTurbine"))
 					try
 					{
-						if (c.getField("shiDa").getBoolean(te))
-							ASTurbines.add(te);
+						NetworkHelper.updateTileEntityField(te, "facing");
 					}
-					catch (Exception e)
-					{
-						e.printStackTrace();
-					}
+					catch (Exception e) {}
+				}
 			}
 			worldObj.setBlockToAir(jb.x, jb.y, jb.z);
 			currentIndexInShip++;
