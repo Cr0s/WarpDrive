@@ -14,12 +14,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockAirGenerator extends BlockContainer {
+public class BlockAirGenerator extends BlockContainer
+{
     private Icon[] iconBuffer;
-    
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_SIDE_ACTIVATED = 2;    
 
-    public BlockAirGenerator(int id, int texture, Material material) {
+    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_SIDE_ACTIVATED = 2;
+
+    public BlockAirGenerator(int id, int texture, Material material)
+    {
         super(id, material);
     }
 
@@ -28,41 +30,48 @@ public class BlockAirGenerator extends BlockContainer {
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[3];
-       
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:airgenSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
         iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:airgenSideActive");
     }
-    
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 0) {
+        if (side == 0)
+        {
             return iconBuffer[ICON_BOTTOM];
-        } else
-        if (side == 1) {
-            if (metadata == 0) {
+        }
+        else if (side == 1)
+        {
+            if (metadata == 0)
+            {
                 return iconBuffer[ICON_INACTIVE_SIDE];
-            } else {
+            }
+            else
+            {
                 return iconBuffer[ICON_SIDE_ACTIVATED];
             }
         }
-        
+
         if (metadata == 0) // Inactive state
         {
             return iconBuffer[ICON_INACTIVE_SIDE];
-        } else if (metadata == 1) {
+        }
+        else if (metadata == 1)
+        {
             return iconBuffer[ICON_SIDE_ACTIVATED];
         }
-         
+
         return null;
-    }        
-    
+    }
+
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1)
+    {
         return new TileEntityAirGenerator();
     }
-    
+
     /**
      * Returns the quantity of items to drop on block destruction.
      */
@@ -79,33 +88,36 @@ public class BlockAirGenerator extends BlockContainer {
     public int idDropped(int par1, Random par2Random, int par3)
     {
         return this.blockID;
-    }    
-    
+    }
+
     @Override
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        {
             return false;
         }
-        
+
         TileEntityAirGenerator gen = (TileEntityAirGenerator)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (gen != null){ 
+        if (gen != null)
+        {
             par5EntityPlayer.addChatMessage("[AirGen] Energy level: " + gen.getCurrentEnergyValue() + " Eu");
         }
 
         return true;
-    }   
-    
+    }
+
     @Override
     public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
     {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
-        
-        if (te != null) {
-        	te.invalidate();
+
+        if (te != null)
+        {
+            te.invalidate();
         }
-        
+
         super.breakBlock(par1World, par2, par3, par4, par5, par6);
-    }      
+    }
 }

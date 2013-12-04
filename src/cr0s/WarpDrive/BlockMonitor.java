@@ -19,15 +19,12 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Icon;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import shipmod.ShipMod;
-import shipmod.chunk.ChunkBuilder;
-import shipmod.entity.EntityShip;
 
 public class BlockMonitor extends BlockContainer
 {
     private Icon frontIcon;
-	private Icon blockIcon;
-	
+    private Icon blockIcon;
+
     public BlockMonitor(int id)
     {
         super(id, Material.iron);
@@ -53,7 +50,7 @@ public class BlockMonitor extends BlockContainer
         this.frontIcon = reg.registerIcon("warpdrive:monitorFront");
         this.blockIcon = reg.registerIcon("warpdrive:monitorSide");
     }
-    
+
     /**
      * Called when the block is placed in the world.
      */
@@ -72,42 +69,44 @@ public class BlockMonitor extends BlockContainer
         {
             return true;
         }
-        
+
         // Get camera frequency
         TileEntity te = world.getBlockTileEntity(x, y, z);
-        
-        if (te != null && te instanceof TileEntityMonitor) {
-        	int freq = ((TileEntityMonitor)te).getFrequency();
-        	
-        	WarpDrive.instance.cams.removeDeadCams();
-        	CamRegistryItem cam = WarpDrive.instance.cams.getCamByFreq(freq, world);
-        	
-        	if (cam == null || cam.worldObj == null || cam.worldObj != world || !WarpDrive.instance.cams.isCamAlive(cam)) {
-        		entityplayer.addChatMessage("[Monitor: " + freq + "] Invalid frequency or camera is too far!");
-        		return false;
-        	} else {
-        		// Spawn camera entity
-        		EntityCamera e = new EntityCamera(world, cam.camPos, entityplayer);
-        		world.spawnEntityInWorld(e);
-        		e.setPositionAndUpdate(cam.camPos.x, cam.camPos.y, cam.camPos.z);
-        		//e.setPositionAndRotation(camPos.x, camPos.y, camPos.z, entityplayer.rotationYaw, entityplayer.rotationPitch);
-        		
-        		ClientCameraUtils.playerData = entityplayer;
-        		WarpDrive.instance.overlayType = cam.type;
-        		ClientCameraUtils.setupViewpoint(e);
-        	}
+
+        if (te != null && te instanceof TileEntityMonitor)
+        {
+            int freq = ((TileEntityMonitor)te).getFrequency();
+            WarpDrive.instance.cams.removeDeadCams();
+            CamRegistryItem cam = WarpDrive.instance.cams.getCamByFreq(freq, world);
+
+            if (cam == null || cam.worldObj == null || cam.worldObj != world || !WarpDrive.instance.cams.isCamAlive(cam))
+            {
+                entityplayer.addChatMessage("[Monitor: " + freq + "] Invalid frequency or camera is too far!");
+                return false;
+            }
+            else
+            {
+                // Spawn camera entity
+                EntityCamera e = new EntityCamera(world, cam.camPos, entityplayer);
+                world.spawnEntityInWorld(e);
+                e.setPositionAndUpdate(cam.camPos.x, cam.camPos.y, cam.camPos.z);
+                //e.setPositionAndRotation(camPos.x, camPos.y, camPos.z, entityplayer.rotationYaw, entityplayer.rotationPitch);
+                ClientCameraUtils.playerData = entityplayer;
+                WarpDrive.instance.overlayType = cam.type;
+                ClientCameraUtils.setupViewpoint(e);
+            }
         }
-        
+
         return false;
     }
-    
+
     public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
     {
-        
-    }    
+    }
 
-	@Override
-	public TileEntity createNewTileEntity(World world) {
-		return new TileEntityMonitor();
-	}
+    @Override
+    public TileEntity createNewTileEntity(World world)
+    {
+        return new TileEntityMonitor();
+    }
 }

@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cr0s.WarpDrive.WarpDrive;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -10,7 +9,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 public class BlockIridium extends Block
-{   
+{
     public BlockIridium(int par1)
     {
         super(par1, Material.rock);

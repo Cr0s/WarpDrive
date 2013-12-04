@@ -2,7 +2,6 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.TileEntityProtocol;
 
 import java.util.Random;
 
@@ -14,28 +13,29 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockWarpIsolation extends Block { 
+public class BlockWarpIsolation extends Block
+{
     private Icon[] iconBuffer;
-   
-    public BlockWarpIsolation(int id, int texture, Material material) {
+
+    public BlockWarpIsolation(int id, int texture, Material material)
+    {
         super(id, material);
     }
-        
+
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[1];
-        
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:warpIsolation");
     }
-    
+
     @Override
     public Icon getIcon(int side, int metadata)
     {
         return iconBuffer[0];
     }
-    
+
     /**
      * Returns the quantity of items to drop on block destruction.
      */

@@ -14,11 +14,10 @@ public class SoundHandler
         try
         {
             System.out.println("[WarpDrive] Registering sound files...");
-            event.manager.addSound("warpdrive:warp.ogg");       
-            
-            event.manager.addSound("warpdrive:hilaser.ogg");   
-            event.manager.addSound("warpdrive:midlaser.ogg");   
-            event.manager.addSound("warpdrive:lowlaser.ogg");   
+            event.manager.addSound("warpdrive:warp.ogg");
+            event.manager.addSound("warpdrive:hilaser.ogg");
+            event.manager.addSound("warpdrive:midlaser.ogg");
+            event.manager.addSound("warpdrive:lowlaser.ogg");
         }
         catch (Exception e)
         {

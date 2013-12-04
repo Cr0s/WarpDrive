@@ -1,8 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.WarpDrive;
-import ic2.api.Direction;
+import net.minecraftforge.common.ForgeDirection;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
@@ -10,109 +9,126 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
-    
+public class TileEntityAirGenerator extends TileEntity implements IEnergySink
+{
     public boolean addedToEnergyNet = false;
-    
+
     private final int EU_PER_AIRBLOCK = 10;
     private final int MAX_ENERGY_VALUE = 36 * EU_PER_AIRBLOCK;
     private int currentEnergyValue = 0;
 
     private int cooldownTicks = 0;
     private final float AIR_POLLUTION_INTERVAL = 10;
-    
+
     private final int START_CONCENTRATION_VALUE = 15;
 
     @Override
-    public void updateEntity() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+    public void updateEntity()
+    {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+        {
             return;
         }
-        
-    	if (!addedToEnergyNet && !this.tileEntityInvalid) {
+
+        if (!addedToEnergyNet && !this.tileEntityInvalid)
+        {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
-        
+
         // Air generator works only in spaces
-        if (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID && worldObj.provider.dimensionId != WarpDrive.instance.hyperSpaceDimID) {
+        if (worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID && worldObj.provider.dimensionId != WarpDrive.instance.hyperSpaceDimID)
+        {
             return;
         }
 
-        if (addedToEnergyNet && currentEnergyValue > EU_PER_AIRBLOCK) {
-            if (cooldownTicks++ > AIR_POLLUTION_INTERVAL) {
+        if (addedToEnergyNet && currentEnergyValue > EU_PER_AIRBLOCK)
+        {
+            if (cooldownTicks++ > AIR_POLLUTION_INTERVAL)
+            {
                 cooldownTicks = 0;
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2); // set enabled texture
-
                 releaseAir();
             }
-        } else
+        }
+        else
         {
-            if (cooldownTicks++ > 20) {
+            if (cooldownTicks++ > 20)
+            {
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
                 cooldownTicks = 0;
             }
         }
     }
-    
-    private void releaseAir() {
-        if (worldObj.isAirBlock(xCoord + 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+
+    private void releaseAir()
+    {
+        if (worldObj.isAirBlock(xCoord + 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord + 1, yCoord, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
-        
-        if (worldObj.isAirBlock(xCoord - 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+
+        if (worldObj.isAirBlock(xCoord - 1, yCoord, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord - 1, yCoord, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
-        
-        if (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+
+        if (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord, yCoord + 1, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
-        
-        if (worldObj.isAirBlock(xCoord, yCoord - 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
-            currentEnergyValue -= EU_PER_AIRBLOCK;
-        }          
-        
-        if (worldObj.isAirBlock(xCoord, yCoord, zCoord + 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+
+        if (worldObj.isAirBlock(xCoord, yCoord - 1, zCoord) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord, yCoord - 1, zCoord, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
         }
-        
-        if (worldObj.isAirBlock(xCoord, yCoord, zCoord - 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0)) {
-            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDrive.instance.config.airID, START_CONCENTRATION_VALUE, 2);
+
+        if (worldObj.isAirBlock(xCoord, yCoord, zCoord + 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord, yCoord, zCoord + 1, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
             currentEnergyValue -= EU_PER_AIRBLOCK;
-        }      
+        }
+
+        if (worldObj.isAirBlock(xCoord, yCoord, zCoord - 1) && (currentEnergyValue - EU_PER_AIRBLOCK >= 0))
+        {
+            worldObj.setBlock(xCoord, yCoord, zCoord - 1, WarpDriveConfig.i.airID, START_CONCENTRATION_VALUE, 2);
+            currentEnergyValue -= EU_PER_AIRBLOCK;
+        }
     }
-    
+
     @Override
-    public void readFromNBT(NBTTagCompound tag) {
+    public void readFromNBT(NBTTagCompound tag)
+    {
         super.readFromNBT(tag);
-        
         this.currentEnergyValue = tag.getInteger("energy");
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag) {
+    public void writeToNBT(NBTTagCompound tag)
+    {
         super.writeToNBT(tag);
-        
         tag.setInteger("energy", this.getCurrentEnergyValue());
-    }    
-    
+    }
+
     // IEnergySink methods implementation
     @Override
-    public int demandsEnergy() {
+    public double demandedEnergyUnits()
+    {
         return (MAX_ENERGY_VALUE - currentEnergyValue);
     }
 
     @Override
-    public int injectEnergy(Direction directionFrom, int amount) {
-        int leftover = 0;
+    public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
+    {
+        double leftover = 0;
+        currentEnergyValue += Math.round(amount);
 
-        currentEnergyValue += amount;
-        if (getCurrentEnergyValue() > MAX_ENERGY_VALUE) {
+        if (getCurrentEnergyValue() > MAX_ENERGY_VALUE)
+        {
             leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
             currentEnergyValue = MAX_ENERGY_VALUE;
         }
@@ -121,42 +137,44 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink {
     }
 
     @Override
-    public int getMaxSafeInput() {
+    public int getMaxSafeInput()
+    {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public boolean acceptsEnergyFrom(TileEntity emitter, Direction direction) {
+    public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
+    {
         return true;
-    }
-
-    @Override
-    public boolean isAddedToEnergyNet() {
-        return addedToEnergyNet;
     }
 
     /**
      * @return the currentEnergyValue
      */
-    public int getCurrentEnergyValue() {
+    public int getCurrentEnergyValue()
+    {
         return currentEnergyValue;
     }
 
-    @Override 
-    public void onChunkUnload() {
-        if (addedToEnergyNet) {
+    @Override
+    public void onChunkUnload()
+    {
+        if (addedToEnergyNet)
+        {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }	
+        }
     }
-    
-    @Override 
-    public void invalidate() {
-        if (addedToEnergyNet) {
+
+    @Override
+    public void invalidate()
+    {
+        if (addedToEnergyNet)
+        {
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }	
-        
+        }
+
         super.invalidate();
     }
 }

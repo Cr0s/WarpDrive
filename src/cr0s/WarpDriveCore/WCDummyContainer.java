@@ -13,50 +13,48 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-public class WCDummyContainer extends DummyModContainer {
+public class WCDummyContainer extends DummyModContainer
+{
+    public WCDummyContainer()
+    {
+        super(new ModMetadata());
+        ModMetadata meta = getMetadata();
+        meta.modId = "WarpDriveCore";
+        meta.name = "WarpDriveCore";
+        meta.version = "1.0.0.1";
+        meta.credits = "Cr0s";
+        meta.authorList = Arrays.asList("cr0s");
+        meta.description = "";
+        meta.url = "";
+        meta.updateUrl = "";
+        meta.screenshots = new String[0];
+        meta.logoFile = "";
+    }
 
-	public WCDummyContainer() {
+    @Override
+    public boolean registerBus(EventBus bus, LoadController controller)
+    {
+        bus.register(this);
+        return true;
+    }
 
-		super(new ModMetadata());
-		ModMetadata meta = getMetadata();
-		meta.modId = "WarpDriveCore";
-		meta.name = "WarpDriveCore";
-		meta.version = "1.0.0.0";
-		meta.credits = "Cr0s";
-		meta.authorList = Arrays.asList("cr0s");
-		meta.description = "";
-		meta.url = "";
-		meta.updateUrl = "";
-		meta.screenshots = new String[0];
-		meta.logoFile = "";
+    @Subscribe
+    public void modConstruction(FMLConstructionEvent evt)
+    {
+    }
 
-	}
+    @Subscribe
+    public void init(FMLInitializationEvent evt)
+    {
+    }
 
-	@Override
-	public boolean registerBus(EventBus bus, LoadController controller) {
-		bus.register(this);
-		return true;
-	}
+    @Subscribe
+    public void preInit(FMLPreInitializationEvent evt)
+    {
+    }
 
-	
-	@Subscribe
-	public void modConstruction(FMLConstructionEvent evt){
-
-	}
-
-	@Subscribe
-	public void init(FMLInitializationEvent evt) {
-
-	}
-	
-	@Subscribe
-	public void preInit(FMLPreInitializationEvent evt) {
-
-	}
-
-	@Subscribe
-	public void postInit(FMLPostInitializationEvent evt) {
-
-	}
-
+    @Subscribe
+    public void postInit(FMLPostInitializationEvent evt)
+    {
+    }
 }
