@@ -30,6 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.fluids.FluidRegistry;
 import appeng.api.WorldCoord;
 import appeng.api.IAEItemStack;
 import appeng.api.Util;
@@ -51,6 +52,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
+	private boolean useDeiterium = false;
 
 	private String[] methodsArray =
 	{
@@ -121,10 +123,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 							int blockID = worldObj.getBlockId(xCoord, currentLayer, zCoord);
 							if (blockID != 0)
-								if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) != Material.water && canDig(blockID))
+								if (canDig(blockID))
 									harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
-								else
-									isMining = false;
 							currentMode = 1;
 							return;
 						}
@@ -149,7 +149,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
 
 						// Skip if block is too hard or its empty block
-						if (worldObj.getBlockMaterial(xCoord, currentLayer, zCoord) == Material.water || !canDig(blockID))
+						if (!canDig(blockID))
 							return;
 
 						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * MINE_DELAY, 0, 50);
@@ -244,6 +244,23 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
+		if (useDeiterium)
+		{
+			IMEInventoryHandler cellArray = grid.getCellArray();
+			if (cellArray != null)
+			{
+				int consume = isQuarry?15:1000;
+				IAEItemStack entryToAEIS = Util.createItemStack(new ItemStack(WarpDriveConfig.i.AEExtraFDI, consume, FluidRegistry.getFluidID("deuterium")));
+				long contained = cellArray.countOfItemType(entryToAEIS);
+				if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta) && contained >= consume)
+				{
+					cellArray.extractItems(entryToAEIS);
+					ArrayList<ItemStack> t = new ArrayList<ItemStack>();
+					t.add(new ItemStack(blockID, 1, blockMeta));
+					return t;
+				}
+			}
+		}
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, 0);
 	}
 
@@ -508,6 +525,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		isMining = tag.getBoolean("isMining");
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
+		useDeiterium = tag.getBoolean("useDeiterium");
 		minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 	}
 
@@ -518,6 +536,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		tag.setBoolean("isMining", isMining);
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
+		tag.setBoolean("useDeiterium", useDeiterium);
 	}
 //CC
 	// IPeripheral methods implementation
@@ -547,6 +566,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
+				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
 				return new Boolean[] { true };
 
 			case 1: // stop()
@@ -565,6 +585,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
+				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
 				return new Boolean[] { true };
 
 			case 4: // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()

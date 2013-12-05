@@ -21,7 +21,7 @@ public class WarpDriveConfig
 	private Configuration config;
 	public int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID;
 //
-	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
+	public boolean isGregLoaded = false, isAELoaded = false, isAEExtraLoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
 	public int[] IC2_Air;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
@@ -30,6 +30,7 @@ public class WarpDriveConfig
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
 	private Class<?> AEItems;
+	public Item AEExtraFDI;
 	public ArrayList<int[]> CommonWorldGenOres;
 
 	private WarpDriveConfig() {}
@@ -130,6 +131,9 @@ public class WarpDriveConfig
 		isAELoaded = Loader.isModLoaded("AppliedEnergistics");
 		if (isAELoaded)
 			LoadAE();
+		isAEExtraLoaded = Loader.isModLoaded("extracells");
+		if (isAEExtraLoaded)
+			LoadAEExtra();
 		isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvSolPanelLoaded)
 			LoadASP();
@@ -173,6 +177,7 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
 		Compot = Items.getItem("advancedAlloy");
+		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}
 
 	private void LoadCC()
@@ -235,6 +240,22 @@ public class WarpDriveConfig
 			System.out.println("WarpDriveConfig Error loading AE classes");
 			e.printStackTrace();
 			isAELoaded = false;
+		}
+	}
+
+	private void LoadAEExtra()
+	{
+		try
+		{
+			Class<?> z = Class.forName("extracells.ItemEnum");
+			Object z1 = z.getEnumConstants()[6];
+			AEExtraFDI = (Item)z1.getClass().getDeclaredMethod("getItemEntry").invoke(z1);
+		}
+		catch (Exception e)
+		{
+			System.out.println("WarpDriveConfig Error loading AEExtra classes");
+			e.printStackTrace();
+			isAEExtraLoaded = false;
 		}
 	}
 

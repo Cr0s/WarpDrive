@@ -34,7 +34,7 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.1.5_ZLO", dependencies="required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.1.5_ZLO", dependencies="required-after:IC2; after:required-AppliedEnergistics; after:extracells; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {"WarpDriveBeam", "WarpDriveFreq", "WarpDriveLaserT"}, packetHandler = PacketHandler.class)
 /**
  * @author Cr0s
