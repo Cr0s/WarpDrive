@@ -170,7 +170,9 @@ public class WarpDriveConfig
 		SpaceHelmets.add(Items.getItem("hazmatHelmet").itemID);
 		SpaceHelmets.add(Items.getItem("quantumHelmet").itemID);
 		Jetpacks.add(Items.getItem("jetpack").itemID);
+System.out.println("ZLO1 " + Items.getItem("jetpack").itemID);
 		Jetpacks.add(Items.getItem("electricJetpack").itemID);
+System.out.println("ZLO1 " + Items.getItem("electricJetpack").itemID);
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
@@ -332,8 +334,8 @@ public class WarpDriveConfig
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
 			if (z.getField("ultimateSolarHelmet").get(null) != null)
 				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
-			Jetpacks.add(z.getField("advJetpackID").getInt(null));
-			Jetpacks.add(z.getField("graviChestPlateID").getInt(null));
+			Jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
+			Jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
 		}
 		catch (Exception e)
 		{
