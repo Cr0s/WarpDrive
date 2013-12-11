@@ -244,7 +244,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (useDeiterium)
+		if (useDeiterium && grid != null)
 		{
 			IMEInventoryHandler cellArray = grid.getCellArray();
 			if (cellArray != null)
