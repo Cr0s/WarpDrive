@@ -591,7 +591,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
                 return new Object[] { (Integer)core.zCoord };
 
-            case 13:
+            case 13: // get_energy_value
                 if (core != null)
                 {
                     return new Object[] { (Integer)((TileEntityReactor)core).currentEnergyValue };
@@ -639,7 +639,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 19: // set_core_frequency
                 if (arguments.length == 1 && (core != null && core instanceof TileEntityReactor))
                 {
-                    ((TileEntityReactor)core).coreFrequency = ((String)arguments[0]);
+                    ((TileEntityReactor)core).coreFrequency = ((String)arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
                 }
 
                 break;

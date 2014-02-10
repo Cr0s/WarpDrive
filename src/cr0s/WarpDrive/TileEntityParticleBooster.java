@@ -26,7 +26,6 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
 {
     public boolean addedToEnergyNet = false;
 
-    private final int MAX_ENERGY_VALUE = 100000; // eU
     private int currentEnergyValue = 0;
 
     int ticks = 0;
@@ -48,7 +47,7 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
         if (++ticks > 40)
         {
             ticks = 0;
-            currentEnergyValue = Math.min(currentEnergyValue, MAX_ENERGY_VALUE);
+            currentEnergyValue = Math.min(currentEnergyValue, WarpDriveConfig.i.PB_MAX_ENERGY_VALUE);
             worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, currentEnergyValue / 10000, 2);
         }
     }
@@ -71,7 +70,7 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
     @Override
     public double demandedEnergyUnits()
     {
-        return (MAX_ENERGY_VALUE - currentEnergyValue);
+        return (WarpDriveConfig.i.PB_MAX_ENERGY_VALUE - currentEnergyValue);
     }
 
     @Override
@@ -80,10 +79,10 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
         double leftover = 0;
         currentEnergyValue += Math.round(amount);
 
-        if (getCurrentEnergyValue() > MAX_ENERGY_VALUE)
+        if (getCurrentEnergyValue() > WarpDriveConfig.i.PB_MAX_ENERGY_VALUE)
         {
-            leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-            currentEnergyValue = MAX_ENERGY_VALUE;
+            leftover = (getCurrentEnergyValue() - WarpDriveConfig.i.PB_MAX_ENERGY_VALUE);
+            currentEnergyValue = WarpDriveConfig.i.PB_MAX_ENERGY_VALUE;
         }
 
         return leftover;

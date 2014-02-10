@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Random;
 import java.lang.reflect.*;
+
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
 import net.minecraft.block.Block;
@@ -18,18 +19,69 @@ public class WarpDriveConfig
 {
 	public static WarpDriveConfig i;
 	private Configuration config;
-	public int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID;
+	public int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
 //
-	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
+	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
 	public int[] IC2_Air;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
-	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres;
+	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, scannerIgnoreBlocks;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
 	private Class<?> AEItems;
 	public ArrayList<int[]> CommonWorldGenOres;
+	public Item AEExtraFDI;
 
+	// Mod config
+		// Warp Core
+	    public int WC_MAX_ENERGY_VALUE = 100000000;
+	    public int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
+	    public int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
+	    public int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
+	    public int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
+	    public int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
+	    public int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
+	    public int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
+	    public int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
+	    public int WC_MAX_SHIP_SIDE = 100;
+	    public int WC_COOLDOWN_INTERVAL_SECONDS = 4;
+	    public int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+	    public int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
+	
+	    // Warp Radar
+	    public int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
+	    
+	    // Particle Booster
+	    public int PB_MAX_ENERGY_VALUE = 100000;
+	    
+	    // Mining Laser
+		public int ML_MAX_BOOSTERS_NUMBER = 1;
+		public int ML_SCAN_DELAY = 20 * 5;
+		public int ML_MINE_DELAY = 10;
+		public int ML_EU_PER_LAYER_SPACE = 500;
+		public int ML_EU_PER_LAYER_EARTH = 5000;
+		
+		// Laser Emitter
+		public int LE_MAX_BOOSTERS_NUMBER = 10;
+		public int LE_MAX_LASER_ENERGY = 4000000;
+		public int LE_EMIT_DELAY_TICKS = 20 * 3;
+		public int LE_EMIT_SCAN_DELAY_TICKS = 10;
+		public double LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
+		public int LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
+		public int LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
+		public int LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
+		public int LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
+		public int LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
+		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
+		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+		
+		// Cloaking device core
+		public int CD_MAX_CLOAKING_FIELD_SIDE = 100;
+		public int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
+		public int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
+		public int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
+		public int CD_COIL_CAPTURE_BLOCKS = 5;
+		
 	private WarpDriveConfig() {}
 
 	public ItemStack getIC2Item(String id)
@@ -89,6 +141,60 @@ public class WarpDriveConfig
 		i.config = config;
 	}
 
+	public void loadWarpDriveConfig() {		
+		// Warp Core
+		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", 100000000).getInt();
+		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", 10).getInt();
+		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", 100).getInt();
+	    WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", 1000).getInt();
+	    WC_ENERGY_PER_BLOCK_MODE2 = config.get("WarpCore", "energy_per_block_mode2", 1000).getInt();
+	    WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_ped_entity_to_space", 1000000).getInt();
+	    WC_MAX_JUMP_DISTANCE = config.get("WarpCore", "max_jump_distance", 128).getInt();
+	    WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", 15000).getInt();   // Maximum ship mass to jump on earth (15k blocks)
+	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", 500).getInt(); ; // Minimum ship volume value for hyper space
+	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", 100).getInt(); 
+	    
+	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", 4).getInt(); 
+	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", 10).getInt(); 
+	    WC_ISOLATION_UPDATE_INTARVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", 10).getInt();		
+	    
+	    // Warp Radar
+	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", 100000000).getInt();
+	    
+	    // Particle Booster
+	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", 100000).getInt();
+	    
+	    // Mining Laser
+		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
+		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
+		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 500).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 5000).getInt();	  
+		
+		// Laser Emitter
+		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", 10).getInt();
+		LE_MAX_LASER_ENERGY = config.get("LaserEmitter", "max_laser_energy", 4000000).getInt();
+		LE_EMIT_DELAY_TICKS = config.get("LaserEmitter", "emit_delay_ticks", 60).getInt();
+		LE_EMIT_SCAN_DELAY_TICKS = config.get("LaserEmitter", "emit_scan_delay_ticks", 10).getInt();
+		
+		// Laser Emitter tweaks
+		LE_COLLECT_ENERGY_MULTIPLIER = config.get("LaserEmitterTweaks", "collect_energy_multiplier", 0.6D).getDouble(0.6D);
+		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "beam_length_per_energy_divider", 5000).getInt();
+		LE_ENTITY_HIT_SET_ON_FIRE_TIME = config.get("LaserEmitterTweaks", "entity_hit_set_on_fire_time", 100).getInt();
+		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "entity_hit_damage_per_energy_divider", 10000).getInt();
+		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = config.get("LaserEmitterTweaks", "entity_hit_explosion_laser_energy", 1000000).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY = config.get("LaserEmitterTweaks", "block_hit_consume_energy", 70000).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_block_resistance", 1000).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_distance", 10).getInt();
+		
+		// Cloaking device core
+		CD_MAX_CLOAKING_FIELD_SIDE = config.get("CloakingDevice", "max_cloaking_field_side", 100).getInt();
+		CD_ENERGY_PER_BLOCK_TIER1 = config.get("CloakingDevice", "energy_per_block_tier1", 125).getInt();
+		CD_ENERGY_PER_BLOCK_TIER2 = config.get("CloakingDevice", "energy_per_block_tier2", 500).getInt();	
+		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", 3).getInt();	
+		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", 5).getInt();
+	}
+	
 	public void Init2()
 	{
 		CommonWorldGenOres = new ArrayList<int[]>();
@@ -103,6 +209,7 @@ public class WarpDriveConfig
 		SpaceHelmets = new HashSet<Integer>();
 		Jetpacks = new HashSet<Integer>();
 		MinerOres = new HashSet<Integer>();
+		scannerIgnoreBlocks = new HashSet<Integer>();
 		config.load();
 		coreID = config.getBlock("core", 500).getInt();
 		controllerID = config.getBlock("controller", 501).getInt();
@@ -119,32 +226,45 @@ public class WarpDriveConfig
 		camID = config.getBlock("camera", 513).getInt();
 		monitorID = config.getBlock("monitor", 514).getInt();
 		iridiumID = config.getBlock("iridium", 515).getInt();
-		config.save();
+		shipScannerID = config.getBlock("shipscanner", 516).getInt();
+		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
+		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
+		
 		LoadIC2();
 		LoadCC();
+		
 		isGregLoaded = Loader.isModLoaded("gregtech_addon");
 		if (isGregLoaded)
 			LoadGT();
+		
 		isAELoaded = Loader.isModLoaded("AppliedEnergistics");
 		if (isAELoaded)
 			LoadAE();
+		
+		isAEExtraLoaded = Loader.isModLoaded("extracells");
+		if (isAEExtraLoaded)
+			LoadAEExtra();	
+		
 		isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvSolPanelLoaded)
 			LoadASP();
+		
 		isASLoaded = Loader.isModLoaded("AtomicScience");
 		if (isASLoaded)
 			LoadAS();
+		
 		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
 		if (isICBMLoaded)
 			LoadICBM();
+		
 		isMFFSLoaded = Loader.isModLoaded("MFFS");
 		if (isMFFSLoaded)
 			LoadMFFS();
+		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded)
 			LoadGS();
 //
-		MinerOres.add(iridiumID);
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		for (int[] t : CommonWorldGenOres)
 			MinerOres.add(t[0]);
@@ -156,6 +276,23 @@ public class WarpDriveConfig
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
 		MinerOres.add(Block.torchWood.blockID);
+		
+		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
+		scannerIgnoreBlocks.add(coreID);
+		scannerIgnoreBlocks.add(controllerID);
+		scannerIgnoreBlocks.add(iridiumID);
+		
+		scannerIgnoreBlocks.add(Items.getItem("mfsUnit").itemID);
+		scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
+		scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
+		scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
+
+		// Do not scan ores and valuables
+		for (int[] t : CommonWorldGenOres) // each element of this set is pair [id, meta]
+			scannerIgnoreBlocks.add(t[0]); // we adding ID only
+		
+		loadWarpDriveConfig();
+		config.save();
 	}
 
 	private void LoadIC2()
@@ -170,6 +307,7 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
+		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}
 
 	private void LoadCC()
@@ -228,6 +366,22 @@ public class WarpDriveConfig
 		}
 	}
 
+	private void LoadAEExtra()
+	{
+		try
+		{
+			Class<?> z = Class.forName("extracells.ItemEnum");
+			Object z1 = z.getEnumConstants()[6];
+			AEExtraFDI = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
+		}
+		catch (Exception e)
+		{
+			System.out.println("WarpDriveConfig Error loading AEExtra classes");
+			e.printStackTrace();
+			isAEExtraLoaded = false;
+		}
+	}	
+	
 	private void LoadASP()
 	{
 		try
@@ -250,7 +404,7 @@ public class WarpDriveConfig
 	{
 		try
 		{
-			Class<?> z = Class.forName("atomicscience.ZhuYaoAS");
+			Class<?> z = Class.forName("atomicscience.AtomicScience");
 			CommonWorldGenOres.add(new int[] {((Block)z.getField("bHeOre").get(null)).blockID, 0});
 			AS_Turbine = ((Block)z.getField("bWoLun").get(null)).blockID;
 		}
@@ -301,8 +455,8 @@ public class WarpDriveConfig
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
 			if (z.getField("ultimateSolarHelmet").get(null) != null)
 				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
-			Jetpacks.add(z.getField("advJetpackID").getInt(null));
-			Jetpacks.add(z.getField("graviChestPlateID").getInt(null));
+			Jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
+			Jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
 		}
 		catch (Exception e)
 		{

@@ -26,7 +26,6 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 {
 	public boolean addedToEnergyNet = false;
 
-	private final int MAX_ENERGY_VALUE = 100 * (1000 * 1000); // 100 000 000 Eu
 	private int currentEnergyValue = 0;
 
 	private String[] methodsArray =
@@ -197,7 +196,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 	@Override
 	public double demandedEnergyUnits()
 	{
-		return (MAX_ENERGY_VALUE - currentEnergyValue);
+		return (WarpDriveConfig.i.WR_MAX_ENERGY_VALUE - currentEnergyValue);
 	}
 
 	@Override
@@ -206,10 +205,10 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 		double leftover = 0;
 		currentEnergyValue += Math.round(amount);
 
-		if (getCurrentEnergyValue() > MAX_ENERGY_VALUE)
+		if (getCurrentEnergyValue() > WarpDriveConfig.i.WR_MAX_ENERGY_VALUE)
 		{
-			leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-			currentEnergyValue = MAX_ENERGY_VALUE;
+			leftover = (getCurrentEnergyValue() - WarpDriveConfig.i.WR_MAX_ENERGY_VALUE);
+			currentEnergyValue = WarpDriveConfig.i.WR_MAX_ENERGY_VALUE;
 		}
 
 		return leftover;

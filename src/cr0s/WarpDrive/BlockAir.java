@@ -179,80 +179,82 @@ public class BlockAir extends Block
 
         int mid_concentration;
         int block_count = 1;
-        final int K = 128;
-        mid_concentration = worldObj.getBlockMetadata(x, y, z) * K;
+        //final int K = 128;
+        mid_concentration = worldObj.getBlockMetadata(x, y, z);// * K;
 
+        // Count air in adjacent blocks
         if (worldObj.isAirBlock(x + 1, y, z))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x + 1, y, z) * K;
+            mid_concentration += worldObj.getBlockMetadata(x + 1, y, z);// * K;
         }
 
         if (worldObj.isAirBlock(x - 1, y, z))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x - 1, y, z) * K;
+            mid_concentration += worldObj.getBlockMetadata(x - 1, y, z);// * K;
         }
 
         if (worldObj.isAirBlock(x, y + 1, z))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x, y + 1, z) * K;
+            mid_concentration += worldObj.getBlockMetadata(x, y + 1, z);// * K;
         }
 
         if (worldObj.isAirBlock(x, y - 1, z))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x, y - 1, z) * K;
+            mid_concentration += worldObj.getBlockMetadata(x, y - 1, z);// * K;
         }
 
         if (worldObj.isAirBlock(x, y, z + 1))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x, y, z + 1) * K;
+            mid_concentration += worldObj.getBlockMetadata(x, y, z + 1);// * K;
         }
 
         if (worldObj.isAirBlock(x, y, z - 1))
         {
             block_count++;
-            mid_concentration += worldObj.getBlockMetadata(x, y, z - 1) * K;
+            mid_concentration += worldObj.getBlockMetadata(x, y, z - 1);// * K;
         }
 
-        mid_concentration = mid_concentration / block_count;
-        SetAirBlockConcentration(worldObj, x, y, z, mid_concentration / K);
+        mid_concentration = (int) Math.floor(mid_concentration * 1.0f / block_count);
+        setNewAirBlockWithConcentration(worldObj, x, y, z, mid_concentration);// / K);
 
-        if (worldObj.isAirBlock(x + 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x + 1, y, z) * K))
+        // Check and setup air to adjacent blocks
+        if (worldObj.isAirBlock(x + 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x + 1, y, z)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x + 1, y, z, mid_concentration / K);
+           setNewAirBlockWithConcentration(worldObj, x + 1, y, z, mid_concentration);// / K);
         }
 
-        if (worldObj.isAirBlock(x - 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x - 1, y, z) * K))
+        if (worldObj.isAirBlock(x - 1, y, z) && (mid_concentration > worldObj.getBlockMetadata(x - 1, y, z)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x - 1, y, z, mid_concentration / K);
+           setNewAirBlockWithConcentration(worldObj, x - 1, y, z, mid_concentration);// / K);
         }
 
-        if (worldObj.isAirBlock(x, y + 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y + 1, z) * K))
+        if (worldObj.isAirBlock(x, y + 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y + 1, z)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x, y + 1, z, mid_concentration / K);
+           setNewAirBlockWithConcentration(worldObj, x, y + 1, z, mid_concentration);// / K);
         }
 
-        if (worldObj.isAirBlock(x, y - 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y - 1, z) * K))
+        if (worldObj.isAirBlock(x, y - 1, z) && (mid_concentration > worldObj.getBlockMetadata(x, y - 1, z)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x, y - 1, z, mid_concentration  / K);
+           setNewAirBlockWithConcentration(worldObj, x, y - 1, z, mid_concentration);//  / K);
         }
 
-        if (worldObj.isAirBlock(x, y, z + 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z + 1) * K))
+        if (worldObj.isAirBlock(x, y, z + 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z + 1)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x, y, z + 1, mid_concentration / K);
+           setNewAirBlockWithConcentration(worldObj, x, y, z + 1, mid_concentration);// / K);
         }
 
-        if (worldObj.isAirBlock(x, y, z - 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z - 1) * K))
+        if (worldObj.isAirBlock(x, y, z - 1) && (mid_concentration > worldObj.getBlockMetadata(x, y, z - 1)))// * K))
         {
-            SetAirBlockConcentration(worldObj, x, y, z - 1, mid_concentration / K);
+           setNewAirBlockWithConcentration(worldObj, x, y, z - 1, mid_concentration);// / K);
         }
     }
 
-    private void SetAirBlockConcentration(World worldObj, int x, int y, int z, int concentration)
+    private void setNewAirBlockWithConcentration(World worldObj, int x, int y, int z, int concentration)
     {
         worldObj.setBlock(x, y, z, this.blockID, concentration, 2);
     }
