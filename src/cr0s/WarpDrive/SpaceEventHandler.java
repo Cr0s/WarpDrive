@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import java.util.HashMap;
+import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,10 +20,16 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 public class SpaceEventHandler
 {
 	private HashMap<String, Integer> vacuumPlayers;
-
+	private HashMap<String, Integer> cloakPlayersTimers;
+	private long lastTimer = 0;
+	
+	private final int CLOAK_CHECK_TIMEOUT_SEC = 5;
+	
 	public SpaceEventHandler()
 	{
 		vacuumPlayers = new HashMap<String, Integer>();
+		cloakPlayersTimers = new HashMap<String, Integer>();
+		this.lastTimer = 0;
 	}
 
 	@ForgeSubscribe
@@ -43,8 +50,10 @@ public class SpaceEventHandler
 			entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
 			return;
 		}
+		if (entity instanceof EntityPlayerMP)
+			updatePlayerCloakState(entity);
 
-		// Обновление происходит в космическом или гипер пространстве
+		// If player in vaccum, check and start consuming air cells
 		if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
 		{
 			boolean inVacuum = isEntityInVacuum(entity);
@@ -87,7 +96,7 @@ public class SpaceEventHandler
 						entity.attackEntityFrom(DamageSource.drown, 1);
 					}
 
-					// Отправить назад на Землю
+					// If player falling down, teleport on earth
 					if (entity.posY < -10.0D)
 					{
 						((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
@@ -103,6 +112,57 @@ public class SpaceEventHandler
 		}
 	}
 
+	private void updatePlayerCloakState(EntityLivingBase entity)
+	{
+		// Make sure for elapsed time is second after last update
+		if (System.currentTimeMillis() - this.lastTimer > 1000)
+			lastTimer = System.currentTimeMillis();
+		else 
+			return;
+		
+		try {
+			EntityPlayerMP p = (EntityPlayerMP)entity;
+			Integer cloakTicks = this.cloakPlayersTimers.get(p.username);
+			
+			if (cloakTicks == null)
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, 0);
+				
+				return;
+			}
+			
+			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_SEC)
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, 0);
+				
+				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(p.worldObj.provider.dimensionId, MathHelper.floor_double(p.posX), MathHelper.floor_double(p.posY), MathHelper.floor_double(p.posZ), false);
+				if (cloaks.size() != 0)
+				{
+					//System.out.println("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
+					for (CloakedArea area : cloaks)
+					{
+						//System.out.println("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
+						if (!area.isPlayerInArea(p) && area.isPlayerWithinArea(p))
+						{
+							WarpDrive.instance.cloaks.playerEnteringCloakedArea(area, p);
+						}
+					}
+				} else
+				{
+					//System.out.println("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
+					WarpDrive.instance.cloaks.checkPlayerLeavedArea(p);
+				}
+			}
+			else
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, cloakTicks + 1);			
+			}
+		} catch (Exception e) { e.printStackTrace(); }
+	}
+	
 	private void setPlayerAirValue(EntityLivingBase entity, Integer air)
 	{
 		vacuumPlayers.remove(((EntityPlayerMP)entity).username);

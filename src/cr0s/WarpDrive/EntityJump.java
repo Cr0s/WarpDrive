@@ -384,7 +384,6 @@ public class EntityJump extends Entity
 				moveY = movementVector[1] * distance;
 				moveZ = movementVector[2] * distance;
 
-				// Нужно не упереться в пол мира и потолок космоса
 				if ((maxY + moveY) > 255)
 				{
 					moveY = 255 - maxY;
@@ -654,9 +653,6 @@ public class EntityJump extends Entity
 		return testDistance;
 	}
 
-	/*
-	 * Получить реальное количество блоков, из которых состоит корабль
-	 */
 	public int getRealShipSize()
 	{
 		LocalProfiler.start("EntityJump.getRealShipSize");
@@ -706,19 +702,10 @@ public class EntityJump extends Entity
 
 			Entity entity = (Entity)o;
 			MovingEntity movingEntity = new MovingEntity(entity);
-			// Добавим в список Entity
 			entitiesOnShip.add(movingEntity);
 		}
 	}
 
-	/**
-	 * Перемещение сущностей вместе с кораблем
-	 * @param axisalignedbb область корабля
-	 * @param distance расстояние перемещения
-	 * @param direction направление перемещения
-	 * @param restorePositions восстановление старых позиций для предотвращения выпадения, либо перемещение на новую
-	 * @return
-	 */
 	public boolean moveEntities(boolean restorePositions)
 	{
 		System.out.println("[JE] Moving entities");
@@ -779,7 +766,6 @@ public class EntityJump extends Entity
 				if (entity instanceof EntityPlayerMP)
 				{
 					EntityPlayerMP player = (EntityPlayerMP) entity;
-					// Если на корабле есть кровать, то передвинуть точку спауна игрока
 					ChunkCoordinates bedLocation = player.getBedLocation();
 
 					if (bedLocation != null && testBB(axisalignedbb, bedLocation.posX, bedLocation.posY, bedLocation.posZ))
@@ -802,15 +788,11 @@ public class EntityJump extends Entity
 		return true;
 	}
 
-	/**
-	 * Проверка на вхождение точки в область (bounding-box)
-	 */
 	public boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z)
 	{
 		return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
 	}
 
-	// Получение вектора в зависимости от направления прыжка
 	public int[] getVector(int i)
 	{
 		int v[] =
@@ -851,13 +833,6 @@ public class EntityJump extends Entity
 		return v;
 	}
 
-	/**
-	 * Проверка возможности установки корабля в месте, удалённом от корабля на
-	 * определённом расстоянии в сторону прыжка
-	 *
-	 * @param i
-	 * @return true, если корабль уместился на новом месте
-	 */
 	public boolean checkMovement(int testDistance)
 	{
 		if ((dir == -1 && maxY + testDistance > 255) && !toSpace)
@@ -919,23 +894,11 @@ public class EntityJump extends Entity
 		return true;
 	}
 
-	/**
-	 * Точка находится в варп-поле корабля?
-	 *
-	 * @param x
-	 * @param y
-	 * @param z
-	 * @return true, если находится
-	 */
 	public boolean isBlockInShip(int x, int y, int z)
 	{
 		return x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ;
 	}
 
-	/**
-	 * Выключение модема, если периферийное устройство является модемом
-	 * @param p - периферийное устройство
-	 */
 	private void turnOffModem(IPeripheral p)
 	{
 		// FIXME
@@ -954,9 +917,6 @@ public class EntityJump extends Entity
 		}*/
 	}
 
-	/**
-	 * Выключение всех модемов на корабле
-	 */
 	private void turnOffModems()
 	{
 		// FIXME
@@ -1109,7 +1069,7 @@ public class EntityJump extends Entity
 		//System.out.println("[JE@"+this+"] writeEntityToNBT()");
 	}
 
-	// Own implementation of setting blocks withow light recalculation in optimization purposes
+	// Own implementation of setting blocks without light recalculation in optimization purposes
 	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
 	{
 		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)

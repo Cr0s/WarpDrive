@@ -64,15 +64,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		"offset"	//5
 	};
 
-	private final int SCAN_DELAY = 20 * 5;
 	private int delayTicksScan = 0;
-
-	private final int MINE_DELAY = 10;
 	private int delayTicksMine = 0;
-
-	private final int EU_PER_LAYER_SPACE = 500;
-	private final int EU_PER_LAYER_EARTH = 5000;
-
 	private int currentMode = 0; // 0 - scan next layer, 1 - collect valuables
 
 	private int currentLayer;
@@ -105,19 +98,19 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 			if (currentMode == 0)
 			{
-				if (++delayTicksScan > SCAN_DELAY)
+				if (++delayTicksScan > WarpDriveConfig.i.ML_SCAN_DELAY)
 				{
 					delayTicksScan = 0;
 					valuablesInLayer.clear();
 					valuableIndex = 0;
-					if (!collectEnergyPacketFromBooster(isOnEarth ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE, true))
+					if (!collectEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE, true))
 						return;
 					while (currentLayer > 0)
 					{
 						scanLayer();
 						if (valuablesInLayer.size() > 0)
 						{
-							if (!collectEnergyPacketFromBooster(isOnEarth ? EU_PER_LAYER_EARTH : EU_PER_LAYER_SPACE, false))
+							if (!collectEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE, false))
 								return;
 							sendLaserPacket(minerVector, new Vector3(xCoord, currentLayer, zCoord).add(0.5), 0, 0, 1, 20, 0, 50);
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
@@ -137,7 +130,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			}
 			else
 			{
-				if (++delayTicksMine > MINE_DELAY)
+				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY)
 				{
 					delayTicksMine = 0;
 
@@ -152,7 +145,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						if (!canDig(blockID))
 							return;
 
-						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * MINE_DELAY, 0, 50);
+						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						harvestBlock(valuable);
 					}

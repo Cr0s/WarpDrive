@@ -7,7 +7,7 @@ import cpw.mods.fml.relauncher.IFMLCallHook;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
-@MCVersion(value = "1.6.2")
+@MCVersion(value = "1.6.4")
 public class WCFMLLoadingPlugin implements IFMLLoadingPlugin, IFMLCallHook
 {
     public static File location;

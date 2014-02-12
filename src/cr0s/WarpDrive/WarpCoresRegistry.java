@@ -6,8 +6,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 
-/**
- * @authorCr0s
+/** Registry of active Warp Cores in world
+ * @author Cr0s
  */
 public class WarpCoresRegistry
 {
@@ -143,7 +143,7 @@ public class WarpCoresRegistry
 			double d5 = c.zCoord - core.zCoord;
 			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 
-			if (distance <= (2 * core.MAX_SHIP_SIDE) - 1)
+			if (distance <= (2 * WarpDriveConfig.i.WC_MAX_SHIP_SIDE) - 1)
 			{
 				// Check for warpfields intersections
 				core.prepareToJump(); // calculate spatial parameters

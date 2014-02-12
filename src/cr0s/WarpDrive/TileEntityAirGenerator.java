@@ -18,7 +18,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink
     private int currentEnergyValue = 0;
 
     private int cooldownTicks = 0;
-    private final float AIR_POLLUTION_INTERVAL = 10;
+    private final float AIR_POLLUTION_INTERVAL = 4; // seconds
 
     private final int START_CONCENTRATION_VALUE = 15;
 
@@ -44,7 +44,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink
 
         if (addedToEnergyNet && currentEnergyValue > EU_PER_AIRBLOCK)
         {
-            if (cooldownTicks++ > AIR_POLLUTION_INTERVAL)
+            if (cooldownTicks++ > AIR_POLLUTION_INTERVAL * 20)
             {
                 cooldownTicks = 0;
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2); // set enabled texture

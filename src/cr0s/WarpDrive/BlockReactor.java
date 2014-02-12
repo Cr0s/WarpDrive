@@ -46,7 +46,7 @@ public class BlockReactor extends BlockContainer
             return iconBuffer[ICON_TOP];
         }
 
-        if (metadata == 0) // Inactive state
+        if (metadata == 0) //Inactive state
         {
             return iconBuffer[ICON_INACTIVE_SIDE];
         }

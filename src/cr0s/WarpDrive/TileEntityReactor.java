@@ -1,7 +1,5 @@
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import net.minecraftforge.common.ForgeDirection;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
@@ -23,7 +21,9 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
+import cpw.mods.fml.common.FMLCommonHandler;
 
 /**
  * @author Cr0s
@@ -58,35 +58,22 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     int currentMode = 0;
 
     int currentEnergyValue = 0;
-    int maxEnergyValue = 100000000;
 
-    private final int ENERGY_PER_BLOCK_MODE1 = 10; // eU
-    private final int ENERGY_PER_DISTANCE_MODE1 = 100; // eU
-    private final int ENERGY_PER_BLOCK_MODE2 = 1000; // eU
-    private final int ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
-    private final int ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
     private final byte MODE_BASIC_JUMP = 1; // 0-128
     private final byte MODE_LONG_JUMP = 2;  // 0-12800
     private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
     private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
     private final byte MODE_TELEPORT = -1;
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
-    private final int MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-    private final int MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-    private final int MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
 
-    public final int MAX_SHIP_SIDE = 100;
     int cooldownTime = 0;
-    private final int COOLDOWN_INTERVAL_SECONDS = 4;
     public int randomCooldownAddition = 0;
 
-    private final int CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
     private int registryUpdateTicks = 0;
     public String coreFrequency = "default";
 
     public int isolationBlocksCount = 0;
     public int isolationUpdateTicks = 0;
-    private final int ISOLATION_UPDATE_INTARVAL_SECONDS = 10;
 
     public String coreState = "";
     public TileEntityProtocol controller;
@@ -103,7 +90,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         }
 
         // Update warp core in cores registry
-        if (++registryUpdateTicks > CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20)
+        if (++registryUpdateTicks > WarpDriveConfig.i.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20)
         {
             registryUpdateTicks = 0;
             WarpDrive.instance.registry.updateInRegistry(this);
@@ -114,7 +101,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             return;
         }
 
-        if (++isolationUpdateTicks > ISOLATION_UPDATE_INTARVAL_SECONDS * 20)
+        if (++isolationUpdateTicks > WarpDriveConfig.i.WC_ISOLATION_UPDATE_INTARVAL_SECONDS * 20)
         {
             isolationUpdateTicks = 0;
             updateIsolationState();
@@ -190,7 +177,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     // Set up activated animation
                     if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 0)
                     {
-                        // TODO: check for "warpcore turns into dirt" bug
                         worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2); // Set block state to "active"
                         makePlayersOnShipDrunk();
                     }
@@ -202,7 +188,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     }
 
                     // Awaiting cooldown time
-                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
+                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
                     {
                         return;
                     }
@@ -222,6 +208,13 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;
                     }
 
+                    if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false))
+                    {
+                        this.controller.setJumpFlag(false);
+                        messageToAllPlayersOnShip("Wap-Core is inside cloaking field. Can't jump. Disable cloaking field to jump!");
+                        return;                    	
+                    }
+                    
                     System.out.println("[W-C] Jumping!");
                     doJump();
                     controller.setJumpFlag(false);
@@ -365,7 +358,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void summonPlayer(EntityPlayerMP player, int x, int y, int z)
     {
-        if (this.currentEnergyValue - this.ENERGY_PER_ENTITY_TO_SPACE >= 0)
+        if (this.currentEnergyValue - WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE >= 0)
         {
             player.setPositionAndUpdate(x, y, z);
 
@@ -374,12 +367,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 player.mcServer.getConfigurationManager().transferPlayerToDimension(player, this.worldObj.provider.dimensionId, new SpaceTeleporter(DimensionManager.getWorld(this.worldObj.provider.dimensionId), 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
             }
 
-            this.currentEnergyValue -= this.ENERGY_PER_ENTITY_TO_SPACE;
+            this.currentEnergyValue -= WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE;
         }
     }
 
     public boolean prepareToJump()
     {
+    	if (controller == null)
+    		return false;
+    	
         this.direction = controller.getDirection();
         this.shipFront = controller.getFront();
         this.shipRight = controller.getRight();
@@ -387,7 +383,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         this.shipBack  = controller.getBack();
         this.shipLeft  = controller.getLeft();
         this.shipDown  = controller.getDown();
-        this.distance  = Math.min(this.MAX_JUMP_DISTANCE, controller.getDistance());
+        this.distance  = Math.min(WarpDriveConfig.i.WC_MAX_JUMP_DISTANCE, controller.getDistance());
         return calculateSpatialShipParameters();
     }
 
@@ -475,7 +471,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         }
 
         // Ship side is too big
-        if (shipLength > MAX_SHIP_SIDE || shipWidth > MAX_SHIP_SIDE || shipHeight > MAX_SHIP_SIDE)
+        if (shipLength > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipWidth > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipHeight > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
         {
             this.controller.setJumpFlag(false);
             return false;
@@ -483,7 +479,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         this.shipVolume = getRealShipVolume();
 
-        if (shipVolume > MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0)
+        if (shipVolume > WarpDriveConfig.i.WC_MAX_JUMP_DISTANCE && worldObj.provider.dimensionId == 0)
         {
             this.controller.setJumpFlag(false);
             return false;
@@ -785,9 +781,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
             if (t != null && !isShipInJumpgate(t))
             {
-                if (shipVolume < MIN_SHIP_VOLUME_FOR_HYPERSPACE)
+                if (shipVolume < WarpDriveConfig.i.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE)
                 {
-                    this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + MIN_SHIP_VOLUME_FOR_HYPERSPACE + "). Insufficient ship mass to open hyperspace portal.");
+                    this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + WarpDriveConfig.i.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE + "). Insufficient ship mass to open hyperspace portal.");
                     this.controller.setJumpFlag(false);
                     return;
                 }
@@ -802,6 +798,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
             {
                 System.out.println("[WP-TE] Insufficient energy to jump");
+                messageToAllPlayersOnShip("Insufficient energy to jump!");
                 this.controller.setJumpFlag(false);
                 return;
             }
@@ -870,12 +867,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
                 for (Object o : list)
                 {
-                    if (currentEnergyValue - ENERGY_PER_ENTITY_TO_SPACE < 0)
+                    if (currentEnergyValue - WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE < 0)
                     {
                         return;
                     }
 
-                    currentEnergyValue -= ENERGY_PER_ENTITY_TO_SPACE;
+                    currentEnergyValue -= WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE;
                     Entity entity = (Entity) o;
                     int x = MathHelper.floor_double(entity.posX);
                     int z = MathHelper.floor_double(entity.posZ);
@@ -1009,19 +1006,19 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         switch (currentMode)
         {
             case MODE_BASIC_JUMP:
-                energyValue = (ENERGY_PER_BLOCK_MODE1 * shipVolume) + (ENERGY_PER_DISTANCE_MODE1 * jumpDistance);
+                energyValue = (WarpDriveConfig.i.WC_ENERGY_PER_BLOCK_MODE1 * shipVolume) + (WarpDriveConfig.i.WC_ENERGY_PER_DISTANCE_MODE1 * jumpDistance);
                 break;
 
             case MODE_LONG_JUMP:
-                energyValue = (ENERGY_PER_BLOCK_MODE2 * shipVolume) + (ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
+                energyValue = (WarpDriveConfig.i.WC_ENERGY_PER_BLOCK_MODE2 * shipVolume) + (WarpDriveConfig.i.WC_ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
                 break;
 
             case MODE_HYPERSPACE:
-                energyValue = this.maxEnergyValue / 10; // 10% of maximum
+                energyValue = WarpDriveConfig.i.WC_MAX_ENERGY_VALUE / 10; // 10% of maximum
                 break;
 
             case MODE_BEACON_JUMP:
-                energyValue = this.maxEnergyValue / 2;  // half of maximum
+                energyValue = WarpDriveConfig.i.WC_MAX_ENERGY_VALUE / 2;  // half of maximum
                 break;
 
             case MODE_GATE_JUMP:
@@ -1104,7 +1101,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             return 0;
         }
 
-        return (maxEnergyValue - currentEnergyValue);
+        return (WarpDriveConfig.i.WC_MAX_ENERGY_VALUE - currentEnergyValue);
     }
 
     @Override
@@ -1113,10 +1110,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         double leftover = 0;
         currentEnergyValue += Math.round(amount);
 
-        if (currentEnergyValue > maxEnergyValue)
+        if (currentEnergyValue > WarpDriveConfig.i.WC_MAX_ENERGY_VALUE)
         {
-            leftover = (currentEnergyValue - maxEnergyValue);
-            currentEnergyValue = maxEnergyValue;
+            leftover = (currentEnergyValue - WarpDriveConfig.i.WC_MAX_ENERGY_VALUE);
+            currentEnergyValue = WarpDriveConfig.i.WC_MAX_ENERGY_VALUE;
         }
 
         return leftover;

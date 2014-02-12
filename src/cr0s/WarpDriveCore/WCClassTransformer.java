@@ -24,49 +24,60 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
     public WCClassTransformer()
     {
-        // Obfuscated Notch methods
-        nodemap.put("worldClass", "abv");
-        nodemap.put("playerMP", "ju");
-        nodemap.put("netLoginHandler", "jx");
-        nodemap.put("confManagerClass", "hm");
+        nodemap.put("worldClass", "abw");
+        nodemap.put("playerMP", "jv");
+        nodemap.put("netLoginHandler", "jy");
+        nodemap.put("confManagerClass", "hn");
         nodemap.put("createPlayerMethod", "a");
         nodemap.put("createPlayerDesc", (new StringBuilder()).append("(Ljava/lang/String;)L").append((String)nodemap.get("playerMP")).append(";").toString());
         nodemap.put("respawnPlayerMethod", "a");
         nodemap.put("respawnPlayerDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("playerMP")).append(";IZ)L").append((String)nodemap.get("playerMP")).append(";").toString());
-        nodemap.put("itemInWorldManagerClass", "jv");
+        nodemap.put("itemInWorldManagerClass", "jw");
         nodemap.put("attemptLoginMethodBukkit", "attemptLogin");
         nodemap.put("attemptLoginDescBukkit", (new StringBuilder()).append("(L").append((String)nodemap.get("netLoginHandler")).append(";Ljava/lang/String;Ljava/lang/String;)L").append((String)nodemap.get("playerMP")).append(";").toString());
-        nodemap.put("playerControllerClass", "bcz");
-        nodemap.put("playerClient", "bdf");
-        nodemap.put("netClientHandler", "bct");
+        nodemap.put("playerControllerClass", "bdc");
+        nodemap.put("playerClient", "bdi");
+        nodemap.put("netClientHandler", "bcw");
         nodemap.put("createClientPlayerMethod", "a");
         nodemap.put("createClientPlayerDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("worldClass")).append(";)L").append((String)nodemap.get("playerClient")).append(";").toString());
-        nodemap.put("entityLivingClass", "oe");
+        nodemap.put("entityLivingClass", "of");
         nodemap.put("moveEntityMethod", "e");
         nodemap.put("moveEntityDesc", "(FF)V");
-        nodemap.put("entityItemClass", "sr");
+        nodemap.put("entityItemClass", "ss");
         nodemap.put("onUpdateMethod", "l_");
         nodemap.put("onUpdateDesc", "()V");
-        nodemap.put("entityRendererClass", "bfb");
+        nodemap.put("entityRendererClass", "bfe");
         nodemap.put("updateLightmapMethod", "h");
         nodemap.put("updateLightmapDesc", "(F)V");
-        nodemap.put("player", "ue");
-        nodemap.put("containerPlayer", "vu");
-        nodemap.put("invPlayerClass", "uc");
-        nodemap.put("minecraft", "ats");
-        nodemap.put("session", "aup");
-        nodemap.put("guiPlayer", "axs");
-        nodemap.put("thePlayer", "g");
+        nodemap.put("player", "uf");
+        nodemap.put("containerPlayer", "vv");
+        nodemap.put("invPlayerClass", "ud");
+        nodemap.put("minecraft", "atv");
+        nodemap.put("session", "aus");
+        nodemap.put("guiPlayer", "axv");
+        nodemap.put("thePlayer", "h");
         nodemap.put("displayGui", "a");
-        nodemap.put("guiScreen", "avv");
+        nodemap.put("guiScreen", "awe");
         nodemap.put("displayGuiDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("guiScreen")).append(";)V").toString());
         nodemap.put("runTick", "k");
         nodemap.put("runTickDesc", "()V");
         nodemap.put("clickMiddleMouseButton", "W");
         nodemap.put("clickMiddleMouseButtonDesc", "()V");
-        nodemap.put("itemRendererClass", "bfg");
+        nodemap.put("itemRendererClass", "bfj");
         nodemap.put("renderOverlaysMethod", "b");
         nodemap.put("renderOverlaysDesc", "(F)V");
+        nodemap.put("updateFogColorMethod", "i");
+        nodemap.put("updateFogColorDesc", "(F)V");
+        nodemap.put("getFogColorMethod", "f");
+        nodemap.put("getSkyColorMethod", "a");
+        nodemap.put("vecClass", "atc");
+        nodemap.put("entityClass", "nn");
+        nodemap.put("getFogColorDesc", (new StringBuilder()).append("(F)L").append((String)nodemap.get("vecClass")).append(";").toString());
+        nodemap.put("getSkyColorDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("entityClass")).append(";F)L").append((String)nodemap.get("vecClass")).append(";").toString());
+        nodemap.put("guiSleepClass", "avm");
+        nodemap.put("wakeEntityMethod", "g");
+        nodemap.put("wakeEntityDesc", "()V");
+        nodemap.put("orientCameraDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("minecraft")).append(";L").append((String)nodemap.get("entityLivingClass")).append(";)V").toString());
     }
 
     @Override

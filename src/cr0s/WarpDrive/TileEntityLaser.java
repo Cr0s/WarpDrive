@@ -34,9 +34,6 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLaser extends TileEntity implements IPeripheral
 {
-	private final int MAX_BOOSTERS_NUMBER = 10;
-	private final int MAX_LASER_ENERGY = 4000000;
-
 	private int dx, dz, dy;
 	public float yaw, pitch; // laser direction
 
@@ -68,7 +65,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public void updateEntity()
 	{
 		// Frequency is not set
-		if (frequency == -1)
+		if (frequency <= 0)
 		{
 			return;
 		}
@@ -88,11 +85,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			}
 		}
 
-		if (isEmitting && ++delayTicks > 20 * 3)
+		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS))
 		{
 			delayTicks = 0;
 			isEmitting = false;
-			emitBeam(Math.min(this.collectEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * 0.60D), MAX_LASER_ENERGY));
+			emitBeam(Math.min(this.collectEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.i.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.i.LE_MAX_LASER_ENERGY));
 			energyFromOtherBeams = 0;
 		}
 	}
@@ -102,11 +99,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		if (isEmitting)
 		{
 			energyFromOtherBeams += amount;
-			System.out.println("[EL] Added energy: " + amount);
+			System.out.println("[LE] Added energy: " + amount);
 		}
 		else
 		{
-			System.out.println("[EL] Ignored energy: " + amount);
+			System.out.println("[LE] Ignored energy: " + amount);
 		}
 	}
 
@@ -116,7 +113,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 		if (findFirstBooster() != null)
 		{
-			for (int shift = 1; shift <= MAX_BOOSTERS_NUMBER; shift++)
+			for (int shift = 1; shift <= WarpDriveConfig.i.LE_MAX_BOOSTERS_NUMBER; shift++)
 			{
 				int newX = xCoord + (dx * shift);
 				int newY = yCoord + (dy * shift);
@@ -141,7 +138,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	private void emitBeam(int energy)
 	{
 		// Beam power calculations
-		int beamLengthBlocks = energy / 5000;
+		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
 		System.out.println("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
 		if (energy == 0 || beamLengthBlocks < 1)
@@ -204,16 +201,16 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 				{
 					if (distanceToEntity <= beamLengthBlocks)
 					{
-						((EntityLivingBase)e).setFire(100);
-						((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / 10000);
+						((EntityLivingBase)e).setFire(WarpDriveConfig.i.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
+						((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.i.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
 
-						if (energy > 1000000)
+						if (energy > WarpDriveConfig.i.LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY)
 						{
 							worldObj.newExplosion(null, e.posX, e.posY, e.posZ, 4F, true, true);
 						}
 
 						// consume energy
-						energy -= 10000 + (10 * distanceToEntity);
+						energy -= WarpDriveConfig.i.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER + (10 * distanceToEntity);
 						endPoint = new Vector3(entityHit.hitVec);
 						break;
 					}
@@ -268,7 +265,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 					endPoint = new Vector3(hit.hitVec);
 				}
 
-				energy -=  70000 + (resistance * 1000) + (distance * 10);
+				energy -=  WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + (distance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
 				endPoint = new Vector3(hit.hitVec);
 
 				if (energy <= 0)
