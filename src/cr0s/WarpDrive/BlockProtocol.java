@@ -68,7 +68,6 @@ public class BlockProtocol extends BlockContainer
 		}
 		else
 			return iconBuffer[ICON_SIDE_ACTIVATED];
-		return null;
 	}
 
 	@Override

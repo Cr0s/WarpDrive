@@ -59,7 +59,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	int warpCoreSearchTicks = 0;
 
 	// Config
-	private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
+	private final String SCHEMATICS_DIR = "schematics";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
 	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
@@ -83,9 +83,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	
 	@Override
 	public void updateEntity() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
-		}
 
 		if (!addedToEnergyNet && !this.tileEntityInvalid) {
 			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
@@ -440,15 +439,17 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	private void scanShip() {
 		// Enable scanner
 		switchState(1);
+		File f = new File(SCHEMATICS_DIR);
+		if (!f.exists() || !f.isDirectory())
+			f.mkdirs();
 
 		// Generate unique file name
 		do {
 			schematicFileName = (new StringBuilder().append(core.coreFrequency)
 					.append(System.currentTimeMillis()).append(".schematic"))
 					.toString();
-		} while (new File(this.SCHEMATICS_DIR + schematicFileName).exists());
-
-		saveShipToSchematic(this.SCHEMATICS_DIR + schematicFileName);
+		} while (new File(SCHEMATICS_DIR + "/" + schematicFileName).exists());
+		saveShipToSchematic(SCHEMATICS_DIR + "/" + schematicFileName);
 	}
 
 	private NBTTagCompound readNBTFromFile(String fileName) {
