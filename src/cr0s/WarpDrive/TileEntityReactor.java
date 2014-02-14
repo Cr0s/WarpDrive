@@ -201,6 +201,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;
                     }
 
+System.out.println("ZLO5");
                     if (WarpDrive.instance.registry.isWarpCoreIntersectsWithOthers(this))
                     {
                         this.controller.setJumpFlag(false);
@@ -208,6 +209,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;
                     }
 
+System.out.println("ZLO6");
                     if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false))
                     {
                         this.controller.setJumpFlag(false);
@@ -215,6 +217,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;                    	
                     }
                     
+System.out.println("ZLO7");
                     System.out.println("[W-C] Jumping!");
                     doJump();
                     controller.setJumpFlag(false);
@@ -479,7 +482,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         this.shipVolume = getRealShipVolume();
 
-        if (shipVolume > WarpDriveConfig.i.WC_MAX_JUMP_DISTANCE && worldObj.provider.dimensionId == 0)
+        if (shipVolume > WarpDriveConfig.i.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0)
         {
             this.controller.setJumpFlag(false);
             return false;
