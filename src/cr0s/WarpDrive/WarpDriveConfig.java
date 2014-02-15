@@ -75,6 +75,8 @@ public class WarpDriveConfig
 		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
 		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
 		
+		public String schemaLocation = "/home/cros/mc_site/schematics/";
+		
 		// Cloaking device core
 		public int CD_MAX_CLOAKING_FIELD_SIDE = 100;
 		public int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
@@ -99,7 +101,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Call getAEBlock failed for " + id);
+			WarpDrive.debugPrint("WarpDriveConfig Call getAEBlock failed for " + id);
 		}
 		return null;
 	}
@@ -114,7 +116,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Call getAEMaterial failed for " + id);
+			WarpDrive.debugPrint("WarpDriveConfig Call getAEMaterial failed for " + id);
 		}
 		return null;
 	}
@@ -129,7 +131,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Call getAEItem failed for " + id);
+			WarpDrive.debugPrint("WarpDriveConfig Call getAEItem failed for " + id);
 		}
 		return null;
 	}
@@ -193,6 +195,9 @@ public class WarpDriveConfig
 		CD_ENERGY_PER_BLOCK_TIER2 = config.get("CloakingDevice", "energy_per_block_tier2", 500).getInt();	
 		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", 3).getInt();	
 		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", 5).getInt();
+		
+		// Dark's modifications
+		schemaLocation = config.get("Dark's stuff", "schematic_location", schemaLocation).getString();
 	}
 	
 	public void Init2()
@@ -324,7 +329,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading CC classes AWWW SHEEEEET NIGGA");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading CC classes AWWW SHEEEEET NIGGA");
 			e.printStackTrace();
 		}
 	}
@@ -343,7 +348,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading GT classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading GT classes");
 			e.printStackTrace();
 			isGregLoaded = false;
 		}
@@ -360,7 +365,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading AE classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading AE classes");
 			e.printStackTrace();
 			isAELoaded = false;
 		}
@@ -376,7 +381,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading AEExtra classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading AEExtra classes");
 			e.printStackTrace();
 			isAEExtraLoaded = false;
 		}
@@ -394,7 +399,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading ASP classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading ASP classes");
 			e.printStackTrace();
 			isAdvSolPanelLoaded = false;
 		}
@@ -410,7 +415,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading AS classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading AS classes");
 			isASLoaded = false;
 		}
 	}
@@ -427,7 +432,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading ICBM classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
@@ -442,7 +447,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading MFFS classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading MFFS classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
@@ -460,7 +465,7 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading GS classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}

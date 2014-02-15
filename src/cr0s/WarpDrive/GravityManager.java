@@ -20,7 +20,9 @@ public class GravityManager
         if (inSpace)
         {
             boolean insideGravField = isEntityInGraviField(entity);
-
+            if(entity instanceof EntityPlayer)
+            	((EntityPlayer)entity).addChatMessage("Grav:" + (insideGravField?"YES":"NO"));
+            	
             if (insideGravField)
             {
                 return 0.08D;

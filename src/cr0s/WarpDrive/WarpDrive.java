@@ -34,7 +34,7 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.0", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.0", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
@@ -100,10 +100,14 @@ public class WarpDrive implements LoadingCallback {
 				.getSuggestedConfigurationFile()));
 
 		if (FMLCommonHandler.instance().getSide().isClient()) {
-			System.out
-			.println("[WarpDrive] Registering sounds event handler...");
+			debugPrint("[WarpDrive] Registering sounds event handler...");
 			MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		}
+	}
+	
+	public static void debugPrint(String out)
+	{
+		System.out.println(out);
 	}
 
 	@Init
@@ -391,9 +395,12 @@ public class WarpDrive implements LoadingCallback {
 		
 		registry = new WarpCoresRegistry();
 
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			jumpGates = new JumpGatesRegistry();
-		} else {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer())
+		{
+			
+		}
+		else
+		{
 			cams = new CamRegistry();
 		}
 	}
@@ -421,6 +428,8 @@ public class WarpDrive implements LoadingCallback {
 	@EventHandler
 	public void serverLoad(FMLServerStartingEvent event) {
 		cloaks = new CloakManager();
+		debugPrint("Added jump registry");
+		jumpGates = new JumpGatesRegistry();
 		MinecraftForge.EVENT_BUS.register(new CloakChunkWatcher());
 		
 		event.registerServerCommand(new GenerateCommand());

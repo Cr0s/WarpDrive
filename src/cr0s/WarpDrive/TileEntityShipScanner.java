@@ -59,7 +59,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	int warpCoreSearchTicks = 0;
 
 	// Config
-	private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
+	//private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
+	private final String SCHEMATICS_DIR = WarpDriveConfig.i.schemaLocation;
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
 	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;

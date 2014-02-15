@@ -53,7 +53,17 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	private boolean isMining = false;
 	private boolean isQuarry = false;
 	private boolean useDeiterium = false;
-
+	
+	public void setNetworkReady( boolean isReady )
+	{
+		return ;
+	}
+	
+	public boolean isMachineActive()
+	{
+		return true;
+	}
+	
 	private String[] methodsArray =
 	{
 		"mine",		//0

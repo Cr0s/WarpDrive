@@ -4,6 +4,7 @@ import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -76,8 +77,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public String coreState = "";
     public TileEntityProtocol controller;
+    
+    public boolean shouldTele = false;
 
     private boolean soundPlayed = false;
+    
+    private ArrayList<Entity> teleportedEntities = new ArrayList<Entity>(10);
 
     @Override
     public void updateEntity()
@@ -99,6 +104,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         {
             return;
         }
+        //WarpDrive.debugPrint("Serverside");
 
         if (++isolationUpdateTicks > WarpDriveConfig.i.WC_ISOLATION_UPDATE_INTARVAL_SECONDS * 20)
         {
@@ -132,10 +138,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         }
         else
         {
+        	WarpDrive.debugPrint("No controller?");
             invalidAssembly = true;
             return;
         }
-
         switch (currentMode)
         {
             case MODE_TELEPORT:
@@ -145,7 +151,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     {
                         return;
                     }
-
                     if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))
                     {
                         summonPlayersByChestCode();
@@ -154,7 +159,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 }
                 else
                 {
-                    teleportPlayersToSpace();
+                	if(controller != null && controller.isJumpFlag())
+                	{
+                		shouldTele = true;
+                		teleportPlayersToSpace();
+                		controller.setJumpFlag(false);
+                	}
                 }
 
                 break;
@@ -214,7 +224,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;                    	
                     }
                     
-                    System.out.println("[W-C] Jumping!");
+                    WarpDrive.debugPrint("[W-C] Jumping!");
                     doJump();
                     controller.setJumpFlag(false);
                 }
@@ -239,7 +249,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 continue;
             }
 
-            System.out.println(msg);
+            WarpDrive.debugPrint(msg);
             ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
         }
     }
@@ -491,7 +501,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
+            WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -531,7 +541,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         {
             // Consume all energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
+            WarpDrive.debugPrint("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -559,14 +569,14 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         }
         else
         {
-            System.out.println("[TE-WC] Beacon not found.");
+            WarpDrive.debugPrint("[TE-WC] Beacon not found.");
         }
     }
 
     private boolean isShipInJumpgate(JumpGate jg)
     {
         AxisAlignedBB aabb = jg.getGateAABB();
-        System.out.println("Gate AABB: " + aabb);
+        WarpDrive.debugPrint("Gate AABB: " + aabb);
         int numBlocks = 0;
 
         if (aabb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(maxX - minX, maxY - minY, maxZ - minZ)))
@@ -593,11 +603,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (numBlocks == 0)
         {
-            System.out.println("[GATE] Is 0 blocks inside gate.");
+            WarpDrive.debugPrint("[GATE] Is 0 blocks inside gate.");
             return false;
         }
 
-        System.out.println("[GATE] Ship volume: " + shipVolume + ", blocks in gate: " + numBlocks + ". Percentage: " + ((shipVolume / numBlocks) * 100));
+        WarpDrive.debugPrint("[GATE] Ship volume: " + shipVolume + ", blocks in gate: " + numBlocks + ". Percentage: " + ((shipVolume / numBlocks) * 100));
 
         // At least 80% of ship must be inside jumpgate
         if (shipVolume / numBlocks > 0.8F)
@@ -649,7 +659,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
+            WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -709,12 +719,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     return;
                 }
 
-                System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
+                WarpDrive.debugPrint("[GATE] Place found over " + (10 - numTries) + " tries.");
             }
 
             // Consume energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
+            WarpDrive.debugPrint("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -749,6 +759,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void doJump()
     {
+    	if (currentMode == this.MODE_TELEPORT)
+    	{
+    		WarpDrive.debugPrint("SETTING TELE TO TRU");
+    		shouldTele = true;
+    	}
+    	
         if (currentMode == this.MODE_GATE_JUMP)
         {
             if (FMLCommonHandler.instance().getEffectiveSide().isClient())
@@ -756,14 +772,14 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 return;
             }
 
-            System.out.println("[TE-WC] Performing gate jump...");
+            WarpDrive.debugPrint("[TE-WC] Performing gate jump...");
             doGateJump();
             return;
         }
 
         if (currentMode == this.MODE_BEACON_JUMP)
         {
-            System.out.println("[TE-WC] Performing beacon jump...");
+            WarpDrive.debugPrint("[TE-WC] Performing beacon jump...");
             doBeaconJump();
             return;
         }
@@ -791,23 +807,23 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE)
         {
-            System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
-            System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
+            WarpDrive.debugPrint("[WP-TE] Energy: " + currentEnergyValue + " eU");
+            WarpDrive.debugPrint("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
 
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
             {
-                System.out.println("[WP-TE] Insufficient energy to jump");
+                WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
                 messageToAllPlayersOnShip("Insufficient energy to jump!");
                 this.controller.setJumpFlag(false);
                 return;
             }
 
             this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
+            WarpDrive.debugPrint((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
+            WarpDrive.debugPrint((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
+            WarpDrive.debugPrint((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
 
-            //System.out.println("[WC-TE] Distance: " + distance + "; shipSize: " + shipSize);
+            //WarpDrive.debugPrint("[WC-TE] Distance: " + distance + "; shipSize: " + shipSize);
             if (this.currentMode == this.MODE_BASIC_JUMP)
             {
                 distance += shipSize;
@@ -821,7 +837,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 }
             }
 
-            System.out.println((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
+            WarpDrive.debugPrint((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, distance, direction, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -842,7 +858,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             {
                 jump.toHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
                 jump.fromHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID);
-                System.out.println("[JUMP] From HS: " + jump.fromHyperSpace + " | To HS: " + jump.fromHyperSpace);
+                WarpDrive.debugPrint("[JUMP] From HS: " + jump.fromHyperSpace + " | To HS: " + jump.fromHyperSpace);
             }
 
             jump.xCoord = xCoord;
@@ -857,63 +873,70 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void teleportPlayersToSpace()
     {
-        if (currentMode == MODE_TELEPORT && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID)
+    	int destDimensionID = -1;
+        if (currentMode == MODE_TELEPORT && worldObj.provider.dimensionId != WarpDrive.instance.spaceDimID && worldObj.provider.dimensionId != WarpDrive.instance.hyperSpaceDimID)
         {
-            if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))
+        	destDimensionID = WarpDrive.instance.spaceDimID;
+        }
+        else if(currentMode == MODE_TELEPORT && worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID)
+        {
+        	destDimensionID = 0;
+        }
+        else
+        {
+        	return ;
+        }
+        
+    	if (shouldTele)
+        {
+    		WarpDrive.debugPrint("Trying to teleport to Dimension" + destDimensionID);
+    		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(xCoord - 5, yCoord - 5, zCoord - 5, xCoord + 5, yCoord + 5, zCoord + 5);
+            List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
+    		for (Object o : list)
             {
-                AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(xCoord - 5, yCoord - 5, zCoord - 5, xCoord + 5, yCoord + 5, zCoord + 5);
-                List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
-
-                for (Object o : list)
+                if (currentEnergyValue - WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE < 0)
                 {
-                    if (currentEnergyValue - WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE < 0)
+                	//if(o instanceof EntityPlayerMP)
+                	//	((EntityPlayerMP)o).addChatMessage("Not enough energy to teleport");
+                    return;
+                }
+
+                currentEnergyValue -= WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE;
+                Entity entity = (Entity) o;
+                int x = MathHelper.floor_double(entity.posX);
+                int z = MathHelper.floor_double(entity.posZ);
+                //int y = MathHelper.floor_double(entity.posY);
+                final int WOOL_BLOCK_ID = 35;
+                int newY;
+
+                for (newY = 254; newY > 0; newY--)
+                {
+                	if(destDimensionID == 0)
+                	{
+                		if(!DimensionManager.getWorld(0).isAirBlock(x,newY,z))
+                			break;
+                	}
+                	
+                	if (DimensionManager.getWorld(destDimensionID).getBlockId(x, newY, z) == WOOL_BLOCK_ID)
                     {
-                        return;
-                    }
-
-                    currentEnergyValue -= WarpDriveConfig.i.WC_ENERGY_PER_ENTITY_TO_SPACE;
-                    Entity entity = (Entity) o;
-                    int x = MathHelper.floor_double(entity.posX);
-                    int z = MathHelper.floor_double(entity.posZ);
-                    //int y = MathHelper.floor_double(entity.posY);
-                    final int WOOL_BLOCK_ID = 35;
-                    int newY;
-
-                    for (newY = 254; newY > 0; newY--)
-                    {
-                        if (DimensionManager.getWorld(WarpDrive.instance.spaceDimID).getBlockId(x, newY, z) == WOOL_BLOCK_ID)
-                        {
-                            break;
-                        }
-                    }
-
-                    if (newY <= 0)
-                    {
-                        newY = 254;
-                    }
-
-                    if (entity instanceof EntityPlayerMP)
-                    {
-                        ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDrive.instance.spaceDimID, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, x, 256, z));
-                        WorldServer space = DimensionManager.getWorld(WarpDrive.instance.spaceDimID);
-
-                        if (space.isAirBlock(x, newY, z))
-                        {
-                            space.setBlock(x, newY, z, Block.stone.blockID, 0, 2);
-                            space.setBlock(x + 1, newY, z, Block.stone.blockID, 0, 2);
-                            space.setBlock(x - 1, newY, z, Block.stone.blockID, 0, 2);
-                            space.setBlock(x, newY, z + 1, Block.stone.blockID, 0, 2);
-                            space.setBlock(x, newY, z - 1, Block.stone.blockID, 0, 2);
-                            space.setBlock(x + 1, newY, z + 1, Block.stone.blockID, 0, 2);
-                            space.setBlock(x - 1, newY, z - 1, Block.stone.blockID, 0, 2);
-                            space.setBlock(x + 1, newY, z - 1, Block.stone.blockID, 0, 2);
-                            space.setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
-                        }
-
-                        ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
+                        break;
                     }
                 }
+
+                if (newY <= 0)
+                {
+                    newY = 254;
+                }
+
+                if (entity instanceof EntityPlayerMP)
+                {
+                    ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), destDimensionID, new SpaceTeleporter(DimensionManager.getWorld(destDimensionID), 0, x, 256, z));
+                    WorldServer space = DimensionManager.getWorld(0);
+
+                    ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
+                }
             }
+    		shouldTele = false;
         }
     }
 
@@ -933,7 +956,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
             if (checkPlayerInventory(chest, player))
             {
-                System.out.println("[P] Summoning " + player.username);
+                WarpDrive.debugPrint("[P] Summoning " + player.username);
                 summonPlayer(player, xCoord, yCoord + 2, zCoord);
             }
         }
@@ -941,7 +964,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public boolean checkPlayerInventory(TileEntityChest chest, EntityPlayerMP player)
     {
-        Boolean result = false;
         final int MIN_KEY_LENGTH = 5;
         int keyLength = 0;
 
@@ -950,7 +972,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             ItemStack chestItem = chest.getStackInSlot(index);
             ItemStack playerItem = player.inventory.getStackInSlot(9 + index);
 
-            if (chestItem == null || playerItem == null)
+            if (chestItem == null)
             {
                 continue;
             }
@@ -959,21 +981,17 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             {
                 return false;
             }
-            else
-            {
-                result = true;
-            }
 
             keyLength++;
         }
 
         if (keyLength < MIN_KEY_LENGTH)
         {
-            System.out.println("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
+            WarpDrive.debugPrint("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
             return false;
         }
 
-        return result;
+        return true;
     }
 
     public Boolean isChestSummonMode()

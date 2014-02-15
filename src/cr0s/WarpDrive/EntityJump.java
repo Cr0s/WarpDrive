@@ -1039,7 +1039,7 @@ public class EntityJump extends Entity
 			{
 				if (o1.xCoord == o2.xCoord && o1.yCoord == o2.yCoord && o1.zCoord == o2.zCoord)
 				{
-					System.out.println("Removed duplicated TE: " + o1 + ", " + o2);
+					WarpDrive.debugPrint("Removed duplicated TE: " + o1 + ", " + o2);
 					return 0;
 				}
 				else

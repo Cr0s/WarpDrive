@@ -20,7 +20,7 @@ public class TileEntityAirGenerator extends TileEntity implements IEnergySink
     private int cooldownTicks = 0;
     private final float AIR_POLLUTION_INTERVAL = 4; // seconds
 
-    private final int START_CONCENTRATION_VALUE = 15;
+    private final int START_CONCENTRATION_VALUE = 45;
 
     @Override
     public void updateEntity()

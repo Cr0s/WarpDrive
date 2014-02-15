@@ -61,7 +61,10 @@ public class BlockProtocol extends BlockContainer
         }
         else if (metadata > 0)    // Activated, in metadata stored mode number
         {
-            return iconBuffer[ICON_SIDE_ACTIVATED + metadata - 1];
+			int iconIndex = ICON_SIDE_ACTIVATED + metadata - 1;
+			if(iconIndex > iconBuffer.length)
+				iconIndex = iconBuffer.length - 1;
+            return iconBuffer[iconIndex];
         }
 
         return null;

@@ -84,13 +84,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     private void setJumpDistance(int distance)
     {
-        System.out.println("Setting jump distance: " + distance);
+        WarpDrive.debugPrint("Setting jump distance: " + distance);
         this.distance = distance;
     }
 
     private void setMode(int mode)
     {
-        // System.out.println("Setting mode: " + mode);
+        // WarpDrive.debugPrint("Setting mode: " + mode);
         this.mode = mode;
     }
 
@@ -109,7 +109,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             dir = 270;
         }
 
-        System.out.println("Setting direction: " + dir);
+        WarpDrive.debugPrint("Setting direction: " + dir);
         this.direction = dir;
     }
 
@@ -433,7 +433,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
      */
     public void setBeaconFrequency(String beaconFrequency)
     {
-        //System.out.println("Setting beacon freqency: " + beaconFrequency);
+        //WarpDrive.debugPrint("Setting beacon freqency: " + beaconFrequency);
         this.beaconFrequency = beaconFrequency;
     }
 
@@ -469,11 +469,24 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
         return null;
     }
-
+    
+    private int toInt(Object ob)
+    {
+    	try
+    	{
+    		return (int)Math.round(Double.parseDouble(ob.toString()));
+    	}
+    	catch(Exception e)
+    	{
+    		WarpDrive.debugPrint(e.getMessage());
+    	}
+    	return -100000;
+    }
+    
     @Override
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
     {
-        //System.out.println("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
+        //WarpDrive.debugPrint("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
         switch (method)
         {
             case 0: // dim_getp ()
@@ -481,13 +494,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 1: // dim_setp (front, right, up)
                 if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
                 {
-                    return new Integer[] { -1 };
+                    return new String[] { "Accepts 3 arguments, which are distance from warpcore (Forward,Right,Up)" };
                 }
 
-                System.out.println("Setting positive gabarits: f: " + ((Double)arguments[0]).intValue() + " r: " + ((Double)arguments[1]).intValue() + " u: " + ((Double)arguments[2]).intValue());
-                setFront(((Double)arguments[0]).intValue());
-                setRight(((Double)arguments[1]).intValue());
-                setUp(((Double)arguments[2]).intValue());
+                WarpDrive.debugPrint("Setting positive gabarits: f: " + ((Double)arguments[0]).intValue() + " r: " + ((Double)arguments[1]).intValue() + " u: " + ((Double)arguments[2]).intValue());
+                setFront(toInt(arguments[0]));
+                setRight(toInt(arguments[1]));
+                setUp(toInt(arguments[2]));
                 WarpDrive.instance.registry.removeDeadCores();
                 break;
 
@@ -496,13 +509,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 3: // dim_setn (back, left, down)
                 if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
                 {
-                    return new Integer[] { -1 };
+                	return new String[] { "Accepts 3 arguments, which are distance from warpcore (Back,Left,Down)" };
                 }
 
-                System.out.println("Setting negative gabarits: b: " + ((Double)arguments[0]).intValue() + " l: " + ((Double)arguments[1]).intValue() + " d: " + ((Double)arguments[2]).intValue());
-                setBack(((Double)arguments[0]).intValue());
-                setLeft(((Double)arguments[1]).intValue());
-                setDown(((Double)arguments[2]).intValue());
+                WarpDrive.debugPrint("Setting negative gabarits: b: " + ((Double)arguments[0]).intValue() + " l: " + ((Double)arguments[1]).intValue() + " d: " + ((Double)arguments[2]).intValue());
+                setBack(toInt(arguments[0]));
+                setLeft(toInt(arguments[1]));
+                setDown(toInt(arguments[2]));
                 WarpDrive.instance.registry.removeDeadCores();
                 break;
 
@@ -512,7 +525,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     return new Integer[] { -1 };
                 }
 
-                setMode(((Double)arguments[0]).intValue());
+                setMode(toInt(arguments[0]));
                 break;
 
             case 5: // set_distance (distance)
@@ -521,7 +534,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     return new Integer[] { -1 };
                 }
 
-                setJumpDistance(((Double)arguments[0]).intValue());
+                setJumpDistance(toInt(arguments[0]));
                 break;
 
             case 6: // set_direction (dir)
@@ -530,7 +543,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     return new Integer[] { -1 };
                 }
 
-                setDirection(((Double)arguments[0]).intValue());
+                setDirection(toInt(arguments[0]));
                 break;
 
             case 7: // get_attached_players
@@ -541,7 +554,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     String nick = this.players.get(i);
                     list += nick + ((i == this.players.size() - 1) ? "" : ",");
                 }
-
+ 
                 if (players.isEmpty())
                 {
                     list = "";
@@ -639,7 +652,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 19: // set_core_frequency
                 if (arguments.length == 1 && (core != null && core instanceof TileEntityReactor))
                 {
-                    ((TileEntityReactor)core).coreFrequency = ((String)arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
+                    ((TileEntityReactor)core).coreFrequency = (arguments[0].toString()).replace("/", "").replace(".", "").replace("\\", ".");
                 }
 
                 break;
