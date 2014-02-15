@@ -477,6 +477,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             case -2:
                 this.shipSize = this.shipDown + this.shipUp;
                 break;
+                
+            default:
+            	this.controller.setJumpFlag(false);
+            	return false;
         }
         
         // Ship side is too big
