@@ -127,12 +127,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						{
 							if (!collectEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE, false))
 								return;
+							/*
 							sendLaserPacket(minerVector, new Vector3(xCoord, currentLayer, zCoord).add(0.5), 0, 0, 1, 20, 0, 50);
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 							int blockID = worldObj.getBlockId(xCoord, currentLayer, zCoord);
 							if (blockID != 0)
 								if (canDig(blockID))
-									harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
+									harvestBlock(new Vector3(xCoord, currentLayer, zCoord));*/
 							currentMode = 1;
 							return;
 						}
