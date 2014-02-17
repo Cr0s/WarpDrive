@@ -10,6 +10,7 @@ import java.lang.reflect.*;
 
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
+import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -273,14 +274,28 @@ public class WarpDriveConfig
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		for (int[] t : CommonWorldGenOres)
 			MinerOres.add(t[0]);
-		MinerOres.add(Block.wood.blockID);
-		MinerOres.add(Block.planks.blockID);
-		MinerOres.add(Block.rail.blockID);
+		//MinerOres.add(Block.wood.blockID);
+		//MinerOres.add(Block.planks.blockID);
+		//MinerOres.add(Block.rail.blockID);
 		MinerOres.add(Block.oreDiamond.blockID);
 		MinerOres.add(Block.obsidian.blockID);
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
-		MinerOres.add(Block.torchWood.blockID);
+		//MinerOres.add(Block.torchWood.blockID);
+		
+		String[] oreNames = OreDictionary.getOreNames();
+		for(String oreName: oreNames)
+		{
+			if(oreName.substring(0,3).equals("ore"))
+			{
+				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
+				for(ItemStack i: item)
+				{
+					MinerOres.add(i.itemID);
+					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
+				}
+			}
+		}
 		
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
@@ -344,7 +359,7 @@ public class WarpDriveConfig
 			GT_Ores = t[2]; // meta 1-15 = ores
 			GT_Granite = t[5]; // 0 - black, 1 - black cobble, 8 - red, 9 - red cobble
 			MinerOres.add(GT_Ores);
-			MinerOres.add(GT_Granite);
+			//MinerOres.add(GT_Granite);
 		}
 		catch (Exception e)
 		{

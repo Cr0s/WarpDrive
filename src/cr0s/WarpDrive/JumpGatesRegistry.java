@@ -137,6 +137,16 @@ public final class JumpGatesRegistry
 
         return result;
     }
+    
+    public String commaList()
+    {
+    	String result = "";
+    	for (JumpGate jg : gates)
+    	{
+    		result += jg.toNiceString() + ",";
+    	}
+    	return result;
+    }
 
     public JumpGate findNearestGate(int x, int y, int z)
     {

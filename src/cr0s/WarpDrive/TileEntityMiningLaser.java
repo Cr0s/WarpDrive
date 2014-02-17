@@ -31,6 +31,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 import appeng.api.WorldCoord;
 import appeng.api.IAEItemStack;
 import appeng.api.Util;
@@ -49,10 +50,14 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private final int MAX_BOOSTERS_NUMBER = 1;
 
+	private int digX,digZ = 10;
+	private final int CUBE_SIDE = 8;
+	
 	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
-	private boolean useDeiterium = false;
+	
+	private boolean silkTouch = false;
 	
 	public void setNetworkReady( boolean isReady )
 	{
@@ -154,10 +159,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						// Skip if block is too hard or its empty block
 						if (!canDig(blockID))
 							return;
-
-						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
-						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
-						harvestBlock(valuable);
+						if(WarpDriveConfig.i.MinerOres.contains(blockID))
+						{
+							sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
+							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
+							harvestBlock(valuable);
+						}
 					}
 					else
 					{
@@ -247,17 +254,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (useDeiterium && grid != null)
+		if (silkTouch && grid != null)
 		{
 			IMEInventoryHandler cellArray = grid.getCellArray();
 			if (cellArray != null)
 			{
-				int consume = isQuarry?15:1000;
-				IAEItemStack entryToAEIS = Util.createItemStack(new ItemStack(WarpDriveConfig.i.AEExtraFDI, consume, FluidRegistry.getFluidID("deuterium")));
-				long contained = cellArray.countOfItemType(entryToAEIS);
-				if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta) && contained >= consume)
+				if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta))
 				{
-					cellArray.extractItems(entryToAEIS);
 					ArrayList<ItemStack> t = new ArrayList<ItemStack>();
 					t.add(new ItemStack(blockID, 1, blockMeta));
 					return t;
@@ -354,9 +357,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		valuablesInLayer.clear();
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
-		final int CUBE_SIDE = 8;
-		x1 = xCoord + CUBE_SIDE / 2;
-		x2 = xCoord - CUBE_SIDE / 2;
+		x1 = xCoord + digX / 2;
+		x2 = xCoord - digX / 2;
 
 		if (x1 < x2)
 		{
@@ -369,8 +371,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			xmax = x1;
 		}
 
-		z1 = zCoord + CUBE_SIDE / 2;
-		z2 = zCoord - CUBE_SIDE / 2;
+		z1 = zCoord + digZ / 2;
+		z2 = zCoord - digZ / 2;
 
 		if (z1 < z2)
 		{
@@ -386,6 +388,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
 		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
 
+		
+		
 		// Search for valuable blocks
 		for (int x = xmin; x <= xmax; x++)
 			for (int z = zmin; z <= zmax; z++)
@@ -528,7 +532,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		isMining = tag.getBoolean("isMining");
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
-		useDeiterium = tag.getBoolean("useDeiterium");
+		silkTouch = tag.getBoolean("silkTouch");
 		minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 	}
 
@@ -539,7 +543,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		tag.setBoolean("isMining", isMining);
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
-		tag.setBoolean("useDeiterium", useDeiterium);
+		tag.setBoolean("silkTouch", silkTouch);
 	}
 //CC
 	// IPeripheral methods implementation
@@ -569,7 +573,22 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
-				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
+				silkTouch = false;
+				digX = CUBE_SIDE;
+				digZ = CUBE_SIDE;
+				if(arguments.length == 1)
+				{
+					if(arguments[0].toString().equals("1"))
+						silkTouch = true;
+						
+				}
+				else if(arguments.length >= 2)
+				{
+					digX = (int) Math.round(Double.parseDouble(arguments[0].toString()));
+					digZ = (int) Math.round(Double.parseDouble(arguments[1].toString()));
+					if(arguments.length >= 3)
+						silkTouch = Double.parseDouble(arguments[2].toString()) == 1;
+				}
 				return new Boolean[] { true };
 
 			case 1: // stop()
@@ -588,7 +607,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
-				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
+				silkTouch = false;
+				if(arguments.length == 1)
+				{
+					if(Double.parseDouble(arguments[0].toString()) == 1)
+						silkTouch = true;
+						
+				}
 				return new Boolean[] { true };
 
 			case 4: // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
