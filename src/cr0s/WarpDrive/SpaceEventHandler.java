@@ -6,16 +6,18 @@ import java.util.List;
 import cr0s.WarpDrive.CloakManager.CloakedArea;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 /**
- * Обработчик событий в мире Space
+ * 
  * @author Cr0s
  */
 public class SpaceEventHandler
@@ -80,7 +82,7 @@ public class SpaceEventHandler
 
 						if (airValue <= 0)
 						{
-							if (consumeO2(((EntityPlayerMP)entity).inventory.mainInventory))
+							if (consumeO2(((EntityPlayerMP)entity).inventory.mainInventory,(EntityPlayerMP)entity))
 							{
 								setPlayerAirValue(entity, 300);
 							}
@@ -165,7 +167,7 @@ public class SpaceEventHandler
 	}
 
 	/**
-	 * Проверка, находится ли Entity в открытом космосе
+	 * 
 	 * @param e
 	 * @return
 	 */
@@ -182,13 +184,29 @@ public class SpaceEventHandler
 		return true;
 	}
 
-	private boolean consumeO2(ItemStack[] i)
+	private boolean consumeO2(ItemStack[] i,EntityPlayerMP ent)
 	{
 		for (int j = 0; j < i.length; ++j)
 			if (i[j] != null && i[j].itemID == WarpDriveConfig.i.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.i.IC2_Air[1])
 			{
 				if (--i[j].stackSize <= 0)
+				{
 					i[j] = null;
+				}
+				
+				if(WarpDriveConfig.i.IC2_Empty.length != 0)
+				{
+					WarpDrive.debugPrint("giveEmptyCell");
+					int emptyCell = WarpDriveConfig.i.IC2_Empty[0];
+					int emptyCellM = WarpDriveConfig.i.IC2_Empty[1];
+					ItemStack emptyCellIS = new ItemStack(emptyCell,1,emptyCellM);
+					if(!ent.inventory.addItemStackToInventory(emptyCellIS))
+					{
+						World world = ent.worldObj;
+						EntityItem itemEnt = new EntityItem(world, ent.posX, ent.posY, ent.posZ, emptyCellIS);
+						ent.worldObj.spawnEntityInWorld(itemEnt);
+					}
+				}
 				return true;
 			}
 		return false;
