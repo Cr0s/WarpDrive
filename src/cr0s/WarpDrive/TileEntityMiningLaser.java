@@ -702,7 +702,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				{
 					try
 					{
-						Double arg = Double.parseDouble(arguments[1].toString());
+						Double arg = Double.parseDouble(arguments[0].toString());
 						speedMul = Math.min(WarpDriveConfig.i.ML_MAX_SPEED,Math.max(arg,WarpDriveConfig.i.ML_MIN_SPEED));
 					}
 					catch(NumberFormatException e)
