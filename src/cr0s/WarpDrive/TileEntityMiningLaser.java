@@ -81,7 +81,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		"state",	//4
 		"offset",	//5
 		"setSilktouch", //6
-		"setFortune" //7
+		"setFortune", //7
+		"setSpeedMul"
 	};
 
 	private int delayTicksScan = 0;
@@ -182,7 +183,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 							return;
 						}
 					}
-					else
+					else if(valuableIndex >= valuablesInLayer.size())
 					{
 						currentMode = 0;
 						--currentLayer;
