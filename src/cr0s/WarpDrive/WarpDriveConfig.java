@@ -59,8 +59,14 @@ public class WarpDriveConfig
 		public int ML_MAX_BOOSTERS_NUMBER = 1;
 		public int ML_SCAN_DELAY = 20 * 5;
 		public int ML_MINE_DELAY = 10;
-		public int ML_EU_PER_LAYER_SPACE = 500;
-		public int ML_EU_PER_LAYER_EARTH = 5000;
+		public int ML_EU_PER_LAYER_SPACE = 100;
+		public int ML_EU_PER_LAYER_EARTH = 1000;
+		public int ML_EU_PER_BLOCK_SPACE = ML_EU_PER_LAYER_SPACE / 10;
+		public int ML_EU_PER_BLOCK_EARTH = ML_EU_PER_LAYER_EARTH / 10;
+		public double ML_EU_MUL_SILKTOUCH = 1.25;
+		public double ML_EU_MUL_FORTUNE   = 1.25;
+		public double ML_MAX_SPEED   = 10;
+		public double ML_MIN_SPEED   = 0.1;
 		
 		// Laser Emitter
 		public int LE_MAX_BOOSTERS_NUMBER = 10;
@@ -272,12 +278,6 @@ public class WarpDriveConfig
 			LoadGS();
 //
 		MinerOres.add(Block.oreNetherQuartz.blockID);
-		for (int[] t : CommonWorldGenOres)
-			MinerOres.add(t[0]);
-		//MinerOres.add(Block.wood.blockID);
-		//MinerOres.add(Block.planks.blockID);
-		//MinerOres.add(Block.rail.blockID);
-		MinerOres.add(Block.oreDiamond.blockID);
 		MinerOres.add(Block.obsidian.blockID);
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
