@@ -166,6 +166,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 							valuableIndex++;
 							return;
 						}
+						
 						if(WarpDriveConfig.i.MinerOres.contains(blockID) && isRoomForHarvest())
 						{
 							if(collectEnergyPacketFromBooster(energyReq,false))
@@ -208,16 +209,20 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
 		if (blockID != Block.waterMoving.blockID && blockID != Block.waterStill.blockID && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID)
 		{
+			boolean didPlace = true;
 			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
 			if (stacks != null)
+			{
 				for (ItemStack stack : stacks)
 				{
 					if (grid != null)
-						return putInGrid(stack) == stack.stackSize;
+						didPlace = didPlace && putInGrid(stack) == stack.stackSize;
 					else
-						return putInChest(findChest(), stack) == stack.stackSize;
+						didPlace = didPlace && putInChest(findChest(), stack) == stack.stackSize;
 				}
+			}
 			worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), blockID + (blockMeta << 12));
+			return didPlace;
 		}
 		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
 		// Evaporate water
