@@ -116,6 +116,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 	{
 		if(minLayer > yCoord - 1)
 			minLayer = yCoord - 1;
+		if(currentLayer > yCoord - 1)
+			currentLayer = yCoord - 1;
 		if(speedMul == 0)
 			speedMul = 1;
 		speedMul = Math.max(WarpDriveConfig.i.ML_MIN_SPEED,Math.min(WarpDriveConfig.i.ML_MAX_SPEED,speedMul));
@@ -667,14 +669,20 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 				{
 					if(arguments.length >= 2)
 					{
-						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
-						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
-						
-						isQuarry = false;
-						delayTicksScan = 0;
-						currentMode = 0;
-						isMining = true;
-						refreshLoading();
+						try
+						{
+							digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
+							digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
+							
+							isQuarry = false;
+							delayTicksScan = 0;
+							currentMode = 0;
+							isMining = true;
+						}
+						catch(NumberFormatException e)
+						{
+							
+						}
 					}
 				}
 				catch(NumberFormatException e)
@@ -783,7 +791,11 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 				try
 				{
 					if(arguments.length >= 1)
+					{
 						currentLayer = Math.min(yCoord-1, Math.max(1, toInt(arguments[0])));
+						if(isMining)
+							currentMode = 0;
+					}
 				}
 				catch(NumberFormatException e)
 				{
