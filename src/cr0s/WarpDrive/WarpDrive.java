@@ -68,7 +68,7 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.1", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.1.1", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
