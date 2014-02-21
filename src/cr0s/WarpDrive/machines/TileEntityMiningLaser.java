@@ -53,7 +53,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 
 	private final int MAX_BOOSTERS_NUMBER = 1;
 
-	private int digX,digZ = 10;
+	private int digX,digZ = 8;
 	private final int CUBE_SIDE = 8;
 	
 	private int dx, dz, dy;
@@ -66,6 +66,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 	private int fortuneLevel = 0;
 	
 	private int miningDelay = 0;
+	private int minLayer = 1;
 	
 	public void setNetworkReady( boolean isReady )
 	{
@@ -85,9 +86,11 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 		"quarry",	//3
 		"state",	//4
 		"offset",	//5
-		"setSilktouch", //6
-		"setFortune", //7
-		"setSpeedMul"
+		"silktouch", //6
+		"fortune", //7
+		"speedMul", //8
+		"layer", //9
+		"minLayer" //10
 	};
 
 	private int delayTicksScan = 0;
@@ -111,6 +114,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 	@Override
 	public void updateEntity()
 	{
+		if(minLayer > yCoord - 1)
+			minLayer = yCoord - 1;
 		if(speedMul == 0)
 			speedMul = 1;
 		speedMul = Math.max(WarpDriveConfig.i.ML_MIN_SPEED,Math.min(WarpDriveConfig.i.ML_MAX_SPEED,speedMul));
@@ -134,7 +139,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					valuableIndex = 0;
 					if (!collectEnergyPacketFromBooster(calculateLayerCost(), true))
 						return;
-					while (currentLayer > 0)
+					while (currentLayer > (minLayer - 1))
 					{
 						scanLayer();
 						if (valuablesInLayer.size() > 0)
@@ -148,7 +153,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 						else
 							--currentLayer;
 					}
-					if (currentLayer <= 0)
+					if (currentLayer < minLayer)
 					{
 						refreshLoading();
 						isMining = false;
@@ -196,7 +201,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 						}
 						else
 						{
-							miningDelay++;
+							miningDelay= Math.min(miningDelay+1, 20);
 							return;
 						}
 					}
@@ -599,9 +604,15 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 		isMining = tag.getBoolean("isMining");
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
+		minLayer= tag.getInteger("minLayer");
+		
+		digX = tag.getInteger("digX");
+		digZ = tag.getInteger("digZ");
+		
 		silkTouch = tag.getBoolean("silkTouch");
 		fortuneLevel = tag.getInteger("fortuneLevel");
 		speedMul = tag.getDouble("speedMul");
+		
 		minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 	}
 
@@ -612,6 +623,11 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 		tag.setBoolean("isMining", isMining);
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
+		tag.setInteger("minLayer", minLayer);
+		
+		tag.setInteger("digX", digX);
+		tag.setInteger("digZ", digZ);
+		
 		tag.setBoolean("silkTouch", silkTouch);
 		tag.setInteger("fortuneLevel", fortuneLevel);
 		tag.setDouble("speedMul", speedMul);
@@ -628,6 +644,11 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 	public String[] getMethodNames()
 	{
 		return methodsArray;
+	}
+	
+	private int toInt(Object o)
+	{
+		return (int) Math.round(Double.parseDouble(o.toString()));
 	}
 
 	@Override
@@ -646,8 +667,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 				{
 					if(arguments.length >= 2)
 					{
-						digX = (int) Math.round(Double.parseDouble(arguments[0].toString()));
-						digZ = (int) Math.round(Double.parseDouble(arguments[1].toString()));
+						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
+						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
 						
 						isQuarry = false;
 						delayTicksScan = 0;
@@ -687,8 +708,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 				{
 					if(arguments.length >= 2)
 					{
-						digX = (int) Math.round(Double.parseDouble(arguments[0].toString()));
-						digZ = (int) Math.round(Double.parseDouble(arguments[1].toString()));
+						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
+						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
 					}
 				}
 				catch(NumberFormatException e)
@@ -704,7 +725,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 				if (booster != null)
 					energy = booster.getCurrentEnergyValue();
 				String state = "not mining";
-				Integer valuablesInLayer, valuablesMined;
+				int valuablesMined   = 0;
+				int valuablesInLayer = 0;
 				if (isMining)
 				{
 					valuablesInLayer = this.valuablesInLayer.size();
@@ -712,9 +734,9 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					state = "mining" + ((isQuarry) ? " (quarry mode)" : "");
 					if (energy < 0)
 						state = "out of energy";
-					return new Object[] {state, energy, currentLayer, valuablesMined, valuablesInLayer};
 				}
-				return new Object[] {state, energy, currentLayer, 0, 0};
+				return new Object[] {state, energy, currentLayer, valuablesMined, valuablesInLayer,
+						digX, digZ, speedMul, fortuneLevel, silkTouch};
 
 			case 5: // Offset
 				if (arguments.length == 1)
@@ -725,11 +747,11 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					layerOffset = t + 1;
 				}
 				return new Integer[] { layerOffset-1 };
-			case 6: // setSilkTouch(1/boolean)
+			case 6: // silktouch(1/boolean)
 				if (arguments.length == 1)
 					silkTouch = arguments[0].toString() == "true" || arguments[0].toString() == "1";
 				return new Boolean[] { silkTouch };
-			case 7: // setFortuneLevel(int)
+			case 7: // fortune(int)
 				if (arguments.length == 1)
 				{
 					try
@@ -742,7 +764,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					}
 				}
 				return new Integer[] { fortuneLevel };
-			case 8: // setSpeedMul(double)
+			case 8: // speedMul(double)
 				if (arguments.length == 1)
 				{
 					try
@@ -756,6 +778,32 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					}
 				}
 				return new Double[] { speedMul };
+			case 9: //layer
+			{
+				try
+				{
+					if(arguments.length >= 1)
+						currentLayer = Math.min(yCoord-1, Math.max(1, toInt(arguments[0])));
+				}
+				catch(NumberFormatException e)
+				{
+					return new String[] { "NaN" };
+				}
+				return new Integer[] { currentLayer };
+			}
+			case 10: //setMinLayer
+			{
+				try
+				{
+					if(arguments.length >= 1)
+						minLayer = Math.min(yCoord-1, Math.max(1, toInt(arguments[0])));
+				}
+				catch(NumberFormatException e)
+				{
+					return new String[] { "NaN" };
+				}
+				return new Integer[] { currentLayer };
+			}
 		}
 		return null;
 	}

@@ -61,11 +61,11 @@ public class WarpDriveConfig
 		public int ML_SCAN_DELAY = 20 * 5;
 		public int ML_MINE_DELAY = 10;
 		public int ML_EU_PER_LAYER_SPACE = 100;
-		public int ML_EU_PER_LAYER_EARTH = 1000;
-		public int ML_EU_PER_BLOCK_SPACE = ML_EU_PER_LAYER_SPACE / 10;
-		public int ML_EU_PER_BLOCK_EARTH = ML_EU_PER_LAYER_EARTH / 10;
-		public double ML_EU_MUL_SILKTOUCH = 1.25;
-		public double ML_EU_MUL_FORTUNE   = 1.25;
+		public int ML_EU_PER_LAYER_EARTH = 2500;
+		public int ML_EU_PER_BLOCK_SPACE = 10;
+		public int ML_EU_PER_BLOCK_EARTH = 50;
+		public double ML_EU_MUL_SILKTOUCH = 2.5;
+		public double ML_EU_MUL_FORTUNE   = 1.5;
 		public double ML_MAX_SPEED   = 10;
 		public double ML_MIN_SPEED   = 0.1;
 		public int	  ML_MAX_SIZE    = 128;
@@ -180,10 +180,14 @@ public class WarpDriveConfig
 		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
 		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
 		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 1000).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 5).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
 		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
 		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
+		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
+		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
+		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
+		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
 		
 		// Laser Emitter
 		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", 10).getInt();

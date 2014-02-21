@@ -444,6 +444,9 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	private void scanShip() {
 		// Enable scanner
 		switchState(1);
+		File f = new File(SCHEMATICS_DIR);
+		if (!f.exists() || !f.isDirectory())
+					f.mkdirs();
 
 		// Generate unique file name
 		do {
