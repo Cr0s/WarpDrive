@@ -1,6 +1,8 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraftforge.common.ForgeDirection;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;

@@ -1,6 +1,7 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.WarpDrive;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;

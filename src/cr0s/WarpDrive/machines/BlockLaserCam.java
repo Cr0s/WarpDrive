@@ -1,8 +1,9 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.Random;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -12,13 +13,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockCamera extends BlockContainer
+public class BlockLaserCam extends BlockContainer
 {
     private Icon[] iconBuffer;
 
     private final int ICON_SIDE = 0;
 
-    public BlockCamera(int id, int texture, Material material)
+    public BlockLaserCam(int id, int texture, Material material)
     {
         super(id, material);
     }
@@ -29,7 +30,7 @@ public class BlockCamera extends BlockContainer
     {
         iconBuffer = new Icon[1];
         // Solid textures
-        iconBuffer[ICON_SIDE] = par1IconRegister.registerIcon("warpdrive:cameraSide");
+        iconBuffer[ICON_SIDE] = par1IconRegister.registerIcon("warpdrive:laserSideCam");
     }
 
     @Override
@@ -41,7 +42,7 @@ public class BlockCamera extends BlockContainer
     @Override
     public TileEntity createNewTileEntity(World var1)
     {
-        return new TileEntityCamera();
+        return new TileEntityLaser();
     }
 
     /**

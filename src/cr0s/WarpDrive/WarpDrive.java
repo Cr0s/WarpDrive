@@ -16,8 +16,39 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cr0s.WarpDrive.machines.BlockAirGenerator;
+import cr0s.WarpDrive.machines.BlockCamera;
+import cr0s.WarpDrive.machines.BlockCloakingCoil;
+import cr0s.WarpDrive.machines.BlockCloakingDeviceCore;
+import cr0s.WarpDrive.machines.BlockLaser;
+import cr0s.WarpDrive.machines.BlockLaserCam;
+import cr0s.WarpDrive.machines.BlockLift;
+import cr0s.WarpDrive.machines.BlockMiningLaser;
+import cr0s.WarpDrive.machines.BlockMonitor;
+import cr0s.WarpDrive.machines.BlockParticleBooster;
+import cr0s.WarpDrive.machines.BlockProtocol;
+import cr0s.WarpDrive.machines.BlockRadar;
+import cr0s.WarpDrive.machines.BlockReactor;
+import cr0s.WarpDrive.machines.BlockShipScanner;
+import cr0s.WarpDrive.machines.BlockWarpIsolation;
+import cr0s.WarpDrive.machines.TileEntityAirGenerator;
+import cr0s.WarpDrive.machines.TileEntityCamera;
+import cr0s.WarpDrive.machines.TileEntityCloakingDeviceCore;
+import cr0s.WarpDrive.machines.TileEntityLaser;
+import cr0s.WarpDrive.machines.TileEntityLift;
+import cr0s.WarpDrive.machines.TileEntityMiningLaser;
+import cr0s.WarpDrive.machines.TileEntityMonitor;
+import cr0s.WarpDrive.machines.TileEntityParticleBooster;
+import cr0s.WarpDrive.machines.TileEntityProtocol;
+import cr0s.WarpDrive.machines.TileEntityRadar;
+import cr0s.WarpDrive.machines.TileEntityReactor;
+import cr0s.WarpDrive.machines.TileEntityShipScanner;
+import cr0s.WarpDrive.machines.WarpChunkTE;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -25,6 +56,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
@@ -32,6 +65,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.1", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
@@ -92,6 +126,8 @@ public class WarpDrive implements LoadingCallback {
 	public CamRegistry cams;
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
+	
+	private ArrayList<Ticket> warpTickets = new ArrayList<Ticket>();
 
 	@EventHandler
 	// @PreInit
@@ -437,11 +473,90 @@ public class WarpDrive implements LoadingCallback {
 		event.registerServerCommand(new InvisibleCommand());
 		event.registerServerCommand(new JumpgateCommand());
 	}
+	
+	private ArrayList<Ticket> worldTickets(World worldObj)
+	{
+		ArrayList<Ticket> ticks = new ArrayList<Ticket>();
+		for(Ticket t: warpTickets)
+			if(t.world.equals(worldObj))
+				ticks.add(t);
+		return ticks;
+	}
+	
+	public Ticket registerChunkLoadTE(WarpChunkTE te,boolean refreshLoading)
+	{
+		World worldObj = te.worldObj;
+		ArrayList<Ticket> worldTicks = worldTickets(worldObj);
+		boolean isWorldTicketed = worldTicks.size() != 0;
+		if(isWorldTicketed)
+		{
+			if(ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0)
+			{
+				Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
+				if(t != null)
+				{
+					te.giveTicket(t);
+					if(refreshLoading)
+						te.refreshLoading();
+					return t;
+				}
+				else
+				{
+					WarpDrive.debugPrint("Ticket not granted");
+				}
+			}
+			else
+			{
+				WarpDrive.debugPrint("No tickets left!");
+			}
+		}
+		else
+		{
+			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
+			if(t != null)
+			{
+				te.giveTicket(t);
+				if(refreshLoading)
+					te.refreshLoading();
+				return t;
+			}
+			else
+			{
+				WarpDrive.debugPrint("Ticket not granted");
+			}
+		}
+		return null;
+	}
+	
+	public Ticket registerChunkLoadTE(WarpChunkTE te)
+	{
+		return registerChunkLoadTE(te,true);
+	}
+	
+	public Ticket getTicket(WarpChunkTE te)
+	{
+		return registerChunkLoadTE(te,false);
+	}
+	
+	public void removeTicket(Ticket t)
+	{
+		for(Ticket ticket:warpTickets)
+			if(t.equals(ticket))
+				warpTickets.remove(ticket);
+	}
 
 	@Override
-	public void ticketsLoaded(List<Ticket> tickets, World world) {
-		for (Ticket ticket : tickets) {
+	public void ticketsLoaded(List<Ticket> tickets, World world)
+	{
+		for (Ticket ticket : tickets)
+		{
+			warpTickets.add(ticket);
+			ImmutableSet chunks = ticket.getChunkList();
+			for(Object chunk : chunks)
+				if(chunk instanceof ChunkCoordIntPair)
+					ForgeChunkManager.unforceChunk(ticket,(ChunkCoordIntPair)chunk);
 			ForgeChunkManager.releaseTicket(ticket);
+			//ForgeChunkManager.releaseTicket(ticket);
 		}
 	}
 }

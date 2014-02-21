@@ -1,9 +1,11 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+
 import java.util.Random;
+
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -12,13 +14,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockReactor extends BlockContainer
+public class BlockLift extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
-
-    public BlockReactor(int id, int texture, Material material)
+    public BlockLift(int id, int texture, Material material)
     {
         super(id, material);
     }
@@ -27,41 +27,41 @@ public class BlockReactor extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[5];
-        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:coreSideInactive");
-        iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:coreBottom");
-        iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:coreTop");
-        iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:coreSideActive");
+        iconBuffer = new Icon[6];
+        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:liftSideOffline");
+        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:liftSideUp");
+        iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:liftSideDown");
+        iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:liftUpInactive");
+        iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:liftUpOut");
+        iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:liftUpIn");
     }
 
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 0)
+        if (side == 1)
         {
-            return iconBuffer[ICON_BOTTOM];
+            return iconBuffer[3 + metadata];
         }
-        else if (side == 1)
+        else if (side == 0)
         {
-            return iconBuffer[ICON_TOP];
-        }
-
-        if (metadata == 0) //Inactive state
-        {
-            return iconBuffer[ICON_INACTIVE_SIDE];
-        }
-        else if (metadata == 1)     // Activated state
-        {
-            return iconBuffer[ICON_SIDE_ACTIVATED];
+            if (metadata == 0)
+            {
+                return iconBuffer[3];
+            }
+            else
+            {
+                return iconBuffer[6 - metadata];
+            }
         }
 
-        return null;
+        return iconBuffer[metadata];
     }
 
     @Override
     public TileEntity createNewTileEntity(World var1)
     {
-        return new TileEntityReactor();
+        return new TileEntityLift();
     }
 
     /**
@@ -93,11 +93,11 @@ public class BlockReactor extends BlockContainer
             return false;
         }
 
-        TileEntityReactor reactor = (TileEntityReactor)par1World.getBlockTileEntity(par2, par3, par4);
+        TileEntityLift booster = (TileEntityLift)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (reactor != null)
+        if (booster != null)
         {
-            par5EntityPlayer.addChatMessage(reactor.getCoreState());
+            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getCurrentEnergyValue());
         }
 
         return true;
@@ -108,13 +108,9 @@ public class BlockReactor extends BlockContainer
     {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (te != null && te instanceof TileEntityReactor)
+        if (te != null)
         {
-            WarpDrive.instance.registry.removeFromRegistry((TileEntityReactor)te);
             te.invalidate();
         }
-
-        WarpDrive.instance.registry.removeDeadCores();
-        super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }

@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.machines.TileEntityReactor;
 import dan200.computer.api.IPeripheral;
 import dan200.turtle.api.ITurtleAccess;
 import dan200.turtle.api.TurtleSide;
@@ -1221,4 +1222,27 @@ public class EntityJump extends Entity
 				e.printStackTrace();
 			}
 	}
+	
+	public void setMinMaxes(int minXV,int maxXV,int minYV,int maxYV,int minZV,int maxZV)
+	{
+		minX = minXV;
+		maxX = maxXV;
+		minY = minYV;
+		maxY = maxYV;
+		minZ = minZV;
+		maxZ = maxZV;
+	}
+	
+	public void setIsCoordJump(boolean bool)
+	{
+		isCoordJump = bool;
+	}
+	
+	public void setDest(int x,int y, int z)
+	{
+		destX = x;
+		destY = y;
+		destZ = z;
+	}
+	
 }

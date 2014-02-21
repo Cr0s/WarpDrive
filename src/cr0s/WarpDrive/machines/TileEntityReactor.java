@@ -1,4 +1,4 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -25,6 +25,11 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.EntityJump;
+import cr0s.WarpDrive.JumpGate;
+import cr0s.WarpDrive.SpaceTeleporter;
+import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.WarpDriveConfig;
 /**
  * @author Cr0s
  */
@@ -547,12 +552,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
             WarpDrive.debugPrint("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
-            jump.maxX = maxX;
-            jump.minX = minX;
-            jump.maxZ = maxZ;
-            jump.minZ = minZ;
-            jump.maxY = maxY;
-            jump.minY = minY;
+            jump.setMinMaxes(minX,maxX,minY,maxY,minZ,maxZ);
             jump.shipFront = shipFront;
             jump.shipBack = shipBack;
             jump.shipLeft = shipLeft;
@@ -563,10 +563,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             jump.xCoord = xCoord;
             jump.yCoord = yCoord;
             jump.zCoord = zCoord;
-            jump.isCoordJump = true; // is jump to a beacon
-            jump.destX = beaconX;
-            jump.destY = yCoord;
-            jump.destZ = beaconZ;
+            jump.setIsCoordJump(true);
+            jump.setDest(beaconX, yCoord, beaconZ);
             jump.on = true;
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
@@ -746,10 +744,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             jump.xCoord = xCoord;
             jump.yCoord = yCoord;
             jump.zCoord = zCoord;
-            jump.isCoordJump = true;
-            jump.destX = destX;
-            jump.destY = destY;
-            jump.destZ = destZ;
+            jump.setIsCoordJump(true);
+            jump.setDest(destX,destY,destZ);
             jump.on = true;
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
@@ -856,7 +852,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             jump.shipUp = shipUp;
             jump.shipDown = shipDown;
             jump.shipLength = this.shipSize;
-            jump.isCoordJump = false;
+            jump.setIsCoordJump(false);
 
             if (currentMode == MODE_HYPERSPACE)
             {

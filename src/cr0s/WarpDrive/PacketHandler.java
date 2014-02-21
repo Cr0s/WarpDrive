@@ -17,6 +17,9 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.Player;
+import cr0s.WarpDrive.machines.TileEntityCamera;
+import cr0s.WarpDrive.machines.TileEntityLaser;
+import cr0s.WarpDrive.machines.TileEntityMonitor;
 import net.minecraft.client.multiplayer.WorldClient;
 
 public class PacketHandler implements IPacketHandler

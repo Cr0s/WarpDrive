@@ -1,4 +1,4 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -14,11 +14,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockShipScanner extends BlockContainer
+public class BlockAirGenerator extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    public BlockShipScanner(int id, int texture, Material material)
+    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_SIDE_ACTIVATED = 2;
+
+    public BlockAirGenerator(int id, int texture, Material material)
     {
         super(id, material);
     }
@@ -28,30 +30,46 @@ public class BlockShipScanner extends BlockContainer
     public void registerIcons(IconRegister par1IconRegister)
     {
         iconBuffer = new Icon[3];
-        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:shipScannerUp");
-        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:shipScannerSide");
-        iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:contBottom");
+        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:airgenSideInactive");
+        iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
+        iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:airgenSideActive");
     }
 
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 1) // UP
+        if (side == 0)
         {
-            return iconBuffer[0];
+            return iconBuffer[ICON_BOTTOM];
         }
-        else if (side == 0) // DOWN
+        else if (side == 1)
         {
-            return iconBuffer[2];
+            if (metadata == 0)
+            {
+                return iconBuffer[ICON_INACTIVE_SIDE];
+            }
+            else
+            {
+                return iconBuffer[ICON_SIDE_ACTIVATED];
+            }
         }
 
-        return iconBuffer[1];
+        if (metadata == 0) // Inactive state
+        {
+            return iconBuffer[ICON_INACTIVE_SIDE];
+        }
+        else if (metadata == 1)
+        {
+            return iconBuffer[ICON_SIDE_ACTIVATED];
+        }
+
+        return null;
     }
 
     @Override
     public TileEntity createNewTileEntity(World var1)
     {
-        return new TileEntityShipScanner();
+        return new TileEntityAirGenerator();
     }
 
     /**
@@ -72,9 +90,6 @@ public class BlockShipScanner extends BlockContainer
         return this.blockID;
     }
 
-    /**
-     * Called upon block activation (right click on the block.)
-     */
     @Override
     public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
     {
@@ -83,11 +98,11 @@ public class BlockShipScanner extends BlockContainer
             return false;
         }
 
-        TileEntityShipScanner me = (TileEntityShipScanner)par1World.getBlockTileEntity(par2, par3, par4);
+        TileEntityAirGenerator gen = (TileEntityAirGenerator)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (me != null)
+        if (gen != null)
         {
-            par5EntityPlayer.addChatMessage("[Ship Scanner] Energy level: " + me.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[AirGen] Energy level: " + gen.getCurrentEnergyValue() + " Eu");
         }
 
         return true;
@@ -102,5 +117,7 @@ public class BlockShipScanner extends BlockContainer
         {
             te.invalidate();
         }
+
+        super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }

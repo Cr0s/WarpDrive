@@ -1,4 +1,4 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -14,11 +14,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockLift extends BlockContainer
+public class BlockParticleBooster extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    public BlockLift(int id, int texture, Material material)
+    public BlockParticleBooster(int id, int texture, Material material)
     {
         super(id, material);
     }
@@ -27,32 +27,32 @@ public class BlockLift extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[6];
-        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:liftSideOffline");
-        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:liftSideUp");
-        iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:liftSideDown");
-        iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:liftUpInactive");
-        iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:liftUpOut");
-        iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:liftUpIn");
+        iconBuffer = new Icon[12];
+        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide0");
+        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide1");
+        iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide2");
+        iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide3");
+        iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide4");
+        iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide5");
+        iconBuffer[6] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide6");
+        iconBuffer[7] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide7");
+        iconBuffer[8] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide8");
+        iconBuffer[9] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide9");
+        iconBuffer[10] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide10");
+        iconBuffer[11] = par1IconRegister.registerIcon("warpdrive:particleBoosterTopBottom");
     }
 
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        if (side == 1)
+        if (side == 0 || side == 1)
         {
-            return iconBuffer[3 + metadata];
+            return iconBuffer[11];
         }
-        else if (side == 0)
+
+        if (metadata > 10)
         {
-            if (metadata == 0)
-            {
-                return iconBuffer[3];
-            }
-            else
-            {
-                return iconBuffer[6 - metadata];
-            }
+            metadata = 10;
         }
 
         return iconBuffer[metadata];
@@ -61,7 +61,7 @@ public class BlockLift extends BlockContainer
     @Override
     public TileEntity createNewTileEntity(World var1)
     {
-        return new TileEntityLift();
+        return new TileEntityParticleBooster();
     }
 
     /**
@@ -93,11 +93,11 @@ public class BlockLift extends BlockContainer
             return false;
         }
 
-        TileEntityLift booster = (TileEntityLift)par1World.getBlockTileEntity(par2, par3, par4);
+        TileEntityParticleBooster booster = (TileEntityParticleBooster)par1World.getBlockTileEntity(par2, par3, par4);
 
         if (booster != null)
         {
-            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getCurrentEnergyValue());
         }
 
         return true;
@@ -112,5 +112,7 @@ public class BlockLift extends BlockContainer
         {
             te.invalidate();
         }
+
+        super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }

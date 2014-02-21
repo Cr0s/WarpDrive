@@ -2,6 +2,8 @@ package cr0s.WarpDrive;
 
 import java.util.ArrayList;
 
+import cr0s.WarpDrive.machines.TileEntityReactor;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;

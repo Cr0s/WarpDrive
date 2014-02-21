@@ -1,10 +1,14 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.machines;
 
 import java.util.List;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.CamRegistryItem;
+import cr0s.WarpDrive.ClientCameraUtils;
+import cr0s.WarpDrive.EntityCamera;
+import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
