@@ -114,6 +114,9 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 	@Override
 	public void updateEntity()
 	{
+		if(shouldChunkLoad() != areChunksLoaded)
+			refreshLoading();
+		
 		if(minLayer > yCoord - 1)
 			minLayer = yCoord - 1;
 		if(currentLayer > yCoord - 1)
@@ -157,8 +160,8 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 					}
 					if (currentLayer < minLayer)
 					{
-						refreshLoading();
 						isMining = false;
+						refreshLoading();
 					}
 				}
 			}
@@ -462,7 +465,7 @@ public class TileEntityMiningLaser extends WarpChunkTE implements IPeripheral, I
 
 		minChunk = worldObj.getChunkFromBlockCoords(xmin,zmin).getChunkCoordIntPair();
 		maxChunk = worldObj.getChunkFromBlockCoords(xmax,zmax).getChunkCoordIntPair();
-		refreshLoading();
+		refreshLoading(true);
 		
 		// Search for valuable blocks
 		for (int x = xmin; x <= xmax; x++)

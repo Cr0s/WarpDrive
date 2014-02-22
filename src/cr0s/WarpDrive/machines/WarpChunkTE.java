@@ -22,11 +22,12 @@ public abstract class WarpChunkTE extends TileEntity
 	
 	boolean areChunksLoaded = false;
 	
-	public void refreshLoading()
+	public void refreshLoading(boolean force)
 	{
+		boolean load = shouldChunkLoad();
 		if(ticketList.size() != 0)
 		{
-			if(shouldChunkLoad() && !areChunksLoaded)
+			if(load && (!areChunksLoaded || force))
 			{
 				int ticketSize = ticketList.get(0).getMaxChunkListDepth();
 				ArrayList<ChunkCoordIntPair> chunkList = getChunksToLoad();
@@ -56,7 +57,7 @@ public abstract class WarpChunkTE extends TileEntity
 				}
 				areChunksLoaded = true;
 			}
-			else if(areChunksLoaded)
+			else if(!load)
 			{
 				for(Ticket ticket:ticketList)
 				{
@@ -71,10 +72,15 @@ public abstract class WarpChunkTE extends TileEntity
 				areChunksLoaded = false;
 			}
 		}
-		else
+		else if(load)
 		{
 			WarpDrive.instance.registerChunkLoadTE(this);
 		}
+	}
+	
+	public void refreshLoading()
+	{
+		refreshLoading(false);
 	}
 	
 	public void giveTicket(Ticket t)
