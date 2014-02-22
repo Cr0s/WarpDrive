@@ -21,9 +21,14 @@ public abstract class WarpChunkTE extends TileEntity
 	protected ChunkCoordIntPair maxChunk = null;
 	
 	boolean areChunksLoaded = false;
+	boolean isRefreshing = false;
 	
 	public void refreshLoading(boolean force)
 	{
+		if(isRefreshing)
+			return;
+		
+		isRefreshing = true;
 		boolean load = shouldChunkLoad();
 		if(ticketList.size() != 0)
 		{
@@ -76,6 +81,7 @@ public abstract class WarpChunkTE extends TileEntity
 		{
 			WarpDrive.instance.registerChunkLoadTE(this);
 		}
+		isRefreshing = false;
 	}
 	
 	public void refreshLoading()
