@@ -3,16 +3,22 @@ WarpDrive
 
 A warp drive mod for minecraft
 
--Wiki:
- -http://wiki.kubach.tk/
-   Wiki:
+Minecraft forum:
+   http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
+   
+Mod Showcase:
+   https://www.youtube.com/watch?v=9pUSZPEMc1g
+   
+Wiki:
    http://wiki.kubach.tk/
-                            To Contact Us
-  Visit our IRC channel on EsperNet: irc://chaos.esper.net/WarpDriveOr use WebChat
-  
 
-  P.S.:
-  TO ALL PEOPLE, WHO FALL IN CRASH WITH NoClassDefFound ERROR:
-  Re-download WarpDrive.jar!
-  
-  If it does not work, just install Applied Energistics
+Installation
+============
+1. Download fresh build: http://kubach.tk/1.6.4/WarpDrive.zip
+2. Download fresh Core build: http://kubach.tk/1.6.4/WarpDriveCore.jar
+3. Install last version of IC2 and Computer Craft
+
+Contact Us
+=============
+* Visit our IRC channel on EsperNet: irc://chaos.esper.net/WarpDrive
+* Or PM me: http://www.minecraftforum.net/user/1133830-anon1644/
