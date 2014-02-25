@@ -1,7 +1,9 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+
 import java.util.List;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -162,4 +164,10 @@ public final class EntityStarCore extends Entity
         nbttagcompound.setInteger("z", this.zCoord);
         nbttagcompound.setInteger("radius", this.radius);
     }
+    
+    @Override
+    public boolean shouldRenderInPass(int pass)
+    {
+        return false;
+    }    
 }
