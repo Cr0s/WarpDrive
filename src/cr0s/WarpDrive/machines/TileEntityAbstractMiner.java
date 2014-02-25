@@ -94,7 +94,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (silkTouch)
+		if (silkTouch())
 		{
 			if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta))
 			{
@@ -131,14 +131,14 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	//GETTERSETTERS
 	
-	protected boolean silkTouch()
-	{
-		return silkTouch;
-	}
-	
 	protected int fortune()
 	{
 		return fortuneLevel;
+	}
+	
+	protected boolean silkTouch()
+	{
+		return silkTouch;
 	}
 	
 	protected boolean silkTouch(boolean b)
@@ -451,6 +451,8 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	protected void defineMiningArea(int minX, int minZ, int maxX, int maxZ)
 	{
+		if(worldObj == null)
+			return;
 		ChunkCoordIntPair a = worldObj.getChunkFromBlockCoords(minX, minZ).getChunkCoordIntPair();
 		ChunkCoordIntPair b = worldObj.getChunkFromBlockCoords(maxX, maxZ).getChunkCoordIntPair();
 		if(a.equals(minChunk))
@@ -503,6 +505,14 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	}
 	
 	//OVERRIDES
+	@Override
+	public void updateEntity()
+	{
+		if(shouldChunkLoad() != areChunksLoaded)
+			refreshLoading();
+		
+	}
+	
 	@Override
 	public float getPowerDrainPerTick()
 	{

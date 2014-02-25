@@ -28,7 +28,7 @@ public class WarpDriveConfig
 	public int[] IC2_Air;
 	public int[] IC2_Empty;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
-	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, scannerIgnoreBlocks;
+	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
 	private Class<?> AEItems;
@@ -232,6 +232,7 @@ public class WarpDriveConfig
 		Jetpacks = new HashSet<Integer>();
 		MinerOres = new HashSet<Integer>();
 		MinerLogs = new HashSet<Integer>();
+		MinerLeaves = new HashSet<Integer>();
 		scannerIgnoreBlocks = new HashSet<Integer>();
 		config.load();
 		coreID = config.getBlock("core", 500).getInt();
@@ -294,30 +295,7 @@ public class WarpDriveConfig
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
 		//MinerOres.add(Block.torchWood.blockID);
-		
-		String[] oreNames = OreDictionary.getOreNames();
-		for(String oreName: oreNames)
-		{
-			if(oreName.substring(0,3).equals("ore"))
-			{
-				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
-					MinerOres.add(i.itemID);
-					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
-				}
-			}
-			if(oreName.contains("log") || oreName.contains("Log"))
-			{
-				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
-					MinerLogs.add(i.itemID);
-					WarpDrive.debugPrint("WD: Added log ID: "+i.itemID);
-				}
-			}
-		}
-		
+		LoadOreDict();
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
 		scannerIgnoreBlocks.add(controllerID);
@@ -334,6 +312,42 @@ public class WarpDriveConfig
 		
 		loadWarpDriveConfig();
 		config.save();
+	}
+	
+	private void LoadOreDict()
+	{
+		String[] oreNames = OreDictionary.getOreNames();
+		for(String oreName: oreNames)
+		{
+			String lowerOreName = oreName.toLowerCase();
+			if(oreName.substring(0,3).equals("ore"))
+			{
+				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
+				for(ItemStack i: item)
+				{
+					MinerOres.add(i.itemID);
+					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
+				}
+			}
+			if(lowerOreName.contains("log"))
+			{
+				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
+				for(ItemStack i: item)
+				{
+					MinerLogs.add(i.itemID);
+					WarpDrive.debugPrint("WD: Added log ID: "+i.itemID);
+				}
+			}
+			if(lowerOreName.contains("leave") || lowerOreName.contains("leaf"))
+			{
+				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
+				for(ItemStack i: item)
+				{
+					MinerLeaves.add(i.itemID);
+					WarpDrive.debugPrint("WD: Added leaf ID: "+i.itemID);
+				}
+			}
+		}
 	}
 
 	private void LoadIC2()

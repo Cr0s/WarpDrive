@@ -37,8 +37,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	{
 		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
 		if(silkTouch())
-			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
+			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH  * speedMul);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune()))  * speedMul);
 	}
 	
 	private String[] methodsArray =
@@ -71,8 +71,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	@Override
 	public void updateEntity()
 	{
-		if(shouldChunkLoad() != areChunksLoaded)
-			refreshLoading();
+		super.updateEntity();
 		
 		if(minLayer > yCoord - 1)
 			minLayer = yCoord - 1;
