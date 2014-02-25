@@ -6,6 +6,9 @@ A warp drive mod for minecraft
 Minecraft forum:
    http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
    
+Mod Showcase:
+   https://www.youtube.com/watch?v=9pUSZPEMc1g
+   
 Wiki:
    http://wiki.kubach.tk/
 
