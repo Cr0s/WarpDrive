@@ -189,6 +189,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     // Awaiting cooldown time
                     if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
                     {
+                    	//System.out.println("[WC] Awaiting cooldown: " + cooldownTime + " < " + ( ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition));
                         return;
                     }
 
@@ -197,11 +198,13 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
                     if (!prepareToJump())
                     {
+                    	System.out.println("[WC] Prepare to jump returns false");
                         return;
                     }
 
                     if (WarpDrive.instance.registry.isWarpCoreIntersectsWithOthers(this))
                     {
+                    	System.out.println("[WD] Intersect");
                         this.controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Warp field intersects with other ship's field. Cannot jump.");
                         return;
@@ -209,6 +212,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
                     if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false))
                     {
+                    	System.out.println("[WD] Core inside cloaking field");
                         this.controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Wap-Core is inside cloaking field. Can't jump. Disable cloaking field to jump!");
                         return;                    	
@@ -467,6 +471,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             case -2:
                 this.shipSize = this.shipDown + this.shipUp;
                 break;
+                
+           default:
+				this.controller.setJumpFlag(false);
+				return false;                
         }
         
         // Ship side is too big
@@ -478,7 +486,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         this.shipVolume = getRealShipVolume();
 
-        if (shipVolume > WarpDriveConfig.i.WC_MAX_JUMP_DISTANCE && worldObj.provider.dimensionId == 0)
+        if (shipVolume > WarpDriveConfig.i.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0)
         {
             this.controller.setJumpFlag(false);
             return false;
@@ -749,6 +757,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void doJump()
     {
+    	System.out.println("[WC] doJump() called");
         if (currentMode == this.MODE_GATE_JUMP)
         {
             if (FMLCommonHandler.instance().getEffectiveSide().isClient())
@@ -778,7 +787,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
             JumpGate t = WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord);
 
-            if (t != null && !isShipInJumpgate(t))
+            
+            if (WarpDrive.instance.jumpGates == null) 
+            	System.out.println("[JumpGates] WarpDrive.instance.jumpGates is NULL!");
+            
+            if (WarpDrive.instance.jumpGates != null && t != null && !isShipInJumpgate(t))
             {
                 if (shipVolume < WarpDriveConfig.i.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE)
                 {

@@ -391,11 +391,9 @@ public class WarpDrive implements LoadingCallback {
 		
 		registry = new WarpCoresRegistry();
 
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			jumpGates = new JumpGatesRegistry();
-		} else {
-			cams = new CamRegistry();
-		}
+		
+		jumpGates = new JumpGatesRegistry();
+		cams = new CamRegistry();
 	}
 
 	private void registerSpaceDimension() {

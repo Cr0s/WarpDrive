@@ -53,6 +53,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	private boolean isMining = false;
 	private boolean isQuarry = false;
 	private boolean useDeiterium = false;
+	private boolean AENetworkReady = false;
 
 	private String[] methodsArray =
 	{
@@ -178,7 +179,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			if (stacks != null)
 				for (ItemStack stack : stacks)
 				{
-					if (grid != null)
+					if (grid != null && AENetworkReady)
 						putInGrid(stack);
 					else
 						putInChest(findChest(), stack);
@@ -237,7 +238,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (useDeiterium && grid != null)
+		if (useDeiterium && grid != null && AENetworkReady)
 		{
 			IMEInventoryHandler cellArray = grid.getCellArray();
 			if (cellArray != null)
@@ -691,6 +692,16 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	@Override
 	public boolean coveredConnections()
+	{
+		return true;
+	}
+
+	public void setNetworkReady( boolean isReady )
+	{
+		AENetworkReady = isReady;
+	}
+
+	public boolean isMachineActive()
 	{
 		return true;
 	}

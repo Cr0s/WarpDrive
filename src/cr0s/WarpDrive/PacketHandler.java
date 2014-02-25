@@ -64,13 +64,11 @@ public class PacketHandler implements IPacketHandler
             int h = Math.abs(maxY - minY);
             int l = Math.abs(maxZ - minZ);
             
-            //(-2099; 208; 423) -> (-2069; 243; 453)
-            // 
             int size = w * h * l;
             
             //System.out.println("[Cloak Packet] Received " + ((decloak) ? "DEcloaked" : "cloaked") + "area: (" + minX + "; " + minY + "; " + minZ + ") -> (" + maxX + "; " + maxY + "; " + maxZ + ")");            
             
-            if (minX <= player.chunkCoordX && maxX >= player.chunkCoordY && minY <= player.chunkCoordY && maxY >= player.chunkCoordY  && minZ <= player.chunkCoordZ && maxZ >= player.chunkCoordZ)
+            if (minX <= player.posX && maxX >= player.posY && minY <= player.posZ && maxY >= player.posX  && minZ <= player.posY && maxZ >= player.posZ)
             	return;
             
             // Hide the area
@@ -94,7 +92,7 @@ public class PacketHandler implements IPacketHandler
 	            	((WorldClient)worldObj).removeEntityFromWorld(e.entityId);
 	            }
             } else { // reveal the area
-            	player.worldObj.markBlockRangeForRenderUpdate(minX, minY, minZ, maxX, maxY, maxZ);
+            	player.worldObj.markBlockRangeForRenderUpdate(minX + 1, minY + 1, minZ + 1, maxX + 1, maxY + 1, maxZ + 1);
             	
             	// Make some graphics
             	int numLasers = 25 + player.worldObj.rand.nextInt(300);
