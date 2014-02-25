@@ -34,11 +34,6 @@ import cr0s.WarpDrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGridMachine, ITileCable
 {
-	//FOR OVERRIDE
-	protected final boolean canSilktouch=true;
-	protected final int minFortune=0;
-	protected final int maxFortune=5;
-	protected final int laserBelow = 1;
 	
 	//FOR STORAGE
 	private boolean silkTouch = false;
@@ -51,6 +46,15 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	private IGridInterface grid;
 	private boolean isMEReady = false;
 	
+	abstract boolean	canSilkTouch();
+	abstract int		minFortune();
+	abstract int		maxFortune();
+	abstract double		laserBelow();
+	
+	abstract float		getColorR();
+	abstract float		getColorG();
+	abstract float		getColorB();
+	
 	public TileEntityAbstractMiner()
 	{
 		super();
@@ -62,7 +66,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		if(minerVector == null)
 			minerVector = new Vector3();
 		minerVector.x = xCoord;
-		minerVector.y = yCoord - (laserBelow);
+		minerVector.y = yCoord - (laserBelow());
 		minerVector.z = zCoord;
 		minerVector = minerVector.translate(0.5);
 	}
@@ -143,7 +147,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	protected boolean silkTouch(boolean b)
 	{
-		silkTouch = canSilktouch && b;
+		silkTouch = canSilkTouch() && b;
 		return silkTouch();
 	}
 	
@@ -156,11 +160,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	{
 		try
 		{
-			fortuneLevel = Math.min(maxFortune, Math.max(minFortune,f));
+			fortuneLevel = Math.min(maxFortune(), Math.max(minFortune(),f));
 		}
 		catch(NumberFormatException e)
 		{
-			fortuneLevel = minFortune;
+			fortuneLevel = minFortune();
 		}
 		return fortune();
 	}
@@ -271,8 +275,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	private void mineBlock(Vector3 valuable,int blockID, int blockMeta)
 	{
-		sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).translate(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
-		worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
+		float r = getColorR();
+		float g = getColorG();
+		float b = getColorB();
+		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
+		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 		worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), blockID + (blockMeta << 12));
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 	}
@@ -455,11 +462,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 			return;
 		ChunkCoordIntPair a = worldObj.getChunkFromBlockCoords(minX, minZ).getChunkCoordIntPair();
 		ChunkCoordIntPair b = worldObj.getChunkFromBlockCoords(maxX, maxZ).getChunkCoordIntPair();
-		if(a.equals(minChunk))
-			if(b.equals(maxChunk))
+		if(minChunk != null && a.equals(minChunk))
+			if(maxChunk != null && b.equals(maxChunk))
 				return;
-		if(b.equals(minChunk))
-			if(a.equals(maxChunk))
+		if(minChunk != null && b.equals(minChunk))
+			if(maxChunk != null && a.equals(maxChunk))
 				return;
 		minChunk = a;
 		maxChunk = b;
@@ -481,7 +488,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		fortuneLevel = tag.getInteger("fortuneLevel");
 		
 		minerVector.x = xCoord;
-		minerVector.y = yCoord - (laserBelow);
+		minerVector.y = yCoord - (laserBelow());
 		minerVector.z = zCoord;
 		minerVector = minerVector.translate(0.5);
 	}

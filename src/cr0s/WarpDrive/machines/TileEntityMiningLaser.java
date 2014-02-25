@@ -433,4 +433,47 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	public boolean shouldChunkLoad() {
 		return isMining;
 	}
+	
+	//ABSTRACT LASER IMPLEMENTATION
+	@Override
+	protected boolean canSilkTouch()
+	{
+		return true;
+	}
+	
+	@Override
+	protected int minFortune()
+	{
+		return 0;
+	}
+
+	@Override
+	protected int maxFortune()
+	{
+		return 5;
+	}
+
+	@Override
+	protected double laserBelow()
+	{
+		return 0.5;
+	}
+
+	@Override
+	protected float getColorR()
+	{
+		return 0f;
+	}
+
+	@Override
+	protected float getColorG()
+	{
+		return 0f;
+	}
+
+	@Override
+	protected float getColorB()
+	{
+		return 1f;
+	}
 }

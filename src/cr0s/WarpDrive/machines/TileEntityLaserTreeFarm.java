@@ -13,10 +13,6 @@ import dan200.computer.api.IPeripheral;
 
 public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements IPeripheral
 {
-	protected final boolean canSilktouch=true;
-	protected final int minFortune=0;
-	protected final int maxFortune=0;
-	protected final int laserBelow = -1;
 	
 	Boolean active = false;
 	
@@ -316,6 +312,49 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	@Override
 	public void detach(IComputerAccess computer)
 	{
+	}
+	
+	//ABSTRACT LASER IMPLEMENTATION
+	@Override
+	protected boolean canSilkTouch()
+	{
+		return true;
+	}
+
+	@Override
+	protected int minFortune()
+	{
+		return 0;
+	}
+
+	@Override
+	protected int maxFortune()
+	{
+		return 0;
+	}
+
+	@Override
+	protected double laserBelow()
+	{
+		return -0.5;
+	}
+
+	@Override
+	protected float getColorR()
+	{
+		return 0.2f;
+	}
+
+	@Override
+	protected float getColorG()
+	{
+		return 0.7f;
+	}
+
+	@Override
+	protected float getColorB()
+	{
+		return 0.4f;
 	}
 	
 }

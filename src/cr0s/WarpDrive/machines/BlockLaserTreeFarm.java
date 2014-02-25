@@ -31,7 +31,7 @@ public class BlockLaserTreeFarm extends BlockContainer
         iconBuffer = new Icon[2];
         // Solid textures
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:particleBoosterTopBottom");
-        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:miningLaserSide0");
+        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:laserTreeFarmSide0");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BlockLaserTreeFarm extends BlockContainer
             return iconBuffer[0];
         }
 
-        return iconBuffer[metadata + 1];
+        return iconBuffer[1];
     }
     
     @Override

@@ -82,6 +82,10 @@ public class FXBeam extends EntityFX
         {
             TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
         }
+        else
+        {
+        	
+        }
 
         /**
          * Sets the particle age based on distance.
@@ -145,6 +149,10 @@ public class FXBeam extends EntityFX
         else if (red == 0.5 && green == 0 && blue == 0.5)
         {
             TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
+        }
+        else
+        {
+        	TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
         }
 
         /**
