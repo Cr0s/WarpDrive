@@ -69,6 +69,7 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.1.1", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
@@ -428,6 +429,12 @@ public class WarpDrive implements LoadingCallback {
 				'm', WarpDriveConfig.i.getIC2Item("advancedMachine"), 'a',
 				WarpDriveConfig.i.getIC2Item("advancedAlloy"), 's',
 				WarpDriveConfig.i.getIC2Item("advancedCircuit"), 'g', Block.glass);	
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock),false,new Object[] {
+				"cwc", "wmw", "cwc",
+				'c', WarpDriveConfig.i.getIC2Item("electronicCircuit"),
+				'w', "logWood",
+				'm', miningLaserBlock }));
 		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), 
 				"imi",
