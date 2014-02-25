@@ -113,17 +113,17 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	private IInventory findChest()
 	{
+		int[] xPos = {1,-1,0,0,0,0};
+		int[] yPos = {0,0,-1,1,0,0};
+		int[] zPos = {0,0,0,0,-1,1};
 		TileEntity result = null;
-		for(int x=-1;x<=1;x++)
+		
+		for(int i=0;i<6;i++)
 		{
-			for(int y=-1;y<=1;y++)
+			result = worldObj.getBlockTileEntity(xCoord+xPos[i], yCoord+yPos[i], zCoord+zPos[i]);
+			if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
 			{
-				for(int z=-1;z<=1;z++)
-				{
-					result = worldObj.getBlockTileEntity(xCoord+x, yCoord+y, zCoord+z);
-					if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
-						return (IInventory) result;
-				}
+				return (IInventory) result;
 			}
 		}
 		return null;
@@ -145,6 +145,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	{
 		silkTouch = canSilktouch && b;
 		return silkTouch();
+	}
+	
+	protected boolean silkTouch(Object o)
+	{
+		return silkTouch(toBool(o));
 	}
 	
 	protected int fortune(int f)
@@ -177,9 +182,22 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	//DATA RET
 	
+	protected int calculateLayerCost()
+	{
+		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
+	}
+	
+	protected int calculateBlockCost()
+	{
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
+		if(silkTouch())
+			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
+	}
+	
 	protected boolean isRoomForHarvest()
 	{
-		if(grid != null && isMEReady)
+		if(isMEReady && grid != null)
 			return true;
 		
 		IInventory inv = findChest();

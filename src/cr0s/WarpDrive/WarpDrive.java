@@ -22,6 +22,7 @@ import cr0s.WarpDrive.machines.BlockCloakingCoil;
 import cr0s.WarpDrive.machines.BlockCloakingDeviceCore;
 import cr0s.WarpDrive.machines.BlockLaser;
 import cr0s.WarpDrive.machines.BlockLaserCam;
+import cr0s.WarpDrive.machines.BlockLaserTreeFarm;
 import cr0s.WarpDrive.machines.BlockLift;
 import cr0s.WarpDrive.machines.BlockMiningLaser;
 import cr0s.WarpDrive.machines.BlockMonitor;
@@ -35,6 +36,7 @@ import cr0s.WarpDrive.machines.TileEntityAirGenerator;
 import cr0s.WarpDrive.machines.TileEntityCamera;
 import cr0s.WarpDrive.machines.TileEntityCloakingDeviceCore;
 import cr0s.WarpDrive.machines.TileEntityLaser;
+import cr0s.WarpDrive.machines.TileEntityLaserTreeFarm;
 import cr0s.WarpDrive.machines.TileEntityLift;
 import cr0s.WarpDrive.machines.TileEntityMiningLaser;
 import cr0s.WarpDrive.machines.TileEntityMonitor;
@@ -92,6 +94,7 @@ public class WarpDrive implements LoadingCallback {
 	public static Block monitorBlock;
 	public static Block boosterBlock;
 	public static Block miningLaserBlock;
+	public static Block laserTreeFarmBlock;
 	public static Block liftBlock;
 	public static Block scannerBlock;
 	public static Block cloakBlock;
@@ -262,6 +265,15 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class,
 				"miningLaserBlock");
+		
+		// LASER TREE FARM
+		this.laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.i.laserTreeFarmID,0,Material.rock)
+		.setHardness(0.5F).setStepSound(Block.soundMetalFootstep)
+		.setCreativeTab(CreativeTabs.tabRedstone)
+		.setUnlocalizedName("Laser Tree Farm");
+		LanguageRegistry.addName(laserTreeFarmBlock, "Laser Tree Farm");
+		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
+		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class,"laserTreeFarmBlock");
 		
 		// PARTICLE BOOSTER
 		this.boosterBlock = new BlockParticleBooster(

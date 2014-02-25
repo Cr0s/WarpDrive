@@ -26,11 +26,13 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	private int miningDelay = 0;
 	private int minLayer = 1;
 	
+	@Override
 	protected int calculateLayerCost()
 	{
 		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
 	}
 	
+	@Override
 	protected int calculateBlockCost()
 	{
 		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
@@ -195,10 +197,6 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			zmin = z2;
 			zmax = z1;
 		}
-
-		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
-		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
-
 		defineMiningArea(xmin,zmin,xmax,zmax);
 		
 		// Search for valuable blocks
@@ -217,69 +215,6 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 							valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 
-		valuableIndex = 0;
-		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
-	}
-
-	
-
-	private void scanLayer()
-	{
-		//System.out.println("Scanning layer");
-		valuablesInLayer.clear();
-		int xmax, zmax, x1, x2, z1, z2;
-		int xmin, zmin;
-		x1 = xCoord + digX / 2;
-		x2 = xCoord - digX / 2;
-	
-		if (x1 < x2)
-		{
-			xmin = x1;
-			xmax = x2;
-		}
-		else
-		{
-			xmin = x2;
-			xmax = x1;
-		}
-	
-		z1 = zCoord + digZ / 2;
-		z2 = zCoord - digZ / 2;
-	
-		if (z1 < z2)
-		{
-			zmin = z1;
-			zmax = z2;
-		}
-		else
-		{
-			zmin = z2;
-			zmax = z1;
-		}
-	
-		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
-		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
-	
-		minChunk = worldObj.getChunkFromBlockCoords(xmin,zmin).getChunkCoordIntPair();
-		maxChunk = worldObj.getChunkFromBlockCoords(xmax,zmax).getChunkCoordIntPair();
-		refreshLoading(true);
-		
-		// Search for valuable blocks
-		for (int x = xmin; x <= xmax; x++)
-			for (int z = zmin; z <= zmax; z++)
-			{
-				int blockID = worldObj.getBlockId(x, currentLayer, z);
-				if (canDig(blockID))
-					if (isQuarry)   // Quarry collects all blocks
-					{
-						if (!worldObj.isAirBlock(x, currentLayer, z) && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID)
-							valuablesInLayer.add(new Vector3(x, currentLayer, z));
-					}
-					else   // Not-quarry collect only valuables blocks
-						if (WarpDriveConfig.i.MinerOres.contains(worldObj.getBlockId(x, currentLayer, z)))
-							valuablesInLayer.add(new Vector3(x, currentLayer, z));
-			}
-	
 		valuableIndex = 0;
 		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
 	}

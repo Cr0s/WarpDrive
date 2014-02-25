@@ -13,13 +13,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockMiningLaser extends BlockContainer
+public class BlockLaserTreeFarm extends BlockContainer
 {
     private Icon[] iconBuffer;
 
     private final int ICON_SIDE = 0;
 
-    public BlockMiningLaser(int id, int texture, Material material)
+    public BlockLaserTreeFarm(int id, int texture, Material material)
     {
         super(id, material);
     }
@@ -48,7 +48,7 @@ public class BlockMiningLaser extends BlockContainer
     @Override
     public TileEntity createNewTileEntity(World var1)
     {
-        return new TileEntityMiningLaser();
+        return new TileEntityLaserTreeFarm();
     }
 
     /**

@@ -21,13 +21,14 @@ public class WarpDriveConfig
 	public static WarpDriveConfig i;
 	private Configuration config;
 	public int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
+	public int laserTreeFarmID;
 //
 	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
 	public int[] IC2_Air;
 	public int[] IC2_Empty;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
-	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, scannerIgnoreBlocks;
+	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, scannerIgnoreBlocks;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
 	private Class<?> AEItems;
@@ -230,6 +231,7 @@ public class WarpDriveConfig
 		SpaceHelmets = new HashSet<Integer>();
 		Jetpacks = new HashSet<Integer>();
 		MinerOres = new HashSet<Integer>();
+		MinerLogs = new HashSet<Integer>();
 		scannerIgnoreBlocks = new HashSet<Integer>();
 		config.load();
 		coreID = config.getBlock("core", 500).getInt();
@@ -250,6 +252,7 @@ public class WarpDriveConfig
 		shipScannerID = config.getBlock("shipscanner", 516).getInt();
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
+		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
 		
 		LoadIC2();
 		LoadCC();
@@ -302,6 +305,15 @@ public class WarpDriveConfig
 				{
 					MinerOres.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
+				}
+			}
+			if(oreName.contains("log") || oreName.contains("Log"))
+			{
+				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
+				for(ItemStack i: item)
+				{
+					MinerLogs.add(i.itemID);
+					WarpDrive.debugPrint("WD: Added log ID: "+i.itemID);
 				}
 			}
 		}
