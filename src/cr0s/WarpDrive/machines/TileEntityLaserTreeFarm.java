@@ -2,6 +2,7 @@ package cr0s.WarpDrive.machines;
 
 import java.util.ArrayList;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.oredict.OreDictionary;
 import cr0s.WarpDrive.Vector3;
@@ -19,6 +20,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	private int mode = 0;
 	private boolean doLeaves = false;
 	private boolean silkTouchLeaves = false;
+	private boolean treeTap = false;
 	
 	private final int defSize = 8;
 	private final int scanWait = 40;
@@ -41,6 +43,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"leaves",
 			"silkTouch",
 			"silkTouchLeaves",
+			"treetap",
 			"state"
 	};
 	
@@ -63,7 +66,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 					scan = 0;
 					logs = scanTrees();
 					if(logs.size() > 0)
-						mode = 1;
+						mode = treeTap ? 2 : 1;
 					logIndex = 0;
 				}
 			}
@@ -72,35 +75,87 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 				if(++scan >= mineWait * delayMul)
 				{
 					scan = 0;
-					int cost = calculateBlockCost();
-					if(collectEnergyPacketFromBooster(cost,true))
+					
+					if(logIndex >= logs.size())
 					{
-						if(logIndex >= logs.size())
+						mode = 0;
+						return;
+					}
+					Vector3 pos = logs.get(logIndex);
+					int blockID = worldObj.getBlockId(pos.intX(), pos.intY(), pos.intZ());
+					
+					if(mode == 1)
+					{
+						int cost = calculateBlockCost(blockID);
+						if(collectEnergyPacketFromBooster(cost,true))
 						{
-							mode = 0;
-							return;
-						}
-						Vector3 pos = logs.get(logIndex);
-						int blockID = worldObj.getBlockId(pos.intX(), pos.intY(), pos.intZ());
-						if(isLog(blockID) || (doLeaves && isLeaf(blockID)))
-						{
-							delayMul = 1;
-							if(isRoomForHarvest())
+							if(isLog(blockID) || (doLeaves && isLeaf(blockID)))
 							{
-								if(collectEnergyPacketFromBooster(cost,false))
+								delayMul = 1;
+								if(isRoomForHarvest())
 								{
-									if(isLog(blockID))
-										delayMul = 4;
-									totalHarvested++;
-									harvestBlock(pos);
+									if(collectEnergyPacketFromBooster(cost,false))
+									{
+										if(isLog(blockID))
+										{
+											delayMul = 4;
+											totalHarvested++;
+										}
+										harvestBlock(pos);
+									}
+									else
+										return;
 								}
 								else
 									return;
 							}
+							logIndex++;
+						}
+					}
+					else if(mode == 2)
+					{
+						int cost = calculateBlockCost(blockID);
+						if(collectEnergyPacketFromBooster(cost,true))
+						{
+							if(isRoomForHarvest())
+							{
+								if(blockID == WarpDriveConfig.i.IC2_RubberTree)
+								{
+									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
+									if(metadata >= 2 && metadata <= 5)
+									{
+										WarpDrive.debugPrint("wetspot found");
+										if(collectEnergyPacketFromBooster(cost,false))
+										{
+											ItemStack resin = WarpDriveConfig.i.IC2_Resin.copy();
+											resin.stackSize = (int) Math.round(Math.random() * 4);
+											dumpToInv(resin);
+											worldObj.setBlockMetadataWithNotify(pos.intX(), pos.intY(), pos.intZ(), metadata+6, 3);
+											laserBlock(pos);
+											totalHarvested++;
+											delayMul = 4;
+										}
+										else
+											return;
+									}
+									else
+										delayMul = 1;
+								}
+								else if(isLeaf(blockID))
+								{
+									if(collectEnergyPacketFromBooster(cost,true))
+									{
+										delayMul = 1;
+										harvestBlock(pos);
+									}
+									else
+										return;
+								}
+							}
 							else
 								return;
+							logIndex++;
 						}
-						logIndex++;
 					}
 				}
 			}
@@ -188,6 +243,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		tag.setInteger("zSize", zSize);
 		tag.setBoolean("doLeaves", doLeaves);
 		tag.setBoolean("active", active);
+		tag.setBoolean("treetap", treeTap);
+		tag.setBoolean("silkTouchLeaves", silkTouchLeaves);
 	}
 	
 	@Override
@@ -200,6 +257,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		
 		doLeaves = tag.getBoolean("doLeaves");
 		active   = tag.getBoolean("active");
+		treeTap  = tag.getBoolean("treetap");
+		silkTouchLeaves = tag.getBoolean("silkTouchLeaves");
 	}
 	
 	@Override
@@ -246,13 +305,13 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			{
 				if(arguments.length == 1)
 				{
-					xSize = toInt(arguments[0]);
+					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.i.TF_MAX_SIZE);
 					zSize = xSize;
 				}
 				else if(arguments.length == 2)
 				{
-					xSize = toInt(arguments[0]);
-					zSize = toInt(arguments[1]);
+					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.i.TF_MAX_SIZE);
+					zSize = clamp(toInt(arguments[1]),3,WarpDriveConfig.i.TF_MAX_SIZE);
 				}
 			}
 			catch(NumberFormatException e)
@@ -296,7 +355,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		{
 			try
 			{
-				silkTouchLeaves = toBool(arguments[0]);
+				if(arguments.length >= 1)
+					silkTouchLeaves = toBool(arguments[0]);
 			}
 			catch(Exception e)
 			{
@@ -305,9 +365,23 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			return new Object[] { silkTouchLeaves };
 		}
 		
+		if(methodStr == "treetap")
+		{
+			try
+			{
+				if(arguments.length >= 1)
+					treeTap = toBool(arguments[0]);
+			}
+			catch(Exception e)
+			{
+				treeTap = false;
+			}
+			return new Object[] { treeTap };
+		}
+		
 		if(methodStr == "state")
 		{
-			String state = active ? "active" : "inactive";
+			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
 			return new Object[] { state, xSize,zSize,energy(),totalHarvested };
 		}
 		return null;

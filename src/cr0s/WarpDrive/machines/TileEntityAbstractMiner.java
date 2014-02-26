@@ -71,28 +71,6 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		minerVector = minerVector.translate(0.5);
 	}
 	
-	protected int toInt(double d)
-	{
-		return (int) Math.round(d);
-	}
-	
-	protected int toInt(Object o)
-	{
-		return toInt(toDouble(o));
-	}
-	
-	protected double toDouble(Object o)
-	{
-		return Double.parseDouble(o.toString());
-	}
-	
-	protected boolean toBool(Object o)
-	{
-		if(o.toString() == "true" || o.toString() == "1.0" || o.toString() == "1")
-			return true;
-		return false;
-	}
-	
 	private List<ItemStack> getItemStackFromBlock(int i, int j, int k, int blockID, int blockMeta)
 	{
 		Block block = Block.blocksList[blockID];
@@ -165,7 +143,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	{
 		try
 		{
-			fortuneLevel = Math.min(maxFortune(), Math.max(minFortune(),f));
+			fortuneLevel = clamp(f,minFortune(),maxFortune());
 		}
 		catch(NumberFormatException e)
 		{
@@ -198,8 +176,13 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	protected int calculateBlockCost()
 	{
+		return calculateBlockCost(0);
+	}
+	
+	protected int calculateBlockCost(int blockID)
+	{
 		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
-		if(silkTouch())
+		if(silkTouch(blockID))
 			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
 		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
 	}
@@ -278,13 +261,18 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		}
 	}
 	
-	private void mineBlock(Vector3 valuable,int blockID, int blockMeta)
+	protected void laserBlock(Vector3 valuable)
 	{
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
 		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
+	}
+	
+	private void mineBlock(Vector3 valuable,int blockID, int blockMeta)
+	{
+		laserBlock(valuable);
 		worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), blockID + (blockMeta << 12));
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 	}
@@ -301,10 +289,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 			{
 				for (ItemStack stack : stacks)
 				{
-					if (grid != null)
-						didPlace = didPlace && putInGrid(stack) == stack.stackSize;
-					else
-						didPlace = didPlace && putInChest(findChest(), stack) == stack.stackSize;
+					didPlace = didPlace && dumpToInv(stack) == stack.stackSize;
 				}
 			}
 			mineBlock(valuable,blockID,blockMeta);
@@ -315,6 +300,14 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 		return true;
+	}
+	
+	protected int dumpToInv(ItemStack item)
+	{
+		if (grid != null)
+			return putInGrid(item);
+		else
+			return putInChest(findChest(), item);
 	}
 	
 	private int putInGrid(ItemStack itemStackSource)

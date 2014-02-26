@@ -27,6 +27,8 @@ public class WarpDriveConfig
 //
 	public int[] IC2_Air;
 	public int[] IC2_Empty;
+	public int IC2_RubberTree;
+	public ItemStack IC2_Resin;
 	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
 	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
 	private Class<?> AEBlocks;
@@ -34,6 +36,8 @@ public class WarpDriveConfig
 	private Class<?> AEItems;
 	public ArrayList<int[]> CommonWorldGenOres;
 	public Item AEExtraFDI;
+	
+	public boolean debugMode = false;
 
 	// Mod config
 		// Warp Core
@@ -178,20 +182,6 @@ public class WarpDriveConfig
 	    
 	    // Particle Booster
 	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", 100000).getInt();
-	    
-	    // Mining Laser
-		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
-		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
-		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
-		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
-		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
-		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
-		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
-		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
 		
 		// Laser Emitter
 		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", 10).getInt();
@@ -217,7 +207,25 @@ public class WarpDriveConfig
 		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", 5).getInt();
 		
 		// Dark's modifications
+		debugMode = config.get("Dark's stuff", "debug_mode", false).getBoolean(false);
 		schemaLocation = config.get("Dark's stuff", "schematic_location", schemaLocation).getString();
+		
+	    // Mining Laser
+		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
+		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
+		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
+		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
+		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
+		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
+		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
+		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
+		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
+		
+		// Tree Farm
+		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
 	}
 	
 	public void Init2()
@@ -362,6 +370,11 @@ public class WarpDriveConfig
 		Jetpacks.add(Items.getItem("electricJetpack").itemID);
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		IC2_Empty = new int[] {Items.getItem("cell").itemID, Items.getItem("cell").getItemDamage()};
+		ItemStack rubberTree = Items.getItem("rubberWood");
+		ItemStack stickyResin = Items.getItem("resin");
+		if(rubberTree != null)
+			IC2_RubberTree = rubberTree.itemID;
+		IC2_Resin = stickyResin;
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("copperOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("tinOre").getItemDamage()});
