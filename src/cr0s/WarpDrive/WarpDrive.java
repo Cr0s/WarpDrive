@@ -119,7 +119,7 @@ public class WarpDrive implements LoadingCallback {
 
 	@Instance("WarpDrive")
 	public static WarpDrive instance;
-	@SidedProxy(clientSide = "cr0s.WarpDrive.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
+	@SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
 	public static CommonProxy proxy;
 
 	public WarpCoresRegistry registry;

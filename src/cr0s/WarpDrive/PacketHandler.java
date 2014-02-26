@@ -69,14 +69,14 @@ public class PacketHandler implements IPacketHandler
             
             int size = w * h * l;
             
-            //System.out.println("[Cloak Packet] Received " + ((decloak) ? "DEcloaked" : "cloaked") + "area: (" + minX + "; " + minY + "; " + minZ + ") -> (" + maxX + "; " + maxY + "; " + maxZ + ")");            
+            //WarpDrive.debugPrint("[Cloak Packet] Received " + ((decloak) ? "DEcloaked" : "cloaked") + "area: (" + minX + "; " + minY + "; " + minZ + ") -> (" + maxX + "; " + maxY + "; " + maxZ + ")");            
             
             if (minX <= player.posX && maxX >= player.posY && minY <= player.posZ && maxY >= player.posX  && minZ <= player.posY && maxZ >= player.posZ)
             	return;
             
             // Hide the area
             if (!decloak) {
-	            //System.out.println("[Cloak Packet] Removing " + size + " blocks...");
+	            //WarpDrive.debugPrint("[Cloak Packet] Removing " + size + " blocks...");
 	            
 	            // Now hide the blocks within area
 	            World worldObj = player.worldObj;
@@ -86,7 +86,7 @@ public class PacketHandler implements IPacketHandler
 	            			if (worldObj.getBlockId(x, y, z) != 0)
 	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.i.gasID : 0, 5, 4);
 	            
-	    		//System.out.println("[Cloak Packet] Removing entity...");
+	    		//WarpDrive.debugPrint("[Cloak Packet] Removing entity...");
 	            // Hide any entities inside area
 	            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
 	            List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
@@ -160,12 +160,12 @@ public class PacketHandler implements IPacketHandler
             int z = inputStream.readInt();
             float yaw = inputStream.readFloat();
             float pitch = inputStream.readFloat();
-            System.out.println("Got target packet: (" + x + "; " + y + "; " + z + ") | yaw: " + yaw + " | pitch: " + pitch);
+            WarpDrive.debugPrint("Got target packet: (" + x + "; " + y + "; " + z + ") | yaw: " + yaw + " | pitch: " + pitch);
             TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
 
             if (te != null)
             {
-                System.out.println("TE is NULL");
+                WarpDrive.debugPrint("TE is NULL");
 
                 if (te instanceof TileEntityLaser)
                 {
@@ -193,7 +193,7 @@ public class PacketHandler implements IPacketHandler
             int y = inputStream.readInt();
             int z = inputStream.readInt();
             int freq = inputStream.readInt();
-            //System.out.println("Got freq packet: (" + x + "; " + y + "; " + z + ") | freq: " + freq);
+            //WarpDrive.debugPrint("Got freq packet: (" + x + "; " + y + "; " + z + ") | freq: " + freq);
             TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
 
             if (te != null)
@@ -222,6 +222,7 @@ public class PacketHandler implements IPacketHandler
 
     private void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
     {
+    	WarpDrive.debugPrint("Received beam");
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
         int dimID;
         Vector3 source, target;
@@ -254,21 +255,21 @@ public class PacketHandler implements IPacketHandler
             energy = inputStream.readInt();
 
             // Render beam
-            /*System.out.println("sx: " + sx + " sy: " + sy + " sz: " + sz);
-            System.out.println("tx: " + sx + " ty: " + sy + " tz: " + sz);
+            WarpDrive.debugPrint("sx: " + sx + " sy: " + sy + " sz: " + sz);
+            WarpDrive.debugPrint("tx: " + sx + " ty: " + sy + " tz: " + sz);
 
-            System.out.println("source: " + source);
-            System.out.println("target: " + target);
-            System.out.println("r: " + r);
-            System.out.println("g: " + g);
-            System.out.println("b " + b);
-            System.out.println("age: " + age);
-            System.out.println("energy: " + energy);*/
+            WarpDrive.debugPrint("source: " + source);
+            WarpDrive.debugPrint("target: " + target);
+            WarpDrive.debugPrint("r: " + r);
+            WarpDrive.debugPrint("g: " + g);
+            WarpDrive.debugPrint("b " + b);
+            WarpDrive.debugPrint("age: " + age);
+            WarpDrive.debugPrint("energy: " + energy);
 
             // To avoid NPE at logging in
             if (worldObj == null)
             {
-                System.out.println("WorldObj is null");
+                WarpDrive.debugPrint("WorldObj is null");
                 return;
             }
 

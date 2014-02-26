@@ -84,7 +84,7 @@ public class FXBeam extends EntityFX
         }
         else
         {
-        	
+        	TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
         }
 
         /**

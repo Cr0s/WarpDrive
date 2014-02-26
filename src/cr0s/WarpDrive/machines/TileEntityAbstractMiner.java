@@ -219,7 +219,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 
 		if (side == Side.SERVER)
 		{
-			//WarpDrive.debugPrint("trying to fire laser!");
+			WarpDrive.debugPrint("trying to fire laser!");
 			if (source == null || dest == null || worldObj == null)
 			{
 				return;
