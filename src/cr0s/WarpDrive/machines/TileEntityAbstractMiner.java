@@ -88,7 +88,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	protected boolean toBool(Object o)
 	{
-		if(o.toString() == "true" || o.toString() == "1")
+		if(o.toString() == "true" || o.toString() == "1.0" || o.toString() == "1")
 			return true;
 		return false;
 	}
@@ -98,7 +98,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (silkTouch())
+		if (silkTouch(blockID))
 		{
 			if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta))
 			{
@@ -143,6 +143,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	protected boolean silkTouch()
 	{
 		return silkTouch;
+	}
+	
+	protected boolean silkTouch(int blockID)
+	{
+		return silkTouch();
 	}
 	
 	protected boolean silkTouch(boolean b)

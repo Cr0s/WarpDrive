@@ -71,6 +71,9 @@ public class WarpDriveConfig
 		public double ML_MIN_SPEED   = 0.1;
 		public int	  ML_MAX_SIZE    = 128;
 		
+		//Tree farm
+		public int TF_MAX_SIZE=32;
+		
 		// Laser Emitter
 		public int LE_MAX_BOOSTERS_NUMBER = 10;
 		public int LE_MAX_LASER_ENERGY = 4000000;

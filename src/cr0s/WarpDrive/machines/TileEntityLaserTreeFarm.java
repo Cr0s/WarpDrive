@@ -18,6 +18,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	
 	private int mode = 0;
 	private boolean doLeaves = false;
+	private boolean silkTouchLeaves = false;
 	
 	private final int defSize = 8;
 	private final int scanWait = 40;
@@ -39,6 +40,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"area",
 			"leaves",
 			"silkTouch",
+			"silkTouchLeaves",
 			"state"
 	};
 	
@@ -290,6 +292,19 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			return new Object[] { silkTouch() };
 		}
 		
+		if(methodStr == "silkTouchLeaves")
+		{
+			try
+			{
+				silkTouchLeaves = toBool(arguments[0]);
+			}
+			catch(Exception e)
+			{
+				silkTouchLeaves = false;
+			}
+			return new Object[] { silkTouchLeaves };
+		}
+		
 		if(methodStr == "state")
 		{
 			String state = active ? "active" : "inactive";
@@ -315,6 +330,14 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	}
 	
 	//ABSTRACT LASER IMPLEMENTATION
+	@Override
+	protected boolean silkTouch(int blockID)
+	{
+		if(isLeaf(blockID))
+			return silkTouchLeaves;
+		return silkTouch();
+	}
+	
 	@Override
 	protected boolean canSilkTouch()
 	{
