@@ -64,11 +64,11 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	private void fixMinerVector()
 	{
 		if(minerVector == null)
-			minerVector = new Vector3();
+			minerVector = new Vector3(xCoord,yCoord-laserBelow(),zCoord);
 		minerVector.x = xCoord;
 		minerVector.y = yCoord - (laserBelow());
 		minerVector.z = zCoord;
-		minerVector = minerVector.translate(0.5);
+		minerVector.translate(0.5);
 	}
 	
 	private List<ItemStack> getItemStackFromBlock(int i, int j, int k, int blockID, int blockMeta)
@@ -263,6 +263,7 @@ public abstract class TileEntityAbstractMiner extends WarpChunkTE implements IGr
 	
 	protected void laserBlock(Vector3 valuable)
 	{
+		fixMinerVector();
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
