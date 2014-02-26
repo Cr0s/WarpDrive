@@ -265,4 +265,10 @@ System.out.println("ZLO EntitySphereGen THE FUCK create");
 		c.isModified = true;
 		return true;
 	}
+	
+    @Override
+    public boolean shouldRenderInPass(int pass)
+    {
+        return false;
+    }	
 }

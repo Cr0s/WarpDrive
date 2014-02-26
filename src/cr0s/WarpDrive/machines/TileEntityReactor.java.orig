@@ -487,9 +487,15 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 this.shipSize = this.shipDown + this.shipUp;
                 break;
                 
+<<<<<<< HEAD:src/cr0s/WarpDrive/machines/TileEntityReactor.java
             default:
             	this.controller.setJumpFlag(false);
+            	return false;
+=======
+           default:
+				this.controller.setJumpFlag(false);
 				return false;                
+>>>>>>> 2285a5d75c56ad846175edf7a731b2738f06bb72:src/cr0s/WarpDrive/TileEntityReactor.java
         }
         
         // Ship side is too big
@@ -763,12 +769,16 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void doJump()
     {
+<<<<<<< HEAD:src/cr0s/WarpDrive/machines/TileEntityReactor.java
     	if (currentMode == this.MODE_TELEPORT)
     	{
     		WarpDrive.debugPrint("SETTING TELE TO TRU");
     		shouldTele = true;
     	}
     	
+=======
+    	System.out.println("[WC] doJump() called");
+>>>>>>> 2285a5d75c56ad846175edf7a731b2738f06bb72:src/cr0s/WarpDrive/TileEntityReactor.java
         if (currentMode == this.MODE_GATE_JUMP)
         {
             if (FMLCommonHandler.instance().getEffectiveSide().isClient())

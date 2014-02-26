@@ -3,7 +3,6 @@ WarpDrive
 
 A warp drive mod for minecraft
 
-Modified by DarkholmeTenk
 Minecraft forum:
    http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
    

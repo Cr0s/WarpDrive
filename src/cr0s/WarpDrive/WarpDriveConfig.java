@@ -163,10 +163,10 @@ public class WarpDriveConfig
 		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", 100).getInt();
 	    WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", 1000).getInt();
 	    WC_ENERGY_PER_BLOCK_MODE2 = config.get("WarpCore", "energy_per_block_mode2", 1000).getInt();
-	    WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_ped_entity_to_space", 1000000).getInt();
+	    WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_per_entity_to_space", 1000000).getInt();
 	    WC_MAX_JUMP_DISTANCE = config.get("WarpCore", "max_jump_distance", 128).getInt();
 	    WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", 15000).getInt();   // Maximum ship mass to jump on earth (15k blocks)
-	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", 500).getInt(); ; // Minimum ship volume value for hyper space
+	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", 500).getInt(); // Minimum ship volume value for hyper space
 	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", 100).getInt(); 
 	    
 	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", 4).getInt(); 
@@ -363,8 +363,8 @@ public class WarpDriveConfig
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		IC2_Empty = new int[] {Items.getItem("cell").itemID, Items.getItem("cell").getItemDamage()};
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
+		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("copperOre").getItemDamage()});
+		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("tinOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
 		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}

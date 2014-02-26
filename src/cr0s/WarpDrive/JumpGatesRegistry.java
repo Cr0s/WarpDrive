@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
+import net.minecraft.client.Minecraft;
 
 public final class JumpGatesRegistry
 {
@@ -20,8 +21,17 @@ public final class JumpGatesRegistry
     //@SideOnly(Side.CLIENT)
     public JumpGatesRegistry()
     {
-        db = MinecraftServer.getServer().getFile("gates.txt");
-
+        db = new File("gates.txt");
+        System.out.println("Gates.txt file: " + db);
+        
+        if (db != null && !db.exists()) {
+        	try {
+				db.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }
+        
         try
         {
             loadGates();

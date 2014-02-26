@@ -207,20 +207,20 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     public String getAttachedPlayersList()
     {
-        String list = "";
+        StringBuilder list = new StringBuilder("");
 
         for (int i = 0; i < this.players.size(); i++)
         {
             String nick = this.players.get(i);
-            list += nick + ((i == this.players.size() - 1) ? "" : ", ");
+            list.append(nick + ((i == this.players.size() - 1) ? "" : ", "));
         }
 
         if (players.isEmpty())
         {
-            list = "<nobody>";
+            list = new StringBuilder("<nobody>");
         }
 
-        return list;
+        return list.toString();
     }
 
     /**

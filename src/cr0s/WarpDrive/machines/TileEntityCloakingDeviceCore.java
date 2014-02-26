@@ -72,6 +72,9 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 	private int updateTicks = 0;
 	private int laserDrawingTicks = 0;
 	
+	private boolean soundPlayed = false;
+	private int soundTicks = 0;
+	
 	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -83,6 +86,12 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 			addedToEnergyNet = true;
 		}
 
+		// Reset sound timer
+		if (soundTicks++ >= 40) {
+			this.soundTicks = 0;
+			this.soundPlayed = false;
+		}
+		
 		if (--this.updateTicks <= 0) {
 			//System.out.println("[CloakDev] Updating cloaking state...");
 			this.updateTicks = ((this.tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.i.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
@@ -95,7 +104,10 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 					if (!WarpDrive.instance.cloaks.isAreaExists(this.frequency)) {
 						WarpDrive.instance.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, frequency, tier);
 						worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-						worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cloak", 4F, 1F);
+						if (!soundPlayed) {
+							soundPlayed = true;
+							worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cl", 4F, 1F);
+						}
 						
 						// Enable coils
 						setCoilsState(true);
@@ -218,7 +230,11 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		if (WarpDrive.instance.cloaks.isAreaExists(this.frequency))
 			WarpDrive.instance.cloaks.removeCloakedArea(this.frequency);
 		
-		worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:decloak", 4F, 1F);
+		if (!soundPlayed) {
+			soundPlayed = true;
+			worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:dcl", 4F, 1F);
+		}
+		
 		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);
 	}
 	public void countBlocksAndConsumeEnergy() {
@@ -377,7 +393,10 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		switch (method) {
 		case 0: // setFieldTier(1 or 2)
 			if (arguments.length == 1) {
-				this.tier = ((Double)arguments[0]).byteValue();
+				if (((Double)arguments[0]).byteValue() != 1 && ((Double)arguments[0]).byteValue() != 2) {
+					this.tier = 1;
+				} else
+					this.tier = ((Double)arguments[0]).byteValue();
 			}
 
 			break;

@@ -450,9 +450,20 @@ public class WarpDrive implements LoadingCallback {
 		
 		registry = new WarpCoresRegistry();
 
+<<<<<<< HEAD
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer())
+		{
+			
+		}
+		else
+		{
+			cams = new CamRegistry();
+		}
+=======
 		
 		jumpGates = new JumpGatesRegistry();
 		cams = new CamRegistry();
+>>>>>>> 2285a5d75c56ad846175edf7a731b2738f06bb72
 	}
 
 	private void registerSpaceDimension() {
@@ -478,6 +489,8 @@ public class WarpDrive implements LoadingCallback {
 	@EventHandler
 	public void serverLoad(FMLServerStartingEvent event) {
 		cloaks = new CloakManager();
+		debugPrint("Added jump registry");
+		jumpGates = new JumpGatesRegistry();
 		MinecraftForge.EVENT_BUS.register(new CloakChunkWatcher());
 		
 		event.registerServerCommand(new GenerateCommand());
