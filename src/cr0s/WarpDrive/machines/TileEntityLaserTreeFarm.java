@@ -141,6 +141,17 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 									else
 										delayMul = 1;
 								}
+								else if(isLog(blockID))
+								{
+									if(collectEnergyPacketFromBooster(cost,false))
+									{
+										delayMul = 4;
+										totalHarvested++;
+										harvestBlock(pos);
+									}
+									else
+										return;
+								}
 								else if(isLeaf(blockID))
 								{
 									if(collectEnergyPacketFromBooster(cost,true))
