@@ -577,6 +577,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
 		camFreq = tag.getInteger("camfreq");
+		parseFrequency(frequency);
 	}
 
 	@Override
@@ -637,10 +638,16 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 			case 2: // Freq
 				if (arguments.length == 1)
 				{
-					if (parseFrequency(((Double)arguments[0]).intValue()))
-						frequency = ((Double)arguments[0]).intValue();
-					else
-						return new Integer[] { -1 };
+					try
+					{
+						if (parseFrequency(toInt(arguments[0])))
+							frequency = toInt(arguments[0]);
+						else
+							return new Integer[] { -1 };
+					}
+					catch(NumberFormatException e)
+					{
+					}
 				}
 				return new Integer[] { frequency };
 			case 3: // getFirstHit()
