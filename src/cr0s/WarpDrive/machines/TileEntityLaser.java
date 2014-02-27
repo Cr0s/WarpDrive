@@ -36,7 +36,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityLaser extends TileEntity implements IPeripheral
+public class TileEntityLaser extends TileEntityAbstractLaser implements IPeripheral
 {
 	private int dx, dz, dy;
 	public float yaw, pitch; // laser direction
@@ -103,11 +103,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		if (isEmitting)
 		{
 			energyFromOtherBeams += amount;
-			System.out.println("[LE] Added energy: " + amount);
+			WarpDrive.debugPrint("[LE] Added energy: " + amount);
 		}
 		else
 		{
-			System.out.println("[LE] Ignored energy: " + amount);
+			WarpDrive.debugPrint("[LE] Ignored energy: " + amount);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	{
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
-		System.out.println("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
+		WarpDrive.debugPrint("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
 		if (energy == 0 || beamLengthBlocks < 1)
 		{
@@ -151,7 +151,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		}
 
 		Vector3 beamVector = new Vector3(this).add(0.5);
-		System.out.println("beamVector: " + beamVector);
+		WarpDrive.debugPrint("beamVector: " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
@@ -161,9 +161,9 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		Vector3 lookVector = new Vector3((double) directionx, (double) pitchvertical, (double) directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
-		System.out.println("Look vector: " + lookVector);
-		System.out.println("reachPoint: " + reachPoint);
-		System.out.println("translatedBeamVector: " + beamVector);
+		WarpDrive.debugPrint("Look vector: " + lookVector);
+		WarpDrive.debugPrint("reachPoint: " + reachPoint);
+		WarpDrive.debugPrint("translatedBeamVector: " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 
@@ -189,11 +189,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 			if (entityHit == null)
 			{
-				System.out.println("Entity hit is null.");
+				WarpDrive.debugPrint("Entity hit is null.");
 			}
 			else
 			{
-				System.out.println("Entity hit: " + entityHit);
+				WarpDrive.debugPrint("Entity hit: " + entityHit);
 			}
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase)
@@ -425,7 +425,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 		return null;
 	}
-
+	/*
 	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius)
 	{
 		Side side = FMLCommonHandler.instance().getEffectiveSide();
@@ -497,7 +497,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			packet.length = bos.size();
 			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(dest.intX(), dest.intY(), dest.intZ(), radius, worldObj.provider.dimensionId, packet);
 		}
-	}
+	}*/
 
 	private void playSoundCorrespondsEnergy(int energy)
 	{
@@ -700,6 +700,12 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			packet.length = bos.size();
 			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
 		}
+	}
+	
+	@Override
+	public boolean shouldChunkLoad()
+	{
+		return false;
 	}
 
 	@Override

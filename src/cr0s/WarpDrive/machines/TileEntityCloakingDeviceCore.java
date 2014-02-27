@@ -46,7 +46,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.entity.player.EntityPlayerMP;
 
-public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergySink,
+public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implements IEnergySink,
 		IPeripheral {
 	public boolean addedToEnergyNet = false;
 
@@ -58,7 +58,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 			"getEnergyLevel", // 2 
 			"enableCloakingField", // 3 enables field if assembled right
 			"disableCloakingField", // 4 disables cloaking field
-			"setFieldFrequency" // 5 setFieldFrequency(int)
+			"fieldFrequency" // 5 fieldFrequency(int)
 	};
 	
 	public boolean isEnabled = false;
@@ -169,7 +169,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		
 		for (int i = START_LENGTH + 1; i < WarpDriveConfig.i.CD_MAX_CLOAKING_FIELD_SIDE; i++) {
 			if (worldObj.getBlockId(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz) == WarpDriveConfig.i.cloakCoilID)
-				sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).add(0.5), r, g, b, 110, 0, 100);	
+				sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).translate(0.5), r, g, b, 110, 0, 100);	
 		}
 	}	
 	
@@ -219,7 +219,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 						g = 0f;
 				}
 				
-				sendLaserPacket(new Vector3(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]).add(0.5), new Vector3(xCoord + START_LENGTH * dx[j], yCoord + START_LENGTH * dy[j], zCoord + START_LENGTH * dz[j]).add(0.5), r, g, b, 110, 0, 100);
+				sendLaserPacket(new Vector3(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]).translate(0.5), new Vector3(xCoord + START_LENGTH * dx[j], yCoord + START_LENGTH * dy[j], zCoord + START_LENGTH * dz[j]).translate(0.5), r, g, b, 110, 0, 100);
 			}
 		}
 	}
@@ -250,47 +250,10 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		this.currentEnergyValue -= energyToConsume;
 	}
 	
-	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius) {
-		Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-		if (side == Side.SERVER) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				// Write source vector
-				outputStream.writeDouble(source.x);
-				outputStream.writeDouble(source.y);
-				outputStream.writeDouble(source.z);
-				// Write target vector
-				outputStream.writeDouble(dest.x);
-				outputStream.writeDouble(dest.y);
-				outputStream.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream.writeFloat(r);
-				outputStream.writeFloat(g);
-				outputStream.writeFloat(b);
-				// Write age
-				outputStream.writeByte(age);
-				// Write energy value
-				outputStream.writeInt(energy);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			
-			// Send packet to all players within cloaked area
-			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
-			for (Entity e : list) {
-				if (e != null && e instanceof EntityPlayer) {
-					((EntityPlayerMP)e).playerNetServerHandler.sendPacketToPlayer(packet);
-				}
-			}
-		}
+	@Override
+	public boolean shouldChunkLoad()
+	{
+		return false;
 	}
 	
 	@Override
@@ -392,14 +355,18 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 			int method, Object[] arguments) throws Exception {
 		switch (method) {
 		case 0: // setFieldTier(1 or 2)
-			if (arguments.length == 1) {
-				if (((Double)arguments[0]).byteValue() != 1 && ((Double)arguments[0]).byteValue() != 2) {
-					this.tier = 1;
-				} else
-					this.tier = ((Double)arguments[0]).byteValue();
+			try
+			{
+				if (arguments.length >= 1)
+				{
+					tier = (byte) clamp(toInt(arguments[0]),1,2);
+				}
 			}
-
-			break;
+			catch(NumberFormatException e)
+			{
+				tier = 1;
+			}
+			return new Object[] { tier };
 		case 1: // isAssemblyValid()
 			return new Object[] { (boolean)validateAssembly() };
 
@@ -408,25 +375,33 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 			
 		case 3: // enableCloakingField()
 			this.isEnabled = true;
-			break;
+			return new Object[] { true };
 			
 		case 4: // disableCloakingField()
 			disableCloakingField();
 			setCoilsState(false);
-			break;
+			return new Object[] { false };
 			
 		case 5: // setFieldFrequency(int)
-			if (arguments.length == 1) {
-				if (isEnabled)
-					disableCloakingField();
-				
-				if (WarpDrive.instance.cloaks.isAreaExists(((Double)arguments[0]).intValue()))
-					return new Object[] { (Boolean)false };
-				
-				this.frequency = ((Double)arguments[0]).intValue();
-				return new Object[] { (Boolean)true };
+			if (arguments.length == 1)
+			{
+				try
+				{
+					if (isEnabled)
+						disableCloakingField();
+					
+					if (WarpDrive.instance.cloaks.isAreaExists(toInt(arguments[0])))
+						return new Object[] { this.frequency };
+					
+					this.frequency = toInt(arguments[0]);
+					return new Object[] { this.frequency };
+				}
+				catch(NumberFormatException e)
+				{
+					return new Object[] { false };
+				}
 			}		
-			break;
+			return new Object[] { this.frequency };
 		}
 		
 		return null;

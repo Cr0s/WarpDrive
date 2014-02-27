@@ -103,7 +103,7 @@ public class EntityJump extends Entity
 	{
 		super(world);
 		targetWorld = worldObj;
-		System.out.println("[JE@" + this + "] Entity created (empty)");
+		WarpDrive.debugPrint("[JE@" + this + "] Entity created (empty)");
 	}
 
 	public EntityJump(World world, int x, int y, int z, int _dist, int _direction, int _dx, int _dz, TileEntityReactor parReactor)
@@ -122,7 +122,7 @@ public class EntityJump extends Entity
 		this.dz = _dz;
 		maxX = maxZ = maxY = minX = minZ = minY = 0;
 		targetWorld = worldObj;
-		System.out.println("[JE@" + this + "] Entity created");
+		WarpDrive.debugPrint("[JE@" + this + "] Entity created");
 		this.reactor = parReactor;
 	}
 
@@ -134,11 +134,11 @@ public class EntityJump extends Entity
 		}
 
 		on = false;
-		System.out.println("[JE@" + this + "] Killing jump entity...");
+		WarpDrive.debugPrint("[JE@" + this + "] Killing jump entity...");
 
 		if (!reason.isEmpty())
 		{
-			System.out.println("[JUMP] Killed: " + reason);
+			WarpDrive.debugPrint("[JUMP] Killed: " + reason);
 		}
 
 		unlockWorlds();
@@ -168,7 +168,7 @@ public class EntityJump extends Entity
 
 		if (state == STATE_IDLE)
 		{
-			System.out.println("[JE] Preparing to jump...");
+			WarpDrive.debugPrint("[JE] Preparing to jump...");
 			prepareToJump();
 			state = STATE_JUMPING;
 		}
@@ -202,7 +202,7 @@ public class EntityJump extends Entity
 
 	private void forceChunks()
 	{
-		System.out.println("[JE@" + this + "] Forcing chunks");
+		WarpDrive.debugPrint("[JE@" + this + "] Forcing chunks");
 		sourceWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, worldObj, Type.ENTITY);
 		targetWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, targetWorld, Type.NORMAL);
 		sourceWorldTicket.bindEntity(this);
@@ -235,7 +235,7 @@ public class EntityJump extends Entity
 
 	private void unforceChunks()
 	{
-		System.out.println("[JE@" + this + "] Unforcing chunks");
+		WarpDrive.debugPrint("[JE@" + this + "] Unforcing chunks");
 
 		if (sourceWorldTicket == null || targetWorldTicket == null)
 		{
@@ -276,7 +276,7 @@ public class EntityJump extends Entity
 
 	public void lockWorlds()
 	{
-		System.out.println("[JE@" + this + "] Locking worlds...");
+		WarpDrive.debugPrint("[JE@" + this + "] Locking worlds...");
 		targetWorld.isRemote = true;
 
 		// When warping between dimensions is need to lock both worlds
@@ -288,7 +288,7 @@ public class EntityJump extends Entity
 
 	public void unlockWorlds()
 	{
-		System.out.println("[JE@" + this + "] Unlocking worlds..");
+		WarpDrive.debugPrint("[JE@" + this + "] Unlocking worlds..");
 		targetWorld.isRemote = false;
 
 		if (targetWorld.provider.dimensionId != worldObj.provider.dimensionId)
@@ -399,13 +399,13 @@ public class EntityJump extends Entity
 
 		if (betweenWorlds)
 		{
-			System.out.println("[JE] Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
+			WarpDrive.debugPrint("[JE] Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
 		}
 
 		forceChunks();
 		lockWorlds();
 		saveEntities(axisalignedbb);
-		System.out.println("[JE] Saved " + entitiesOnShip.size() + " entities from ship");
+		WarpDrive.debugPrint("[JE] Saved " + entitiesOnShip.size() + " entities from ship");
 
 		if (!isCoordJump && !(toHyperSpace || fromHyperSpace))
 		{
@@ -450,7 +450,7 @@ public class EntityJump extends Entity
 		this.currentIndexInShip = 0;
 		msCounter = System.currentTimeMillis();
 		LocalProfiler.stop();
-		System.out.println("Removing TE duplicates. Size before jump: " + targetWorld.loadedTileEntityList.size());
+		WarpDrive.debugPrint("Removing TE duplicates. Size before jump: " + targetWorld.loadedTileEntityList.size());
 	}
 
 	/**
@@ -458,9 +458,9 @@ public class EntityJump extends Entity
 	 */
 	public void finishJump()
 	{
-		System.out.println("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
+		WarpDrive.debugPrint("[JE] Finished. Jump took " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds");
 		//FIXME TileEntity duplication workaround
-		System.out.println("Removing TE duplicates. Size before: " + targetWorld.loadedTileEntityList.size());
+		WarpDrive.debugPrint("Removing TE duplicates. Size before: " + targetWorld.loadedTileEntityList.size());
 		LocalProfiler.start("EntityJump.removeDuplicates()");
 
 		try
@@ -469,11 +469,11 @@ public class EntityJump extends Entity
 		}
 		catch (Exception e)
 		{
-			System.out.println("TE Duplicates removing exception: " + e.getMessage());
+			WarpDrive.debugPrint("TE Duplicates removing exception: " + e.getMessage());
 		}
 
 		LocalProfiler.stop();
-		System.out.println("Removing TE duplicates. Size after: " + targetWorld.loadedTileEntityList.size());
+		WarpDrive.debugPrint("Removing TE duplicates. Size after: " + targetWorld.loadedTileEntityList.size());
 		killEntity("");
 	}
 
@@ -485,7 +485,7 @@ public class EntityJump extends Entity
 	{
 		LocalProfiler.start("EntityJump.removeShip");
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
-		System.out.println("[JE] Removing ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
+		WarpDrive.debugPrint("[JE] Removing ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
 		TileEntity te;
 		Class<?> c;
 		for (int index = 0; index < blocksToMove; index++)
@@ -592,7 +592,7 @@ public class EntityJump extends Entity
 			}
 		}
 
-		System.out.println((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
+		WarpDrive.debugPrint((new StringBuilder()).append("[JUMP] Ship saved: ").append((new StringBuilder()).append(ship.length).append(" blocks")).toString());
 		LocalProfiler.stop();
 	}
 
@@ -603,7 +603,7 @@ public class EntityJump extends Entity
 	{
 		LocalProfiler.start("EntityJump.moveShip");
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
-		System.out.println("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
+		WarpDrive.debugPrint("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
 
 		for (int index = 0; index < blocksToMove; index++)
 		{
@@ -626,7 +626,7 @@ public class EntityJump extends Entity
 	 */
 	public int getPossibleJumpDistance()
 	{
-		System.out.println("[JUMP] Calculating possible jump distance...");
+		WarpDrive.debugPrint("[JUMP] Calculating possible jump distance...");
 		int testDistance = this.distance;
 		int blowPoints = 0;
 
@@ -709,7 +709,7 @@ public class EntityJump extends Entity
 
 	public boolean moveEntities(boolean restorePositions)
 	{
-		System.out.println("[JE] Moving entities");
+		WarpDrive.debugPrint("[JE] Moving entities");
 
 		if (entitiesOnShip != null)
 		{
@@ -742,7 +742,7 @@ public class EntityJump extends Entity
 					newEntityZ = oldEntityZ + moveZ;
 				}
 
-				//System.out.println("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
+				//WarpDrive.debugPrint("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
 
 				// Travel to another dimension if needed
 				if (betweenWorlds && !restorePositions)
@@ -839,7 +839,7 @@ public class EntityJump extends Entity
 	{
 		if ((dir == -1 && maxY + testDistance > 255) && !toSpace)
 		{
-			System.out.println("[JUMP] Reactor will blow due +high limit");
+			WarpDrive.debugPrint("[JUMP] Reactor will blow due +high limit");
 			return false;
 		}
 
@@ -848,7 +848,7 @@ public class EntityJump extends Entity
 			blowY = minY - testDistance;
 			blowX = xCoord;
 			blowZ = zCoord;
-			System.out.println("[JUMP] Reactor will blow due -low limit");
+			WarpDrive.debugPrint("[JUMP] Reactor will blow due -low limit");
 			return false;
 		}
 
@@ -886,7 +886,7 @@ public class EntityJump extends Entity
 						blowX = x;
 						blowY = y;
 						blowZ = z;
-						System.out.println((new StringBuilder()).append("[JUMP] Reactor will blow due BlockID ").append((new StringBuilder()).append(blockID).append(" at (").append(newX).append(";").append(newY).append(";").append(newZ).append(")").toString()).toString());
+						WarpDrive.debugPrint((new StringBuilder()).append("[JUMP] Reactor will blow due BlockID ").append((new StringBuilder()).append(blockID).append(" at (").append(newX).append(";").append(newY).append(";").append(newZ).append(")").toString()).toString());
 						return false;
 					}
 				}
@@ -1048,19 +1048,19 @@ public class EntityJump extends Entity
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound)
 	{
-		//System.out.println("[JE@"+this+"] readEntityFromNBT()");
+		//WarpDrive.debugPrint("[JE@"+this+"] readEntityFromNBT()");
 	}
 
 	@Override
 	protected void entityInit()
 	{
-		//System.out.println("[JE@"+this+"] entityInit()");
+		//WarpDrive.debugPrint("[JE@"+this+"] entityInit()");
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound var1)
 	{
-		//System.out.println("[JE@"+this+"] writeEntityToNBT()");
+		//WarpDrive.debugPrint("[JE@"+this+"] writeEntityToNBT()");
 	}
 
 	// Own implementation of setting blocks without light recalculation in optimization purposes

@@ -255,16 +255,9 @@ public class PacketHandler implements IPacketHandler
             energy = inputStream.readInt();
 
             // Render beam
-            WarpDrive.debugPrint("sx: " + sx + " sy: " + sy + " sz: " + sz);
-            WarpDrive.debugPrint("tx: " + sx + " ty: " + sy + " tz: " + sz);
-
             WarpDrive.debugPrint("source: " + source);
             WarpDrive.debugPrint("target: " + target);
-            WarpDrive.debugPrint("r: " + r);
-            WarpDrive.debugPrint("g: " + g);
-            WarpDrive.debugPrint("b " + b);
-            WarpDrive.debugPrint("age: " + age);
-            WarpDrive.debugPrint("energy: " + energy);
+            WarpDrive.debugPrint("r: " + r + " g: " + g + " b:" + b + " age: " + age +" en: " + energy);
 
             // To avoid NPE at logging in
             if (worldObj == null)

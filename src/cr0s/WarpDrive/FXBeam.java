@@ -43,6 +43,7 @@ public class FXBeam extends EntityFX
     public FXBeam(World par1World, Vector3 position, float yaw, float pitch, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
+        WarpDrive.debugPrint("creating new FXBeam");
         a = true;
         this.setRGB(red, green, blue);
         this.setSize(0.02F, 0.02F);
@@ -57,35 +58,8 @@ public class FXBeam extends EntityFX
         this.prevPitch = this.rotPitch;
         this.particleMaxAge = age;
         this.energy = energy;
-
-        if (red == 1 && green == 0 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_red.png");
-        }
-        else if (red == 0 && green == 1 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_green.png");
-        }
-        else if (red == 0 && green == 0 && blue == 1)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy.png");
-        }
-        else if (red == 1 && green == 1 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_yellow.png");
-        }
-        else if (red == 1 && green == 0.5 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_orange.png");
-        }
-        else if (red == 0.5 && green == 0 && blue == 0.5)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
-        }
-        else
-        {
-        	TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
-        }
+        
+        TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
 
         /**
          * Sets the particle age based on distance.
@@ -107,6 +81,7 @@ public class FXBeam extends EntityFX
     public FXBeam(World par1World, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
+        WarpDrive.debugPrint("attempting to render!");
         this.setRGB(red, green, blue);
         this.setSize(0.02F, 0.02F);
         this.noClip = true;
@@ -126,34 +101,7 @@ public class FXBeam extends EntityFX
         this.particleMaxAge = age;
         this.energy = energy;
 
-        if (red == 1 && green == 0 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_red.png");
-        }
-        else if (red == 0 && green == 1 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_green.png");
-        }
-        else if (red == 0 && green == 0 && blue == 1)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy.png");
-        }
-        else if (red == 1 && green == 1 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_yellow.png");
-        }
-        else if (red == 1 && green == 0.5 && blue == 0)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_orange.png");
-        }
-        else if (red == 0.5 && green == 0 && blue == 0.5)
-        {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
-        }
-        else
-        {
-        	TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
-        }
+        TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
 
         /**
          * Sets the particle age based on distance.
@@ -173,7 +121,7 @@ public class FXBeam extends EntityFX
 
         //this.pulse = (energy == 0);
         //if (TEXTURE != null) {
-        //	System.out.println("BeamFX created. Texture: " + TEXTURE);
+        WarpDrive.debugPrint("BeamFX created. Texture: " + TEXTURE);
         //}
     }
 

@@ -115,14 +115,17 @@ public abstract class WarpChunkTE extends WarpTE
 	
 	public ArrayList<ChunkCoordIntPair> getChunksFromCentre(ChunkCoordIntPair chunkA,ChunkCoordIntPair chunkB)
 	{
+		if(!shouldChunkLoad())
+			return null;
 		int minX = Math.min(chunkA.chunkXPos, chunkB.chunkXPos);
 		int maxX = Math.max(chunkA.chunkXPos, chunkB.chunkXPos);
 		int minZ = Math.min(chunkA.chunkZPos, chunkB.chunkZPos);
 		int maxZ = Math.max(chunkA.chunkZPos, chunkB.chunkZPos);
 		WarpDrive.debugPrint("From " + minX + "," + minZ + " to " + maxX + "," + maxZ);
 		
-		int deltaX = 2 * ((maxX - minX + 1) / 2) + 1;
-		int deltaZ = 2 * ((maxZ - minZ + 1) / 2) + 1;
+		//REMOVE ODD SIZES
+		int deltaX = (maxX - minX + 1);
+		int deltaZ = (maxZ - minZ + 1);
 		WarpDrive.debugPrint("Allocating Block: " + deltaX + "," + deltaZ);
 		
 		maxX = minX + deltaX - 1;

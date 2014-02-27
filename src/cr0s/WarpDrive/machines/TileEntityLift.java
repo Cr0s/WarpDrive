@@ -27,7 +27,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityLift extends TileEntity implements IEnergySink
+public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySink
 {
     public boolean addedToEnergyNet = false;
 
@@ -36,11 +36,23 @@ public class TileEntityLift extends TileEntity implements IEnergySink
 
     private int mode = 0; // 0 - inactive, 1 - up, 2 - down
     private int firstUncoveredY;
+    private Vector3 firstUncoveredYVec;
+    private Vector3 myVector;
 
     private boolean isEnabled = false;
 
     int ticks = 0;
+    
+    public TileEntityLift()
+    {
+    	super();
+    }
 
+    private void sendLaser(float r,float g,float b, int age, int energy, int rad)
+    {
+    	sendLaserPacket(myVector,firstUncoveredYVec,r,g,b,age,energy,rad);
+    }
+    
     @Override
     public void updateEntity()
     {
@@ -54,6 +66,9 @@ public class TileEntityLift extends TileEntity implements IEnergySink
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
             addedToEnergyNet = true;
         }
+        if(ticks % 8 == 0)
+        	if(isEnabled)
+        		liftEntity();
 
         if (++ticks > 40)
         {
@@ -89,6 +104,8 @@ public class TileEntityLift extends TileEntity implements IEnergySink
                     if (!worldObj.isAirBlock(xCoord, ny, zCoord))
                     {
                         firstUncoveredY = ny;
+                        myVector = new Vector3(this).translate(0.5);
+                        firstUncoveredYVec = new Vector3(xCoord,ny,zCoord).translate(0.5);
                         break;
                     }
                 }
@@ -96,11 +113,13 @@ public class TileEntityLift extends TileEntity implements IEnergySink
                 if (yCoord - firstUncoveredY > 0)
                     if (mode == 1)
                     {
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 0f, 1f, 0f, 40, 0, 100);
+                    	sendLaser(0f,1f,0f,40,0,100);
+                        //sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 0f, 1f, 0f, 40, 0, 100);
                     }
                     else if (mode == 2)
                     {
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 0f, 0f, 1f, 40, 0, 100);
+                    	sendLaser(0f,0f,1f,40,0,100);
+                        sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 0f, 0f, 1f, 40, 0, 100);
                     }
 
                 liftEntity();
@@ -140,11 +159,11 @@ public class TileEntityLift extends TileEntity implements IEnergySink
             zmin = z2;
             zmax = z1;
         }
-
+        double errorMargin = 0.1;
         // Lift up
         if (mode == 1)
         {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + 0.3, firstUncoveredY, zmin + 0.3, xmax - 0.3, yCoord, zmax - 0.3);
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + errorMargin, firstUncoveredY, zmin + errorMargin, xmax - errorMargin, yCoord, zmax - errorMargin);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
 
             if (list != null)   // up
@@ -154,7 +173,8 @@ public class TileEntityLift extends TileEntity implements IEnergySink
                     if (o != null && o instanceof EntityLivingBase)
                     {
                         ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, yCoord + 1, zCoord + 0.5f);
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
+                        sendLaser(1f,1f,0f,40,0,100);
+                        //sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
                         currentEnergyValue = 0;
                         return;
@@ -164,7 +184,7 @@ public class TileEntityLift extends TileEntity implements IEnergySink
         }
         else if (mode == 2)     // down
         {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + 0.3, yCoord, zmin + 0.3, xmax - 0.3, yCoord + 2, zmax - 0.3);
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin + errorMargin, yCoord, zmin + errorMargin, xmax - errorMargin, yCoord + 2, zmax - errorMargin);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
 
             if (list != null)
@@ -174,7 +194,8 @@ public class TileEntityLift extends TileEntity implements IEnergySink
                     if (o != null && o instanceof EntityLivingBase)
                     {
                         ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, firstUncoveredY + 1, zCoord + 0.5f);
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
+                        //sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).translate(0.5), 1, 1, 0, 40, 0, 100);
+                        sendLaser(1f,1f,0f,40,0,100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
                         currentEnergyValue = 0;
                         return;
@@ -183,78 +204,11 @@ public class TileEntityLift extends TileEntity implements IEnergySink
             }
         }
     }
-
-    public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius)
+    
+    @Override
+    public boolean shouldChunkLoad()
     {
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-        if (side == Side.SERVER)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream = new DataOutputStream(bos);
-
-            try
-            {
-                // Write source vector
-                outputStream.writeDouble(source.x);
-                outputStream.writeDouble(source.y);
-                outputStream.writeDouble(source.z);
-                // Write target vector
-                outputStream.writeDouble(dest.x);
-                outputStream.writeDouble(dest.y);
-                outputStream.writeDouble(dest.z);
-                // Write r, g, b of laser
-                outputStream.writeFloat(r);
-                outputStream.writeFloat(g);
-                outputStream.writeFloat(b);
-                // Write age
-                outputStream.writeByte(age);
-                // Write energy value
-                outputStream.writeInt(energy);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-
-            Packet250CustomPayload packet = new Packet250CustomPayload();
-            packet.channel = "WarpDriveBeam";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(source.intX(), source.intY(), source.intZ(), radius, worldObj.provider.dimensionId, packet);
-            ByteArrayOutputStream bos2 = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream2 = new DataOutputStream(bos2);
-
-            try
-            {
-                // Write source vector
-                outputStream2.writeDouble(source.x);
-                outputStream2.writeDouble(source.y);
-                outputStream2.writeDouble(source.z);
-                // Write target vector
-                outputStream2.writeDouble(dest.x);
-                outputStream2.writeDouble(dest.y);
-                outputStream2.writeDouble(dest.z);
-                // Write r, g, b of laser
-                outputStream2.writeFloat(r);
-                outputStream2.writeFloat(g);
-                outputStream2.writeFloat(b);
-                // Write age
-                outputStream2.writeByte(age);
-                // Write energy value
-                outputStream2.writeInt(energy);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-
-            Packet250CustomPayload packet2 = new Packet250CustomPayload();
-            packet.channel = "WarpDriveBeam";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(dest.intX(), dest.intY(), dest.intZ(), radius, worldObj.provider.dimensionId, packet);
-        }
+    	return false;
     }
 
     @Override
