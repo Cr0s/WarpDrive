@@ -1,7 +1,6 @@
 package cr0s.WarpDrive;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,7 +32,7 @@ public class GravityManager
 
                     if (player.isSneaking())
                     {
-                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.i.Jetpacks.contains(player.getCurrentArmor(2).itemID))
+                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.Jetpacks.contains(player.getCurrentArmor(2).itemID))
                         {
                             return SPACE_GRAVITY_SNEAK;
                         }

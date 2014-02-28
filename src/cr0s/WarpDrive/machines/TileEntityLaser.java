@@ -2,7 +2,6 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.CamRegistryItem;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
@@ -13,17 +12,14 @@ import dan200.computer.api.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.network.packet.Packet62LevelSound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -32,9 +28,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLaser extends TileEntityAbstractLaser implements IPeripheral
 {
@@ -89,11 +82,11 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 			}
 		}
 
-		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS))
+		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS))
 		{
 			delayTicks = 0;
 			isEmitting = false;
-			emitBeam(Math.min(this.collectEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.i.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.i.LE_MAX_LASER_ENERGY));
+			emitBeam(Math.min(this.collectEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY));
 			energyFromOtherBeams = 0;
 		}
 	}
@@ -117,7 +110,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 
 		if (findFirstBooster() != null)
 		{
-			for (int shift = 1; shift <= WarpDriveConfig.i.LE_MAX_BOOSTERS_NUMBER; shift++)
+			for (int shift = 1; shift <= WarpDriveConfig.LE_MAX_BOOSTERS_NUMBER; shift++)
 			{
 				int newX = xCoord + (dx * shift);
 				int newY = yCoord + (dy * shift);
@@ -142,7 +135,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 	private void emitBeam(int energy)
 	{
 		// Beam power calculations
-		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
+		int beamLengthBlocks = energy / WarpDriveConfig.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
 		WarpDrive.debugPrint("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
 		if (energy == 0 || beamLengthBlocks < 1)
@@ -150,7 +143,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 			return;
 		}
 
-		Vector3 beamVector = new Vector3(this).add(0.5);
+		Vector3 beamVector = new Vector3(this).translate(0.5);
 		WarpDrive.debugPrint("beamVector: " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
@@ -205,16 +198,16 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 				{
 					if (distanceToEntity <= beamLengthBlocks)
 					{
-						((EntityLivingBase)e).setFire(WarpDriveConfig.i.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
-						((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.i.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
+						((EntityLivingBase)e).setFire(WarpDriveConfig.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
+						((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
 
-						if (energy > WarpDriveConfig.i.LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY)
+						if (energy > WarpDriveConfig.LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY)
 						{
 							worldObj.newExplosion(null, e.posX, e.posY, e.posZ, 4F, true, true);
 						}
 
 						// consume energy
-						energy -= WarpDriveConfig.i.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER + (10 * distanceToEntity);
+						energy -= WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER + (10 * distanceToEntity);
 						endPoint = new Vector3(entityHit.hitVec);
 						break;
 					}
@@ -250,7 +243,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 				}
 
 				// Hit is a laser head
-				if (blockID == WarpDriveConfig.i.laserID || blockID == WarpDriveConfig.i.laserCamID)
+				if (blockID == WarpDriveConfig.laserID || blockID == WarpDriveConfig.laserCamID)
 				{
 					// Compare frequencies
 					TileEntityLaser tel = (TileEntityLaser)worldObj.getBlockTileEntity(hit.blockX, hit.blockY, hit.blockZ);
@@ -269,7 +262,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 					endPoint = new Vector3(hit.hitVec);
 				}
 
-				energy -=  WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + (distance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
+				energy -=  WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + (distance * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
 				endPoint = new Vector3(hit.hitVec);
 
 				if (energy <= 0)
@@ -352,7 +345,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 
 	public boolean isWithCamera()
 	{
-		return (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID);
+		return (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.laserCamID);
 	}
 
 	public int getFrequency()

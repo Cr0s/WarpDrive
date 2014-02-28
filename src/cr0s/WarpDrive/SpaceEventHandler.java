@@ -70,7 +70,7 @@ public class SpaceEventHandler
 				if (entity instanceof EntityPlayerMP)
 				{
 
-					if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && WarpDriveConfig.i.SpaceHelmets.contains(((EntityPlayerMP)entity).getCurrentArmor(3).itemID))
+					if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && WarpDriveConfig.SpaceHelmets.contains(((EntityPlayerMP)entity).getCurrentArmor(3).itemID))
 					{
 						Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
 
@@ -142,15 +142,15 @@ public class SpaceEventHandler
 				
 				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(p.worldObj.provider.dimensionId, MathHelper.floor_double(p.posX), MathHelper.floor_double(p.posY), MathHelper.floor_double(p.posZ), false);
 				if (cloaks.size() != 0) {
-					//System.out.println("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
+					//WarpDrive.debugPrint("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
 					for (CloakedArea area : cloaks) {
-						//System.out.println("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
+						//WarpDrive.debugPrint("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
 						if (!area.isPlayerInArea(p) && area.isPlayerWithinArea(p)) {
 							WarpDrive.instance.cloaks.playerEnteringCloakedArea(area, p);
 						}
 					}
 				} else {
-					//System.out.println("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
+					//WarpDrive.debugPrint("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
 					WarpDrive.instance.cloaks.checkPlayerLeavedArea(p);
 				}
 			} else {
@@ -179,7 +179,7 @@ public class SpaceEventHandler
 		int id1 = e.worldObj.getBlockId(x, y, z);
 		int id2 = e.worldObj.getBlockId(x, y + 1, z);
 
-		if (id1 == WarpDriveConfig.i.airID || id2 == WarpDriveConfig.i.airID)
+		if (id1 == WarpDriveConfig.airID || id2 == WarpDriveConfig.airID)
 			return false;
 		return true;
 	}
@@ -187,18 +187,18 @@ public class SpaceEventHandler
 	private boolean consumeO2(ItemStack[] i,EntityPlayerMP ent)
 	{
 		for (int j = 0; j < i.length; ++j)
-			if (i[j] != null && i[j].itemID == WarpDriveConfig.i.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.i.IC2_Air[1])
+			if (i[j] != null && i[j].itemID == WarpDriveConfig.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.IC2_Air[1])
 			{
 				if (--i[j].stackSize <= 0)
 				{
 					i[j] = null;
 				}
 				
-				if(WarpDriveConfig.i.IC2_Empty.length != 0)
+				if(WarpDriveConfig.IC2_Empty.length != 0)
 				{
 					WarpDrive.debugPrint("giveEmptyCell");
-					int emptyCell = WarpDriveConfig.i.IC2_Empty[0];
-					int emptyCellM = WarpDriveConfig.i.IC2_Empty[1];
+					int emptyCell = WarpDriveConfig.IC2_Empty[0];
+					int emptyCellM = WarpDriveConfig.IC2_Empty[1];
 					ItemStack emptyCellIS = new ItemStack(emptyCell,1,emptyCellM);
 					if(!ent.inventory.addItemStackToInventory(emptyCellIS))
 					{

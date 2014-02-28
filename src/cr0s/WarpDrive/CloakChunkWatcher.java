@@ -1,13 +1,9 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import cr0s.WarpDrive.CloakManager.CloakedArea;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.packet.Packet56MapChunks;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 

@@ -6,24 +6,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import ic2.api.network.NetworkHelper;
 
 public class MetaRotations
 {
     private File metaRotationsDirectory;
-    public Map<Integer, BlockMetaRotation> metaRotationMap = new HashMap();
+    public Map<Integer, BlockMetaRotation> metaRotationMap = new HashMap<Integer, BlockMetaRotation>();
 
     public int getRotatedMeta(int block, int meta, int rotate)
     {

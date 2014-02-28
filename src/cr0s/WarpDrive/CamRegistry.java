@@ -1,9 +1,6 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public class CamRegistry
@@ -32,7 +29,7 @@ public class CamRegistry
     {
         if (i.worldObj != null)
         {
-            if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.i.camID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.i.laserCamID)
+            if (i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.camID && i.worldObj.getBlockId(i.camPos.x, i.camPos.y, i.camPos.z) != WarpDriveConfig.laserCamID)
             {
                 return false;
             }

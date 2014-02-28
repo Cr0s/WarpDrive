@@ -2,7 +2,6 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.world.World;
-import net.minecraftforge.client.MinecraftForgeClient;
 
 public class ClientProxy extends CommonProxy
 {

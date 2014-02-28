@@ -1,10 +1,9 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.JumpBlock;
 import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
@@ -15,34 +14,22 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergyTile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.ModLoader;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityShipScanner extends TileEntity implements IEnergySink,
+public class TileEntityShipScanner extends TileEntityAbstractLaser implements IEnergySink,
 		IPeripheral {
 	public boolean addedToEnergyNet = false;
 
@@ -50,9 +37,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	private int currentEnergyValue = 0;
 
 	private int state = 0; // 0 - inactive, 1 - active
-	private int firstUncoveredY;
 
-	private boolean isEnabled = false;
 	private TileEntityReactor core = null;
 
 	int laserTicks = 0;
@@ -63,7 +48,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 
 	// Config
 	//private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
-	private final String SCHEMATICS_DIR = WarpDriveConfig.i.schemaLocation;
+	private final String SCHEMATICS_DIR = WarpDriveConfig.schemaLocation;
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
 	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
@@ -109,8 +94,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 
 		if (state == 0) { // inactive
 			if (++laserTicks > 20) {
-				sendLaserPacket(new Vector3(this).add(0.5), new Vector3(
-						core.xCoord, core.yCoord, core.zCoord).add(0.5), 0f,
+				sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(core.xCoord, core.yCoord, core.zCoord).translate(0.5), 0f,
 						1f, 0f, 40, 0, 100);
 				laserTicks = 0;
 			}
@@ -157,7 +141,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 							g = 0f;
 					}
 					
-					sendLaserPacket(new Vector3(this).add(0.5), new Vector3(x, core.maxY, randomZ).add(0.5), r, g, b, 15, 0, 100);
+					sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(x, core.maxY, randomZ).translate(0.5), r, g, b, 15, 0, 100);
 				}
 			}
 			
@@ -172,7 +156,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			deployDelayTicks = 0;
 			
 			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
-			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
+			WarpDrive.debugPrint("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -199,8 +183,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					if (worldObj.rand.nextInt(100) <= 10) {
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						
-						sendLaserPacket(new Vector3(this).add(0.5), new Vector3(
-								newX + block.x, newY + block.y, newZ + block.z).add(0.5), 0f,
+						sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(
+								newX + block.x, newY + block.y, newZ + block.z).translate(0.5), 0f,
 								1f, 0f, 15, 0, 100);
 					}
 				}
@@ -220,7 +204,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 
 		// Search for warp cores above
 		for (int newY = yCoord + 1; newY <= 255; newY++) {
-			if (worldObj.getBlockId(xCoord, newY, zCoord) == WarpDriveConfig.i.coreID) { // found
+			if (worldObj.getBlockId(xCoord, newY, zCoord) == WarpDriveConfig.coreID) { // found
 																							// warp
 																							// core
 																							// above
@@ -239,80 +223,6 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 
 		return result;
-	}
-
-	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g,
-			float b, int age, int energy, int radius) {
-		Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-		if (side == Side.SERVER) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				// Write source vector
-				outputStream.writeDouble(source.x);
-				outputStream.writeDouble(source.y);
-				outputStream.writeDouble(source.z);
-				// Write target vector
-				outputStream.writeDouble(dest.x);
-				outputStream.writeDouble(dest.y);
-				outputStream.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream.writeFloat(r);
-				outputStream.writeFloat(g);
-				outputStream.writeFloat(b);
-				// Write age
-				outputStream.writeByte(age);
-				// Write energy value
-				outputStream.writeInt(energy);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer
-					.getServer()
-					.getConfigurationManager()
-					.sendToAllNear(source.intX(), source.intY(), source.intZ(),
-							radius, worldObj.provider.dimensionId, packet);
-			ByteArrayOutputStream bos2 = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream2 = new DataOutputStream(bos2);
-
-			try {
-				// Write source vector
-				outputStream2.writeDouble(source.x);
-				outputStream2.writeDouble(source.y);
-				outputStream2.writeDouble(source.z);
-				// Write target vector
-				outputStream2.writeDouble(dest.x);
-				outputStream2.writeDouble(dest.y);
-				outputStream2.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream2.writeFloat(r);
-				outputStream2.writeFloat(g);
-				outputStream2.writeFloat(b);
-				// Write age
-				outputStream2.writeByte(age);
-				// Write energy value
-				outputStream2.writeInt(energy);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			Packet250CustomPayload packet2 = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer
-					.getServer()
-					.getConfigurationManager()
-					.sendToAllNear(dest.intX(), dest.intY(), dest.intZ(),
-							radius, worldObj.provider.dimensionId, packet);
-		}
 	}
 
 	// Checks energy level
@@ -339,14 +249,14 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
 	
-		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
+		WarpDrive.debugPrint("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
 		
 		int size = width * length * height;
 		
 		// Consume energy
 		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_SCAN);
 		
-		System.out.println("[ShipScanner] Size: " + size);
+		WarpDrive.debugPrint("[ShipScanner] Size: " + size);
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -362,7 +272,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
 					
 					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.i.scannerIgnoreBlocks.contains(blockID))
+					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.scannerIgnoreBlocks.contains(blockID))
 						blockID = 0;
 					
 					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
@@ -421,7 +331,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	}
 
 	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
-		System.out.println("[ShipScanner] Filename: " + fileName);
+		WarpDrive.debugPrint("[ShipScanner] Filename: " + fileName);
 		
 		try {
 			File file = new File(fileName);
@@ -488,7 +398,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + fileName);
 		
 		if (schematic == null) {
-			System.out.println("[ShipScanner] Schematic is null!");
+			WarpDrive.debugPrint("[ShipScanner] Schematic is null!");
 			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
 		}
 		
@@ -510,11 +420,11 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		
 		int size = width* height * length;
 		
-		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
+		WarpDrive.debugPrint("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
 		
 		// Check energy level
 		if (!isEnoughEnergyForDeploy(size)) {
-			System.out.println("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
+			WarpDrive.debugPrint("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
 			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
 		}
 		
@@ -531,7 +441,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 
 		if (occupiedBlockCount > 0) {
-			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
+			WarpDrive.debugPrint("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
 			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
 		}
 		
@@ -548,11 +458,11 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		this.newY = targetY;
 		this.newZ = targetZ;
 		
-		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
+		WarpDrive.debugPrint("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
 		
 		// Read blocks and TileEntities from NBT to internal storage array
 		
-		System.out.println("[ShipScanner] Loading blocks...");
+		WarpDrive.debugPrint("[ShipScanner] Loading blocks...");
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
@@ -571,7 +481,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 		
 		// Load Tile Entities
-		System.out.println("[ShipScanner] Loading TileEntities...");
+		WarpDrive.debugPrint("[ShipScanner] Loading TileEntities...");
 		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
@@ -581,7 +491,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			int teY = teTag.getInteger("y");
 			int teZ = teTag.getInteger("z");
 			
-			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
+			WarpDrive.debugPrint("[ShipScanner] Loaded TE: " + teTag.getString("id"));
 			tileEntities[teX + (teY * length + teZ) * width] = teTag;
 		}			
 		
@@ -605,9 +515,9 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
 						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
 						if (tileEntities[x + (y * length + z) * width] == null) {
-							System.out.println("null!");
+							WarpDrive.debugPrint("null!");
 						} else
-							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
+							WarpDrive.debugPrint(tileEntities[x + (y * length + z) * width].getString("id"));
 					}
 					blocksToDeploy[x + (y * length + z) * width] = jb;
 				}
@@ -615,7 +525,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 		
 		switchState(1);
-		System.out.println("[ShipScanner] Ship deployed.");
+		WarpDrive.debugPrint("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
 	
@@ -681,7 +591,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					return new Object[] { 0, "Specified .schematic file not found!" };
 				else
 				{
-					System.out.println("[ShipScanner] Trying to deploy ship");
+					WarpDrive.debugPrint("[ShipScanner] Trying to deploy ship");
 					return deployShip(fileName, x, y, z);
 				}
 			} else
@@ -935,4 +845,10 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			}
 		}
 	}	
+	
+	@Override
+	public boolean shouldChunkLoad()
+	{
+		return false;
+	}
 }

@@ -156,8 +156,7 @@ public class SpaceGenerator extends ChunkProviderGenerate implements IChunkProvi
     }
 
     @Override
-    public List getPossibleCreatures(EnumCreatureType var1, int var2, int var3,
-                                     int var4)
+    public List getPossibleCreatures(EnumCreatureType var1, int var2, int var3, int var4)
     {
         // TODO Auto-generated method stub
         return null;

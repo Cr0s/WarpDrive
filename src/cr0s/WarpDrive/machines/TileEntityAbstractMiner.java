@@ -1,12 +1,7 @@
 package cr0s.WarpDrive.machines;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
 
 import appeng.api.IAEItemStack;
 import appeng.api.Util;
@@ -22,14 +17,11 @@ import net.minecraft.block.Block;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.Vector3;
-import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridMachine, ITileCable

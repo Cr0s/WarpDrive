@@ -1,7 +1,6 @@
 package cr0s.WarpDrive;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;

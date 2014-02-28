@@ -1,13 +1,9 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Random;
-import java.lang.reflect.*;
-
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
@@ -20,86 +16,91 @@ public class WarpDriveConfig
 {
 	public static WarpDriveConfig i;
 	private Configuration config;
-	public int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
-	public int laserTreeFarmID;
+	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
+	public static int laserTreeFarmID, transporterID;
 //
-	public boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
+	public static boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
-	public int[] IC2_Air;
-	public int[] IC2_Empty;
-	public int IC2_RubberTree;
-	public ItemStack IC2_Resin;
-	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
-	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
-	private Class<?> AEBlocks;
-	private Class<?> AEMaterials;
-	private Class<?> AEItems;
-	public ArrayList<int[]> CommonWorldGenOres;
-	public Item AEExtraFDI;
+	public static int[] IC2_Air;
+	public static int[] IC2_Empty;
+	public static int IC2_RubberTree;
+	public static ItemStack IC2_Resin;
+	public static int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public static Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
+	private static Class<?> AEBlocks;
+	private static Class<?> AEMaterials;
+	private static Class<?> AEItems;
+	public static ArrayList<int[]> CommonWorldGenOres;
+	public static Item AEExtraFDI;
 	
 	public boolean debugMode = false;
 
 	// Mod config
 		// Warp Core
-	    public int WC_MAX_ENERGY_VALUE = 100000000;
-	    public int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
-	    public int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
-	    public int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
-	    public int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
-	    public int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
-	    public int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-	    public int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-	    public int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
-	    public int WC_MAX_SHIP_SIDE = 100;
-	    public int WC_COOLDOWN_INTERVAL_SECONDS = 4;
-	    public int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
-	    public int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
+	    public static int WC_MAX_ENERGY_VALUE = 100000000;
+	    public static int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
+	    public static int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
+	    public static int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
+	    public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
+	    public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
+	    public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
+	    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
+	    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
+	    public static int WC_MAX_SHIP_SIDE = 100;
+	    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;
+	    public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+	    public static int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
 	
 	    // Warp Radar
-	    public int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
+	    public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
 	    
 	    // Particle Booster
-	    public int PB_MAX_ENERGY_VALUE = 100000;
+	    public static int PB_MAX_ENERGY_VALUE = 100000;
 	    
 	    // Mining Laser
-		public int ML_MAX_BOOSTERS_NUMBER = 1;
-		public int ML_SCAN_DELAY = 20 * 5;
-		public int ML_MINE_DELAY = 10;
-		public int ML_EU_PER_LAYER_SPACE = 100;
-		public int ML_EU_PER_LAYER_EARTH = 2500;
-		public int ML_EU_PER_BLOCK_SPACE = 10;
-		public int ML_EU_PER_BLOCK_EARTH = 50;
-		public double ML_EU_MUL_SILKTOUCH = 2.5;
-		public double ML_EU_MUL_FORTUNE   = 1.5;
-		public double ML_MAX_SPEED   = 10;
-		public double ML_MIN_SPEED   = 0.1;
-		public int	  ML_MAX_SIZE    = 128;
+		public static int		ML_MAX_BOOSTERS_NUMBER = 1;
+		public static int		ML_SCAN_DELAY = 20 * 5;
+		public static int		ML_MINE_DELAY = 10;
+		public static int		ML_EU_PER_LAYER_SPACE = 100;
+		public static int		ML_EU_PER_LAYER_EARTH = 2500;
+		public static int		ML_EU_PER_BLOCK_SPACE = 10;
+		public static int 		ML_EU_PER_BLOCK_EARTH = 50;
+		public static double	ML_EU_MUL_SILKTOUCH = 2.5;
+		public static double	ML_EU_MUL_FORTUNE   = 1.5;
+		public static double	ML_MAX_SPEED   = 10;
+		public static double	ML_MIN_SPEED   = 0.1;
+		public static int		ML_MAX_SIZE    = 128;
 		
 		//Tree farm
-		public int TF_MAX_SIZE=32;
+		public static int TF_MAX_SIZE=32;
+		
+		//Transporter
+		public static int     TR_MAX_ENERGY=1000000;
+		public static boolean TR_RELATIVE_COORDS=false;
+		public static double  TR_EU_PER_METRE=100;
 		
 		// Laser Emitter
-		public int LE_MAX_BOOSTERS_NUMBER = 10;
-		public int LE_MAX_LASER_ENERGY = 4000000;
-		public int LE_EMIT_DELAY_TICKS = 20 * 3;
-		public int LE_EMIT_SCAN_DELAY_TICKS = 10;
-		public double LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
-		public int LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
-		public int LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
-		public int LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
-		public int LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
-		public int LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
-		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
-		public int LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+		public static int		LE_MAX_BOOSTERS_NUMBER = 10;
+		public static int		LE_MAX_LASER_ENERGY = 4000000;
+		public static int		LE_EMIT_DELAY_TICKS = 20 * 3;
+		public static int		LE_EMIT_SCAN_DELAY_TICKS = 10;
+		public static double	LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
+		public static int		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
+		public static int		LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
+		public static int		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
+		public static int		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
+		public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
+		public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
+		public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
 		
-		public String schemaLocation = "/home/cros/mc_site/schematics/";
+		public static String schemaLocation = "/home/cros/mc_site/schematics/";
 		
 		// Cloaking device core
-		public int CD_MAX_CLOAKING_FIELD_SIDE = 100;
-		public int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
-		public int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
-		public int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
-		public int CD_COIL_CAPTURE_BLOCKS = 5;
+		public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
+		public static int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
+		public static int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
+		public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
+		public static int CD_COIL_CAPTURE_BLOCKS = 5;
 		
 	private WarpDriveConfig() {}
 
@@ -226,6 +227,11 @@ public class WarpDriveConfig
 		
 		// Tree Farm
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
+		
+		// Transporter
+		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 1000000).getInt();	
+		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
+		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 	}
 	
 	public void Init2()
@@ -265,6 +271,7 @@ public class WarpDriveConfig
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
+		transporterID = config.getBlock("transporter", 520).getInt();
 		
 		LoadIC2();
 		LoadCC();

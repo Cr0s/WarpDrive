@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.FMLNetworkHandler;
-import cpw.mods.fml.relauncher.Side;
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.entity.EntityLivingBase;
@@ -45,9 +42,7 @@ import net.minecraft.network.packet.Packet24MobSpawn;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.network.packet.Packet25EntityPainting;
 import net.minecraft.network.packet.Packet26EntityExpOrb;
-import net.minecraft.network.packet.Packet56MapChunks;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
@@ -354,9 +349,6 @@ public class CloakManager {
 
 					extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
 				}
-
-				int j2 = c.xPosition * 16 + x;
-				int k2 = c.zPosition * 16 + z;
 				extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
 
 				if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)

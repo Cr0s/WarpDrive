@@ -6,31 +6,18 @@ import cpw.mods.fml.relauncher.Side;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.util.List;
-
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.EnumOptions;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatMessageComponent;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import net.minecraft.entity.player.EntityPlayer;
 
 public final class EntityCamera extends EntityLivingBase
 {
@@ -38,7 +25,6 @@ public final class EntityCamera extends EntityLivingBase
     public int yCoord;
     public int zCoord;
 
-    private int ticks = 0;
     private EntityPlayer player;
 
     private Minecraft mc = Minecraft.getMinecraft();
@@ -94,7 +80,7 @@ public final class EntityCamera extends EntityLivingBase
                 fireWaitTicks = 2;
 
                 // Make a shoot with camera-laser
-                if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID)
+                if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.laserCamID)
                 {
                     sendTargetPacket();
                 }

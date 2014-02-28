@@ -1,8 +1,5 @@
 package cr0s.WarpDrive;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-
 import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.EntityRegistry;
 

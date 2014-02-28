@@ -33,7 +33,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     private int back, left, down;
 
     // Player attaching
-    public ArrayList<String> players = new ArrayList();
+    public ArrayList<String> players = new ArrayList<String>();
     public String playersString = "";
 
     private String beaconFrequency = "";

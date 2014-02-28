@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.INetworkManager;
@@ -14,7 +13,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.Player;
 import cr0s.WarpDrive.machines.TileEntityCamera;
@@ -63,12 +61,6 @@ public class PacketHandler implements IPacketHandler
             
             byte tier = inputStream.readByte();
             
-            int w = Math.abs(maxX - minX);
-            int h = Math.abs(maxY - minY);
-            int l = Math.abs(maxZ - minZ);
-            
-            int size = w * h * l;
-            
             //WarpDrive.debugPrint("[Cloak Packet] Received " + ((decloak) ? "DEcloaked" : "cloaked") + "area: (" + minX + "; " + minY + "; " + minZ + ") -> (" + maxX + "; " + maxY + "; " + maxZ + ")");            
             
             if (minX <= player.posX && maxX >= player.posY && minY <= player.posZ && maxY >= player.posX  && minZ <= player.posY && maxZ >= player.posZ)
@@ -84,7 +76,7 @@ public class PacketHandler implements IPacketHandler
 	    			for (int x = minX; x <= maxX; x++)
 	    				for(int z = minZ; z <= maxZ; z++)
 	            			if (worldObj.getBlockId(x, y, z) != 0)
-	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.i.gasID : 0, 5, 4);
+	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.gasID : 0, 5, 4);
 	            
 	    		//WarpDrive.debugPrint("[Cloak Packet] Removing entity...");
 	            // Hide any entities inside area
@@ -224,7 +216,6 @@ public class PacketHandler implements IPacketHandler
     {
     	WarpDrive.debugPrint("Received beam");
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
-        int dimID;
         Vector3 source, target;
         double sx, sy, sz;
         double tx, ty, tz;

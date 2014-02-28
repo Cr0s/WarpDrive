@@ -119,7 +119,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 						{
 							if(isRoomForHarvest())
 							{
-								if(blockID == WarpDriveConfig.i.IC2_RubberTree)
+								if(blockID == WarpDriveConfig.IC2_RubberTree)
 								{
 									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
 									if(metadata >= 2 && metadata <= 5)
@@ -127,7 +127,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 										WarpDrive.debugPrint("wetspot found");
 										if(collectEnergyPacketFromBooster(cost,false))
 										{
-											ItemStack resin = WarpDriveConfig.i.IC2_Resin.copy();
+											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
 											resin.stackSize = (int) Math.round(Math.random() * 4);
 											dumpToInv(resin);
 											worldObj.setBlockMetadataWithNotify(pos.intX(), pos.intY(), pos.intZ(), metadata+6, 3);
@@ -175,12 +175,12 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	
 	private boolean isLog(int blockID)
 	{
-		return WarpDriveConfig.i.MinerLogs.contains(blockID);
+		return WarpDriveConfig.MinerLogs.contains(blockID);
 	}
 	
 	private boolean isLeaf(int blockID)
 	{
-		return WarpDriveConfig.i.MinerLeaves.contains(blockID);
+		return WarpDriveConfig.MinerLeaves.contains(blockID);
 	}
 	
 	private void addTree(ArrayList<Vector3> list,Vector3 newTree)
@@ -316,13 +316,13 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			{
 				if(arguments.length == 1)
 				{
-					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.i.TF_MAX_SIZE);
+					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
 					zSize = xSize;
 				}
 				else if(arguments.length == 2)
 				{
-					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.i.TF_MAX_SIZE);
-					zSize = clamp(toInt(arguments[1]),3,WarpDriveConfig.i.TF_MAX_SIZE);
+					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
+					zSize = clamp(toInt(arguments[1]),3,WarpDriveConfig.TF_MAX_SIZE);
 				}
 			}
 			catch(NumberFormatException e)

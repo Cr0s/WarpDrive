@@ -1,7 +1,5 @@
 package cr0s.WarpDrive.machines;
 
-import java.util.List;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -10,18 +8,13 @@ import cr0s.WarpDrive.ClientCameraUtils;
 import cr0s.WarpDrive.EntityCamera;
 import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.BlockContainer;
-import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Icon;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public class BlockMonitor extends BlockContainer

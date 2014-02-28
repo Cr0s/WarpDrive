@@ -3,8 +3,6 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.machines.TileEntityReactor;
 import dan200.computer.api.IPeripheral;
-import dan200.turtle.api.ITurtleAccess;
-import dan200.turtle.api.TurtleSide;
 import ic2.api.network.NetworkHelper;
 
 import java.lang.reflect.Method;
@@ -577,7 +575,7 @@ public class EntityJump extends Entity
 							int blockID = worldObj.getBlockId(x, y, z);
 
 							// Skip air blocks
-							if (blockID == 0 || blockID == WarpDriveConfig.i.gasID)
+							if (blockID == 0 || blockID == WarpDriveConfig.gasID)
 							{
 								continue;
 							}
@@ -668,7 +666,7 @@ public class EntityJump extends Entity
 					int blockID = worldObj.getBlockId(x, y, z);
 
 					// Skipping air blocks
-					if (blockID == 0 || blockID == WarpDriveConfig.i.gasID)
+					if (blockID == 0 || blockID == WarpDriveConfig.gasID)
 					{
 						continue;
 					}
@@ -768,7 +766,7 @@ public class EntityJump extends Entity
 				{
 					EntityPlayerMP player = (EntityPlayerMP) entity;
 
-					ChunkCoordinates bedLocation = player.getBedLocation();
+					ChunkCoordinates bedLocation = player.getBedLocation(player.worldObj.provider.dimensionId);
 
 					if (bedLocation != null && testBB(axisalignedbb, bedLocation.posX, bedLocation.posY, bedLocation.posZ))
 					{
@@ -881,7 +879,7 @@ public class EntityJump extends Entity
 						return false;
 					}
 
-					if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDriveConfig.i.airID && blockID != WarpDriveConfig.i.gasID && blockID != 18)
+					if (blockOnShipID != 0 && blockID != 0 && blockID != WarpDriveConfig.airID && blockID != WarpDriveConfig.gasID && blockID != 18)
 					{
 						blowX = x;
 						blowY = y;
@@ -971,7 +969,7 @@ public class EntityJump extends Entity
 			mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
 
 			// Re-schedule air blocks update
-			if (blockID == WarpDriveConfig.i.airID)
+			if (blockID == WarpDriveConfig.airID)
 			{
 				targetWorld.markBlockForUpdate(newX, newY, newZ);
 				targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 40 + targetWorld.rand.nextInt(20));
@@ -986,12 +984,12 @@ public class EntityJump extends Entity
 				oldnbt.setInteger("y", newY);
 				oldnbt.setInteger("z", newZ);
 				TileEntity newTileEntity = null;
-				if (blockID == WarpDriveConfig.i.CC_Computer || blockID == WarpDriveConfig.i.CC_peripheral || blockID == WarpDriveConfig.i.CCT_Turtle || blockID == WarpDriveConfig.i.CCT_Upgraded || blockID == WarpDriveConfig.i.CCT_Advanced)
+				if (blockID == WarpDriveConfig.CC_Computer || blockID == WarpDriveConfig.CC_peripheral || blockID == WarpDriveConfig.CCT_Turtle || blockID == WarpDriveConfig.CCT_Upgraded || blockID == WarpDriveConfig.CCT_Advanced)
 				{
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
 				}
-				else if (blockID == WarpDriveConfig.i.AS_Turbine)
+				else if (blockID == WarpDriveConfig.AS_Turbine)
 				{
 					if (oldnbt.hasKey("zhuYao"))
 					{

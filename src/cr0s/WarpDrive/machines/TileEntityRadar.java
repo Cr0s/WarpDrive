@@ -24,7 +24,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergySink
+public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 {
 	public boolean addedToEnergyNet = false;
 
@@ -71,7 +71,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 			{
 				if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1)))
 				{
-					//System.out.println("Scanning...");
+					//WarpDrive.debugPrint("Scanning...");
 					WarpDrive.instance.registry.removeDeadCores();
 					results = WarpDrive.instance.registry.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
@@ -122,7 +122,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 			case 1: // scanRadius (radius)
 				if (arguments.length == 1)
 				{
-					int radius = ((Double)arguments[0]).intValue();
+					int radius = toInt(arguments[0]);
 					if (radius <= 0 || radius > 10000)
 					{
 						scanRadius = 0;
@@ -140,7 +140,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 					else
 					{
 						results = null;
-						System.out.println("Radius: " + radius + " | Enough energy: " + isEnergyEnoughForScanRadiusW(radius));
+						WarpDrive.debugPrint("Radius: " + radius + " | Enough energy: " + isEnergyEnoughForScanRadiusW(radius));
 						return new Boolean[] { false };
 					}
 				}
@@ -198,7 +198,7 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 	@Override
 	public double demandedEnergyUnits()
 	{
-		return (WarpDriveConfig.i.WR_MAX_ENERGY_VALUE - currentEnergyValue);
+		return (WarpDriveConfig.WR_MAX_ENERGY_VALUE - currentEnergyValue);
 	}
 
 	@Override
@@ -207,10 +207,10 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 		double leftover = 0;
 		currentEnergyValue += Math.round(amount);
 
-		if (getCurrentEnergyValue() > WarpDriveConfig.i.WR_MAX_ENERGY_VALUE)
+		if (getCurrentEnergyValue() > WarpDriveConfig.WR_MAX_ENERGY_VALUE)
 		{
-			leftover = (getCurrentEnergyValue() - WarpDriveConfig.i.WR_MAX_ENERGY_VALUE);
-			currentEnergyValue = WarpDriveConfig.i.WR_MAX_ENERGY_VALUE;
+			leftover = (getCurrentEnergyValue() - WarpDriveConfig.WR_MAX_ENERGY_VALUE);
+			currentEnergyValue = WarpDriveConfig.WR_MAX_ENERGY_VALUE;
 		}
 
 		return leftover;

@@ -145,7 +145,7 @@ public class WarpCoresRegistry
 			double d5 = c.zCoord - core.zCoord;
 			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 
-			if (distance <= (2 * WarpDriveConfig.i.WC_MAX_SHIP_SIDE) - 1)
+			if (distance <= (2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1)
 			{
 				// Check for warpfields intersections
 				core.prepareToJump(); // calculate spatial parameters
@@ -171,7 +171,7 @@ public class WarpCoresRegistry
 		ArrayList<TileEntityReactor> oldRegistry = (ArrayList<TileEntityReactor>) registry.clone();
 
 		for (TileEntityReactor c : registry)
-			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.i.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid())
+			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid())
 				oldRegistry.remove(c);
 
 		// Update old registry to new witout dead cores

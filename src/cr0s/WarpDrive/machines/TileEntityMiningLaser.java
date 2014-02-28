@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 
-
 public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IPeripheral
 {
 	protected final int laserBelow = 0;
@@ -29,16 +28,16 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	@Override
 	protected int calculateLayerCost()
 	{
-		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
+		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
 	}
 	
 	@Override
 	protected int calculateBlockCost()
 	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
 		if(silkTouch())
-			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH  * speedMul);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune()))  * speedMul);
+			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH  * speedMul);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune()))  * speedMul);
 	}
 	
 	private String[] methodsArray =
@@ -79,12 +78,12 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			currentLayer = yCoord - 1;
 		if(speedMul == 0)
 			speedMul = 1;
-		speedMul = Math.max(WarpDriveConfig.i.ML_MIN_SPEED,Math.min(WarpDriveConfig.i.ML_MAX_SPEED,speedMul));
+		speedMul = clamp(speedMul,WarpDriveConfig.ML_MIN_SPEED,WarpDriveConfig.ML_MAX_SPEED);
 		if (isMining)
 		{
 			if (currentMode == 0)
 			{
-				if (++delayTicksScan > (WarpDriveConfig.i.ML_SCAN_DELAY / speedMul))
+				if (++delayTicksScan > (WarpDriveConfig.ML_SCAN_DELAY / speedMul))
 				{
 					delayTicksScan = 0;
 					valuablesInLayer.clear();
@@ -114,13 +113,13 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			}
 			else
 			{
-				if (++delayTicksMine > ((WarpDriveConfig.i.ML_MINE_DELAY / speedMul) + miningDelay))
+				if (++delayTicksMine > ((WarpDriveConfig.ML_MINE_DELAY / speedMul) + miningDelay))
 				{
 					delayTicksMine = 0;
 					int energyReq = calculateBlockCost();
 					if (collectEnergyPacketFromBooster(energyReq,true) && valuableIndex < valuablesInLayer.size())
 					{
-						//System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
+						//WarpDrive.debugPrint("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
 						Vector3 valuable = valuablesInLayer.get(valuableIndex);
 						// Mine valuable ore
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
@@ -131,7 +130,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 							return;
 						}
 						
-						if((WarpDriveConfig.i.MinerOres.contains(blockID) || isQuarry) && isRoomForHarvest())
+						if((WarpDriveConfig.MinerOres.contains(blockID) || isQuarry) && isRoomForHarvest())
 						{
 							if(collectEnergyPacketFromBooster(energyReq,false))
 							{
@@ -165,7 +164,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 
 	private void scanLayer()
 	{
-		//System.out.println("Scanning layer");
+		//WarpDrive.debugPrint("Scanning layer");
 		valuablesInLayer.clear();
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
@@ -210,12 +209,12 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 							valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 					else   // Not-quarry collect only valuables blocks
-						if (WarpDriveConfig.i.MinerOres.contains(worldObj.getBlockId(x, currentLayer, z)))
+						if (WarpDriveConfig.MinerOres.contains(worldObj.getBlockId(x, currentLayer, z)))
 							valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 
 		valuableIndex = 0;
-		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
+		//WarpDrive.debugPrint("[ML] Found " + valuablesInLayer.size() + " valuables");
 	}
 
 	@Override
@@ -276,8 +275,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 				{
 					if(arguments.length >= 2)
 					{
-						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
-						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
+						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.ML_MAX_SIZE);
+						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.ML_MAX_SIZE);
 					}
 					else
 					{
@@ -320,8 +319,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 				{
 					if(arguments.length >= 2)
 					{
-						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.i.ML_MAX_SIZE);
-						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.i.ML_MAX_SIZE);
+						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.ML_MAX_SIZE);
+						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.ML_MAX_SIZE);
 					}
 					defineMiningArea(digX,digZ);
 				}
@@ -371,7 +370,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 					try
 					{
 						Double arg = Double.parseDouble(arguments[0].toString());
-						speedMul = Math.min(WarpDriveConfig.i.ML_MAX_SPEED,Math.max(arg,WarpDriveConfig.i.ML_MIN_SPEED));
+						speedMul = Math.min(WarpDriveConfig.ML_MAX_SPEED,Math.max(arg,WarpDriveConfig.ML_MIN_SPEED));
 					}
 					catch(NumberFormatException e)
 					{

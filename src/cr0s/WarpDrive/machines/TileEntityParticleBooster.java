@@ -1,26 +1,14 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
 import net.minecraftforge.common.ForgeDirection;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityParticleBooster extends TileEntity implements IEnergySink
@@ -48,7 +36,7 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
         if (++ticks > 40)
         {
             ticks = 0;
-            currentEnergyValue = Math.min(currentEnergyValue, WarpDriveConfig.i.PB_MAX_ENERGY_VALUE);
+            currentEnergyValue = Math.min(currentEnergyValue, WarpDriveConfig.PB_MAX_ENERGY_VALUE);
             worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, currentEnergyValue / 10000, 2);
         }
     }
@@ -71,7 +59,7 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
     @Override
     public double demandedEnergyUnits()
     {
-        return (WarpDriveConfig.i.PB_MAX_ENERGY_VALUE - currentEnergyValue);
+        return (WarpDriveConfig.PB_MAX_ENERGY_VALUE - currentEnergyValue);
     }
 
     @Override
@@ -80,10 +68,10 @@ public class TileEntityParticleBooster extends TileEntity implements IEnergySink
         double leftover = 0;
         currentEnergyValue += Math.round(amount);
 
-        if (getCurrentEnergyValue() > WarpDriveConfig.i.PB_MAX_ENERGY_VALUE)
+        if (getCurrentEnergyValue() > WarpDriveConfig.PB_MAX_ENERGY_VALUE)
         {
-            leftover = (getCurrentEnergyValue() - WarpDriveConfig.i.PB_MAX_ENERGY_VALUE);
-            currentEnergyValue = WarpDriveConfig.i.PB_MAX_ENERGY_VALUE;
+            leftover = (getCurrentEnergyValue() - WarpDriveConfig.PB_MAX_ENERGY_VALUE);
+            currentEnergyValue = WarpDriveConfig.PB_MAX_ENERGY_VALUE;
         }
 
         return leftover;

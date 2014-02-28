@@ -1,14 +1,10 @@
 package cr0s.WarpDrive.machines;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import com.google.common.collect.ImmutableSet;
 
 import cr0s.WarpDrive.WarpDrive;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;

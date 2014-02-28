@@ -1,10 +1,7 @@
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.IWorldGenerator;
 import java.util.Random;
-import java.util.List;
-import java.util.ArrayList;
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -76,7 +73,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 				generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
 		}
 		// Quartz asteroid
-		else if (WarpDriveConfig.i.isAELoaded && random.nextInt(20000) == 1)
+		else if (WarpDriveConfig.isAELoaded && random.nextInt(20000) == 1)
 		{
 			generateAsteroidOfBlock(world, x, y, z, 4, 6, WarpDriveConfig.i.getAEBlock("blkQuartzOre").itemID, WarpDriveConfig.i.getAEBlock("blkQuartzOre").getItemDamage());
 			if (random.nextBoolean())
@@ -180,7 +177,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 
 	private void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color)
 	{
-		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDriveConfig.i.gasID, color, hollow, true);
+		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDriveConfig.gasID, color, hollow, true);
 		esg.xCoord = x;
 		esg.yCoord = y;
 		esg.zCoord = z;
@@ -216,13 +213,6 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			generateAsteroid(world, x, y, z, asteroidSizeMax, centerRadiusMax);
 	}
 
-	/**
-	 * Asteroid field generator
-	 * @param world мир
-	 * @param x координата центра поля
-	 * @param y координата центра поля
-	 * @param z координата центра поля
-	 */
 	public void generateAsteroidField(World world, int x, int y, int z)
 	{
 		int numOfAsteroids = 15 + world.rand.nextInt(30);
