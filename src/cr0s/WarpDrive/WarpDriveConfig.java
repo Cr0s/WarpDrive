@@ -17,7 +17,7 @@ public class WarpDriveConfig
 	public static WarpDriveConfig i;
 	private Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID;
 //
 	public static boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
@@ -75,9 +75,11 @@ public class WarpDriveConfig
 		public static int TF_MAX_SIZE=32;
 		
 		//Transporter
-		public static int     TR_MAX_ENERGY=1000000;
+		public static int     TR_MAX_ENERGY=10000000;
 		public static boolean TR_RELATIVE_COORDS=false;
 		public static double  TR_EU_PER_METRE=100;
+		public static double  TR_MAX_SCAN_RANGE=4;
+		public static double  TR_MAX_BOOST_MUL=4;
 		
 		// Laser Emitter
 		public static int		LE_MAX_BOOSTERS_NUMBER = 10;
@@ -232,6 +234,7 @@ public class WarpDriveConfig
 		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 1000000).getInt();	
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
+		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
 	}
 	
 	public void Init2()
@@ -272,6 +275,7 @@ public class WarpDriveConfig
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
 		transporterID = config.getBlock("transporter", 520).getInt();
+		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
 		
 		LoadIC2();
 		LoadCC();

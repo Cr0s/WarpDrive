@@ -3,12 +3,19 @@ package cr0s.WarpDrive.machines;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.ChatMessageComponent;
+import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import dan200.computer.api.IComputerAccess;
@@ -20,19 +27,23 @@ import ic2.api.energy.tile.IEnergySink;
 
 public class TileEntityTransporter extends WarpTE implements IEnergySink, IPeripheral
 {
-	private final double scanRange=2;
+	private double scanRange=2;
 	
 	private final int maxEnergy;
 	private double energyBuffer=0;
 	private boolean addedToEnergyNet = false;
 	
+	private int scanDist = 4;
+	private double powerBoost = 1;
 	private double baseLockStrength=-1;
 	private double lockStrengthMul = 1;
 	private boolean isLocked=false;
 	
 	private Vector3 centreOnMe = new Vector3(0.5,1,0.5);
-	private Vector3 source = new Vector3();
-	private Vector3 dest = new Vector3();
+	private Vector3 sourceVec = new Vector3();
+	private Vector3 destVec = new Vector3();
+	
+	private TeleporterDamage teleDam = new TeleporterDamage("teleporter");
 	
 	private String[] methodArray = {
 			"source",
@@ -42,6 +53,7 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 			"lockStrength",
 			"energize",
 			"energy",
+			"powerBoost",
 			"help" };
 	
 	public TileEntityTransporter()
@@ -53,8 +65,15 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	@Override
 	public void updateEntity()
 	{
+		if (!addedToEnergyNet)
+        {
+        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        		MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
+        }
+		
 		if(isLocked && lockStrengthMul > 0)
-			lockStrengthMul-= 0.01;
+			lockStrengthMul*= 0.98;
 	}
 	
 	@Override
@@ -71,7 +90,16 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	
 	private Object[] setVec3(boolean src,Object... arguments)
 	{
-		Vector3 vec = src ? source : dest;
+		Vector3 vec = src ? sourceVec : destVec;
+		
+		if(vec == null)
+		{
+			if(src)
+				sourceVec = new Vector3(0,0,0);
+			else
+				destVec = new Vector3(0,0,0);
+			vec = src ? sourceVec : destVec;
+		}
 		
 		try
 		{
@@ -83,16 +111,23 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 			}
 			else if(arguments.length == 1)
 			{
-				vec.x = xCoord + centreOnMe.x;
-				vec.y = yCoord + centreOnMe.y;
-				vec.z = zCoord + centreOnMe.z;
+				if(WarpDriveConfig.TR_RELATIVE_COORDS)
+				{
+					vec.x = centreOnMe.x;
+					vec.y = centreOnMe.y;
+					vec.z = centreOnMe.z;
+				}
+				else
+				{
+					vec.x = xCoord + centreOnMe.x;
+					vec.y = yCoord + centreOnMe.y;
+					vec.z = zCoord + centreOnMe.z;
+				}
 			}
 		}
 		catch(NumberFormatException e)
 		{
-			vec.x = xCoord + centreOnMe.x;
-			vec.y = yCoord + centreOnMe.y;
-			vec.z = zCoord + centreOnMe.z;
+			return setVec3(src,"this");
 		}
 		return new Object[] { vec.x, vec.y, vec.z };
 	}
@@ -106,21 +141,17 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 		
 		if(str == "source")
 		{
-			if(source == null)
-				source = new Vector3(this).translate(centreOnMe);
 			return setVec3(true,arguments);
 		}
 		
 		if(str == "dest")
 		{
-			if(dest == null)
-				dest = new Vector3(this).translate(centreOnMe);
 			return setVec3(false,arguments);
 		}
 		
 		if(str == "lock")
 		{
-			return new Object[] { lockStrength(source,dest,true) };
+			return new Object[] { lockStrength(sourceVec,destVec,true) };
 		}
 		
 		if(str == "release")
@@ -138,27 +169,43 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 		
 		if(str == "lockStrength")
 		{
-			return new Object[] { lockStrength(source,dest,false) };
+			return new Object[] { lockStrength(sourceVec,destVec,false) };
 		}
 		
 		if(str == "energize")
 		{
 			return new Object[] { energize () };
 		}
+		
+		if(str == "powerBoost")
+		{
+			try
+			{
+				if(arguments.length >= 1)
+					powerBoost = clamp(toInt(arguments[0]),1,WarpDriveConfig.TR_MAX_BOOST_MUL);
+			}
+			catch(NumberFormatException e)
+			{
+				powerBoost = 1;
+			}
+			return new Object[] { powerBoost };
+		}
+		
 		return null;
 	}
 	
 	private boolean energize()
 	{
-		double ls = lockStrength(source,dest,false);
-		ArrayList<EntityLivingBase> entitiesToTransport = findEntities(source,ls);
-		double energyReq = WarpDriveConfig.TR_EU_PER_METRE * source.distanceTo(dest);
+		double ls = lockStrength(sourceVec,destVec,false);
+		ArrayList<EntityLivingBase> entitiesToTransport = findEntities(sourceVec,ls);
+		double energyReq = WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec);
 		for(EntityLivingBase ent : entitiesToTransport)
 		{
 			if(energyBuffer >= energyReq)
 			{
 				energyBuffer -= energyReq;
-				transportEnt(ent,dest);
+				inflictNegativeEffect(ent,ls);
+				transportEnt(ent,destVec);
 			}
 			else
 				break;
@@ -174,18 +221,84 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 			ent.setPositionAndUpdate(dest.x, dest.y, dest.z);
 	}
 	
+	private void inflictNegativeEffect(EntityLivingBase ent,double lockStrength)
+	{
+		double value = Math.random() + lockStrength;
+		
+		WarpDrive.debugPrint("TELEPORT INFLICTION: " + value);
+		if(value < 0.1)
+			ent.attackEntityFrom(teleDam, 1000);
+		
+		if(value < 0.2)
+			ent.attackEntityFrom(teleDam, 10);
+		
+		if(value < 0.5)
+			ent.attackEntityFrom(teleDam, 1);
+	}
+	
+	private double beaconScan(int xV, int yV, int zV)
+	{
+		double beacon = 0;
+		for(int x=xV-scanDist;x<=xV+scanDist;x++)
+		{
+			for(int y=yV-scanDist;y<=yV+scanDist;y++)
+			{
+				if(y < 0 || y > 254)
+					continue;
+				
+				for(int z=xV-scanDist;z<=xV+scanDist;z++)
+				{
+					if(worldObj.getBlockId(x, y, z) != WarpDriveConfig.transportBeaconID)
+						continue;
+					double dist = Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);
+					
+					if(worldObj.getBlockMetadata(x, y, z) == 0)
+						beacon += 1/dist;
+					else
+						beacon -= 1/dist;
+				}
+			}
+		}
+		return beacon;
+	}
+	
+	private double calculatePower(Vector3 d)
+	{
+		Vector3 myCoords;
+		if(WarpDriveConfig.TR_RELATIVE_COORDS)
+			myCoords = centreOnMe;
+		else
+			myCoords = new Vector3(this).translate(centreOnMe);
+		return calculatePower(myCoords,d);
+	}
+	
+	private double calculatePower(Vector3 s, Vector3 d)
+	{
+		double dist = s.distanceTo(d);
+		return clamp(Math.pow(Math.E, -dist / 100) * (1/dist),0,1);
+	}
+	
+	private double min(double... ds)
+	{
+		double curMin = Double.MAX_VALUE;
+		for(double d: ds)
+			curMin = Math.min(curMin, d);
+		return curMin;
+	}
+	
 	private double lockStrength(Vector3 source,Vector3 dest,boolean lock)
 	{
 		if(isLocked)
 		{
-			return baseLockStrength * lockStrengthMul;
+			return Math.max(1, baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1));
 		}
-		else if(lock)
+		else if(lock && source != null && dest != null)
 		{
-			baseLockStrength = 1; //REPLACE THIS!!!
+			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
+			baseLockStrength = basePower;
 			lockStrengthMul  = 1;
 			isLocked = true;
-			return baseLockStrength;
+			return Math.max(1,baseLockStrength * powerBoost);
 		}
 		else
 			return 0;
@@ -199,13 +312,13 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 		Vector3 scanNeg = new Vector3(-scanRange/2,-1,-scanRange/2);
 		if(WarpDriveConfig.TR_RELATIVE_COORDS)
 		{
-			tS.translate(source).translate(scanPos);
-			bS.translate(source).translate(scanNeg);
+			tS.translate(sourceVec).translate(scanPos);
+			bS.translate(sourceVec).translate(scanNeg);
 		}
 		else
 		{
-			tS = source.clone().translate(scanPos);
-			bS = source.clone().translate(scanNeg);
+			tS = sourceVec.clone().translate(scanPos);
+			bS = sourceVec.clone().translate(scanNeg);
 		}
 		return AxisAlignedBB.getBoundingBox(bS.x,bS.y,bS.z,tS.x,tS.y,tS.z);
 	}
@@ -219,7 +332,7 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 		for(Object ent : data)
 		{
 			WarpDrive.debugPrint("Transporter:"+ent.toString() + " found");
-			if(Math.random() < lockStrength) //If weak lock, don't transport
+			if(lockStrength >= 1 || Math.random() < lockStrength) //If weak lock, don't transport (lazy java shouldn't do math.random() if strong lock)
 				if(ent instanceof EntityLivingBase)
 					output.add((EntityLivingBase) ent);
 		}
@@ -273,19 +386,9 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
     {
         if (addedToEnergyNet)
         {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        		MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
-        }
-    }
-
-    @Override
-    public void validate()
-    {
-        super.validate();
-        if (!addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
         }
     }
 
@@ -294,11 +397,34 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
     {
         if (addedToEnergyNet)
         {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
+        		MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
         }
 
         super.invalidate();
     }
-	
+    
+    class TeleporterDamage extends DamageSource
+    {
+
+		protected TeleporterDamage(String par1Str)
+		{
+			super(par1Str);
+		}
+		
+		@Override
+		public ChatMessageComponent getDeathMessage(EntityLivingBase e)
+		{
+			String mess = "";
+			if(e instanceof EntityPlayer || e instanceof EntityPlayerMP)
+				mess = ((EntityPlayer) e).username + " was killed by a teleporter malfunction";
+			else
+				mess = e.getEntityName() + " was killed by a teleporter malfunction";
+			
+			WarpDrive.debugPrint(mess);
+			return ChatMessageComponent.createFromText(mess);
+		}
+    	
+    }
 }

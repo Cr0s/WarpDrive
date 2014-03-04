@@ -12,6 +12,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cr0s.WarpDrive.block.BlockTransportBeacon;
 import cr0s.WarpDrive.machines.*;
 
 import java.util.ArrayList;
@@ -68,6 +69,7 @@ public class WarpDrive implements LoadingCallback {
 	public static Block gasBlock;
 
 	public static Block iridiumBlock;
+	public static Block transportBeaconBlock;
 
 	public static BiomeGenBase spaceBiome;
 	public World space;
@@ -327,6 +329,17 @@ public class WarpDrive implements LoadingCallback {
 		LanguageRegistry.addName(transporterBlock, "Transporter");
 		GameRegistry.registerBlock(transporterBlock, "transporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class,"transporter");
+		
+		// TRANSPORT BEACON
+		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)
+			.setHardness(0.5F)
+			.setStepSound(Block.soundMetalFootstep)
+			.setCreativeTab(CreativeTabs.tabRedstone)
+			.setUnlocalizedName("transporterBeacon");
+		
+		LanguageRegistry.addName(transportBeaconBlock, "Test");
+		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");*/
+		
         
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);

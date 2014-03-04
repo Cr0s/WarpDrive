@@ -4,6 +4,7 @@ import net.minecraft.tileentity.TileEntity;
 
 public abstract class WarpTE extends TileEntity
 {
+	
 	protected int toInt(double d)
 	{
 		return (int) Math.round(d);
