@@ -12,7 +12,6 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cr0s.WarpDrive.block.BlockTransportBeacon;
 import cr0s.WarpDrive.machines.*;
 
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -444,6 +444,13 @@ public class WarpDrive implements LoadingCallback {
 			'w', "logWood",
 			'm', miningLaserBlock }));
 		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] {
+			"ece", "imi", "iei",
+			'e', Item.enderPearl,
+			'c', WarpDriveConfig.i.getIC2Item("electronicCircuit"),
+			'i', WarpDriveConfig.i.getIC2Item("plateiron"),
+			'm', WarpDriveConfig.i.getIC2Item("machine") }));
+		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi", 
 			'i', iridiumBlock,
 			'c', cloakCoilBlock,
@@ -452,8 +459,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.addRecipe(new ItemStack(cloakCoilBlock), "iai", "aca", "iai", 
 			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
 			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"));		
-		
+			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"));
 		registry = new WarpCoresRegistry();
 
 		
