@@ -16,6 +16,8 @@ public class BlockGas extends Block
     public BlockGas(int par1)
     {
         super(par1, Material.air);
+        setHardness(0.0F);
+		setUnlocalizedName("Gas block");
     }
 
     @Override

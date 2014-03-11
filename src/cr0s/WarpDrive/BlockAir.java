@@ -15,6 +15,8 @@ public class BlockAir extends Block
     public BlockAir(int par1)
     {
         super(par1, Material.air);
+        setHardness(0.0F);
+        setUnlocalizedName("Air block");
     }
 
     @Override

@@ -4,6 +4,8 @@ import java.util.Random;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.WarpDrive;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -19,6 +21,10 @@ public class BlockTransporter extends BlockContainer
 	public BlockTransporter(int par1, Material par2Material)
 	{
 		super(par1, par2Material);
+		setHardness(0.5F);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("Transporter");
 	}
 
 	@Override

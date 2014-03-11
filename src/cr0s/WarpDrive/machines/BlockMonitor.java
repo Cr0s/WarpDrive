@@ -7,6 +7,7 @@ import cr0s.WarpDrive.CamRegistryItem;
 import cr0s.WarpDrive.ClientCameraUtils;
 import cr0s.WarpDrive.EntityCamera;
 import cr0s.WarpDrive.WarpDrive;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -25,6 +26,10 @@ public class BlockMonitor extends BlockContainer
     public BlockMonitor(int id)
     {
         super(id, Material.iron);
+        setHardness(0.5F);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("Monitor");
     }
 
     @SideOnly(Side.CLIENT)

@@ -10,6 +10,11 @@ public class BlockIridium extends Block
     public BlockIridium(int par1)
     {
         super(par1, Material.rock);
+        setHardness(0.8F);
+		setResistance(150 * 4);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("Block of Iridium");
     }
 
     @Override

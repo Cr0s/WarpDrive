@@ -15,11 +15,28 @@ import ic2.api.item.Items;
 public class WarpDriveConfig
 {
 	public static WarpDriveConfig i;
-	private Configuration config;
+	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID;
 //
-	public static boolean isGregLoaded = false, isAELoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isAEExtraLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
+	/*
+	 * The variables which store whether or not individual mods are loaded
+	 */
+	public static boolean isGregLoaded			= false;
+	public static boolean isAELoaded			= false;
+	public static boolean isAdvSolPanelLoaded	= false;
+	public static boolean isASLoaded			= false;
+	public static boolean isAEExtraLoaded		= false;
+	public static boolean isICBMLoaded			= false;
+	public static boolean isMFFSLoaded			= false;
+	public static boolean isGraviSuiteLoaded	= false;
+	public static boolean isICLoaded			= false;
+	public static boolean isCCLoaded			= false;
+	
+	/*
+	 * The variables that control which recipes should be loaded
+	 */
+	public static boolean recipesIC2			= true;
 //
 	public static int[] IC2_Air;
 	public static int[] IC2_Empty;
@@ -33,85 +50,87 @@ public class WarpDriveConfig
 	public static ArrayList<int[]> CommonWorldGenOres;
 	public static Item AEExtraFDI;
 	
-	public boolean debugMode = false;
+	public static boolean debugMode = false;
 
 	// Mod config
-		// Warp Core
-	    public static int WC_MAX_ENERGY_VALUE = 100000000;
-	    public static int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
-	    public static int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
-	    public static int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
-	    public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
-	    public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
-	    public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-	    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-	    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
-	    public static int WC_MAX_SHIP_SIDE = 100;
-	    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;
-	    public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
-	    public static int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
-	
-	    // Warp Radar
-	    public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
-	    
-	    // Particle Booster
-	    public static int PB_MAX_ENERGY_VALUE = 100000;
-	    
-	    // Mining Laser
-		public static int		ML_MAX_BOOSTERS_NUMBER = 1;
-		public static int		ML_SCAN_DELAY = 20 * 5;
-		public static int		ML_MINE_DELAY = 10;
-		public static int		ML_EU_PER_LAYER_SPACE = 100;
-		public static int		ML_EU_PER_LAYER_EARTH = 2500;
-		public static int		ML_EU_PER_BLOCK_SPACE = 10;
-		public static int 		ML_EU_PER_BLOCK_EARTH = 50;
-		public static double	ML_EU_MUL_SILKTOUCH = 2.5;
-		public static double	ML_EU_MUL_FORTUNE   = 1.5;
-		public static double	ML_MAX_SPEED   = 10;
-		public static double	ML_MIN_SPEED   = 0.1;
-		public static int		ML_MAX_SIZE    = 128;
-		
-		//Tree farm
-		public static int TF_MAX_SIZE=32;
-		
-		//Transporter
-		public static int     TR_MAX_ENERGY=10000000;
-		public static boolean TR_RELATIVE_COORDS=false;
-		public static double  TR_EU_PER_METRE=100;
-		public static double  TR_MAX_SCAN_RANGE=4;
-		public static double  TR_MAX_BOOST_MUL=4;
-		
-		// Laser Emitter
-		public static int		LE_MAX_BOOSTERS_NUMBER = 10;
-		public static int		LE_MAX_LASER_ENERGY = 4000000;
-		public static int		LE_EMIT_DELAY_TICKS = 20 * 3;
-		public static int		LE_EMIT_SCAN_DELAY_TICKS = 10;
-		public static double	LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
-		public static int		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
-		public static int		LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
-		public static int		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
-		public static int		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
-		public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
-		public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
-		public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
-		
-		public static String schemaLocation = "/home/cros/mc_site/schematics/";
-		
-		// Cloaking device core
-		public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
-		public static int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
-		public static int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
-		public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
-		public static int CD_COIL_CAPTURE_BLOCKS = 5;
-		
-	private WarpDriveConfig() {}
+	// Warp Core
+    public static int WC_MAX_ENERGY_VALUE = 100000000;
+    public static int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
+    public static int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
+    public static int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
+    public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
+    public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
+    public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
+    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
+    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
+    public static int WC_MAX_SHIP_SIDE = 100;
+    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;
+    public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+    public static int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
 
-	public ItemStack getIC2Item(String id)
+    // Warp Radar
+    public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
+    
+    // Particle Booster
+    public static int PB_MAX_ENERGY_VALUE = 100000;
+    
+    // Mining Laser
+	public static int		ML_MAX_BOOSTERS_NUMBER = 1;
+	public static int		ML_SCAN_DELAY = 20 * 5;
+	public static int		ML_MINE_DELAY = 10;
+	public static int		ML_EU_PER_LAYER_SPACE = 100;
+	public static int		ML_EU_PER_LAYER_EARTH = 2500;
+	public static int		ML_EU_PER_BLOCK_SPACE = 10;
+	public static int 		ML_EU_PER_BLOCK_EARTH = 50;
+	public static double	ML_EU_MUL_SILKTOUCH = 2.5;
+	public static double	ML_EU_MUL_FORTUNE   = 1.5;
+	public static double	ML_MAX_SPEED   = 10;
+	public static double	ML_MIN_SPEED   = 0.1;
+	public static int		ML_MAX_SIZE    = 128;
+	
+	//Tree farm
+	public static int TF_MAX_SIZE=32;
+	
+	//Transporter
+	public static int     TR_MAX_ENERGY=10000000;
+	public static boolean TR_RELATIVE_COORDS=false;
+	public static double  TR_EU_PER_METRE=100;
+	public static double  TR_MAX_SCAN_RANGE=4;
+	public static double  TR_MAX_BOOST_MUL=4;
+	
+	// Laser Emitter
+	public static int		LE_MAX_BOOSTERS_NUMBER = 10;
+	public static int		LE_MAX_LASER_ENERGY = 4000000;
+	public static int		LE_EMIT_DELAY_TICKS = 20 * 3;
+	public static int		LE_EMIT_SCAN_DELAY_TICKS = 10;
+	public static double	LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
+	public static int		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
+	public static int		LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
+	public static int		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
+	public static int		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+	
+	// REACTOR MONITOR
+	public static int		RM_MAX_ENERGY = 1000000;
+	public static double	RM_EU_PER_HEAT = 2;
+	
+	public static String schemaLocation = "/home/cros/mc_site/schematics/";
+	
+	// Cloaking device core
+	public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
+	public static int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
+	public static int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
+	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
+	public static int CD_COIL_CAPTURE_BLOCKS = 5;
+
+	public static ItemStack getIC2Item(String id)
 	{
 		return Items.getItem(id);
 	}
 
-	public ItemStack getAEBlock(String id)
+	public static ItemStack getAEBlock(String id)
 	{
 		try
 		{
@@ -126,7 +145,7 @@ public class WarpDriveConfig
 		return null;
 	}
 
-	public ItemStack getAEMaterial(String id)
+	public static ItemStack getAEMaterial(String id)
 	{
 		try
 		{
@@ -141,7 +160,7 @@ public class WarpDriveConfig
 		return null;
 	}
 
-	public ItemStack getAEItem(String id)
+	public static ItemStack getAEItem(String id)
 	{
 		try
 		{
@@ -156,14 +175,13 @@ public class WarpDriveConfig
 		return null;
 	}
 
-	public static void Init(Configuration config)
+	public static void Init(Configuration configIn)
 	{
-		if (i == null)
-			i = new WarpDriveConfig();
-		i.config = config;
+		config = configIn;
 	}
 
-	public void loadWarpDriveConfig() {		
+	public static void loadWarpDriveConfig()
+	{		
 		// Warp Core
 		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", 100000000).getInt();
 		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", 10).getInt();
@@ -235,9 +253,16 @@ public class WarpDriveConfig
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
+		
+		// Reactor monitor
+		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
+		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
+		
+		// Recipes config
+		recipesIC2 = config.get("Recipes", "ic2_recipes",true).getBoolean(true);
 	}
 	
-	public void Init2()
+	public static void Init2()
 	{
 		CommonWorldGenOres = new ArrayList<int[]>();
 		CommonWorldGenOres.add(new int[] {Block.oreIron.blockID, 0});
@@ -276,41 +301,49 @@ public class WarpDriveConfig
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
 		transporterID = config.getBlock("transporter", 520).getInt();
 		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
+		reactorMonitorID = config.getBlock("reactorMonitor",522).getInt();
 		
-		LoadIC2();
-		LoadCC();
+		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
+		
+		isICLoaded = Loader.isModLoaded("IC2");
+		if (isICLoaded)
+			loadIC2();
+		
+		isCCLoaded = Loader.isModLoaded("ComputerCraft");
+		if (isCCLoaded)
+			loadCC();
 		
 		isGregLoaded = Loader.isModLoaded("gregtech_addon");
 		if (isGregLoaded)
-			LoadGT();
+			loadGT();
 		
 		isAELoaded = Loader.isModLoaded("AppliedEnergistics");
 		if (isAELoaded)
-			LoadAE();
+			loadAE();
 		
 		isAEExtraLoaded = Loader.isModLoaded("extracells");
 		if (isAEExtraLoaded)
-			LoadAEExtra();	
+			loadAEExtra();	
 		
 		isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvSolPanelLoaded)
-			LoadASP();
+			loadASP();
 		
 		isASLoaded = Loader.isModLoaded("AtomicScience");
 		if (isASLoaded)
-			LoadAS();
+			loadAS();
 		
 		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
 		if (isICBMLoaded)
-			LoadICBM();
+			loadICBM();
 		
 		isMFFSLoaded = Loader.isModLoaded("MFFS");
 		if (isMFFSLoaded)
-			LoadMFFS();
+			loadMFFS();
 		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded)
-			LoadGS();
+			loadGS();
 //
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		MinerOres.add(Block.obsidian.blockID);
@@ -336,7 +369,7 @@ public class WarpDriveConfig
 		config.save();
 	}
 	
-	private void LoadOreDict()
+	private static void LoadOreDict()
 	{
 		String[] oreNames = OreDictionary.getOreNames();
 		for(String oreName: oreNames)
@@ -372,7 +405,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadIC2()
+	private static void loadIC2()
 	{
 		ASP = Items.getItem("solarPanel").itemID;
 		SpaceHelmets.add(Items.getItem("hazmatHelmet").itemID);
@@ -393,7 +426,7 @@ public class WarpDriveConfig
 		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}
 
-	private void LoadCC()
+	private static void loadCC()
 	{
 		try
 		{
@@ -412,7 +445,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadGT()
+	private static void loadGT()
 	{
 		try
 		{
@@ -432,7 +465,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadAE()
+	private static void loadAE()
 	{
 		try
 		{
@@ -449,7 +482,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadAEExtra()
+	private static void loadAEExtra()
 	{
 		try
 		{
@@ -465,7 +498,7 @@ public class WarpDriveConfig
 		}
 	}	
 	
-	private void LoadASP()
+	private static void loadASP()
 	{
 		try
 		{
@@ -483,7 +516,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadAS()
+	private static void loadAS()
 	{
 		try
 		{
@@ -498,7 +531,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadICBM()
+	private static void loadICBM()
 	{
 		try
 		{
@@ -516,7 +549,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadMFFS()
+	private static void loadMFFS()
 	{
 		try
 		{
@@ -531,7 +564,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private void LoadGS()
+	private static void loadGS()
 	{
 		try
 		{
@@ -549,7 +582,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	public int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon)
+	public static int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon)
 	{
 		if (isMoon)
 		{
@@ -580,7 +613,7 @@ public class WarpDriveConfig
 		return new int[] {Block.stone.blockID, 0};
 	}
 
-	public int[] getRandomSurfaceBlock(Random random, int blockID, int blockMeta, boolean bedrock)
+	public static int[] getRandomSurfaceBlock(Random random, int blockID, int blockMeta, boolean bedrock)
 	{
 		if (bedrock && random.nextInt(1000) == 1)
 			return new int[] {Block.bedrock.blockID, 0};
@@ -612,7 +645,7 @@ public class WarpDriveConfig
 		return getRandomOverworldBlock(random, blockID, blockMeta);
 	}
 
-	public int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta)
+	public static int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta)
 	{
 		if (random.nextInt(25) == 5)
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
@@ -646,7 +679,7 @@ public class WarpDriveConfig
 		return new int[] {blockID, blockMeta};
 	}
 
-	public int[] getRandomNetherBlock(Random random, int blockID, int blockMeta)
+	public static int[] getRandomNetherBlock(Random random, int blockID, int blockMeta)
 	{
 		if (random.nextInt(10000) == 42)
 			return new int[] {iridiumID, 0};
@@ -666,7 +699,7 @@ public class WarpDriveConfig
 		return new int[] {blockID, blockMeta};
 	}
 
-	public int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
+	public static int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
 	{
 		if (random.nextInt(10000) == 42)
 			return new int[] {iridiumID, 0};

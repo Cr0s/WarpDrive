@@ -2,6 +2,7 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.WarpDrive;
 
 import java.util.Random;
 
@@ -19,6 +20,10 @@ public class BlockCloakingCoil extends Block
     public BlockCloakingCoil(int id, int texture, Material material)
     {
         super(id, material);
+        setHardness(0.5F);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("Cloaking Device Coil");
     }
 
     @Override

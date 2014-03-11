@@ -6,6 +6,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
 
 import java.util.Random;
+
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -23,6 +25,10 @@ public class BlockReactor extends BlockContainer
     public BlockReactor(int id, int texture, Material material)
     {
         super(id, material);
+        setHardness(0.5F);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("Warp Core");
     }
 
     @Override

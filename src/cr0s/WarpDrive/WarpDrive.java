@@ -12,6 +12,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cr0s.WarpDrive.item.ItemReactorLaserFocus;
 import cr0s.WarpDrive.machines.*;
 
 import java.util.ArrayList;
@@ -64,12 +65,15 @@ public class WarpDrive implements LoadingCallback {
 	public static Block cloakBlock;
 	public static Block cloakCoilBlock;
 	public static Block transporterBlock;
+	public static Block reactorMonitorBlock;
 	
 	public static Block airBlock;
 	public static Block gasBlock;
 
 	public static Block iridiumBlock;
 	public static Block transportBeaconBlock;
+	
+	public static Item reactorLaserFocusItem;
 
 	public static BiomeGenBase spaceBiome;
 	public World space;
@@ -82,6 +86,8 @@ public class WarpDrive implements LoadingCallback {
 	private int hyperSpaceProviderID;
 	public int hyperSpaceDimID;
 
+	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive","Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
+	
 	@Instance("WarpDrive")
 	public static WarpDrive instance;
 	@SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
@@ -99,11 +105,12 @@ public class WarpDrive implements LoadingCallback {
 	private ArrayList<Ticket> warpTickets = new ArrayList<Ticket>();
 
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event) {
-		WarpDriveConfig.Init(new Configuration(event
-				.getSuggestedConfigurationFile()));
+	public void preInit(FMLPreInitializationEvent event)
+	{
+		WarpDriveConfig.Init(new Configuration(event.getSuggestedConfigurationFile()));
 
-		if (FMLCommonHandler.instance().getSide().isClient()) {
+		if (FMLCommonHandler.instance().getSide().isClient())
+		{
 			debugPrint("[WarpDrive] Registering sounds event handler...");
 			MinecraftForge.EVENT_BUS.register(new SoundHandler());
 		}
@@ -111,20 +118,18 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static void debugPrint(String out)
 	{
-		if(WarpDriveConfig.i == null || WarpDriveConfig.i.debugMode)
+		if(WarpDriveConfig.debugMode)
 				System.out.println(out);
 	}
 
 	@EventHandler
-	public void load(FMLInitializationEvent event) {
-		WarpDriveConfig.i.Init2();
+	public void load(FMLInitializationEvent event)
+	{
+		WarpDriveConfig.Init2();
+		warpdriveTab.setBackgroundImageName(CreativeTabs.tabRedstone.getBackgroundImageName());
 
 		// CORE CONTROLLER
-		protocolBlock = new BlockProtocol(WarpDriveConfig.controllerID,0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Warp Controller");
+		protocolBlock = new BlockProtocol(WarpDriveConfig.controllerID,0, Material.rock);
 		
 		LanguageRegistry.addName(protocolBlock, "Warp Controller");
 		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
@@ -132,133 +137,87 @@ public class WarpDrive implements LoadingCallback {
 				"protocolBlock");
 		
 		// WARP CORE
-		warpCore = new BlockReactor(WarpDriveConfig.coreID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Warp Core");
+		warpCore = new BlockReactor(WarpDriveConfig.coreID, 0, Material.rock);
 		
 		LanguageRegistry.addName(warpCore, "Warp Core");
 		GameRegistry.registerBlock(warpCore, "warpCore");
 		GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");		
 		
 		// WARP RADAR
-		radarBlock = new BlockRadar(WarpDriveConfig.radarID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("W-Radar");
+		radarBlock = new BlockRadar(WarpDriveConfig.radarID, 0, Material.rock);
 		
 		LanguageRegistry.addName(radarBlock, "W-Radar");
 		GameRegistry.registerBlock(radarBlock, "radarBlock");
 		GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");
 		
 		// WARP ISOLATION
-		isolationBlock = new BlockWarpIsolation( WarpDriveConfig.isolationID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Warp-Field Isolation Block");
+		isolationBlock = new BlockWarpIsolation( WarpDriveConfig.isolationID, 0, Material.rock);
 		
 		LanguageRegistry.addName(isolationBlock, "Warp-Field Isolation Block");
 		GameRegistry.registerBlock(isolationBlock, "isolationBlock");
 		
 		// AIR GENERATOR
-		airgenBlock = new BlockAirGenerator(WarpDriveConfig.airgenID, 0,Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Air Generator");
+		airgenBlock = new BlockAirGenerator(WarpDriveConfig.airgenID, 0,Material.rock);
 		
 		LanguageRegistry.addName(airgenBlock, "Air Generator");
 		GameRegistry.registerBlock(airgenBlock, "airgenBlock");
 		GameRegistry.registerTileEntity(TileEntityAirGenerator.class,"airgenBlock");
 		
 		// AIR BLOCK
-		airBlock = (new BlockAir(WarpDriveConfig.airID))
-			.setHardness(0.0F)
-			.setUnlocalizedName("Air block");
+		airBlock = (new BlockAir(WarpDriveConfig.airID));
 		
 		LanguageRegistry.addName(airBlock, "Air block");
 		GameRegistry.registerBlock(airBlock, "airBlock");
 		
 		// GAS BLOCK
-		gasBlock = (new BlockGas(WarpDriveConfig.gasID))
-			.setHardness(0.0F)
-			.setUnlocalizedName("Gas block");
+		gasBlock = (new BlockGas(WarpDriveConfig.gasID));
 		
 		LanguageRegistry.addName(gasBlock, "Gas block");
 		GameRegistry.registerBlock(gasBlock, "gasBlock");
 		
 		// LASER EMITTER
-		laserBlock = new BlockLaser(WarpDriveConfig.laserID, 0,Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Laser Emitter");
+		laserBlock = new BlockLaser(WarpDriveConfig.laserID, 0,Material.rock);
+			
 		LanguageRegistry.addName(laserBlock, "Laser Emitter");
 		GameRegistry.registerBlock(laserBlock, "laserBlock");
 		GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");
 		
 		// LASER EMITTER WITH CAMERA
-		laserCamBlock = new BlockLaserCam(WarpDriveConfig.laserCamID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Laser Emitter + Camera");
+		laserCamBlock = new BlockLaserCam(WarpDriveConfig.laserCamID, 0, Material.rock);
+			
 		LanguageRegistry.addName(laserCamBlock, "Laser Emitter + Camera");
 		GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");
 		
 		// CAMERA
-		cameraBlock = new BlockCamera(WarpDriveConfig.camID, 0,Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Camera block");
+		cameraBlock = new BlockCamera(WarpDriveConfig.camID, 0,Material.rock);
 		
 		LanguageRegistry.addName(cameraBlock, "Camera");
 		GameRegistry.registerBlock(cameraBlock, "cameraBlock");
 		GameRegistry.registerTileEntity(TileEntityCamera.class, "cameraBlock");
 		
 		// MONITOR
-		monitorBlock = new BlockMonitor(WarpDriveConfig.monitorID)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Monitor");
+		monitorBlock = new BlockMonitor(WarpDriveConfig.monitorID);
 		
 		LanguageRegistry.addName(monitorBlock, "Monitor");
 		GameRegistry.registerBlock(monitorBlock, "monitorBlock");
 		GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");
 		
 		// MINING LASER
-		miningLaserBlock = new BlockMiningLaser(WarpDriveConfig.miningLaserID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Mining Laser");
+		miningLaserBlock = new BlockMiningLaser(WarpDriveConfig.miningLaserID, 0, Material.rock);
 		
 		LanguageRegistry.addName(miningLaserBlock, "Mining Laser");
 		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");
 		
 		// LASER TREE FARM
-		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID,0,Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Laser Tree Farm");
+		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID,0,Material.rock);
 		
 		LanguageRegistry.addName(laserTreeFarmBlock, "Laser Tree Farm");
 		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
 		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class,"laserTreeFarmBlock");
 		
 		// PARTICLE BOOSTER
-		boosterBlock = new BlockParticleBooster(WarpDriveConfig.particleBoosterID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Particle Booster");
+		boosterBlock = new BlockParticleBooster(WarpDriveConfig.particleBoosterID, 0, Material.rock);
 		
 		LanguageRegistry.addName(boosterBlock, "Particle Booster");
 		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
@@ -266,69 +225,56 @@ public class WarpDrive implements LoadingCallback {
 				"boosterBlock");
 		
 		// LASER LIFT
-		liftBlock = new BlockLift(WarpDriveConfig.liftID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Laser lift");
+		liftBlock = new BlockLift(WarpDriveConfig.liftID, 0, Material.rock);
 		
 		LanguageRegistry.addName(liftBlock, "Laser lift");
 		GameRegistry.registerBlock(liftBlock, "liftBlock");
 		GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");
 		
 		// IRIDIUM BLOCK
-		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumID)
-			.setHardness(0.8F)
-			.setResistance(150 * 4)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Block of Iridium");
+		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumID);
 		
 		LanguageRegistry.addName(iridiumBlock, "Block of Iridium");
 		GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");
 		
         // SHIP SCANNER
-        scannerBlock = new BlockShipScanner(WarpDriveConfig.shipScannerID, 0, Material.rock)
-	        .setHardness(0.5F)
-	        .setStepSound(Block.soundMetalFootstep)
-	        .setCreativeTab(CreativeTabs.tabRedstone)
-	        .setUnlocalizedName("Ship Scanner");
+        scannerBlock = new BlockShipScanner(WarpDriveConfig.shipScannerID, 0, Material.rock);
         
         LanguageRegistry.addName(scannerBlock, "Ship Scanner");
         GameRegistry.registerBlock(scannerBlock, "scannerBlock");
         GameRegistry.registerTileEntity(TileEntityShipScanner.class, "scannerBlock");		
 
         // CLOAKING DEVICE CORE
-        cloakBlock = new BlockCloakingDeviceCore(WarpDriveConfig.cloakCoreID, 0, Material.rock)
-	        .setHardness(0.5F)
-	        .setStepSound(Block.soundMetalFootstep)
-	        .setCreativeTab(CreativeTabs.tabRedstone)
-	        .setUnlocalizedName("Cloaking Device Core");
+        cloakBlock = new BlockCloakingDeviceCore(WarpDriveConfig.cloakCoreID, 0, Material.rock);
         
         LanguageRegistry.addName(cloakBlock, "Cloaking Device Core");
         GameRegistry.registerBlock(cloakBlock, "cloakBlock");
         GameRegistry.registerTileEntity(TileEntityCloakingDeviceCore.class, "cloakBlock");        
         
         // CLOAKING DEVICE COIL
-		cloakCoilBlock = new BlockCloakingCoil(WarpDriveConfig.cloakCoilID, 0, Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Cloaking Device Coil");
+		cloakCoilBlock = new BlockCloakingCoil(WarpDriveConfig.cloakCoilID, 0, Material.rock);
 		
 		LanguageRegistry.addName(cloakCoilBlock, "Cloaking Device Coil");
 		GameRegistry.registerBlock(cloakCoilBlock, "cloakCoilBlock");    
 		
 		// TRANSPORTER
-		transporterBlock = new BlockTransporter(WarpDriveConfig.transporterID,Material.rock)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("Transporter");
+		transporterBlock = new BlockTransporter(WarpDriveConfig.transporterID,Material.rock);
 		
 		LanguageRegistry.addName(transporterBlock, "Transporter");
 		GameRegistry.registerBlock(transporterBlock, "transporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class,"transporter");
+		
+		reactorMonitorBlock = new BlockLaserReactorMonitor(WarpDriveConfig.reactorMonitorID,Material.rock);
+		
+		LanguageRegistry.addName(reactorMonitorBlock, "Laser Reactor Monitor");
+		GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
+		GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class,"reactorMonitor");
+		
+		// REACTOR LASER FOCUS
+		reactorLaserFocusItem = new ItemReactorLaserFocus(WarpDriveConfig.reactorLaserFocusID);
+		
+		LanguageRegistry.addName(reactorLaserFocusItem, "Reactor Laser Focus");
+		GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
 		
 		// TRANSPORT BEACON
 		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)
@@ -339,7 +285,6 @@ public class WarpDrive implements LoadingCallback {
 		
 		LanguageRegistry.addName(transportBeaconBlock, "Test");
 		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");*/
-		
         
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
@@ -362,109 +307,126 @@ public class WarpDrive implements LoadingCallback {
 		space = DimensionManager.getWorld(spaceDimID);
 		hyperSpace = DimensionManager.getWorld(hyperSpaceDimID);
 		
-		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
+		if(WarpDriveConfig.isICLoaded && WarpDriveConfig.recipesIC2)
+			initIC2Recipes();
 		
+		registry = new WarpCoresRegistry();
+
+		jumpGates = new JumpGatesRegistry();
+		cams = new CamRegistry();
+	}
+	
+	private void initIC2Recipes()
+	{
+		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
+				'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+				'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
+			
 		GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
 		
 		GameRegistry.addRecipe(new ItemStack(radarBlock), "ifi", "imi", "imi",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'f', WarpDriveConfig.i.getIC2Item("frequencyTransmitter"));
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'f', WarpDriveConfig.getIC2Item("frequencyTransmitter"));
 		
 		GameRegistry.addRecipe(new ItemStack(isolationBlock), "iii", "idi", "iii",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'd', Block.blockDiamond);
 		
 		GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
 			'l', Block.leaves,
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
 		
 		GameRegistry.addRecipe(new ItemStack(laserBlock), "sss", "ama", "aaa",
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"),
-			's', WarpDriveConfig.i.getIC2Item("advancedCircuit"));
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			's', WarpDriveConfig.getIC2Item("advancedCircuit"));
 		
 		GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "ama", "ccc",
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"),
-			'm', WarpDriveConfig.i.getIC2Item("miner"));
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			'm', WarpDriveConfig.getIC2Item("miner"));
 		
 		GameRegistry.addRecipe(new ItemStack(boosterBlock), "afc", "ama", "cfa",
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"),
-			'f', WarpDriveConfig.i.getIC2Item("glassFiberCableItem"),
-			'm', WarpDriveConfig.i.getIC2Item("mfeUnit"));
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			'f', WarpDriveConfig.getIC2Item("glassFiberCableItem"),
+			'm', WarpDriveConfig.getIC2Item("mfeUnit"));
 		
 		GameRegistry.addRecipe(new ItemStack(liftBlock), "aca", "ama", "a#a",
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"),
-			'm', WarpDriveConfig.i.getIC2Item("magnetizer"));
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			'm', WarpDriveConfig.getIC2Item("magnetizer"));
 
 		GameRegistry.addRecipe(new ItemStack(iridiumBlock), "iii", "iii", "iii",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"));
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"));
 		
 		GameRegistry.addShapelessRecipe(
-			new ItemStack(WarpDriveConfig.i.getIC2Item("iridiumPlate").getItem(), 9),
+			new ItemStack(WarpDriveConfig.getIC2Item("iridiumPlate").getItem(), 9),
 			new ItemStack(iridiumBlock));
 		
 		GameRegistry.addRecipe(new ItemStack(laserCamBlock), "imi", "cec", "#k#",
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"), 
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"), 
 			'e', laserBlock,
 			'k', cameraBlock);
 		
 		GameRegistry.addRecipe(new ItemStack(cameraBlock), "cgc", "gmg", "cgc",
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'g', Block.glass);
 		
 		GameRegistry.addRecipe(new ItemStack(monitorBlock), "gcg", "gmg", "ggg", 
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'g', Block.glass);
 		
 		GameRegistry.addRecipe(new ItemStack(scannerBlock), "sgs", "mma", "amm",
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"),
-			's', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			's', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'g', Block.glass);	
 	
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock),false,new Object[] {
 			"cwc", "wmw", "cwc",
-			'c', WarpDriveConfig.i.getIC2Item("electronicCircuit"),
+			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
 			'w', "logWood",
 			'm', miningLaserBlock }));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] {
 			"ece", "imi", "iei",
 			'e', Item.enderPearl,
-			'c', WarpDriveConfig.i.getIC2Item("electronicCircuit"),
-			'i', WarpDriveConfig.i.getIC2Item("plateiron"),
-			'm', WarpDriveConfig.i.getIC2Item("machine") }));
+			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
+			'i', WarpDriveConfig.getIC2Item("plateiron"),
+			'm', WarpDriveConfig.getIC2Item("machine") }));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem),false,new Object[] {
+			" p ", "pdp", " p ",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond"}));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] {
+			"pdp", "dmd", "pdp",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond",
+			'm', WarpDriveConfig.getIC2Item("mfeUnit")}));
 		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi", 
 			'i', iridiumBlock,
 			'c', cloakCoilBlock,
-			'm', WarpDriveConfig.i.getIC2Item("advancedMachine"));
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"));
 		
 		GameRegistry.addRecipe(new ItemStack(cloakCoilBlock), "iai", "aca", "iai", 
-			'i', WarpDriveConfig.i.getIC2Item("iridiumPlate"),
-			'c', WarpDriveConfig.i.getIC2Item("advancedCircuit"),
-			'a', WarpDriveConfig.i.getIC2Item("advancedAlloy"));
-		registry = new WarpCoresRegistry();
-
-		
-		jumpGates = new JumpGatesRegistry();
-		cams = new CamRegistry();
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"));
 	}
 
 	private void registerSpaceDimension() {
