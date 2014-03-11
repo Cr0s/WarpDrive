@@ -12,6 +12,7 @@ import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
@@ -403,6 +404,22 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
         }
 
         super.invalidate();
+    }
+    
+    @Override
+    public void writeToNBT(NBTTagCompound tag)
+    {
+    	super.writeToNBT(tag);
+    	tag.setDouble("energyBuffer",energyBuffer);
+    	tag.setDouble("powerBoost", powerBoost);
+    }
+    
+    @Override
+    public void readFromNBT(NBTTagCompound tag)
+    {
+    	super.readFromNBT(tag);
+    	energyBuffer = tag.getDouble("energyBuffer");
+    	powerBoost   = tag.getDouble("powerBoost");
     }
     
     class TeleporterDamage extends DamageSource

@@ -15,6 +15,7 @@ import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.item.ItemReactorLaserFocus;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraftforge.common.ForgeDirection;
@@ -132,6 +133,20 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void writeToNBT(NBTTagCompound tag)
+	{
+		super.writeToNBT(tag);
+		tag.setDouble("energyStored", energyStored);
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound tag)
+	{
+		super.readFromNBT(tag);
+		energyStored = tag.getDouble("energyStored");
 	}
 	
 	@Override
