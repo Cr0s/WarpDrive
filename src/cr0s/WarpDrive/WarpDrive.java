@@ -126,7 +126,6 @@ public class WarpDrive implements LoadingCallback {
 	public void load(FMLInitializationEvent event)
 	{
 		WarpDriveConfig.Init2();
-		warpdriveTab.setBackgroundImageName(CreativeTabs.tabRedstone.getBackgroundImageName());
 
 		// CORE CONTROLLER
 		protocolBlock = new BlockProtocol(WarpDriveConfig.controllerID,0, Material.rock);
@@ -296,9 +295,10 @@ public class WarpDrive implements LoadingCallback {
 		registerHyperSpaceDimension();
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
 
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft
-					.getMinecraft()));
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+		{
+			warpdriveTab.setBackgroundImageName("items.png");
+			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 	}
 
