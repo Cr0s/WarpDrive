@@ -1,17 +1,21 @@
 package cr0s.WarpDrive;
 
+import ic2.api.item.Items;
+
 import java.util.HashMap;
 import java.util.List;
 
 import cr0s.WarpDrive.CloakManager.CloakedArea;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 /**
@@ -193,4 +197,26 @@ public class SpaceEventHandler
 			}
 		return false;
 	}
+	
+    @ForgeSubscribe
+    public void livingFall(LivingFallEvent event)
+    {
+        EntityLivingBase entity = event.entityLiving;
+        float distance = event.distance;
+
+        if (entity instanceof EntityPlayer)
+        {
+            EntityPlayer player = (EntityPlayer) entity;
+            int check = MathHelper.ceiling_float_int(distance - 3.0F);
+
+            if (check > 0)
+            {
+                if ((player.getCurrentArmor(0) != null && player.getCurrentArmor(0).itemID == Items.getItem("quantumBoots").itemID) ||
+                        (player.getCurrentArmor(2) != null && WarpDriveConfig.i.Jetpacks.contains(player.getCurrentArmor(2).itemID)))
+                {
+                    event.setCanceled(true); // Don't damage player
+                }
+            }
+        }
+    }	
 }

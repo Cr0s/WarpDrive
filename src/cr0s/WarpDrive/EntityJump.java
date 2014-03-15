@@ -1213,4 +1213,10 @@ public class EntityJump extends Entity
 				e.printStackTrace();
 			}
 	}
+	
+    @Override
+    public boolean shouldRenderInPass(int pass)
+    {
+        return false;
+    }	
 }
