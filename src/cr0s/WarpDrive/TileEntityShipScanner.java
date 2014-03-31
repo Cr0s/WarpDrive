@@ -62,7 +62,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
-	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
+	private final int BLOCK_TO_DEPLOY_PER_TICK = 3000;
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
 	private String[] methodsArray = { "scanShip", // 0
@@ -188,7 +188,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				// Deploy single block
 				JumpBlock block = blocksToDeploy[currentDeployIndex];
 				
-				if (block!= null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
+				if (block != null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
 				{
 					moveBlockSimple(block);
 					
@@ -590,7 +590,9 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					
 					jb.blockMeta = (localMetadata[x + (y * length + z) * width]) & 0xFF;
 					jb.blockNBT = tileEntities[x + (y * length + z) * width];
-							
+					
+					
+					
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
@@ -599,10 +601,17 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
 						if (tileEntities[x + (y * length + z) * width] == null) {
 							System.out.println("null!");
-						} else
+						} else {
 							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
+						}
+						
+						blocksToDeploy[x + (y * length + z) * width] = jb;
+					} else {
+						jb = null;
+						
+						blocksToDeploy[x + (y * length + z) * width] = jb;
 					}
-					blocksToDeploy[x + (y * length + z) * width] = jb;
+					
 				}
 			}
 		}
