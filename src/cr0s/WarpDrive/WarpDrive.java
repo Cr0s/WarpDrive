@@ -113,7 +113,7 @@ public class WarpDrive implements LoadingCallback {
 		{
 			debugPrint("[WarpDrive] Registering sounds event handler...");
 			MinecraftForge.EVENT_BUS.register(new SoundHandler());
-		}
+		} 
 	}
 	
 	public static void debugPrint(String out)
