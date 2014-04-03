@@ -118,8 +118,10 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static void debugPrint(String out)
 	{
+		if(WarpDriveConfig.debugMode == false)
+			return;
 		if(WarpDriveConfig.debugMode)
-				System.out.println(out);
+			System.out.println(out);
 	}
 
 	@EventHandler
