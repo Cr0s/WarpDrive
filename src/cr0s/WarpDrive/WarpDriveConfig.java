@@ -296,8 +296,8 @@ public class WarpDriveConfig
 		Jetpacks.add(Items.getItem("electricJetpack").itemID);
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
+		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("copperOre").getItemDamage()});
+		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("tinOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
 		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}
