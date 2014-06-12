@@ -298,6 +298,7 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("copperOre").getItemDamage()});
 		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("tinOre").getItemDamage()});
+		CommonWorldGenOres.add(new int[] {Items.getItem("leadOre").itemID, Items.getItem("leadOre").getItemDamage()});
 		MinerOres.add(Items.getItem("rubberWood").itemID);
 		AEExtraFDI = Items.getItem("FluidCell").getItem();
 	}
