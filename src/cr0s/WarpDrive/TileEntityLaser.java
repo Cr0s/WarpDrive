@@ -141,7 +141,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
 		System.out.println("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
-		if (energy == 0 || beamLengthBlocks < 1)
+		if (energy == 0 || beamLengthBlocks < 1 || frequency > 65000 || frequency <= 0)
 		{
 			return;
 		}
@@ -162,6 +162,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		System.out.println("translatedBeamVector: " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
+		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
 
 		// This is scanning beam, do not deal damage to blocks
 		if (frequency == 1420)
@@ -265,7 +266,8 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 					endPoint = new Vector3(hit.hitVec);
 				}
 
-				energy -=  WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + (distance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
+				energy -=  WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + ( (distance - distanceTravelled) * WarpDriveConfig.i.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
+				distanceTravelled = distance;
 				endPoint = new Vector3(hit.hitVec);
 
 				if (energy <= 0)
@@ -513,7 +515,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 	private boolean parseFrequency(int freq)
 	{
-		if (freq > 65000 || freq < 0)   // Invalid frequency
+		if (freq > 65000 || freq <= 0)   // Invalid frequency
 		{
 			r = 1;
 			g = 0;
@@ -521,7 +523,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			return false;
 		}
 
-		if (freq > 0 && freq < 10000)	   // red
+		if (freq > 0 && freq <= 10000)	   // red
 		{
 			r = 1;
 			g = 0;
