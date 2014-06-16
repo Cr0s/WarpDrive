@@ -133,15 +133,15 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			{
 				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY)
 				{
-					delayTicksMine = 0;
-
 					if (valuableIndex < valuablesInLayer.size())
 					{
 						//System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
 						Vector3 valuable = valuablesInLayer.get(valuableIndex++);
 						// Mine valuable ore
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
-
+						if (blockID == 0)
+							return;
+						delayTicksMine = 0;
 						// Skip if block is too hard or its empty block
 						if (!canDig(blockID))
 							return;
@@ -152,6 +152,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 					}
 					else
 					{
+						delayTicksMine = 0;
 						currentMode = 0;
 						--currentLayer;
 					}
@@ -163,6 +164,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private boolean canDig(int blockID)
 	{
+		if (blockID == 0)
+			return false;
 		if (Block.blocksList[blockID] != null)
 			return ((blockID == WarpDriveConfig.i.GT_Granite || blockID == WarpDriveConfig.i.GT_Ores || blockID == WarpDriveConfig.i.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 		else
