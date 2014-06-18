@@ -107,7 +107,7 @@ public class BlockRadar extends BlockContainer
 
         if (radar != null)
         {
-            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
+            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getEnergyStored() + " RF");
         }
 
         return true;

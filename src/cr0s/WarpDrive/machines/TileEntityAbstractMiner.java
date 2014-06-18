@@ -87,6 +87,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	private IInventory findChest()
 	{
+		Vector3[] adjSides = WarpTE.getAdjacentSideOffsets();
 		int[] xPos = {1,-1,0,0,0,0};
 		int[] yPos = {0,0,-1,1,0,0};
 		int[] zPos = {0,0,0,0,-1,1};
@@ -94,7 +95,8 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		
 		for(int i=0;i<6;i++)
 		{
-			result = worldObj.getBlockTileEntity(xCoord+xPos[i], yCoord+yPos[i], zCoord+zPos[i]);
+			Vector3 curOff = adjSides[i];
+			result = worldObj.getBlockTileEntity(xCoord+curOff.intX(), yCoord+curOff.intY(), zCoord+curOff.intZ());
 			if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
 			{
 				return (IInventory) result;
@@ -155,7 +157,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	{
 		TileEntityParticleBooster a = booster();
 		if(a != null)
-			return booster().getCurrentEnergyValue();
+			return booster().getEnergyStored();
 		return 0;
 	}
 	
@@ -198,7 +200,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	protected boolean canDig(int blockID)
 	{
 		if (Block.blocksList[blockID] != null)
-			return ((blockID == WarpDriveConfig.i.GT_Granite || blockID == WarpDriveConfig.i.GT_Ores || blockID == WarpDriveConfig.i.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return ((Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 		else
 			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
@@ -337,9 +339,9 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		TileEntityParticleBooster b = booster();
 		if (b != null)
 			if (test)
-				return packet <= b.getCurrentEnergyValue();
+				return packet <= b.getEnergyStored();
 			else
-				return b.consumeEnergy(packet);
+				return b.removeEnergy(packet,false);
 		return false;
 	}
 	

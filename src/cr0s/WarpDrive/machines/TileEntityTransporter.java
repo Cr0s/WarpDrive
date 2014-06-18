@@ -3,9 +3,6 @@ package cr0s.WarpDrive.machines;
 import java.util.ArrayList;
 import java.util.List;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
@@ -13,26 +10,16 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityTransporter extends WarpTE implements IEnergySink, IPeripheral
+public class TileEntityTransporter extends WarpTE implements IPeripheral
 {
 	private double scanRange=2;
-	
-	private final int maxEnergy;
-	private double energyBuffer=0;
-	private boolean addedToEnergyNet = false;
 	
 	private int scanDist = 4;
 	private double powerBoost = 1;
@@ -57,21 +44,15 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 			"powerBoost",
 			"help" };
 	
-	public TileEntityTransporter()
+	@Override
+	public int getMaxEnergyStored()
 	{
-		super();
-		maxEnergy = WarpDriveConfig.TR_MAX_ENERGY;
+		return WarpDriveConfig.TR_MAX_ENERGY;
 	}
 	
 	@Override
 	public void updateEntity()
 	{
-		if (!addedToEnergyNet)
-        {
-        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
-        		MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
 		
 		if(isLocked && lockStrengthMul > 0)
 			lockStrengthMul*= 0.98;
@@ -80,6 +61,7 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	@Override
 	public String getType()
 	{
+		WarpDrive.debugPrint("GetType");
 		return "transporter";
 	}
 
@@ -138,7 +120,7 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	{
 		String str = methodArray[method];
 		if(str == "energy")
-			return new Object[] {Math.max(energyBuffer,maxEnergy),maxEnergy};
+			return new Object[] {getEnergyStored(),getMaxEnergyStored()};
 		
 		if(str == "source")
 		{
@@ -199,12 +181,11 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	{
 		double ls = lockStrength(sourceVec,destVec,false);
 		ArrayList<EntityLivingBase> entitiesToTransport = findEntities(sourceVec,ls);
-		double energyReq = WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec);
+		int energyReq = (int) Math.ceil(WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
 		for(EntityLivingBase ent : entitiesToTransport)
 		{
-			if(energyBuffer >= energyReq)
+			if(removeEnergy(energyReq,false))
 			{
-				energyBuffer -= energyReq;
 				inflictNegativeEffect(ent,ls);
 				transportEnt(ent,destVec);
 			}
@@ -341,76 +322,15 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 	}
 
 	@Override
-	public boolean canAttachToSide(int side) { return true; }
-
-	@Override
 	public void attach(IComputerAccess computer) {}
 
 	@Override
 	public void detach(IComputerAccess computer) {}
-	
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-	{
-		if(direction.equals(ForgeDirection.UP))
-			return false;
-		return true;
-	}
-
-	@Override
-	public double demandedEnergyUnits()
-	{
-		if(energyBuffer >= maxEnergy)
-			return 0;
-		return maxEnergy-energyBuffer;
-	}
-
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-	{
-		if(energyBuffer < maxEnergy)
-		{
-			energyBuffer += amount;
-			return 0;
-		}
-		return amount;
-	}
-
-	@Override
-	public int getMaxSafeInput()
-	{
-		return Integer.MAX_VALUE;
-	}
-	
-	@Override
-    public void onChunkUnload()
-    {
-        if (addedToEnergyNet)
-        {
-        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
-        		MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-    }
-
-    @Override
-    public void invalidate()
-    {
-        if (addedToEnergyNet)
-        {
-        	if(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER)
-        		MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-
-        super.invalidate();
-    }
     
     @Override
     public void writeToNBT(NBTTagCompound tag)
     {
     	super.writeToNBT(tag);
-    	tag.setDouble("energyBuffer",energyBuffer);
     	tag.setDouble("powerBoost", powerBoost);
     }
     
@@ -418,7 +338,6 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
     public void readFromNBT(NBTTagCompound tag)
     {
     	super.readFromNBT(tag);
-    	energyBuffer = tag.getDouble("energyBuffer");
     	powerBoost   = tag.getDouble("powerBoost");
     }
     
@@ -444,4 +363,10 @@ public class TileEntityTransporter extends WarpTE implements IEnergySink, IPerip
 		}
     	
     }
+
+	@Override
+	public boolean equals(IPeripheral other)
+	{
+		return false;
+	}
 }

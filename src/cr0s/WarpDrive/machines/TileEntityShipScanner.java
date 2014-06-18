@@ -5,14 +5,10 @@ import cr0s.WarpDrive.JumpBlock;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraftforge.common.ForgeDirection;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
-import ic2.api.energy.tile.IEnergyTile;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,13 +25,10 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityShipScanner extends TileEntityAbstractLaser implements IEnergySink,
-		IPeripheral {
-	public boolean addedToEnergyNet = false;
+public class TileEntityShipScanner extends TileEntityAbstractLaser implements IPeripheral
+{
 
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
-	private int currentEnergyValue = 0;
-
 	private int state = 0; // 0 - inactive, 1 - active
 
 	private TileEntityReactor core = null;
@@ -74,11 +67,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
-		}
-
-		if (!addedToEnergyNet && !this.tileEntityInvalid) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			addedToEnergyNet = true;
 		}
 
 		if (++warpCoreSearchTicks > 20) {
@@ -226,15 +214,18 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	}
 
 	// Checks energy level
-	private boolean isEnoughEnergyForScan() {
-		if (core != null) {
-			return core.shipVolume * EU_PER_BLOCK_SCAN <= currentEnergyValue;
+	private boolean isEnoughEnergyForScan()
+	{
+		if (core != null)
+		{
+			return removeEnergy(core.shipVolume * EU_PER_BLOCK_SCAN,true);
 		}
 
 		return false;
 	}
 
-	private void saveShipToSchematic(String fileName) {
+	private void saveShipToSchematic(String fileName)
+	{
 		NBTTagCompound schematic = new NBTTagCompound("Schematic");
 
 		short width = (short) Math.abs(core.maxX - core.minX);
@@ -254,7 +245,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		int size = width * length * height;
 		
 		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_SCAN);
+		removeEnergy(size * EU_PER_BLOCK_SCAN,false);
 		
 		WarpDrive.debugPrint("[ShipScanner] Size: " + size);
 		
@@ -289,12 +280,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 							try {
 								NBTTagCompound tileTag = new NBTTagCompound();
 								te.writeToNBT(tileTag);
-								
-								// Remove energy from energy storages
-								if (te instanceof IEnergyTile) {
-									if (tileTag.hasKey("energy"))
-										tileTag.setInteger("energy", 0);
-								}
 								
 								// Transform TE's coordinates from local axis to .schematic offset-axis
 								tileTag.setInteger("x", te.xCoord - core.minX);
@@ -389,8 +374,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		return null;
 	}
 	
-	private boolean isEnoughEnergyForDeploy(int size) {
-		return size * EU_PER_BLOCK_DEPLOY <= currentEnergyValue;
+	private boolean isEnoughEnergyForDeploy(int size)
+	{
+		return removeEnergy(size * EU_PER_BLOCK_DEPLOY,true);
 	}
 	
 	// Returns result array for CC interface: [ code, "message" ]
@@ -424,8 +410,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		
 		// Check energy level
 		if (!isEnoughEnergyForDeploy(size)) {
-			WarpDrive.debugPrint("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
-			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
+			String output = "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - getEnergyStored())) + " RF";
+			WarpDrive.debugPrint("[ShipScanner] " + output);
+			return new Object[] { 1,  output};
 		}
 		
 		// Check specified area for occupation by blocks
@@ -446,7 +433,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		}
 		
 		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_DEPLOY);
+		removeEnergy(size * EU_PER_BLOCK_DEPLOY,false);
 		
 		// Set deployment vars
 		this.blocksToDeploy = new JumpBlock[size];
@@ -528,18 +515,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		WarpDrive.debugPrint("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
-	
-	@Override
-	public void readFromNBT(NBTTagCompound tag) {
-		super.readFromNBT(tag);
-		this.currentEnergyValue = tag.getInteger("energy");
-	}
-
-	@Override
-	public void writeToNBT(NBTTagCompound tag) {
-		super.writeToNBT(tag);
-		tag.setInteger("energy", this.getCurrentEnergyValue());
-	}
 
 	// CC
 	// IPeripheral methods implementation
@@ -578,7 +553,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			return new Object[] { schematicFileName };
 
 		case 2: // getEnergyLevel()
-			return new Object[] { currentEnergyValue };
+			return new Object[] { getEnergyStored() };
 			
 		case 3: // deployShipFromSchematic(schematicFileName, offsetX, offsetY, offsetZ)
 			if (arguments.length == 4) {
@@ -602,11 +577,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	}
 
 	@Override
-	public boolean canAttachToSide(int side) {
-		return true;
-	}
-
-	@Override
 	public void attach(IComputerAccess computer) {
 	}
 
@@ -614,65 +584,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	public void detach(IComputerAccess computer) {
 	}
 
-	// IEnergySink methods implementation
-	@Override
-	public double demandedEnergyUnits() {
-		return (MAX_ENERGY_VALUE - currentEnergyValue);
-	}
-
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount) {
-		double leftover = 0;
-		currentEnergyValue += Math.round(amount);
-
-		if (getCurrentEnergyValue() > MAX_ENERGY_VALUE) {
-			leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-			currentEnergyValue = MAX_ENERGY_VALUE;
-		}
-
-		return leftover;
-	}
-
-	@Override
-	public int getMaxSafeInput() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter,
-			ForgeDirection direction) {
-		return true;
-	}
-
-	/**
-	 * @return the currentEnergyValue
-	 */
-	public int getCurrentEnergyValue() {
-		return currentEnergyValue;
-	}
-
-	public int collectAllEnergy() {
-		int energy = currentEnergyValue;
-		currentEnergyValue = 0;
-		return energy;
-	}
-
-	@Override
-	public void onChunkUnload() {
-		if (addedToEnergyNet) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-	}
-
-	@Override
-	public void invalidate() {
-		if (addedToEnergyNet) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-
-		super.invalidate();
+	public int collectAllEnergy()
+	{
+		return removeAllEnergy();
 	}
 	
 	public boolean moveBlockSimple(JumpBlock shipBlock)
@@ -849,6 +763,12 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	@Override
 	public boolean shouldChunkLoad()
 	{
+		return false;
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }

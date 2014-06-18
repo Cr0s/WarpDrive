@@ -3,10 +3,6 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.Vector3;
 import net.minecraftforge.common.ForgeDirection;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
-
 import java.util.List;
 
 import net.minecraft.entity.EntityLivingBase;
@@ -15,12 +11,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySink
+public class TileEntityLift extends TileEntityAbstractLaser
 {
-    public boolean addedToEnergyNet = false;
 
     private final int MAX_ENERGY_VALUE = 2048; // eU
-    private int currentEnergyValue = 0;
 
     private int mode = 0; // 0 - inactive, 1 - up, 2 - down
     private int firstUncoveredY;
@@ -48,12 +42,7 @@ public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySi
         {
             return;
         }
-
-        if (!addedToEnergyNet && !this.tileEntityInvalid)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
+        
         if(ticks % 8 == 0)
         	if(isEnabled)
         		liftEntity();
@@ -74,7 +63,7 @@ public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySi
 
             isEnabled = (worldObj.isAirBlock(xCoord, yCoord + 1, zCoord) && worldObj.isAirBlock(xCoord, yCoord + 2, zCoord));
 
-            if (currentEnergyValue != MAX_ENERGY_VALUE || !isEnabled)
+            if (getEnergyStored() != MAX_ENERGY_VALUE || !isEnabled)
             {
                 mode = 0;
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);    // disabled
@@ -164,7 +153,7 @@ public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySi
                         sendLaser(1f,1f,0f,40,0,100);
                         //sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
-                        currentEnergyValue = 0;
+                        removeEnergy(getEnergyStored(),false);
                         return;
                     }
                 }
@@ -185,7 +174,7 @@ public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySi
                         //sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).translate(0.5), 1, 1, 0, 40, 0, 100);
                         sendLaser(1f,1f,0f,40,0,100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
-                        currentEnergyValue = 0;
+                        removeEnergy(getEnergyStored(),false);
                         return;
                     }
                 }
@@ -200,87 +189,8 @@ public class TileEntityLift extends TileEntityAbstractLaser implements IEnergySi
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
+    public int getMaxEnergyStored()
     {
-        super.readFromNBT(tag);
-        this.currentEnergyValue = tag.getInteger("energy");
-    }
-
-    @Override
-    public void writeToNBT(NBTTagCompound tag)
-    {
-        super.writeToNBT(tag);
-        tag.setInteger("energy", this.getCurrentEnergyValue());
-    }
-
-    // IEnergySink methods implementation
-    @Override
-    public double demandedEnergyUnits()
-    {
-        return (MAX_ENERGY_VALUE - currentEnergyValue);
-    }
-
-    @Override
-    public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-    {
-        double leftover = 0;
-        currentEnergyValue += Math.round(amount);
-
-        if (getCurrentEnergyValue() > MAX_ENERGY_VALUE)
-        {
-            leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-            currentEnergyValue = MAX_ENERGY_VALUE;
-        }
-
-        return leftover;
-    }
-
-    @Override
-    public int getMaxSafeInput()
-    {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-    {
-        return true;
-    }
-
-    /**
-     * @return the currentEnergyValue
-     */
-    public int getCurrentEnergyValue()
-    {
-        return currentEnergyValue;
-    }
-
-    public int collectAllEnergy()
-    {
-        int energy = currentEnergyValue;
-        currentEnergyValue = 0;
-        return energy;
-    }
-
-    @Override
-    public void onChunkUnload()
-    {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-    }
-
-    @Override
-    public void invalidate()
-    {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-
-        super.invalidate();
+    	return MAX_ENERGY_VALUE;
     }
 }

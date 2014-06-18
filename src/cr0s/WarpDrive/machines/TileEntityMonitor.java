@@ -3,9 +3,9 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -134,12 +134,6 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
-	}
-
-	@Override
 	public void attach(IComputerAccess computer)
 	{
 	}
@@ -147,5 +141,11 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral
 	@Override
 	public void detach(IComputerAccess computer)
 	{
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

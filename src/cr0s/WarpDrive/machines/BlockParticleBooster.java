@@ -103,7 +103,7 @@ public class BlockParticleBooster extends BlockContainer
 
         if (booster != null)
         {
-            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getEnergyStored() + " RF");
         }
 
         return true;

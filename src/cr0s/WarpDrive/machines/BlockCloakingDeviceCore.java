@@ -80,7 +80,7 @@ public class BlockCloakingDeviceCore extends BlockContainer
 
         if (me != null)
         {
-            par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getCurrentEnergyValue() + " Eu");
+            par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getEnergyStored() + " RF");
         }
 
         return true;

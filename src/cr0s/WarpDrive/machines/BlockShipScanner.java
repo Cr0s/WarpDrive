@@ -93,7 +93,7 @@ public class BlockShipScanner extends BlockContainer
 
         if (me != null)
         {
-            par5EntityPlayer.addChatMessage("[Ship Scanner] Energy level: " + me.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Ship Scanner] Energy level: " + me.getEnergyStored());
         }
 
         return true;

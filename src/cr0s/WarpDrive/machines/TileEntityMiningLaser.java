@@ -3,9 +3,9 @@ package cr0s.WarpDrive.machines;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.util.ArrayList;
 import net.minecraft.block.Block;
@@ -413,12 +413,6 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
-	}
-
-	@Override
 	public void attach(IComputerAccess computer)
 	{
 	}
@@ -474,5 +468,11 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	protected float getColorB()
 	{
 		return 1f;
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

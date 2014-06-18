@@ -6,9 +6,9 @@ import cr0s.WarpDrive.CamRegistryItem;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -119,7 +119,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 
 				if (te != null && te instanceof TileEntityParticleBooster)
 				{
-					energyCollected += ((TileEntityParticleBooster)te).collectAllEnergy();
+					energyCollected += ((TileEntityParticleBooster)te).removeAllEnergy();
 				}
 				else
 				{
@@ -636,12 +636,6 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
-	}
-
-	@Override
 	public void attach(IComputerAccess computer)
 	{
 	}
@@ -649,5 +643,11 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 	@Override
 	public void detach(IComputerAccess computer)
 	{
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

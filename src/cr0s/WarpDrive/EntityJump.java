@@ -2,8 +2,7 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.machines.TileEntityReactor;
-import dan200.computer.api.IPeripheral;
-import ic2.api.network.NetworkHelper;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -522,7 +521,7 @@ public class EntityJump extends Entity
 					te.updateContainingBlockInfo();
 					try
 					{
-						NetworkHelper.updateTileEntityField(te, "facing");
+						//NetworkHelper.updateTileEntityField(te, "facing"); Dunno what this does
 					}
 					catch (Exception e) {}
 				}
