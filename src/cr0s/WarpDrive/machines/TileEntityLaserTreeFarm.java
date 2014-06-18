@@ -44,7 +44,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"silkTouch",
 			"silkTouchLeaves",
 			"treetap",
-			"state"
+			"state",
+			"energy"
 	};
 	
 	public TileEntityLaserTreeFarm()
@@ -372,6 +373,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		{
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
 			return new Object[] { state, xSize,zSize,energy(),totalHarvested };
+		}
+		
+		if(methodStr == "energy")
+		{
+			return getEnergyObject();
 		}
 		return null;
 	}

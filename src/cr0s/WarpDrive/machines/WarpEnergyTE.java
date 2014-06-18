@@ -31,6 +31,11 @@ public abstract class WarpEnergyTE extends TileEntity implements IEnergyHandler
 		return false;
 	}
 	
+	public Object[] getEnergyObject()
+	{
+		return new Object[]{ getEnergyStored(),getMaxEnergyStored() };
+	}
+	
 	protected int removeAllEnergy()
 	{
 		int temp = energyStoredAmount;

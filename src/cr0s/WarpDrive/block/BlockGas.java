@@ -1,6 +1,8 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.block;
 
 import java.util.Random;
+
+import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;

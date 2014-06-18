@@ -42,15 +42,15 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     public String[] methodsArray =
     {
-        "dim_getp", "dim_setp",                                        // 0, 1
-        "dim_getn", "dim_setn",                                        // 2, 3
-        "set_mode", "set_distance", "set_direction",                   // 4, 5, 6
-        "get_attached_players", "summon", "summon_all",                // 7, 8, 9
-        "get_x", "get_y", "get_z",                                     // 10, 11, 12
-        "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
-        "set_beacon_frequency", "get_dx", "get_dz",                    // 16, 17, 18
-        "set_core_frequency", "is_in_space", "is_in_hyperspace",       // 19, 20, 21
-        "set_target_jumpgate",                                         // 22
+        "dimGetP", "dimSetP",                                        // 0, 1
+        "dimGetN", "dimSetN",                                        // 2, 3
+        "setMode", "setDistance", "setDirection",                   // 4, 5, 6
+        "getAttachedPlayers", "summon", "summonAll",                // 7, 8, 9
+        "getX", "getY", "getZ",                                     // 10, 11, 12
+        "energy", "jump", "getShipSize",                // 13, 14, 15
+        "setBeaconFrequency", "getDX", "getDZ",                    // 16, 17, 18
+        "setCoreFrequency", "isInSpace", "isInHyperspace",       // 19, 20, 21
+        "setTargetJumpgate",                                         // 22
     };
 
     private int ticks = 0;
@@ -602,7 +602,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 13: // get_energy_value
                 if (core != null)
                 {
-                    return new Object[] { (Integer)((TileEntityReactor)core).getEnergyStored() };
+                    return ((TileEntityReactor)core).getEnergyObject();
                 }
 
                 return null;

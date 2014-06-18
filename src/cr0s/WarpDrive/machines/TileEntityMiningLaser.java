@@ -52,7 +52,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 		"fortune", //7
 		"speedMul", //8
 		"layer", //9
-		"minLayer" //10
+		"minLayer", //10
+		"energy"
 	};
 
 	private int delayTicksScan = 0;
@@ -344,7 +345,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 					if (energy() < 0)
 						state = "out of energy";
 				}
-				return new Object[] {state, energy(), currentLayer, valuablesMined, valuablesInLayer,
+				return new Object[] {state, getEnergyObject(), currentLayer, valuablesMined, valuablesInLayer,
 						digX, digZ, speedMul, fortune(), silkTouch()};
 
 			case 5: // Offset
@@ -407,6 +408,10 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 					return new String[] { "NaN" };
 				}
 				return new Integer[] { currentLayer };
+			}
+			case 11:
+			{
+				return getEnergyObject();
 			}
 		}
 		return null;

@@ -12,6 +12,8 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
+import cr0s.WarpDrive.block.BlockAir;
+import cr0s.WarpDrive.block.BlockGas;
 import cr0s.WarpDrive.machines.*;
 
 import java.util.ArrayList;

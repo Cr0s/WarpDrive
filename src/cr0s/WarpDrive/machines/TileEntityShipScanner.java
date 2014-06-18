@@ -49,7 +49,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IP
 	
 	private String[] methodsArray = { "scanShip", // 0
 			"getSchematicFileName", // 1
-			"getEnergyLevel", // 2
+			"energy", // 2
 			"deployShipFromSchematic" // 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
 	};
 
@@ -553,7 +553,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IP
 			return new Object[] { schematicFileName };
 
 		case 2: // getEnergyLevel()
-			return new Object[] { getEnergyStored() };
+			return getEnergyObject();
 			
 		case 3: // deployShipFromSchematic(schematicFileName, offsetX, offsetY, offsetZ)
 			if (arguments.length == 4) {

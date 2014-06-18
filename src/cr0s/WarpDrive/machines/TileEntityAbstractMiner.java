@@ -80,6 +80,15 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, fortuneLevel);
 	}
 	
+	@Override
+	public Object[] getEnergyObject()
+	{
+		if(booster == null)
+			return new Object[] { 0, 0};
+		
+		return booster.getEnergyObject();
+	}
+	
 	protected boolean isOnEarth()
 	{
 		return worldObj.provider.dimensionId == 0;

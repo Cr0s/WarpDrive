@@ -47,7 +47,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 		"freq",			// 2
 		"getFirstHit",		// 3
 		"getBoosterDXDZ",	// 4
-		"camFreq"		// 5
+		"camFreq",		// 5
 	};
 
 	public int delayTicks = 0;
@@ -594,6 +594,10 @@ public class TileEntityLaser extends TileEntityAbstractLaser implements IPeriphe
 					return new Integer[] { camFreq };
 				}
 				break;
+			case 6://Energy
+			{
+				return getEnergyObject();
+			}
 		}
 		return null;
 	}
