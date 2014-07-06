@@ -133,24 +133,18 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			{
 				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY)
 				{
-					if (valuableIndex < valuablesInLayer.size())
+					delayTicksMine = 0;
+					while(valuableIndex < valuablesInLayer.size())
 					{
-						//System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
 						Vector3 valuable = valuablesInLayer.get(valuableIndex++);
-						// Mine valuable ore
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
-						if (blockID == 0)
-							return;
-						delayTicksMine = 0;
-						// Skip if block is too hard or its empty block
-						if (!canDig(blockID))
-							return;
-
+						if (blockID == 0 || !canDig(blockID))
+							continue;
 						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						harvestBlock(valuable);
 					}
-					else
+					if (valuableIndex >= valuablesInLayer.size())
 					{
 						delayTicksMine = 0;
 						currentMode = 0;
