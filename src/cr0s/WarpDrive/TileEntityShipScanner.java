@@ -167,7 +167,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			deployDelayTicks = 0;
 			
 			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
-			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
+//			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -334,14 +334,14 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
 	
-		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
+//		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
 		
 		int size = width * length * height;
 		
 		// Consume energy
 		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_SCAN);
 		
-		System.out.println("[ShipScanner] Size: " + size);
+//		System.out.println("[ShipScanner] Size: " + size);
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -416,7 +416,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	}
 
 	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
-		System.out.println("[ShipScanner] Filename: " + fileName);
+//		System.out.println("[ShipScanner] Filename: " + fileName);
 		
 		try {
 			File file = new File(fileName);
@@ -482,7 +482,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
 		
 		if (schematic == null) {
-			System.out.println("[ShipScanner] Schematic is null!");
+//			System.out.println("[ShipScanner] Schematic is null!");
 			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
 		}
 		
@@ -504,11 +504,11 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		
 		int size = width* height * length;
 		
-		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
+//		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
 		
 		// Check energy level
 		if (!isEnoughEnergyForDeploy(size)) {
-			System.out.println("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
+//			System.out.println("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
 			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
 		}
 		
@@ -525,7 +525,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 
 		if (occupiedBlockCount > 0) {
-			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
+//			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
 			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
 		}
 		
@@ -542,11 +542,11 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		this.newY = targetY;
 		this.newZ = targetZ;
 		
-		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
+//		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
 		
 		// Read blocks and TileEntities from NBT to internal storage array
 		
-		System.out.println("[ShipScanner] Loading blocks...");
+//		System.out.println("[ShipScanner] Loading blocks...");
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
@@ -565,7 +565,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 		
 		// Load Tile Entities
-		System.out.println("[ShipScanner] Loading TileEntities...");
+//		System.out.println("[ShipScanner] Loading TileEntities...");
 		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
@@ -575,7 +575,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			int teY = teTag.getInteger("y");
 			int teZ = teTag.getInteger("z");
 			
-			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
+//			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
 			tileEntities[teX + (teY * length + teZ) * width] = teTag;
 		}			
 		
@@ -595,7 +595,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
-					
+/*					
 					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
 						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
 						if (tileEntities[x + (y * length + z) * width] == null) {
@@ -603,13 +603,14 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 						} else
 							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
 					}
+*/
 					blocksToDeploy[x + (y * length + z) * width] = jb;
 				}
 			}
 		}
 		
 		switchState(1);
-		System.out.println("[ShipScanner] Ship deployed.");
+//		System.out.println("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
 	
@@ -675,7 +676,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					return new Object[] { 0, "Specified .schematic file not found!" };
 				else
 				{
-					System.out.println("[ShipScanner] Trying to deploy ship");
+//					System.out.println("[ShipScanner] Trying to deploy ship");
 					return deployShip(fileName, x, y, z);
 				}
 			} else
