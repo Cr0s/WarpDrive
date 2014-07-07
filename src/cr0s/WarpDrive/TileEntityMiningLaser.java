@@ -143,13 +143,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						harvestBlock(valuable);
+						return;//top lel, yes yes
 					}
-					if (valuableIndex >= valuablesInLayer.size())
-					{
-						delayTicksMine = 0;
-						currentMode = 0;
-						--currentLayer;
-					}
+					delayTicksMine = 0;
+					currentMode = 0;
+					--currentLayer;
 				}
 			}
 		}
