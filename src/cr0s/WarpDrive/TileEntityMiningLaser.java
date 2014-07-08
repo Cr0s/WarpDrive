@@ -47,8 +47,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	Boolean powerStatus = false;
 	private IGridInterface grid;
 
-	private final int MAX_BOOSTERS_NUMBER = 1;
-
 	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
@@ -275,7 +273,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		if (inventory == null || itemStackSource == null)
 		{
-			return 0;	//TODO stop operation/raise error/etc instead of losing valuables silently (i.e. no chests and with AE problems)
+			return 0;	//TODO stop operation/raise error/etc instead of losing valuables silently (i.e. no chests and with AE problems)
 		}
 
 		int transferred = 0;
