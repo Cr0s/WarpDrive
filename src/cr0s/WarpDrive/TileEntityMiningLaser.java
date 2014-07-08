@@ -159,7 +159,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		if (blockID == 0)
 			return false;
 		if (Block.blocksList[blockID] != null)
-			return ((blockID == WarpDriveConfig.i.GT_Granite || blockID == WarpDriveConfig.i.GT_Ores || blockID == WarpDriveConfig.i.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return ( (blockID == WarpDriveConfig.i.GT_Granite || 
+						blockID == WarpDriveConfig.i.GT_Ores || 
+						blockID == WarpDriveConfig.i.iridiumID ||
+						Block.blocksList[blockID].blockHardness <= Block.obsidian.blockHardness) &&
+						blockID !=WarpDriveConfig.i.MFFS_Field &&
+						blockID != Block.bedrock.blockID ); //TODO maybe change to WarpDriveConfig.i.MinerOres instead?
 		else
 			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
@@ -270,7 +275,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		if (inventory == null || itemStackSource == null)
 		{
-			return 0;
+			return 0;	//TODO stop operation/raise error/etc instead of losing valuables silently (i.e. no chests and with AE problems)
 		}
 
 		int transferred = 0;
