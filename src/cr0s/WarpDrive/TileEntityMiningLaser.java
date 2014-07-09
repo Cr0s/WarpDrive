@@ -129,10 +129,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			}
 			else
 			{
-				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY)
+				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY && isMining)
 				{
 					delayTicksMine = 0;
-					while(valuableIndex < valuablesInLayer.size())
+					while(valuableIndex < valuablesInLayer.size() && isMining)
 					{
 						Vector3 valuable = valuablesInLayer.get(valuableIndex++);
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
@@ -157,12 +157,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		if (blockID == 0)
 			return false;
 		if (Block.blocksList[blockID] != null)
-			return ( (blockID == WarpDriveConfig.i.GT_Granite || 
-						blockID == WarpDriveConfig.i.GT_Ores || 
-						blockID == WarpDriveConfig.i.iridiumID ||
+			return ( (WarpDriveConfig.i.MinerOres.contains(blockID) ||
 						Block.blocksList[blockID].blockHardness <= Block.obsidian.blockHardness) &&
 						blockID !=WarpDriveConfig.i.MFFS_Field &&
-						blockID != Block.bedrock.blockID ); //TODO maybe change to WarpDriveConfig.i.MinerOres instead?
+						blockID != Block.bedrock.blockID );
 		else
 			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
@@ -273,7 +271,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		if (inventory == null || itemStackSource == null)
 		{
-			return 0;	//TODO stop operation/raise error/etc instead of losing valuables silently (i.e. no chests and with AE problems)
+			isMining = false; //stopping operation
+			return 0;	
 		}
 
 		int transferred = 0;
