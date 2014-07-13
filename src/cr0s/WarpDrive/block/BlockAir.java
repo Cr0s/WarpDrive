@@ -18,7 +18,7 @@ public class BlockAir extends Block
     {
         super(par1, Material.air);
         setHardness(0.0F);
-        setUnlocalizedName("Air block");
+        setUnlocalizedName("warpdrive.blocks.Air");
     }
 
     @Override

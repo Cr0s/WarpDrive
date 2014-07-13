@@ -26,7 +26,7 @@ public class BlockLaserCam extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser Emitter + Camera");
+		setUnlocalizedName("warpdrive.machines.LaserCamera");
     }
 
     @Override

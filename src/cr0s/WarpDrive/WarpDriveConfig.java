@@ -16,7 +16,7 @@ public class WarpDriveConfig
 	public static WarpDriveConfig i;
 	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID, powerReactorID, powerLaserID, componentID;
 //
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -274,6 +274,10 @@ public class WarpDriveConfig
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
 		transporterID = config.getBlock("transporter", 520).getInt();
 		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
+		powerLaserID = config.getBlock("powerLaser", 522).getInt();
+		powerReactorID = config.getBlock("powerReactor",523).getInt();
+		
+		componentID = config.getItem("component", 21140).getInt();
 		
 		isCCLoaded = Loader.isModLoaded("ComputerCraft");
 		if (isCCLoaded)

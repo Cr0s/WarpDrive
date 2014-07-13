@@ -24,7 +24,7 @@ public class BlockLaserTreeFarm extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser Tree Farm");
+		setUnlocalizedName("warpdrive.machines.TreeFarm");
     }
 
     @Override

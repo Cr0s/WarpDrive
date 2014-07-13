@@ -338,7 +338,7 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 		{
 			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1),0,1);
 		}
-		return 0;
+		return -1;
 	}
 	
 	private void unlock()

@@ -26,7 +26,7 @@ public class BlockShipScanner extends BlockContainer
         setHardness(0.5F);
         setStepSound(Block.soundMetalFootstep);
         setCreativeTab(WarpDrive.warpdriveTab);
-        setUnlocalizedName("Ship Scanner");
+        setUnlocalizedName("warpdrive.machines.Scanner");
     }
 
     @Override
