@@ -472,10 +472,11 @@ System.out.println("ZLO7");
                 this.shipSize = this.shipDown + this.shipUp;
                 break;
         }
-
-        // Ship side is too big
-        if (shipLength > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipWidth > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipHeight > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
+        
+        // Ship size is too big
+        if (this.shipSize + 1 > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
         {
+			messageToAllPlayersOnShip("Ship is too long. Cannot jump.");
             this.controller.setJumpFlag(false);
             return false;
         }
