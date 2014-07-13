@@ -54,7 +54,6 @@ public class WarpDriveConfig
 	public int PB_MAX_ENERGY_VALUE = 100000;
 	
 	// Mining Laser
-	public int ML_MAX_BOOSTERS_NUMBER = 1;
 	public int ML_SCAN_DELAY = 20 * 5;
 	public int ML_MINE_DELAY = 10;
 	public int ML_EU_PER_LAYER_SPACE = 500;
