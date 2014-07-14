@@ -53,8 +53,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     public int shipLeft, shipRight;
     public int shipUp, shipDown;
     public int shipHeight, shipWidth, shipLength;
-    int shipSize = 0;
-    int shipVolume;
+    int shipSize = 0;	//ship length in the direction of a jump
+    int shipVolume = 0; //number of all blocks the ship consists of
     int currentMode = 0;
 
     int currentEnergyValue = 0;
@@ -67,7 +67,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
 
     int cooldownTime = 0;
-    public int randomCooldownAddition = 0;
 
     private int registryUpdateTicks = 0;
     public String coreFrequency = "default";
@@ -188,7 +187,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     }
 
                     // Awaiting cooldown time
-                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
+                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) )
                     {
                         return;
                     }
@@ -392,89 +391,29 @@ System.out.println("ZLO7");
 
     public boolean calculateSpatialShipParameters()
     {
-        int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
-
-        if (Math.abs(dx) > 0)
-        {
-            if (dx == 1)
-            {
-                x1 = xCoord - shipBack;
-                x2 = xCoord + shipFront;
-                z1 = zCoord - shipLeft;
-                z2 = zCoord + shipRight;
-            }
-            else
-            {
-                x1 = xCoord - shipFront;
-                x2 = xCoord + shipBack;
-                z1 = zCoord - shipRight;
-                z2 = zCoord + shipLeft;
-            }
-        }
-        else if (Math.abs(dz) > 0)
-        {
-            if (dz == 1)
-            {
-                z1 = zCoord - shipBack;
-                z2 = zCoord + shipFront;
-                x1 = xCoord - shipRight;
-                x2 = xCoord + shipLeft;
-            }
-            else
-            {
-                z1 = zCoord - shipFront;
-                z2 = zCoord + shipBack;
-                x1 = xCoord - shipLeft;
-                x2 = xCoord + shipRight;
-            }
-        }
-
-        if (x1 < x2)
-        {
-            minX = x1;
-            maxX = x2;
-        }
-        else
-        {
-            minX = x2;
-            maxX = x1;
-        }
-
-        if (z1 < z2)
-        {
-            minZ = z1;
-            maxZ = z2;
-        }
-        else
-        {
-            minZ = z2;
-            maxZ = z1;
-        }
-
-        minY = yCoord - shipDown;
-        maxY = yCoord + shipUp;
-        this.shipSize = 0;
-
+		int sizeFrontBack = shipFront + shipBack;
+		int sizeRightLeft = shipRight + shipLeft;
+		int sizeUpDown = shipUp + shipDown;
+	
         switch (this.direction)
         {
             case 0:
             case 180:
-                this.shipSize = this.shipBack + this.shipFront;
+                this.shipSize = sizeFrontBack;
                 break;
 
             case 90:
             case 270:
-                this.shipSize = this.shipLeft + shipRight;
+                this.shipSize = sizeRightLeft;
                 break;
 
             case -1:
             case -2:
-                this.shipSize = this.shipDown + this.shipUp;
+                this.shipSize = sizeUpDown;
                 break;
-        }
-        
+        }   
         // Ship size is too big
-        if (this.shipSize + 1 > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
+        if (sizeFrontBack > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeRightLeft > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeUpDown > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
         {
 			messageToAllPlayersOnShip("Ship is too long. Cannot jump.");
             this.controller.setJumpFlag(false);
