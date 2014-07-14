@@ -391,6 +391,69 @@ System.out.println("ZLO7");
 
     public boolean calculateSpatialShipParameters()
     {
+        int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
+
+        if (Math.abs(dx) > 0)
+        {
+            if (dx == 1)
+            {
+                x1 = xCoord - shipBack;
+                x2 = xCoord + shipFront;
+                z1 = zCoord - shipLeft;
+                z2 = zCoord + shipRight;
+            }
+            else
+            {
+                x1 = xCoord - shipFront;
+                x2 = xCoord + shipBack;
+                z1 = zCoord - shipRight;
+                z2 = zCoord + shipLeft;
+            }
+        }
+        else if (Math.abs(dz) > 0)
+        {
+            if (dz == 1)
+            {
+                z1 = zCoord - shipBack;
+                z2 = zCoord + shipFront;
+                x1 = xCoord - shipRight;
+                x2 = xCoord + shipLeft;
+            }
+            else
+            {
+                z1 = zCoord - shipFront;
+                z2 = zCoord + shipBack;
+                x1 = xCoord - shipLeft;
+                x2 = xCoord + shipRight;
+            }
+        }
+
+        if (x1 < x2)
+        {
+            minX = x1;
+            maxX = x2;
+        }
+        else
+        {
+            minX = x2;
+            maxX = x1;
+        }
+
+        if (z1 < z2)
+        {
+            minZ = z1;
+            maxZ = z2;
+        }
+        else
+        {
+            minZ = z2;
+            maxZ = z1;
+        }
+
+        minY = yCoord - shipDown;
+        maxY = yCoord + shipUp;
+        this.shipSize = 0;
+	
 		int sizeFrontBack = shipFront + shipBack;
 		int sizeRightLeft = shipRight + shipLeft;
 		int sizeUpDown = shipUp + shipDown;
