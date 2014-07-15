@@ -30,6 +30,35 @@ public class BlockPowerReactor extends BlockContainer
 	}
 	
 	@Override
+	public void onBlockAdded(World w,int x, int y,int z)
+	{
+		TileEntity te = w.getBlockTileEntity(x, y, z);
+		if(te instanceof TileEntityPowerReactor)
+			((TileEntityPowerReactor)te).updateNeighbours();
+	}
+	
+	@Override
+	public void onNeighborBlockChange(World w,int x,int y,int z,int b)
+	{
+		TileEntity te = w.getBlockTileEntity(x, y, z);
+		if(te instanceof TileEntityPowerReactor)
+			((TileEntityPowerReactor)te).updateNeighbours();
+	}
+	
+	@Override
+	public void breakBlock(World w,int x,int y,int z, int oid,int om)
+	{
+		int[] xo = {-2,2,0,0};
+		int[] zo = {0,0,-2,2};
+		for(int i=0;i<4;i++)
+		{
+			TileEntity te = w.getBlockTileEntity(x+xo[i], y, z+zo[i]);
+			if(te instanceof TileEntityPowerLaser)
+				((TileEntityPowerLaser)te).unlink();
+		}
+	}
+	
+	@Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {

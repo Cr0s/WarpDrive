@@ -222,7 +222,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
+		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 	

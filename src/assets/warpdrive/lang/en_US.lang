@@ -11,6 +11,7 @@ tile.warpdrive.blocks.Air.name=Air Block
 tile.warpdrive.blocks.Gas.name=Gas Block
 tile.warpdrive.blocks.WarpIsolation.name=Warp-field Isolation Block
 tile.warpdrive.power.Reactor.name=Enantiomorphic Reactor
+tile.warpdrive.power.Laser.name=Aurbis Reactor Stabilisation Laser
 tile.warpdrive.machines.WarpCore.name=Warp Drive
 tile.warpdrive.machines.WarpProtocol.name=Warp Drive Controller
 tile.warpdrive.machines.WarpRadar.name=Warp Radar

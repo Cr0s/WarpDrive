@@ -230,6 +230,8 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(powerReactorBlock,"powerReactor");
 		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, "powerReactor");
 		powerLaserBlock   = new BlockPowerLaser(WarpDriveConfig.powerLaserID);
+		GameRegistry.registerBlock(powerLaserBlock,"powerLaser");
+		GameRegistry.registerTileEntity(TileEntityPowerLaser.class,"powerLaser");
 		
 		// TRANSPORT BEACON
 		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)

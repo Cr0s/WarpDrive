@@ -97,6 +97,11 @@ public class WarpDriveConfig
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
 	
+	// POWER REACTOR
+	public static int		PR_MAX_ENERGY = 10000000;
+	public static int		PR_TICK_TIME  = 20;
+	public static int		PR_MAX_LASERS = 3;
+	
 	// REACTOR MONITOR
 	public static int		RM_MAX_ENERGY = 1000000;
 	public static double	RM_EU_PER_HEAT = 2;
@@ -182,7 +187,7 @@ public class WarpDriveConfig
 	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", 100000000).getInt();
 	    
 	    // Particle Booster
-	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", 100000).getInt();
+	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", 1000000).getInt();
 		
 		// Laser Emitter
 		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", 10).getInt();
@@ -215,11 +220,11 @@ public class WarpDriveConfig
 		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
 		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
 		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
-		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 1000).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 250000).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 80).getInt();
+		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 800).getInt();	  
+		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 16).getInt();
 		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
 		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
 		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
@@ -229,11 +234,15 @@ public class WarpDriveConfig
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
 		
 		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 1000000).getInt();	
+		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 10000000).getInt();	
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
 		
+		// Reactor
+		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
+		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update",20).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 3).getInt();
 	}
 	
 	public static void Init2()

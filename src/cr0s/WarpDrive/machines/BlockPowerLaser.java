@@ -13,20 +13,63 @@ import net.minecraft.world.World;
 
 public class BlockPowerLaser extends BlockContainer
 {
-	Icon[] iconBuffer = new Icon[2];
+	Icon[] iconBuffer = new Icon[3];
 	public BlockPowerLaser(int id)
     {
         super(id, Material.iron);
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.power.laser");
+		setUnlocalizedName("warpdrive.power.Laser");
     }
 
 	@Override
 	public TileEntity createNewTileEntity(World world)
 	{
-		return new TileEntityPowerReactor();
+		return new TileEntityPowerLaser();
+	}
+	
+	@Override
+	public void onBlockAdded(World w,int x,int y, int z)
+	{
+		TileEntity te = w.getBlockTileEntity(x, y, z);
+		if(te instanceof TileEntityPowerLaser)
+			((TileEntityPowerLaser)te).scanForReactor();
+	}
+	
+	@Override
+	public void onNeighborBlockChange(World w,int x,int y,int z,int b)
+	{
+		TileEntity te = w.getBlockTileEntity(x, y, z);
+		if(te instanceof TileEntityPowerLaser)
+			((TileEntityPowerLaser)te).updateNeighbours();
+	}
+	
+	private boolean isActive(int side, int meta)
+	{
+		if(side == 3 && meta == 1)
+			return true;
+		
+		if(side == 2 && meta == 2)
+			return true;
+		
+		if(side == 4 && meta == 4)
+			return true;
+		
+		if(side == 5 && meta == 3)
+			return true;
+		return false;
+	}
+	
+	@Override
+	@SideOnly(Side.CLIENT)
+	public Icon getIcon(int side, int meta)
+	{
+		if(side == 0 || side == 1)
+			return iconBuffer[0];
+		if(isActive(side,meta))
+			return iconBuffer[2];
+		return iconBuffer[1];
 	}
 	
 	@Override
@@ -35,6 +78,7 @@ public class BlockPowerLaser extends BlockContainer
     {
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:powerLaserTopBottom");
         iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:powerLaserSides");
+        iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:powerLaserActive");
     }
 
 }

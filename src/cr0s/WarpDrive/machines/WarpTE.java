@@ -1,5 +1,7 @@
 package cr0s.WarpDrive.machines;
 
+import net.minecraft.block.Block;
+import net.minecraft.world.World;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 
@@ -39,6 +41,12 @@ public abstract class WarpTE extends WarpEnergyTE
 	
 	protected boolean toBool(Object o)
 	{
+		if(o == null)
+			return false;
+		
+		if(o instanceof Boolean)
+			return ((Boolean) o);
+		
 		if(o.toString() == "true" || o.toString() == "1.0" || o.toString() == "1")
 			return true;
 		return false;
@@ -67,5 +75,13 @@ public abstract class WarpTE extends WarpEnergyTE
 	protected boolean isASpaceDim()
 	{
 		return isSpaceDim() || isHyperSpaceDim();
+	}
+	
+	protected boolean isAir(World wo,int x, int y, int z)
+	{
+		int b = wo.getBlockId(x, y, z);
+		if(b == 0 || b == WarpDrive.airBlock.blockID)
+			return true;
+		return false;
 	}
 }
