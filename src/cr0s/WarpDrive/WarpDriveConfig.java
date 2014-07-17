@@ -23,7 +23,7 @@ public class WarpDriveConfig
 	public boolean isGregLoaded = false, isAELoaded = false, isAEExtraLoaded = false, isAdvSolPanelLoaded = false, isASLoaded = false, isICBMLoaded = false, isMFFSLoaded = false, isGraviSuiteLoaded = false;
 //
 	public int[] IC2_Air;
-	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, ICBM_Explosive = 0, MFFS_Field = 0;
 	public Set<Integer> SpaceHelmets, Jetpacks, MinerOres, scannerIgnoreBlocks;
 	private Class<?> AEBlocks;
 	private Class<?> AEMaterials;
@@ -422,6 +422,7 @@ public class WarpDriveConfig
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block)z.getField("blockMachine").get(null)).blockID;
 			ICBM_Missile = ((Item)z.getField("itemMissile").get(null)).itemID;
+			ICBM_Explosive = ((Item)z.getField("blockExplosive").get(null)).itemID;
 		}
 		catch (Exception e)
 		{
