@@ -267,6 +267,7 @@ public class WarpDriveConfig
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
 		MinerOres.add(Block.torchWood.blockID);
+		MinerOres.add(Block.glowStone.blockID);
 		
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
