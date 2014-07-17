@@ -278,7 +278,10 @@ public class WarpDriveConfig
 		scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
 		scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
 		scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
-		scannerIgnoreBlocks.add(ICBM_Explosive);
+		if ( ICBM_Explosive > 0)
+		{
+			scannerIgnoreBlocks.add(ICBM_Explosive);
+		}
 
 		// Do not scan ores and valuables
 		for (int[] t : CommonWorldGenOres) // each element of this set is pair [id, meta]
