@@ -58,17 +58,17 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	
 	int warpCoreSearchTicks = 0;
 
-	// Config
+	// Config //TODO add to WarpDriveConfig
 	private final String SCHEMATICS_DIR = "schematics";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
 	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
-	private String[] methodsArray = { "scanShip", // 0
-			"getSchematicFileName", // 1
-			"getEnergyLevel", // 2
-			"deployShipFromSchematic" // 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+	private String[] methodsArray = { "scan", // 0
+			"fileName", // 1
+			"energy", // 2
+			"deploy" // 3 deploy(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
@@ -187,7 +187,10 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				// Deploy single block
 				JumpBlock block = blocksToDeploy[currentDeployIndex];
 				
-				if (block!= null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
+				if (block != null &&
+					block.blockID != Block.bedrock.blockID &&
+					!WarpDriveConfig.i.scannerIgnoreBlocks.contains(block.blockID) &&
+					worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
 				{
 					moveBlockSimple(block);
 					
@@ -356,8 +359,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				for (int z = 0; z < length; z++) {
 					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
 					
-					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.i.scannerIgnoreBlocks.contains(blockID))
+					// Do not scan air and bedrock
+					if ( worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID )
 						blockID = 0;
 					
 					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
@@ -799,7 +802,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	// Own implementation of setting blocks without light recalculation in optimization purposes
 	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
 	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
+		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) //FIXME magic numbers
 		{
 			if (y < 0)
 			{
