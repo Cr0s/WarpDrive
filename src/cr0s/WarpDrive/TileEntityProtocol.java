@@ -479,7 +479,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 0: // dim_getp ()
                 return new Integer[] { getFront(), getRight(), getUp() };
             case 1: // dim_setp (front, right, up)
-                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
+                if ( arguments.length != 3 ||
+					( ( (Double)arguments[0] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() < 0 ||
+					( (Double)arguments[2] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[2] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[3] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ) )
                 {
                     return new Integer[] { -1 };
                 }
@@ -494,7 +500,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 2: // dim_getn ()
                 return new Integer[] { getBack(), getLeft(), getDown() };
             case 3: // dim_setn (back, left, down)
-                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
+                if ( arguments.length != 3 ||
+					( ( (Double)arguments[0] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() < 0 ||
+					( (Double)arguments[2] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[2] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[3] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ) )
                 {
                     return new Integer[] { -1 };
                 }

@@ -40,9 +40,9 @@ public class WarpDriveConfig
 	public int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
 	public int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
 	public int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-	public int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-	public int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
-	public int WC_MAX_SHIP_SIDE = 100;
+	public int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship volume to jump on earth
+	public int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for hyperspace travel
+	public int WC_MAX_SHIP_SIDE = 199; //miaximum ship length - 1
 	public int WC_COOLDOWN_INTERVAL_SECONDS = 4;
 	public int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
 	public int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		

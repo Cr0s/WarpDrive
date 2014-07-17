@@ -53,8 +53,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     public int shipLeft, shipRight;
     public int shipUp, shipDown;
     public int shipHeight, shipWidth, shipLength;
-    int shipSize = 0;
-    int shipVolume;
+    int shipSize = 0;	//ship length in the direction of a jump
+    int shipVolume = 0; //number of all blocks the ship consists of
     int currentMode = 0;
 
     int currentEnergyValue = 0;
@@ -67,7 +67,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
 
     int cooldownTime = 0;
-    public int randomCooldownAddition = 0;
 
     private int registryUpdateTicks = 0;
     public String coreFrequency = "default";
@@ -188,7 +187,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     }
 
                     // Awaiting cooldown time
-                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
+                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) )
                     {
                         return;
                     }
@@ -454,28 +453,32 @@ System.out.println("ZLO7");
         minY = yCoord - shipDown;
         maxY = yCoord + shipUp;
         this.shipSize = 0;
-
+	
+		int sizeFrontBack = shipFront + shipBack;
+		int sizeRightLeft = shipRight + shipLeft;
+		int sizeUpDown = shipUp + shipDown;
+	
         switch (this.direction)
         {
             case 0:
             case 180:
-                this.shipSize = this.shipBack + this.shipFront;
+                this.shipSize = sizeFrontBack;
                 break;
 
             case 90:
             case 270:
-                this.shipSize = this.shipLeft + shipRight;
+                this.shipSize = sizeRightLeft;
                 break;
 
             case -1:
             case -2:
-                this.shipSize = this.shipDown + this.shipUp;
+                this.shipSize = sizeUpDown;
                 break;
-        }
-
-        // Ship side is too big
-        if (shipLength > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipWidth > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipHeight > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
+        }   
+        // Ship size is too big
+        if (sizeFrontBack > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeRightLeft > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeUpDown > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
         {
+			messageToAllPlayersOnShip("Ship is too long. Cannot jump.");
             this.controller.setJumpFlag(false);
             return false;
         }
