@@ -67,6 +67,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
 
     int cooldownTime = 0;
+    public int randomCooldownAddition = 0;
 
     private int registryUpdateTicks = 0;
     public String coreFrequency = "default";
@@ -187,7 +188,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     }
 
                     // Awaiting cooldown time
-                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) )
+                    if (/*currentMode != MODE_BASIC_JUMP && */cooldownTime++ < ((WarpDriveConfig.i.WC_COOLDOWN_INTERVAL_SECONDS) * 20) + randomCooldownAddition)
                     {
                         return;
                     }
