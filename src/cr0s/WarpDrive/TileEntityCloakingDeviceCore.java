@@ -79,7 +79,6 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		}
 
 		if (--this.updateTicks <= 0) {
-			//System.out.println("[CloakDev] Updating cloaking state...");
 			this.updateTicks = ((this.tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.i.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			if (validateAssembly() && isEnabled) {
@@ -101,13 +100,11 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 							area.sendCloakPacketToPlayersEx(false); // recloak field
 					}
 				} else {
-					System.out.println("[CloakDev] Low power, cloak field collapsing...");
 					currentEnergyValue = 0;
 					setCoilsState(false);
 					disableCloakingField();
 				}
 			} else if (!validateAssembly() && isEnabled) {
-				System.out.println("[CloakDev] Device lost coils, field collapsing");
 				currentEnergyValue = 0;
 				setCoilsState(false);
 				disableCloakingField();				
@@ -225,7 +222,6 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 						blocksCount++;
 		int energyToConsume = blocksCount * ((this.tier == 1) ? WarpDriveConfig.i.CD_ENERGY_PER_BLOCK_TIER1 : WarpDriveConfig.i.CD_ENERGY_PER_BLOCK_TIER2);
 		
-		//System.out.println("[CloakDev] Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
 		this.currentEnergyValue -= energyToConsume;
 	}
 	

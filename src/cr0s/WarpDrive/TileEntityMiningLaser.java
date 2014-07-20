@@ -338,7 +338,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private void scanLayer()
 	{
-		//System.out.println("Scanning layer");
 		valuablesInLayer.clear();
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
@@ -371,9 +370,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			zmax = z1;
 		}
 
-		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
-		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
-
 		// Search for valuable blocks
 		for (int x = xmin; x <= xmax; x++)
 			for (int z = zmin; z <= zmax; z++)
@@ -391,7 +387,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			}
 
 		valuableIndex = 0;
-		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
 	}
 
 	private boolean collectEnergyPacketFromBooster(int packet, boolean test)

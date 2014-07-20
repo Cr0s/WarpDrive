@@ -97,14 +97,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public void addBeamEnergy(int amount)
 	{
 		if (isEmitting)
-		{
 			energyFromOtherBeams += amount;
-			System.out.println("[LE] Added energy: " + amount);
-		}
-		else
-		{
-			System.out.println("[LE] Ignored energy: " + amount);
-		}
 	}
 
 	private int collectEnergyFromBoosters()
@@ -139,7 +132,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	{
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
-		System.out.println("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
 		if (energy == 0 || beamLengthBlocks < 1 || frequency > 65000 || frequency <= 0)
 		{
@@ -147,7 +139,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		}
 
 		Vector3 beamVector = new Vector3(this).add(0.5);
-		System.out.println("beamVector: " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
@@ -157,9 +148,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		Vector3 lookVector = new Vector3((double) directionx, (double) pitchvertical, (double) directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
-		System.out.println("Look vector: " + lookVector);
-		System.out.println("reachPoint: " + reachPoint);
-		System.out.println("translatedBeamVector: " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 
@@ -184,15 +172,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			MovingObjectPosition hit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), true, false);
 			// FIXME entity ray-tracing
 			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
-
-			if (entityHit == null)
-			{
-				System.out.println("Entity hit is null.");
-			}
-			else
-			{
-				System.out.println("Entity hit: " + entityHit);
-			}
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase)
 			{

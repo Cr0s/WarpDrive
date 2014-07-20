@@ -201,7 +201,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                         return;
                     }
 
-System.out.println("ZLO5");
                     if (WarpDrive.instance.registry.isWarpCoreIntersectsWithOthers(this))
                     {
                         this.controller.setJumpFlag(false);
@@ -209,7 +208,6 @@ System.out.println("ZLO5");
                         return;
                     }
 
-System.out.println("ZLO6");
                     if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false))
                     {
                         this.controller.setJumpFlag(false);
@@ -217,8 +215,6 @@ System.out.println("ZLO6");
                         return;                    	
                     }
                     
-System.out.println("ZLO7");
-                    System.out.println("[W-C] Jumping!");
                     doJump();
                     controller.setJumpFlag(false);
                 }
@@ -243,7 +239,6 @@ System.out.println("ZLO7");
                 continue;
             }
 
-            System.out.println(msg);
             ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
         }
     }
@@ -499,7 +494,6 @@ System.out.println("ZLO7");
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -539,7 +533,6 @@ System.out.println("ZLO7");
         {
             // Consume all energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -565,16 +558,11 @@ System.out.println("ZLO7");
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
         }
-        else
-        {
-            System.out.println("[TE-WC] Beacon not found.");
-        }
     }
 
     private boolean isShipInJumpgate(JumpGate jg)
     {
         AxisAlignedBB aabb = jg.getGateAABB();
-        System.out.println("Gate AABB: " + aabb);
         int numBlocks = 0;
 
         if (aabb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(maxX - minX, maxY - minY, maxZ - minZ)))
@@ -601,11 +589,8 @@ System.out.println("ZLO7");
 
         if (numBlocks == 0)
         {
-            System.out.println("[GATE] Is 0 blocks inside gate.");
             return false;
         }
-
-        System.out.println("[GATE] Ship volume: " + shipVolume + ", blocks in gate: " + numBlocks + ". Percentage: " + ((shipVolume / numBlocks) * 100));
 
         // At least 80% of ship must be inside jumpgate
         if (shipVolume / numBlocks > 0.8F)
@@ -657,7 +642,6 @@ System.out.println("ZLO7");
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -717,12 +701,10 @@ System.out.println("ZLO7");
                     return;
                 }
 
-                System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
             }
 
             // Consume energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -764,14 +746,12 @@ System.out.println("ZLO7");
                 return;
             }
 
-            System.out.println("[TE-WC] Performing gate jump...");
             doGateJump();
             return;
         }
 
         if (currentMode == this.MODE_BEACON_JUMP)
         {
-            System.out.println("[TE-WC] Performing beacon jump...");
             doBeaconJump();
             return;
         }
@@ -799,23 +779,14 @@ System.out.println("ZLO7");
 
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE)
         {
-            System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
-            System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
-
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
             {
-                System.out.println("[WP-TE] Insufficient energy to jump");
                 messageToAllPlayersOnShip("Insufficient energy to jump!");
                 this.controller.setJumpFlag(false);
                 return;
             }
 
             this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
-
-            //System.out.println("[WC-TE] Distance: " + distance + "; shipSize: " + shipSize);
             if (this.currentMode == this.MODE_BASIC_JUMP)
             {
                 distance += shipSize;
@@ -829,7 +800,6 @@ System.out.println("ZLO7");
                 }
             }
 
-            System.out.println((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, distance, direction, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -850,7 +820,6 @@ System.out.println("ZLO7");
             {
                 jump.toHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
                 jump.fromHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID);
-                System.out.println("[JUMP] From HS: " + jump.fromHyperSpace + " | To HS: " + jump.fromHyperSpace);
             }
 
             jump.xCoord = xCoord;
@@ -941,7 +910,6 @@ System.out.println("ZLO7");
 
             if (checkPlayerInventory(chest, player))
             {
-                System.out.println("[P] Summoning " + player.username);
                 summonPlayer(player, xCoord, yCoord + 2, zCoord);
             }
         }
@@ -977,7 +945,6 @@ System.out.println("ZLO7");
 
         if (keyLength < MIN_KEY_LENGTH)
         {
-            System.out.println("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
             return false;
         }
 
