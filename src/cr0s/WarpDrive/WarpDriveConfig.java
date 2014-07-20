@@ -279,11 +279,17 @@ public class WarpDriveConfig
 		scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
 		scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
 		if ( ICBM_Explosive > 0)
-		{
 			scannerIgnoreBlocks.add(ICBM_Explosive);
-		}
+		if ( CC_Computer > 0)
+			scannerIgnoreBlocks.add(CC_Computer);
+		if ( CCT_Turtle > 0)
+			scannerIgnoreBlocks.add(CCT_Turtle);
+		if ( CCT_Upgraded > 0)
+			scannerIgnoreBlocks.add(CCT_Upgraded);
+		if ( CCT_Advanced > 0)
+			scannerIgnoreBlocks.add(CCT_Advanced);
 
-		// Do not scan ores and valuables
+		// Do not deploy ores and valuables
 		for (int[] t : CommonWorldGenOres) // each element of this set is pair [id, meta]
 			scannerIgnoreBlocks.add(t[0]); // we adding ID only
 		
