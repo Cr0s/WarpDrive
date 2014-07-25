@@ -85,7 +85,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			}
 		}
 
-		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS))
+		if (isEmitting && ((frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS)))
 		{
 			delayTicks = 0;
 			isEmitting = false;
