@@ -14,7 +14,7 @@ public class BlockAir extends Block
 {
     private final boolean TRANSPARENT_AIR = true;
     private final boolean AIR_DEBUG = false;
-    private final int AIR_BLOCK_TICKS = 20;
+    private final int AIR_BLOCK_TICKS = 40;
     private Icon[] iconBuffer;
 
     public BlockAir(int par1) {

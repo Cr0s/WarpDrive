@@ -20,7 +20,11 @@ public class BlockRadar extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_ACTIVATED_SCAN = 4;
+    private final int ICON_SIDE_INACTIVE = 0;
+    private final int ICON_BOTTOM = 1;
+    private final int ICON_TOP = 2;
+    private final int ICON_SIDE_ACTIVATED = 3;
+    private final int ICON_SIDE_ACTIVATED_SCAN = 4;
 
     public BlockRadar(int id, int texture, Material material) {
         super(id, material);
@@ -33,8 +37,8 @@ public class BlockRadar extends BlockContainer
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[5];
-        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:radarSideInactive");
+        iconBuffer = new Icon[16];
+        iconBuffer[ICON_SIDE_INACTIVE] = par1IconRegister.registerIcon("warpdrive:radarSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:contTop");
         iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:radarSideActive");
@@ -50,14 +54,14 @@ public class BlockRadar extends BlockContainer
         }
 
         if (metadata == 0) {// Inactive state
-            return iconBuffer[ICON_INACTIVE_SIDE];
+            return iconBuffer[ICON_SIDE_INACTIVE];
         } else if (metadata == 1) { // Attached state
             return iconBuffer[ICON_SIDE_ACTIVATED];
         } else if (metadata == 2) { // Scanning state
             return iconBuffer[ICON_SIDE_ACTIVATED_SCAN];
         }
 
-        return iconBuffer[ICON_INACTIVE_SIDE];
+        return iconBuffer[ICON_SIDE_INACTIVE];
     }
 
     @Override

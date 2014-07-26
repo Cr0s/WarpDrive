@@ -12,12 +12,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 
-public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEnergySink
-{
+public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEnergySink {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
-	private final double INTERNAL_TO_EU = 1.0D;
-	private final double INTERNAL_TO_RF = 437.5D / 1800.0D;
+	private static final double EU_PER_INTERNAL = 1.0D;
+	private static final double RF_PER_INTERNAL = 1800.0D / 437.5D;
 	
 	// WarpDrive methods
 	public int getEnergyStored() {
@@ -92,20 +91,20 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     // IndustrialCraft overrides
     @Override
     public double demandedEnergyUnits() {
-        return Math.max(0.0D, getMaxEnergyStored() - energyStored_internal) * INTERNAL_TO_EU;
+        return Math.max(0.0D, getMaxEnergyStored() - energyStored_internal) * EU_PER_INTERNAL;
     }
 
     @Override
     public double injectEnergyUnits(ForgeDirection directionFrom, double amount) {
         double leftover = 0;
-        energyStored_internal += Math.round(amount) / INTERNAL_TO_EU;
+        energyStored_internal += Math.round(amount) / EU_PER_INTERNAL;
 
         if (energyStored_internal > getMaxEnergyStored()) {
             leftover = (energyStored_internal - getMaxEnergyStored());
             energyStored_internal = getMaxEnergyStored();
         }
 
-        return leftover * INTERNAL_TO_EU;
+        return leftover * EU_PER_INTERNAL;
     }
 
     @Override
@@ -121,24 +120,25 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     // ThermalExpansion overrides
 	@Override
 	public int getEnergyStored(ForgeDirection from) {
-		return (int)(getEnergyStored() * INTERNAL_TO_RF);
+		return (int)Math.round(getEnergyStored() * RF_PER_INTERNAL);
 	}
 	
 	@Override
 	public int getMaxEnergyStored(ForgeDirection from) {
-		return (int)(getMaxEnergyStored() * INTERNAL_TO_RF);
+		return (int)Math.round(getMaxEnergyStored() * RF_PER_INTERNAL);
 	}
 	
 	@Override
 	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
-		int maxStored = (int)(getMaxEnergyStored() * INTERNAL_TO_RF);
+		int maxStored = getMaxEnergyStored(from);
 		if (maxStored == 0) {
 			return 0;
 		}
+		int energyStored = getEnergyStored(from);
 		
-		int toAdd = Math.min(maxReceive, maxStored - (int)(getEnergyStored() * INTERNAL_TO_RF));
+		int toAdd = Math.min(maxReceive, maxStored - energyStored);
 		if (!simulate) {
-			energyStored_internal += toAdd / INTERNAL_TO_RF;
+			energyStored_internal = (int)Math.min(getMaxEnergyStored(), energyStored_internal + toAdd / RF_PER_INTERNAL);
 		}
 		
 		return toAdd;

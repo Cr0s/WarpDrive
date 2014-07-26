@@ -58,13 +58,15 @@ public class WarpCoresRegistry {
 	public ArrayList<TileEntityReactor> searchWarpCoresInRadius(int x, int y, int z, int radius) {
 		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>(registry.size());
 
+		printRegistry();
 		for (TileEntityReactor c : registry) {
 			double d3 = c.xCoord - x;
 			double d4 = c.yCoord - y;
 			double d5 = c.zCoord - z;
 			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 
-			if (distance <= radius && !(c.controller == null || c.controller.getMode() == 0) && !isCoreHidden(c)) {
+//			if (distance <= radius && !(c.controller == null || c.controller.getMode() == 0) && !isCoreHidden(c)) {
+			if (distance <= radius && !isCoreHidden(c)) {
 				res.add(c);
 			}
 		}
@@ -87,6 +89,7 @@ public class WarpCoresRegistry {
 			int randomNumber = core.worldObj.rand.nextInt(150);
 
 			if (randomNumber < LOWER_HIDE_POINT + core.isolationBlocksCount) {
+				WarpDrive.debugPrint("" + this + " Core '" + core.coreFrequency + "' is hidden");
 				return true;
 			}
 		}

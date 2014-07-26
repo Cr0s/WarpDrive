@@ -25,21 +25,21 @@ public class WarpDriveConfig
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
-	public static boolean isGregLoaded				= false;
-	public static boolean isAELoaded				= false;
-	public static boolean isAdvSolPanelLoaded		= false;
-	public static boolean isASLoaded				= false;
-	public static boolean isAEExtraLoaded			= false;
-	public static boolean isICBMLoaded				= false;
-	public static boolean isMFFSLoaded				= false;
-	public static boolean isGraviSuiteLoaded		= false;
-	public static boolean isICLoaded				= false;
-	public static boolean isCCLoaded				= false;
-	public static boolean isUndergroundBiomesLoaded	= false;
-	public static boolean isNetherOresLoaded		= false;
-	public static boolean isThermalExpansionLoaded	= false;
-	public static boolean isMetallurgyLoaded		= false;
-
+	public static boolean isGregLoaded						= false;
+	public static boolean isAELoaded						= false;
+	public static boolean isAdvSolPanelLoaded				= false;
+	public static boolean isASLoaded						= false;
+	public static boolean isAEExtraLoaded					= false;
+	public static boolean isICBMLoaded						= false;
+	public static boolean isMFFSLoaded						= false;
+	public static boolean isGraviSuiteLoaded				= false;
+	public static boolean isICLoaded						= false;
+	public static boolean isCCLoaded						= false;
+	public static boolean isUndergroundBiomesLoaded			= false;
+	public static boolean isNetherOresLoaded				= false;
+	public static boolean isThermalExpansionLoaded			= false;
+	public static boolean isMetallurgyLoaded				= false;
+	public static boolean isAdvancedRepulsionSystemsLoaded	= false;
 	
 	/*
 	 * The variables that control which recipes should be loaded
@@ -50,13 +50,18 @@ public class WarpDriveConfig
 	public static int[] IC2_Empty;
 	public static int IC2_RubberWood;
 	public static ItemStack IC2_Resin;
-	public static int CC_Computer = 0, CC_peripheral = 0, CC_Floppy = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public static int CC_Computer = 0, CC_peripheral = 0, CC_Floppy = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0;
+	public static int GT_Ores = 0, GT_Granite = 0, GT_Machine = 0;
+	public static int ASP = 0;
+	public static int AS_Turbine = 0;
+	public static int ICBM_Machine = 0, ICBM_Missile = 0;
 	public static int UB_igneousStone = 0, UB_igneousCobblestone = 0, UB_metamorphicStone = 0, UB_metamorphicCobblestone = 0, UB_sedimentaryStone = 0;
 	public static int NetherOres_count;
 	public static int[] NetherOres_block;
 	public static int[][] Metallurgy_overworldOresBlock;
 	public static int[][] Metallurgy_netherOresBlock;
 	public static int[][] Metallurgy_endOresBlock;
+	public static ArrayList<Integer> forceFieldBlocks;
 
 	public static Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
 	private static Class<?> AEBlocks;
@@ -101,17 +106,19 @@ public class WarpDriveConfig
     
     // Mining Laser
 	public static int		ML_MAX_BOOSTERS_NUMBER = 1;
-	public static int		ML_SCAN_DELAY = 20 * 5;
-	public static int		ML_MINE_DELAY = 10;
-	public static int		ML_EU_PER_LAYER_SPACE = 100;
-	public static int		ML_EU_PER_LAYER_EARTH = 2500;
-	public static int		ML_EU_PER_BLOCK_SPACE = 10;
-	public static int 		ML_EU_PER_BLOCK_EARTH = 50;
+	public static int		ML_WARMUP_DELAY_TICKS = 20;
+	public static int		ML_SCAN_DELAY_TICKS = 10;
+	public static int		ML_MINE_DELAY_TICKS = 3;
+	public static int		ML_EU_PER_LAYER_SPACE = 2000;
+	public static int		ML_EU_PER_LAYER_EARTH = 10000;
+	public static int		ML_EU_PER_BLOCK_SPACE = 500;
+	public static int 		ML_EU_PER_BLOCK_EARTH = 2500;
+	public static double	ML_EU_MUL_ORESONLY = 4.0;
 	public static double	ML_EU_MUL_SILKTOUCH = 2.5;
-	public static double	ML_EU_MUL_FORTUNE   = 1.5;
-	public static double	ML_MAX_SPEED   = 10;
-	public static double	ML_MIN_SPEED   = 0.1;
-	public static int		ML_MAX_SIZE    = 128;
+	public static double	ML_EU_MUL_FORTUNE   = 2.5;
+//	public static double	ML_MAX_SPEED   = 10;
+//	public static double	ML_MIN_SPEED   = 0.1;
+	public static int		ML_MAX_RADIUS  = 6;
 	
 	//Tree farm
 	public static int TF_MAX_SIZE=32;
@@ -150,58 +157,44 @@ public class WarpDriveConfig
 	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
 	public static int CD_COIL_CAPTURE_BLOCKS = 5;
 
-	public static ItemStack getIC2Item(String id)
-	{
+	public static ItemStack getIC2Item(String id) {
 		return Items.getItem(id);
 	}
 
-	public static ItemStack getAEBlock(String id)
-	{
-		try
-		{
+	public static ItemStack getAEBlock(String id) {
+		try {
 			Object ret = AEBlocks.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEBlock failed for " + id);
 		}
 		return null;
 	}
 
-	public static ItemStack getAEMaterial(String id)
-	{
-		try
-		{
+	public static ItemStack getAEMaterial(String id) {
+		try {
 			Object ret = AEMaterials.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEMaterial failed for " + id);
 		}
 		return null;
 	}
 
-	public static ItemStack getAEItem(String id)
-	{
-		try
-		{
+	public static ItemStack getAEItem(String id) {
+		try {
 			Object ret = AEItems.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEItem failed for " + id);
 		}
 		return null;
 	}
 
-	public static void Init(Configuration configIn)
-	{
+	public static void preInit(Configuration configIn) {
 		config = configIn;
 	}
 
@@ -267,17 +260,19 @@ public class WarpDriveConfig
 		
 	    // Mining Laser
 		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
-		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
-		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
-		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
+		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", 20).getInt();
+		ML_SCAN_DELAY_TICKS = config.get("MiningLaser", "scan_delay_ticks", 10).getInt();
+		ML_MINE_DELAY_TICKS = config.get("MiningLaser", "mine_delay_ticks", 3).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 2000).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 10000).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 500).getInt();
+		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 2500).getInt();	  
+		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", 5).getInt();
+		ML_EU_MUL_ORESONLY = config.get("MiningLaser", "oresonly_power_mul", 4.0).getDouble(4.0);
 		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
-		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
-		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
-		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
+		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 2.5).getDouble(2.5);
+//		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
+//		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
 		
 		// Tree Farm
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
@@ -296,7 +291,7 @@ public class WarpDriveConfig
 		recipesIC2 = config.get("Recipes", "ic2_recipes",true).getBoolean(true);
 	}
 	
-	public static void Init2() {
+	public static void load() {
 		CommonWorldGenOres = new ArrayList<int[]>(30);
 		CommonWorldGenOres.add(new int[] {Block.oreIron.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreGold.blockID, 0});
@@ -305,7 +300,9 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Block.oreLapis.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreRedstoneGlowing.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreRedstone.blockID, 0});
-//
+		
+		forceFieldBlocks = new ArrayList<Integer>();
+
 		SpaceHelmets = new HashSet<Integer>();
 		Jetpacks = new HashSet<Integer>();
 		MinerOres = new HashSet<Integer>();
@@ -398,12 +395,17 @@ public class WarpDriveConfig
 			loadMetallurgy();
 		}
 
+		isAdvancedRepulsionSystemsLoaded = Loader.isModLoaded("AdvancedRepulsionSystems");
+		if (isAdvancedRepulsionSystemsLoaded) {
+			loadAdvancedRepulsionSystems();
+		}
 //
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		MinerOres.add(Block.obsidian.blockID);
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
-		//MinerOres.add(Block.torchWood.blockID);
+		MinerOres.add(Block.torchWood.blockID);
+		MinerOres.add(Block.glowStone.blockID);
 		LoadOreDict();
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
@@ -583,61 +585,48 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadICBM()
-	{
-		try
-		{
+	private static void loadICBM() {
+		try {
 			Class<?> z = Class.forName("icbm.core.ICBMCore");
 			CommonWorldGenOres.add(new int[] {((Block)z.getField("blockSulfurOre").get(null)).blockID, 0});
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block)z.getField("blockMachine").get(null)).blockID;
 			ICBM_Missile = ((Item)z.getField("itemMissile").get(null)).itemID;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
 
-	private static void loadMFFS()
-	{
-		try
-		{
+	private static void loadMFFS() {
+		try {
 			Class<?> z = Class.forName("mffs.ModularForceFieldSystem");
-			MFFS_Field = ((Block)z.getField("blockForceField").get(null)).blockID;
-		}
-		catch (Exception e)
-		{
+			int blockId = ((Block)z.getField("blockForceField").get(null)).blockID;
+			forceFieldBlocks.add(blockId);
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading MFFS classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
 
-	private static void loadGS()
-	{
-		try
-		{
+	private static void loadGS() {
+		try {
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
 			if (z.getField("ultimateSolarHelmet").get(null) != null)
 				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 			Jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
 			Jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
 	}
 
-	private static void loadUndergroundBiomes()
-	{
-		try
-		{
+	private static void loadUndergroundBiomes() {
+		try {
 			Class<?> z = Class.forName("exterminatorJeff.undergroundBiomes.common.UndergroundBiomes");
 			UB_igneousStone           = ((Block)z.getField("igneousStone").get(null)).blockID;
 			UB_igneousCobblestone     = ((Block)z.getField("igneousCobblestone").get(null)).blockID;
@@ -645,19 +634,15 @@ public class WarpDriveConfig
 			UB_metamorphicCobblestone = ((Block)z.getField("metamorphicCobblestone").get(null)).blockID;
 			UB_sedimentaryStone       = ((Block)z.getField("sedimentaryStone").get(null)).blockID;
 			WarpDrive.debugPrint("WarpDriveConfig found UndergroundBiomes blocks " + UB_igneousStone + ", " + UB_igneousCobblestone + ", " + UB_metamorphicStone + ", " + UB_metamorphicCobblestone + ", " + UB_sedimentaryStone);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading UndergroundBiomes classes");
 			e.printStackTrace();
 			isUndergroundBiomesLoaded = false;
 		}
 	}
 
-	private static void loadNetherOres()
-	{
-		try
-		{
+	private static void loadNetherOres() {
+		try {
 			NetherOres_count = 21;	// FIXME: extract it properly
 /*			Class<?> z = Class.forName("powercrystals.netherores.ores.Ores");
 			NO_netherOresCount = z.getField("values").get(null).length;
@@ -704,7 +689,19 @@ public class WarpDriveConfig
 			isMetallurgyLoaded = false;
 		}
 	}
-
+	
+	private static void loadAdvancedRepulsionSystems() {
+		try {
+			Class<?> z = Class.forName("mods.immibis.ars.ARSMod");
+			int fieldBlockId = ((Block)z.getField("MFFSFieldblock").get(null)).blockID;
+			forceFieldBlocks.add(fieldBlockId);
+		} catch (Exception e) {
+			System.out.println("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
+			e.printStackTrace();
+			isAdvancedRepulsionSystemsLoaded = false;
+		}
+	}
+	
 	public static int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
 		if (isMoon) {
 			if (isGregLoaded && (random.nextInt(100) == 1)) {

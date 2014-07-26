@@ -110,7 +110,7 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 						if(coolReactor(react))
 						{
 							TileEntity te = (TileEntity)o;
-							sendLaserPacket(myPos,new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5),0f,0.8f,1f,20,0,20);
+							WarpDrive.sendLaserPacket(worldObj, myPos, new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5D), 0f, 0.8f, 1f, 20, 0, 20);
 						}
 					}
 				}

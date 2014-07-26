@@ -203,6 +203,14 @@ public class Vector3 implements Cloneable
         return Math.sqrt(var2 * var2 + var4 * var4 + var6 * var6);
     }
 
+    public double distanceTo_square(Vector3 vector3)
+    {
+        double var2 = vector3.x - this.x;
+        double var4 = vector3.y - this.y;
+        double var6 = vector3.z - this.z;
+        return var2 * var2 + var4 * var4 + var6 * var6;
+    }
+
     /**
      * Multiplies the vector by negative one.
      */

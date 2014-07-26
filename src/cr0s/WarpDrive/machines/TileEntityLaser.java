@@ -132,7 +132,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			return;
 		}
 
-		Vector3 beamVector = new Vector3(this).add(0.5);
+		Vector3 beamVector = new Vector3(this).translate(0.5D);
 		System.out.println("beamVector: " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
@@ -155,7 +155,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			firstHit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), false, false);
 
 			if (firstHit != null) {
-				sendLaserPacket(beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
+				WarpDrive.sendLaserPacket(worldObj, beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
 			}
 			return;
 		}
@@ -246,7 +246,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			}
 		}
 
-		sendLaserPacket(beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);
+		WarpDrive.instance.sendLaserPacket(worldObj, beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);
 	}
 
 	public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
@@ -377,72 +377,6 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		}
 
 		return null;
-	}
-
-	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius) {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				// Write source vector
-				outputStream.writeDouble(source.x);
-				outputStream.writeDouble(source.y);
-				outputStream.writeDouble(source.z);
-				// Write target vector
-				outputStream.writeDouble(dest.x);
-				outputStream.writeDouble(dest.y);
-				outputStream.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream.writeFloat(r);
-				outputStream.writeFloat(g);
-				outputStream.writeFloat(b);
-				// Write age
-				outputStream.writeByte(age);
-				// Write energy value
-				outputStream.writeInt(energy);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(source.intX(), source.intY(), source.intZ(), radius, worldObj.provider.dimensionId, packet);
-			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent around source");
-
-			ByteArrayOutputStream bos2 = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream2 = new DataOutputStream(bos2);
-
-			try {
-				// Write source vector
-				outputStream2.writeDouble(source.x);
-				outputStream2.writeDouble(source.y);
-				outputStream2.writeDouble(source.z);
-				// Write target vector
-				outputStream2.writeDouble(dest.x);
-				outputStream2.writeDouble(dest.y);
-				outputStream2.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream2.writeFloat(r);
-				outputStream2.writeFloat(g);
-				outputStream2.writeFloat(b);
-				// Write age
-				outputStream2.writeByte(age);
-				// Write energy value
-				outputStream2.writeInt(energy);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet2 = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(dest.intX(), dest.intY(), dest.intZ(), radius, worldObj.provider.dimensionId, packet);
-			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent around destination");
-		}
 	}
 
 	private void playSoundCorrespondsEnergy(int energy) {

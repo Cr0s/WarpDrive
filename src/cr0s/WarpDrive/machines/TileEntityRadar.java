@@ -3,6 +3,7 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -43,20 +44,19 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 		}
 		super.updateEntity();
 
-		try
-		{
+		try {
 			if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
-				if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1))) {
-					//System.out.println("Scanning...");
+				cooldownTime++;
+				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
+					WarpDrive.debugPrint("" + this + " Scanning over " + scanRadius + " radius...");
 					WarpDrive.instance.warpCores.removeDeadCores();
 					results = WarpDrive.instance.warpCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
+					WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results");
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 					cooldownTime = 0;
 				}
 			}
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -73,22 +73,18 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 
 	// IPeripheral methods implementation
 	@Override
-	public String getType()
-	{
+	public String getType() {
 		return "radar";
 	}
 
 	@Override
-	public String[] getMethodNames()
-	{
+	public String[] getMethodNames() {
 		return methodsArray;
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
-	{
-		switch (method)
-		{
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		switch (method) {
 			case 0: // scanRay (toX, toY, toZ)
 				return new Object[] { -1 };
 				
@@ -96,13 +92,19 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				if (arguments.length != 1) {
 					return new Boolean[] { false };
 				}
-				int radius = ((Double)arguments[0]).intValue();
-				if (radius <= 0 || radius > 10000)
-				{
+				int radius;
+				try {
+					radius = ((Double)arguments[0]).intValue();
+				} catch(Exception e) {
+	               	return new Boolean[] { false };
+	            }
+				
+				if (radius <= 0 || radius > 10000) {
 					scanRadius = 0;
+					results = null;
 					return new Boolean[] { false };
 				}
-				if (radius == 0 || !consumeEnergy(radius * radius, false)) {
+				if (!consumeEnergy(Math.max(radius, 100) * Math.max(radius, 100), false)) {
 					results = null;
 					return new Boolean[] { false };
 				}
@@ -110,20 +112,25 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				// Begin searching
 				scanRadius = radius;
 				cooldownTime = 0;
+				results = null;
 				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
 				return new Boolean[] { true };
 
 			case 2: // getResultsCount
-				if (results != null)
+				if (results != null) {
 					return new Integer[] { results.size() };
+				}
 				return new Integer[] { 0 };
 				
 			case 3: // getResult
-				if (arguments.length == 1 && (results != null))
-				{
-					int index = ((Double)arguments[0]).intValue();
-					if (index > -1 && index < results.size())
-					{
+				if (arguments.length == 1 && (results != null)) {
+					int index;
+					try {
+						index = ((Double)arguments[0]).intValue();
+					} catch(Exception e) {
+						return new Object[] { (String)"FAIL", 0, 0, 0 };
+					}
+					if (index >= 0 && index < results.size()) {
 						TileEntityReactor res = results.get(index);
 						if (res != null)
 						{
@@ -146,12 +153,17 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 
 	@Override
 	public void attach(IComputerAccess computer) {
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+        computer.mount("/radar", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar"));
+        computer.mount("/scan", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/scan"));
+        computer.mount("/ping", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/ping"));
+        if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 0) {
+        	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+        }
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+		// worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
 	}
 
 	@Override

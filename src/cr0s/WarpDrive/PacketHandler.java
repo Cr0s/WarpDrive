@@ -209,7 +209,7 @@ public class PacketHandler implements IPacketHandler
             energy = inputStream.readInt();
 
             // Render beam
-            WarpDrive.debugPrint("Received beam packet from " + source + " to " + target + " as RGB " + r + " " + g + " " + b + " age " + age +" energy " + energy);
+//            WarpDrive.debugPrint("Received beam packet from " + source + " to " + target + " as RGB " + r + " " + g + " " + b + " age " + age +" energy " + energy);
 
             // To avoid NPE at logging in
             if (worldObj == null)

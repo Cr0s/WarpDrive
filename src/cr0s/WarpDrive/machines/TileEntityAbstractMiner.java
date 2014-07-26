@@ -12,8 +12,8 @@ import appeng.api.me.tiles.IGridMachine;
 import appeng.api.me.tiles.ITileCable;
 import appeng.api.me.util.IGridInterface;
 import appeng.api.me.util.IMEInventoryHandler;
-
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFluid;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,6 +22,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridMachine, ITileCable
@@ -194,13 +195,30 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		}
 		return false;
 	}
-	
-	protected boolean canDig(int blockID)
-	{
-		if (Block.blocksList[blockID] != null)
-			return ((blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
-		else
-			return (blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
+
+	private boolean canDig(int blockID, int x, int y, int z) {// not used
+		// ignore air & fluids
+		if (!WarpDriveConfig.isAirBlock(worldObj, blockID, x, y, z) && Block.blocksList[blockID] != null && !(Block.blocksList[blockID] instanceof BlockFluid)) {
+			return false;
+		}
+		// check blacklist
+		if (blockID == Block.bedrock.blockID) {
+			return false;
+		}
+		if (WarpDriveConfig.forceFieldBlocks.contains(blockID)) {
+//			isMining = false;
+			return false;
+		}
+		// check whitelist
+		// WarpDriveConfig.i.MinerOres.contains(blockID) then true ?
+		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID) {
+			return true;
+		}
+		// check default
+		else if ( (Block.blocksList[blockID] != null) && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) ) {
+			return true;
+		}
+		return false;
 	}
 	
 	//MINING FUNCTIONS
@@ -211,7 +229,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY, 0, 50);
+		WarpDrive.sendLaserPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY_TICKS, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 	

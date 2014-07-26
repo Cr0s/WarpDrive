@@ -63,24 +63,22 @@ public class TileEntityLift extends WarpEnergyTE {
             worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 2); // current mode
 
             // Launch a beam: search non-air blocks under lift
-            for (int ny = yCoord - 1; ny > 0; ny--)
-            {
-                if (!worldObj.isAirBlock(xCoord, ny, zCoord))
-                {
+            for (int ny = yCoord - 1; ny > 0; ny--) {
+            	int blockId = worldObj.getBlockId(xCoord, ny, zCoord);
+            	// 63 & 68 = signs
+                if (blockId != 0 && blockId != 63 && blockId != 68 && !WarpDriveConfig.isAirBlock(worldObj, blockId, xCoord, ny, zCoord)) {
                     firstUncoveredY = ny;
                     break;
                 }
             }
 
-            if (yCoord - firstUncoveredY > 0)
-                if (mode == 1)
-                {
-                    sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 0f, 1f, 0f, 40, 0, 100);
+            if (yCoord - firstUncoveredY > 0) {
+                if (mode == 1) {
+                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
+                } else if (mode == 2) {
+                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 0f, 1f, 40, 0, 100);
                 }
-                else if (mode == 2)
-                {
-                    sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 0f, 0f, 1f, 40, 0, 100);
-                }
+            }
 
             liftEntity();
         }
@@ -132,7 +130,7 @@ public class TileEntityLift extends WarpEnergyTE {
                     if (o != null && o instanceof EntityLivingBase)
                     {
                         ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, yCoord + 1, zCoord + 0.5f);
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
+                        WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
                         consumeAllEnergy();
                         return;
@@ -152,86 +150,13 @@ public class TileEntityLift extends WarpEnergyTE {
                     if (o != null && o instanceof EntityLivingBase)
                     {
                         ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, firstUncoveredY + 1, zCoord + 0.5f);
-                        sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).add(0.5), 1, 1, 0, 40, 0, 100);
+                        WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
                         consumeAllEnergy();
                         return;
                     }
                 }
             }
-        }
-    }
-
-    public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius)
-    {
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-        if (side == Side.SERVER)
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream = new DataOutputStream(bos);
-
-            try
-            {
-                // Write source vector
-                outputStream.writeDouble(source.x);
-                outputStream.writeDouble(source.y);
-                outputStream.writeDouble(source.z);
-                // Write target vector
-                outputStream.writeDouble(dest.x);
-                outputStream.writeDouble(dest.y);
-                outputStream.writeDouble(dest.z);
-                // Write r, g, b of laser
-                outputStream.writeFloat(r);
-                outputStream.writeFloat(g);
-                outputStream.writeFloat(b);
-                // Write age
-                outputStream.writeByte(age);
-                // Write energy value
-                outputStream.writeInt(energy);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-
-            Packet250CustomPayload packet = new Packet250CustomPayload();
-            packet.channel = "WarpDriveBeam";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(source.intX(), source.intY(), source.intZ(), radius, worldObj.provider.dimensionId, packet);
-            ByteArrayOutputStream bos2 = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream2 = new DataOutputStream(bos2);
-
-            try
-            {
-                // Write source vector
-                outputStream2.writeDouble(source.x);
-                outputStream2.writeDouble(source.y);
-                outputStream2.writeDouble(source.z);
-                // Write target vector
-                outputStream2.writeDouble(dest.x);
-                outputStream2.writeDouble(dest.y);
-                outputStream2.writeDouble(dest.z);
-                // Write r, g, b of laser
-                outputStream2.writeFloat(r);
-                outputStream2.writeFloat(g);
-                outputStream2.writeFloat(b);
-                // Write age
-                outputStream2.writeByte(age);
-                // Write energy value
-                outputStream2.writeInt(energy);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
-            }
-
-            Packet250CustomPayload packet2 = new Packet250CustomPayload();
-            packet.channel = "WarpDriveBeam";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(dest.intX(), dest.intY(), dest.intZ(), radius, worldObj.provider.dimensionId, packet);
         }
     }
 

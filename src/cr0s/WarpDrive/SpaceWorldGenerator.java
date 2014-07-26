@@ -212,9 +212,11 @@ public class SpaceWorldGenerator implements IWorldGenerator
 
 	private float binomialRandom(World world) {
 		float linear = world.rand.nextFloat();
-		// ideal sphere repartition = linear ^ 0.5 (sqrt)
+		// ideal sphere repartition = x ^ 0.5 (sqrt)
 		// Dilution but slow to compute = 0.5 * ( x ^ 0.3 + 1 + (x - 1) ^ 3 )
-		// Optimized form = 1.25 - 0.625 / (0.5 + 2 * x)
+		// Optimized 'pushed out' form = 1.25 - 0.625 / (0.5 + 2 * x)
+		// Natural sphere with ring = (1 - x ^ 2.5) * x ^ 0.5 + x ^ 4
+		
 		// rectangular approach: return 0.5F * linear + 0.5F * linear * linear;
 		return 1.25F - 0.625F / (0.5F + 2.0F * linear);
 	}

@@ -30,7 +30,7 @@ public class BlockParticleBooster extends BlockContainer {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[12];
+        iconBuffer = new Icon[16];
         iconBuffer[ 0] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide0");
         iconBuffer[ 1] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide1");
         iconBuffer[ 2] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide2");
