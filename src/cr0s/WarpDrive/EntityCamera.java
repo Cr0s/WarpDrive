@@ -78,9 +78,9 @@ public final class EntityCamera extends EntityLivingBase
             mc.renderViewEntity.rotationPitch = player.rotationPitch;
 
             // Perform zoom
-            if (Mouse.isButtonDown(1) && waitTicks-- == 2)
+            if (Mouse.isButtonDown(1) && waitTicks-- == 0)
             {
-                waitTicks = 2;
+                waitTicks = 4;
                 zoom();
             }
 
@@ -91,7 +91,7 @@ public final class EntityCamera extends EntityLivingBase
             }
             else if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) && fireWaitTicks-- == 0)
             {
-                fireWaitTicks = 2;
+                fireWaitTicks = 1;
 
                 // Make a shoot with camera-laser
                 if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID)
@@ -125,9 +125,15 @@ public final class EntityCamera extends EntityLivingBase
                 {
                     dx = -1;
                 }
+				else if (Keyboard.isKeyDown(Keyboard.KEY_C)) //centering view
+                {
+					this.setPosition(xCoord + 0.5, yCoord + 0.75, zCoord + 0.5);
+					return;
+                }
             }
 
-            this.setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+//            this.setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+			this.setPosition(xCoord + 0.5, yCoord + 0.75, zCoord + 0.5);
         }
     }
 
