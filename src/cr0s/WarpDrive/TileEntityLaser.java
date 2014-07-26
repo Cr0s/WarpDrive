@@ -160,7 +160,9 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 			if (firstHit != null)
 			{
-				sendLaserPacket(beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
+				sendLaserPacket(beamVector, new Vector3(firstHit.hitVec), r, g, b, 50, energy, 200);
+			} else {
+				sendLaserPacket(beamVector, reachPoint, r, g, b, 50, energy, 200);
 			}
 
 			return;
