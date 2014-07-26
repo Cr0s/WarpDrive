@@ -80,15 +80,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, fortuneLevel);
 	}
 	
-	@Override
-	public Object[] getEnergyObject()
-	{
-		if(booster == null)
-			return new Object[] { 0, 0};
-		
-		return booster.getEnergyObject();
-	}
-	
 	protected boolean isOnEarth()
 	{
 		return worldObj.provider.dimensionId == 0;
@@ -96,7 +87,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	private IInventory findChest()
 	{
-		Vector3[] adjSides = WarpTE.getAdjacentSideOffsets();
 		int[] xPos = {1,-1,0,0,0,0};
 		int[] yPos = {0,0,-1,1,0,0};
 		int[] zPos = {0,0,0,0,-1,1};
@@ -104,8 +94,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		
 		for(int i=0;i<6;i++)
 		{
-			Vector3 curOff = adjSides[i];
-			result = worldObj.getBlockTileEntity(xCoord+curOff.intX(), yCoord+curOff.intY(), zCoord+curOff.intZ());
+			result = worldObj.getBlockTileEntity(xCoord+xPos[i], yCoord+yPos[i], zCoord+zPos[i]);
 			if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
 			{
 				return (IInventory) result;
@@ -162,11 +151,11 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return booster;
 	}
 	
-	protected int energy()
-	{
-		TileEntityParticleBooster a = booster();
-		if(a != null)
-			return booster().getEnergyStored();
+	protected int energy() {
+		TileEntityParticleBooster te = booster();
+		if (te != null) {
+			return te.getEnergyStored();
+		}
 		return 0;
 	}
 	
@@ -174,7 +163,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateLayerCost()
 	{
-		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
+		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
 	}
 	
 	protected int calculateBlockCost()
@@ -184,10 +173,10 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateBlockCost(int blockID)
 	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
 		if(silkTouch(blockID))
-			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
+			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune())));
 	}
 	
 	protected boolean isRoomForHarvest()
@@ -209,9 +198,9 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	protected boolean canDig(int blockID)
 	{
 		if (Block.blocksList[blockID] != null)
-			return ((Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return ((blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
 		else
-			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return (blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
 	
 	//MINING FUNCTIONS
@@ -222,7 +211,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
+		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 	
@@ -343,14 +332,12 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return transferred;
 	}
 	
-	protected boolean collectEnergyPacketFromBooster(int packet, boolean test)
+	protected boolean consumeEnergyFromBooster(int requiredEnergy, boolean simulate)
 	{
-		TileEntityParticleBooster b = booster();
-		if (b != null)
-			if (test)
-				return packet <= b.getEnergyStored();
-			else
-				return b.removeEnergy(packet,false);
+		TileEntityParticleBooster te = booster();
+		if (te != null) {
+			return te.consumeEnergy(requiredEnergy, simulate);
+		}
 		return false;
 	}
 	

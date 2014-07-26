@@ -13,13 +13,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockTransporter extends BlockContainer
-{
+public class BlockTransporter extends BlockContainer {
 
 	private Icon[] iconBuffer;
 	
-	public BlockTransporter(int par1, Material par2Material)
-	{
+	public BlockTransporter(int par1, Material par2Material) {
 		super(par1, par2Material);
 		setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
@@ -28,15 +26,13 @@ public class BlockTransporter extends BlockContainer
 	}
 
 	@Override
-	public TileEntity createNewTileEntity(World world)
-	{
+	public TileEntity createNewTileEntity(World world) {
 		return new TileEntityTransporter();
 	}
 	
 	@Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
-    {
+    public void registerIcons(IconRegister par1IconRegister) {
         iconBuffer = new Icon[3];
         // Solid textures
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:transporterBottom");
@@ -45,10 +41,8 @@ public class BlockTransporter extends BlockContainer
     }
 
     @Override
-    public Icon getIcon(int side, int metadata)
-    {
-        if (side == 0 || side == 1)
-        {
+    public Icon getIcon(int side, int metadata) {
+        if (side == 0 || side == 1) {
             return iconBuffer[side];
         }
 
@@ -59,8 +53,7 @@ public class BlockTransporter extends BlockContainer
      * Returns the quantity of items to drop on block destruction.
      */
     @Override
-    public int quantityDropped(Random par1Random)
-    {
+    public int quantityDropped(Random par1Random) {
         return 1;
     }
 
@@ -68,9 +61,7 @@ public class BlockTransporter extends BlockContainer
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3)
-    {
+    public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
-
 }

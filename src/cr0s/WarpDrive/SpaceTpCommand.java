@@ -26,34 +26,31 @@ public class SpaceTpCommand extends CommandBase
     {
         EntityPlayerMP player = (EntityPlayerMP)icommandsender;
         MinecraftServer server = MinecraftServer.getServer();
-        int targetDim = WarpDrive.instance.spaceDimID;
+        int targetDim = WarpDriveConfig.G_SPACE_DIMENSION_ID;
 
-        if (astring.length >= 1)
-        {
-            if ("hyper".equals(astring[0]))
-            {
-                targetDim = WarpDrive.instance.hyperSpaceDimID;
-            }
-            else
-            {
-                notifyAdmins(icommandsender, "/space: teleporting player " + astring[0] + " to space", new Object[0]);
+        if (astring.length >= 1) {
+            if ("hyper".equals(astring[0])) {
+                targetDim = WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
+            } else if ("overworld".equals(astring[0])) {
+                targetDim = 0;
+            } else {
                 player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
             }
         }
 
-        if (player == null)
-        {
+        if (player == null) {
             return;
         }
 
-        WorldServer to = server.worldServerForDimension(targetDim);
-        SpaceTeleporter teleporter = new SpaceTeleporter(to, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
+        WorldServer targetWorld = server.worldServerForDimension(targetDim);
+        notifyAdmins(icommandsender, "/space: teleporting player " + player.getDisplayName() + " to " + targetDim + ":" + targetWorld.getWorldInfo().getWorldName(), new Object[0]);
+        SpaceTeleporter teleporter = new SpaceTeleporter(targetWorld, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
         server.getConfigurationManager().transferPlayerToDimension(player, targetDim, teleporter);
     }
 
     @Override
     public String getCommandUsage(ICommandSender icommandsender)
     {
-        return "/space [hyper|<player>]";
+        return "/space [hyper|overworld|<player>]";
     }
 }

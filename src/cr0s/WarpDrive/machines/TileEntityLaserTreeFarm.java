@@ -12,9 +12,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements IPeripheral
-{
-	
+public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements IPeripheral {
 	Boolean active = false;
 	
 	private int mode = 0;
@@ -44,8 +42,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"silkTouch",
 			"silkTouchLeaves",
 			"treetap",
-			"state",
-			"energy"
+			"state"
 	};
 	
 	public TileEntityLaserTreeFarm()
@@ -58,9 +55,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	{
 		super.updateEntity();
 		
-		if(active)
-		{
-			if(mode == 0)
+		if (active) {
+			if (mode == 0)
 			{	
 				if(++scan >= scanWait)
 				{
@@ -73,11 +69,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			}
 			else
 			{
-				if(++scan >= mineWait * delayMul)
+				if (++scan >= mineWait * delayMul)
 				{
 					scan = 0;
 					
-					if(logIndex >= logs.size())
+					if (logIndex >= logs.size())
 					{
 						mode = 0;
 						return;
@@ -85,65 +81,69 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 					Vector3 pos = logs.get(logIndex);
 					int blockID = worldObj.getBlockId(pos.intX(), pos.intY(), pos.intZ());
 					
-					if(mode == 1)
-					{
+					if (mode == 1) {
 						int cost = calculateBlockCost(blockID);
-						if(collectEnergyPacketFromBooster(cost,true))
-						{
-							if(isLog(blockID) || (doLeaves && isLeaf(blockID)))
-							{
+						if (consumeEnergyFromBooster(cost, true)) {
+							if(isLog(blockID) || (doLeaves && isLeaf(blockID))) {
 								delayMul = 1;
-								if(isRoomForHarvest())
-								{
-									if(collectEnergyPacketFromBooster(cost,false))
-									{
-										if(isLog(blockID))
-										{
+								if (isRoomForHarvest()) {
+									if (consumeEnergyFromBooster(cost, false)) {
+										if (isLog(blockID)) {
 											delayMul = 4;
 											totalHarvested++;
 										}
 										harvestBlock(pos);
-									}
-									else
+									} else {
 										return;
-								}
-								else
+									}
+								} else {
 									return;
+								}
 							}
 							logIndex++;
 						}
-					}
-					else if(mode == 2)
-					{
+					} else if(mode == 2) {
 						int cost = calculateBlockCost(blockID);
-						if(collectEnergyPacketFromBooster(cost,true))
-						{
-							if(isRoomForHarvest())
-							{
-								if(isLog(blockID))
-								{
-									if(collectEnergyPacketFromBooster(cost,false))
+						if(consumeEnergyFromBooster(cost, true)) {
+							if(isRoomForHarvest()) {
+								if(blockID == WarpDriveConfig.IC2_RubberWood) {
+									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
+									if (metadata >= 2 && metadata <= 5) {
+										WarpDrive.debugPrint("wetspot found");
+										if (consumeEnergyFromBooster(cost, false)) {
+											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
+											resin.stackSize = (int) Math.round(Math.random() * 4);
+											dumpToInv(resin);
+											worldObj.setBlockMetadataWithNotify(pos.intX(), pos.intY(), pos.intZ(), metadata+6, 3);
+											laserBlock(pos);
+											totalHarvested++;
+											delayMul = 4;
+										} else {
+											return;
+										}
+									} else {
+										delayMul = 1;
+									}
+								} else if(isLog(blockID)) {
+									if (consumeEnergyFromBooster(cost,false))
 									{
 										delayMul = 4;
 										totalHarvested++;
 										harvestBlock(pos);
-									}
-									else
+									} else {
 										return;
-								}
-								else if(isLeaf(blockID))
-								{
-									if(collectEnergyPacketFromBooster(cost,true))
-									{
+									}
+								} else if(isLeaf(blockID)) {
+									if (consumeEnergyFromBooster(cost, true)) {
 										delayMul = 1;
 										harvestBlock(pos);
-									}
-									else
+									} else {
 										return;
+									}
 								}
-							}
-							else
+							} else {
 								return;
+							}
 							logIndex++;
 						}
 					}
@@ -372,12 +372,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		if(methodStr == "state")
 		{
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
-			return new Object[] { state, xSize,zSize,energy(),totalHarvested };
-		}
-		
-		if(methodStr == "energy")
-		{
-			return getEnergyObject();
+			return new Object[] { state, xSize, zSize, energy(), totalHarvested };
 		}
 		return null;
 	}

@@ -6,20 +6,21 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
-import cr0s.WarpDrive.block.BlockAir;
-import cr0s.WarpDrive.block.BlockGas;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.item.ItemReactorLaserFocus;
 import cr0s.WarpDrive.machines.*;
+import dan200.computercraft.api.ComputerCraftAPI;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import dan200.computercraft.api.ComputerCraftAPI;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -38,7 +39,7 @@ import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:ComputerCraft; after:CCTurtle; required-after:AppliedEnergistics; after:AtomicScience; after:ICBM|Explosion; after:MFFS")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.4.0", dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite; after:UndergroundBiomes; after:NetherOres")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
@@ -68,22 +69,25 @@ public class WarpDrive implements LoadingCallback {
 	public static Block cloakBlock;
 	public static Block cloakCoilBlock;
 	public static Block transporterBlock;
+	public static Block reactorMonitorBlock;
 	
 	public static Block airBlock;
 	public static Block gasBlock;
-	
+
+	public static Block iridiumBlock;
 	public static Block transportBeaconBlock;
+	
+	public static Item reactorLaserFocusItem;
 
 	public static BiomeGenBase spaceBiome;
 	public World space;
-	private int spaceProviderID;
-	public int spaceDimID;
 	public SpaceWorldGenerator spaceWorldGenerator;
 	public HyperSpaceWorldGenerator hyperSpaceWorldGenerator;
-
 	public World hyperSpace;
-	private int hyperSpaceProviderID;
-	public int hyperSpaceDimID;
+	
+	// Client settings
+    public static float normalFOV = 70.0F;
+    public static float normalSensitivity = 1.0F;
 
 	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive","Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
 	
@@ -92,7 +96,7 @@ public class WarpDrive implements LoadingCallback {
 	@SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
 	public static CommonProxy proxy;
 
-	public WarpCoresRegistry registry;
+	public WarpCoresRegistry warpCores;
 	public JumpGatesRegistry jumpGates;
 	
 	public CloakManager cloaks;
@@ -100,34 +104,45 @@ public class WarpDrive implements LoadingCallback {
 	public CamRegistry cams;
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
+    public String debugMessage = "";
 	
 	public static WarpDrivePeripheralHandler peripheralHandler = new WarpDrivePeripheralHandler();
 	
 	private ArrayList<Ticket> warpTickets = new ArrayList<Ticket>();
 
 	@EventHandler
-	public void preInit(FMLPreInitializationEvent event)
-	{
+	public void preInit(FMLPreInitializationEvent event) {
 		WarpDriveConfig.Init(new Configuration(event.getSuggestedConfigurationFile()));
 
-		if (FMLCommonHandler.instance().getSide().isClient())
-		{
-			debugPrint("[WarpDrive] Registering sounds event handler...");
+		if (FMLCommonHandler.instance().getSide().isClient()) {
+	        Minecraft mc = Minecraft.getMinecraft();
+
+	        // System.out.println("[WarpDrive] Registering sounds event handler...");
 			MinecraftForge.EVENT_BUS.register(new SoundHandler());
-		} 
+
+			normalFOV = mc.gameSettings.fovSetting;
+		    normalSensitivity = mc.gameSettings.mouseSensitivity;
+		    System.out.println("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
+		}
 	}
 	
-	public static void debugPrint(String out)
-	{
-		if(WarpDriveConfig.debugMode == false)
+	@SideOnly(Side.CLIENT)
+	@EventHandler
+	public void init(FMLInitializationEvent event) {
+// FIXME		FMLInterModComms.sendMessage("Waila", "register", "cr0s.WarpDrive.client.WailaHandler.callbackRegister");
+	}
+	
+	public static void debugPrint(String out) {
+		if (WarpDriveConfig.debugMode == false) {
 			return;
-		if(WarpDriveConfig.debugMode)
+		}
+		if (WarpDriveConfig.debugMode) {
 			System.out.println(out);
+		}
 	}
 
 	@EventHandler
-	public void load(FMLInitializationEvent event)
-	{
+	public void load(FMLInitializationEvent event) {
 		WarpDriveConfig.Init2();
 
 		// CORE CONTROLLER
@@ -135,8 +150,7 @@ public class WarpDrive implements LoadingCallback {
 		
 		LanguageRegistry.addName(protocolBlock, "Warp Controller");
 		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
-		GameRegistry.registerTileEntity(TileEntityProtocol.class,
-				"protocolBlock");
+		GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");
 		
 		// WARP CORE
 		warpCore = new BlockReactor(WarpDriveConfig.coreID, 0, Material.rock);
@@ -164,6 +178,7 @@ public class WarpDrive implements LoadingCallback {
 		LanguageRegistry.addName(airgenBlock, "Air Generator");
 		GameRegistry.registerBlock(airgenBlock, "airgenBlock");
 		GameRegistry.registerTileEntity(TileEntityAirGenerator.class,"airgenBlock");
+		
 		
 		// AIR BLOCK
 		airBlock = (new BlockAir(WarpDriveConfig.airID));
@@ -204,6 +219,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(monitorBlock, "monitorBlock");
 		GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");
 		
+		
 		// MINING LASER
 		miningLaserBlock = new BlockMiningLaser(WarpDriveConfig.miningLaserID, 0, Material.rock);
 		
@@ -212,7 +228,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");
 		
 		// LASER TREE FARM
-		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID,0,Material.rock);
+		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID, 0, Material.rock);
 		
 		LanguageRegistry.addName(laserTreeFarmBlock, "Laser Tree Farm");
 		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
@@ -223,8 +239,7 @@ public class WarpDrive implements LoadingCallback {
 		
 		LanguageRegistry.addName(boosterBlock, "Particle Booster");
 		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
-		GameRegistry.registerTileEntity(TileEntityParticleBooster.class,
-				"boosterBlock");
+		GameRegistry.registerTileEntity(TileEntityParticleBooster.class, "boosterBlock");
 		
 		// LASER LIFT
 		liftBlock = new BlockLift(WarpDriveConfig.liftID, 0, Material.rock);
@@ -232,6 +247,12 @@ public class WarpDrive implements LoadingCallback {
 		LanguageRegistry.addName(liftBlock, "Laser lift");
 		GameRegistry.registerBlock(liftBlock, "liftBlock");
 		GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");
+		
+		// IRIDIUM BLOCK
+		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumID);
+		
+		LanguageRegistry.addName(iridiumBlock, "Block of Iridium");
+		GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");
 		
         // SHIP SCANNER
         scannerBlock = new BlockShipScanner(WarpDriveConfig.shipScannerID, 0, Material.rock);
@@ -260,6 +281,18 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(transporterBlock, "transporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class,"transporter");
 		
+		reactorMonitorBlock = new BlockLaserReactorMonitor(WarpDriveConfig.reactorMonitorID, Material.rock);
+		
+		LanguageRegistry.addName(reactorMonitorBlock, "Laser Reactor Monitor");
+		GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
+		GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class,"reactorMonitor");
+		
+		// REACTOR LASER FOCUS
+		reactorLaserFocusItem = new ItemReactorLaserFocus(WarpDriveConfig.reactorLaserFocusID);
+		
+		LanguageRegistry.addName(reactorLaserFocusItem, "Reactor Laser Focus");
+		GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
+		
 		// TRANSPORT BEACON
 		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)
 			.setHardness(0.5F)
@@ -272,36 +305,69 @@ public class WarpDrive implements LoadingCallback {
         
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
+		
 		spaceWorldGenerator = new SpaceWorldGenerator();
 		GameRegistry.registerWorldGenerator(spaceWorldGenerator);
 		hyperSpaceWorldGenerator = new HyperSpaceWorldGenerator();
 		GameRegistry.registerWorldGenerator(hyperSpaceWorldGenerator);
+		
 		registerSpaceDimension();
 		registerHyperSpaceDimension();
+		
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
 
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-		{
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			warpdriveTab.setBackgroundImageName("items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
+		
+		ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
 	}
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		space = DimensionManager.getWorld(spaceDimID);
-		hyperSpace = DimensionManager.getWorld(hyperSpaceDimID);
+		space = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
+		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 		
-		registry = new WarpCoresRegistry();
-		
-		ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
-
+		if(WarpDriveConfig.isICLoaded && WarpDriveConfig.recipesIC2) {
+			initIC2Recipes();
+		}
+		if (WarpDriveConfig.isAELoaded && WarpDriveConfig.isThermalExpansionLoaded) {
+			initAETERecipes();
+		}
+				
+		warpCores = new WarpCoresRegistry();
 		jumpGates = new JumpGatesRegistry();
 		cams = new CamRegistry();
 	}
 	
-	/*private void initIC2Recipes()
-	{
+	private void initAETERecipes() {
+		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
+		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
+		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
+		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
+
+		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
+		// middle = fluix crystal, advancedMachine, fluix crystal
+		// bottom = advancedCircuit, bucket Resonant ender, advancedCircuit
+		GameRegistry.addRecipe(new ItemStack(warpCore), "crc", "fmf", "cec",
+				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+				'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+				'r', redstoneEnergycell, 
+				'e', bucketEnder,
+				'f', fluixCrystal);
+		
+		// top = advancedCircuit, floppy, advancedCircuit
+		// middle = advancedCircuit, advancedMachine, advancedCircuit
+		// bottom = advancedCircuit, flux crystal, advancedCircuit
+		GameRegistry.addRecipe(new ItemStack(protocolBlock), "coc", "cmc", "cfc",
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'o', floppy,
+			'f', fluixCrystal);
+	}
+	
+	private void initIC2Recipes() {
 		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
 				'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
@@ -391,6 +457,17 @@ public class WarpDrive implements LoadingCallback {
 			'i', WarpDriveConfig.getIC2Item("plateiron"),
 			'm', WarpDriveConfig.getIC2Item("machine") }));
 		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem),false,new Object[] {
+			" p ", "pdp", " p ",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond"}));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] {
+			"pdp", "dmd", "pdp",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond",
+			'm', WarpDriveConfig.getIC2Item("mfeUnit")}));
+		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi", 
 			'i', iridiumBlock,
 			'c', cloakCoilBlock,
@@ -400,24 +477,20 @@ public class WarpDrive implements LoadingCallback {
 			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'a', WarpDriveConfig.getIC2Item("advancedAlloy"));
-	}*/
+	}
 
 	private void registerSpaceDimension() {
-		spaceBiome = (new BiomeSpace(23))
+		spaceBiome = (new BiomeSpace(24))
 			.setColor(0)
 			.setDisableRain()
 			.setBiomeName("Space");
-		this.spaceProviderID = 14;
-		DimensionManager.registerProviderType(this.spaceProviderID, SpaceProvider.class, true);
-		this.spaceDimID = DimensionManager.getNextFreeDimId();
-		DimensionManager.registerDimension(this.spaceDimID, this.spaceProviderID);
+		DimensionManager.registerProviderType(WarpDriveConfig.G_SPACE_PROVIDER_ID, SpaceProvider.class, true);
+		DimensionManager.registerDimension(WarpDriveConfig.G_SPACE_DIMENSION_ID, WarpDriveConfig.G_SPACE_PROVIDER_ID);
 	}
 
 	private void registerHyperSpaceDimension() {
-		this.hyperSpaceProviderID = 15;
-		DimensionManager.registerProviderType(this.hyperSpaceProviderID, HyperSpaceProvider.class, true);
-		this.hyperSpaceDimID = DimensionManager.getNextFreeDimId();
-		DimensionManager.registerDimension(this.hyperSpaceDimID, this.hyperSpaceProviderID);
+		DimensionManager.registerProviderType(WarpDriveConfig.G_HYPERSPACE_PROVIDER_ID, HyperSpaceProvider.class, true);
+		DimensionManager.registerDimension(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID, WarpDriveConfig.G_HYPERSPACE_PROVIDER_ID);
 	}
 
 	@EventHandler
@@ -429,6 +502,7 @@ public class WarpDrive implements LoadingCallback {
 		event.registerServerCommand(new SpaceTpCommand());
 		event.registerServerCommand(new InvisibleCommand());
 		event.registerServerCommand(new JumpgateCommand());
+		event.registerServerCommand(new DebugCommand());
 	}
 	
 	private ArrayList<Ticket> worldTickets(World worldObj)

@@ -15,7 +15,7 @@ public class JumpgateCommand extends CommandBase
     @Override
     public String getCommandName()
     {
-        return "listjg";
+        return "jumpgates";
     }
 
 	@Override

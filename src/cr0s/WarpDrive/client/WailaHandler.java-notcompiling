@@ -1,0 +1,48 @@
+package cr0s.WarpDrive.client;
+
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
+import mcp.mobius.waila.api.IWailaDataProvider;
+import mcp.mobius.waila.api.IWailaRegistrar;
+
+import java.util.List;
+
+import cr0s.WarpDrive.machines.TileEntityReactor;
+import cr0s.WarpDrive.machines.WarpEnergyTE;
+import net.minecraft.block.Block;
+import net.minecraft.item.ItemStack;
+
+public class WailaHandler implements IWailaDataProvider {
+	@Override
+	public ItemStack getWailaStack(IWailaDataAccessor accessor, IWailaConfigHandler config) {
+		return null;
+	}
+
+	@Override
+	public List<String> getWailaHead(ItemStack itemStack, List<String> toolTip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
+		return toolTip;
+	}
+
+	@Override
+	public List<String> getWailaBody(ItemStack itemStack, List<String> toolTip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
+		if (accessor.getTileEntity() instanceof WarpEnergyTE) {
+			WarpEnergyTE energyTE = (WarpEnergyTE) accessor.getTileEntity();
+			toolTip.add(String.format("Energy level %.0f %% (%d/%d EU)", (energyTE.getEnergyStored() * 100.0F / energyTE.getMaxEnergyStored()), energyTE.getEnergyStored(), + energyTE.getMaxEnergyStored()));
+			if (energyTE instanceof TileEntityReactor) {
+				TileEntityReactor reactorTE = (TileEntityReactor) energyTE;
+				toolTip.add(String.format("Cooldown remaining: %d s", Math.ceil(reactorTE.getCooldown() / 20)));
+			}
+		}
+		return toolTip;
+	}
+
+	@Override
+	public List<String> getWailaTail(ItemStack itemStack, List<String> toolTip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
+		return toolTip;
+	}
+
+	public static void callbackRegister(IWailaRegistrar registrar) {
+		WailaHandler instance = new WailaHandler();
+		registrar.registerBodyProvider(instance, WarpEnergyTE.class);
+	}
+}

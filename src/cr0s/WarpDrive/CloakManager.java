@@ -65,7 +65,7 @@ public class CloakManager {
 
 	public boolean isInCloak(int dimensionID, int x, int y, int z, boolean chunk) {
 		for (int i = 0; i < this.cloaks.size(); i++){
-			if (this.cloaks.get(i).world == null || this.cloaks.get(i).world.provider.dimensionId != dimensionID)
+			if (this.cloaks.get(i).dimensionId != dimensionID)
 				continue;
 			
 			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
@@ -82,7 +82,7 @@ public class CloakManager {
 		ArrayList<CloakedArea> res = new ArrayList<CloakedArea>();
 		
 		for (int i = 0; i < this.cloaks.size(); i++){
-			if (this.cloaks.get(i).world == null || this.cloaks.get(i).world.provider.dimensionId != dimensionID)
+			if (this.cloaks.get(i).dimensionId != dimensionID)
 				continue;
 			
 			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
@@ -97,23 +97,18 @@ public class CloakManager {
 		return res;
 	}
 	
-	public boolean isAreaExists(int frequency) {
-		for (int i = 0; i < this.cloaks.size(); i++){
-			if (this.cloaks.get(i).frequency == frequency)
-				return true;
-		}
-		
-		return false;		
+	public boolean isAreaExists(World worldObj, int x, int y, int z) {
+		return (getCloakedArea(worldObj, x, y, z) != null);		
 	}
 	
-	public void addCloakedAreaWorld(World worldObj, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int frequency, byte tier) { 
-		cloaks.add(new CloakedArea(worldObj, frequency, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), tier));
+	public void addCloakedAreaWorld(World worldObj, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int x, int y, int z, byte tier) { 
+		cloaks.add(new CloakedArea(worldObj, x, y, z, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), tier));
 	}	
 	
-	public void removeCloakedArea(int frequency) {
+	public void removeCloakedArea(World worldObj, int x, int y, int z) {
 		int index = 0;
 		for (int i = 0; i < this.cloaks.size(); i++){
-			if (this.cloaks.get(i).frequency == frequency) {
+			if (this.cloaks.get(i).x == x && this.cloaks.get(i).y == y && this.cloaks.get(i).z == z && this.cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
 				this.cloaks.get(i).sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
 				index = i;
 				break;
@@ -123,9 +118,9 @@ public class CloakManager {
 		cloaks.remove(index);
 	}
 	
-	public CloakedArea getCloakedArea(int frequency) {
+	public CloakedArea getCloakedArea(World worldObj, int x, int y, int z) {
 		for (CloakedArea area : this.cloaks) {
-			if (area.frequency == frequency)
+			if (area.x == x && area.y == y && area.z == z && area.dimensionId == worldObj.provider.dimensionId)
 				return area;
 		}
 		
@@ -182,11 +177,12 @@ public class CloakManager {
 	}
 	
 	public class CloakedArea {
-		public int frequency;
+//		public int frequency;
+		public int x, y, z;
 		public AxisAlignedBB aabb;
 		public LinkedList<EntityPlayer> playersInArea;
 		public byte tier = 0;
-		public World world = null;
+		public int dimensionId = -666;
 		
 		public boolean isPlayerInArea(EntityPlayer player) {
 			for (EntityPlayer p : this.playersInArea) {
@@ -211,8 +207,10 @@ public class CloakManager {
 			return (aabb.minX <= player.posX && aabb.maxX >= player.posX && aabb.minY <= player.posY && aabb.maxY >= player.posY  && aabb.minZ <= player.posZ && aabb.maxZ >= player.posZ);
 		}
 				
-		public CloakedArea(World worldObj, int frequency, AxisAlignedBB aabb, byte tier) {
-			this.frequency = frequency;
+		public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
+			this.x = x;
+			this.y = y;
+			this.z = z;
 			this.aabb = aabb;
 			this.tier = tier;
 			this.playersInArea = new LinkedList<EntityPlayer>();
@@ -220,11 +218,8 @@ public class CloakManager {
 			if (worldObj == null || aabb == null)
 				return;
 			
-			this.world = worldObj;
-			
-			if (this.world == null)
-				return;
-			
+			this.dimensionId = worldObj.provider.dimensionId;
+						
 			try {
 				// Added all players, who inside the field
 				List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
@@ -259,7 +254,7 @@ public class CloakManager {
 	        {
 	            EntityPlayerMP entityplayermp = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(j);
 
-	            if (entityplayermp.dimension == this.world.provider.dimensionId)
+	            if (entityplayermp.dimension == this.dimensionId)
 	            {
 	                double d4 = midX - entityplayermp.posX;
 	                double d5 = midY - entityplayermp.posY;

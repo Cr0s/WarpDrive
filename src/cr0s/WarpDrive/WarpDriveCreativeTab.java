@@ -18,6 +18,12 @@ public class WarpDriveCreativeTab extends CreativeTabs
 		topLabel = topLabelIn;
 	}
 	
+	@Override
+	public Item getTabIconItem()
+    {
+        return WarpDrive.reactorLaserFocusItem;
+    }
+	
 	public String getTranslatedTabLabel()
     {
         return topLabel;

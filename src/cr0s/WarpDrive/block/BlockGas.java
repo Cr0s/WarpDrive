@@ -1,8 +1,7 @@
-package cr0s.WarpDrive.block;
+package cr0s.WarpDrive;
 
 import java.util.Random;
 
-import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -85,7 +84,7 @@ public class BlockGas extends Block
     @Override
     public Icon getIcon(int side, int metadata)
     {
-        return gasIcons[metadata];
+        return gasIcons[metadata % gasIcons.length];	// Lem
     }
 
     @Override
@@ -178,7 +177,7 @@ public class BlockGas extends Block
     public void onBlockAdded(World par1World, int par2, int par3, int par4)
     {
         // Gas blocks allow only in space
-        if (par1World.provider.dimensionId != WarpDrive.instance.spaceDimID)
+        if (par1World.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID)
         {
             par1World.setBlockToAir(par2, par3, par4);
         }

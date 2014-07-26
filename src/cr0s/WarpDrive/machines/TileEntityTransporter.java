@@ -3,6 +3,9 @@ package cr0s.WarpDrive.machines;
 import java.util.ArrayList;
 import java.util.List;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
@@ -10,14 +13,17 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.MinecraftForge;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityTransporter extends WarpTE implements IPeripheral
+public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 {
 	private double scanRange=2;
 	
@@ -45,38 +51,34 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 			"help" };
 	
 	@Override
-	public int getMaxEnergyStored()
-	{
+	public int getMaxEnergyStored() {
 		return WarpDriveConfig.TR_MAX_ENERGY;
 	}
 	
 	@Override
-	public void updateEntity()
-	{
+	public void updateEntity() {
+		super.updateEntity();
 		
-		if(isLocked && lockStrengthMul > 0)
+		if (isLocked && lockStrengthMul > 0) {
 			lockStrengthMul*= 0.98;
+		}
 	}
 	
+	// IPeripheral overrides
 	@Override
-	public String getType()
-	{
-		WarpDrive.debugPrint("GetType");
+	public String getType() {
 		return "transporter";
 	}
 
 	@Override
-	public String[] getMethodNames()
-	{
+	public String[] getMethodNames() {
 		return methodArray;
 	}
 	
-	private Object[] setVec3(boolean src,Object... arguments)
-	{
+	private Object[] setVec3(boolean src,Object... arguments) {
 		Vector3 vec = src ? sourceVec : destVec;
 		
-		if(vec == null)
-		{
+		if (vec == null) {
 			if(src)
 				sourceVec = new Vector3(0,0,0);
 			else
@@ -86,22 +88,16 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 		
 		try
 		{
-			if(arguments.length >= 3)
-			{
+			if (arguments.length >= 3) {
 				vec.x = toDouble(arguments[0]);
 				vec.y = toDouble(arguments[1]);
 				vec.z = toDouble(arguments[2]);
-			}
-			else if(arguments.length == 1)
-			{
-				if(WarpDriveConfig.TR_RELATIVE_COORDS)
-				{
+			} else if(arguments.length == 1) {
+				if(WarpDriveConfig.TR_RELATIVE_COORDS) {
 					vec.x = centreOnMe.x;
 					vec.y = centreOnMe.y;
 					vec.z = centreOnMe.z;
-				}
-				else
-				{
+				} else {
 					vec.x = xCoord + centreOnMe.x;
 					vec.y = yCoord + centreOnMe.y;
 					vec.z = zCoord + centreOnMe.z;
@@ -119,8 +115,9 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
 	{
 		String str = methodArray[method];
-		if(str == "energy")
-			return new Object[] {getEnergyStored(),getMaxEnergyStored()};
+		if(str == "energy") {
+			return new Object[] { getEnergyStored(), getMaxEnergyStored() };
+		}
 		
 		if(str == "source")
 		{
@@ -134,34 +131,28 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 		
 		if(str == "lock")
 		{
-			return new Object[] { lockStrength(sourceVec,destVec,true) };
+			return new Object[] { lockStrength(sourceVec, destVec, true) };
 		}
 		
 		if(str == "release")
 		{
-			if(isLocked)
-			{
+			if (isLocked) {
 				isLocked = false;
 				return new Object[] { true };
-			}
-			else
-			{
+			} else {
 				return new Object[] { false };
 			}
 		}
 		
-		if(str == "lockStrength")
-		{
+		if(str == "lockStrength") {
 			return new Object[] { lockStrength(sourceVec,destVec,false) };
 		}
 		
-		if(str == "energize")
-		{
+		if(str == "energize") {
 			return new Object[] { energize () };
 		}
 		
-		if(str == "powerBoost")
-		{
+		if(str == "powerBoost") {
 			try
 			{
 				if(arguments.length >= 1)
@@ -181,16 +172,14 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 	{
 		double ls = lockStrength(sourceVec,destVec,false);
 		ArrayList<EntityLivingBase> entitiesToTransport = findEntities(sourceVec,ls);
-		int energyReq = (int) Math.ceil(WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
-		for(EntityLivingBase ent : entitiesToTransport)
-		{
-			if(removeEnergy(energyReq,false))
-			{
-				inflictNegativeEffect(ent,ls);
-				transportEnt(ent,destVec);
-			}
-			else
+		int energyRequested = (int)Math.ceil(WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
+		for(EntityLivingBase ent : entitiesToTransport) {
+			if (consumeEnergy(energyRequested, false)) {
+				inflictNegativeEffect(ent, ls);
+				transportEnt(ent, destVec);
+			} else {
 				break;
+			}
 		}
 		return false;
 	}
@@ -326,47 +315,53 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 
 	@Override
 	public void detach(IComputerAccess computer) {}
+	
+	@Override
+	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction) {
+		if (direction.equals(ForgeDirection.UP))
+			return false;
+		return super.acceptsEnergyFrom(emitter, direction);
+	}
+
+	@Override
+	public int getMaxSafeInput() {
+		return Integer.MAX_VALUE;
+	}
     
     @Override
-    public void writeToNBT(NBTTagCompound tag)
-    {
+    public void writeToNBT(NBTTagCompound tag) {
     	super.writeToNBT(tag);
     	tag.setDouble("powerBoost", powerBoost);
     }
     
     @Override
-    public void readFromNBT(NBTTagCompound tag)
-    {
+    public void readFromNBT(NBTTagCompound tag) {
     	super.readFromNBT(tag);
     	powerBoost   = tag.getDouble("powerBoost");
     }
     
-    class TeleporterDamage extends DamageSource
-    {
-
-		protected TeleporterDamage(String par1Str)
-		{
+    class TeleporterDamage extends DamageSource {
+		protected TeleporterDamage(String par1Str) {
 			super(par1Str);
 		}
 		
 		@Override
-		public ChatMessageComponent getDeathMessage(EntityLivingBase e)
-		{
+		public ChatMessageComponent getDeathMessage(EntityLivingBase e) {
 			String mess = "";
-			if(e instanceof EntityPlayer || e instanceof EntityPlayerMP)
+			if(e instanceof EntityPlayer || e instanceof EntityPlayerMP) {
 				mess = ((EntityPlayer) e).username + " was killed by a teleporter malfunction";
-			else
+			} else {
 				mess = e.getEntityName() + " was killed by a teleporter malfunction";
+			}
 			
 			WarpDrive.debugPrint(mess);
 			return ChatMessageComponent.createFromText(mess);
 		}
-    	
     }
 
 	@Override
-	public boolean equals(IPeripheral other)
-	{
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }

@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import net.minecraft.util.MathHelper;
 
 public final class JumpGatesRegistry
@@ -158,22 +159,20 @@ public final class JumpGatesRegistry
 
     public JumpGate findNearestGate(int x, int y, int z)
     {
-        System.out.println(jumpGatesList());
-        double minDistance = -1;
+//    	WarpDrive.debugPrint(jumpGatesList());
+        double minDistance2 = -1;
         JumpGate res = null;
 
         for (JumpGate jg : gates)
         {
-            double d3 = jg.xCoord - x;
-            double d4 = jg.yCoord - y;
-            double d5 = jg.zCoord - z;
-            double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
-            System.out.println("Checking gate: " + jg.name + ", distance: " + distance);
+            double dX = jg.xCoord - x;
+            double dY = jg.yCoord - y;
+            double dZ = jg.zCoord - z;
+            double distance2 = dX * dX + dY * dY + dZ * dZ;
 
-            if (minDistance == -1 || distance < minDistance)
+            if ((minDistance2 == -1) || (distance2 < minDistance2))
             {
-                System.out.println("Setting " + jg.name + " as nearest");
-                minDistance = distance;
+                minDistance2 = distance2;
                 res = jg;
             }
         }

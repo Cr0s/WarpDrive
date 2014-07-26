@@ -1,45 +1,60 @@
 package cr0s.WarpDrive.machines;
 
-import cr0s.WarpDrive.Vector3;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
-import net.minecraft.block.Block;
-import net.minecraft.nbt.NBTTagCompound;
+import java.util.Arrays;
+import java.util.List;
 
-public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IPeripheral
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.network.packet.Packet62LevelSound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.world.World;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.fluids.FluidRegistry;
+import appeng.api.WorldCoord;
+import appeng.api.IAEItemStack;
+import appeng.api.Util;
+import appeng.api.events.GridTileLoadEvent;
+import appeng.api.events.GridTileUnloadEvent;
+import appeng.api.me.tiles.IGridMachine;
+import appeng.api.me.tiles.ITileCable;
+import appeng.api.me.util.IGridInterface;
+import appeng.api.me.util.IMEInventoryHandler;
+import cr0s.WarpDrive.*;
+
+public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IGridMachine, ITileCable
 {
-	protected final int laserBelow = 0;
-	
-	private int digX,digZ = 8;
-	private final int CUBE_SIDE = 8;
+	Boolean powerStatus = false;
+	private IGridInterface grid;
+
+	private final int MAX_BOOSTERS_NUMBER = 1;
+
+	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
-	
-	private double speedMul = 1;
-	
-	private int miningDelay = 0;
-	private int minLayer = 1;
-	
-	@Override
-	protected int calculateLayerCost()
-	{
-		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
-	}
-	
-	@Override
-	protected int calculateBlockCost()
-	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
-		if(silkTouch())
-			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH  * speedMul);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune()))  * speedMul);
-	}
-	
+	private boolean useDeiterium = false;
+	private boolean AENetworkReady = false;
+
 	private String[] methodsArray =
 	{
 		"mine",		//0
@@ -47,13 +62,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 		"isMining",	//2
 		"quarry",	//3
 		"state",	//4
-		"offset",	//5
-		"silktouch", //6
-		"fortune", //7
-		"speedMul", //8
-		"layer", //9
-		"minLayer", //10
-		"energy"
+		"offset"	//5
 	};
 
 	private int delayTicksScan = 0;
@@ -66,111 +75,282 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	private int valuableIndex = 0;
 
 	private int layerOffset = 1;
+
+	private Vector3 minerVector;
 	//private long uid = 0;
+
+	TileEntityParticleBooster booster = null;
+
+	private boolean isOnEarth = false;
 	//int t = 20;
 	@Override
-	public void updateEntity()
-	{
-		super.updateEntity();
-		
-		if(minLayer > yCoord - 1)
-			minLayer = yCoord - 1;
-		if(currentLayer > yCoord - 1)
-			currentLayer = yCoord - 1;
-		if(speedMul == 0)
-			speedMul = 1;
-		speedMul = clamp(speedMul,WarpDriveConfig.ML_MIN_SPEED,WarpDriveConfig.ML_MAX_SPEED);
-		if (isMining)
-		{
-			if (currentMode == 0)
-			{
-				if (++delayTicksScan > (WarpDriveConfig.ML_SCAN_DELAY / speedMul))
-				{
+	public void updateEntity() {
+		if (isMining) {
+			isOnEarth = (worldObj.provider.dimensionId == 0);
+			
+			if (minerVector != null) {
+				minerVector.x = xCoord;
+				minerVector.y = yCoord - 1;
+				minerVector.z = zCoord;
+				minerVector = minerVector.add(0.5);
+			}
+
+			if (currentMode == 0) { // scanning
+				delayTicksScan++;
+				if (delayTicksScan > WarpDriveConfig.ML_SCAN_DELAY) {
 					delayTicksScan = 0;
 					valuablesInLayer.clear();
 					valuableIndex = 0;
-					if (!collectEnergyPacketFromBooster(calculateLayerCost(), true))
+					if (!consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE, true))
 						return;
-					while (currentLayer > (minLayer - 1))
-					{
+					while (currentLayer > 0) {
 						scanLayer();
-						if (valuablesInLayer.size() > 0)
-						{
-							if(collectEnergyPacketFromBooster(calculateLayerCost(),false))
-							{
-								currentMode = 1;
+						if (valuablesInLayer.size() > 0) {
+							if (!consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE, false)) {
 								return;
 							}
+							sendLaserPacket(minerVector, new Vector3(xCoord, currentLayer, zCoord).add(0.5), 0, 0, 1, 20, 0, 50);
+							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
+							int blockID = worldObj.getBlockId(xCoord, currentLayer, zCoord);
+							if (blockID != 0)
+								if (canDig(blockID))
+									harvestBlock(new Vector3(xCoord, currentLayer, zCoord));
+							currentMode = 1;
+							return;
+						} else {
+							currentLayer--;
 						}
-						else
-							--currentLayer;
 					}
-					if (currentLayer < minLayer)
-					{
+					if (currentLayer <= 0) {
 						isMining = false;
-						refreshLoading();
 					}
 				}
-			}
-			else
-			{
-				if (++delayTicksMine > ((WarpDriveConfig.ML_MINE_DELAY / speedMul) + miningDelay))
-				{
+			} else { // mining
+				delayTicksMine++;
+				if (delayTicksMine > WarpDriveConfig.ML_MINE_DELAY) {
 					delayTicksMine = 0;
-					int energyReq = calculateBlockCost();
-					if (collectEnergyPacketFromBooster(energyReq,true) && valuableIndex < valuablesInLayer.size())
-					{
-						//WarpDrive.debugPrint("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
-						Vector3 valuable = valuablesInLayer.get(valuableIndex);
+
+					if (valuableIndex < valuablesInLayer.size()) {
+						//System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
+						Vector3 valuable = valuablesInLayer.get(valuableIndex++);
 						// Mine valuable ore
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
-						if (!canDig(blockID))
-						{
-							WarpDrive.debugPrint("Cannot mine: " + blockID);
-							valuableIndex++;
+
+						if (blockID == 0) {
+							delayTicksMine = (int) (WarpDriveConfig.ML_MINE_DELAY * 0.8F);
+						}
+						// Skip if block is too hard or its empty block
+						if (!canDig(blockID)) {
 							return;
 						}
-						
-						if((WarpDriveConfig.MinerOres.contains(blockID) || isQuarry) && isRoomForHarvest())
-						{
-							if(collectEnergyPacketFromBooster(energyReq,false))
-							{
-								harvestBlock(valuable);
-								valuableIndex++;
-								miningDelay = 0;
-								return;
-							}
-						}
-						else if(isRoomForHarvest())
-						{
-							miningDelay = 0;
-							valuableIndex++;
-							return;
-						}
-						else
-						{
-							miningDelay= Math.min(miningDelay+1, 20);
-							return;
-						}
-					}
-					else if(valuableIndex >= valuablesInLayer.size())
-					{
+
+						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.ML_MINE_DELAY, 0, 50);
+						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
+						harvestBlock(valuable);
+					} else {
 						currentMode = 0;
-						--currentLayer;
+						currentLayer--;
 					}
 				}
 			}
 		}
 	}
 
+
+	private boolean canDig(int blockID) {
+		// check blacklist
+		if (blockID == WarpDriveConfig.MFFS_Field || blockID == Block.bedrock.blockID) {
+			return false;
+		}
+		// check whitelist
+		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID) {
+			return true;
+		}
+		// check default
+		else if ( (Block.blocksList[blockID] != null) && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) ) {
+			return true;
+		}
+		return false;
+	}
+
+	private void harvestBlock(Vector3 valuable) {
+		int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
+		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
+		if (blockID != Block.waterMoving.blockID && blockID != Block.waterStill.blockID && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID)
+		{
+			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
+			if (stacks != null)
+				for (ItemStack stack : stacks)
+				{
+					if (grid != null && AENetworkReady)
+						putInGrid(stack);
+					else
+						putInChest(findChest(), stack);
+				}
+			worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), blockID + (blockMeta << 12));
+		}
+		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
+		// Evaporate water
+			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
+		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
+	}
+
+	private IInventory findChest()
+	{
+		TileEntity result = null;
+		result = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+
+		if (result != null && result instanceof IInventory)
+		{
+			return (IInventory) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+
+		if (result != null && result instanceof IInventory)
+		{
+			return (IInventory) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+
+		if (result != null && result instanceof IInventory)
+		{
+			return (IInventory) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+
+		if (result != null && result instanceof IInventory)
+		{
+			return (IInventory) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
+
+		if (result != null && result instanceof IInventory)
+		{
+			return (IInventory) result;
+		}
+
+		return null;
+	}
+
+	public List<ItemStack> getItemStackFromBlock(int i, int j, int k, int blockID, int blockMeta)
+	{
+		Block block = Block.blocksList[blockID];
+		if (block == null)
+			return null;
+		if (useDeiterium && grid != null && AENetworkReady)
+		{
+			IMEInventoryHandler cellArray = grid.getCellArray();
+			if (cellArray != null)
+			{
+				int consume = isQuarry?15:1000;
+				IAEItemStack entryToAEIS = Util.createItemStack(new ItemStack(WarpDriveConfig.AEExtraFDI, consume, FluidRegistry.getFluidID("deuterium")));
+				long contained = cellArray.countOfItemType(entryToAEIS);
+				if (block.canSilkHarvest(worldObj, null, i, j, k, blockMeta) && contained >= consume)
+				{
+					cellArray.extractItems(entryToAEIS);
+					ArrayList<ItemStack> t = new ArrayList<ItemStack>();
+					t.add(new ItemStack(blockID, 1, blockMeta));
+					return t;
+				}
+			}
+		}
+		return block.getBlockDropped(worldObj, i, j, k, blockMeta, 0);
+	}
+
+	public int putInGrid(ItemStack itemStackSource)
+	{
+		int transferred = itemStackSource.stackSize;
+		IMEInventoryHandler cellArray = grid.getCellArray();
+		if (cellArray != null)
+		{
+			IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
+			if (ret != null)
+				transferred -= ret.getStackSize();
+		}
+		return transferred;
+	}
+
+	public int putInChest(IInventory inventory, ItemStack itemStackSource)
+	{
+		if (inventory == null || itemStackSource == null)
+		{
+			return 0;
+		}
+
+		int transferred = 0;
+
+		for (int i = 0; i < inventory.getSizeInventory(); i++)
+		{
+			if (!inventory.isItemValidForSlot(i, itemStackSource))
+			{
+				continue;
+			}
+
+			ItemStack itemStack = inventory.getStackInSlot(i);
+
+			if (itemStack == null || !itemStack.isItemEqual(itemStackSource))
+			{
+				continue;
+			}
+
+			int transfer = Math.min(itemStackSource.stackSize - transferred, itemStack.getMaxStackSize() - itemStack.stackSize);
+			itemStack.stackSize += transfer;
+			transferred += transfer;
+
+			if (transferred == itemStackSource.stackSize)
+			{
+				return transferred;
+			}
+		}
+
+		for (int i = 0; i < inventory.getSizeInventory(); i++)
+		{
+			if (!inventory.isItemValidForSlot(i, itemStackSource))
+			{
+				continue;
+			}
+
+			ItemStack itemStack = inventory.getStackInSlot(i);
+
+			if (itemStack != null)
+			{
+				continue;
+			}
+
+			int transfer = Math.min(itemStackSource.stackSize - transferred, itemStackSource.getMaxStackSize());
+			ItemStack dest = copyWithSize(itemStackSource, transfer);
+			inventory.setInventorySlotContents(i, dest);
+			transferred += transfer;
+
+			if (transferred == itemStackSource.stackSize)
+			{
+				return transferred;
+			}
+		}
+
+		return transferred;
+	}
+
+	public ItemStack copyWithSize(ItemStack itemStack, int newSize)
+	{
+		ItemStack ret = itemStack.copy();
+		ret.stackSize = newSize;
+		return ret;
+	}
+
 	private void scanLayer()
 	{
-		//WarpDrive.debugPrint("Scanning layer");
+		//System.out.println("Scanning layer");
 		valuablesInLayer.clear();
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
-		x1 = xCoord + digX / 2;
-		x2 = xCoord - digX / 2;
+		final int CUBE_SIDE = 8;
+		x1 = xCoord + CUBE_SIDE / 2;
+		x2 = xCoord - CUBE_SIDE / 2;
 
 		if (x1 < x2)
 		{
@@ -183,8 +363,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			xmax = x1;
 		}
 
-		z1 = zCoord + digZ / 2;
-		z2 = zCoord - digZ / 2;
+		z1 = zCoord + CUBE_SIDE / 2;
+		z2 = zCoord - CUBE_SIDE / 2;
 
 		if (z1 < z2)
 		{
@@ -196,8 +376,10 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			zmin = z2;
 			zmax = z1;
 		}
-		defineMiningArea(xmin,zmin,xmax,zmax);
-		
+
+		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
+		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
+
 		// Search for valuable blocks
 		for (int x = xmin; x <= xmax; x++)
 			for (int z = zmin; z <= zmax; z++)
@@ -215,7 +397,121 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			}
 
 		valuableIndex = 0;
-		//WarpDrive.debugPrint("[ML] Found " + valuablesInLayer.size() + " valuables");
+		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
+	}
+
+	private boolean consumeEnergyPacketFromBooster(int amount, boolean simulate) {
+		if (booster == null) {
+			booster = findFirstBooster();
+		}
+		if (booster != null) {
+			return booster.consumeEnergy(amount, simulate);
+		} else {
+			return false;
+		}
+	}
+
+	private TileEntityParticleBooster findFirstBooster()
+	{
+		TileEntity result;
+		result = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+
+		if (result != null && result instanceof TileEntityParticleBooster)
+		{
+			dx = 1;
+			dz = 0;
+			dy = 0;
+			return (TileEntityParticleBooster) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+
+		if (result != null && result instanceof TileEntityParticleBooster)
+		{
+			dx = -1;
+			dz = 0;
+			dy = 0;
+			return (TileEntityParticleBooster) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+
+		if (result != null && result instanceof TileEntityParticleBooster)
+		{
+			dx = 0;
+			dz = 1;
+			dy = 0;
+			return (TileEntityParticleBooster) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+
+		if (result != null && result instanceof TileEntityParticleBooster)
+		{
+			dx = 0;
+			dz = -1;
+			dy = 0;
+			return (TileEntityParticleBooster) result;
+		}
+
+		result = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
+
+		if (result != null && result instanceof TileEntityParticleBooster)
+		{
+			dx = 0;
+			dz = 0;
+			dy = 1;
+			return (TileEntityParticleBooster) result;
+		}
+
+		return null;
+	}
+
+	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius)
+	{
+		Side side = FMLCommonHandler.instance().getEffectiveSide();
+
+		if (side == Side.SERVER)
+		{
+			if (source == null || dest == null || worldObj == null)
+			{
+				return;
+			}
+
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream outputStream = new DataOutputStream(bos);
+
+			try
+			{
+				// Write source vector
+				outputStream.writeDouble(source.x);
+				outputStream.writeDouble(source.y);
+				outputStream.writeDouble(source.z);
+				// Write target vector
+				outputStream.writeDouble(dest.x);
+				outputStream.writeDouble(dest.y);
+				outputStream.writeDouble(dest.z);
+				// Write r, g, b of laser
+				outputStream.writeFloat(r);
+				outputStream.writeFloat(g);
+				outputStream.writeFloat(b);
+				// Write age
+				outputStream.writeByte(age);
+				// Write energy value
+				outputStream.writeInt(0);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+
+			Packet250CustomPayload packet = new Packet250CustomPayload();
+			packet.channel = "WarpDriveBeam";
+			packet.data = bos.toByteArray();
+			packet.length = bos.size();
+			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(source.intX(), source.intY(), source.intZ(), radius, worldObj.provider.dimensionId, packet);
+			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(dest.intX(), dest.intY(), dest.intZ(), radius, worldObj.provider.dimensionId, packet);
+		}
 	}
 
 	@Override
@@ -225,12 +521,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 		isMining = tag.getBoolean("isMining");
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
-		minLayer= tag.getInteger("minLayer");
-		
-		digX = tag.getInteger("digX");
-		digZ = tag.getInteger("digZ");
-		
-		speedMul = tag.getDouble("speedMul");
+		useDeiterium = tag.getBoolean("useDeiterium");
+		minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 	}
 
 	@Override
@@ -240,12 +532,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 		tag.setBoolean("isMining", isMining);
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
-		tag.setInteger("minLayer", minLayer);
-		
-		tag.setInteger("digX", digX);
-		tag.setInteger("digZ", digZ);
-		
-		tag.setDouble("speedMul", speedMul);
+		tag.setBoolean("useDeiterium", useDeiterium);
 	}
 //CC
 	// IPeripheral methods implementation
@@ -269,42 +556,22 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 			case 0: // Mine()
 				if (isMining)
 					return new Boolean[] { false };
+				isQuarry = false;
+				delayTicksScan = 0;
+				currentMode = 0;
+				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
-				digX = CUBE_SIDE;
-				digZ = CUBE_SIDE;
-				try
-				{
-					if(arguments.length >= 2)
-					{
-						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.ML_MAX_SIZE);
-						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.ML_MAX_SIZE);
-					}
-					else
-					{
-						digX = CUBE_SIDE;
-						digZ = CUBE_SIDE;
-					}
-					isQuarry = false;
-					delayTicksScan = 0;
-					currentMode = 0;
-					isMining = true;
-					defineMiningArea(digX,digZ);
-				}
-				catch(NumberFormatException e)
-				{
-					isMining = false;
-					refreshLoading();
-					return new Boolean[] { false };
-				}
+				isMining = true;
+				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
 				return new Boolean[] { true };
 
 			case 1: // stop()
 				isMining = false;
-				refreshLoading();
 				break;
 
 			case 2: // isMining()
 				return new Boolean[] { isMining };
+				
 			case 3: // Quarry()
 				if (isMining)
 					return new Boolean[] { false };
@@ -312,107 +579,38 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 				isQuarry = true;
 				delayTicksScan = 0;
 				currentMode = 0;
+				minerVector = new Vector3(xCoord, yCoord - 1, zCoord).add(0.5);
 				currentLayer = yCoord - layerOffset;
 				isMining = true;
-				digX = CUBE_SIDE;
-				digZ = CUBE_SIDE;
-				try
-				{
-					if(arguments.length >= 2)
-					{
-						digX = Math.min(toInt(arguments[0]),WarpDriveConfig.ML_MAX_SIZE);
-						digZ = Math.min(toInt(arguments[1]),WarpDriveConfig.ML_MAX_SIZE);
-					}
-					defineMiningArea(digX,digZ);
-				}
-				catch(NumberFormatException e)
-				{
-					isMining = false;
-					refreshLoading();
-					return new Boolean[] { false };
-				}
+				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
 				return new Boolean[] { true };
 
 			case 4: // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
+				int energy = 0;
+				if (booster != null) {
+					energy = booster.getEnergyStored();
+				}
 				String state = "not mining";
-				int valuablesMined   = 0;
-				int valuablesInLayer = 0;
-				if (isMining)
-				{
+				Integer valuablesInLayer, valuablesMined;
+				if (isMining) {
 					valuablesInLayer = this.valuablesInLayer.size();
 					valuablesMined = this.valuableIndex;
 					state = "mining" + ((isQuarry) ? " (quarry mode)" : "");
-					if (energy() < 0)
+					if (energy < 0) {
 						state = "out of energy";
+					}
+					return new Object[] {state, energy, currentLayer, valuablesMined, valuablesInLayer};
 				}
-				return new Object[] {state, getEnergyObject(), currentLayer, valuablesMined, valuablesInLayer,
-						digX, digZ, speedMul, fortune(), silkTouch()};
+				return new Object[] {state, energy, currentLayer, 0, 0};
 
 			case 5: // Offset
-				if (arguments.length == 1)
-				{
+				if (arguments.length == 1) {
 					int t = ((Double)arguments[0]).intValue();
 					if (t < 0)
 						t = 0;
 					layerOffset = t + 1;
 				}
 				return new Integer[] { layerOffset-1 };
-			case 6: // silktouch(1/boolean)
-				if (arguments.length == 1)
-					silkTouch(toBool(arguments[0]));
-				return new Boolean[] { silkTouch() };
-			case 7: // fortune(int)
-				if (arguments.length == 1)
-					fortune(toInt(arguments[0]));
-				return new Integer[] { fortune() };
-			case 8: // speedMul(double)
-				if (arguments.length == 1)
-				{
-					try
-					{
-						Double arg = Double.parseDouble(arguments[0].toString());
-						speedMul = Math.min(WarpDriveConfig.ML_MAX_SPEED,Math.max(arg,WarpDriveConfig.ML_MIN_SPEED));
-					}
-					catch(NumberFormatException e)
-					{
-						speedMul = 1;
-					}
-				}
-				return new Double[] { speedMul };
-			case 9: //layer
-			{
-				try
-				{
-					if(arguments.length >= 1)
-					{
-						currentLayer = Math.min(yCoord-1, Math.max(1, toInt(arguments[0])));
-						if(isMining)
-							currentMode = 0;
-					}
-				}
-				catch(NumberFormatException e)
-				{
-					return new String[] { "NaN" };
-				}
-				return new Integer[] { currentLayer };
-			}
-			case 10: //setMinLayer
-			{
-				try
-				{
-					if(arguments.length >= 1)
-						minLayer = Math.min(yCoord-1, Math.max(1, toInt(arguments[0])));
-				}
-				catch(NumberFormatException e)
-				{
-					return new String[] { "NaN" };
-				}
-				return new Integer[] { currentLayer };
-			}
-			case 11:
-			{
-				return getEnergyObject();
-			}
 		}
 		return null;
 	}
@@ -426,54 +624,85 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	public void detach(IComputerAccess computer)
 	{
 	}
+//AE
+	@Override
+	public float getPowerDrainPerTick()
+	{
+		return 1;
+	}
 
 	@Override
-	public boolean shouldChunkLoad() {
-		return isMining;
+	public void validate()
+	{
+		super.validate();
+		MinecraftForge.EVENT_BUS.post(new GridTileLoadEvent(this, worldObj, getLocation()));
 	}
-	
-	//ABSTRACT LASER IMPLEMENTATION
+
 	@Override
-	protected boolean canSilkTouch()
+	public void invalidate()
+	{
+		super.invalidate();
+		MinecraftForge.EVENT_BUS.post(new GridTileUnloadEvent(this, worldObj, getLocation()));
+	}
+
+	@Override
+	public WorldCoord getLocation()
+	{
+		return new WorldCoord(xCoord, yCoord, zCoord);
+	}
+
+	@Override
+	public boolean isValid()
 	{
 		return true;
 	}
-	
+
 	@Override
-	protected int minFortune()
+	public void setPowerStatus(boolean hasPower)
 	{
-		return 0;
+		powerStatus = hasPower;
 	}
 
 	@Override
-	protected int maxFortune()
+	public boolean isPowered()
 	{
-		return 5;
+		return powerStatus;
 	}
 
 	@Override
-	protected double laserBelow()
+	public IGridInterface getGrid()
 	{
-		return 0.5;
+		return grid;
 	}
 
 	@Override
-	protected float getColorR()
+	public void setGrid(IGridInterface gi)
 	{
-		return 0f;
+		grid = gi;
 	}
 
 	@Override
-	protected float getColorG()
+	public World getWorld()
 	{
-		return 0f;
+		return worldObj;
 	}
 
 	@Override
-	protected float getColorB()
+	public boolean coveredConnections()
 	{
-		return 1f;
+		return true;
 	}
+
+	public void setNetworkReady( boolean isReady )
+	{
+		AENetworkReady = isReady;
+	}
+
+	public boolean isMachineActive()
+	{
+		return true;
+	}
+
 
 	@Override
 	public boolean equals(IPeripheral other) {

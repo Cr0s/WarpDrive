@@ -150,7 +150,7 @@ public class HyperSpaceProvider extends WorldProvider
     @Override
     public int getRespawnDimension(EntityPlayerMP player)
     {
-        return WarpDrive.instance.hyperSpaceDimID;
+        return WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
     }
 
     @Override

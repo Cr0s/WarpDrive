@@ -10,13 +10,23 @@ public class WorldGenStructure
 	{
 		if (corrupted && (rand.nextInt(15) == 1))
 			return 0;
-		return Block.stone.blockID;
+		
+		if (WarpDriveConfig.isICLoaded) {
+			return WarpDriveConfig.getIC2Item("reinforcedStone").itemID;
+		} else {
+			return Block.stone.blockID;
+		}
 	}
 
 	public static int getGlassBlock(boolean corrupted, Random rand)
 	{
 		if (corrupted && (rand.nextInt(30) == 1))
 			return 0;
-		return Block.glass.blockID;
+		
+		if (WarpDriveConfig.isICLoaded) {
+			return WarpDriveConfig.getIC2Item("reinforcedGlass").itemID;
+		} else {
+			return Block.glass.blockID;
+		}
 	}
 }

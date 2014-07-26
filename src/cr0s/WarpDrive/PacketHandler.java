@@ -76,7 +76,7 @@ public class PacketHandler implements IPacketHandler
 	    			for (int x = minX; x <= maxX; x++)
 	    				for(int z = minZ; z <= maxZ; z++)
 	            			if (worldObj.getBlockId(x, y, z) != 0)
-	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.gasID : 0, 5, 4);
+	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.gasID : 0, (tier == 1) ? 5 : 0, 4);
 	            
 	    		//WarpDrive.debugPrint("[Cloak Packet] Removing entity...");
 	            // Hide any entities inside area
@@ -90,7 +90,7 @@ public class PacketHandler implements IPacketHandler
             	player.worldObj.markBlockRangeForRenderUpdate(minX + 1, minY + 1, minZ + 1, maxX + 1, maxY + 1, maxZ + 1);
             	
             	// Make some graphics
-            	int numLasers = 25 + player.worldObj.rand.nextInt(300);
+            	int numLasers = 25 + player.worldObj.rand.nextInt(100);
             	
             	for (int i = 0; i < numLasers; i++) {
             		int randX1 = minX + player.worldObj.rand.nextInt(maxX - minX);
@@ -131,7 +131,7 @@ public class PacketHandler implements IPacketHandler
 							g = 0f;
     				}            		
             		
-            		WarpDrive.proxy.renderBeam(player.worldObj, new Vector3(randX1, randY1, randZ1), new Vector3(randX2, randY2, randZ2), r, g, b, 10, 100);
+            		WarpDrive.proxy.renderBeam(player.worldObj, new Vector3(randX1, randY1, randZ1), new Vector3(randX2, randY2, randZ2), r, g, b, 60, 100);
             	}
             }
         }
@@ -152,21 +152,14 @@ public class PacketHandler implements IPacketHandler
             int z = inputStream.readInt();
             float yaw = inputStream.readFloat();
             float pitch = inputStream.readFloat();
-            WarpDrive.debugPrint("Got target packet: (" + x + "; " + y + "; " + z + ") | yaw: " + yaw + " | pitch: " + pitch);
+            WarpDrive.debugPrint("Received target packet: (" + x + "; " + y + "; " + z + ") yaw: " + yaw + " pitch: " + pitch);
             TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
-
-            if (te != null)
-            {
-                WarpDrive.debugPrint("TE is NULL");
-
-                if (te instanceof TileEntityLaser)
-                {
-                    TileEntityLaser l = (TileEntityLaser)te;
-                    l.yaw = yaw;
-                    l.pitch = pitch;
-                    l.delayTicks = 0;
-                    l.isEmitting = true;
-                }
+            if (te != null && te instanceof TileEntityLaser) {
+                TileEntityLaser laser = (TileEntityLaser)te;
+                laser.yaw = yaw;
+                laser.pitch = pitch;
+                laser.delayTicks = 0;
+                laser.isEmitting = true;
             }
         }
         catch (Exception e)
@@ -175,34 +168,23 @@ public class PacketHandler implements IPacketHandler
         }
     }
 
-    public void handleFreqUpdate(Packet250CustomPayload packet, EntityPlayer player)
-    {
+    public void handleFreqUpdate(Packet250CustomPayload packet, EntityPlayer player) {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 
-        try
-        {
+        try {
             int x = inputStream.readInt();
             int y = inputStream.readInt();
             int z = inputStream.readInt();
-            int freq = inputStream.readInt();
-            //WarpDrive.debugPrint("Got freq packet: (" + x + "; " + y + "; " + z + ") | freq: " + freq);
+            int frequency = inputStream.readInt();
+//            WarpDrive.debugPrint("Received frequency packet: (" + x + ", " + y + ", " + z + ") frequency '" + frequency + "'");
             TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
-
-            if (te != null)
-            {
-                if (te instanceof TileEntityMonitor)
-                {
-                    ((TileEntityMonitor)te).setFrequency(freq);
-                }
-                else if (te instanceof TileEntityCamera)
-                {
-                    ((TileEntityCamera)te).setFrequency(freq);
-                    WarpDrive.instance.cams.updateInRegistry(new CamRegistryItem(freq, new ChunkPosition(x, y, z), player.worldObj).setType(0));
-                }
-                else if (te instanceof TileEntityLaser)
-                {
-                    ((TileEntityLaser)te).camFreq = freq;
-                    WarpDrive.instance.cams.updateInRegistry(new CamRegistryItem(freq, new ChunkPosition(x, y, z), player.worldObj).setType(1));
+            if (te != null) {
+                if (te instanceof TileEntityMonitor) {
+                    ((TileEntityMonitor)te).setFrequency(frequency);
+                } else if (te instanceof TileEntityCamera) {
+                    ((TileEntityCamera)te).setFrequency(frequency);
+                } else if (te instanceof TileEntityLaser) {
+                    ((TileEntityLaser)te).setCameraFrequency(frequency);
                 }
             }
         }
@@ -214,7 +196,6 @@ public class PacketHandler implements IPacketHandler
 
     private void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
     {
-    	WarpDrive.debugPrint("Received beam");
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
         Vector3 source, target;
         double sx, sy, sz;
@@ -246,9 +227,7 @@ public class PacketHandler implements IPacketHandler
             energy = inputStream.readInt();
 
             // Render beam
-            WarpDrive.debugPrint("source: " + source);
-            WarpDrive.debugPrint("target: " + target);
-            WarpDrive.debugPrint("r: " + r + " g: " + g + " b:" + b + " age: " + age +" en: " + energy);
+            WarpDrive.debugPrint("Received beam packet from " + source + " to " + target + " as RGB " + r + " " + g + " " + b + " age " + age +" energy " + energy);
 
             // To avoid NPE at logging in
             if (worldObj == null)

@@ -18,13 +18,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockMonitor extends BlockContainer
-{
+public class BlockMonitor extends BlockContainer {
     private Icon frontIcon;
     private Icon blockIcon;
 
-    public BlockMonitor(int id)
-    {
+    public BlockMonitor(int id) {
         super(id, Material.iron);
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
@@ -37,8 +35,7 @@ public class BlockMonitor extends BlockContainer
     /**
      * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata
      */
-    public Icon getIcon(int side, int meta)
-    {
+    public Icon getIcon(int side, int meta) {
         meta &= 3;
         return side == 2 ? (meta == 0 ? this.frontIcon : this.blockIcon) : (side == 3 ? (meta == 2 ? this.frontIcon : this.blockIcon) : (side == 4 ? (meta == 3 ? this.frontIcon : this.blockIcon) : (side == 5 ? (meta == 1 ? this.frontIcon : this.blockIcon) : this.blockIcon)));
     }
@@ -47,8 +44,7 @@ public class BlockMonitor extends BlockContainer
      * When this method is called, your block should register all the icons it needs with the given IconRegister. This
      * is the only chance you get to register icons.
      */
-    public void registerIcons(IconRegister reg)
-    {
+    public void registerIcons(IconRegister reg) {
         this.frontIcon = reg.registerIcon("warpdrive:monitorFront");
         this.blockIcon = reg.registerIcon("warpdrive:monitorSide");
     }
@@ -56,8 +52,7 @@ public class BlockMonitor extends BlockContainer
     /**
      * Called when the block is placed in the world.
      */
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemstack)
-    {
+    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemstack) {
         int dir = Math.round(entityliving.rotationYaw / 90.0F) & 3;
         world.setBlockMetadataWithNotify(x, y, z, dir, 3);
     }
@@ -65,50 +60,42 @@ public class BlockMonitor extends BlockContainer
     /**
      * Called upon block activation (right click on the block.)
      */
-    public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityplayer, int par6, float par7, float par8, float par9)
-    {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient())
-        {
-            return true;
+    public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+    	// Monitor is only reacting client side
+    	if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            return false;
         }
 
         // Get camera frequency
-        TileEntity te = world.getBlockTileEntity(x, y, z);
+        TileEntity te = par1World.getBlockTileEntity(x, y, z);
 
-        if (te != null && te instanceof TileEntityMonitor)
-        {
-            int freq = ((TileEntityMonitor)te).getFrequency();
-            WarpDrive.instance.cams.removeDeadCams();
-            CamRegistryItem cam = WarpDrive.instance.cams.getCamByFreq(freq, world);
-
-            if (cam == null || cam.worldObj == null || cam.worldObj != world || !WarpDrive.instance.cams.isCamAlive(cam))
-            {
-                entityplayer.addChatMessage("[Monitor: " + freq + "] Invalid frequency or camera is too far!");
+        if (te != null && te instanceof TileEntityMonitor && (par5EntityPlayer.getHeldItem() == null)) {
+            int frequency = ((TileEntityMonitor)te).getFrequency();
+            WarpDrive.instance.cams.removeDeadCams(par1World);
+            CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, frequency);
+            if (cam == null) {
+            	par5EntityPlayer.addChatMessage(getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!");
                 return false;
-            }
-            else
-            {
+            } else {
+            	par5EntityPlayer.addChatMessage(getLocalizedName() + " Frequency '" + frequency + "' is valid. Viewing camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
                 // Spawn camera entity
-                EntityCamera e = new EntityCamera(world, cam.camPos, entityplayer);
-                world.spawnEntityInWorld(e);
-                e.setPositionAndUpdate(cam.camPos.x, cam.camPos.y, cam.camPos.z);
+                EntityCamera e = new EntityCamera(par1World, cam.position, par5EntityPlayer);
+                par1World.spawnEntityInWorld(e);
+                e.setPositionAndUpdate(cam.position.x + 0.5D, cam.position.y + 0.5D, cam.position.z + 0.5D);
                 //e.setPositionAndRotation(camPos.x, camPos.y, camPos.z, entityplayer.rotationYaw, entityplayer.rotationPitch);
-                ClientCameraUtils.playerData = entityplayer;
                 WarpDrive.instance.overlayType = cam.type;
-                ClientCameraUtils.setupViewpoint(e);
+                ClientCameraUtils.setupViewpoint(par5EntityPlayer, e, x, y, z, blockID, cam.position.x, cam.position.y, cam.position.z, par1World.getBlockId(cam.position.x, cam.position.y, cam.position.z));
             }
         }
 
         return false;
     }
 
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
-    {
+    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
     }
 
     @Override
-    public TileEntity createNewTileEntity(World world)
-    {
+    public TileEntity createNewTileEntity(World world) {
         return new TileEntityMonitor();
     }
 }

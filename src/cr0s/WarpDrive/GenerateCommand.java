@@ -29,7 +29,7 @@ public class GenerateCommand extends CommandBase
     @Override
     public String getCommandUsage(ICommandSender par1ICommandSender)
     {
-        return "/" + getCommandName() + " <structure>\nPossible structures: moon, ship, asteroid, astfield, gascloud, star, jumpgate <name>";
+        return "/" + getCommandName() + " <structure>\nPossible structures: moon, ship, asteroid, astfield, gascloud, star <class>, jumpgate <name>";
     }
 
     @Override
@@ -41,9 +41,9 @@ public class GenerateCommand extends CommandBase
 	        String struct = params[0];
 	
 	        // Reject command, if player is not in space
-	        if (player.dimension != WarpDrive.instance.spaceDimID && (!"ship".equals(struct)))
+	        if (player.dimension != WarpDriveConfig.G_SPACE_DIMENSION_ID && (!"ship".equals(struct)))
 	        {
-	            player.addChatMessage("* generate: this structure generation allowed only in space!");
+	            player.addChatMessage("* generate: this structure is only allowed in space!");
 	            return;
 	        }
 	
@@ -81,7 +81,8 @@ public class GenerateCommand extends CommandBase
 		        else if (struct.equals("star"))
 		        {
 		            notifyAdmins(icommandsender, "/generate: generating star at " + x + ", " + y + ", " + z, new Object[0]);
-		            WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z);
+		            Integer type = (params.length > 1) ? Integer.parseInt(params[1]) : -1;	// Lem
+		            WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z, type);	// Lem
 		        }
 		        else if (struct.equals("jumpgate"))
 		        {

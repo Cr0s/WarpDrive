@@ -9,7 +9,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 
-public abstract class WarpChunkTE extends WarpTE
+public abstract class WarpChunkTE extends WarpEnergyTE
 {
 	private ArrayList<Ticket> ticketList = new ArrayList<Ticket>();
 	
