@@ -1,9 +1,9 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import cr0s.WarpDrive.machines.TileEntityReactor;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
@@ -12,10 +12,10 @@ import net.minecraft.util.MathHelper;
  * @author Cr0s
  */
 public class WarpCoresRegistry {
-	private ArrayList<TileEntityReactor> registry;
+	private LinkedList<TileEntityReactor> registry;
 
 	public WarpCoresRegistry() {
-		registry = new ArrayList<TileEntityReactor>();
+		registry = new LinkedList<TileEntityReactor>();
 	}
 
 	public int searchCoreInRegistry(TileEntityReactor core) {
@@ -56,7 +56,7 @@ public class WarpCoresRegistry {
 	}
 
 	public ArrayList<TileEntityReactor> searchWarpCoresInRadius(int x, int y, int z, int radius) {
-		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>();
+		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>(registry.size());
 
 		for (TileEntityReactor c : registry) {
 			double d3 = c.xCoord - x;

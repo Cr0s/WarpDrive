@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import cr0s.WarpDrive.machines.TileEntityReactor;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -7,27 +8,26 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 
-public class SpaceTpCommand extends CommandBase
-{
+public class SpaceTpCommand extends CommandBase {
     @Override
-    public int getRequiredPermissionLevel()
-    {
+    public int getRequiredPermissionLevel() {
         return 2;
     }
 
     @Override
-    public String getCommandName()
-    {
+    public String getCommandName() {
         return "space";
     }
 
     @Override
-    public void processCommand(ICommandSender icommandsender, String[] astring)
-    {
-        EntityPlayerMP player = (EntityPlayerMP)icommandsender;
+    public void processCommand(ICommandSender icommandsender, String[] astring) {
+        EntityPlayerMP player = null;
         MinecraftServer server = MinecraftServer.getServer();
         int targetDim = WarpDriveConfig.G_SPACE_DIMENSION_ID;
 
+        if (icommandsender != null && icommandsender instanceof EntityPlayerMP) {
+        	player = (EntityPlayerMP)icommandsender; 
+        }
         if (astring.length >= 1) {
             if ("hyper".equals(astring[0])) {
                 targetDim = WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
@@ -39,7 +39,8 @@ public class SpaceTpCommand extends CommandBase
         }
 
         if (player == null) {
-            return;
+           notifyAdmins(icommandsender, "/space: undefined player");
+           return;
         }
 
         WorldServer targetWorld = server.worldServerForDimension(targetDim);
@@ -49,8 +50,7 @@ public class SpaceTpCommand extends CommandBase
     }
 
     @Override
-    public String getCommandUsage(ICommandSender icommandsender)
-    {
+    public String getCommandUsage(ICommandSender icommandsender) {
         return "/space [hyper|overworld|<player>]";
     }
 }

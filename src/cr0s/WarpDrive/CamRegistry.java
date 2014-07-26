@@ -1,17 +1,17 @@
 package cr0s.WarpDrive;
 
-import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import cr0s.WarpDrive.machines.TileEntityReactor;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 public class CamRegistry {
-    private ArrayList<CamRegistryItem> registry;
+    private LinkedList<CamRegistryItem> registry;
 
     public CamRegistry() {
-        registry = new ArrayList<CamRegistryItem>();
+        registry = new LinkedList<CamRegistryItem>();
     }
 
     public CamRegistryItem getCamByFrequency(World worldObj, int frequency) {

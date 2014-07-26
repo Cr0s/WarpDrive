@@ -20,7 +20,7 @@ public class BlockAir extends Block
     public BlockAir(int par1) {
         super(par1, Material.air);
         setHardness(0.0F);
-        setUnlocalizedName("Air block");
+        setUnlocalizedName("warpdrive.blocks.Air");
     }
 
     @Override
@@ -84,8 +84,7 @@ public class BlockAir extends Block
     }
 
     @Override
-    public Icon getIcon(int side, int metadata)
-    {
+    public Icon getIcon(int side, int metadata) {
     	if (AIR_DEBUG) {
             return iconBuffer[metadata];
     	} else {
@@ -139,39 +138,16 @@ public class BlockAir extends Block
     }
 
     @Override
-    public boolean shouldSideBeRendered(IBlockAccess par1IBlockAccess, int par2, int par3, int par4, int par5) {
+    public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
     	if (AIR_DEBUG) {
-    		return true;
+    		return side == 0;
     	}
     	
-        if (par1IBlockAccess.getBlockId(par2, par3, par4) == this.blockID) {
+    	int sideBlockID = world.getBlockId(x, y, z);
+        if (sideBlockID == this.blockID) {
             return false;
-        } else {
-            final int i = par1IBlockAccess.getBlockId(par2, par3, par4);
-            boolean var6 = false;
-
-            if (Block.blocksList[i] != null) {
-                var6 = !Block.blocksList[i].isOpaqueCube();
-            }
-
-            final boolean var7 = i == 0;
-
-            if ((var6 || var7) && par5 == 3 && !var6) {
-                return true;
-            } else if ((var6 || var7) && par5 == 4 && !var6) {
-                return true;
-            } else if ((var6 || var7) && par5 == 5 && !var6) {
-                return true;
-            } else if ((var6 || var7) && par5 == 2 && !var6) {
-                return true;
-            } else if ((var6 || var7) && par5 == 0 && !var6) {
-                return true;
-            } else if ((var6 || var7) && par5 == 1 && !var6) {
-                return true;
-            } else {
-                return false;
-            }
         }
+        return world.isAirBlock(x, y, z);
     }
 
     private void spreadAirBlock(World worldObj, int x, int y, int z, int concentration) {
@@ -268,7 +244,7 @@ public class BlockAir extends Block
         		if ( (xp_blockId != WarpDriveConfig.airgenID) && (xn_blockId != WarpDriveConfig.airgenID)
         		  && (yp_blockId != WarpDriveConfig.airgenID) && (yn_blockId != WarpDriveConfig.airgenID)
         		  && (zp_blockId != WarpDriveConfig.airgenID) && (zn_blockId != WarpDriveConfig.airgenID) ) {
-        			WarpDrive.debugPrint("AirGenerator not found, removing air block at " + x + ", " + y + ", " + z);
+//        			WarpDrive.debugPrint("AirGenerator not found, removing air block at " + x + ", " + y + ", " + z);
             		worldObj.setBlockMetadataWithNotify(x, y, z, 1, 2);
         		} else {
         		// keep the block as a source

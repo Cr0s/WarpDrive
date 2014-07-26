@@ -18,7 +18,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
 		super(id);
 		setMaxDamage(maxHeat);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Reactor Laser Focus");
+		setUnlocalizedName("warpdrive.items.ReactorLaserFocus");
 	}
 	
 	@Override

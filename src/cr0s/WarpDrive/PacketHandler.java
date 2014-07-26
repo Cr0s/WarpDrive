@@ -46,8 +46,7 @@ public class PacketHandler implements IPacketHandler
     public void handleCloak(Packet250CustomPayload packet, EntityPlayer player) {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 
-        try
-        {   
+        try {   
             // Read cloaked area parameters
             int minX = inputStream.readInt();
             int minY = inputStream.readInt();
@@ -72,11 +71,17 @@ public class PacketHandler implements IPacketHandler
 	            
 	            // Now hide the blocks within area
 	            World worldObj = player.worldObj;
-	    		for (int y = minY; y <= maxY; y++)
-	    			for (int x = minX; x <= maxX; x++)
-	    				for(int z = minZ; z <= maxZ; z++)
-	            			if (worldObj.getBlockId(x, y, z) != 0)
-	            				worldObj.setBlock(x, y, z, (tier == 1) ? WarpDriveConfig.gasID : 0, (tier == 1) ? 5 : 0, 4);
+	            int cloakBlockID = (tier == 1) ? WarpDriveConfig.gasID : 0;
+	            int cloakBlockMetadata = (tier == 1) ? 5 : 0;
+	    		for (int y = minY; y <= maxY; y++) {
+	    			for (int x = minX; x <= maxX; x++) {
+	    				for(int z = minZ; z <= maxZ; z++) {
+	            			if (worldObj.getBlockId(x, y, z) != 0) {
+	            				worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
+	            			}
+	    				}
+	    			}
+	    		}
 	            
 	    		//WarpDrive.debugPrint("[Cloak Packet] Removing entity...");
 	            // Hide any entities inside area
@@ -90,53 +95,30 @@ public class PacketHandler implements IPacketHandler
             	player.worldObj.markBlockRangeForRenderUpdate(minX + 1, minY + 1, minZ + 1, maxX + 1, maxY + 1, maxZ + 1);
             	
             	// Make some graphics
-            	int numLasers = 25 + player.worldObj.rand.nextInt(100);
+            	int numLasers = 80 + player.worldObj.rand.nextInt(50);
             	
+            	double centerX = (minX + maxX) / 2.0D; 
+            	double centerY = (minY + maxY) / 2.0D; 
+            	double centerZ = (minZ + maxZ) / 2.0D;
+            	double radiusX = (maxX - minX) / 2.0D + 5.0D; 
+            	double radiusY = (maxY - minY) / 2.0D + 5.0D; 
+            	double radiusZ = (maxZ - minZ) / 2.0D + 5.0D;
+           
             	for (int i = 0; i < numLasers; i++) {
-            		int randX1 = minX + player.worldObj.rand.nextInt(maxX - minX);
-            		int randX2 = minX + player.worldObj.rand.nextInt(maxX - minX);
-            		
-            		int randY1 = minY + player.worldObj.rand.nextInt(maxY - minY);
-            		int randY2 = minY + player.worldObj.rand.nextInt(maxY - minY);
-            		
-            		int randZ1 = minZ + player.worldObj.rand.nextInt(maxZ - minZ);
-            		int randZ2 = minZ + player.worldObj.rand.nextInt(maxZ - minZ);
-            		
-            		float r = 0, g = 0, b = 0;
-            		
-    				switch (player.worldObj.rand.nextInt(6)) {
-						case 0:
-							r = 1.0f;
-							g = b = 0;
-							break;
-						case 1:
-							r = b = 0;
-							g = 1.0f;
-							break;
-						case 2:
-							r = g = 0;
-							b = 1.0f;
-							break;
-						case 3:
-							r = b = 0.5f;
-							g = 0;
-							break;
-						case 4:
-							r = g = 1.0f;
-							b = 0;
-							break;
-						case 5:
-							r = 1.0f; 
-							b = 0.5f;
-							g = 0f;
-    				}            		
-            		
-            		WarpDrive.proxy.renderBeam(player.worldObj, new Vector3(randX1, randY1, randZ1), new Vector3(randX2, randY2, randZ2), r, g, b, 60, 100);
+            		WarpDrive.proxy.renderBeam(player.worldObj,
+            			new Vector3(
+	        				centerX + radiusX * player.worldObj.rand.nextGaussian(),
+	        				centerY + radiusY * player.worldObj.rand.nextGaussian(),
+	        				centerZ + radiusZ * player.worldObj.rand.nextGaussian()),
+        				new Vector3(
+	        				centerX + radiusX * player.worldObj.rand.nextGaussian(),
+	        				centerY + radiusY * player.worldObj.rand.nextGaussian(),
+	        				centerZ + radiusZ * player.worldObj.rand.nextGaussian()),
+        				player.worldObj.rand.nextFloat(), player.worldObj.rand.nextFloat(), player.worldObj.rand.nextFloat(),
+        				60 + player.worldObj.rand.nextInt(60), 100);
             	}
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }    	
     }

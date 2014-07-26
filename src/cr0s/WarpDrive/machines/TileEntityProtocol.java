@@ -43,23 +43,23 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     boolean ready = false;                // Ready to operate (valid assembly)
 
-    public String[] methodsArray =
-    {
-        "dim_getp", "dim_setp",                                        // 0, 1
-        "dim_getn", "dim_setn",                                        // 2, 3
-        "set_mode", "set_distance", "set_direction",                   // 4, 5, 6
-        "get_attached_players", "summon", "summon_all",                // 7, 8, 9
-        "get_x", "get_y", "get_z",                                     // 10, 11, 12
-        "get_energy_level", "do_jump", "get_ship_size",                // 13, 14, 15
-        "set_beacon_frequency", "get_dx", "get_dz",                    // 16, 17, 18
-        "set_core_frequency", "is_in_space", "is_in_hyperspace",       // 19, 20, 21
-        "set_target_jumpgate",                                         // 22
+    public String[] methodsArray = {
+        "dim_getp", "dim_setp",										// 0, 1
+        "dim_getn", "dim_setn",										// 2, 3
+        "set_mode", "set_distance", "set_direction",				// 4, 5, 6
+        "get_attached_players", "summon", "summon_all",				// 7, 8, 9
+        "get_x", "get_y", "get_z",									// 10, 11, 12
+        "get_energy_level", "do_jump", "get_ship_size",				// 13, 14, 15
+        "set_beacon_frequency", "get_dx", "get_dz",					// 16, 17, 18
+        "set_core_frequency", "is_in_space", "is_in_hyperspace",	// 19, 20, 21
+        "set_target_jumpgate",										// 22
+        "isAttached"												// 23
     };
 
     private int ticks = 0;
     private final int BLOCK_UPDATE_INTERVAL = 20 * 3; // 3 seconds
 
-    private TileEntityReactor core;
+    private TileEntityReactor core = null;
 
     @Override
     public void updateEntity() {
@@ -79,14 +79,12 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         }
     }
 
-    private void setJumpDistance(int distance)
-    {
+    private void setJumpDistance(int distance) {
         System.out.println("Setting jump distance: " + distance);
         this.distance = distance;
     }
 
-    private void setMode(int mode)
-    {
+    private void setMode(int mode) {
         // System.out.println("Setting mode: " + mode);
         this.mode = mode;
     }
@@ -100,12 +98,11 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             dir = 270;
         }
 
-        WarpDrive.debugPrint("" + this + " Setting direction: " + dir);
+        //WarpDrive.debugPrint("" + this + " Setting direction: " + dir);
         this.direction = dir;
     }
 
-    private void doJump()
-    {
+    private void doJump() {
         if (core != null) {
             // Adding random ticks to warmup
             core.randomWarmupAddition = worldObj.rand.nextInt(WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
@@ -117,8 +114,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
-    {
+    public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
         setMode(tag.getInteger("mode"));
         setFront(tag.getInteger("front"));
@@ -135,8 +131,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
-    {
+    public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
         updatePlayersString();
         tag.setString("players", playersString);
@@ -170,45 +165,37 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         entityPlayer.addChatMessage(getBlockType().getLocalizedName() + " Successfully attached.");
     }
 
-    public void updatePlayersString()
-    {
+    public void updatePlayersString() {
         String nick;
         this.playersString = "";
 
-        for (int i = 0; i < players.size(); i++)
-        {
+        for (int i = 0; i < players.size(); i++) {
             nick = players.get(i);
             this.playersString += nick + "|";
         }
     }
 
-    public void updatePlayersList()
-    {
+    public void updatePlayersList() {
         String[] playersArray = playersString.split("\\|");
 
-        for (int i = 0; i < playersArray.length; i++)
-        {
+        for (int i = 0; i < playersArray.length; i++) {
             String nick = playersArray[i];
 
-            if (!nick.isEmpty())
-            {
+            if (!nick.isEmpty()) {
                 players.add(nick);
             }
         }
     }
 
-    public String getAttachedPlayersList()
-    {
+    public String getAttachedPlayersList() {
         StringBuilder list = new StringBuilder("");
 
-        for (int i = 0; i < this.players.size(); i++)
-        {
+        for (int i = 0; i < this.players.size(); i++) {
             String nick = this.players.get(i);
             list.append(nick + ((i == this.players.size() - 1) ? "" : ", "));
         }
 
-        if (players.isEmpty())
-        {
+        if (players.isEmpty()) {
             list = new StringBuilder("<nobody>");
         }
 
@@ -218,16 +205,14 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     /**
      * @return the jumpFlag
      */
-    public boolean isJumpFlag()
-    {
+    public boolean isJumpFlag() {
         return jumpFlag;
     }
 
     /**
      * @param jumpFlag the jumpFlag to set
      */
-    public void setJumpFlag(boolean jumpFlag)
-    {
+    public void setJumpFlag(boolean jumpFlag) {
     	WarpDrive.debugPrint("" + this + " setJumpFlag(" + jumpFlag + ")");
         this.jumpFlag = jumpFlag;
     }
@@ -235,101 +220,88 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     /**
      * @return the front
      */
-    public int getFront()
-    {
+    public int getFront() {
         return front;
     }
 
     /**
      * @param front the front to set
      */
-    public void setFront(int front)
-    {
+    public void setFront(int front) {
         this.front = front;
     }
 
     /**
      * @return the right
      */
-    public int getRight()
-    {
+    public int getRight() {
         return right;
     }
 
     /**
      * @param right the right to set
      */
-    public void setRight(int right)
-    {
+    public void setRight(int right) {
         this.right = right;
     }
 
     /**
      * @return the up
      */
-    public int getUp()
-    {
+    public int getUp() {
         return up;
     }
 
     /**
      * @param up the up to set
      */
-    public void setUp(int up)
-    {
+    public void setUp(int up) {
         this.up = up;
     }
 
     /**
      * @return the back
      */
-    public int getBack()
-    {
+    public int getBack() {
         return back;
     }
 
     /**
      * @param back the back to set
      */
-    public void setBack(int back)
-    {
+    public void setBack(int back) {
         this.back = back;
     }
 
     /**
      * @return the left
      */
-    public int getLeft()
-    {
+    public int getLeft() {
         return left;
     }
 
     /**
      * @param left the left to set
      */
-    public void setLeft(int left)
-    {
+    public void setLeft(int left) {
         this.left = left;
     }
 
     /**
      * @return the down
      */
-    public int getDown()
-    {
+    public int getDown() {
         return down;
     }
 
     /**
      * @param down the down to set
      */
-    public void setDown(int down)
-    {
+    public void setDown(int down) {
         this.down = down;
     }
 
-    public void setDistance(int distance)
-    {
+    public void setDistance(int distance) {
         this.distance = distance;
     }
 
@@ -341,32 +313,28 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     /**
      * @return the mode
      */
-    public int getMode()
-    {
+    public int getMode() {
         return mode;
     }
 
     /**
      * @return the direction
      */
-    public int getDirection()
-    {
+    public int getDirection() {
         return direction;
     }
 
     /**
      * @return the summonFlag
      */
-    public boolean isSummonAllFlag()
-    {
+    public boolean isSummonAllFlag() {
         return summonFlag;
     }
 
     /**
      * @param summonFlag the summonFlag to set
      */
-    public void setSummonAllFlag(boolean summonFlag)
-    {
+    public void setSummonAllFlag(boolean summonFlag) {
         this.summonFlag = summonFlag;
     }
 
@@ -407,17 +375,15 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     /**
      * @return the beaconFrequency
      */
-    public String getBeaconFrequency()
-    {
+    public String getBeaconFrequency() {
         return beaconFrequency;
     }
 
     /**
      * @param beaconFrequency the beaconFrequency to set
      */
-    public void setBeaconFrequency(String beaconFrequency)
-    {
-        //System.out.println("Setting beacon freqency: " + beaconFrequency);
+    public void setBeaconFrequency(String beaconFrequency) {
+        //WarpDrive.debugPrint("Setting beacon frequency: " + beaconFrequency);
         this.beaconFrequency = beaconFrequency;
     }
 
@@ -450,7 +416,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     @Override
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
     	int argInt0, argInt1, argInt2;
-        //System.out.println("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
+        //WarpDrive.debugPrint("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
         switch (method) {
             case 0: // dim_getp ()
                 return new Integer[] { getFront(), getRight(), getUp() };
@@ -612,6 +578,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                 	try {
 	                    if (!core.validateShipSpatialParameters(reason)) {
 	                    	core.messageToAllPlayersOnShip(reason.toString());
+	                    	return null;
 	                    }
 	                    return new Object[] { (Integer)core.getRealShipVolume() };
                 	} catch(Exception e) {
@@ -660,6 +627,12 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     setTargetJumpgateName((String)arguments[0]);
                 }
                 break;
+                
+            case 23: // isAttached
+                if (core != null) {
+                	return new Object[] { (boolean)(core.controller != null) };
+                }
+                break;
         }
 
         return new Integer[] { 0 };
@@ -685,5 +658,14 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 	public boolean equals(IPeripheral other) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s \'%s\' @ \'%s\' %d, %d, %d", new Object[] {
+       		getClass().getSimpleName(),
+       		core == null ? beaconFrequency : core.coreFrequency,
+       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+       		Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord)});
 	}
 }

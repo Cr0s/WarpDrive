@@ -28,7 +28,7 @@ public class BlockAirGenerator extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Air Generator");
+		setUnlocalizedName("warpdrive.machines.AirGenerator");
     }
 
     @Override

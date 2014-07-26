@@ -457,7 +457,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		
 	// Returns result array for CC interface: [ code, "message" ]
 	private Object[] deployShip(String fileName, int offsetX, int offsetY, int offsetZ) {
-		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + fileName);
+		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
 		
 		if (schematic == null) {
 			System.out.println("[ShipScanner] Schematic is null!");
@@ -654,7 +654,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				int y = ((Double)arguments[2]).intValue();
 				int z = ((Double)arguments[3]).intValue();
 				
-				if (!new File(SCHEMATICS_DIR + fileName).exists()) 
+				if (!new File(SCHEMATICS_DIR  + "/" + fileName).exists()) 
 					return new Object[] { 0, "Specified .schematic file not found!" };
 				else
 				{

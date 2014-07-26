@@ -27,7 +27,7 @@ public class BlockRadar extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("W-Radar");
+		setUnlocalizedName("warpdrive.machines.WarpRadar");
     }
 
     @Override

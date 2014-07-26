@@ -47,7 +47,7 @@ public class TileEntityReactor extends WarpEnergyTE
     public int shipVolume;
     private int currentMode = 0;
 
-    private final byte MODE_TELEPORT = -1;
+    private final byte MODE_TELEPORT = 3;
 //    private final byte MODE_IDLE = 0;
     private final byte MODE_BASIC_JUMP = 1; // 0-128
     private final byte MODE_LONG_JUMP = 2;  // 0-12800
@@ -99,7 +99,7 @@ public class TileEntityReactor extends WarpEnergyTE
             registryUpdateTicks = 0;
             WarpDrive.instance.warpCores.updateInRegistry(this);
 //            WarpDrive.instance.registry.printRegistry();
-            WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag " + (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime); 
+//            WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag " + (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime); 
 
             TileEntity c = findControllerBlock();
             if (c == null) {
@@ -269,7 +269,7 @@ public class TileEntityReactor extends WarpEnergyTE
     }
 
     public void messageToAllPlayersOnShip(String msg) {
-        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
+        AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX + 0.99D, this.maxY + 0.99D, this.maxZ + 0.99D);
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
         System.out.println("" + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client":"Server") + this + " messageToAllPlayersOnShip: " + msg);
@@ -278,7 +278,7 @@ public class TileEntityReactor extends WarpEnergyTE
                 continue;
             }
 
-            ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
+            ((EntityPlayer)o).addChatMessage("[" + (coreFrequency.length() > 0 ? coreFrequency : "WarpCore") + "] " + msg);
         }
     }
 
@@ -804,11 +804,9 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
-    private void teleportPlayersToSpace()
-    {
-        if (worldObj.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID)
-        {
-            AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(xCoord - 5, yCoord - 5, zCoord - 5, xCoord + 5, yCoord + 5, zCoord + 5);
+    private void teleportPlayersToSpace() {
+        if (worldObj.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID) {
+            AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(xCoord - 2, yCoord - 1, zCoord - 2, xCoord + 2, yCoord + 4, zCoord + 2);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
             WorldServer spaceWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
@@ -834,8 +832,7 @@ public class TileEntityReactor extends WarpEnergyTE
                     newY = 254;
                 }
 
-                if (entity instanceof EntityPlayerMP)
-                {
+                if (entity instanceof EntityPlayerMP) {
                     ((EntityPlayerMP) entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), WarpDriveConfig.G_SPACE_DIMENSION_ID, new SpaceTeleporter(DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID), 0, x, 256, z));
 
                     if (spaceWorld.isAirBlock(x, newY, z)) {
@@ -850,7 +847,7 @@ public class TileEntityReactor extends WarpEnergyTE
                         spaceWorld.setBlock(x - 1, newY, z + 1, Block.stone.blockID, 0, 2);
                     }
 
-                    ((EntityPlayerMP) entity).setPositionAndUpdate(x, newY + 2, z);
+                    ((EntityPlayerMP) entity).setPositionAndUpdate(x + 0.5D, newY + 2.0D, z + 0.5D);
                 }
             }
         }
@@ -957,18 +954,22 @@ public class TileEntityReactor extends WarpEnergyTE
     public int getRealShipVolume() {
         int shipVolume = 0;
 
-        for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                for (int y = minY; y <= maxY; y++) {
-                    int blockID = worldObj.getBlockId(x, y, z);
-                    
-                    if (WarpDriveConfig.isAirBlock(worldObj, blockID, x, y, z) && (blockID != WarpDriveConfig.airID)) {
-                    	continue;
-                    }
-                    
-                    shipVolume++;
-                }
-            }
+        try {
+	        for (int x = minX; x <= maxX; x++) {
+	            for (int z = minZ; z <= maxZ; z++) {
+	                for (int y = minY; y <= maxY; y++) {
+	                    int blockID = worldObj.getBlockId(x, y, z);
+	                    
+	                    if (WarpDriveConfig.isAirBlock(worldObj, blockID, x, y, z) && (blockID != WarpDriveConfig.airID)) {
+	                    	continue;
+	                    }
+	                    
+	                    shipVolume++;
+	                }
+	            }
+	        }
+        } catch(Exception e) {
+        	e.printStackTrace();
         }
 
         return shipVolume;
@@ -1074,5 +1075,14 @@ public class TileEntityReactor extends WarpEnergyTE
     public void invalidate() {
         WarpDrive.instance.warpCores.removeFromRegistry(this);
         super.invalidate();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s \'%s\' @ \'%s\' %d, %d, %d", new Object[] {
+            getClass().getSimpleName(),
+            coreFrequency,
+            worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+            Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord)});
     }
 }

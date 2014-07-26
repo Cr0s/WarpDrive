@@ -24,7 +24,7 @@ public class BlockParticleBooster extends BlockContainer {
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Particle Booster");
+		setUnlocalizedName("warpdrive.machines.ParticleBooster");
     }
 
     @Override

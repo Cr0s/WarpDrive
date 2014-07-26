@@ -16,8 +16,7 @@ public class WorldGenSmallShip extends WorldGenerator
 	private boolean corrupted;
 	private int solarType;
 
-	public WorldGenSmallShip(boolean corrupted)
-	{
+	public WorldGenSmallShip(boolean corrupted) {
 		this.corrupted = corrupted;
 		solarType = WarpDriveConfig.getIC2Item("solarPanel").getItemDamage();
 	}

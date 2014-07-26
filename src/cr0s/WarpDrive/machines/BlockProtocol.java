@@ -28,7 +28,7 @@ public class BlockProtocol extends BlockContainer {
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Warp Controller");
+		setUnlocalizedName("warpdrive.machines.WarpProtocol");
     }
 
     @Override

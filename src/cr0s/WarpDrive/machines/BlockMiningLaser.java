@@ -22,7 +22,7 @@ public class BlockMiningLaser extends BlockContainer {
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Mining Laser");
+		setUnlocalizedName("warpdrive.machines.MiningLaser");
     }
 
     @Override

@@ -84,14 +84,14 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 		
 		updateTicks--;
 		if (updateTicks <= 0) {
-			//System.out.println("[CloakDev] Updating cloaking state...");
+			//System.out.println("" + this + " Updating cloaking state...");
 			updateTicks = ((tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			isValid = validateAssembly();
 			isCloaking = WarpDrive.instance.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord); 
 			if (!isEnabled) {// disabled
 				if (isCloaking) {// disabled, cloaking => stop cloaking
-					WarpDrive.debugPrint("[CloakDev] Disabled, cloak field going down...");
+					WarpDrive.debugPrint("" + this + " Disabled, cloak field going down...");
 					disableCloakingField();
 				} else {// disabled, no cloaking
 					// IDLE
@@ -100,13 +100,14 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 				boolean hasEnoughPower = countBlocksAndConsumeEnergy();
 				if (!isCloaking) {// enabled, not cloaking
 					if (hasEnoughPower && isValid) {// enabled, can cloak and able to
+						setCoilsState(true);
+						
 						// Register cloak
 						WarpDrive.instance.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, xCoord, yCoord, zCoord, tier);
 						if (!soundPlayed) {
 							soundPlayed = true;
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cloak", 4F, 1F);
 						}
-						setCoilsState(true);
 						
 						// Refresh the field
 						CloakedArea area = WarpDrive.instance.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
@@ -118,14 +119,19 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 					}
 				} else {// enabled & cloaked
 					if (!isValid) {// enabled, cloaking but invalid
-						WarpDrive.debugPrint("[CloakDev] Coil(s) lost, cloak field is collapsing...");
+						WarpDrive.debugPrint("" + this + " Coil(s) lost, cloak field is collapsing...");
 						consumeAllEnergy();
 						disableCloakingField();				
 					} else {// enabled, cloaking and valid
 						if (hasEnoughPower) {// enabled, cloaking and able to
 							// IDLE
+							// Refresh the field	!!! LemTest 2014-07-12
+							CloakedArea area = WarpDrive.instance.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
+							if (area != null) {
+								area.sendCloakPacketToPlayersEx(false); // recloak field
+							}
 						} else {// loosing power
-							WarpDrive.debugPrint("[CloakDev] Low power, cloak field is collapsing...");
+							WarpDrive.debugPrint("" + this + " Low power, cloak field is collapsing...");
 							disableCloakingField();
 						}
 					}
@@ -278,7 +284,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 			energyToConsume = volume * WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER2;
 		}
 		
-		//System.out.println("[CloakDev] Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
+		//System.out.println("" + this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
 		return consumeEnergy(energyToConsume, false);
 	}
 	

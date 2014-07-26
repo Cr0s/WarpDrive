@@ -21,7 +21,7 @@ public class BlockCloakingCoil extends Block {
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Cloaking Device Coil");
+		setUnlocalizedName("warpdrive.machines.CloakingCoil");
     }
 
     @Override

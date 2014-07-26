@@ -28,9 +28,8 @@ public class SpaceEventHandler {
 	private HashMap<Integer, Integer> entity_airBlock;
 	private HashMap<String, Integer> player_airTank;
 	private HashMap<String, Integer> player_cloakTicks;
-	private long lastTimer = 0;
-		
-	private final int CLOAK_CHECK_TIMEOUT_SEC = 5;
+	
+	private final int CLOAK_CHECK_TIMEOUT_TICKS = 100;
 	private final int AIR_BLOCK_TICKS = 20;
 	private final int AIR_TANK_TICKS = 300;
 	
@@ -38,7 +37,6 @@ public class SpaceEventHandler {
 		entity_airBlock = new HashMap<Integer, Integer>();
 		player_airTank = new HashMap<String, Integer>();
 		player_cloakTicks = new HashMap<String, Integer>();
-		this.lastTimer = 0;
 	}
 
 	@ForgeSubscribe
@@ -67,26 +65,26 @@ public class SpaceEventHandler {
 		// If player in vacuum, check and start consuming air cells
 		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			int id1 = entity.worldObj.getBlockId(x, y, z);
-			int id2 = entity.worldObj.getBlockId(x, y + 1, z);
+			int id2 = entity.worldObj.getBlockId(x, y - 1, z);
 			boolean inVacuum = (id1 != WarpDriveConfig.airID && id2 != WarpDriveConfig.airID);
 			Integer air;
 			if (!inVacuum) {// In space with air blocks
 				air = entity_airBlock.get(entity.entityId);
 				if (air == null) {
 					entity_airBlock.put(entity.entityId, AIR_BLOCK_TICKS);
-				} else if (air <= 0) {// time elapsed => consume air block
+				} else if (air <= 1) {// time elapsed => consume air block
 					entity_airBlock.put(entity.entityId, AIR_BLOCK_TICKS);
 					
 					int metadata;
-					if (id2 != WarpDriveConfig.airID) {
-						metadata = entity.worldObj.getBlockMetadata(x, y + 1, z);
-						if (metadata > 0 && metadata < 15) {
-							entity.worldObj.setBlockMetadataWithNotify(x, y + 1, z, metadata - 1, 2);
-						}
-					} else {
+					if (id1 == WarpDriveConfig.airID) {
 						metadata = entity.worldObj.getBlockMetadata(x, y, z);
 						if (metadata > 0 && metadata < 15) {
 							entity.worldObj.setBlockMetadataWithNotify(x, y, z, metadata - 1, 2);
+						}
+					} else {
+						metadata = entity.worldObj.getBlockMetadata(x, y - 1, z);
+						if (metadata > 0 && metadata < 15) {
+							entity.worldObj.setBlockMetadataWithNotify(x, y - 1, z, metadata - 1, 2);
 						}
 					}
 				} else {
@@ -99,9 +97,9 @@ public class SpaceEventHandler {
 
 					if ((player.getCurrentArmor(3) != null) && (WarpDriveConfig.SpaceHelmets.contains(player.getCurrentArmor(3).itemID))) {
 						air = player_airTank.get(player.username);
-						if (air == null) {
-							player_airTank.put(player.username, AIR_TANK_TICKS);
-						} else if (air <= 0) {
+						if (air == null) {// new player in space => grace period
+							player_airTank.put(player.username, AIR_TANK_TICKS / 2);
+						} else if (air <= 1) {
 							if (consumeO2(player.inventory.mainInventory, player)) {
 								player_airTank.put(player.username, AIR_TANK_TICKS);
 							} else {
@@ -130,13 +128,6 @@ public class SpaceEventHandler {
 	}
 
 	private void updatePlayerCloakState(EntityLivingBase entity) {
-		// Make sure for elapsed time is second after last update
-		if (System.currentTimeMillis() - this.lastTimer > 1000) {
-			lastTimer = System.currentTimeMillis();
-		} else { 
-			return;
-		}
-		
 		try {
 			EntityPlayerMP player = (EntityPlayerMP)entity;
 			Integer cloakTicks = player_cloakTicks.get(player.username);
@@ -146,7 +137,7 @@ public class SpaceEventHandler {
 				return;
 			}
 			
-			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_SEC) {
+			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_TICKS) {
 				player_cloakTicks.put(player.username, 0);
 				
 				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(player.worldObj.provider.dimensionId, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), false);
@@ -154,18 +145,20 @@ public class SpaceEventHandler {
 					//WarpDrive.debugPrint("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
 					for (CloakedArea area : cloaks) {
 						//WarpDrive.debugPrint("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
-						if (!area.isPlayerInArea(player) && area.isPlayerWithinArea(player)) {
+						if (!area.isPlayerInArea(player.username) && area.isEntityWithinArea(player)) {
 							WarpDrive.instance.cloaks.playerEnteringCloakedArea(area, player);
 						}
 					}
 				} else {
 					//WarpDrive.debugPrint("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
-					WarpDrive.instance.cloaks.checkPlayerLeavedArea(player);
+					WarpDrive.instance.cloaks.checkPlayerLeftArea(player);
 				}
 			} else {
 				player_cloakTicks.put(player.username, cloakTicks + 1);			
 			}
-		} catch (Exception e) { e.printStackTrace(); }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
@@ -177,7 +170,7 @@ public class SpaceEventHandler {
 				}
 				
 				if (WarpDriveConfig.IC2_Empty.length != 0) {
-					WarpDrive.debugPrint("giveEmptyCell");
+//					WarpDrive.debugPrint("giveEmptyCell");
 					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_Empty[0], 1, WarpDriveConfig.IC2_Empty[1]);
 					if (!entityPlayer.inventory.addItemStackToInventory(emptyCell)) {
 						World world = entityPlayer.worldObj;

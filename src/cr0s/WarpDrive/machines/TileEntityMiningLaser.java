@@ -47,8 +47,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	Boolean powerStatus = false;
 	private IGridInterface grid;
 
-	private final int MAX_BOOSTERS_NUMBER = 1;
-
 	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
@@ -127,7 +125,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				}
 			} else { // mining
 				delayTicksMine++;
-				if (delayTicksMine > WarpDriveConfig.ML_MINE_DELAY) {
+				if (delayTicksMine > WarpDriveConfig.ML_MINE_DELAY && isMining) {
 					delayTicksMine = 0;
 
 					if (valuableIndex < valuablesInLayer.size()) {
@@ -147,10 +145,11 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.ML_MINE_DELAY, 0, 50);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						harvestBlock(valuable);
-					} else {
-						currentMode = 0;
-						currentLayer--;
+						return;
 					}
+					
+					currentMode = 0;
+					currentLayer--;
 				}
 			}
 		}
@@ -163,6 +162,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			return false;
 		}
 		// check whitelist
+		// WarpDriveConfig.i.MinerOres.contains(blockID) then true ?
 		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID) {
 			return true;
 		}
@@ -276,8 +276,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	public int putInChest(IInventory inventory, ItemStack itemStackSource)
 	{
-		if (inventory == null || itemStackSource == null)
-		{
+		if (inventory == null || itemStackSource == null) {
+			isMining = false; //stopping operation
 			return 0;
 		}
 

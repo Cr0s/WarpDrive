@@ -20,7 +20,7 @@ public class WarpDriveConfig
 {
 	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, componentID;
 //
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -82,11 +82,11 @@ public class WarpDriveConfig
     public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
     public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
     public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
-    public static int WC_MAX_SHIP_SIDE = 100;
+    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 3000;   // Maximum ship mass to jump on earth
+    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 1200; // Minimum ship volume value for hyperspace travel
+    public static int WC_MAX_SHIP_SIDE = 127;
     public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;	// FIXME update me
-    public static int WC_COLLISION_TOLERANCE_BLOCKS = 5;
+    public static int WC_COLLISION_TOLERANCE_BLOCKS = 3;
     public static int WC_WARMUP_SHORTJUMP_SECONDS = 10;
     public static int WC_WARMUP_LONGJUMP_SECONDS = 30;
     public static int WC_WARMUP_RANDOM_TICKS = 60;
@@ -296,9 +296,8 @@ public class WarpDriveConfig
 		recipesIC2 = config.get("Recipes", "ic2_recipes",true).getBoolean(true);
 	}
 	
-	public static void Init2()
-	{
-		CommonWorldGenOres = new ArrayList<int[]>();
+	public static void Init2() {
+		CommonWorldGenOres = new ArrayList<int[]>(30);
 		CommonWorldGenOres.add(new int[] {Block.oreIron.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreGold.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreCoal.blockID, 0});
@@ -336,8 +335,11 @@ public class WarpDriveConfig
 		transporterID = config.getBlock("transporter", 520).getInt();
 		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
 		reactorMonitorID = config.getBlock("reactorMonitor",522).getInt();
+		powerLaserID = config.getBlock("powerLaser", 523).getInt();
+		powerReactorID = config.getBlock("powerReactor",524).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
+		componentID = config.getItem("component", 8701).getInt();
 		
 		isICLoaded = Loader.isModLoaded("IC2");
 		if (isICLoaded)
@@ -421,35 +423,27 @@ public class WarpDriveConfig
 		config.save();
 	}
 	
-	private static void LoadOreDict()
-	{
+	private static void LoadOreDict() {
 		String[] oreNames = OreDictionary.getOreNames();
-		for(String oreName: oreNames)
-		{
+		for(String oreName: oreNames) {
 			String lowerOreName = oreName.toLowerCase();
-			if(oreName.substring(0,3).equals("ore"))
-			{
+			if (oreName.substring(0,3).equals("ore")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerOres.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
 				}
 			}
-			if(lowerOreName.contains("log"))
-			{
+			if (lowerOreName.contains("log")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerLogs.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added log ID: "+i.itemID);
 				}
 			}
-			if(lowerOreName.contains("leave") || lowerOreName.contains("leaf"))
-			{
+			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerLeaves.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added leaf ID: "+i.itemID);
 				}

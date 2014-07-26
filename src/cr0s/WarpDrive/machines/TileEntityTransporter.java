@@ -2,13 +2,15 @@ package cr0s.WarpDrive.machines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -48,6 +50,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			"energize",
 			"energy",
 			"powerBoost",
+			"energyCost",
 			"help" };
 	
 	@Override
@@ -59,8 +62,12 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	public void updateEntity() {
 		super.updateEntity();
 		
-		if (isLocked && lockStrengthMul > 0) {
-			lockStrengthMul*= 0.98;
+		if(isLocked) {
+			if(lockStrengthMul > 0.8) {
+				lockStrengthMul *= 0.995;
+			} else {
+				lockStrengthMul*= 0.98;
+			}
 		}
 	}
 	
@@ -68,6 +75,38 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	@Override
 	public String getType() {
 		return "transporter";
+	}
+	
+	public String helpStr(Object[] function) {
+		if (function != null && function.length > 0) {
+			String fun = function[0].toString().toLowerCase();
+			if(fun.equals("source")) {
+				if(WarpDriveConfig.TR_RELATIVE_COORDS) {
+					return "source(x,y,z): sets the coordinates (relative to the transporter) to teleport from\ndest(): returns the relative x,y,z coordinates of the source";
+				} else {
+					return "source(x,y,z): sets the absolute coordinates to teleport from\ndest(): returns the x,y,z coordinates of the source";
+				}
+			} else if(fun.equals("dest")) {
+				if(WarpDriveConfig.TR_RELATIVE_COORDS) {
+					return "dest(x,y,z): sets the coordinates (relative to the transporter) to teleport to\ndest(): returns the relative x,y,z coordinates of the destination";
+				} else {
+					return "dest(x,y,z): sets the absolute coordinates to teleport to\ndest(): returns the x,y,z coordinates of the destination";
+				}
+			} else if(fun.equals("lock")) {
+				return "lock(): locks the source and dest coordinates in and returns the lock strength (float)";
+			} else if(fun.equals("release")) {
+				return "release(): releases the current lock";
+			} else if(fun.equals("lockstrength")) {
+				return "lockStrength(): returns the current lock strength (float)";
+			} else if(fun.equals("energize")) {
+				return "energize(): attempts to teleport all entities at source to dest. Returns the number of entities transported (-1 indicates a problem).";
+			} else if(fun.equals("powerboost")) {
+				return "powerBoost(boostAmount): sets the level of power to use (1 being default), returns the level of power\npowerBoost(): returns the level of power";
+			} else if(fun.equals("energycost")) {
+				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
+			}
+		}
+		return "help(\"functionName\"): returns help for the function specified";
 	}
 
 	@Override
@@ -79,20 +118,22 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 		Vector3 vec = src ? sourceVec : destVec;
 		
 		if (vec == null) {
+			Vector3 sV = WarpDriveConfig.TR_RELATIVE_COORDS ? new Vector3(this) : new Vector3(0,0,0);
 			if(src)
-				sourceVec = new Vector3(0,0,0);
+				sourceVec = sV;
 			else
-				destVec = new Vector3(0,0,0);
+				destVec = sV;
 			vec = src ? sourceVec : destVec;
 		}
 		
-		try
-		{
+		try {
 			if (arguments.length >= 3) {
+				unlock();
 				vec.x = toDouble(arguments[0]);
 				vec.y = toDouble(arguments[1]);
 				vec.z = toDouble(arguments[2]);
 			} else if(arguments.length == 1) {
+				unlock();
 				if(WarpDriveConfig.TR_RELATIVE_COORDS) {
 					vec.x = centreOnMe.x;
 					vec.y = centreOnMe.y;
@@ -103,49 +144,39 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 					vec.z = zCoord + centreOnMe.z;
 				}
 			}
-		}
-		catch(NumberFormatException e)
-		{
+		} catch(NumberFormatException e) {
 			return setVec3(src,"this");
 		}
 		return new Object[] { vec.x, vec.y, vec.z };
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
-	{
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		String str = methodArray[method];
-		if(str == "energy") {
+		if (str == "energy") {
 			return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 		}
 		
-		if(str == "source")
-		{
+		if (str == "source") {
 			return setVec3(true,arguments);
 		}
 		
-		if(str == "dest")
-		{
+		if (str == "dest") {
 			return setVec3(false,arguments);
 		}
 		
-		if(str == "lock")
-		{
-			return new Object[] { lockStrength(sourceVec, destVec, true) };
+		if (str == "lock") {
+			return new Object[] { lock(sourceVec, destVec) };
 		}
 		
 		if(str == "release")
 		{
-			if (isLocked) {
-				isLocked = false;
-				return new Object[] { true };
-			} else {
-				return new Object[] { false };
-			}
+			unlock();
+			return null;
 		}
 		
 		if(str == "lockStrength") {
-			return new Object[] { lockStrength(sourceVec,destVec,false) };
+			return new Object[] { getLockStrength() };
 		}
 		
 		if(str == "energize") {
@@ -156,7 +187,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			try
 			{
 				if(arguments.length >= 1)
-					powerBoost = clamp(toInt(arguments[0]),1,WarpDriveConfig.TR_MAX_BOOST_MUL);
+					powerBoost = clamp(toDouble(arguments[0]),1,WarpDriveConfig.TR_MAX_BOOST_MUL);
 			}
 			catch(NumberFormatException e)
 			{
@@ -165,46 +196,82 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			return new Object[] { powerBoost };
 		}
 		
+		if (str == "energyCost") {
+			return new Object[] { energyCost() };
+		}
+		
+		if (str == "help") {
+			return new Object[] { helpStr(arguments) };
+		}
+		
 		return null;
 	}
 	
-	private boolean energize()
-	{
-		double ls = lockStrength(sourceVec,destVec,false);
-		ArrayList<EntityLivingBase> entitiesToTransport = findEntities(sourceVec,ls);
-		int energyRequested = (int)Math.ceil(WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
-		for(EntityLivingBase ent : entitiesToTransport) {
-			if (consumeEnergy(energyRequested, false)) {
-				inflictNegativeEffect(ent, ls);
-				transportEnt(ent, destVec);
+	private Integer energyCost() {
+		if (sourceVec != null && destVec != null) {
+			return (int) Math.ceil(Math.pow(3, powerBoost - 1) * WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
+		}
+  		return null;
+  	}
+	
+	private int energize() {
+		if (isLocked) {
+			int count = 0;
+			double ls = getLockStrength();
+			WarpDrive.debugPrint("LS:" + getLockStrength());
+			ArrayList<Entity> entitiesToTransport = findEntities(sourceVec, ls);
+			Integer energyReq = energyCost();
+			if (energyReq == null) {
+				return -1;
+			}
+			for(Entity ent : entitiesToTransport) {
+				WarpDrive.debugPrint("" + this + " Handling entity " + ent.getEntityName());
+				if (consumeEnergy(energyReq, false)) {
+					WarpDrive.debugPrint("" + this + " Energy taken");
+					inflictNegativeEffect(ent, ls);
+					transportEnt(ent,destVec);
+					count++;
+				} else {
+					break;
+				}
+			}
+			return count;
+		}
+		return -1;
+	}
+	
+	private void transportEnt(Entity ent, Vector3 dest) {
+		if (ent instanceof EntityLivingBase) {
+			EntityLivingBase livingEnt = (EntityLivingBase) ent;
+			if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+				livingEnt.setPositionAndUpdate(xCoord+dest.x, yCoord+dest.y, zCoord+dest.z);
 			} else {
-				break;
+				livingEnt.setPositionAndUpdate(dest.x, dest.y, dest.z);
+			}
+		} else {
+			if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+				ent.setPosition(xCoord+dest.x, yCoord+dest.y, zCoord+dest.z);
+			} else {
+				ent.setPosition(dest.x, dest.y, dest.z);
 			}
 		}
-		return false;
 	}
 	
-	private void transportEnt(EntityLivingBase ent, Vector3 dest)
-	{
-		if(WarpDriveConfig.TR_RELATIVE_COORDS)
-			ent.setPositionAndUpdate(xCoord+dest.x, yCoord+dest.y, zCoord+dest.z);
-		else
-			ent.setPositionAndUpdate(dest.x, dest.y, dest.z);
-	}
-	
-	private void inflictNegativeEffect(EntityLivingBase ent,double lockStrength)
-	{
+	private void inflictNegativeEffect(Entity ent, double lockStrength) {
 		double value = Math.random() + lockStrength;
 		
-		WarpDrive.debugPrint("TELEPORT INFLICTION: " + value);
-		if(value < 0.1)
+		WarpDrive.debugPrint("TRANSPORTER INFLICTION: " + value);
+		if (value < 0.1) {
 			ent.attackEntityFrom(teleDam, 1000);
+		}
 		
-		if(value < 0.2)
+		if (value < 0.2) {
 			ent.attackEntityFrom(teleDam, 10);
+		}
 		
-		if(value < 0.5)
+		if (value < 0.5) {
 			ent.attackEntityFrom(teleDam, 1);
+		}
 	}
 	
 	private double beaconScan(int xV, int yV, int zV)
@@ -257,55 +324,61 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 		return curMin;
 	}
 	
-	private double lockStrength(Vector3 source,Vector3 dest,boolean lock)
-	{
-		if(isLocked)
-		{
-			return Math.max(1, baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1));
+	private double getLockStrength() {
+		if (isLocked) {
+			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost - 1), 0, 1);
 		}
-		else if(lock && source != null && dest != null)
-		{
-			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
-			baseLockStrength = basePower;
-			lockStrengthMul  = 1;
-			isLocked = true;
-			return Math.max(1,baseLockStrength * powerBoost);
-		}
-		else
-			return 0;
+		return -1;
 	}
-	
-	private AxisAlignedBB getAABB()
-	{
+
+ 	private void unlock() {
+ 		isLocked = false;
+ 		baseLockStrength = 0;
+ 	}
+ 	
+	private double lock(Vector3 source,Vector3 dest) {
+ 		if (source != null && dest != null) {
+  			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
+  			baseLockStrength = basePower;
+  			lockStrengthMul  = 1;
+  			isLocked = true;
+ 			WarpDrive.debugPrint(baseLockStrength + "," + getLockStrength());
+ 			return getLockStrength();
+  		} else {
+ 			unlock();
+  			return 0;
+ 		}
+  	}
+	 	
+	private AxisAlignedBB getAABB() {
 		Vector3 tS = new Vector3(this);
 		Vector3 bS = new Vector3(this);
-		Vector3 scanPos = new Vector3(scanRange/2,1,scanRange/2);
+		Vector3 scanPos = new Vector3( scanRange/2, 2, scanRange/2);
 		Vector3 scanNeg = new Vector3(-scanRange/2,-1,-scanRange/2);
-		if(WarpDriveConfig.TR_RELATIVE_COORDS)
-		{
+		if(WarpDriveConfig.TR_RELATIVE_COORDS) {
 			tS.translate(sourceVec).translate(scanPos);
 			bS.translate(sourceVec).translate(scanNeg);
-		}
-		else
-		{
+		} else {
 			tS = sourceVec.clone().translate(scanPos);
 			bS = sourceVec.clone().translate(scanNeg);
 		}
 		return AxisAlignedBB.getBoundingBox(bS.x,bS.y,bS.z,tS.x,tS.y,tS.z);
 	}
 	
-	private ArrayList<EntityLivingBase> findEntities(Vector3 source, double lockStrength)
-	{
+	private ArrayList<Entity> findEntities(Vector3 source, double lockStrength) {
 		AxisAlignedBB bb = getAABB();
-		ArrayList<EntityLivingBase> output = new ArrayList<EntityLivingBase>();
 		WarpDrive.debugPrint("Transporter:" +bb.toString());
 		List data = worldObj.getEntitiesWithinAABBExcludingEntity(null, bb);
-		for(Object ent : data)
-		{
-			WarpDrive.debugPrint("Transporter:"+ent.toString() + " found");
-			if(lockStrength >= 1 || Math.random() < lockStrength) //If weak lock, don't transport (lazy java shouldn't do math.random() if strong lock)
-				if(ent instanceof EntityLivingBase)
-					output.add((EntityLivingBase) ent);
+		ArrayList<Entity> output = new ArrayList<Entity>(data.size());
+		for(Object ent : data) {
+			if (lockStrength >= 1 || worldObj.rand.nextDouble() < lockStrength) {// If weak lock, don't transport
+				WarpDrive.debugPrint("" + this + " Entity '" + ent.toString() + "' found and added");
+				if (ent instanceof Entity) {
+					output.add((Entity) ent);
+				}
+			} else {
+				WarpDrive.debugPrint("" + this + " Entity '" + ent.toString() + "' discarded");
+			}
 		}
 		return output;
 	}

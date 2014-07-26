@@ -24,7 +24,7 @@ public class BlockCloakingDeviceCore extends BlockContainer {
         setHardness(0.5F);
         setStepSound(Block.soundMetalFootstep);
         setCreativeTab(WarpDrive.warpdriveTab);
-        setUnlocalizedName("Cloaking Device Core");
+        setUnlocalizedName("warpdrive.machines.CloakingDeviceCore");
     }
 
     @Override

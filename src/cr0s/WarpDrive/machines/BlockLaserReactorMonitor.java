@@ -16,7 +16,7 @@ public class BlockLaserReactorMonitor extends BlockContainer {
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser Reactor Monitor");
+		setUnlocalizedName("warpdrive.machines.LaserReactorMonitor");
     }
     
     public BlockLaserReactorMonitor(int id, Material material) {

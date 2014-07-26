@@ -14,7 +14,7 @@ public class BlockIridium extends Block
 		setResistance(150 * 4);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Block of Iridium");
+		setUnlocalizedName("warpdrive.blocks.IridiumBlock");
     }
 
     @Override
