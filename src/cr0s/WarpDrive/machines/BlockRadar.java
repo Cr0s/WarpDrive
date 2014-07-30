@@ -28,7 +28,7 @@ public class BlockRadar extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("W-Radar");
+		setUnlocalizedName("warpdrive.machines.WarpRadar");
     }
 
     @Override
@@ -107,7 +107,7 @@ public class BlockRadar extends BlockContainer
 
         if (radar != null)
         {
-            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
+            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getEnergyStored() + " RF");
         }
 
         return true;

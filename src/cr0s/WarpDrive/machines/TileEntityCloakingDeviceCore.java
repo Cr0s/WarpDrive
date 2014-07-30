@@ -5,23 +5,19 @@ import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.CloakManager.CloakedArea;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraftforge.common.ForgeDirection;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implements IEnergySink, IPeripheral
+public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implements IPeripheral
 {
 	public boolean addedToEnergyNet = false;
 
-	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
-	private int currentEnergyValue = 0;
+	private final int MAX_ENERGY_VALUE = 500000000; // 500kk RF
 	
 	private String[] methodsArray = { "setFieldTier", // 0 setFieldTier(1 or 2)
 			"isAssemblyValid", // 1 - returns true or false
@@ -45,16 +41,16 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 	private int soundTicks = 0;
 	
 	@Override
+	public int getMaxEnergyStored()
+	{
+		return MAX_ENERGY_VALUE;
+	}
+	
+	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 		{
 			return;
-		}
-
-		if (!addedToEnergyNet && !this.tileEntityInvalid)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			addedToEnergyNet = true;
 		}
 
 		// Reset sound timer
@@ -74,7 +70,7 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 				// Consume power for sustaining cloaking field
 				countBlocksAndConsumeEnergy();
 				
-				if (currentEnergyValue >= 0)
+				if (getEnergyStored() >= 0)
 				{
 					if (!WarpDrive.instance.cloaks.isAreaExists(this.frequency))
 					{
@@ -100,7 +96,7 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 				else
 				{
 					WarpDrive.debugPrint("[CloakDev] Low power, cloak field collapsing...");
-					currentEnergyValue = 0;
+					removeEnergy(getEnergyStored(),false);
 					setCoilsState(false);
 					disableCloakingField();
 				}
@@ -108,7 +104,7 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 			else if (!validateAssembly() && isEnabled)
 			{
 				WarpDrive.debugPrint("[CloakDev] Device lost coils, field collapsing");
-				currentEnergyValue = 0;
+				removeEnergy(getEnergyStored(),false);
 				setCoilsState(false);
 				disableCloakingField();				
 			}
@@ -248,7 +244,7 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 		int energyToConsume = blocksCount * ((this.tier == 1) ? WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER1 : WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER2);
 		
 		//WarpDrive.debugPrint("[CloakDev] Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
-		this.currentEnergyValue -= energyToConsume;
+		removeEnergy(energyToConsume,false);
 	}
 	
 	@Override
@@ -261,7 +257,6 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 	public void readFromNBT(NBTTagCompound tag)
 	{
 		super.readFromNBT(tag);
-		this.currentEnergyValue = tag.getInteger("energy");
 		this.tier = tag.getByte("tier");
 		this.frequency = tag.getInteger("frequency");
 		this.isEnabled = tag.getBoolean("enabled");
@@ -271,7 +266,6 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 	public void writeToNBT(NBTTagCompound tag)
 	{
 		super.writeToNBT(tag);
-		tag.setInteger("energy", this.getCurrentEnergyValue());
 		tag.setByte("tier", this.tier);
 		tag.setInteger("frequency", this.frequency);
 		tag.setBoolean("enabled", this.isEnabled);
@@ -390,7 +384,7 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 				return new Object[] { (boolean)validateAssembly() };
 	
 			case 2: // getEnergyLevel()
-				return new Object[] { currentEnergyValue };
+				return new Object[] { getEnergyStored() };
 				
 			case 3: // enableCloakingField()
 				this.isEnabled = true;
@@ -426,85 +420,21 @@ public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implem
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
-	}
-
-	@Override
 	public void attach(IComputerAccess computer) {}
 
 	@Override
 	public void detach(IComputerAccess computer) {}
 
-	// IEnergySink methods implementation
-	@Override
-	public double demandedEnergyUnits()
-	{
-		return (MAX_ENERGY_VALUE - currentEnergyValue);
-	}
-
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-	{
-		double leftover = 0;
-		currentEnergyValue += Math.round(amount);
-
-		if (getCurrentEnergyValue() > MAX_ENERGY_VALUE)
-		{
-			leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-			currentEnergyValue = MAX_ENERGY_VALUE;
-		}
-
-		return leftover;
-	}
-
-	@Override
-	public int getMaxSafeInput()
-	{
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter,ForgeDirection direction)
-	{
-		return true;
-	}
-
-	/**
-	 * @return the currentEnergyValue
-	 */
-	public int getCurrentEnergyValue()
-	{
-		return currentEnergyValue;
-	}
-
 	public int collectAllEnergy()
 	{
-		int energy = currentEnergyValue;
-		currentEnergyValue = 0;
+		int energy = getEnergyStored();
+		removeEnergy(energy,false);
 		return energy;
 	}
 
 	@Override
-	public void onChunkUnload()
-	{
-		if (addedToEnergyNet)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-	}
-
-	@Override
-	public void invalidate()
-	{
-		if (addedToEnergyNet)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-
-		super.invalidate();
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

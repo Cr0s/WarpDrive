@@ -29,7 +29,7 @@ public class BlockMonitor extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Monitor");
+		setUnlocalizedName("warpdrive.machines.Monitor");
     }
 
     @SideOnly(Side.CLIENT)

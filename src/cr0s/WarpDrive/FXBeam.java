@@ -42,7 +42,7 @@ public class FXBeam extends EntityFX
     public FXBeam(World par1World, Vector3 position, float yaw, float pitch, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
-        WarpDrive.debugPrint("creating new FXBeam");
+        //WarpDrive.debugPrint("creating new FXBeam");
         a = true;
         this.setRGB(red, green, blue);
         this.setSize(0.02F, 0.02F);
@@ -80,7 +80,7 @@ public class FXBeam extends EntityFX
     public FXBeam(World par1World, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
-        WarpDrive.debugPrint("attempting to render!");
+        //WarpDrive.debugPrint("attempting to render!");
         this.setRGB(red, green, blue);
         this.setSize(0.02F, 0.02F);
         this.noClip = true;
@@ -120,7 +120,7 @@ public class FXBeam extends EntityFX
 
         //this.pulse = (energy == 0);
         //if (TEXTURE != null) {
-        WarpDrive.debugPrint("BeamFX created. Texture: " + TEXTURE);
+        //WarpDrive.debugPrint("BeamFX created. Texture: " + TEXTURE);
         //}
     }
 

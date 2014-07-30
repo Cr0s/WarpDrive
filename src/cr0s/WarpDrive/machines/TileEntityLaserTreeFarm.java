@@ -8,9 +8,9 @@ import net.minecraftforge.oredict.OreDictionary;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements IPeripheral
 {
@@ -44,7 +44,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"silkTouch",
 			"silkTouchLeaves",
 			"treetap",
-			"state"
+			"state",
+			"energy"
 	};
 	
 	public TileEntityLaserTreeFarm()
@@ -119,29 +120,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 						{
 							if(isRoomForHarvest())
 							{
-								if(blockID == WarpDriveConfig.IC2_RubberTree)
-								{
-									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
-									if(metadata >= 2 && metadata <= 5)
-									{
-										WarpDrive.debugPrint("wetspot found");
-										if(collectEnergyPacketFromBooster(cost,false))
-										{
-											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
-											resin.stackSize = (int) Math.round(Math.random() * 4);
-											dumpToInv(resin);
-											worldObj.setBlockMetadataWithNotify(pos.intX(), pos.intY(), pos.intZ(), metadata+6, 3);
-											laserBlock(pos);
-											totalHarvested++;
-											delayMul = 4;
-										}
-										else
-											return;
-									}
-									else
-										delayMul = 1;
-								}
-								else if(isLog(blockID))
+								if(isLog(blockID))
 								{
 									if(collectEnergyPacketFromBooster(cost,false))
 									{
@@ -395,13 +374,12 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
 			return new Object[] { state, xSize,zSize,energy(),totalHarvested };
 		}
+		
+		if(methodStr == "energy")
+		{
+			return getEnergyObject();
+		}
 		return null;
-	}
-
-	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
 	}
 
 	@Override
@@ -463,6 +441,12 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	protected float getColorB()
 	{
 		return 0.4f;
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 }

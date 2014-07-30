@@ -26,7 +26,7 @@ public class BlockLift extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser lift");
+		setUnlocalizedName("warpdrive.machines.LaserLift");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class BlockLift extends BlockContainer
 
         if (booster != null)
         {
-            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getEnergyStored() + " RF");
         }
 
         return true;

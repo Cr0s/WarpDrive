@@ -186,7 +186,7 @@ public class SpaceEventHandler
 
 	private boolean consumeO2(ItemStack[] i,EntityPlayerMP ent)
 	{
-		for (int j = 0; j < i.length; ++j)
+		/*for (int j = 0; j < i.length; ++j)
 			if (i[j] != null && i[j].itemID == WarpDriveConfig.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.IC2_Air[1])
 			{
 				if (--i[j].stackSize <= 0)
@@ -209,6 +209,7 @@ public class SpaceEventHandler
 				}
 				return true;
 			}
-		return false;
+		return false;*/
+		return true;
 	}
 }

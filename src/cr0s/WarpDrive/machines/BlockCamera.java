@@ -26,7 +26,7 @@ public class BlockCamera extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Camera block");
+		setUnlocalizedName("warpdrive.machines.Camera");
     }
 
     @Override

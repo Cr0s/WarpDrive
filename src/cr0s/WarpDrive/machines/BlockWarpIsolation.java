@@ -21,7 +21,7 @@ public class BlockWarpIsolation extends Block
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Warp-Field Isolation Block");
+		setUnlocalizedName("warpdrive.blocks.WarpIsolation");
     }
 
     @Override

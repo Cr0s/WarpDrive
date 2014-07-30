@@ -26,7 +26,7 @@ public class BlockCloakingDeviceCore extends BlockContainer
         setHardness(0.5F);
         setStepSound(Block.soundMetalFootstep);
         setCreativeTab(WarpDrive.warpdriveTab);
-        setUnlocalizedName("Cloaking Device Core");
+        setUnlocalizedName("warpdrive.machines.CloakCore");
     }
 
     @Override
@@ -80,7 +80,7 @@ public class BlockCloakingDeviceCore extends BlockContainer
 
         if (me != null)
         {
-            par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getCurrentEnergyValue() + " Eu");
+            par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getEnergyStored() + " RF");
         }
 
         return true;

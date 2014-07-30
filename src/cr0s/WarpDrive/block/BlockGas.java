@@ -1,6 +1,8 @@
-package cr0s.WarpDrive;
+package cr0s.WarpDrive.block;
 
 import java.util.Random;
+
+import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
@@ -17,7 +19,7 @@ public class BlockGas extends Block
     {
         super(par1, Material.air);
         setHardness(0.0F);
-		setUnlocalizedName("Gas block");
+		setUnlocalizedName("warpdrive.blocks.Gas");
     }
 
     @Override

@@ -1,9 +1,5 @@
 package cr0s.WarpDrive.machines;
 
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
-
 import java.util.List;
 
 import net.minecraft.entity.Entity;
@@ -31,10 +27,8 @@ import cr0s.WarpDrive.WarpDriveConfig;
 /**
  * @author Cr0s
  */
-public class TileEntityReactor extends TileEntity implements IEnergySink
+public class TileEntityReactor extends WarpTE
 {
-    public boolean addedToEnergyNet = false;
-
     public Boolean ready;
 
     public Boolean invalidAssembly = false;
@@ -59,8 +53,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     int shipSize = 0;
     int shipVolume;
     int currentMode = 0;
-
-    int currentEnergyValue = 0;
 
     private final byte MODE_BASIC_JUMP = 1; // 0-128
     private final byte MODE_LONG_JUMP = 2;  // 0-12800
@@ -88,11 +80,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     @Override
     public void updateEntity()
     {
-        if (!FMLCommonHandler.instance().getEffectiveSide().isClient() && !addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
 
         // Update warp core in cores registry
         if (++registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20)
@@ -180,7 +167,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     return;
                 }
 
-                coreState = "Energy level: " + currentEnergyValue + " Eu";
+                coreState = "Energy level: " + getEnergyStored() + " RF";
 
                 if (controller.isJumpFlag())
                 {
@@ -372,7 +359,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void summonPlayer(EntityPlayerMP player, int x, int y, int z)
     {
-        if (this.currentEnergyValue - WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE >= 0)
+    	if (this.removeEnergy(WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE, true))
         {
             player.setPositionAndUpdate(x, y, z);
 
@@ -380,8 +367,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             {
                 player.mcServer.getConfigurationManager().transferPlayerToDimension(player, this.worldObj.provider.dimensionId, new SpaceTeleporter(DimensionManager.getWorld(this.worldObj.provider.dimensionId), 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
             }
-
-            this.currentEnergyValue -= WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;
+            removeEnergy(WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE,false);
         }
     }
 
@@ -508,7 +494,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     private void doBeaconJump()
     {
-        if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
+    	if(!removeEnergy(calculateRequiredEnergy(shipVolume, distance),true))
         {
             WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
@@ -549,7 +535,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         if (isBeaconFound)
         {
             // Consume all energy
-            currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
+        	removeEnergy(calculateRequiredEnergy(shipVolume, distance),false);
             WarpDrive.debugPrint("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.setMinMaxes(minX,maxX,minY,maxY,minZ,maxZ);
@@ -659,7 +645,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     private void doGateJump()
     {
-        if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
+    	if(!removeEnergy(calculateRequiredEnergy(shipVolume, distance),true))
         {
             WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
@@ -725,7 +711,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             }
 
             // Consume energy
-            currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
+            removeEnergy(calculateRequiredEnergy(shipVolume, distance),false);
             WarpDrive.debugPrint("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
@@ -811,18 +797,17 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE)
         {
-            WarpDrive.debugPrint("[WP-TE] Energy: " + currentEnergyValue + " eU");
-            WarpDrive.debugPrint("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
+            WarpDrive.debugPrint("[WP-TE] Energy: " + getEnergyStored() + " RF");
+            WarpDrive.debugPrint("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " RF");
 
-            if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
+            if(!removeEnergy(calculateRequiredEnergy(shipVolume, distance),true))
             {
                 WarpDrive.debugPrint("[WP-TE] Insufficient energy to jump");
                 messageToAllPlayersOnShip("Insufficient energy to jump!");
                 this.controller.setJumpFlag(false);
                 return;
             }
-
-            this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
+            removeEnergy(calculateRequiredEnergy(shipVolume, distance),false);
             WarpDrive.debugPrint((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
             WarpDrive.debugPrint((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
             WarpDrive.debugPrint((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
@@ -898,14 +883,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
     		for (Object o : list)
             {
-                if (currentEnergyValue - WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE < 0)
+    			if(!removeEnergy(WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE,false))
                 {
-                	//if(o instanceof EntityPlayerMP)
-                	//	((EntityPlayerMP)o).addChatMessage("Not enough energy to teleport");
                     return;
                 }
-
-                currentEnergyValue -= WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;
                 Entity entity = (Entity) o;
                 int x = MathHelper.floor_double(entity.posX);
                 int z = MathHelper.floor_double(entity.posZ);
@@ -1115,48 +1096,9 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     }
 
     @Override
-    public double demandedEnergyUnits()
-    {
-        if (this.controller != null && controller.getMode() == 0)
-        {
-            return 0;
-        }
-
-        return (WarpDriveConfig.WC_MAX_ENERGY_VALUE - currentEnergyValue);
-    }
-
-    @Override
-    public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-    {
-        double leftover = 0;
-        currentEnergyValue += Math.round(amount);
-
-        if (currentEnergyValue > WarpDriveConfig.WC_MAX_ENERGY_VALUE)
-        {
-            leftover = (currentEnergyValue - WarpDriveConfig.WC_MAX_ENERGY_VALUE);
-            currentEnergyValue = WarpDriveConfig.WC_MAX_ENERGY_VALUE;
-        }
-
-        return leftover;
-    }
-
-    @Override
-    public int getMaxSafeInput()
-    {
-        return Integer.MAX_VALUE;
-    }
-
-    @Override
-    public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-    {
-        return true;
-    }
-
-    @Override
     public void readFromNBT(NBTTagCompound tag)
     {
         super.readFromNBT(tag);
-        currentEnergyValue = tag.getInteger("energy");
         coreFrequency = tag.getString("corefrequency");
         isolationBlocksCount = tag.getInteger("isolation");
         WarpDrive.instance.registry.updateInRegistry(this);
@@ -1166,20 +1108,20 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     public void writeToNBT(NBTTagCompound tag)
     {
         super.writeToNBT(tag);
-        tag.setInteger("energy", currentEnergyValue);
         tag.setString("corefrequency", coreFrequency);
         tag.setInteger("isolation", this.isolationBlocksCount);
+    }
+    
+    @Override
+    public int getMaxEnergyStored()
+    {
+    	return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
     }
 
     @Override
     public void onChunkUnload()
     {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-
+    	super.onChunkUnload();
         WarpDrive.instance.registry.removeFromRegistry(this);
     }
 
@@ -1188,22 +1130,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         super.validate();
         WarpDrive.instance.registry.updateInRegistry(this);
-        if (!addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
     }
 
     @Override
     public void invalidate()
     {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-
         super.invalidate();
     }
 }

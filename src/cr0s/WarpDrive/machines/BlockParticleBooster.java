@@ -26,7 +26,7 @@ public class BlockParticleBooster extends BlockContainer
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Particle Booster");
+		setUnlocalizedName("warpdrive.machines.ParticleBooster");
     }
 
     @Override
@@ -103,7 +103,7 @@ public class BlockParticleBooster extends BlockContainer
 
         if (booster != null)
         {
-            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getCurrentEnergyValue());
+            par5EntityPlayer.addChatMessage("[Particle Booster] Energy level: " + booster.getEnergyStored() + " RF");
         }
 
         return true;

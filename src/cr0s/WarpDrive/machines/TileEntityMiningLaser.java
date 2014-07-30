@@ -3,9 +3,9 @@ package cr0s.WarpDrive.machines;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.util.ArrayList;
 import net.minecraft.block.Block;
@@ -52,7 +52,8 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 		"fortune", //7
 		"speedMul", //8
 		"layer", //9
-		"minLayer" //10
+		"minLayer", //10
+		"energy"
 	};
 
 	private int delayTicksScan = 0;
@@ -344,7 +345,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 					if (energy() < 0)
 						state = "out of energy";
 				}
-				return new Object[] {state, energy(), currentLayer, valuablesMined, valuablesInLayer,
+				return new Object[] {state, getEnergyObject(), currentLayer, valuablesMined, valuablesInLayer,
 						digX, digZ, speedMul, fortune(), silkTouch()};
 
 			case 5: // Offset
@@ -408,14 +409,12 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 				}
 				return new Integer[] { currentLayer };
 			}
+			case 11:
+			{
+				return getEnergyObject();
+			}
 		}
 		return null;
-	}
-
-	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
 	}
 
 	@Override
@@ -474,5 +473,11 @@ public class TileEntityMiningLaser extends TileEntityAbstractMiner implements IP
 	protected float getColorB()
 	{
 		return 1f;
+	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 }

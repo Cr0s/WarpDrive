@@ -1,34 +1,14 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
-
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import java.util.ArrayList;
-import java.util.List;
 
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.MinecraftForge;
-
-public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
+public class TileEntityRadar extends WarpTE implements IPeripheral
 {
-	public boolean addedToEnergyNet = false;
-
-	private int currentEnergyValue = 0;
 
 	private String[] methodsArray =
 	{
@@ -48,17 +28,12 @@ public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 	private boolean isEnergyEnoughForScanRadiusW(int radius)
 	{
 		int needEnergy = (radius * radius);
-		return ((getCurrentEnergyValue() - needEnergy) > 0);
+		return removeEnergy(needEnergy,true);
 	}
 
 	@Override
 	public void updateEntity()
 	{
-		if (!addedToEnergyNet && !this.tileEntityInvalid)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			addedToEnergyNet = true;
-		}
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 		{
@@ -83,20 +58,6 @@ public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 		{
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void readFromNBT(NBTTagCompound tag)
-	{
-		super.readFromNBT(tag);
-		this.currentEnergyValue = tag.getInteger("energy");
-	}
-
-	@Override
-	public void writeToNBT(NBTTagCompound tag)
-	{
-		super.writeToNBT(tag);
-		tag.setInteger("energy", this.getCurrentEnergyValue());
 	}
 
 	// IPeripheral methods implementation
@@ -131,7 +92,7 @@ public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 					if (radius != 0 && isEnergyEnoughForScanRadiusW(radius))
 					{
 						// Consume energy
-						this.currentEnergyValue -= radius * radius;
+						removeEnergy(radius * radius,false);
 						// Begin searching
 						scanRadius = radius;
 						cooldownTime = 0;
@@ -168,7 +129,7 @@ public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 				}
 				return new Object[] { (String)"FAIL", 0, 0, 0 };
 			case 4: // getEnergyLevel
-				return new Integer[] { getCurrentEnergyValue() };
+				return new Integer[] { getEnergyStored() };
 			case 5: // Pos
 				return new Integer[] { xCoord, yCoord, zCoord };
 		}
@@ -177,84 +138,22 @@ public class TileEntityRadar extends WarpTE implements IPeripheral, IEnergySink
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
+	public void attach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public void attach(IComputerAccess computer)
-	{
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+	public void detach(IComputerAccess computer) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public void detach(IComputerAccess computer)
-	{
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+	public boolean equals(IPeripheral other) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
-	// IEnergySink methods implementation
-	@Override
-	public double demandedEnergyUnits()
-	{
-		return (WarpDriveConfig.WR_MAX_ENERGY_VALUE - currentEnergyValue);
-	}
 
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-	{
-		double leftover = 0;
-		currentEnergyValue += Math.round(amount);
-
-		if (getCurrentEnergyValue() > WarpDriveConfig.WR_MAX_ENERGY_VALUE)
-		{
-			leftover = (getCurrentEnergyValue() - WarpDriveConfig.WR_MAX_ENERGY_VALUE);
-			currentEnergyValue = WarpDriveConfig.WR_MAX_ENERGY_VALUE;
-		}
-
-		return leftover;
-	}
-
-	@Override
-	public int getMaxSafeInput()
-	{
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-	{
-		return true;
-	}
-
-	/**
-	 * @return the currentEnergyValue
-	 */
-	public int getCurrentEnergyValue()
-	{
-		return currentEnergyValue;
-	}
-
-	@Override
-	public void onChunkUnload()
-	{
-		if (addedToEnergyNet)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-	}
-
-	@Override
-	public void invalidate()
-	{
-		if (addedToEnergyNet)
-		{
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-
-		super.invalidate();
-	}
 }

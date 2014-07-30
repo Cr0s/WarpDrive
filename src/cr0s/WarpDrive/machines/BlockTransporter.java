@@ -24,7 +24,7 @@ public class BlockTransporter extends BlockContainer
 		setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Transporter");
+		setUnlocalizedName("warpdrive.machines.Transporter");
 	}
 
 	@Override
