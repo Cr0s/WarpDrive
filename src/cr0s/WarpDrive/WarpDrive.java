@@ -394,6 +394,21 @@ public class WarpDrive implements LoadingCallback {
 				'd', Item.diamond,
 				'r', Item.redstone,
 				'n', Item.goldNugget));
+		
+		//Power Laser
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii","ilg","ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'c', componentItem.getIS(5),
+				'l', componentItem.getIS(3)));
+		
+		//Power Reactor
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi","gog","ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'o', componentItem.getIS(4),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
 	}
 	
 	/*private void initIC2Recipes()
