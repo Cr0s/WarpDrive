@@ -23,7 +23,9 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	String[] methodArray = {
 			"energy",
 			"hasReactor",
-			"sendLaser"
+			"side",
+			"sendLaser",
+			"help"
 	};
 	
 	@Override
@@ -81,7 +83,7 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		int meta = 0;
 		if(side != ForgeDirection.UNKNOWN)
 			meta = side.ordinal() - 1;
-		WarpDrive.debugPrint("META:" + meta);
+		//WarpDrive.debugPrint("META:" + meta);
 		if(worldObj.getBlockMetadata(xCoord, yCoord, zCoord)!= meta)
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta, 3);
 	}
@@ -114,7 +116,7 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		
 		if(useLaser == true)
 		{
-			WarpDrive.debugPrint("LAS:" + myVec.toString() + "TO" + reactorVec.toString());
+			//WarpDrive.debugPrint("LAS:" + myVec.toString() + "TO" + reactorVec.toString());
 			sendLaserPacket(myVec,reactorVec,0.1f,0.2f,1.0f,25,50,100);
 			useLaser = false;
 		}
@@ -134,18 +136,21 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	
 	private void laserReactor(int amount)
 	{
-		scanForBooster();
-		scanForReactor();
-		if(booster == null)
-			return;
-		if(reactor == null)
-			return;
-		WarpDrive.debugPrint("TTS:" + amount);
-		if(booster.removeEnergy(amount, false))
+		if(amount > 0)
 		{
-			WarpDrive.debugPrint("L:" + side.toString() +":" + amount);
-			useLaser = true;
-			reactor.decreaseInstability(side, amount);
+			scanForBooster();
+			scanForReactor();
+			if(booster == null)
+				return;
+			if(reactor == null)
+				return;
+			//WarpDrive.debugPrint("TTS:" + amount);
+			if(booster.removeEnergy(amount, false))
+			{
+				//WarpDrive.debugPrint("L:" + side.toString() +":" + amount);
+				useLaser = true;
+				reactor.decreaseInstability(side, amount);
+			}
 		}
 	}
 	
@@ -172,6 +177,23 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	{
 		return methodArray;
 	}
+	
+	private String helpStr(Object[] args)
+	{
+		if(args.length > 0)
+		{
+			String arg = args[0].toString().toLowerCase();
+			if(arg.equals("energy"))
+				return WarpDrive.defEnergyStr;
+			else if(arg.equals("hasreactor"))
+				return "hasReactor(): returns true if the laser can see a reactor and false otherwise";
+			else if(arg.equals("sendlaser"))
+				return "sendLaser(int): sends a laser of energy int to the reactor";
+			else if(arg.equals("side"))
+				return "side(): returns 0-3 depending on which side of the reactor its on";
+		}
+		return WarpDrive.defHelpStr;
+	}
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context,int methodID, Object[] arguments) throws Exception
@@ -193,6 +215,14 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		{
 			if(arguments.length >= 1)
 				laserReactor(toInt(arguments[0]));
+		}
+		else if(method.equals("help"))
+		{
+			return new Object[] {helpStr(arguments)};
+		}
+		else if(method.equals("side"))
+		{
+			return new Object[] { side.ordinal() - 2 };
 		}
 		return null;
 	}

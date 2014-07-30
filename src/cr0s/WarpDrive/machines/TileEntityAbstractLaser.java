@@ -16,10 +16,10 @@ public abstract class TileEntityAbstractLaser extends WarpChunkTE
 	protected void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius)
 	{
 		Side side = FMLCommonHandler.instance().getEffectiveSide();
-		WarpDrive.debugPrint("S:" + side.toString());
+		//WarpDrive.debugPrint("S:" + side.toString());
 		if (side == Side.SERVER)
 		{
-			WarpDrive.debugPrint("laser:" + source + ":" + dest + ":" + r + ":" + g + ":" + b + ":" + age);
+			//WarpDrive.debugPrint("laser:" + source + ":" + dest + ":" + r + ":" + g + ":" + b + ":" + age);
 			if (source == null || dest == null || worldObj == null)
 			{
 				return;

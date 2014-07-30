@@ -21,6 +21,7 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	private final int tickTime;
 	private final int maxLasers;
 	private final int minGen;
+	int cm;
 	
 	private Random randomGen = new Random();
 	
@@ -29,6 +30,7 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	private double[] instabilityValues = new double[4]; //no instability = 0, explosion = 100
 	private int lasersReceived = 0;
 	private int lastRate = 0;
+	private int desPow = 0;
 	private int released = 0;
 	
 	private boolean active = false;
@@ -44,10 +46,10 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 			"setActive", //bool
 			"energy", // returns energy,maxenergy
 			"instability", // returns ins0,1,2,3
-			"release",
-			"releaseRate",
-			"releaseAbove",
-			"debugLaser"
+			"release", // releases all energy
+			"releaseRate", // releases energy when more than arg0 is produced
+			"releaseAbove", // releases any energy above arg0 amount
+			"help" // returns help on arg0 function
 	};
 	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
 	
@@ -88,7 +90,8 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 		if(amount <= 1)
 			return;
 		
-		WarpDrive.debugPrint("validLaser" + amount);
+		//WarpDrive.debugPrint("validLaser" + amount);
+		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, getSideInt(), 3);
 		if(lasersReceived++ <= maxLasers)
 		{
 			double consumeRateIncrease = 1 + Math.pow(Math.E, lastRate/30000);
@@ -106,8 +109,8 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	
 	public int generateEnergy()
 	{
-		int amountToGenerate = minGen + (int)Math.ceil(Math.pow(containedEnergy,0.6));
-		amountToGenerate *= tickTime;
+		int amountToGeneratePerTick = minGen + (int)Math.ceil(Math.pow(containedEnergy,0.6));
+		int amountToGenerate = amountToGeneratePerTick * tickTime;
 		
 		double stabilityOffset = 0.5;
 		for(int i=0;i<4;i++)
@@ -117,7 +120,7 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 		
 		amountToGenerate *= (1-stabilityOffset);
 		containedEnergy = Math.min(containedEnergy+amountToGenerate,maxEnergy);
-		return (amountToGenerate / tickTime);
+		return (amountToGenerate / 20);
 	}
 	
 	@Override
@@ -125,21 +128,80 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	{
 		outputPower();
 		released = 0;
-		if(!active || ++tickCount % tickTime != 0)
-			return;
 		
+		if(++tickCount % tickTime != 0)
+			return;
 		tickCount = 0;
 		
-		lasersReceived = 0;
-		if(explode())
+		if(!active)
+		{
+			lasersReceived = Math.max(0, lasersReceived - 1);
 			return;
+		}
+		lasersReceived = 0;
+		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, getSideInt(), 3);
+		if(shouldExplode())
+		{
+			explode();
+		}
 		increaseInstability();
 		
 		lastRate = generateEnergy();
 		sendEvent("reactorPulse",new Object[] { lastRate });
 	}
 	
-	public boolean explode()
+	private void explode()
+	{
+		//r is radius, but there's gonna be a lot of repeating in the next bit of code so I'm using a really short variable name
+		int r = (int) Math.floor(1.6 * Math.pow(containedEnergy,0.125));
+		WarpDrive.debugPrint("explosion radius:" + r);
+		if(r > 1)
+		{
+			double c = 0.05 * Math.pow(containedEnergy,0.125); // chance of a block being destroyed (ranges from 0.5 to 0.05)
+			WarpDrive.debugPrint("COE:" + c);
+			for(int x=xCoord-r;x<xCoord+r;x++)
+			{
+				for(int y=yCoord-r;y<yCoord+r;y++)
+				{
+					for(int z=zCoord-r;z<zCoord+r;z++)
+					{
+						if(z != zCoord || y != yCoord || x != xCoord)
+						{
+							double rn = randomGen.nextDouble();
+							if(rn < c)
+							{
+								//WarpDrive.debugPrint("deleting:"+x+","+y+","+z);
+								//worldObj.destroyBlock(x,y,z, false);
+								//worldObj.setBlock(x, y, z, 0, 0, 3);
+								worldObj.setBlockToAir(x, y, z);
+							}
+						}
+					}
+				}
+			}
+			
+		}
+		worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+	}
+	
+	private int getSideInt()
+	{
+		double maxIns = 0;
+		for(Double ins:instabilityValues)
+		{
+			if(ins > maxIns)
+				maxIns = ins;
+		}
+		WarpDrive.debugPrint("MI:" + maxIns + "," + xCoord + "," + yCoord + "," + zCoord);
+		int inVal = (int) Math.floor( (3 * maxIns / 100) + 0.5);
+		int maxEn = (int) Math.floor( (3 * containedEnergy) / maxEnergy);
+		
+		int output = (4 * inVal) + maxEn;
+		WarpDrive.debugPrint("" +output);
+		return output;
+	}
+	
+	private boolean shouldExplode()
 	{
 		boolean exp = false;
 		for(int i=0;i<4;i++)
@@ -260,6 +322,30 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 		return false;
 	}
 	
+	//Takes the arguments passed by function call and returns an appropriate string
+	private String helpStr(Object[] args)
+	{
+		if(args.length > 0)
+		{
+			String arg = args[0].toString().toLowerCase();
+			if(arg.equals("getactive"))
+				return "getActive(): returns true if the reactor is active and false otherwise";
+			else if(arg.equals("setactive"))
+				return "setActive(bool): activates the reactor if passed true and deactivates if passed false";
+			else if(arg.equals("energy"))
+				return WarpDrive.defEnergyStr;
+			else if(arg.equals("instability"))
+				return "instability(): returns the 4 instability values (100 is the point when the reactor explodes)";
+			else if(arg.equals("release"))
+				return "release(bool): sets the reactor to output all energy or disables outputting of energy";
+			else if(arg.equals("releaserate"))
+				return "releaseRate(int): sets the reactor to try to release exactly int/tick";
+			else if(arg.equals("releaseabove"))
+				return "releaseAbove(int): releases all energy above stored int";
+		}
+		return WarpDrive.defHelpStr;
+	}
+	
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context,int methodID,Object[] arguments) throws Exception
 	{
@@ -294,11 +380,14 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 		}
 		else if(methodName.equals("release"))
 		{
-			boolean doRelease = toBool(arguments[0]);
-			releaseMode = doRelease ? 1 : 0;
-			releaseAbove = 0;
-			releaseRate  = 0;
-			return new Object[] { doRelease };
+			if(arguments.length > 0)
+			{
+				boolean doRelease = toBool(arguments[0]);
+				releaseMode = doRelease ? 1 : 0;
+				releaseAbove = 0;
+				releaseRate  = 0;
+			}
+			return new Object[] { releaseMode != 0 };
 		}
 		else if(methodName.equals("releaseRate"))
 		{
@@ -315,9 +404,11 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 			if(rate <= 0)
 				releaseMode = 0;
 			else
-				releaseMode = 3;
-			
-			releaseRate = (rate > 0) ? rate : 0;
+			{
+				releaseAbove = (int)Math.ceil(Math.pow(rate,1.0/0.6));
+				WarpDrive.debugPrint(""+releaseAbove);
+				releaseMode = 2;
+			}
 			return new Object[] { (rate > 0) , rate };
 		}
 		else if(methodName.equals("releaseAbove"))
@@ -363,6 +454,10 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 				containedEnergy -= amount;
 				decreaseInstability(d,amount);
 			}
+		}
+		else if(methodName.equals("help"))
+		{
+			return new Object[] { helpStr(arguments) };
 		}
 		
 		return null;

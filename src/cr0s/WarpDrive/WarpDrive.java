@@ -109,6 +109,9 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static WarpDrivePeripheralHandler peripheralHandler = new WarpDrivePeripheralHandler();
 	
+	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
+	public static String defEnergyStr = "energy(): returns currently contained energy, max contained energy";
+	
 	private ArrayList<Ticket> warpTickets = new ArrayList<Ticket>();
 
 	@EventHandler

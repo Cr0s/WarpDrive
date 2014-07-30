@@ -214,7 +214,7 @@ public class PacketHandler implements IPacketHandler
 
     private void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
     {
-    	WarpDrive.debugPrint("Received beam");
+    	//WarpDrive.debugPrint("Received beam");
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
         Vector3 source, target;
         double sx, sy, sz;
@@ -246,9 +246,9 @@ public class PacketHandler implements IPacketHandler
             energy = inputStream.readInt();
 
             // Render beam
-            WarpDrive.debugPrint("source: " + source);
-            WarpDrive.debugPrint("target: " + target);
-            WarpDrive.debugPrint("r: " + r + " g: " + g + " b:" + b + " age: " + age +" en: " + energy);
+            //WarpDrive.debugPrint("source: " + source);
+            //WarpDrive.debugPrint("target: " + target);
+            //WarpDrive.debugPrint("r: " + r + " g: " + g + " b:" + b + " age: " + age +" en: " + energy);
 
             // To avoid NPE at logging in
             if (worldObj == null)

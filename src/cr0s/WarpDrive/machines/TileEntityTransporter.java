@@ -73,7 +73,7 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 		return "transporter";
 	}
 	
-	public String helpStr(Object[] function)
+	private String helpStr(Object[] function)
 	{
 		if(function != null && function.length > 0)
 		{
@@ -104,8 +104,10 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 				return "powerBoost(boostAmount): sets the level of power to use (1 being default), returns the level of power\npowerBoost(): returns the level of power";
 			else if(fun.equals("energycost"))
 				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
+			else if(fun.equals("energy"))
+				return WarpDrive.defEnergyStr;
 		}
-		return "help(\"functionName\"): returns help for the function specified";
+		return WarpDrive.defHelpStr;
 	}
 
 	@Override
