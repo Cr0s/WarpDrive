@@ -52,6 +52,8 @@ public final class EntityCamera extends EntityLivingBase
     private float oldFOV;
     private float oldSens;
 
+	private boolean isCentered = true;
+
     public EntityCamera(World world, ChunkPosition pos, EntityPlayer player)
     {
         super(world);
@@ -74,13 +76,12 @@ public final class EntityCamera extends EntityLivingBase
         if (FMLCommonHandler.instance().getEffectiveSide().isClient())
         {
             mc.renderViewEntity.rotationYaw = player.rotationYaw;
-            //mc.renderViewEntity.rotationYawHead = player.rotationYawHead;
             mc.renderViewEntity.rotationPitch = player.rotationPitch;
 
             // Perform zoom
-            if (Mouse.isButtonDown(1) && waitTicks-- == 2)
+            if (Mouse.isButtonDown(1) && waitTicks-- <= 0)
             {
-                waitTicks = 2;
+                waitTicks = 4;
                 zoom();
             }
 
@@ -89,9 +90,9 @@ public final class EntityCamera extends EntityLivingBase
                 ClientCameraUtils.resetCam();
                 this.setDead();
             }
-            else if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) && fireWaitTicks-- == 0)
+            else if (Mouse.isButtonDown(0) && fireWaitTicks-- <= 0)
             {
-                fireWaitTicks = 2;
+                fireWaitTicks = 1;
 
                 // Make a shoot with camera-laser
                 if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID)
@@ -125,9 +126,21 @@ public final class EntityCamera extends EntityLivingBase
                 {
                     dx = -1;
                 }
+				else if (Keyboard.isKeyDown(Keyboard.KEY_C)) //centering view
+                {
+					isCentered = !isCentered;
+					return;
+                }
             }
 
-            this.setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+			if (isCentered)
+			{
+				this.setPosition(xCoord + 0.5, yCoord + 0.75, zCoord + 0.5);				
+			} else {
+	            this.setPosition(xCoord + dx, yCoord + dy, zCoord + dz);			
+			}
+
+
         }
     }
 
