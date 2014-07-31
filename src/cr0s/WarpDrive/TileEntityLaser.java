@@ -56,7 +56,13 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
 
-	private MovingObjectPosition firstHit;
+	private MovingObjectPosition firstHit = null;
+	private int hitX = 0;
+	private int hitY = 0;
+	private int hitZ = 0;
+	private int hitBlockId = 0;
+	private int hitBlockMeta = 0;
+	private float hitBlockResistance = 0;
 
 	private int camUpdateTicks = 20;
 	private int registryUpdateTicks = 20 * 10;
@@ -65,7 +71,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public void updateEntity()
 	{
 		// Frequency is not set
-		if (frequency <= 0)
+		if (frequency <= 0 || frequency > 65000)
 		{
 			return;
 		}
@@ -85,7 +91,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			}
 		}
 
-		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS))
+		if (isEmitting && ((frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS)))
 		{
 			delayTicks = 0;
 			isEmitting = false;
@@ -160,7 +166,15 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 			if (firstHit != null)
 			{
-				sendLaserPacket(beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
+				hitBlockId = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				hitBlockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				hitBlockResistance = Block.blocksList[hitBlockId].blockResistance;
+				hitX = firstHit.blockX;
+				hitY = firstHit.blockY;
+				hitZ = firstHit.blockZ;
+				sendLaserPacket(beamVector, new Vector3(firstHit.hitVec), r, g, b, 50, energy, 200);
+			} else {
+				sendLaserPacket(beamVector, reachPoint, r, g, b, 50, energy, 200);
 			}
 
 			return;
@@ -596,7 +610,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 				{
 					double dx = (Double)arguments[0];
 					double dy = (Double)arguments[1];
-					double dz = (Double)arguments[2];
+					double dz = -(Double)arguments[2];	//FIXME kostyl
 					double targetX = xCoord + dx;
 					double targetY = yCoord + dy;
 					double targetZ = zCoord + dz;
@@ -627,8 +641,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 					int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					float blockResistance = Block.blocksList[blockID].blockResistance;
-					Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, (Float)blockResistance };
-					firstHit = null;
+					Object[] info = { hitX, hitY, hitZ, hitBlockId, hitBlockMeta, (Float)hitBlockResistance };
 					return info;
 				}
 				else
