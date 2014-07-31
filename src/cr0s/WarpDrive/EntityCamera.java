@@ -79,7 +79,7 @@ public final class EntityCamera extends EntityLivingBase
             mc.renderViewEntity.rotationPitch = player.rotationPitch;
 
             // Perform zoom
-            if (Mouse.isButtonDown(1) && waitTicks-- == 0)
+            if (Mouse.isButtonDown(1) && waitTicks-- <= 0)
             {
                 waitTicks = 4;
                 zoom();
@@ -90,7 +90,7 @@ public final class EntityCamera extends EntityLivingBase
                 ClientCameraUtils.resetCam();
                 this.setDead();
             }
-            else if (Mouse.isButtonDown(0) && fireWaitTicks-- == 0)
+            else if (Mouse.isButtonDown(0) && fireWaitTicks-- <= 0)
             {
                 fireWaitTicks = 1;
 
