@@ -27,7 +27,7 @@ public class BlockReactor extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void registerIcons(IconRegister par1IconRegister)
     {
-        iconBuffer = new Icon[5];
+        iconBuffer = new Icon[4];
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:coreSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:coreBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:coreTop");

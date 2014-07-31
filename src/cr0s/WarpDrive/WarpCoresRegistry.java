@@ -148,7 +148,6 @@ public class WarpCoresRegistry
 				// Check for warpfields intersections
 				core.prepareToJump(); // calculate spatial parameters
 				c.prepareToJump();
-				
 				// Compare warp-fields for intersection
 				aabb1 = AxisAlignedBB.getBoundingBox(core.minX, core.minY, core.minZ, core.maxX, core.maxY, core.maxZ);
 				aabb2 = AxisAlignedBB.getBoundingBox(c.minX, c.minY, c.minZ, c.maxX, c.maxY, c.maxZ);

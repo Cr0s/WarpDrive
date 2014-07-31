@@ -69,7 +69,6 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 			{
 				if (cooldownTime++ > (20 * ((scanRadius / 1000) + 1)))
 				{
-					//System.out.println("Scanning...");
 					WarpDrive.instance.registry.removeDeadCores();
 					results = WarpDrive.instance.registry.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
@@ -138,7 +137,6 @@ public class TileEntityRadar extends TileEntity implements IPeripheral, IEnergyS
 					else
 					{
 						results = null;
-						System.out.println("Radius: " + radius + " | Enough energy: " + isEnergyEnoughForScanRadiusW(radius));
 						return new Boolean[] { false };
 					}
 				}

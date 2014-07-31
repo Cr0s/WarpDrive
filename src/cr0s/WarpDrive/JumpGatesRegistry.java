@@ -21,17 +21,8 @@ public final class JumpGatesRegistry
     //@SideOnly(Side.CLIENT)
     public JumpGatesRegistry()
     {
-        db = new File("gates.txt");
-        System.out.println("Gates.txt file: " + db);
-        
-        if (db != null && !db.exists()) {
-        	try {
-				db.createNewFile();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-        }
-        
+        db = MinecraftServer.getServer().getFile("gates.txt");
+
         try
         {
             loadGates();

@@ -16,83 +16,83 @@ import net.minecraft.world.World;
 
 public class BlockCloakingDeviceCore extends BlockContainer
 {
-    private Icon[] iconBuffer;
+	private Icon[] iconBuffer;
 
-    public BlockCloakingDeviceCore(int id, int texture, Material material)
-    {
-        super(id, material);
-    }
+	public BlockCloakingDeviceCore(int id, int texture, Material material)
+	{
+		super(id, material);
+	}
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
-    {
-        iconBuffer = new Icon[2];
-        iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:cloakingCoreInactive");
-        iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:cloakingCoreActive");
-    }
+	@Override
+	@SideOnly(Side.CLIENT)
+	public void registerIcons(IconRegister par1IconRegister)
+	{
+		iconBuffer = new Icon[2];
+		iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:cloakingCoreInactive");
+		iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:cloakingCoreActive");
+	}
 
-    @Override
-    public Icon getIcon(int side, int metadata)
-    {
-    	return iconBuffer[metadata];
-    }
+	@Override
+	public Icon getIcon(int side, int metadata)
+	{
+		return iconBuffer[metadata];
+	}
 
-    @Override
-    public TileEntity createNewTileEntity(World var1)
-    {
-        return new TileEntityCloakingDeviceCore();
-    }
+	@Override
+	public TileEntity createNewTileEntity(World var1)
+	{
+		return new TileEntityCloakingDeviceCore();
+	}
 
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
-    @Override
-    public int quantityDropped(Random par1Random)
-    {
-        return 1;
-    }
+	/**
+	 * Returns the quantity of items to drop on block destruction.
+	 */
+	@Override
+	public int quantityDropped(Random par1Random)
+	{
+		return 1;
+	}
 
-    /**
-     * Returns the ID of the items to drop on destruction.
-     */
-    @Override
-    public int idDropped(int par1, Random par2Random, int par3)
-    {
-        return this.blockID;
-    }
+	/**
+	 * Returns the ID of the items to drop on destruction.
+	 */
+	@Override
+	public int idDropped(int par1, Random par2Random, int par3)
+	{
+		return this.blockID;
+	}
 
-    @Override
-    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
-    {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-        {
-            return false;
-        }
+	@Override
+	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
+	{
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+		{
+			return false;
+		}
 
-        TileEntityCloakingDeviceCore me = (TileEntityCloakingDeviceCore)par1World.getBlockTileEntity(par2, par3, par4);
+		TileEntityCloakingDeviceCore me = (TileEntityCloakingDeviceCore)par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (me != null)
-        {
-            par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getCurrentEnergyValue() + " Eu");
-        }
+		if (me != null)
+		{
+			par5EntityPlayer.addChatMessage("[CloakDeviceCore] Energy level: " + me.getCurrentEnergyValue() + " Eu");
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
-    {
-        TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+	@Override
+	public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
+	{
+		TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
 
-        if (te != null)
-        {
-        	if (((TileEntityCloakingDeviceCore)te).isEnabled)
-        		((TileEntityCloakingDeviceCore)te).disableCloakingField();
-        	
-            te.invalidate();
-        }
+		if (te != null)
+		{
+			if (((TileEntityCloakingDeviceCore)te).isEnabled)
+				((TileEntityCloakingDeviceCore)te).disableCloakingField();
+			
+			te.invalidate();
+		}
 
-        super.breakBlock(par1World, par2, par3, par4, par5, par6);
-    }
+		super.breakBlock(par1World, par2, par3, par4, par5, par6);
+	}
 }

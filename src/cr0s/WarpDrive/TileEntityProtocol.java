@@ -84,13 +84,11 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     private void setJumpDistance(int distance)
     {
-        System.out.println("Setting jump distance: " + distance);
         this.distance = distance;
     }
 
     private void setMode(int mode)
     {
-        // System.out.println("Setting mode: " + mode);
         this.mode = mode;
     }
 
@@ -109,7 +107,6 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             dir = 270;
         }
 
-        System.out.println("Setting direction: " + dir);
         this.direction = dir;
     }
 
@@ -206,20 +203,20 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     public String getAttachedPlayersList()
     {
-        StringBuilder list = new StringBuilder("");
+        String list = "";
 
         for (int i = 0; i < this.players.size(); i++)
         {
             String nick = this.players.get(i);
-            list.append(nick + ((i == this.players.size() - 1) ? "" : ", "));
+            list += nick + ((i == this.players.size() - 1) ? "" : ", ");
         }
 
         if (players.isEmpty())
         {
-            list = new StringBuilder("<nobody>");
+            list = "<nobody>";
         }
 
-        return list.toString();
+        return list;
     }
 
     /**
@@ -433,7 +430,6 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
      */
     public void setBeaconFrequency(String beaconFrequency)
     {
-        //System.out.println("Setting beacon freqency: " + beaconFrequency);
         this.beaconFrequency = beaconFrequency;
     }
 
@@ -473,18 +469,22 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     @Override
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
     {
-        //System.out.println("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
         switch (method)
         {
             case 0: // dim_getp ()
                 return new Integer[] { getFront(), getRight(), getUp() };
             case 1: // dim_setp (front, right, up)
-                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
+                if ( arguments.length != 3 ||
+					( ( (Double)arguments[0] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() < 0 ||
+					( (Double)arguments[2] ).intValue() < 0 ||
+					( (Double)arguments[0] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[1] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[2] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ) )
                 {
                     return new Integer[] { -1 };
                 }
 
-                System.out.println("Setting positive gabarits: f: " + ((Double)arguments[0]).intValue() + " r: " + ((Double)arguments[1]).intValue() + " u: " + ((Double)arguments[2]).intValue());
                 setFront(((Double)arguments[0]).intValue());
                 setRight(((Double)arguments[1]).intValue());
                 setUp(((Double)arguments[2]).intValue());
@@ -494,12 +494,17 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
             case 2: // dim_getn ()
                 return new Integer[] { getBack(), getLeft(), getDown() };
             case 3: // dim_setn (back, left, down)
-                if (arguments.length != 3 || (((Double)arguments[0]).intValue() < 0 || ((Double)arguments[1]).intValue() < 0 || ((Double)arguments[2]).intValue() < 0))
+                if ( arguments.length != 3 ||
+					( ( (Double)arguments[0] ).intValue() < 0 ||
+					( (Double)arguments[1] ).intValue() < 0 ||
+					( (Double)arguments[2] ).intValue() < 0 ||
+					( (Double)arguments[0] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[1] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ||
+					( (Double)arguments[2] ).intValue() > WarpDriveConfig.i.WC_MAX_SHIP_SIDE ) )
                 {
                     return new Integer[] { -1 };
                 }
 
-                System.out.println("Setting negative gabarits: b: " + ((Double)arguments[0]).intValue() + " l: " + ((Double)arguments[1]).intValue() + " d: " + ((Double)arguments[2]).intValue());
                 setBack(((Double)arguments[0]).intValue());
                 setLeft(((Double)arguments[1]).intValue());
                 setDown(((Double)arguments[2]).intValue());

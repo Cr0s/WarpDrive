@@ -58,17 +58,17 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	
 	int warpCoreSearchTicks = 0;
 
-	// Config
-	private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
+	// Config //TODO add to WarpDriveConfig
+	private final String SCHEMATICS_DIR = "schematics";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
-	private final int BLOCK_TO_DEPLOY_PER_TICK = 3000;
+	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
-	private String[] methodsArray = { "scanShip", // 0
-			"getSchematicFileName", // 1
-			"getEnergyLevel", // 2
-			"deployShipFromSchematic" // 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+	private String[] methodsArray = { "scan", // 0
+			"fileName", // 1
+			"energy", // 2
+			"deploy" // 3 deploy(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
@@ -83,9 +83,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	
 	@Override
 	public void updateEntity() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
-		}
 
 		if (!addedToEnergyNet && !this.tileEntityInvalid) {
 			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
@@ -168,7 +167,6 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			deployDelayTicks = 0;
 			
 			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
-			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -188,7 +186,10 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				// Deploy single block
 				JumpBlock block = blocksToDeploy[currentDeployIndex];
 				
-				if (block != null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
+				if (block != null &&
+					block.blockID != Block.bedrock.blockID &&
+					!WarpDriveConfig.i.scannerIgnoreBlocks.contains(block.blockID) &&
+					worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
 				{
 					moveBlockSimple(block);
 					
@@ -335,14 +336,12 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
 	
-		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
 		
 		int size = width * length * height;
 		
 		// Consume energy
 		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_SCAN);
 		
-		System.out.println("[ShipScanner] Size: " + size);
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -357,8 +356,8 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				for (int z = 0; z < length; z++) {
 					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
 					
-					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.i.scannerIgnoreBlocks.contains(blockID))
+					// Do not scan air and bedrock
+					if ( worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID )
 						blockID = 0;
 					
 					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
@@ -417,7 +416,6 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	}
 
 	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
-		System.out.println("[ShipScanner] Filename: " + fileName);
 		
 		try {
 			File file = new File(fileName);
@@ -440,15 +438,17 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	private void scanShip() {
 		// Enable scanner
 		switchState(1);
+		File f = new File(SCHEMATICS_DIR);
+		if (!f.exists() || !f.isDirectory())
+			f.mkdirs();
 
 		// Generate unique file name
 		do {
 			schematicFileName = (new StringBuilder().append(core.coreFrequency)
 					.append(System.currentTimeMillis()).append(".schematic"))
 					.toString();
-		} while (new File(this.SCHEMATICS_DIR + schematicFileName).exists());
-
-		saveShipToSchematic(this.SCHEMATICS_DIR + schematicFileName);
+		} while (new File(SCHEMATICS_DIR + "/" + schematicFileName).exists());
+		saveShipToSchematic(SCHEMATICS_DIR + "/" + schematicFileName);
 	}
 
 	private NBTTagCompound readNBTFromFile(String fileName) {
@@ -473,15 +473,14 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	}
 	
 	private boolean isEnoughEnergyForDeploy(int size) {
-		return size * EU_PER_BLOCK_DEPLOY <= currentEnergyValue;
+		return MAX_ENERGY_VALUE <= currentEnergyValue;
 	}
 	
 	// Returns result array for CC interface: [ code, "message" ]
 	private Object[] deployShip(String fileName, int offsetX, int offsetY, int offsetZ) {
-		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + fileName);
+		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
 		
 		if (schematic == null) {
-			System.out.println("[ShipScanner] Schematic is null!");
 			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
 		}
 		
@@ -503,11 +502,9 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		
 		int size = width* height * length;
 		
-		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
 		
 		// Check energy level
 		if (!isEnoughEnergyForDeploy(size)) {
-			System.out.println("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
 			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
 		}
 		
@@ -524,12 +521,11 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 
 		if (occupiedBlockCount > 0) {
-			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
 			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
 		}
 		
 		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_DEPLOY);
+		currentEnergyValue = 0;
 		
 		// Set deployment vars
 		this.blocksToDeploy = new JumpBlock[size];
@@ -541,11 +537,9 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		this.newY = targetY;
 		this.newZ = targetZ;
 		
-		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
 		
 		// Read blocks and TileEntities from NBT to internal storage array
 		
-		System.out.println("[ShipScanner] Loading blocks...");
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
@@ -564,7 +558,6 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 		
 		// Load Tile Entities
-		System.out.println("[ShipScanner] Loading TileEntities...");
 		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
@@ -574,7 +567,6 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 			int teY = teTag.getInteger("y");
 			int teZ = teTag.getInteger("z");
 			
-			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
 			tileEntities[teX + (teY * length + teZ) * width] = teTag;
 		}			
 		
@@ -590,34 +582,16 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 					
 					jb.blockMeta = (localMetadata[x + (y * length + z) * width]) & 0xFF;
 					jb.blockNBT = tileEntities[x + (y * length + z) * width];
-					
-					
-					
+							
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
-					
-					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
-						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
-						if (tileEntities[x + (y * length + z) * width] == null) {
-							System.out.println("null!");
-						} else {
-							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
-						}
-						
-						blocksToDeploy[x + (y * length + z) * width] = jb;
-					} else {
-						jb = null;
-						
-						blocksToDeploy[x + (y * length + z) * width] = jb;
-					}
-					
+					blocksToDeploy[x + (y * length + z) * width] = jb;
 				}
 			}
 		}
 		
 		switchState(1);
-		System.out.println("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
 	
@@ -679,11 +653,10 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 				int y = ((Double)arguments[2]).intValue();
 				int z = ((Double)arguments[3]).intValue();
 				
-				if (!new File(SCHEMATICS_DIR + fileName).exists()) 
+				if (!new File(SCHEMATICS_DIR + "/" + fileName).exists()) 
 					return new Object[] { 0, "Specified .schematic file not found!" };
 				else
 				{
-					System.out.println("[ShipScanner] Trying to deploy ship");
 					return deployShip(fileName, x, y, z);
 				}
 			} else
@@ -806,7 +779,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	// Own implementation of setting blocks without light recalculation in optimization purposes
 	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
 	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
+		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) //FIXME magic numbers
 		{
 			if (y < 0)
 			{

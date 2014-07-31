@@ -18,8 +18,6 @@ public class SoundHandler
             event.manager.addSound("warpdrive:hilaser.ogg");
             event.manager.addSound("warpdrive:midlaser.ogg");
             event.manager.addSound("warpdrive:lowlaser.ogg");
-            event.manager.addSound("warpdrive:cl.ogg");
-            event.manager.addSound("warpdrive:dcl.ogg");
         }
         catch (Exception e)
         {

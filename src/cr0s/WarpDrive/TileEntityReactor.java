@@ -24,6 +24,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
+
 /**
  * @author Cr0s
  */
@@ -52,8 +53,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     public int shipLeft, shipRight;
     public int shipUp, shipDown;
     public int shipHeight, shipWidth, shipLength;
-    int shipSize = 0;
-    int shipVolume;
+    int shipSize = 0;	//ship length in the direction of a jump
+    int shipVolume = 0; //number of all blocks the ship consists of
     int currentMode = 0;
 
     int currentEnergyValue = 0;
@@ -64,7 +65,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
     private final byte MODE_TELEPORT = -1;
     private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
-    
+
     int cooldownTime = 0;
     public int randomCooldownAddition = 0;
 
@@ -198,13 +199,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
                     if (!prepareToJump())
                     {
-                    	System.out.println("[WC] Prepare to jump returns false");
                         return;
                     }
 
                     if (WarpDrive.instance.registry.isWarpCoreIntersectsWithOthers(this))
                     {
-                    	System.out.println("[WD] Intersect");
                         this.controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Warp field intersects with other ship's field. Cannot jump.");
                         return;
@@ -212,13 +211,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
                     if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false))
                     {
-                    	System.out.println("[WD] Core inside cloaking field");
                         this.controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Wap-Core is inside cloaking field. Can't jump. Disable cloaking field to jump!");
                         return;                    	
                     }
                     
-                    System.out.println("[W-C] Jumping!");
                     doJump();
                     controller.setJumpFlag(false);
                 }
@@ -243,7 +240,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 continue;
             }
 
-            System.out.println(msg);
             ((EntityPlayer)o).addChatMessage("[WarpCore] " + msg);
         }
     }
@@ -454,32 +450,32 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         minY = yCoord - shipDown;
         maxY = yCoord + shipUp;
         this.shipSize = 0;
-
+	
+		int sizeFrontBack = shipFront + shipBack;
+		int sizeRightLeft = shipRight + shipLeft;
+		int sizeUpDown = shipUp + shipDown;
+	
         switch (this.direction)
         {
             case 0:
             case 180:
-                this.shipSize = this.shipBack + this.shipFront;
+                this.shipSize = sizeFrontBack;
                 break;
 
             case 90:
             case 270:
-                this.shipSize = this.shipLeft + shipRight;
+                this.shipSize = sizeRightLeft;
                 break;
 
             case -1:
             case -2:
-                this.shipSize = this.shipDown + this.shipUp;
+                this.shipSize = sizeUpDown;
                 break;
-                
-           default:
-				this.controller.setJumpFlag(false);
-				return false;                
-        }
-        
-        // Ship side is too big
-        if (shipLength > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipWidth > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || shipHeight > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
+        }   
+        // Ship size is too big
+        if (sizeFrontBack > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeRightLeft > WarpDriveConfig.i.WC_MAX_SHIP_SIDE || sizeUpDown > WarpDriveConfig.i.WC_MAX_SHIP_SIDE)
         {
+			messageToAllPlayersOnShip("Ship is too long. Cannot jump.");
             this.controller.setJumpFlag(false);
             return false;
         }
@@ -499,7 +495,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -539,7 +534,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
         {
             // Consume all energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -565,16 +559,11 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             worldObj.spawnEntityInWorld(jump);
             coreState = "";
         }
-        else
-        {
-            System.out.println("[TE-WC] Beacon not found.");
-        }
     }
 
     private boolean isShipInJumpgate(JumpGate jg)
     {
         AxisAlignedBB aabb = jg.getGateAABB();
-        System.out.println("Gate AABB: " + aabb);
         int numBlocks = 0;
 
         if (aabb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(maxX - minX, maxY - minY, maxZ - minZ)))
@@ -601,11 +590,8 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (numBlocks == 0)
         {
-            System.out.println("[GATE] Is 0 blocks inside gate.");
             return false;
         }
-
-        System.out.println("[GATE] Ship volume: " + shipVolume + ", blocks in gate: " + numBlocks + ". Percentage: " + ((shipVolume / numBlocks) * 100));
 
         // At least 80% of ship must be inside jumpgate
         if (shipVolume / numBlocks > 0.8F)
@@ -657,7 +643,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
     {
         if (currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
         {
-            System.out.println("[WP-TE] Insufficient energy to jump");
             this.controller.setJumpFlag(false);
             return;
         }
@@ -717,12 +702,10 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                     return;
                 }
 
-                System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
             }
 
             // Consume energy
             currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println("[TE-WC] Moving ship to a place around gate '" + jg.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, 1, 0, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -757,7 +740,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
     public void doJump()
     {
-    	System.out.println("[WC] doJump() called");
         if (currentMode == this.MODE_GATE_JUMP)
         {
             if (FMLCommonHandler.instance().getEffectiveSide().isClient())
@@ -765,14 +747,12 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 return;
             }
 
-            System.out.println("[TE-WC] Performing gate jump...");
             doGateJump();
             return;
         }
 
         if (currentMode == this.MODE_BEACON_JUMP)
         {
-            System.out.println("[TE-WC] Performing beacon jump...");
             doBeaconJump();
             return;
         }
@@ -787,11 +767,7 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
             JumpGate t = WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord);
 
-            
-            if (WarpDrive.instance.jumpGates == null) 
-            	System.out.println("[JumpGates] WarpDrive.instance.jumpGates is NULL!");
-            
-            if (WarpDrive.instance.jumpGates != null && t != null && !isShipInJumpgate(t))
+            if (t != null && !isShipInJumpgate(t))
             {
                 if (shipVolume < WarpDriveConfig.i.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE)
                 {
@@ -804,23 +780,14 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE)
         {
-            System.out.println("[WP-TE] Energy: " + currentEnergyValue + " eU");
-            System.out.println("[WP-TE] Need to jump: " + calculateRequiredEnergy(shipVolume, distance) + " eU");
-
             if (this.currentEnergyValue - calculateRequiredEnergy(shipVolume, distance) < 0)
             {
-                System.out.println("[WP-TE] Insufficient energy to jump");
                 messageToAllPlayersOnShip("Insufficient energy to jump!");
                 this.controller.setJumpFlag(false);
                 return;
             }
 
             this.currentEnergyValue -= calculateRequiredEnergy(shipVolume, distance);
-            System.out.println((new StringBuilder()).append("Jump params: X ").append(minX).append(" -> ").append(maxX).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Y ").append(minY).append(" -> ").append(maxY).append(" blocks").toString());
-            System.out.println((new StringBuilder()).append("Jump params: Z ").append(minZ).append(" -> ").append(maxZ).append(" blocks").toString());
-
-            //System.out.println("[WC-TE] Distance: " + distance + "; shipSize: " + shipSize);
             if (this.currentMode == this.MODE_BASIC_JUMP)
             {
                 distance += shipSize;
@@ -834,7 +801,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
                 }
             }
 
-            System.out.println((new StringBuilder()).append("[JUMP] Totally moving ").append((new StringBuilder()).append(shipVolume).append(" blocks to length ").append(distance).append(" blocks, direction: ").append(direction).toString()).toString());
             EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, distance, direction, dx, dz, this);
             jump.maxX = maxX;
             jump.minX = minX;
@@ -855,7 +821,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
             {
                 jump.toHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID);
                 jump.fromHyperSpace = (worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID);
-                System.out.println("[JUMP] From HS: " + jump.fromHyperSpace + " | To HS: " + jump.fromHyperSpace);
             }
 
             jump.xCoord = xCoord;
@@ -946,7 +911,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
             if (checkPlayerInventory(chest, player))
             {
-                System.out.println("[P] Summoning " + player.username);
                 summonPlayer(player, xCoord, yCoord + 2, zCoord);
             }
         }
@@ -982,7 +946,6 @@ public class TileEntityReactor extends TileEntity implements IEnergySink
 
         if (keyLength < MIN_KEY_LENGTH)
         {
-            System.out.println("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
             return false;
         }
 

@@ -47,8 +47,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	Boolean powerStatus = false;
 	private IGridInterface grid;
 
-	private final int MAX_BOOSTERS_NUMBER = 1;
-
 	private int dx, dz, dy;
 	private boolean isMining = false;
 	private boolean isQuarry = false;
@@ -131,30 +129,23 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			}
 			else
 			{
-				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY)
+				if (++delayTicksMine > WarpDriveConfig.i.ML_MINE_DELAY && isMining)
 				{
 					delayTicksMine = 0;
-
-					if (valuableIndex < valuablesInLayer.size())
+					while(valuableIndex < valuablesInLayer.size() && isMining)
 					{
-						//System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
 						Vector3 valuable = valuablesInLayer.get(valuableIndex++);
-						// Mine valuable ore
 						int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
-
-						// Skip if block is too hard or its empty block
-						if (!canDig(blockID))
-							return;
-
+						if (blockID == 0 || !canDig(blockID))
+							continue;
 						sendLaserPacket(minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).add(0.5), 1, 1, 0, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						harvestBlock(valuable);
+						return;//top lel, yes yes
 					}
-					else
-					{
-						currentMode = 0;
-						--currentLayer;
-					}
+					delayTicksMine = 0;
+					currentMode = 0;
+					--currentLayer;
 				}
 			}
 		}
@@ -163,8 +154,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private boolean canDig(int blockID)
 	{
+		if (blockID == 0)
+			return false;
 		if (Block.blocksList[blockID] != null)
-			return ((blockID == WarpDriveConfig.i.GT_Granite || blockID == WarpDriveConfig.i.GT_Ores || blockID == WarpDriveConfig.i.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return ( (WarpDriveConfig.i.MinerOres.contains(blockID) ||
+						Block.blocksList[blockID].blockHardness <= Block.obsidian.blockHardness) &&
+						blockID !=WarpDriveConfig.i.MFFS_Field &&
+						blockID != Block.bedrock.blockID );
 		else
 			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
@@ -275,7 +271,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	{
 		if (inventory == null || itemStackSource == null)
 		{
-			return 0;
+			isMining = false; //stopping operation
+			return 0;	
 		}
 
 		int transferred = 0;
@@ -341,7 +338,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private void scanLayer()
 	{
-		//System.out.println("Scanning layer");
 		valuablesInLayer.clear();
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
@@ -374,9 +370,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			zmax = z1;
 		}
 
-		//System.out.println("Layer: xmax: " + xmax + ", xmin: " + xmin);
-		//System.out.println("Layer: zmax: " + zmax + ", zmin: " + zmin);
-
 		// Search for valuable blocks
 		for (int x = xmin; x <= xmax; x++)
 			for (int z = zmin; z <= zmax; z++)
@@ -394,7 +387,6 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			}
 
 		valuableIndex = 0;
-		//System.out.println("[ML] Found " + valuablesInLayer.size() + " valuables");
 	}
 
 	private boolean collectEnergyPacketFromBooster(int packet, boolean test)

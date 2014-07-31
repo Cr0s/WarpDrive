@@ -56,7 +56,13 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
 
-	private MovingObjectPosition firstHit;
+	private MovingObjectPosition firstHit = null;
+	private int hitX = 0;
+	private int hitY = 0;
+	private int hitZ = 0;
+	private int hitBlockId = 0;
+	private int hitBlockMeta = 0;
+	private float hitBlockResistance = 0;
 
 	private int camUpdateTicks = 20;
 	private int registryUpdateTicks = 20 * 10;
@@ -65,7 +71,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public void updateEntity()
 	{
 		// Frequency is not set
-		if (frequency <= 0)
+		if (frequency <= 0 || frequency > 65000)
 		{
 			return;
 		}
@@ -85,7 +91,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			}
 		}
 
-		if (isEmitting && (frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS))
+		if (isEmitting && ((frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS)))
 		{
 			delayTicks = 0;
 			isEmitting = false;
@@ -97,14 +103,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	public void addBeamEnergy(int amount)
 	{
 		if (isEmitting)
-		{
 			energyFromOtherBeams += amount;
-			System.out.println("[LE] Added energy: " + amount);
-		}
-		else
-		{
-			System.out.println("[LE] Ignored energy: " + amount);
-		}
 	}
 
 	private int collectEnergyFromBoosters()
@@ -139,7 +138,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	{
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
-		System.out.println("Energy: " + energy + " | beamLengthBlocks: " + beamLengthBlocks);
 
 		if (energy == 0 || beamLengthBlocks < 1 || frequency > 65000 || frequency <= 0)
 		{
@@ -147,7 +145,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		}
 
 		Vector3 beamVector = new Vector3(this).add(0.5);
-		System.out.println("beamVector: " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
@@ -157,11 +154,9 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		Vector3 lookVector = new Vector3((double) directionx, (double) pitchvertical, (double) directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
-		System.out.println("Look vector: " + lookVector);
-		System.out.println("reachPoint: " + reachPoint);
-		System.out.println("translatedBeamVector: " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
+
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
 
 		// This is scanning beam, do not deal damage to blocks
@@ -171,7 +166,15 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 			if (firstHit != null)
 			{
-				sendLaserPacket(beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
+				hitBlockId = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				hitBlockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				hitBlockResistance = Block.blocksList[hitBlockId].blockResistance;
+				hitX = firstHit.blockX;
+				hitY = firstHit.blockY;
+				hitZ = firstHit.blockZ;
+				sendLaserPacket(beamVector, new Vector3(firstHit.hitVec), r, g, b, 50, energy, 200);
+			} else {
+				sendLaserPacket(beamVector, reachPoint, r, g, b, 50, energy, 200);
 			}
 
 			return;
@@ -183,15 +186,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			MovingObjectPosition hit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), true, false);
 			// FIXME entity ray-tracing
 			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
-
-			if (entityHit == null)
-			{
-				System.out.println("Entity hit is null.");
-			}
-			else
-			{
-				System.out.println("Entity hit: " + entityHit);
-			}
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase)
 			{
@@ -616,7 +610,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 				{
 					double dx = (Double)arguments[0];
 					double dy = (Double)arguments[1];
-					double dz = (Double)arguments[2];
+					double dz = -(Double)arguments[2];	//FIXME kostyl
 					double targetX = xCoord + dx;
 					double targetY = yCoord + dy;
 					double targetZ = zCoord + dz;
@@ -647,8 +641,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 					int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					float blockResistance = Block.blocksList[blockID].blockResistance;
-					Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, (Float)blockResistance };
-					firstHit = null;
+					Object[] info = { hitX, hitY, hitZ, hitBlockId, hitBlockMeta, (Float)hitBlockResistance };
 					return info;
 				}
 				else

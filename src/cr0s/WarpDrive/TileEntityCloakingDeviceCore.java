@@ -3,7 +3,6 @@ package cr0s.WarpDrive;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.CloakManager.CloakedArea;
 import dan200.computer.api.IComputerAccess;
 import dan200.computer.api.ILuaContext;
 import dan200.computer.api.IPeripheral;
@@ -68,9 +67,6 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 	private int updateTicks = 0;
 	private int laserDrawingTicks = 0;
 	
-	private boolean soundPlayed = false;
-	private int soundTicks = 0;
-	
 	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -82,14 +78,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 			addedToEnergyNet = true;
 		}
 
-		// Reset sound timer
-		if (soundTicks++ >= 40) {
-			this.soundTicks = 0;
-			this.soundPlayed = false;
-		}
-		
 		if (--this.updateTicks <= 0) {
-			//System.out.println("[CloakDev] Updating cloaking state...");
 			this.updateTicks = ((this.tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.i.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			if (validateAssembly() && isEnabled) {
@@ -100,10 +89,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 					if (!WarpDrive.instance.cloaks.isAreaExists(this.frequency)) {
 						WarpDrive.instance.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, frequency, tier);
 						worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2);
-						if (!soundPlayed) {
-							soundPlayed = true;
-							worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cl", 4F, 1F);
-						}
+						worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cloak", 4F, 1F);
 						
 						// Enable coils
 						setCoilsState(true);
@@ -114,13 +100,11 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 							area.sendCloakPacketToPlayersEx(false); // recloak field
 					}
 				} else {
-					System.out.println("[CloakDev] Low power, cloak field collapsing...");
 					currentEnergyValue = 0;
 					setCoilsState(false);
 					disableCloakingField();
 				}
 			} else if (!validateAssembly() && isEnabled) {
-				System.out.println("[CloakDev] Device lost coils, field collapsing");
 				currentEnergyValue = 0;
 				setCoilsState(false);
 				disableCloakingField();				
@@ -226,11 +210,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		if (WarpDrive.instance.cloaks.isAreaExists(this.frequency))
 			WarpDrive.instance.cloaks.removeCloakedArea(this.frequency);
 		
-		if (!soundPlayed) {
-			soundPlayed = true;
-			worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:dcl", 4F, 1F);
-		}
-		
+		worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:decloak", 4F, 1F);
 		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);
 	}
 	public void countBlocksAndConsumeEnergy() {
@@ -242,7 +222,6 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 						blocksCount++;
 		int energyToConsume = blocksCount * ((this.tier == 1) ? WarpDriveConfig.i.CD_ENERGY_PER_BLOCK_TIER1 : WarpDriveConfig.i.CD_ENERGY_PER_BLOCK_TIER2);
 		
-		//System.out.println("[CloakDev] Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
 		this.currentEnergyValue -= energyToConsume;
 	}
 	
@@ -333,7 +312,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		this.right = searchCoilInDirection((byte)-1, (byte)0, (byte)0) + WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS;
 		if (this.right == WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS) return false;		
 		
-		this.up = searchCoilInDirection((byte)0, (byte)1, (byte)0)     + WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS;
+		this.up = searchCoilInDirection((byte)0, (byte)1, (byte)0)	 + WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS;
 		if (this.up == WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS) return false; 
 		this.down = searchCoilInDirection((byte)0, (byte)-1, (byte)0)  + WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS;
 		if (this.down == WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS) return false;
@@ -343,31 +322,31 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		this.back = searchCoilInDirection((byte)0, (byte)0, (byte)-1)  + WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS;
 		if (this.back == WarpDriveConfig.i.CD_COIL_CAPTURE_BLOCKS) return false;
 		
-        int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
+		int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
 
 
-        z1 = zCoord - this.back;
-        z2 = zCoord + this.front;
-        x1 = xCoord - this.right;
-        x2 = xCoord + this.left;
+		z1 = zCoord - this.back;
+		z2 = zCoord + this.front;
+		x1 = xCoord - this.right;
+		x2 = xCoord + this.left;
 
-        if (x1 < x2) {
-        	this.minX = x1;this. maxX = x2;
-        }
-        else {
-        	this.minX = x2; this.maxX = x1;
-        }
+		if (x1 < x2) {
+			this.minX = x1;this. maxX = x2;
+		}
+		else {
+			this.minX = x2; this.maxX = x1;
+		}
 
-        if (z1 < z2) {
-        	this.minZ = z1; this.maxZ = z2;
-        }
-        else {
-        	this.minZ = z2; this.maxZ = z1;
-        }		
+		if (z1 < z2) {
+			this.minZ = z1; this.maxZ = z2;
+		}
+		else {
+			this.minZ = z2; this.maxZ = z1;
+		}		
 		
-        this.minY = yCoord - this.down;
-        this.maxY = yCoord + this.up;
-        
+		this.minY = yCoord - this.down;
+		this.maxY = yCoord + this.up;
+		
 		return true;
 	}
 	
@@ -389,10 +368,7 @@ public class TileEntityCloakingDeviceCore extends TileEntity implements IEnergyS
 		switch (method) {
 		case 0: // setFieldTier(1 or 2)
 			if (arguments.length == 1) {
-				if (((Double)arguments[0]).byteValue() != 1 && ((Double)arguments[0]).byteValue() != 2) {
-					this.tier = 1;
-				} else
-					this.tier = ((Double)arguments[0]).byteValue();
+				this.tier = ((Double)arguments[0]).byteValue();
 			}
 
 			break;
