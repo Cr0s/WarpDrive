@@ -8,6 +8,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -15,6 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import cr0s.WarpDrive.api.IBreathingHelmet;
 
 /**
  * 
@@ -69,37 +71,52 @@ public class SpaceEventHandler
 			{
 				if (entity instanceof EntityPlayerMP)
 				{
-
-					if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && WarpDriveConfig.SpaceHelmets.contains(((EntityPlayerMP)entity).getCurrentArmor(3).itemID))
+					boolean hasHelmet = false;
+					if (((EntityPlayerMP)entity).getCurrentArmor(3) != null)
 					{
-						Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
-
-						if (airValue == null)
+						ItemStack helmetStack = ((EntityPlayerMP)entity).getCurrentArmor(3);
+						Item helmet = helmetStack.getItem();
+						if(helmet instanceof IBreathingHelmet)
 						{
-							vacuumPlayers.put(((EntityPlayerMP)entity).username, 300);
-							airValue = 300;
-						}
-
-						if (airValue <= 0)
-						{
-							if (consumeO2(((EntityPlayerMP)entity).inventory.mainInventory,(EntityPlayerMP)entity))
+							IBreathingHelmet breathHelmet = (IBreathingHelmet)helmet;
+							Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
+							if(breathHelmet.canBreath(entity))
 							{
-								setPlayerAirValue(entity, 300);
+								hasHelmet = true;
+								if (airValue == null)
+								{
+									vacuumPlayers.put(((EntityPlayerMP)entity).username, 300);
+									airValue = 300;
+								}
+		
+								if (airValue <= 0)
+								{
+									if (breathHelmet.removeAir(entity))
+									{
+										setPlayerAirValue(entity, 300);
+									}
+									else
+									{
+										setPlayerAirValue(entity, 0);
+										entity.attackEntityFrom(DamageSource.drown, 1);
+									}
+								}
+								else
+								{
+									setPlayerAirValue(entity, airValue - 1);
+								}
 							}
-							else
-							{
-								setPlayerAirValue(entity, 0);
-								entity.attackEntityFrom(DamageSource.drown, 1);
-							}
-						}
-						else
-						{
-							setPlayerAirValue(entity, airValue - 1);
 						}
 					}
 					else
 					{
 						entity.attackEntityFrom(DamageSource.drown, 1);
+					}
+					
+					if(!hasHelmet)
+					{
+						if(vacuumPlayers.containsKey(((EntityPlayerMP)entity).username))
+							vacuumPlayers.remove(((EntityPlayerMP)entity).username);
 					}
 
 					// If player falling down, teleport on earth
@@ -181,35 +198,6 @@ public class SpaceEventHandler
 
 		if (id1 == WarpDriveConfig.airID || id2 == WarpDriveConfig.airID)
 			return false;
-		return true;
-	}
-
-	private boolean consumeO2(ItemStack[] i,EntityPlayerMP ent)
-	{
-		/*for (int j = 0; j < i.length; ++j)
-			if (i[j] != null && i[j].itemID == WarpDriveConfig.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.IC2_Air[1])
-			{
-				if (--i[j].stackSize <= 0)
-				{
-					i[j] = null;
-				}
-				
-				if(WarpDriveConfig.IC2_Empty.length != 0)
-				{
-					WarpDrive.debugPrint("giveEmptyCell");
-					int emptyCell = WarpDriveConfig.IC2_Empty[0];
-					int emptyCellM = WarpDriveConfig.IC2_Empty[1];
-					ItemStack emptyCellIS = new ItemStack(emptyCell,1,emptyCellM);
-					if(!ent.inventory.addItemStackToInventory(emptyCellIS))
-					{
-						World world = ent.worldObj;
-						EntityItem itemEnt = new EntityItem(world, ent.posX, ent.posY, ent.posZ, emptyCellIS);
-						ent.worldObj.spawnEntityInWorld(itemEnt);
-					}
-				}
-				return true;
-			}
-		return false;*/
 		return true;
 	}
 }
