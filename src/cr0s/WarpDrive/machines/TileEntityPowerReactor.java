@@ -38,6 +38,8 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	private int releaseRate = 0;
 	private int releaseAbove = 0;
 	
+	private boolean init = false;
+	
 	IEnergyHandler aboveConnection;
 	IEnergyHandler belowConnection;
 	
@@ -133,6 +135,12 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 			return;
 		tickCount = 0;
 		
+		if(!init)
+		{
+			init = true;
+			updateNeighbours();
+		}
+		
 		if(!active)
 		{
 			lasersReceived = Math.max(0, lasersReceived - 1);
@@ -170,9 +178,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 							double rn = randomGen.nextDouble();
 							if(rn < c)
 							{
-								//WarpDrive.debugPrint("deleting:"+x+","+y+","+z);
-								//worldObj.destroyBlock(x,y,z, false);
-								//worldObj.setBlock(x, y, z, 0, 0, 3);
 								worldObj.setBlockToAir(x, y, z);
 							}
 						}
@@ -192,7 +197,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 			if(ins > maxIns)
 				maxIns = ins;
 		}
-		WarpDrive.debugPrint("MI:" + maxIns + "," + xCoord + "," + yCoord + "," + zCoord);
 		int inVal = (int) Math.floor( (3 * maxIns / 100) + 0.5);
 		int maxEn = (int) Math.floor( (3 * containedEnergy) / maxEnergy);
 		
@@ -217,7 +221,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	
 	public void updateNeighbours()
 	{
-		WarpDrive.debugPrint("CHANGES!");
 		TileEntity te;
 		IEnergyHandler ieh;
 		te = worldObj.getBlockTileEntity(xCoord, yCoord+1, zCoord);
@@ -230,7 +233,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 				ieh = (IEnergyHandler)te;
 				if(ieh.canInterface(ForgeDirection.DOWN))
 				{
-					WarpDrive.debugPrint("a network");
 					aboveConnection = ieh;
 					valid = true;
 				}
@@ -270,7 +272,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	
 	private void outputPower(IEnergyHandler ieh,ForgeDirection dir)
 	{
-		//WarpDrive.debugPrint("outputting");
 		int amountToDump = ieh.receiveEnergy(dir,getPotentialReleaseAmount(),true);
 		int dumped = ieh.receiveEnergy(dir, amountToDump, false);
 		released += dumped;
@@ -507,15 +508,17 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	@Override
 	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate)
 	{
-		int toExtract;
+		int dumped;
 		if(!canInterface(from))
 			return 0;
 		
-		toExtract = Math.min(maxExtract,getPotentialReleaseAmount());
+		dumped = Math.min(maxExtract,getPotentialReleaseAmount());
 		if(!simulate)
-			containedEnergy -= toExtract;
-		
-		return toExtract;
+		{
+			released += dumped;
+			containedEnergy -= dumped;
+		}
+		return dumped;
 	}
 	
 	public int getEnergyStored()
