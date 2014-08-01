@@ -39,7 +39,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:ComputerCraft; after:CCTurtle; required-after:AppliedEnergistics; after:AtomicScience; after:ICBM|Explosion; after:MFFS")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.1", dependencies = "required-after:ComputerCraft; after:CCTurtle; required-after:AppliedEnergistics; after:AtomicScience; after:ICBM|Explosion; after:MFFS")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
