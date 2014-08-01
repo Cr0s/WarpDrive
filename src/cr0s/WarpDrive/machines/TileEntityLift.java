@@ -2,14 +2,10 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.Vector3;
-import net.minecraftforge.common.ForgeDirection;
 import java.util.List;
 
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLift extends TileEntityAbstractLaser
 {

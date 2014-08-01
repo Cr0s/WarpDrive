@@ -97,9 +97,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	private IInventory findChest()
 	{
 		Vector3[] adjSides = WarpTE.getAdjacentSideOffsets();
-		int[] xPos = {1,-1,0,0,0,0};
-		int[] yPos = {0,0,-1,1,0,0};
-		int[] zPos = {0,0,0,0,-1,1};
 		TileEntity result = null;
 		
 		for(int i=0;i<6;i++)
@@ -174,7 +171,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateLayerCost()
 	{
-		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
+		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
 	}
 	
 	protected int calculateBlockCost()
@@ -184,10 +181,10 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateBlockCost(int blockID)
 	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
 		if(silkTouch(blockID))
-			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
+			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune())));
 	}
 	
 	protected boolean isRoomForHarvest()
@@ -209,9 +206,9 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	protected boolean canDig(int blockID)
 	{
 		if (Block.blocksList[blockID] != null)
-			return ((Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return ((Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
 		else
-			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+			return (blockID != WarpDriveConfig.MFFS_Field && blockID != Block.bedrock.blockID);
 	}
 	
 	//MINING FUNCTIONS

@@ -30,7 +30,6 @@ public class TileEntityPowerReactor extends WarpTE implements IPeripheral
 	private double[] instabilityValues = new double[4]; //no instability = 0, explosion = 100
 	private int lasersReceived = 0;
 	private int lastRate = 0;
-	private int desPow = 0;
 	private int released = 0;
 	
 	private boolean active = false;

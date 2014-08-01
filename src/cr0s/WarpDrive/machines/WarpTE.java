@@ -1,6 +1,5 @@
 package cr0s.WarpDrive.machines;
 
-import net.minecraft.block.Block;
 import net.minecraft.world.World;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;

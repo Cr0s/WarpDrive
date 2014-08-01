@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.Loader;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityZombie;
