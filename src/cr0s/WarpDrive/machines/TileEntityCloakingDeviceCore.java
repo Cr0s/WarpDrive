@@ -8,10 +8,7 @@ import cr0s.WarpDrive.CloakManager.CloakedArea;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityCloakingDeviceCore extends TileEntityAbstractLaser implements IPeripheral
 {

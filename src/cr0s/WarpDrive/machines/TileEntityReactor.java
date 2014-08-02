@@ -16,8 +16,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.EntityJump;
 import cr0s.WarpDrive.JumpGate;

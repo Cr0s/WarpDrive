@@ -11,7 +11,6 @@ import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import cr0s.WarpDrive.block.BlockAir;
 import cr0s.WarpDrive.block.BlockGas;
 import cr0s.WarpDrive.item.ItemWarpComponent;
@@ -40,7 +39,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:ComputerCraft; after:CCTurtle; required-after:AppliedEnergistics; after:AtomicScience; after:ICBM|Explosion; after:MFFS")
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.1", dependencies = "required-after:ComputerCraft; after:CCTurtle; required-after:AppliedEnergistics; after:AtomicScience; after:ICBM|Explosion; after:MFFS")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 

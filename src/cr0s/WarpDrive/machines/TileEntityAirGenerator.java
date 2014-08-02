@@ -2,7 +2,6 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.Vector3;
-import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
 public class TileEntityAirGenerator extends WarpTE
@@ -10,7 +9,6 @@ public class TileEntityAirGenerator extends WarpTE
 
     private final int RF_PER_AIRBLOCK = 10;
     private final int MAX_ENERGY_VALUE = 36 * RF_PER_AIRBLOCK;
-    private int currentEnergyValue = 0;
 
     private int cooldownTicks = 0;
     private final float AIR_POLLUTION_INTERVAL = 4; // seconds
