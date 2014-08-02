@@ -473,7 +473,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 	}
 	
 	private boolean isEnoughEnergyForDeploy(int size) {
-		return size * EU_PER_BLOCK_DEPLOY <= currentEnergyValue;
+		return MAX_ENERGY_VALUE <= currentEnergyValue;
 	}
 	
 	// Returns result array for CC interface: [ code, "message" ]
@@ -525,7 +525,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		}
 		
 		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_DEPLOY);
+		currentEnergyValue = 0;
 		
 		// Set deployment vars
 		this.blocksToDeploy = new JumpBlock[size];

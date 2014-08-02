@@ -427,7 +427,7 @@ public class WarpDriveConfig
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block)z.getField("blockMachine").get(null)).blockID;
 			ICBM_Missile = ((Item)z.getField("itemMissile").get(null)).itemID;
-			ICBM_Explosive = ((Item)z.getField("blockExplosive").get(null)).itemID;
+			ICBM_Explosive = ((Block)z.getField("blockExplosive").get(null)).blockID;
 			scannerIgnoreBlocks.add(ICBM_Explosive);
 		}
 		catch (Exception e)
