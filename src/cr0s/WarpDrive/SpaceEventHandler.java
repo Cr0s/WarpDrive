@@ -97,8 +97,7 @@ public class SpaceEventHandler
 									}
 									else
 									{
-										setPlayerAirValue(entity, 0);
-										entity.attackEntityFrom(DamageSource.drown, 1);
+										hasHelmet = false;
 									}
 								}
 								else
@@ -108,13 +107,10 @@ public class SpaceEventHandler
 							}
 						}
 					}
-					else
-					{
-						entity.attackEntityFrom(DamageSource.drown, 1);
-					}
 					
 					if(!hasHelmet)
 					{
+						entity.attackEntityFrom(DamageSource.drown, 1);
 						if(vacuumPlayers.containsKey(((EntityPlayerMP)entity).username))
 							vacuumPlayers.remove(((EntityPlayerMP)entity).username);
 					}
