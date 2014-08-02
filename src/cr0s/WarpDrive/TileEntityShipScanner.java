@@ -505,7 +505,7 @@ public class TileEntityShipScanner extends TileEntity implements IEnergySink,
 		
 		// Check energy level
 		if (!isEnoughEnergyForDeploy(size)) {
-			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
+			return new Object[] { 1, "Not enough energy! Need at least " + MAX_ENERGY_VALUE + " Eu" };
 		}
 		
 		// Check specified area for occupation by blocks
