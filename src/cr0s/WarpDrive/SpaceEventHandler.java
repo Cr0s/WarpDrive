@@ -79,6 +79,7 @@ public class SpaceEventHandler
 							if (consumeO2(((EntityPlayerMP)entity).inventory.mainInventory))
 							{
 								setPlayerAirValue(entity, 300);
+								((EntityPlayerMP)entity).inventory.addItemStackToInventory(new ItemStack(WarpDriveConfig.i.IC2_Air[0],1,0));
 							}
 							else
 							{
