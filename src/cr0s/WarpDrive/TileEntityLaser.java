@@ -34,6 +34,10 @@ import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLaser extends TileEntity implements IPeripheral
 {
+	//magic constants
+	private final int SCANNING_BEAM_LENGTH = 400;
+	private final int SCANNING_BEAM_FREQ = 1420;
+
 	private int dx, dz, dy;
 	public float yaw, pitch; // laser direction
 
@@ -91,7 +95,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			}
 		}
 
-		if (isEmitting && ((frequency != 1420 && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == 1420) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS)))
+		if (isEmitting && ((frequency != SCANNING_BEAM_FREQ && ++delayTicks > WarpDriveConfig.i.LE_EMIT_DELAY_TICKS) || ((frequency == SCANNING_BEAM_FREQ) && ++delayTicks > WarpDriveConfig.i.LE_EMIT_SCAN_DELAY_TICKS)))
 		{
 			delayTicks = 0;
 			isEmitting = false;
@@ -112,7 +116,11 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 
 		if (findFirstBooster() != null)
 		{
-			for (int shift = 1; shift <= WarpDriveConfig.i.LE_MAX_BOOSTERS_NUMBER; shift++)
+			int maxShift = WarpDriveConfig.i.LE_MAX_BOOSTERS_NUMBER;
+			if (frequency == SCANNING_BEAM_FREQ)
+				maxShift = 1;
+				
+			for (int shift = 1; shift <= maxShift; shift++)
 			{
 				int newX = xCoord + (dx * shift);
 				int newY = yCoord + (dy * shift);
@@ -138,6 +146,9 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	{
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.i.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
+		
+		if (frequency == SCANNING_BEAM_FREQ)
+			beamLengthBlocks = SCANNING_BEAM_LENGTH;
 
 		if (energy == 0 || beamLengthBlocks < 1 || frequency > 65000 || frequency <= 0)
 		{
@@ -160,7 +171,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
 
 		// This is scanning beam, do not deal damage to blocks
-		if (frequency == 1420)
+		if (frequency == SCANNING_BEAM_FREQ)
 		{
 			firstHit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), false, false);
 
