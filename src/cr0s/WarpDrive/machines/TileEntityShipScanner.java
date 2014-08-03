@@ -1,41 +1,26 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.*;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
 import ic2.api.energy.tile.IEnergyTile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.ModLoader;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
@@ -60,10 +45,10 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
 	private String[] methodsArray = {
-		"scanShip",					// 0
-		"getSchematicFileName",		// 1
-		"getEnergyLevel",			// 2
-		"deployShipFromSchematic"	// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+		"scan",					// 0
+		"fileName",		// 1
+		"energy",			// 2
+		"deploy"	// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
@@ -180,8 +165,10 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				// Deploy single block
 				JumpBlock block = blocksToDeploy[currentDeployIndex];
 				
-				if (block != null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
-				{
+				if (block != null &&
+					block.blockID != Block.bedrock.blockID &&
+					!WarpDriveConfig.scannerIgnoreBlocks.contains(block.blockID) &&
+					worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z)) {
 					moveBlockSimple(block);
 					
 					if (worldObj.rand.nextInt(100) <= 10) {
@@ -265,8 +252,9 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
 					
 					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.scannerIgnoreBlocks.contains(blockID))
+					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID /*|| WarpDriveConfig.scannerIgnoreBlocks.contains(blockID)/**/) {
 						blockID = 0;
+					}
 					
 					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					localBlocks[x + (y * length + z) * width] = (byte) blockID;
@@ -323,7 +311,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		writeNBTToFile(fileName, schematic);
 	}
 
-	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
+	private static void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
 		System.out.println("[ShipScanner] Filename: " + fileName);
 		
 		try {
@@ -334,8 +322,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 			FileOutputStream fileoutputstream = new FileOutputStream(file);
 
-			CompressedStreamTools.writeCompressed(nbttagcompound,
-					fileoutputstream);
+			CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
 
 			fileoutputstream.close();
 		} catch (Exception exception) {
@@ -361,7 +348,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		saveShipToSchematic(this.SCHEMATICS_DIR + "/" + schematicFileName);
 	}
 
-	private NBTTagCompound readNBTFromFile(String fileName) {
+	private static NBTTagCompound readNBTFromFile(String fileName) {
 		try {
 			File file = new File(fileName);
 			if (!file.exists()) {
@@ -369,8 +356,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			}
 			
 			FileInputStream fileinputstream = new FileInputStream(file);
-			NBTTagCompound nbttagcompound = CompressedStreamTools
-					.readCompressed(fileinputstream);
+			NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(fileinputstream);
 
 			fileinputstream.close();
 			
@@ -782,7 +768,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}	
 }

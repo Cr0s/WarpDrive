@@ -91,15 +91,15 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     private void setDirection(int dir) {
         if (dir == 1) {
-            dir = -1;
+        	this.direction = -1;
         } else if (dir == 2) {
-            dir = -2;
+        	this.direction = -2;
         } else if (dir == 255) {
-            dir = 270;
+        	this.direction = 270;
+        } else {
+        	this.direction = dir;
         }
-
-        //WarpDrive.debugPrint("" + this + " Setting direction: " + dir);
-        this.direction = dir;
+        //WarpDrive.debugPrint("" + this + " Direction set to " + this.direction);
     }
 
     private void doJump() {
@@ -519,7 +519,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     list = "";
                 }
 
-                return new Object[] { (String)list };
+                return new Object[] { list };
 
             case 8: // summon
                 if (arguments.length != 1) {
@@ -545,28 +545,28 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                     return null;
                 }
 
-                return new Object[] { (Integer)core.xCoord };
+                return new Object[] { core.xCoord };
 
             case 11: // get_y
                 if (core == null) {
                     return null;
                 }
 
-                return new Object[] { (Integer)core.yCoord };
+                return new Object[] { core.yCoord };
 
             case 12: // get_z
                 if (core == null) {
                     return null;
                 }
 
-                return new Object[] { (Integer)core.zCoord };
+                return new Object[] { core.zCoord };
 
             case 13: // get_energy_value
                 if (core == null) {
                 	return null;
                 }
 
-                return new Object[] { (Integer)(core.getEnergyStored() ) };
+                return new Object[] { (core.getEnergyStored() ) };
 
             case 14: // do_jump
                 doJump();
@@ -580,7 +580,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 	                    	core.messageToAllPlayersOnShip(reason.toString());
 	                    	return null;
 	                    }
-	                    return new Object[] { (Integer)core.getRealShipVolume() };
+	                    return new Object[] { core.shipVolume };
                 	} catch(Exception e) {
                 		if (WarpDriveConfig.debugMode) {
                 			e.printStackTrace();
@@ -599,14 +599,14 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                 break;
 
             case 17: // get_dx
-                if (core != null && core instanceof TileEntityReactor) {
-                    return new Object[] { (Integer)core.dx };
+                if (core != null) {
+                    return new Object[] { core.dx };
                 }
                 break;
 
             case 18: // get_dz
-                if (core != null && core instanceof TileEntityReactor) {
-                    return new Object[] { (Integer)core.dz };
+                if (core != null) {
+                    return new Object[] { core.dz };
                 }
                 break;
 
@@ -656,8 +656,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 	
 	@Override

@@ -74,11 +74,11 @@ public final class EntitySphereGen extends Entity
 	public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere, boolean generateOres) {
 		super(world);
 		this.xCoord = x;
-		this.posX = (double) x;
+		this.posX = x;
 		this.yCoord = y;
-		this.posY = (double) y;
+		this.posY = y;
 		this.zCoord = z;
-		this.posZ = (double) z;
+		this.posZ = z;
 		this.radius = radius;
 		this.hollow = hollow;
 		this.fillingSphere = fillingSphere;
@@ -236,7 +236,7 @@ public final class EntitySphereGen extends Entity
 	}
 
 	// Own implementation of setting blocks without light recalculation in optimization purposes
-	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6) {
+	private static boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6) {
 		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
 			if (y < 0)
 				return false;
@@ -250,7 +250,7 @@ public final class EntitySphereGen extends Entity
 		}
 	}
 
-	public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta) {
+	private static boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta) {
 		int j1 = z << 4 | x;
 		if (y >= c.precipitationHeightMap[j1] - 1)
 			c.precipitationHeightMap[j1] = -999;

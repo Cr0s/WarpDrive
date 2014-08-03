@@ -19,8 +19,8 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
 public class BlockMonitor extends BlockContainer {
-    private Icon frontIcon;
-    private Icon blockIcon;
+    private Icon iconFront;
+    private Icon iconBlock;
 
     public BlockMonitor(int id) {
         super(id, Material.iron);
@@ -30,29 +30,32 @@ public class BlockMonitor extends BlockContainer {
 		setUnlocalizedName("warpdrive.machines.Monitor");
     }
 
-    @SideOnly(Side.CLIENT)
+    @Override
+	@SideOnly(Side.CLIENT)
 
     /**
      * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata
      */
-    public Icon getIcon(int side, int meta) {
-        meta &= 3;
-        return side == 2 ? (meta == 0 ? this.frontIcon : this.blockIcon) : (side == 3 ? (meta == 2 ? this.frontIcon : this.blockIcon) : (side == 4 ? (meta == 3 ? this.frontIcon : this.blockIcon) : (side == 5 ? (meta == 1 ? this.frontIcon : this.blockIcon) : this.blockIcon)));
+    public Icon getIcon(int side, int parMetadata) {
+        int meta = parMetadata & 3;
+        return side == 2 ? (meta == 0 ? this.iconFront : this.iconBlock) : (side == 3 ? (meta == 2 ? this.iconFront : this.iconBlock) : (side == 4 ? (meta == 3 ? this.iconFront : this.iconBlock) : (side == 5 ? (meta == 1 ? this.iconFront : this.iconBlock) : this.iconBlock)));
     }
 
     /**
      * When this method is called, your block should register all the icons it needs with the given IconRegister. This
      * is the only chance you get to register icons.
      */
-    public void registerIcons(IconRegister reg) {
-        this.frontIcon = reg.registerIcon("warpdrive:monitorFront");
-        this.blockIcon = reg.registerIcon("warpdrive:monitorSide");
+    @Override
+	public void registerIcons(IconRegister reg) {
+        this.iconFront = reg.registerIcon("warpdrive:monitorFront");
+        this.iconBlock = reg.registerIcon("warpdrive:monitorSide");
     }
 
     /**
      * Called when the block is placed in the world.
      */
-    public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemstack) {
+    @Override
+	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entityliving, ItemStack itemstack) {
         int dir = Math.round(entityliving.rotationYaw / 90.0F) & 3;
         world.setBlockMetadataWithNotify(x, y, z, dir, 3);
     }
@@ -60,7 +63,8 @@ public class BlockMonitor extends BlockContainer {
     /**
      * Called upon block activation (right click on the block.)
      */
-    public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+    @Override
+	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
     	// Monitor is only reacting client side
     	if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return false;
@@ -91,7 +95,8 @@ public class BlockMonitor extends BlockContainer {
         return false;
     }
 
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
+    @Override
+	public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
     }
 
     @Override

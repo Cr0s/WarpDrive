@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import cr0s.WarpDrive.machines.TileEntityReactor;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 
@@ -146,7 +145,7 @@ public class WarpCoresRegistry {
 		for (int i = registry.size() - 1; i >= 0; i--) {
 			c = registry.get(i);
 			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
-				WarpDrive.debugPrint("Removing 'dead' core at " + c.xCoord + ", " + c.yCoord + ", " + c.zCoord);
+				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null)? c.xCoord : "?") + ", " + ((c != null)? c.yCoord : "?") + ", " + ((c != null)? c.zCoord : "?"));
 				registry.remove(i);
 			}
 		}

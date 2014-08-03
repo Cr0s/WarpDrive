@@ -4,8 +4,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.CamRegistryItem;
-import cr0s.WarpDrive.ClientCameraUtils;
-import cr0s.WarpDrive.EntityCamera;
 import cr0s.WarpDrive.WarpDrive;
 
 import java.util.Random;
@@ -69,7 +67,8 @@ public class BlockCamera extends BlockContainer {
     /**
      * Called upon block activation (right click on the block.)
      */
-    public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+    @Override
+	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return false;
         }

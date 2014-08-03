@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,7 +7,6 @@ import java.util.Random;
 
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
-import net.minecraftforge.common.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -19,7 +17,7 @@ import ic2.api.item.Items;
 public class WarpDriveConfig
 {
 	private static Configuration config;
-	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
+	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
 	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, componentID;
 //
 	/*
@@ -54,7 +52,7 @@ public class WarpDriveConfig
 	public static int GT_Ores = 0, GT_Granite = 0, GT_Machine = 0;
 	public static int ASP = 0;
 	public static int AS_Turbine = 0;
-	public static int ICBM_Machine = 0, ICBM_Missile = 0;
+	public static int ICBM_Machine = 0, ICBM_Missile = 0, ICBM_Explosive = 0;
 	public static int UB_igneousStone = 0, UB_igneousCobblestone = 0, UB_metamorphicStone = 0, UB_metamorphicCobblestone = 0, UB_sedimentaryStone = 0;
 	public static int NetherOres_count;
 	public static int[] NetherOres_block;
@@ -143,6 +141,11 @@ public class WarpDriveConfig
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+
+	// POWER REACTOR
+	public static int		PR_MAX_ENERGY = 10000000;
+	public static int		PR_TICK_TIME  = 20;
+	public static int		PR_MAX_LASERS = 3;
 	
 	// REACTOR MONITOR
 	public static int		RM_MAX_ENERGY = 1000000;
@@ -282,7 +285,12 @@ public class WarpDriveConfig
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
-		
+
+		// Reactor
+		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
+		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update",20).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 3).getInt();
+
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
 		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
@@ -324,7 +332,7 @@ public class WarpDriveConfig
 		laserCamID = config.getBlock("lasercam", 512).getInt();
 		camID = config.getBlock("camera", 513).getInt();
 		monitorID = config.getBlock("monitor", 514).getInt();
-		iridiumID = config.getBlock("iridium", 515).getInt();
+		iridiumBlockID = config.getBlock("iridium", 515).getInt();
 		shipScannerID = config.getBlock("shipscanner", 516).getInt();
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
@@ -410,16 +418,27 @@ public class WarpDriveConfig
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
 		scannerIgnoreBlocks.add(controllerID);
-		scannerIgnoreBlocks.add(iridiumID);
+		scannerIgnoreBlocks.add(iridiumBlockID);
 		
-		scannerIgnoreBlocks.add(Items.getItem("mfsUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
-
-		// Do not scan ores and valuables
-		for (int[] t : CommonWorldGenOres) // each element of this set is pair [id, meta]
+		if (isICLoaded) {
+			scannerIgnoreBlocks.add(Items.getItem("mfsUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
+		}
+		if (isICBMLoaded) {
+			scannerIgnoreBlocks.add(ICBM_Explosive);
+		}
+		if (isCCLoaded) {
+			 scannerIgnoreBlocks.add(CC_Computer);
+			 scannerIgnoreBlocks.add(CCT_Turtle);
+			 scannerIgnoreBlocks.add(CCT_Upgraded);
+			 scannerIgnoreBlocks.add(CCT_Advanced);
+		}
+		// Do not deploy ores and valuables
+		for (int[] t : CommonWorldGenOres) {// each element of this set is pair [id, meta]
 			scannerIgnoreBlocks.add(t[0]); // we adding ID only
+		}
 		
 		loadWarpDriveConfig();
 		config.save();
@@ -592,6 +611,7 @@ public class WarpDriveConfig
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block)z.getField("blockMachine").get(null)).blockID;
 			ICBM_Missile = ((Item)z.getField("itemMissile").get(null)).itemID;
+			ICBM_Explosive = ((Block)z.getField("blockExplosive").get(null)).blockID;
 		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
@@ -793,7 +813,7 @@ public class WarpDriveConfig
 		} else if (random.nextInt(250) == 1) {
 			return new int[] {Block.oreDiamond.blockID, 0};
 		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
-			return new int[] {iridiumID, 0};
+			return new int[] {iridiumBlockID, 0};
 		} else if (isGregLoaded) {
 			if (random.nextInt(50) == 1)
 				return new int[] {GT_Ores, 5}; //Bauxite S /* Stone/Iron/Diamod pick | +S = Silktouch recommended */
@@ -819,7 +839,7 @@ public class WarpDriveConfig
 
 	public static int[] getRandomNetherBlock(Random random, int blockID, int blockMeta) {
 		if (isICLoaded && (!isNetherOresLoaded) && (random.nextInt(10000) == 42)) {
-			return new int[] {iridiumID, 0};
+			return new int[] {iridiumBlockID, 0};
 		} else if (isNetherOresLoaded && (random.nextInt(25) == 1)) {
 			int rnd = random.nextInt(NetherOres_count);
 			return new int[] {NetherOres_block[rnd / 16], rnd % 16};
@@ -842,7 +862,7 @@ public class WarpDriveConfig
 	public static int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
 	{
 		if (isICLoaded && random.nextInt(10000) == 42) {
-			return new int[] { iridiumID, 0 };
+			return new int[] { iridiumBlockID, 0 };
 		} else if (isGregLoaded) {
 			if (random.nextInt(250) == 1)
 				return new int[] {GT_Ores, 9}; //Tungstate I

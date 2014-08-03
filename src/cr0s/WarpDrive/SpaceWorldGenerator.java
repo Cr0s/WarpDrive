@@ -77,7 +77,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 	}
 
-	public void generateMoon(World world, int x, int y, int z) {
+	public static void generateMoon(World world, int x, int y, int z) {
 		int coreRadius = 5 + world.rand.nextInt(12);
 		int moonRadius = coreRadius + 5 + world.rand.nextInt(26);
 		int y2 = Math.max(moonRadius + 6, Math.min(y, 255 - moonRadius - 6));
@@ -129,12 +129,12 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 	}
 
-	private void placeStarCore(World world, int x, int y, int z, int radius) {
+	private static void placeStarCore(World world, int x, int y, int z, int radius) {
 		EntityStarCore core = new EntityStarCore(world, x, y, z, radius);
 		core.xCoord = x;
 		core.yCoord = y;
 		core.zCoord = z;
-		core.setPosition((double)x, (double)y, (double)z);
+		core.setPosition(x, y, z);
 		world.spawnEntityInWorld(core);
 	}
 	
@@ -170,25 +170,25 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 	}
 
-	private void generateSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int blockID, int blockMeta, boolean generateOres) {
+	private static void generateSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int blockID, int blockMeta, boolean generateOres) {
 		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, blockID, blockMeta, hollow, true, generateOres);
 		world.spawnEntityInWorld(esg);
 	}
 
-	private void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) {
+	private static void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) {
 		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDriveConfig.gasID, color, hollow, true, false);
 		world.spawnEntityInWorld(esg);
 	}
 
-	private void generateSmallShip(World world, int x, int y, int z, int jitter) {
-		x = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		y = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		z = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		System.out.println("Generating small ship at " + x + "," + y + "," + z);
-		new WorldGenSmallShip(world.rand.nextBoolean()).generate(world, world.rand, x, y, z);
+	private static void generateSmallShip(World world, int x, int y, int z, int jitter) {
+		int x2 = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
+		int y2 = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
+		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
+		System.out.println("Generating small ship at " + x2 + "," + y2 + "," + z2);
+		new WorldGenSmallShip(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
 	}
 
-	public void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
+	public static void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
 		if (world.rand.nextInt(30) == 1) {
 			int[] t = new int[] {0, 0};
 			if (world.rand.nextInt(25) == 1) {
@@ -210,7 +210,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 	}
 
-	private float binomialRandom(World world) {
+	private static float binomialRandom(World world) {
 		float linear = world.rand.nextFloat();
 		// ideal sphere repartition = x ^ 0.5 (sqrt)
 		// Dilution but slow to compute = 0.5 * ( x ^ 0.3 + 1 + (x - 1) ^ 3 )
@@ -220,7 +220,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		// rectangular approach: return 0.5F * linear + 0.5F * linear * linear;
 		return 1.25F - 0.625F / (0.5F + 2.0F * linear);
 	}
-	public void generateAsteroidField(World world, int x, int y, int z) {
+	public static void generateAsteroidField(World world, int x, int y1, int z) {
 		LocalProfiler.start("SpaceWorldGenerator.generateAsteroidField");
 		// 6.0.1 au = 120 radius with 60 to 140 big + 60 to 140 small + 5 to 13 gaz
 		// 45238 blocks surface with 120 to 280 asteroids => 161 to 376 blocks per asteroid (big & small)
@@ -261,8 +261,8 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		int numOfSmallAsteroids = Math.round((1.0F - bigRatio) * surfaceSmall / surfacePerAsteroid);
 		int numOfClouds = Math.round(numOfBigAsteroids * 1.0F / (10.0F + world.rand.nextInt(10)));
 		int maxHeight = 70 + world.rand.nextInt(50);
-		int y2 = Math.min(240 - maxHeight, Math.max(y, maxHeight));
-		System.out.println("Generating asteroid field at " + x + "," + y + "," + z
+		int y2 = Math.min(240 - maxHeight, Math.max(y1, maxHeight));
+		System.out.println("Generating asteroid field at " + x + "," + y2 + "," + z
 					+ " qty " + numOfBigAsteroids + ", " + numOfSmallAsteroids + ", " + numOfClouds
 					+ " over " + maxDistance + ", " + maxHeight + " surfacePerAsteroid " + String.format("%.1f", surfacePerAsteroid));
 		
@@ -275,7 +275,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			float verticalRange = Math.max(3.0F, binomial * maxHeight);
 			
 			int aX = (int) (x + Math.round(horizontalRange * Math.cos(bearing)));
-			int aY = (int) (y + Math.round(verticalRange * Math.cos(yawn)));
+			int aY = (int) (y2 + Math.round(verticalRange * Math.cos(yawn)));
 			int aZ = (int) (z + Math.round(horizontalRange * Math.sin(bearing)));
 			/*System.out.println(String.format("Big asteroid: %.3f %.3f r %.3f r makes %3d, %3d, %3d", new Object[] {
 		       		Double.valueOf(binomial),Double.valueOf(bearing), Double.valueOf(yawn),  
@@ -293,7 +293,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			float verticalRange = Math.max(3.0F, binomial * maxHeight);
 			
 			int aX = (int) (x + Math.round(horizontalRange * Math.cos(bearing)));
-			int aY = (int) (y + Math.round(verticalRange * Math.cos(yawn)));
+			int aY = (int) (y2 + Math.round(verticalRange * Math.cos(yawn)));
 			int aZ = (int) (z + Math.round(horizontalRange * Math.sin(bearing)));
 			
 			// Placing
@@ -313,7 +313,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			float verticalRange = Math.max(3.0F, binomial * maxHeight);
 			
 			int aX = (int) (x + Math.round(horizontalRange * Math.cos(bearing)));
-			int aY = (int) (y + Math.round(verticalRange * Math.cos(yawn)));
+			int aY = (int) (y2 + Math.round(verticalRange * Math.cos(yawn)));
 			int aZ = (int) (z + Math.round(horizontalRange * Math.sin(bearing)));
 			
 			// Placing
@@ -334,8 +334,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	 * @param cloudSizeMax maximum gas cloud size (by number of balls it consists)
 	 * @param centerRadiusMax maximum radius of central ball
 	 */
-	public void generateGasCloudOfColor(World world, int x, int y, int z, int cloudSizeMax, int centerRadiusMax, int color)
-	{
+	public static void generateGasCloudOfColor(World world, int x, int y, int z, int cloudSizeMax, int centerRadiusMax, int color) {
 		int cloudSize = 1 + world.rand.nextInt(20);
 		if (cloudSizeMax != 0)
 			cloudSize = Math.min(cloudSizeMax, cloudSize);
@@ -346,8 +345,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		// Asteroid's center
 		generateGasSphereEntity(world, x, y, z, centerRadius, false, color);
 		// Asteroids knolls
-		for (int i = 1; i <= cloudSize; i++)
-		{
+		for (int i = 1; i <= cloudSize; i++) {
 			int radius = 2 + world.rand.nextInt(centerRadius);
 			int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
@@ -365,7 +363,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	 * @param asteroidSizeMax maximum asteroid size (by number of balls it consists)
 	 * @param centerRadiusMax maximum radius of central ball
 	 */
-	private void generateAsteroidOfBlock(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax, int blockID, int meta) {
+	private static void generateAsteroidOfBlock(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax, int blockID, int meta) {
 		// FIXME: get a proper range of random instead of capping it
 		int asteroidSize = 1 + world.rand.nextInt(6);
 		if (asteroidSizeMax != 0) {
@@ -400,7 +398,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	 * @param forcedID sphere of specified blocks or random blocks if not specified
 	 * @return
 	 */
-	public void generateSphereDirect(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow) {
+	public static void generateSphereDirect(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow) {
 		if (forcedID == -1) {
 			generateSphereDirect(world, xCoord, yCoord, zCoord, radius, corrupted, forcedID, meta, hollow, WarpDriveConfig.getDefaultSurfaceBlock(world.rand, corrupted, false));
 		} else {
@@ -408,11 +406,11 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 	}
 
-	public void generateSphereDirect(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow, int[] defaultBlock) {
-		radius += 0.5D; // Radius from center of block
-		double radiusSq = radius * radius; // Optimization to avoid sqrts...
-		double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow sphere
-		int ceilRadius = (int) Math.ceil(radius);
+	public static void generateSphereDirect(World world, int xCoord, int yCoord, int zCoord, double radius, boolean corrupted, int forcedID, int meta, boolean hollow, int[] defaultBlock) {
+		double radiusC = radius + 0.5D; // Radius from center of block
+		double radiusSq = radiusC * radiusC; // Optimization to avoid sqrts...
+		double radius1Sq = (radiusC - 1.0D) * (radiusC - 1.0D); // for hollow sphere
+		int ceilRadius = (int) Math.ceil(radiusC);
 
 		int[] blockID = new int[] {0, 0};
 		if (forcedID != -1) {

@@ -1,25 +1,20 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.network.packet.Packet62LevelSound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -28,9 +23,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
-import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.*;
 
 public class TileEntityLaser extends WarpTE implements IPeripheral {
@@ -55,8 +47,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	public int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
-
-	private MovingObjectPosition firstHit;
+	
+	private MovingObjectPosition firstHit = null;
 
 	private int camUpdateTicks = 20;
 	private int registryUpdateTicks = 20 * 10;
@@ -77,13 +69,13 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			}
 		}
 
-		// Frequency is not set
-		if (beamFrequency <= 0) {
+		// Frequency is not set		
+		if (beamFrequency <= 0 || beamFrequency > 65000) {
 			return;
 		}
 
 		delayTicks++;
-		if (isEmitting && (beamFrequency != 1420 && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || ((beamFrequency == 1420) && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS)) {
+		if (isEmitting && ((beamFrequency != 1420 && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || ((beamFrequency == 1420) && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS))) {
 			delayTicks = 0;
 			isEmitting = false;
 			emitBeam(Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY));
@@ -94,9 +86,9 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	public void addBeamEnergy(int amount) {
 		if (isEmitting) {
 			energyFromOtherBeams += amount;
-			System.out.println("[LE] Added energy: " + amount);
+			WarpDrive.debugPrint("[LE] Added energy: " + amount);
 		} else {
-			System.out.println("[LE] Ignored energy: " + amount);
+			WarpDrive.debugPrint("[LE] Ignored energy: " + amount);
 		}
 	}
 
@@ -123,29 +115,27 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	}
 
 	// TODO refactor me
-	private void emitBeam(int energy) {
+	private void emitBeam(int parEnergy) {
+		int energy = parEnergy; 	// FIXME
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
-		WarpDrive.debugPrint("" + this + " Energy " + energy + " over " + beamLengthBlocks + " blocks");
 
 		if (energy == 0 || beamLengthBlocks < 1 || beamFrequency > 65000 || beamFrequency <= 0) {
 			return;
 		}
 
 		Vector3 beamVector = new Vector3(this).translate(0.5D);
-		System.out.println("beamVector: " + beamVector);
+		WarpDrive.debugPrint("" + this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
 		float pitchvertical = MathHelper.sin(-pitch * 0.017453292F);
 		float directionx = yawx * pitchhorizontal;
 		float directionz = yawz * pitchhorizontal;
-		Vector3 lookVector = new Vector3((double) directionx, (double) pitchvertical, (double) directionz);
+		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
-		System.out.println("Look vector: " + lookVector);
-		System.out.println("reachPoint: " + reachPoint);
-		System.out.println("translatedBeamVector: " + beamVector);
+		WarpDrive.debugPrint("" + this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
@@ -154,9 +144,12 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		if (beamFrequency == 1420) {
 			firstHit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), false, false);
 
-			if (firstHit != null) {
-				WarpDrive.sendLaserPacket(worldObj, beamVector, new Vector3(firstHit), r, g, b, 50, energy, 200);
-			}
+ 			if (firstHit != null) {
+				WarpDrive.sendLaserPacket(worldObj, beamVector, new Vector3(firstHit.hitVec), r, g, b, 50, energy, 200);
+			} else {
+				WarpDrive.sendLaserPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
+  			}
+
 			return;
 		}
 
@@ -166,7 +159,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			// FIXME entity ray-tracing
 			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
 
-			System.out.println("Entity hit is " + entityHit);
+			WarpDrive.debugPrint("Entity hit is " + entityHit);
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
 				EntityLivingBase e = (EntityLivingBase)entityHit.entityHit;
@@ -174,8 +167,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 				if (hit == null || (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > distanceToEntity)) {
 					if (distanceToEntity <= beamLengthBlocks) {
-						((EntityLivingBase)e).setFire(WarpDriveConfig.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
-						((EntityLivingBase)e).attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
+						e.setFire(WarpDriveConfig.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
+						e.attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
 
 						if (energy > WarpDriveConfig.LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY) {
 							worldObj.newExplosion(null, e.posX, e.posY, e.posZ, 4F, true, true);
@@ -204,7 +197,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				}
 
 				int blockID = worldObj.getBlockId(hit.blockX, hit.blockY, hit.blockZ);
-				int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
+				// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
 				float resistance = Block.blocksList[blockID].blockResistance;
 
 				if (blockID == Block.bedrock.blockID) {
@@ -266,8 +259,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 		for (Entity entityHit : (Iterable<Entity>) entitiesHit) {
 			if (entityHit != null && entityHit.canBeCollidedWith() && entityHit.boundingBox != null) {
-				float border = entityHit.getCollisionBorderSize();
-				AxisAlignedBB aabb = entityHit.boundingBox.expand((double) border, (double) border, (double) border);
+				double border = entityHit.getCollisionBorderSize();
+				AxisAlignedBB aabb = entityHit.boundingBox.expand(border, border, border);
 				MovingObjectPosition hitMOP = aabb.calculateIntercept(playerPosition, playerViewOffset);
 
 				if (hitMOP != null) {
@@ -472,7 +465,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				} else if (arguments.length == 3) {
 					double dx = (Double)arguments[0];
 					double dy = (Double)arguments[1];
-					double dz = (Double)arguments[2];
+					double dz = -(Double)arguments[2];
 					double targetX = xCoord + dx;
 					double targetY = yCoord + dy;
 					double targetZ = zCoord + dz;
@@ -504,8 +497,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 					int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
 					float blockResistance = Block.blocksList[blockID].blockResistance;
-					Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, (Float)blockResistance };
-					firstHit = null;
+					Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, blockResistance };
 					return info;
 				} else {
 					return new Integer[] { 0, 0, 0, 0, 0, -1 };
@@ -560,7 +552,6 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 }

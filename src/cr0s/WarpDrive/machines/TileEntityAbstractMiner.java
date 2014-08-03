@@ -86,18 +86,13 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return worldObj.provider.dimensionId == 0;
 	}
 	
-	private IInventory findChest()
-	{
-		int[] xPos = {1,-1,0,0,0,0};
-		int[] yPos = {0,0,-1,1,0,0};
-		int[] zPos = {0,0,0,0,-1,1};
+	private IInventory findChest() {
 		TileEntity result = null;
 		
-		for(int i=0;i<6;i++)
-		{
-			result = worldObj.getBlockTileEntity(xCoord+xPos[i], yCoord+yPos[i], zCoord+zPos[i]);
-			if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
-			{
+		for(int i = 0; i < 6; i++) {
+			Vector3 sideOffset = adjacentSideOffsets[i];
+			result = worldObj.getBlockTileEntity(xCoord + sideOffset.intX(), yCoord + sideOffset.intY(), zCoord + sideOffset.intZ());
+			if (result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory)) {
 				return (IInventory) result;
 			}
 		}
@@ -210,8 +205,8 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 			return false;
 		}
 		// check whitelist
-		// WarpDriveConfig.i.MinerOres.contains(blockID) then true ?
-		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumID) {
+		// WarpDriveConfig.MinerOres.contains(blockID) then true ?
+		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumBlockID) {
 			return true;
 		}
 		// check default
@@ -260,7 +255,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		}
 		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
 		// Evaporate water
-			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
+			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 		return true;
 	}
@@ -289,7 +284,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return transferred;
 	}
 
-	private int putInChest(IInventory inventory, ItemStack itemStackSource)
+	private static int putInChest(IInventory inventory, ItemStack itemStackSource)
 	{
 		if (inventory == null || itemStackSource == null)
 		{
@@ -432,7 +427,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		refreshLoading(true);
 	}
 	
-	private ItemStack copyWithSize(ItemStack itemStack, int newSize)
+	private static ItemStack copyWithSize(ItemStack itemStack, int newSize)
 	{
 		ItemStack ret = itemStack.copy();
 		ret.stackSize = newSize;
@@ -440,6 +435,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	}
 	
 	//NBT DATA
+	@Override
 	public void readFromNBT(NBTTagCompound tag)
 	{
 		super.readFromNBT(tag);
@@ -452,6 +448,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		minerVector = minerVector.translate(0.5);
 	}
 	
+	@Override
 	public void writeToNBT(NBTTagCompound tag)
 	{
 		super.writeToNBT(tag);
@@ -460,11 +457,13 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	}
 	
 	//AE INTERFACE
+	@Override
 	public void setNetworkReady( boolean isReady )
 	{
 		isMEReady = isReady;
 	}
 	
+	@Override
 	public boolean isMachineActive()
 	{
 		return isMEReady;

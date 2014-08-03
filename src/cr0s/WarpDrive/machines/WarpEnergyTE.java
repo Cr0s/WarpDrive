@@ -5,8 +5,6 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
@@ -15,8 +13,8 @@ import net.minecraftforge.common.MinecraftForge;
 public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEnergySink {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
-	private static final double EU_PER_INTERNAL = 1.0D;
-	private static final double RF_PER_INTERNAL = 1800.0D / 437.5D;
+	protected static final double EU_PER_INTERNAL = 1.0D;
+	protected static final double RF_PER_INTERNAL = 1800.0D / 437.5D;
 	
 	// WarpDrive methods
 	public int getEnergyStored() {

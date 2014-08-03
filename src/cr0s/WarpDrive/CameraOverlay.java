@@ -19,7 +19,7 @@ public class CameraOverlay
         mc = parMinecraft;
     }
     
-    private int colorGradient(float gradient, int start, int end) {
+    private static int colorGradient(float gradient, int start, int end) {
     	return Math.max(0, Math.min(255, start + Math.round(gradient * (end - start))));
     }
 
@@ -42,9 +42,9 @@ public class CameraOverlay
 	
 	        Tessellator tessellator = Tessellator.instance;
 	        tessellator.startDrawingQuads();
-	        tessellator.addVertexWithUV(       0.0D, (double)scaledHeight, -90.0D, 0.0D, 1.0D);
-	        tessellator.addVertexWithUV((double)scaledWidth, (double)scaledHeight, -90.0D, 1.0D, 1.0D);
-	        tessellator.addVertexWithUV((double)scaledWidth,         0.0D, -90.0D, 1.0D, 0.0D);
+	        tessellator.addVertexWithUV(       0.0D, scaledHeight, -90.0D, 0.0D, 1.0D);
+	        tessellator.addVertexWithUV(scaledWidth, scaledHeight, -90.0D, 1.0D, 1.0D);
+	        tessellator.addVertexWithUV(scaledWidth,         0.0D, -90.0D, 1.0D, 0.0D);
 	        tessellator.addVertexWithUV(       0.0D,         0.0D, -90.0D, 0.0D, 0.0D);
 	        tessellator.draw();
 	        

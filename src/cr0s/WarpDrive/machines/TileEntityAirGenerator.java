@@ -1,12 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityAirGenerator extends WarpEnergyTE {
     private final int EU_PER_NEWAIRBLOCK = 12;

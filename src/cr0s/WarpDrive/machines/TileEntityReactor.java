@@ -17,8 +17,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.*;
 
@@ -47,13 +45,13 @@ public class TileEntityReactor extends WarpEnergyTE
     public int shipVolume;
     private int currentMode = 0;
 
-    private final byte MODE_TELEPORT = 3;
-//    private final byte MODE_IDLE = 0;
-    private final byte MODE_BASIC_JUMP = 1; // 0-128
-    private final byte MODE_LONG_JUMP = 2;  // 0-12800
-    private final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
-    private final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
-    private final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
+    private static final byte MODE_TELEPORT = 3;
+//    private static final byte MODE_IDLE = 0;
+    private static final byte MODE_BASIC_JUMP = 1; // 0-128
+    private static final byte MODE_LONG_JUMP = 2;  // 0-12800
+    private static final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
+    private static final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
+    private static final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
     
     private int warmupTime = 0;
     private int cooldownTime = 0;
@@ -396,7 +394,6 @@ public class TileEntityReactor extends WarpEnergyTE
     public boolean validateShipSpatialParameters(StringBuilder reason) {
     	if (controller == null) {
     		reason.append("TileEntityReactor.validateShipSpatialParameters: no controller detected!");
-    		WarpDrive.debugPrint(reason.toString());
     		return false;
     	}
         direction = controller.getDirection();
@@ -474,22 +471,19 @@ public class TileEntityReactor extends WarpEnergyTE
                 
            default:
        	   		reason.append("Invalid jump direction " + direction);
-        	   	WarpDrive.debugPrint(reason.toString());
 				return false;
         }
         
         // Ship side is too big
         if ((shipBack + shipFront) > WarpDriveConfig.WC_MAX_SHIP_SIDE || (shipLeft + shipRight) > WarpDriveConfig.WC_MAX_SHIP_SIDE || (shipDown + shipUp) > WarpDriveConfig.WC_MAX_SHIP_SIDE) {
    	   		reason.append("Ship is too big (max is " + WarpDriveConfig.WC_MAX_SHIP_SIDE + " per side)");
-    	   	WarpDrive.debugPrint(reason.toString());
             return false;
         }
 
-        this.shipVolume = getRealShipVolume();
+        this.shipVolume = computeRealShipVolume();
 
         if (shipVolume > WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0) {
    	   		reason.append("Ship is too big for the overworld (max is " + WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE + " blocks)");
-    	   	WarpDrive.debugPrint(reason.toString());
             return false;
         }
 
@@ -531,7 +525,7 @@ public class TileEntityReactor extends WarpEnergyTE
         // Now make jump to a beacon
         if (isBeaconFound) {
             // Consume energy
-            if (consumeEnergy(calculateRequiredEnergy(shipVolume, distance), false)) {
+            if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
 	            System.out.println("" + this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 	            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 	            jump.maxX = maxX;
@@ -712,7 +706,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
 
         // Consume energy
-        if (consumeEnergy(calculateRequiredEnergy(shipVolume, distance), false)) {
+        if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
 	        System.out.println("[TE-WC] Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 	        EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 	        jump.maxX = maxX;
@@ -730,7 +724,7 @@ public class TileEntityReactor extends WarpEnergyTE
     }
 
     private void doJump() {
-    	int requiredEnergy = calculateRequiredEnergy(shipVolume, distance);
+    	int requiredEnergy = calculateRequiredEnergy(currentMode, shipVolume, distance);
 
         if (!consumeEnergy(requiredEnergy, true)) {
             messageToAllPlayersOnShip("Insufficient energy to jump! Core is currently charged with " + getEnergyStored() + " EU while jump requires " + requiredEnergy + " EU");
@@ -875,7 +869,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
-    private boolean checkPlayerInventory(TileEntityChest chest, EntityPlayerMP player)  {
+    private static boolean checkPlayerInventory(TileEntityChest chest, EntityPlayerMP player)  {
         Boolean result = false;
         final int MIN_KEY_LENGTH = 5;
         int keyLength = 0;
@@ -917,9 +911,9 @@ public class TileEntityReactor extends WarpEnergyTE
         return false;
     }
 
-    private boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z)
+    private static boolean testBB(AxisAlignedBB axisalignedbb, int x, int y, int z)
     {
-        return axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z;
+        return axisalignedbb.minX <= x && axisalignedbb.maxX >= x && axisalignedbb.minY <= y && axisalignedbb.maxY >= y && axisalignedbb.minZ <= z && axisalignedbb.maxZ >= z;
     }
 
     @Override
@@ -927,7 +921,7 @@ public class TileEntityReactor extends WarpEnergyTE
         return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU." + ((cooldownTime <= 0) ? "" : (" " + (cooldownTime / 20) + " s left of cooldown."));
     }
 
-    private int calculateRequiredEnergy(int shipVolume, int jumpDistance)  {
+    private static int calculateRequiredEnergy(int currentMode, int shipVolume, int jumpDistance)  {
         switch (currentMode) {
         	case MODE_TELEPORT:
         		return WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;
@@ -951,8 +945,8 @@ public class TileEntityReactor extends WarpEnergyTE
         return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
     }
 
-    public int getRealShipVolume() {
-        int shipVolume = 0;
+    private int computeRealShipVolume() {
+        int realShipVolume = 0;
 
         try {
 	        for (int x = minX; x <= maxX; x++) {
@@ -964,7 +958,7 @@ public class TileEntityReactor extends WarpEnergyTE
 	                    	continue;
 	                    }
 	                    
-	                    shipVolume++;
+	                    realShipVolume++;
 	                }
 	            }
 	        }
@@ -972,7 +966,7 @@ public class TileEntityReactor extends WarpEnergyTE
         	e.printStackTrace();
         }
 
-        return shipVolume;
+        return realShipVolume;
     }
 
     private TileEntity findControllerBlock()

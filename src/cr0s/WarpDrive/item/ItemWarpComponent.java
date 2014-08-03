@@ -1,6 +1,5 @@
 package cr0s.WarpDrive.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cpw.mods.fml.common.registry.GameRegistry;

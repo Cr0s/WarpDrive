@@ -4,7 +4,6 @@ import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.EnumOptions;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
@@ -39,7 +38,7 @@ public class ClientCameraUtils {
         check2_blockId = blockId2;
         
         WarpDrive.debugPrint("Setting viewpoint: " + entityCamera.toString());
-        mc.renderViewEntity = (EntityLivingBase)entityCamera;
+        mc.renderViewEntity = entityCamera;
         mc.gameSettings.thirdPersonView = 0;
         WarpDrive.instance.isOverlayEnabled = true;
         

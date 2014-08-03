@@ -1,8 +1,5 @@
 package cr0s.WarpDrive.machines;
 
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
 import ic2.api.reactor.IReactor;
 import ic2.api.reactor.IReactorChamber;
 
@@ -18,8 +15,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
 
 public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	private final int workRate = 10;

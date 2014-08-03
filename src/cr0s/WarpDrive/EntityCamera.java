@@ -2,7 +2,6 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.relauncher.Side;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -11,7 +10,6 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.EnumOptions;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityLivingBase;
@@ -53,11 +51,11 @@ public final class EntityCamera extends EntityLivingBase
         int y = pos.y;
         int z = pos.z;
         this.xCoord = x;
-        this.posX = (double) x;
+        this.posX = x;
         this.yCoord = y;
-        this.posY = (double) y;
+        this.posY = y;
         this.zCoord = z;
-        this.posZ = (double) z;
+        this.posZ = z;
         this.player = player;
     }
     
@@ -95,7 +93,7 @@ public final class EntityCamera extends EntityLivingBase
             // Perform zoom
             if (Mouse.isButtonDown(0)) {
             	zoomWaitTicks++;
-            	if (zoomWaitTicks == 2) {
+            	if (zoomWaitTicks >= 2) {
             		zoomWaitTicks = 0;
             		zoom();
                 }
@@ -108,7 +106,7 @@ public final class EntityCamera extends EntityLivingBase
             } else {
 	            if (Mouse.isButtonDown(1)) {
 	            	closeWaitTicks++;
-	            	if (closeWaitTicks == 2) {
+	            	if (closeWaitTicks >= 2) {
 	            		closeWaitTicks = 0;
 	    	    		closeCamera();
 	            	}
@@ -119,7 +117,7 @@ public final class EntityCamera extends EntityLivingBase
             
             if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
             	fireWaitTicks++;
-            	if (fireWaitTicks == 2) {
+            	if (fireWaitTicks >= 2) {
                     fireWaitTicks = 0;
 
                     // Make a shoot with camera-laser
@@ -151,6 +149,12 @@ public final class EntityCamera extends EntityLivingBase
         }
     }
 
+    @Override
+    public void onUpdate() {
+    	super.onUpdate();
+        this.motionX = this.motionY = this.motionZ = 0.0D;
+    }
+    
     public void zoom() {
         if (zoomNumber == 0) {
             mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -0.75F);

@@ -64,13 +64,13 @@ public class CloakManager {
 	}
 
 	public boolean isInCloak(int dimensionID, int x, int y, int z, boolean chunk) {
-		for (int i = 0; i < this.cloaks.size(); i++){
+		for (int i = 0; i < this.cloaks.size(); i++) {
 			if (this.cloaks.get(i).dimensionId != dimensionID)
 				continue;
 			
 			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
 			
-			if (axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && (chunk || (axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y)) && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z) {
+			if (axisalignedbb.minX <= x && axisalignedbb.maxX >= x && (chunk || (axisalignedbb.minY <= y && axisalignedbb.maxY >= y)) && axisalignedbb.minZ <= z && axisalignedbb.maxZ >= z) {
 				return true;
 			}
 		}
@@ -86,7 +86,7 @@ public class CloakManager {
 				continue;
 			
 			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
-			if (axisalignedbb.minX <= (double) x && axisalignedbb.maxX >= (double) x && (chunk || (axisalignedbb.minY <= (double) y && axisalignedbb.maxY >= (double) y)) && axisalignedbb.minZ <= (double) z && axisalignedbb.maxZ >= (double) z) {
+			if (axisalignedbb.minX <= x && axisalignedbb.maxX >= x && (chunk || (axisalignedbb.minY <= y && axisalignedbb.maxY >= y)) && axisalignedbb.minZ <= z && axisalignedbb.maxZ >= z) {
 				res.add(cloaks.get(i));
 			}
 		}		
@@ -105,7 +105,7 @@ public class CloakManager {
 	public void removeCloakedArea(World worldObj, int x, int y, int z) {
 		int index = 0;
 		for (int i = 0; i < this.cloaks.size(); i++){
-			if (this.cloaks.get(i).x == x && this.cloaks.get(i).y == y && this.cloaks.get(i).z == z && this.cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
+			if (this.cloaks.get(i).coreX == x && this.cloaks.get(i).coreY == y && this.cloaks.get(i).coreZ == z && this.cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
 				this.cloaks.get(i).sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
 				index = i;
 				break;
@@ -117,21 +117,21 @@ public class CloakManager {
 	
 	public CloakedArea getCloakedArea(World worldObj, int x, int y, int z) {
 		for (CloakedArea area : this.cloaks) {
-			if (area.x == x && area.y == y && area.z == z && area.dimensionId == worldObj.provider.dimensionId)
+			if (area.coreX == x && area.coreY == y && area.coreZ == z && area.dimensionId == worldObj.provider.dimensionId)
 				return area;
 		}
 		
 		return null;
 	}
 	
-	public void playerEnteringCloakedArea(CloakedArea area, EntityPlayer player) {
+	public static void playerEnteringCloakedArea(CloakedArea area, EntityPlayer player) {
 		area.addPlayer(player.username);
 		revealChunksToPlayer(area, player);
 		revealEntityToPlayer(area, player);
 		area.sendCloakPacketToPlayer(player, false);
 	}
 	
-	public void revealEntityToPlayer(CloakedArea area, EntityPlayer p) {
+	public static void revealEntityToPlayer(CloakedArea area, EntityPlayer p) {
 		List<Entity> list = p.worldObj.getEntitiesWithinAABBExcludingEntity(p, area.aabb);
 		
 		for (Entity e : list) {
@@ -150,7 +150,7 @@ public class CloakManager {
 		}
 	}
 	
-	public void revealChunksToPlayer(CloakedArea area, EntityPlayer p) {
+	public static void revealChunksToPlayer(CloakedArea area, EntityPlayer p) {
 		//System.outprintln("[Cloak] Revealing cloaked chunks in area " + area.frequency + " to player " + p.username);
 		for (int x = (int)area.aabb.minX; x <= (int)area.aabb.maxX; x++) {
 			for (int z = (int)area.aabb.minZ; z <= (int)area.aabb.maxZ; z++) {
@@ -177,11 +177,11 @@ public class CloakManager {
 	}
 	
 	public class CloakedArea {
-		public int x, y, z;
+		public int dimensionId = -666;
+		public int coreX, coreY, coreZ;
 		public AxisAlignedBB aabb;
 		private LinkedList<String> playersInArea;
 		public byte tier = 0;
-		public int dimensionId = -666;
 		
 		public boolean isPlayerInArea(String username) {
 			for (String playerInArea : playersInArea) {
@@ -213,9 +213,9 @@ public class CloakManager {
 		}
 		
 		public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
-			this.x = x;
-			this.y = y;
-			this.z = z;
+			this.coreX = x;
+			this.coreY = y;
+			this.coreZ = z;
 			this.aabb = aabb;
 			this.tier = tier;
 			this.playersInArea = new LinkedList<String>();
@@ -361,7 +361,7 @@ public class CloakManager {
 		}		
 	}
 	
-	private Packet getPacketForThisEntity(Entity e) {
+	private static Packet getPacketForThisEntity(Entity e) {
         if (e.isDead) {
             e.worldObj.getWorldLogAgent().logWarning("Fetching addPacket for removed entity");
         }
@@ -437,16 +437,16 @@ public class CloakManager {
                 } else if (e instanceof EntityItemFrame) {
                     EntityItemFrame entityitemframe = (EntityItemFrame)e;
                     packet23vehiclespawn = new Packet23VehicleSpawn(e, 71, entityitemframe.hangingDirection);
-                    packet23vehiclespawn.xPosition = MathHelper.floor_float((float)(entityitemframe.xPosition * 32));
-                    packet23vehiclespawn.yPosition = MathHelper.floor_float((float)(entityitemframe.yPosition * 32));
-                    packet23vehiclespawn.zPosition = MathHelper.floor_float((float)(entityitemframe.zPosition * 32));
+                    packet23vehiclespawn.xPosition = MathHelper.floor_float(entityitemframe.xPosition * 32);
+                    packet23vehiclespawn.yPosition = MathHelper.floor_float(entityitemframe.yPosition * 32);
+                    packet23vehiclespawn.zPosition = MathHelper.floor_float(entityitemframe.zPosition * 32);
                     return packet23vehiclespawn;
                 } else if (e instanceof EntityLeashKnot) {
                     EntityLeashKnot entityleashknot = (EntityLeashKnot)e;
                     packet23vehiclespawn = new Packet23VehicleSpawn(e, 77);
-                    packet23vehiclespawn.xPosition = MathHelper.floor_float((float)(entityleashknot.xPosition * 32));
-                    packet23vehiclespawn.yPosition = MathHelper.floor_float((float)(entityleashknot.yPosition * 32));
-                    packet23vehiclespawn.zPosition = MathHelper.floor_float((float)(entityleashknot.zPosition * 32));
+                    packet23vehiclespawn.xPosition = MathHelper.floor_float(entityleashknot.xPosition * 32);
+                    packet23vehiclespawn.yPosition = MathHelper.floor_float(entityleashknot.yPosition * 32);
+                    packet23vehiclespawn.zPosition = MathHelper.floor_float(entityleashknot.zPosition * 32);
                     return packet23vehiclespawn;
                 } else if (e instanceof EntityXPOrb) {
                     return new Packet26EntityExpOrb((EntityXPOrb)e);

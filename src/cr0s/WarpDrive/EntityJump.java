@@ -17,15 +17,12 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -308,7 +305,7 @@ public class EntityJump extends Entity
 		}
 	}
 
-	public String getDirectionLabel(int direction) {
+	public static String getDirectionLabel(int direction) {
 		switch (direction) {
 			case -1: return "UP";
 			case -2: return "DOWN";
@@ -333,7 +330,7 @@ public class EntityJump extends Entity
 		moveX = moveY = moveZ = 0;
 		
 		TransitionPlane overworld = new TransitionPlane(0, 0, 0, 5000, 5000, 0, 0);
-		Vector3 exit;
+		Vector3 exit; //FIXME
 		if (toSpace) {
 			if (worldObj.provider.dimensionId == overworld.dimensionId) {
 				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition
@@ -536,10 +533,10 @@ public class EntityJump extends Entity
 					try
 					{
 						Method method;
-						method = c.getDeclaredMethod("onUnloaded", null);
-						method.invoke(te, null);
-						method = c.getDeclaredMethod("onLoaded", null);
-						method.invoke(te, null);
+						method = c.getDeclaredMethod("onUnloaded", (Class<?>[])null);
+						method.invoke(te, (Object[])null);
+						method = c.getDeclaredMethod("onLoaded", (Class<?>[])null);
+						method.invoke(te, (Class<?>)null);
 					}
 					catch (Exception e)
 					{
@@ -1005,17 +1002,17 @@ public class EntityJump extends Entity
 		}
 
 		int movementVector[] = getVector(direction);
-		int moveX = movementVector[0] * testDistance;
-		int moveY = movementVector[1] * testDistance;
-		int moveZ = movementVector[2] * testDistance;
+		int lmoveX = movementVector[0] * testDistance;
+		int lmoveY = movementVector[1] * testDistance;
+		int lmoveZ = movementVector[2] * testDistance;
 		
 		int x, y, z, newX, newY, newZ, blockOnShipID, blockID;
 		for (y = minY; y <= maxY; y++) {
-			newY = y + moveY;
+			newY = y + lmoveY;
 			for (x = minX; x <= maxX; x++) {
-				newX = x + moveX;
+				newX = x + lmoveX;
 				for (z = minZ; z <= maxZ; z++) {
-					newZ = z + moveZ;
+					newZ = z + lmoveZ;
 
 					blockID = worldObj.getBlockId(newX, newY, newZ);
 					if ((blockID == Block.bedrock.blockID) || (blockID == 2702)) {// Blacklist
@@ -1050,11 +1047,11 @@ public class EntityJump extends Entity
 			return null;
 		}
 	}
-
+/*
 	private void turnOffModem(IPeripheral p)
 	{
 		// FIXME
-		/*if (p.getType() == "modem") {
+		if (p.getType() == "modem") {
 			String[] methods = p.getMethodNames();
 			for(int i = 0; i < methods.length; i++) {
 				if (methods[i] == "closeAll") {
@@ -1066,13 +1063,13 @@ public class EntityJump extends Entity
 					return;
 				}
 			}
-		}*/
+		}
 	}
 
 	private void turnOffModems()
 	{
 		// FIXME
-		/*for (int x = minX; x <= maxX; x++) {
+		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
 					int blockID = worldObj.getBlockId(x, y, z);
@@ -1096,8 +1093,8 @@ public class EntityJump extends Entity
 					}
 				}
 			}
-		}*/
-	}
+		}
+	}/**/
 
 	private boolean moveBlockSimple(int indexInShip)
 	{
@@ -1197,7 +1194,7 @@ public class EntityJump extends Entity
 		return true;
 	}
 
-	private ArrayList<Object> removeDuplicates(List<TileEntity> l)
+	private static ArrayList<Object> removeDuplicates(List<TileEntity> l)
 	{
 		Set<TileEntity> s = new TreeSet<TileEntity>(new Comparator<TileEntity>()
 		{
@@ -1379,9 +1376,9 @@ public class EntityJump extends Entity
 			try
 			{
 				c = t.getClass();
-				Method method = c.getDeclaredMethod("bianDa", null);
-				method.invoke(t, null);
-				method.invoke(t, null);
+				Method method = c.getDeclaredMethod("bianDa", (Class<?>[])null);
+				method.invoke(t, (Object[])null);
+				method.invoke(t, (Object[])null);
 			}
 			catch (Exception e)
 			{

@@ -51,10 +51,6 @@ public class BlockParticleBooster extends BlockContainer {
             return iconBuffer[11];
         }
 
-        if (metadata > 10) {
-            metadata = 10;
-        }
-
         return iconBuffer[metadata];
     }
 

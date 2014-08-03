@@ -16,29 +16,36 @@ public abstract class WarpTE extends TileEntity
  		adjacentSideOffsets[5] = new Vector3(-1, 0, 0);
  	}
  	
-	protected int toInt(double d) {
+	protected static int toInt(double d) {
 		return (int) Math.round(d);
 	}
 	
-	protected int toInt(Object o) {
+	protected static int toInt(Object o) {
 		return toInt(toDouble(o));
 	}
 	
-	protected double toDouble(Object o) {
+	protected static double toDouble(Object o) {
 		return Double.parseDouble(o.toString());
 	}
 	
-	protected boolean toBool(Object o) {
-		if(o.toString() == "true" || o.toString() == "1.0" || o.toString() == "1")
+	protected static boolean toBool(Object o) {
+		if (o == null) {
+			 return false;
+		}
+		if (o instanceof Boolean) {
+			 return ((Boolean) o);
+		}
+		if (o.toString() == "true" || o.toString() == "1.0" || o.toString() == "1" || o.toString() == "y" || o.toString() == "yes") {
 			return true;
+		}
 		return false;
 	}
 	
-	protected int clamp(int a,int min,int max) {
-		return Math.min(max, Math.max(a,min));
+	protected static int clamp(int a, int min, int max) {
+		return Math.min(max, Math.max(a, min));
 	}
 	
-	protected double clamp(double a,double min,double max) {
-		return Math.min(max, Math.max(a,min));
+	protected static double clamp(double a, double min, double max) {
+		return Math.min(max, Math.max(a, min));
 	}
 }

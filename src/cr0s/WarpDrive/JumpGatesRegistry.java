@@ -10,10 +10,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.minecraft.util.MathHelper;
-
-public final class JumpGatesRegistry
-{
+public final class JumpGatesRegistry {
     private File db;
     private ArrayList<JumpGate> gates = new ArrayList<JumpGate>();
 

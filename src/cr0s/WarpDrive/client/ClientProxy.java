@@ -5,7 +5,6 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cr0s.WarpDrive.CommonProxy;
 import cr0s.WarpDrive.FXBeam;
 import cr0s.WarpDrive.Vector3;
-import cr0s.WarpDrive.WarpDrive;
 
 public class ClientProxy extends CommonProxy
 {

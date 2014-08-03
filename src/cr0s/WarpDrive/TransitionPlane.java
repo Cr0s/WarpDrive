@@ -1,9 +1,7 @@
 package cr0s.WarpDrive;
 
-import java.util.List;
 
 import cr0s.WarpDrive.Vector3;
-import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 
 /**

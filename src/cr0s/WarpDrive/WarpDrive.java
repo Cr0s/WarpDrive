@@ -6,13 +6,11 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLInterModComms;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.item.*;
@@ -118,6 +116,9 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static WarpDrivePeripheralHandler peripheralHandler = new WarpDrivePeripheralHandler();
 	
+	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
+	public static String defEnergyStr = "energy(): returns currently contained energy, max contained energy";
+
 	private LinkedList<Ticket> warpTickets = new LinkedList<Ticket>();
 
 	@EventHandler
@@ -244,7 +245,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");
 		
 		// IRIDIUM BLOCK
-		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumID);
+		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumBlockID);
 		
 		GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");
 		
@@ -290,7 +291,9 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(powerReactorBlock,"powerReactor");
 		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, "powerReactor");
 		powerLaserBlock   = new BlockPowerLaser(WarpDriveConfig.powerLaserID);
-		
+		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
+		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, "powerLaser");
+		 
 		// REACTOR LASER FOCUS
 		reactorLaserFocusItem = new ItemReactorLaserFocus(WarpDriveConfig.reactorLaserFocusID);
 		GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
@@ -298,8 +301,7 @@ public class WarpDrive implements LoadingCallback {
 		// COMPONENT ITEMS
 		componentItem = new ItemWarpComponent(WarpDriveConfig.componentID);
 		GameRegistry.registerItem(componentItem, "component");		
-		
-		
+				
 		 
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
@@ -342,7 +344,7 @@ public class WarpDrive implements LoadingCallback {
 		cams = new CamRegistry();
 	}
 	
-	private void initVanillaRecipes() {
+	private static void initVanillaRecipes() {
 		componentItem.registerRecipes();
 		//WarpCore
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(warpCore), false, "ipi", "ici", "idi",
@@ -454,9 +456,24 @@ public class WarpDrive implements LoadingCallback {
 				'd', Item.diamond,
 				'r', Item.redstone,
 				'n', Item.goldNugget));
+		
+		//Power Laser
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii","ilg","ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'c', componentItem.getIS(5),
+				'l', componentItem.getIS(3)));
+		
+		//Power Reactor
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi","gog","ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'o', componentItem.getIS(4),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
 	}
 	
-	private void initAETERecipes() {
+	private static void initAETERecipes() {
 		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
 		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
@@ -482,7 +499,7 @@ public class WarpDrive implements LoadingCallback {
 			'f', fluixCrystal);
 	}
 	
-	private void initIC2Recipes() {
+	private static void initIC2Recipes() {
 		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
 				'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
@@ -594,7 +611,7 @@ public class WarpDrive implements LoadingCallback {
 			'a', WarpDriveConfig.getIC2Item("advancedAlloy"));
 	}
 
-	private void registerSpaceDimension() {
+	private static void registerSpaceDimension() {
 		spaceBiome = (new BiomeSpace(24))
 			.setColor(0)
 			.setDisableRain()
@@ -603,7 +620,7 @@ public class WarpDrive implements LoadingCallback {
 		DimensionManager.registerDimension(WarpDriveConfig.G_SPACE_DIMENSION_ID, WarpDriveConfig.G_SPACE_PROVIDER_ID);
 	}
 
-	private void registerHyperSpaceDimension() {
+	private static void registerHyperSpaceDimension() {
 		DimensionManager.registerProviderType(WarpDriveConfig.G_HYPERSPACE_PROVIDER_ID, HyperSpaceProvider.class, true);
 		DimensionManager.registerDimension(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID, WarpDriveConfig.G_HYPERSPACE_PROVIDER_ID);
 	}
@@ -646,11 +663,13 @@ public class WarpDrive implements LoadingCallback {
 						te.refreshLoading();
 					return t;
 				}
-				else
+				else {
 					WarpDrive.debugPrint("Ticket not granted");
+				}
 			}
-			else
+			else {
 				WarpDrive.debugPrint("No tickets left!");
+			}
 		}
 		else
 		{
@@ -761,12 +780,12 @@ public class WarpDrive implements LoadingCallback {
             }
 
             Packet250CustomPayload packet2 = new Packet250CustomPayload();
-            packet.channel = "WarpDriveBeam";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
+            packet2.channel = "WarpDriveBeam";
+            packet2.data = bos.toByteArray();
+            packet2.length = bos.size();
             MinecraftServer.getServer().getConfigurationManager().sendToAllNear(
             		dest.intX(), dest.intY(), dest.intZ(),
-            		radius, worldObj.provider.dimensionId, packet);
+            		radius, worldObj.provider.dimensionId, packet2);
         }
     }
 }

@@ -6,14 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import cr0s.WarpDrive.CloakManager.CloakedArea;
-import net.minecraft.entity.Entity;
+import cr0s.WarpDrive.api.IBreathingHelmet;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.EnumGameType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
@@ -32,6 +34,7 @@ public class SpaceEventHandler {
 	private final int CLOAK_CHECK_TIMEOUT_TICKS = 100;
 	private final int AIR_BLOCK_TICKS = 20;
 	private final int AIR_TANK_TICKS = 300;
+	private final int AIR_DROWN_TICKS = 20;
 	
 	public SpaceEventHandler() 	{
 		entity_airBlock = new HashMap<Integer, Integer>();
@@ -60,9 +63,20 @@ public class SpaceEventHandler {
 		
 		if (entity instanceof EntityPlayerMP) { 
 			updatePlayerCloakState(entity);
+			
+			// skip players in creative
+			if (((EntityPlayerMP)entity).theItemInWorldManager.getGameType() == EnumGameType.CREATIVE) {
+				return;
+			}
 		}
+		
+		// skip dead or invulnerable entities
+		if (entity.isDead || entity.isEntityInvulnerable()) {
+			return;
+		}
+		
 
-		// If player in vacuum, check and start consuming air cells
+		// If entity is in vacuum, check and start consuming air cells
 		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			int id1 = entity.worldObj.getBlockId(x, y, z);
 			int id2 = entity.worldObj.getBlockId(x, y - 1, z);
@@ -94,23 +108,66 @@ public class SpaceEventHandler {
 				// Damage entity if in vacuum without protection
 				if (entity instanceof EntityPlayerMP) {
 					EntityPlayerMP player = (EntityPlayerMP)entity;
+					air = player_airTank.get(player.username);
 
-					if ((player.getCurrentArmor(3) != null) && (WarpDriveConfig.SpaceHelmets.contains(player.getCurrentArmor(3).itemID))) {
-						air = player_airTank.get(player.username);
-						if (air == null) {// new player in space => grace period
-							player_airTank.put(player.username, AIR_TANK_TICKS / 2);
-						} else if (air <= 1) {
-							if (consumeO2(player.inventory.mainInventory, player)) {
-								player_airTank.put(player.username, AIR_TANK_TICKS);
-							} else {
-								player_airTank.put(player.username, 0);
-								entity.attackEntityFrom(DamageSource.drown, 1);
+					boolean hasHelmet = false;
+					ItemStack helmetStack = player.getCurrentArmor(3);
+					if (helmetStack != null) {
+						Item helmet = helmetStack.getItem();
+						if (helmet instanceof IBreathingHelmet) {
+							IBreathingHelmet breathHelmet = (IBreathingHelmet)helmet;
+							if (breathHelmet.canBreath(player)) {
+								hasHelmet = true;
+								if (air == null) {// new player in space => grace period
+									player_airTank.put(player.username, AIR_TANK_TICKS);
+									player.setAir(300);
+								} else if (air <= 1) {
+									if (breathHelmet.removeAir(player)) {
+										player_airTank.put(player.username, AIR_TANK_TICKS);
+										player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
+									} else {
+										player_airTank.put(player.username, AIR_DROWN_TICKS);
+										player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
+										player.attackEntityFrom(DamageSource.drown, 5.0F);
+									}
+								} else {
+									player_airTank.put(player.username, air - 1);
+									player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
+								}
 							}
+						} else if (WarpDriveConfig.SpaceHelmets.contains(helmetStack.itemID)) {
+							hasHelmet = true;
+							if (air == null) {// new player in space => grace period
+								player_airTank.put(player.username, AIR_TANK_TICKS);
+								player.setAir(300);
+							} else if (air <= 1) {
+								if (consumeO2(player.inventory.mainInventory, player)) {
+									player_airTank.put(player.username, AIR_TANK_TICKS);
+									player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
+								} else {
+									player_airTank.put(player.username, AIR_DROWN_TICKS);
+									player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
+									entity.attackEntityFrom(DamageSource.drown, 5.0F);
+								}
+							} else {
+								player_airTank.put(player.username, air - 1);
+								player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
+							}
+						}
+					}
+					
+					if (!hasHelmet) {
+						if (air == null) {// new player in space => grace period
+							player_airTank.put(player.username, AIR_TANK_TICKS);
+							player.setAir(300);
+						} else if (air <= 1) {
+							player_airTank.put(player.username, AIR_DROWN_TICKS);
+							player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
+							entity.attackEntityFrom(DamageSource.drown, 5.0F);
 						} else {
 							player_airTank.put(player.username, air - 1);
+							player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 						}
-					} else {
-						entity.attackEntityFrom(DamageSource.drown, 1);
 					}
 
 					// If player falling down, teleport on earth
@@ -121,7 +178,7 @@ public class SpaceEventHandler {
 					}
 				} else {
 					entity_airBlock.put(entity.entityId, 0);
-					entity.attackEntityFrom(DamageSource.drown, 1);
+					entity.attackEntityFrom(DamageSource.drown, 2.0F);
 				}
 			}
 		}
@@ -161,14 +218,14 @@ public class SpaceEventHandler {
 		}
 	}
 	
-	private boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
+	private static boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
 		for (int j = 0; j < inventory.length; ++j) {
 			if (inventory[j] != null && inventory[j].itemID == WarpDriveConfig.IC2_Air[0] && inventory[j].getItemDamage() == WarpDriveConfig.IC2_Air[1]) {
 				inventory[j].stackSize--;
 				if (inventory[j].stackSize <= 0) {
 					inventory[j] = null;
 				}
-				
+
 				if (WarpDriveConfig.IC2_Empty.length != 0) {
 //					WarpDrive.debugPrint("giveEmptyCell");
 					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_Empty[0], 1, WarpDriveConfig.IC2_Empty[1]);

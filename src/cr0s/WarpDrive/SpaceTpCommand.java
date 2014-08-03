@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cr0s.WarpDrive.machines.TileEntityReactor;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;

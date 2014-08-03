@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.oredict.OreDictionary;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
@@ -144,15 +143,15 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		}
 	}
 	
-	private boolean isLog(int blockID) {
+	private static boolean isLog(int blockID) {
 		return WarpDriveConfig.MinerLogs.contains(blockID);
 	}
 	
-	private boolean isLeaf(int blockID) {
+	private static boolean isLeaf(int blockID) {
 		return WarpDriveConfig.MinerLeaves.contains(blockID);
 	}
 	
-	private void addTree(LinkedList<Vector3> list, Vector3 newTree) {
+	private static void addTree(LinkedList<Vector3> list, Vector3 newTree) {
 		WarpDrive.debugPrint("Adding tree position:" + newTree.x + "," + newTree.y + "," + newTree.z);
 		list.add(newTree);
 	}
@@ -380,7 +379,6 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 }

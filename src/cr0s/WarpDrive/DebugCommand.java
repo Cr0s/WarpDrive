@@ -5,7 +5,6 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 
@@ -94,11 +93,15 @@ public class DebugCommand extends CommandBase
             	switch (ch) {
             	case 'I':
                     notifyAdmins(icommandsender, "[" + getCommandName() + "] " + side + ": invalidating");
-            		te.invalidate();
+            		if (te != null) {
+            			te.invalidate();
+            		}
             		break;
             	case 'V':
                     notifyAdmins(icommandsender, "[" + getCommandName() + "] " + side + ": validating");
-            		te.validate();
+            		if (te != null) {
+            			te.validate();
+            		}
             		break;
             	case 'A':
                     notifyAdmins(icommandsender, "[" + getCommandName() + "] " + side + ": setting to Air");
@@ -132,7 +135,9 @@ public class DebugCommand extends CommandBase
             		break;
             	case 'C':
                     notifyAdmins(icommandsender, "[" + getCommandName() + "] " + side + ": update containing block info");
-            		te.updateContainingBlockInfo();
+            		if (te != null) {
+            			te.updateContainingBlockInfo();
+            		}
             		break;
             	}
             }

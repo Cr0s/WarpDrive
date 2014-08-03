@@ -1,42 +1,32 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.*;
 
 public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 	private String[] methodsArray =
 	{
-		"scanRay",		// 0
+		"scanRay",			// 0
 		"scanRadius",		// 1
 		"getResultsCount",	// 2
 		"getResult",		// 3
 		"getEnergyLevel",	// 4
-		"pos"			// 5
+		"pos"				// 5
 	};
 
 	private ArrayList<TileEntityReactor> results;
 
 	private int scanRadius = 0;
 	private int cooldownTime = 0;
-
+	
 	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -128,18 +118,18 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 					try {
 						index = ((Double)arguments[0]).intValue();
 					} catch(Exception e) {
-						return new Object[] { (String)"FAIL", 0, 0, 0 };
+						return new Object[] { "FAIL", 0, 0, 0 };
 					}
 					if (index >= 0 && index < results.size()) {
 						TileEntityReactor res = results.get(index);
 						if (res != null)
 						{
 							int yAddition = (res.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
-							return new Object[] { (String)res.coreFrequency, (Integer)res.xCoord, (Integer)res.yCoord + yAddition, (Integer)res.zCoord };
+							return new Object[] { res.coreFrequency, res.xCoord, res.yCoord + yAddition, res.zCoord };
 						}
 					}
 				}
-				return new Object[] { (String)"FAIL", 0, 0, 0 };
+				return new Object[] { "FAIL", 0, 0, 0 };
 				
 			case 4: // getEnergyLevel
 				return new Integer[] { getEnergyStored() };
@@ -179,7 +169,6 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 }

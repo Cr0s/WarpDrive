@@ -91,20 +91,20 @@ public abstract class WarpChunkTE extends WarpEnergyTE
 		ticketList.add(t);
 	}
 	
-	private int dX(int dir)
+	private static int dX(int dir)
 	{
-		if(dir == 1)
+		if (dir == 1)
 			return 1;
-		else if(dir == 3)
+		else if (dir == 3)
 			return -1;
 		return 0;
 	}
 	
-	private int dZ(int dir)
+	private static int dZ(int dir)
 	{
-		if(dir == 0)
+		if (dir == 0)
 			return 1;
-		else if(dir == 2)
+		else if (dir == 2)
 			return -1;
 		return 0;
 	}

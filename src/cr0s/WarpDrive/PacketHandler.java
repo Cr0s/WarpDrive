@@ -11,7 +11,6 @@ import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.Player;
@@ -43,7 +42,7 @@ public class PacketHandler implements IPacketHandler
         }
     }
 
-    public void handleCloak(Packet250CustomPayload packet, EntityPlayer player) {
+    public static void handleCloak(Packet250CustomPayload packet, EntityPlayer player) {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 
         try {   
@@ -123,7 +122,7 @@ public class PacketHandler implements IPacketHandler
         }    	
     }
     
-    public void handleLaserTargeting(Packet250CustomPayload packet, EntityPlayer player)
+    public static void handleLaserTargeting(Packet250CustomPayload packet, EntityPlayer player)
     {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 
@@ -150,7 +149,7 @@ public class PacketHandler implements IPacketHandler
         }
     }
 
-    public void handleFreqUpdate(Packet250CustomPayload packet, EntityPlayer player) {
+    public static void handleFreqUpdate(Packet250CustomPayload packet, EntityPlayer player) {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 
         try {
@@ -176,7 +175,7 @@ public class PacketHandler implements IPacketHandler
         }
     }
 
-    private void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
+    private static void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
     {
         DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
         Vector3 source, target;

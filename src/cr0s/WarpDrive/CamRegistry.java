@@ -3,7 +3,6 @@ package cr0s.WarpDrive;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import cr0s.WarpDrive.machines.TileEntityReactor;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
@@ -45,7 +44,7 @@ public class CamRegistry {
         return null;
     }
 
-    private boolean isCamAlive(World worldObj, CamRegistryItem cam) {
+    private static boolean isCamAlive(World worldObj, CamRegistryItem cam) {
     	if (worldObj.provider.dimensionId != cam.dimensionId) {
     		WarpDrive.debugPrint("Inconsistent worldObj with camera " + worldObj.provider.dimensionId + " vs " + cam.dimensionId);
     		return false;

@@ -1,38 +1,23 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFluid;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.network.packet.Packet62LevelSound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
 import appeng.api.WorldCoord;
 import appeng.api.IAEItemStack;
@@ -243,7 +228,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		if ( (Block.blocksList[blockID] != null) && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) ) {
 			return true;
 		}
-		WarpDrive.debugPrint("" + this + " Rejecting " + blockID + " at (" + x + ", " + y + ", " + z + ")");
+		// WarpDrive.debugPrint("" + this + " Rejecting " + blockID + " at (" + x + ", " + y + ", " + z + ")");
 		return false;
 	}
 
@@ -252,7 +237,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
 		if (Block.blocksList[blockID] != null && (Block.blocksList[blockID] instanceof BlockFluid)) {
 			// Evaporate fluid
-			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
+			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		} else {
 			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
 			if (stacks != null) {
@@ -407,7 +392,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		return false;
 	}
 
-	public ItemStack copyWithSize(ItemStack itemStack, int newSize)
+	public static ItemStack copyWithSize(ItemStack itemStack, int newSize)
 	{
 		ItemStack ret = itemStack.copy();
 		ret.stackSize = newSize;
@@ -701,12 +686,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 
 	// Applied Energistics	@Override
 
+	@Override
 	public float getPowerDrainPerTick() {
 		return 1;
 	}
@@ -763,10 +748,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		return true;
 	}
 
+	@Override
 	public void setNetworkReady( boolean isReady ) {
 		AENetworkReady = isReady;
 	}
 
+	@Override
 	public boolean isMachineActive() {
 		return isMining();
 	}

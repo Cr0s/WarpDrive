@@ -38,11 +38,11 @@ public final class EntityStarCore extends Entity
     {
         super(world);
         this.xCoord = x;
-        this.posX = (double) x;
+        this.posX = x;
         this.yCoord = y;
-        this.posY = (double) y;
+        this.posY = y;
         this.zCoord = z;
-        this.posZ = (double) z;
+        this.posZ = z;
         this.radius = radius;
     }
 

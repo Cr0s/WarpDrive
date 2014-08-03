@@ -2,15 +2,11 @@ package cr0s.WarpDrive.machines;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -20,7 +16,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatMessageComponent;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -77,7 +72,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 		return "transporter";
 	}
 	
-	public String helpStr(Object[] function) {
+	private static String helpStr(Object[] function) {
 		if (function != null && function.length > 0) {
 			String fun = function[0].toString().toLowerCase();
 			if(fun.equals("source")) {
@@ -106,7 +101,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
 			}
 		}
-		return "help(\"functionName\"): returns help for the function specified";
+		return WarpDrive.defHelpStr;
 	}
 
 	@Override
@@ -274,7 +269,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 		}
 	}
 	
-	private double beaconScan(int xV, int yV, int zV)
+	private double beaconScan(int xV, int yV, int zV)	// FIXME: never used
 	{
 		double beacon = 0;
 		for(int x=xV-scanDist;x<=xV+scanDist;x++)
@@ -310,13 +305,13 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 		return calculatePower(myCoords,d);
 	}
 	
-	private double calculatePower(Vector3 s, Vector3 d)
+	private static double calculatePower(Vector3 s, Vector3 d)
 	{
 		double dist = s.distanceTo(d);
 		return clamp(Math.pow(Math.E, -dist / 100) * (1/dist),0,1);
 	}
 	
-	private double min(double... ds)
+	private static double min(double... ds)
 	{
 		double curMin = Double.MAX_VALUE;
 		for(double d: ds)
@@ -434,7 +429,6 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 }

@@ -2,58 +2,38 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.CloakManager.CloakedArea;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.src.ModLoader;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraft.entity.player.EntityPlayerMP;
 import cr0s.WarpDrive.*;
 
 public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPeripheral {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk EU
 	
-	private String[] methodsArray = { "setFieldTier", // 0 setFieldTier(1 or 2)
+	private String[] methodsArray = {
+			"setFieldTier", // 0 setFieldTier(1 or 2)
 			"isAssemblyValid", // 1 - returns true or false
 			"getEnergyLevel", // 2 
 			"enableCloakingField", // 3 enables field if assembled right
 			"disableCloakingField", // 4 disables cloaking field
-			"setFieldFrequency" // 5 setFieldFrequency(int)
+			"isEnabled" // 5 return true if currently enabled
 	};
 	
 	public boolean isEnabled = false;
 	public byte tier = 1; // cloaking field tier, 1 or 2
-//	public int frequency = 0;
 	
 	// Spatial cloaking field parameters
 	public int front, back, up, down, left, right;
@@ -149,8 +129,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	}
 	
 	public void setCoilsState(boolean enabled) {
-		final int START_LENGTH = 2; // Step length from core block to main coils
-		
 		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, (enabled) ? 1 : 0, 2);
 		
 		// Directions to check (all six directions: left, right, up, down, front, back)
@@ -454,18 +432,8 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 			this.isEnabled = false;
 			break;
 			
-		case 5: // setFieldFrequency(int)
-			if (arguments.length == 1) {
-				disableCloakingField();
-				
-				if (WarpDrive.instance.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord)) { // ((Double)arguments[0]).intValue())) {
-					return new Object[] { (Boolean)false };
-				}
-				
-//				this.frequency = ((Double)arguments[0]).intValue();
-				return new Object[] { (Boolean)true };
-			}		
-			break;
+		case 5: // isEnabled()
+			return new Object[] { this.isEnabled };
 		}
 		
 		return null;
@@ -495,7 +463,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 
 	@Override
 	public boolean equals(IPeripheral other) {
-		// TODO Auto-generated method stub
-		return false;
+		return other == this;
 	}
 }

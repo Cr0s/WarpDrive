@@ -1,6 +1,5 @@
 package cr0s.WarpDrive;
 
-import cpw.mods.fml.common.Loader;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityZombie;
@@ -555,7 +554,7 @@ public class WorldGenSmallShip extends WorldGenerator
 		return true;
 	}
 
-	public void spawnNPC(World world, int i, int j, int k)
+	public static void spawnNPC(World world, int i, int j, int k)
 	{
 		int numMobs = 2 + world.rand.nextInt(10);
 
@@ -564,7 +563,7 @@ public class WorldGenSmallShip extends WorldGenerator
 			for (int idx = 0; idx < numMobs; idx++)
 			{
 				EntityVillager entityvillager = new EntityVillager(world, 0);
-				entityvillager.setLocationAndAngles((double)i + 0.5D, (double)j, (double)k + 0.5D, 0.0F, 0.0F);
+				entityvillager.setLocationAndAngles(i + 0.5D, j, k + 0.5D, 0.0F, 0.0F);
 				world.spawnEntityInWorld(entityvillager);
 			}
 		}
@@ -573,7 +572,7 @@ public class WorldGenSmallShip extends WorldGenerator
 			for (int idx = 0; idx < numMobs; idx++)
 			{
 				EntityZombie entityzombie = new EntityZombie(world);
-				entityzombie.setLocationAndAngles((double)i + 0.5D, (double)j, (double)k + 0.5D, 0.0F, 0.0F);
+				entityzombie.setLocationAndAngles(i + 0.5D, j, k + 0.5D, 0.0F, 0.0F);
 				world.spawnEntityInWorld(entityzombie);
 			}
 		}
