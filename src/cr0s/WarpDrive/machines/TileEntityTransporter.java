@@ -24,12 +24,14 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 	private double scanRange=2;
 	
 	private int scanDist = 4;
+	
+	private double beaconEffect = 0;
 	private double powerBoost = 1;
 	private double baseLockStrength=-1;
 	private double lockStrengthMul = 1;
 	private boolean isLocked=false;
 	
-	private Vector3 centreOnMe = new Vector3(0.5,1,0.5);
+	private final Vector3 centreOnMe = new Vector3(0.5,1,0.5);
 	private Vector3 sourceVec = new Vector3();
 	private Vector3 destVec = new Vector3();
 	
@@ -232,6 +234,8 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 			Integer energyReq = energyCost();
 			if(energyReq == null)
 				return -1;
+			
+			Vector3 modDest = destVec.clone().translate(centreOnMe);
 			for(Entity ent : entitiesToTransport)
 			{
 				WarpDrive.debugPrint("handling entity " + ent.getEntityName());
@@ -239,7 +243,7 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 				{
 					WarpDrive.debugPrint("Energy taken");
 					inflictNegativeEffect(ent,ls);
-					transportEnt(ent,destVec);
+					transportEnt(ent,modDest);
 					count++;
 				}
 				else
@@ -286,20 +290,28 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 	
 	private double beaconScan(int xV, int yV, int zV)
 	{
+		WarpDrive.debugPrint("BeaconScan:" + xV + ","+yV + "," + zV);
 		double beacon = 0;
-		for(int x=xV-scanDist;x<=xV+scanDist;x++)
+		int beaconCount = 0;
+		int xL = xV - scanDist;
+		int xU = xV + scanDist;
+		int yL = yV - scanDist;
+		int yU = yV + scanDist;
+		int zL = zV - scanDist;
+		int zU = zV + scanDist;
+		for(int x=xL;x<=xU;x++)
 		{
-			for(int y=yV-scanDist;y<=yV+scanDist;y++)
+			for(int y=yL;y<=yU;y++)
 			{
 				if(y < 0 || y > 254)
 					continue;
 				
-				for(int z=xV-scanDist;z<=xV+scanDist;z++)
+				for(int z=zL;z<=zU;z++)
 				{
 					if(worldObj.getBlockId(x, y, z) != WarpDriveConfig.transportBeaconID)
 						continue;
-					double dist = Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);
-					
+					double dist = 1 + Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);
+					beaconCount++;
 					if(worldObj.getBlockMetadata(x, y, z) == 0)
 						beacon += 1/dist;
 					else
@@ -307,7 +319,24 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 				}
 			}
 		}
+		if(beaconCount > 0)
+			beacon /= Math.sqrt(beaconCount);
 		return beacon;
+	}
+	
+	private double beaconScan(Vector3 s, Vector3 d)
+	{
+		s = absoluteVector(s);
+		d = absoluteVector(d);
+		return beaconScan(toInt(s.x),toInt(s.y),toInt(s.z)) + beaconScan(toInt(d.x),toInt(d.y),toInt(d.z));
+	}
+	
+	private Vector3 absoluteVector(Vector3 a)
+	{
+		if(WarpDriveConfig.TR_RELATIVE_COORDS)
+			return a.clone().translate(new Vector3(this));
+		else
+			return a;
 	}
 	
 	private double calculatePower(Vector3 d)
@@ -338,7 +367,7 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 	{
 		if(isLocked)
 		{
-			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1),0,1);
+			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1) * (1+beaconEffect),0,1);
 		}
 		return -1;
 	}
@@ -355,6 +384,8 @@ public class TileEntityTransporter extends WarpTE implements IPeripheral
 		if(source != null && dest != null)
 		{
 			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
+			beaconEffect = beaconScan(source,dest);
+			WarpDrive.debugPrint("BEACON:" + beaconEffect);
 			baseLockStrength = basePower;
 			lockStrengthMul  = 1;
 			isLocked = true;

@@ -77,6 +77,7 @@ public class EntityJump extends Entity
 	public final static int STATE_IDLE = 0;
 	public final static int STATE_JUMPING = 1;
 	public final static int STATE_REMOVING = 2;
+	public final static int STATE_RERENDERING = 3;
 	int state = STATE_IDLE;
 	int currentIndexInShip = 0;
 
@@ -181,19 +182,24 @@ public class EntityJump extends Entity
 			{
 				//moveEntities(true);
 				moveShip();
+				currentIndexInShip = ship.length;
 			}
 		}
 		else if (state == STATE_REMOVING)
 		{
+			WarpDrive.debugPrint("REMOVING!");
 			ASTurbines = new ArrayList<TileEntity>();
 			removeShip();
-
-			if (currentIndexInShip >= ship.length - 1)
-			{
-				finishJump();
-				FixASTurbines();
-				state = STATE_IDLE;
-			}
+			state = STATE_RERENDERING;
+		}
+		else if (state == STATE_RERENDERING)
+		{
+			currentIndexInShip = 0;
+			rerenderShip();
+			finishJump();
+			//FixASTurbines();
+			state = STATE_IDLE;
+			killEntity("");
 		}
 	}
 
@@ -615,6 +621,30 @@ public class EntityJump extends Entity
 
 		LocalProfiler.stop();
 	}
+	
+	private void rerenderShip()
+	{
+		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
+		WarpDrive.debugPrint("[JE] Moving ship part: " + currentIndexInShip + "/" + ship.length + " [btm: " + blocksToMove + "]");
+
+		for (int index = 0; index < blocksToMove; index++)
+		{
+			if (currentIndexInShip >= ship.length)
+			{
+				break;
+			}
+
+			JumpBlock shipBlock = ship[currentIndexInShip];
+
+			int oldX = shipBlock.x;
+			int oldY = shipBlock.y;
+			int oldZ = shipBlock.z;
+			int newX = oldX + moveX;
+			int newY = oldY + moveY;
+			int newZ = oldZ + moveZ;
+			currentIndexInShip++;
+		}
+	}
 
 	/**
 	 * Checking jump possibility
@@ -739,7 +769,7 @@ public class EntityJump extends Entity
 					newEntityZ = oldEntityZ + moveZ;
 				}
 
-				//WarpDrive.debugPrint("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
+				WarpDrive.debugPrint("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
 
 				// Travel to another dimension if needed
 				if (betweenWorlds && !restorePositions)
@@ -783,7 +813,7 @@ public class EntityJump extends Entity
 				}
 			}
 		}
-
+		WarpDrive.debugPrint("entities moved");
 		return true;
 	}
 
@@ -965,7 +995,9 @@ public class EntityJump extends Entity
 			int newZ = oldZ + moveZ;
 			int blockID = shipBlock.blockID;
 			int blockMeta = shipBlock.blockMeta;
-			mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
+			targetWorld.setBlock(newX,newY,newZ,blockID,blockMeta,0);
+			//mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
+			WarpDrive.debugPrint("BID:" + blockID + "," + newY);
 
 			// Re-schedule air blocks update
 			if (blockID == WarpDriveConfig.airID)
@@ -983,6 +1015,7 @@ public class EntityJump extends Entity
 				oldnbt.setInteger("y", newY);
 				oldnbt.setInteger("z", newZ);
 				TileEntity newTileEntity = null;
+				
 				if (blockID == WarpDriveConfig.CC_Computer || blockID == WarpDriveConfig.CC_peripheral || blockID == WarpDriveConfig.CCT_Turtle || blockID == WarpDriveConfig.CCT_Upgraded || blockID == WarpDriveConfig.CCT_Advanced)
 				{
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
@@ -1002,13 +1035,16 @@ public class EntityJump extends Entity
 				}
 				
 				if (newTileEntity == null)
+				{
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
+				}
 				
 				newTileEntity.worldObj = targetWorld;
 				newTileEntity.validate();
 				
 				worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
 				targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+				targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 2);
 			}
 		}
 		catch (Exception exception)
