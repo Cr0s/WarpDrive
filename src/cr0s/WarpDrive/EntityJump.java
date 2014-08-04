@@ -642,7 +642,6 @@ public class EntityJump extends Entity
 			int newX = oldX + moveX;
 			int newY = oldY + moveY;
 			int newZ = oldZ + moveZ;
-			targetWorld.markBlockForUpdate(newX,newY,newZ);
 			currentIndexInShip++;
 		}
 	}

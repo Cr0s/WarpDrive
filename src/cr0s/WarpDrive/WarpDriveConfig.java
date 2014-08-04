@@ -77,7 +77,7 @@ public class WarpDriveConfig
 	public static int TF_MAX_SIZE=32;
 	
 	//Transporter
-	public static int     TR_MAX_ENERGY=10000000;
+	public static int     TR_MAX_ENERGY=25000000;
 	public static boolean TR_RELATIVE_COORDS=false;
 	public static double  TR_EU_PER_METRE=100;
 	public static double  TR_MAX_SCAN_RANGE=4;
@@ -234,7 +234,7 @@ public class WarpDriveConfig
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
 		
 		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 10000000).getInt();	
+		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 25000000).getInt();	
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();

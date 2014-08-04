@@ -12,6 +12,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.WarpDrive.block.BlockAir;
+import cr0s.WarpDrive.block.BlockBeacon;
 import cr0s.WarpDrive.block.BlockGas;
 import cr0s.WarpDrive.item.ItemWarpComponent;
 import cr0s.WarpDrive.machines.*;
@@ -235,6 +236,9 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(powerLaserBlock,"powerLaser");
 		GameRegistry.registerTileEntity(TileEntityPowerLaser.class,"powerLaser");
 		
+		
+		transportBeaconBlock = new BlockBeacon(WarpDriveConfig.transportBeaconID);
+		GameRegistry.registerBlock(transportBeaconBlock,"transportBeacon");
 		// TRANSPORT BEACON
 		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)
 			.setHardness(0.5F)
@@ -408,6 +412,13 @@ public class WarpDrive implements LoadingCallback {
 				'o', componentItem.getIS(4),
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
+		
+		//Transport Beacon
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transportBeaconBlock),false, " e ","ldl", " s ",
+				'e', Item.enderPearl,
+				'l', "dyeBlue",
+				'd', Item.diamond,
+				's', Item.stick));
 	}
 	
 	/*private void initIC2Recipes()
