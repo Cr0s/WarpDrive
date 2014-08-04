@@ -120,38 +120,30 @@ public class SpaceEventHandler {
 								hasHelmet = true;
 								if (air == null) {// new player in space => grace period
 									player_airTank.put(player.username, AIR_TANK_TICKS);
-									player.setAir(300);
 								} else if (air <= 1) {
 									if (breathHelmet.removeAir(player)) {
 										player_airTank.put(player.username, AIR_TANK_TICKS);
-										player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 									} else {
 										player_airTank.put(player.username, AIR_DROWN_TICKS);
-										player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
-										player.attackEntityFrom(DamageSource.drown, 5.0F);
+										player.attackEntityFrom(DamageSource.drown, 2.0F);
 									}
 								} else {
 									player_airTank.put(player.username, air - 1);
-									player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 								}
 							}
 						} else if (WarpDriveConfig.SpaceHelmets.contains(helmetStack.itemID)) {
 							hasHelmet = true;
 							if (air == null) {// new player in space => grace period
 								player_airTank.put(player.username, AIR_TANK_TICKS);
-								player.setAir(300);
 							} else if (air <= 1) {
 								if (consumeO2(player.inventory.mainInventory, player)) {
 									player_airTank.put(player.username, AIR_TANK_TICKS);
-									player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 								} else {
 									player_airTank.put(player.username, AIR_DROWN_TICKS);
-									player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
-									entity.attackEntityFrom(DamageSource.drown, 5.0F);
+									entity.attackEntityFrom(DamageSource.drown, 2.0F);
 								}
 							} else {
 								player_airTank.put(player.username, air - 1);
-								player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 							}
 						}
 					}
@@ -159,14 +151,11 @@ public class SpaceEventHandler {
 					if (!hasHelmet) {
 						if (air == null) {// new player in space => grace period
 							player_airTank.put(player.username, AIR_TANK_TICKS);
-							player.setAir(300);
 						} else if (air <= 1) {
 							player_airTank.put(player.username, AIR_DROWN_TICKS);
-							player.setAir(Math.round(AIR_DROWN_TICKS * 300.0F / AIR_TANK_TICKS));
-							entity.attackEntityFrom(DamageSource.drown, 5.0F);
+							entity.attackEntityFrom(DamageSource.drown, 2.0F);
 						} else {
 							player_airTank.put(player.username, air - 1);
-							player.setAir(Math.round(air * 300.0F / AIR_TANK_TICKS));
 						}
 					}
 

@@ -49,8 +49,8 @@ public class BlockPowerReactor extends BlockContainer {
 	public void breakBlock(World w,int x,int y,int z, int oid,int om) {
 		super.breakBlock(w, x, y, z, oid, om);
 		
-		int[] xo = {-2,2,0,0};
-		int[] zo = {0,0,-2,2};
+		int[] xo = {-2, 2, 0, 0};
+		int[] zo = { 0, 0,-2, 2};
 		for(int i = 0; i < 4; i++) {
 			TileEntity te = w.getBlockTileEntity(x+xo[i], y, z+zo[i]);
 			if(te instanceof TileEntityPowerLaser) {
