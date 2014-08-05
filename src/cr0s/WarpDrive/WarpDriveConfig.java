@@ -566,7 +566,7 @@ public class WarpDriveConfig
 			Object z1 = z.getEnumConstants()[6];
 			AEExtra_fluidDrive = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
 			z = Class.forName("extracells.BlockEnum");
-			z1 = z.getEnumConstants()[10];
+			z1 = z.getEnumConstants()[9];
 			AEExtra_certusQuartzTank = (Block)z1.getClass().getDeclaredMethod("getBlockInstance").invoke(z1);
 		}
 		catch (Exception e)

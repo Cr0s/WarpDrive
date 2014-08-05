@@ -478,16 +478,12 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
 		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
 		ItemStack quantumEntangledSingularity = WarpDriveConfig.getAEMaterial("matQuantumEntangledSingularity");
-		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEMaterial("matQuartz");
+		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEBlock("blkQuartzLamp");
 		vibrantQuartzGlass.setItemDamage(4);
 		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
 		antimatter.setItemDamage(1);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
 		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack, 1, 0);
-		WarpDrive.debugPrint("quantumEntangledSingularity is " + quantumEntangledSingularity.itemID);
-		WarpDrive.debugPrint("vibrantQuartzGlass is " + vibrantQuartzGlass.itemID);
-		WarpDrive.debugPrint("antimatter is " + antimatter.itemID);
-		WarpDrive.debugPrint("ultimateLappack is " + ultimateLappack.itemID);
 
 		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
 		// middle = fluix crystal, advancedMachine, fluix crystal
