@@ -69,7 +69,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			if (random.nextBoolean()) {
 				generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
 			}
-		} else if (WarpDriveConfig.isAELoaded && random.nextInt(1600) == 1) {// Quartz asteroid
+		} else if (WarpDriveConfig.isAppliedEnergisticsLoaded && random.nextInt(1600) == 1) {// Quartz asteroid
 			generateAsteroidOfBlock(world, x, y, z, 3, 2, WarpDriveConfig.getAEBlock("blkQuartzOre").itemID, WarpDriveConfig.getAEBlock("blkQuartzOre").getItemDamage());
 			if (random.nextBoolean()) {
 				generateGasCloudOfColor(world, x, y, z, 4, 7, random.nextInt(12));

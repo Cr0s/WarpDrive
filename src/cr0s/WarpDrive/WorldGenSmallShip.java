@@ -645,7 +645,7 @@ public class WorldGenSmallShip extends WorldGenerator
 
 					// AE Quarz
 				case 9:
-					if (WarpDriveConfig.isAELoaded)
+					if (WarpDriveConfig.isAppliedEnergisticsLoaded)
 					{
 						res = WarpDriveConfig.getAEMaterial("matQuartz").copy();
 						res.stackSize = 2 + rand.nextInt(22);
@@ -656,7 +656,7 @@ public class WorldGenSmallShip extends WorldGenerator
 
 					// AE improved processor
 				case 10:
-					if (WarpDriveConfig.isAELoaded)
+					if (WarpDriveConfig.isAppliedEnergisticsLoaded)
 					{
 						res = WarpDriveConfig.getAEMaterial("matProcessorAdvanced").copy();
 						res.stackSize = 1 + rand.nextInt(3);

@@ -24,9 +24,9 @@ public class WarpDriveConfig
 	 * The variables which store whether or not individual mods are loaded
 	 */
 	public static boolean isGregLoaded						= false;
-	public static boolean isAELoaded						= false;
+	public static boolean isAppliedEnergisticsLoaded		= false;
 	public static boolean isAdvSolPanelLoaded				= false;
-	public static boolean isASLoaded						= false;
+	public static boolean isAtomicScienceLoaded				= false;
 	public static boolean isAEExtraLoaded					= false;
 	public static boolean isICBMLoaded						= false;
 	public static boolean isMFFSLoaded						= false;
@@ -48,11 +48,13 @@ public class WarpDriveConfig
 	public static int[] IC2_Empty;
 	public static int IC2_RubberWood;
 	public static ItemStack IC2_Resin;
+	public static Item IC2_fluidCell;
 	public static int CC_Computer = 0, CC_peripheral = 0, CC_Floppy = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0;
 	public static int GT_Ores = 0, GT_Granite = 0, GT_Machine = 0;
 	public static int ASP = 0;
-	public static int AS_Turbine = 0;
+	public static int AS_Turbine = 0, AS_deuteriumCell = 0;
 	public static int ICBM_Machine = 0, ICBM_Missile = 0, ICBM_Explosive = 0;
+	public static int GS_ultimateLappack = 0;
 	public static int UB_igneousStone = 0, UB_igneousCobblestone = 0, UB_metamorphicStone = 0, UB_metamorphicCobblestone = 0, UB_sedimentaryStone = 0;
 	public static int NetherOres_count;
 	public static int[] NetherOres_block;
@@ -66,7 +68,8 @@ public class WarpDriveConfig
 	private static Class<?> AEMaterials;
 	private static Class<?> AEItems;
 	public static ArrayList<int[]> CommonWorldGenOres;
-	public static Item AEExtraFDI;
+	public static Item AEExtra_fluidDrive;
+	public static Block AEExtra_certusQuartzTank;
 	
 	public static boolean debugMode = false;
 
@@ -289,7 +292,7 @@ public class WarpDriveConfig
 		// Reactor
 		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
 		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update",20).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 3).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 4).getInt();
 
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
@@ -358,9 +361,9 @@ public class WarpDriveConfig
 		if (isGregLoaded)
 			loadGT();
 		
-		isAELoaded = Loader.isModLoaded("AppliedEnergistics");
-		if (isAELoaded)
-			loadAE();
+		isAppliedEnergisticsLoaded = Loader.isModLoaded("AppliedEnergistics");
+		if (isAppliedEnergisticsLoaded)
+			loadAppliedEnergistics();
 		
 		isAEExtraLoaded = Loader.isModLoaded("extracells");
 		if (isAEExtraLoaded)
@@ -370,9 +373,9 @@ public class WarpDriveConfig
 		if (isAdvSolPanelLoaded)
 			loadASP();
 		
-		isASLoaded = Loader.isModLoaded("AtomicScience");
-		if (isASLoaded)
-			loadAS();
+		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
+		if (isAtomicScienceLoaded)
+			loadAtomicScience();
 		
 		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
 		if (isICBMLoaded)
@@ -384,7 +387,7 @@ public class WarpDriveConfig
 		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded)
-			loadGS();
+			loadGraviSuite();
 		
 		isUndergroundBiomesLoaded = Loader.isModLoaded("UndergroundBiomes");
 		if (isUndergroundBiomesLoaded)
@@ -482,10 +485,10 @@ public class WarpDriveConfig
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		IC2_Empty = new int[] {Items.getItem("cell").itemID, Items.getItem("cell").getItemDamage()};
 		ItemStack rubberWood = Items.getItem("rubberWood");
-		ItemStack stickyResin = Items.getItem("resin");
-		if(rubberWood != null)
+		IC2_Resin = Items.getItem("resin");
+		if(rubberWood != null) {
 			IC2_RubberWood = rubberWood.itemID;
-		IC2_Resin = stickyResin;
+		}
 		ItemStack ore = Items.getItem("uraniumOre");
 		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
 		ore = Items.getItem("copperOre");
@@ -496,7 +499,7 @@ public class WarpDriveConfig
 		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
 
 		MinerOres.add(Items.getItem("rubberWood").itemID);
-		AEExtraFDI = Items.getItem("FluidCell").getItem();
+		IC2_fluidCell = Items.getItem("FluidCell").getItem();
 	}
 
 	private static void loadCC()
@@ -538,7 +541,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadAE()
+	private static void loadAppliedEnergistics()
 	{
 		try
 		{
@@ -549,9 +552,9 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			WarpDrive.debugPrint("WarpDriveConfig Error loading AE classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading AppliedEnergistics classes");
 			e.printStackTrace();
-			isAELoaded = false;
+			isAppliedEnergisticsLoaded = false;
 		}
 	}
 
@@ -561,7 +564,10 @@ public class WarpDriveConfig
 		{
 			Class<?> z = Class.forName("extracells.ItemEnum");
 			Object z1 = z.getEnumConstants()[6];
-			AEExtraFDI = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
+			AEExtra_fluidDrive = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
+			z = Class.forName("extracells.BlockEnum");
+			z1 = z.getEnumConstants()[10];
+			AEExtra_certusQuartzTank = (Block)z1.getClass().getDeclaredMethod("getBlockInstance").invoke(z1);
 		}
 		catch (Exception e)
 		{
@@ -589,18 +595,15 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadAS()
-	{
-		try
-		{
-			Class<?> z = Class.forName("atomicscience.AtomicScience");
-			CommonWorldGenOres.add(new int[] {((Block)z.getField("bHeOre").get(null)).blockID, 0});
-			AS_Turbine = ((Block)z.getField("bWoLun").get(null)).blockID;
-		}
-		catch (Exception e)
-		{
+	private static void loadAtomicScience() {
+		try {
+			Class<?> z = Class.forName("resonantinduction.atomic.Atomic");
+			CommonWorldGenOres.add(new int[] {((Block)z.getField("blockUraniumOre").get(null)).blockID, 0});
+			AS_Turbine = ((Block)z.getField("blockElectricTurbine").get(null)).blockID;
+			AS_deuteriumCell = ((Item)z.getField("itemDeuteriumCell").get(null)).itemID;
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading AS classes");
-			isASLoaded = false;
+			isAtomicScienceLoaded = false;
 		}
 	}
 
@@ -631,13 +634,14 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadGS() {
+	private static void loadGraviSuite() {
 		try {
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
 			if (z.getField("ultimateSolarHelmet").get(null) != null)
 				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 			Jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
 			Jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
+			GS_ultimateLappack = z.getField("ultimateLappackID").getInt(null) + 256;
 		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
@@ -808,7 +812,7 @@ public class WarpDriveConfig
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
 		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
 			return Metallurgy_overworldOresBlock[random.nextInt(Metallurgy_overworldOresBlock.length)];
-		} else if (isAELoaded && random.nextInt(750) == 1) {
+		} else if (isAppliedEnergisticsLoaded && random.nextInt(750) == 1) {
 			return new int[] {getAEBlock("blkQuartzOre").itemID, getAEBlock("blkQuartzOre").getItemDamage()};
 		} else if (random.nextInt(250) == 1) {
 			return new int[] {Block.oreDiamond.blockID, 0};
@@ -880,8 +884,7 @@ public class WarpDriveConfig
 		return new int[] {blockID, blockMeta};
 	}
 
-	public static boolean isAirBlock(World worldObj, int id, int x, int y, int z)
-	{
+	public static boolean isAirBlock(World worldObj, int id, int x, int y, int z) {
 		return id == 0 || Block.blocksList[id] == null || Block.blocksList[id].isAirBlock(worldObj, x, y, z);
     }
 }

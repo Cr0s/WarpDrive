@@ -332,7 +332,7 @@ public class WarpDrive implements LoadingCallback {
 		if (WarpDriveConfig.isICLoaded && WarpDriveConfig.recipesIC2) {
 			initIC2Recipes();
 		}
-		if (WarpDriveConfig.isAELoaded && WarpDriveConfig.isThermalExpansionLoaded) {
+		if (WarpDriveConfig.isAppliedEnergisticsLoaded && WarpDriveConfig.isThermalExpansionLoaded) {
 			initAETERecipes();
 		}
 		if (!WarpDriveConfig.recipesIC2) {
@@ -477,7 +477,17 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
 		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
+		ItemStack quantumEntangledSingularity = WarpDriveConfig.getAEMaterial("matQuantumEntangledSingularity");
+		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEMaterial("matQuartz");
+		vibrantQuartzGlass.setItemDamage(4);
+		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
+		antimatter.setItemDamage(1);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
+		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack, 1, 0);
+		WarpDrive.debugPrint("quantumEntangledSingularity is " + quantumEntangledSingularity.itemID);
+		WarpDrive.debugPrint("vibrantQuartzGlass is " + vibrantQuartzGlass.itemID);
+		WarpDrive.debugPrint("antimatter is " + antimatter.itemID);
+		WarpDrive.debugPrint("ultimateLappack is " + ultimateLappack.itemID);
 
 		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
 		// middle = fluix crystal, advancedMachine, fluix crystal
@@ -497,6 +507,28 @@ public class WarpDrive implements LoadingCallback {
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'o', floppy,
 			'f', fluixCrystal);
+		
+		// top = Iridium plate, Ultimate lappack, Iridium plate
+		// middle = Singularity, 1 gram antimatter, Singularity
+		// bottom = Iridium plate, Ultimate lappack, Iridium plate
+		GameRegistry.addRecipe(new ItemStack(powerReactorBlock), "ili", "sas", "ili",
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			's', quantumEntangledSingularity,
+			'a', antimatter,
+			'l', ultimateLappack);
+		
+		// top = Advanced circuit, Advanced alloy, Advanced alloy
+		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass
+		// bottom = Advanced circuit, Certus quartz tank, Advanced alloy
+		ItemStack isMiningLaserBlock = new ItemStack(miningLaserBlock.blockID, 1, 0);
+		ItemStack isCertusQuartzTank = new ItemStack(WarpDriveConfig.AEExtra_certusQuartzTank.blockID, 1, 0);
+
+		GameRegistry.addRecipe(new ItemStack(powerLaserBlock), "caa", "czg", "cta",
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			'z', isMiningLaserBlock,
+			't', isCertusQuartzTank,
+			'g', vibrantQuartzGlass);
 	}
 	
 	private static void initIC2Recipes() {
