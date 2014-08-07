@@ -37,7 +37,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	
 	int warpCoreSearchTicks = 0;
 
-	// Config
+	// Config //TODO add to WarpDriveConfig
 	private final String SCHEMATICS_DIR = "warpDrive_schematics";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
@@ -63,9 +63,8 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	
 	@Override
 	public void updateEntity() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
-		}
 
 		super.updateEntity();
 
@@ -145,7 +144,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			deployDelayTicks = 0;
 			
 			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
-			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -229,14 +227,12 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
 	
-		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
 		
 		int size = width * length * height;
 		
 		// Consume energy
 		consumeEnergy(size * EU_PER_BLOCK_SCAN, false);
 		
-		System.out.println("[ShipScanner] Size: " + size);
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -343,9 +339,9 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			schematicFileName = (new StringBuilder().append(core.coreFrequency)
 					.append(System.currentTimeMillis()).append(".schematic"))
 					.toString();
-		} while (new File(this.SCHEMATICS_DIR + "/" + schematicFileName).exists());
+		} while (new File(SCHEMATICS_DIR + "/" + schematicFileName).exists());
 
-		saveShipToSchematic(this.SCHEMATICS_DIR + "/" + schematicFileName);
+		saveShipToSchematic(SCHEMATICS_DIR + "/" + schematicFileName);
 	}
 
 	private static NBTTagCompound readNBTFromFile(String fileName) {
@@ -367,13 +363,12 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	
 		return null;
 	}
-		
+	
 	// Returns result array for CC interface: [ code, "message" ]
 	private Object[] deployShip(String fileName, int offsetX, int offsetY, int offsetZ) {
 		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
 		
 		if (schematic == null) {
-			System.out.println("[ShipScanner] Schematic is null!");
 			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
 		}
 		
@@ -395,7 +390,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		
 		int size = width* height * length;
 		
-		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
 		
 		// Check energy level
 		if (!consumeEnergy(size * EU_PER_BLOCK_DEPLOY, false)) {
@@ -417,7 +411,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		}
 
 		if (occupiedBlockCount > 0) {
-			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
 			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
 		}
 		
@@ -431,11 +424,9 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		this.newY = targetY;
 		this.newZ = targetZ;
 		
-		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
 		
 		// Read blocks and TileEntities from NBT to internal storage array
 		
-		System.out.println("[ShipScanner] Loading blocks...");
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
@@ -454,7 +445,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		}
 		
 		// Load Tile Entities
-		System.out.println("[ShipScanner] Loading TileEntities...");
 		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
@@ -464,7 +454,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			int teY = teTag.getInteger("y");
 			int teZ = teTag.getInteger("z");
 			
-			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
 			tileEntities[teX + (teY * length + teZ) * width] = teTag;
 		}			
 		
@@ -501,13 +490,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 						
 						blocksToDeploy[x + (y * length + z) * width] = jb;
 					}
-					
 				}
 			}
 		}
 		
 		switchState(1);
-		System.out.println("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
 	
@@ -567,15 +554,15 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				int y = ((Double)arguments[2]).intValue();
 				int z = ((Double)arguments[3]).intValue();
 				
-				if (!new File(SCHEMATICS_DIR  + "/" + fileName).exists()) 
+				if (!new File(SCHEMATICS_DIR + "/" + fileName).exists()) {
 					return new Object[] { 0, "Specified .schematic file not found!" };
-				else
+				} else
 				{
-					System.out.println("[ShipScanner] Trying to deploy ship");
 					return deployShip(fileName, x, y, z);
 				}
-			} else
+			} else {
 				return new Object[] { 4, ".schematic file name not specified or invalid arguments count!" };
+			}
 		}
 		
 		return null;
@@ -634,7 +621,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	// Own implementation of setting blocks without light recalculation in optimization purposes
 	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
 	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
+		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) //FIXME magic numbers
 		{
 			if (y < 0)
 			{

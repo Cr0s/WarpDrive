@@ -26,6 +26,10 @@ import net.minecraft.world.ChunkPosition;
 import cr0s.WarpDrive.*;
 
 public class TileEntityLaser extends WarpTE implements IPeripheral {
+	//magic constants
+	private final int SCANNING_BEAM_LENGTH = 400;	//FIXME merge re-adding a non-used definition?
+	private final int SCANNING_BEAM_FREQ = 1420;
+
 	private int dx, dz, dy;
 	public float yaw, pitch; // laser direction
 
@@ -139,9 +143,9 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
-
+		
 		// This is scanning beam, do not deal damage to blocks
-		if (beamFrequency == 1420) {
+		if (beamFrequency == SCANNING_BEAM_FREQ) {
 			firstHit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), false, false);
 
  			if (firstHit != null) {
@@ -149,7 +153,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			} else {
 				WarpDrive.sendLaserPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
   			}
-
+ 			
 			return;
 		}
 
@@ -465,7 +469,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				} else if (arguments.length == 3) {
 					double dx = (Double)arguments[0];
 					double dy = (Double)arguments[1];
-					double dz = -(Double)arguments[2];
+					double dz = -(Double)arguments[2];	//FIXME kostyl
 					double targetX = xCoord + dx;
 					double targetY = yCoord + dy;
 					double targetZ = zCoord + dz;

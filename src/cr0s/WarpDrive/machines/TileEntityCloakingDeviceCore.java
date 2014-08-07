@@ -2,7 +2,7 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-import cr0s.WarpDrive.CloakManager.CloakedArea;
+import cr0s.WarpDrive.CloakedArea;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -374,21 +374,19 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 
         if (x1 < x2) {
         	this.minX = x1; this.maxX = x2;
-        }
-        else {
+        } else {
         	this.minX = x2; this.maxX = x1;
         }
 
         if (z1 < z2) {
         	this.minZ = z1; this.maxZ = z2;
-        }
-        else {
+        } else {
         	this.minZ = z2; this.maxZ = z1;
-        }		
-		
+        }
+        
         this.minY = yCoord - this.down;
         this.maxY = yCoord + this.up;
-        
+		
 		return true;
 	}
 
