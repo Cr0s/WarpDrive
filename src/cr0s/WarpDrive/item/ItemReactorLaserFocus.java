@@ -18,7 +18,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
 		super(id);
 		setMaxDamage(maxHeat);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Reactor Laser Focus");
+		setUnlocalizedName("warpdrive.items.ReactorLaserFocus");
 	}
 	
 	@Override
@@ -28,7 +28,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
         this.itemIcon = par1IconRegister.registerIcon("warpdrive:reactorFocus");
     }
 	
-	private void damageComponent(ItemStack self,int damage)
+	private static void damageComponent(ItemStack self,int damage)
 	{
 		//WarpDrive.debugPrint("ReactorCompDamage:" + damage);
 		int currDamage = self.getItemDamage();
@@ -36,7 +36,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
 		self.setItemDamage(nextDamage);
 	}
 	
-	private void balanceComponent(ItemStack self, ItemStack other)
+	private static void balanceComponent(ItemStack self, ItemStack other)
 	{
 		final int selfBalance = 4;
 		int otherDamage = other.getItemDamage();
@@ -47,7 +47,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
 		other.setItemDamage(newOne);
 	}
 	
-	private void coolComponent(ItemStack self, IReactorComponent comp, IReactor reactor, ItemStack stack, int x, int y)
+	private static void coolComponent(ItemStack self, IReactorComponent comp, IReactor reactor, ItemStack stack, int x, int y)
 	{
 		int maxTransfer = maxHeat - self.getItemDamage();
 		int compHeat = comp.getCurrentHeat(reactor, stack, x, y);
@@ -56,7 +56,7 @@ public class ItemReactorLaserFocus extends Item implements IReactorComponent
 		damageComponent(self,retained - transferHeat);
 	}
 	
-	private void coolReactor(IReactor reactor,ItemStack stack)
+	private static void coolReactor(IReactor reactor,ItemStack stack)
 	{
 		int reactorHeat = reactor.getHeat();
 		int myHeat = stack.getItemDamage();

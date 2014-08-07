@@ -20,23 +20,25 @@ public class BlockRadar extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_ACTIVATED_SCAN = 4;
+    private final int ICON_SIDE_INACTIVE = 0;
+    private final int ICON_BOTTOM = 1;
+    private final int ICON_TOP = 2;
+    private final int ICON_SIDE_ACTIVATED = 3;
+    private final int ICON_SIDE_ACTIVATED_SCAN = 4;
 
-    public BlockRadar(int id, int texture, Material material)
-    {
+    public BlockRadar(int id, int texture, Material material) {
         super(id, material);
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("W-Radar");
+		setUnlocalizedName("warpdrive.machines.WarpRadar");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
-    {
-        iconBuffer = new Icon[5];
-        iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:radarSideInactive");
+    public void registerIcons(IconRegister par1IconRegister) {
+        iconBuffer = new Icon[16];
+        iconBuffer[ICON_SIDE_INACTIVE] = par1IconRegister.registerIcon("warpdrive:radarSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:contTop");
         iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:radarSideActive");
@@ -44,36 +46,26 @@ public class BlockRadar extends BlockContainer
     }
 
     @Override
-    public Icon getIcon(int side, int metadata)
-    {
-        if (side == 0)
-        {
+    public Icon getIcon(int side, int metadata) {
+        if (side == 0) {
             return iconBuffer[ICON_BOTTOM];
-        }
-        else if (side == 1)
-        {
+        } else if (side == 1) {
             return iconBuffer[ICON_TOP];
         }
 
-        if (metadata == 0) // Inactive state
-        {
-            return iconBuffer[ICON_INACTIVE_SIDE];
-        }
-        else if (metadata == 1)     // Attached state
-        {
+        if (metadata == 0) {// Inactive state
+            return iconBuffer[ICON_SIDE_INACTIVE];
+        } else if (metadata == 1) { // Attached state
             return iconBuffer[ICON_SIDE_ACTIVATED];
-        }
-        else if (metadata == 2)     // Scanning state
-        {
+        } else if (metadata == 2) { // Scanning state
             return iconBuffer[ICON_SIDE_ACTIVATED_SCAN];
         }
 
-        return null;
+        return iconBuffer[ICON_SIDE_INACTIVE];
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1)
-    {
+    public TileEntity createNewTileEntity(World var1) {
         return new TileEntityRadar();
     }
 
@@ -81,8 +73,7 @@ public class BlockRadar extends BlockContainer
      * Returns the quantity of items to drop on block destruction.
      */
     @Override
-    public int quantityDropped(Random par1Random)
-    {
+    public int quantityDropped(Random par1Random) {
         return 1;
     }
 
@@ -90,36 +81,29 @@ public class BlockRadar extends BlockContainer
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3)
-    {
+    public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
 
     @Override
-    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
-    {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-        {
+    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return false;
         }
 
-        TileEntityRadar radar = (TileEntityRadar)par1World.getBlockTileEntity(par2, par3, par4);
-
-        if (radar != null)
-        {
-            par5EntityPlayer.addChatMessage("[Radar] Energy level: " + radar.getCurrentEnergyValue() + " Eu");
+        WarpEnergyTE te = (WarpEnergyTE)par1World.getBlockTileEntity(par2, par3, par4);
+        if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
+        	par5EntityPlayer.addChatMessage(te.getStatus());
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
-    {
+    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
-
-        if (te != null)
-        {
+        if (te != null) {
             te.invalidate();
         }
 

@@ -14,23 +14,20 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockLaserTreeFarm extends BlockContainer
-{
+public class BlockLaserTreeFarm extends BlockContainer {
     private Icon[] iconBuffer;
 
-    public BlockLaserTreeFarm(int id, int texture, Material material)
-    {
+    public BlockLaserTreeFarm(int id, int texture, Material material) {
         super(id, material);
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser Tree Farm");
+		setUnlocalizedName("warpdrive.machines.LaserTreeFarm");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
-    {
+    public void registerIcons(IconRegister par1IconRegister) {
         iconBuffer = new Icon[2];
         // Solid textures
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:particleBoosterTopBottom");
@@ -38,10 +35,8 @@ public class BlockLaserTreeFarm extends BlockContainer
     }
 
     @Override
-    public Icon getIcon(int side, int metadata)
-    {
-        if (side == 0 || side == 1)
-        {
+    public Icon getIcon(int side, int metadata) {
+        if (side == 0 || side == 1) {
             return iconBuffer[0];
         }
 
@@ -49,8 +44,7 @@ public class BlockLaserTreeFarm extends BlockContainer
     }
     
     @Override
-    public TileEntity createNewTileEntity(World var1)
-    {
+    public TileEntity createNewTileEntity(World var1) {
         return new TileEntityLaserTreeFarm();
     }
 
@@ -58,8 +52,7 @@ public class BlockLaserTreeFarm extends BlockContainer
      * Returns the quantity of items to drop on block destruction.
      */
     @Override
-    public int quantityDropped(Random par1Random)
-    {
+    public int quantityDropped(Random par1Random) {
         return 1;
     }
 
@@ -67,8 +60,7 @@ public class BlockLaserTreeFarm extends BlockContainer
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3)
-    {
+    public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
 }

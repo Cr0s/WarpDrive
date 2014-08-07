@@ -1,22 +1,16 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.JumpBlock;
-import cr0s.WarpDrive.Vector3;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
-import net.minecraftforge.common.ForgeDirection;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
+import cr0s.WarpDrive.*;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 import ic2.api.energy.tile.IEnergyTile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import net.minecraft.block.Block;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -27,17 +21,14 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityShipScanner extends TileEntityAbstractLaser implements IEnergySink,
-		IPeripheral {
-	public boolean addedToEnergyNet = false;
-
+public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
-	private int currentEnergyValue = 0;
 
 	private int state = 0; // 0 - inactive, 1 - active
+	private int firstUncoveredY;
 
+	private boolean isEnabled = false;
 	private TileEntityReactor core = null;
 
 	int laserTicks = 0;
@@ -47,17 +38,17 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	int warpCoreSearchTicks = 0;
 
 	// Config
-	//private final String SCHEMATICS_DIR = "/home/cros/mc_site/schematics/";
-	private final String SCHEMATICS_DIR = WarpDriveConfig.schemaLocation;
+	private final String SCHEMATICS_DIR = "warpDrive_schematics";
 	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
 	private final int EU_PER_BLOCK_DEPLOY = 5000;
-	private final int BLOCK_TO_DEPLOY_PER_TICK = 1000;
+	private final int BLOCK_TO_DEPLOY_PER_TICK = 3000;
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
-	private String[] methodsArray = { "scanShip", // 0
-			"getSchematicFileName", // 1
-			"getEnergyLevel", // 2
-			"deployShipFromSchematic" // 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+	private String[] methodsArray = {
+		"scan",					// 0
+		"fileName",		// 1
+		"energy",			// 2
+		"deploy"	// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
@@ -76,10 +67,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			return;
 		}
 
-		if (!addedToEnergyNet && !this.tileEntityInvalid) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			addedToEnergyNet = true;
-		}
+		super.updateEntity();
 
 		if (++warpCoreSearchTicks > 20) {
 			core = searchWarpCore();
@@ -94,8 +82,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 
 		if (state == 0) { // inactive
 			if (++laserTicks > 20) {
-				sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(core.xCoord, core.yCoord, core.zCoord).translate(0.5), 0f,
-						1f, 0f, 40, 0, 100);
+				WarpDrive.sendLaserPacket(worldObj,
+						new Vector3(this).translate(0.5D), new Vector3(core.xCoord, core.yCoord, core.zCoord).translate(0.5D),
+						0f, 1f, 0f, 40, 0, 100);
 				laserTicks = 0;
 			}
 		} else if (state == 1 && !isDeploying) { // active: scanning
@@ -141,7 +130,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 							g = 0f;
 					}
 					
-					sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(x, core.maxY, randomZ).translate(0.5), r, g, b, 15, 0, 100);
+					WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(x, core.maxY, randomZ).translate(0.5D), r, g, b, 15, 0, 100);
 				}
 			}
 			
@@ -156,7 +145,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			deployDelayTicks = 0;
 			
 			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
-			WarpDrive.debugPrint("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
+			System.out.println("[ShipScanner] Deploying ship part: " + currentDeployIndex + "/" + blocksToDeployCount + " [remains: " + blocks + "]");
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -176,16 +165,19 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 				// Deploy single block
 				JumpBlock block = blocksToDeploy[currentDeployIndex];
 				
-				if (block!= null && worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z))
-				{
+				if (block != null &&
+					block.blockID != Block.bedrock.blockID &&
+					!WarpDriveConfig.scannerIgnoreBlocks.contains(block.blockID) &&
+					worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z)) {
 					moveBlockSimple(block);
 					
 					if (worldObj.rand.nextInt(100) <= 10) {
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						
-						sendLaserPacket(new Vector3(this).translate(0.5), new Vector3(
-								newX + block.x, newY + block.y, newZ + block.z).translate(0.5), 0f,
-								1f, 0f, 15, 0, 100);
+						WarpDrive.sendLaserPacket(worldObj,
+								new Vector3(this).translate(0.5D),
+								new Vector3(newX + block.x, newY + block.y, newZ + block.z).translate(0.5D),
+								0f, 1f, 0f, 15, 0, 100);
 					}
 				}
 				
@@ -200,20 +192,17 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	}
 
 	private TileEntityReactor searchWarpCore() {
+		StringBuilder reason = new StringBuilder();
 		TileEntityReactor result = null;
 
 		// Search for warp cores above
 		for (int newY = yCoord + 1; newY <= 255; newY++) {
-			if (worldObj.getBlockId(xCoord, newY, zCoord) == WarpDriveConfig.coreID) { // found
-																							// warp
-																							// core
-																							// above
+			if (worldObj.getBlockId(xCoord, newY, zCoord) == WarpDriveConfig.coreID) { // found warp core above
 				result = (TileEntityReactor) worldObj.getBlockTileEntity(
 						xCoord, newY, zCoord);
 
 				if (result != null) {
-					if (!result.prepareToJump()) { // If we can't refresh ship's
-													// spatial parameters
+					if (!result.validateShipSpatialParameters(reason)) { // If we can't refresh ship's spatial parameters
 						result = null;
 					}
 				}
@@ -223,15 +212,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		}
 
 		return result;
-	}
-
-	// Checks energy level
-	private boolean isEnoughEnergyForScan() {
-		if (core != null) {
-			return core.shipVolume * EU_PER_BLOCK_SCAN <= currentEnergyValue;
-		}
-
-		return false;
 	}
 
 	private void saveShipToSchematic(String fileName) {
@@ -249,14 +229,14 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
 	
-		WarpDrive.debugPrint("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
+		System.out.println("[ShipScanner] Ship parameters: w: " + width + ", l: " + length + ", h:" + height);
 		
 		int size = width * length * height;
 		
 		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_SCAN);
+		consumeEnergy(size * EU_PER_BLOCK_SCAN, false);
 		
-		WarpDrive.debugPrint("[ShipScanner] Size: " + size);
+		System.out.println("[ShipScanner] Size: " + size);
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -272,8 +252,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
 					
 					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID || WarpDriveConfig.scannerIgnoreBlocks.contains(blockID))
+					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID /*|| WarpDriveConfig.scannerIgnoreBlocks.contains(blockID)/**/) {
 						blockID = 0;
+					}
 					
 					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					localBlocks[x + (y * length + z) * width] = (byte) blockID;
@@ -330,8 +311,8 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		writeNBTToFile(fileName, schematic);
 	}
 
-	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
-		WarpDrive.debugPrint("[ShipScanner] Filename: " + fileName);
+	private static void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
+		System.out.println("[ShipScanner] Filename: " + fileName);
 		
 		try {
 			File file = new File(fileName);
@@ -341,8 +322,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 
 			FileOutputStream fileoutputstream = new FileOutputStream(file);
 
-			CompressedStreamTools.writeCompressed(nbttagcompound,
-					fileoutputstream);
+			CompressedStreamTools.writeCompressed(nbttagcompound, fileoutputstream);
 
 			fileoutputstream.close();
 		} catch (Exception exception) {
@@ -356,19 +336,19 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		switchState(1);
 		File f = new File(SCHEMATICS_DIR);
 		if (!f.exists() || !f.isDirectory())
-					f.mkdirs();
+			f.mkdirs();
 
 		// Generate unique file name
 		do {
 			schematicFileName = (new StringBuilder().append(core.coreFrequency)
 					.append(System.currentTimeMillis()).append(".schematic"))
 					.toString();
-		} while (new File(this.SCHEMATICS_DIR + schematicFileName).exists());
+		} while (new File(this.SCHEMATICS_DIR + "/" + schematicFileName).exists());
 
-		saveShipToSchematic(this.SCHEMATICS_DIR + schematicFileName);
+		saveShipToSchematic(this.SCHEMATICS_DIR + "/" + schematicFileName);
 	}
 
-	private NBTTagCompound readNBTFromFile(String fileName) {
+	private static NBTTagCompound readNBTFromFile(String fileName) {
 		try {
 			File file = new File(fileName);
 			if (!file.exists()) {
@@ -376,8 +356,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			}
 			
 			FileInputStream fileinputstream = new FileInputStream(file);
-			NBTTagCompound nbttagcompound = CompressedStreamTools
-					.readCompressed(fileinputstream);
+			NBTTagCompound nbttagcompound = CompressedStreamTools.readCompressed(fileinputstream);
 
 			fileinputstream.close();
 			
@@ -388,17 +367,13 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 	
 		return null;
 	}
-	
-	private boolean isEnoughEnergyForDeploy(int size) {
-		return size * EU_PER_BLOCK_DEPLOY <= currentEnergyValue;
-	}
-	
+		
 	// Returns result array for CC interface: [ code, "message" ]
 	private Object[] deployShip(String fileName, int offsetX, int offsetY, int offsetZ) {
-		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + fileName);
+		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
 		
 		if (schematic == null) {
-			WarpDrive.debugPrint("[ShipScanner] Schematic is null!");
+			System.out.println("[ShipScanner] Schematic is null!");
 			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
 		}
 		
@@ -420,12 +395,13 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		
 		int size = width* height * length;
 		
-		WarpDrive.debugPrint("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
+		System.out.println("[ShipScanner] Deploying ship: (size: " + size + ", h: " + height + ", w: " + width + ", l: " + length + ")");
 		
 		// Check energy level
-		if (!isEnoughEnergyForDeploy(size)) {
-			WarpDrive.debugPrint("[ShipScanner] Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu");
-			return new Object[] { 1, "Not enough energy! Need at least " + (Math.abs(size * EU_PER_BLOCK_DEPLOY - currentEnergyValue)) + " Eu" };
+		if (!consumeEnergy(size * EU_PER_BLOCK_DEPLOY, false)) {
+			String msg = "[ShipScanner] Not enough energy! Need at least " + (size * EU_PER_BLOCK_DEPLOY) + " EU";
+			WarpDrive.debugPrint(msg);
+			return new Object[] { 1, msg };
 		}
 		
 		// Check specified area for occupation by blocks
@@ -441,12 +417,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		}
 
 		if (occupiedBlockCount > 0) {
-			WarpDrive.debugPrint("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
+			System.out.println("[ShipScanner] Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
 			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
 		}
-		
-		// Consume energy
-		currentEnergyValue = Math.abs(currentEnergyValue - size * EU_PER_BLOCK_DEPLOY);
 		
 		// Set deployment vars
 		this.blocksToDeploy = new JumpBlock[size];
@@ -458,11 +431,11 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		this.newY = targetY;
 		this.newZ = targetZ;
 		
-		WarpDrive.debugPrint("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
+		System.out.println("[ShipScanner] Target to deploy: (" + targetX + ", " + targetY + ", " + targetZ + ")");
 		
 		// Read blocks and TileEntities from NBT to internal storage array
 		
-		WarpDrive.debugPrint("[ShipScanner] Loading blocks...");
+		System.out.println("[ShipScanner] Loading blocks...");
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
@@ -481,7 +454,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		}
 		
 		// Load Tile Entities
-		WarpDrive.debugPrint("[ShipScanner] Loading TileEntities...");
+		System.out.println("[ShipScanner] Loading TileEntities...");
 		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
@@ -491,7 +464,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			int teY = teTag.getInteger("y");
 			int teZ = teTag.getInteger("z");
 			
-			WarpDrive.debugPrint("[ShipScanner] Loaded TE: " + teTag.getString("id"));
+			System.out.println("[ShipScanner] Loaded TE: " + teTag.getString("id"));
 			tileEntities[teX + (teY * length + teZ) * width] = teTag;
 		}			
 		
@@ -507,7 +480,9 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 					
 					jb.blockMeta = (localMetadata[x + (y * length + z) * width]) & 0xFF;
 					jb.blockNBT = tileEntities[x + (y * length + z) * width];
-							
+					
+					
+					
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
@@ -515,30 +490,35 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
 						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
 						if (tileEntities[x + (y * length + z) * width] == null) {
-							WarpDrive.debugPrint("null!");
-						} else
-							WarpDrive.debugPrint(tileEntities[x + (y * length + z) * width].getString("id"));
+							System.out.println("null!");
+						} else {
+							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
+						}
+						
+						blocksToDeploy[x + (y * length + z) * width] = jb;
+					} else {
+						jb = null;
+						
+						blocksToDeploy[x + (y * length + z) * width] = jb;
 					}
-					blocksToDeploy[x + (y * length + z) * width] = jb;
+					
 				}
 			}
 		}
 		
 		switchState(1);
-		WarpDrive.debugPrint("[ShipScanner] Ship deployed.");
+		System.out.println("[ShipScanner] Ship deployed.");
 		return new Object[] { 3, "Ship deployed." };
 	}
 	
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		this.currentEnergyValue = tag.getInteger("energy");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setInteger("energy", this.getCurrentEnergyValue());
 	}
 
 	// CC
@@ -562,15 +542,15 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			if (this.state == 1)
 				return new Object[] { false, 0, "Already scanning" };
 
-			if (core != null && isEnoughEnergyForScan()) {
-				scanShip();
-			} else if (core == null) {
+			if (core == null) {
 				return new Object[] { false, 1, "Warp-Core not found" };
+			} else if (consumeEnergy(core.shipVolume * EU_PER_BLOCK_SCAN, true)) {
+				scanShip();
 			} else {
 				return new Object[] { false, 2, "Not enough energy!" };
 			}
-
 			break;
+
 		case 1: // getSchematicFileName()
 			if (state != 0 && !schematicFileName.isEmpty())
 				return new Object[] { "Scanning in process. Please wait." };
@@ -578,7 +558,7 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 			return new Object[] { schematicFileName };
 
 		case 2: // getEnergyLevel()
-			return new Object[] { currentEnergyValue };
+			return new Object[] { getEnergyStored() };
 			
 		case 3: // deployShipFromSchematic(schematicFileName, offsetX, offsetY, offsetZ)
 			if (arguments.length == 4) {
@@ -587,11 +567,11 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 				int y = ((Double)arguments[2]).intValue();
 				int z = ((Double)arguments[3]).intValue();
 				
-				if (!new File(SCHEMATICS_DIR + fileName).exists()) 
+				if (!new File(SCHEMATICS_DIR  + "/" + fileName).exists()) 
 					return new Object[] { 0, "Specified .schematic file not found!" };
 				else
 				{
-					WarpDrive.debugPrint("[ShipScanner] Trying to deploy ship");
+					System.out.println("[ShipScanner] Trying to deploy ship");
 					return deployShip(fileName, x, y, z);
 				}
 			} else
@@ -599,11 +579,6 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 		}
 		
 		return null;
-	}
-
-	@Override
-	public boolean canAttachToSide(int side) {
-		return true;
 	}
 
 	@Override
@@ -616,63 +591,8 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 
 	// IEnergySink methods implementation
 	@Override
-	public double demandedEnergyUnits() {
-		return (MAX_ENERGY_VALUE - currentEnergyValue);
-	}
-
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount) {
-		double leftover = 0;
-		currentEnergyValue += Math.round(amount);
-
-		if (getCurrentEnergyValue() > MAX_ENERGY_VALUE) {
-			leftover = (getCurrentEnergyValue() - MAX_ENERGY_VALUE);
-			currentEnergyValue = MAX_ENERGY_VALUE;
-		}
-
-		return leftover;
-	}
-
-	@Override
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
-	}
-
-	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter,
-			ForgeDirection direction) {
-		return true;
-	}
-
-	/**
-	 * @return the currentEnergyValue
-	 */
-	public int getCurrentEnergyValue() {
-		return currentEnergyValue;
-	}
-
-	public int collectAllEnergy() {
-		int energy = currentEnergyValue;
-		currentEnergyValue = 0;
-		return energy;
-	}
-
-	@Override
-	public void onChunkUnload() {
-		if (addedToEnergyNet) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-	}
-
-	@Override
-	public void invalidate() {
-		if (addedToEnergyNet) {
-			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-			addedToEnergyNet = false;
-		}
-
-		super.invalidate();
 	}
 	
 	public boolean moveBlockSimple(JumpBlock shipBlock)
@@ -844,11 +764,10 @@ public class TileEntityShipScanner extends TileEntityAbstractLaser implements IE
 				return true;
 			}
 		}
-	}	
-	
-	@Override
-	public boolean shouldChunkLoad()
-	{
-		return false;
 	}
+
+	@Override
+	public boolean equals(IPeripheral other) {
+		return other == this;
+	}	
 }

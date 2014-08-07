@@ -1,0 +1,43 @@
+if not term.isColor() then
+  print("Advanced computer required")
+  exit()
+end
+
+Side = { "bottom", "top", "back", "left", "right" }
+for i = 1,5 do
+  if peripheral.getType(Side[i]) == "cloakingdevicecore" then
+    warp = peripheral.wrap(Side[i])
+    break
+  else
+    warp = nil
+  end
+end
+
+if warp == nil then
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No cloak core detected")
+else
+  warp.setFieldFrequency(1337)
+  warp.setFieldTier(2)
+  warp.enableCloakingField()
+  if warp.isAssemblyValid() then
+    term.setBackgroundColor(colors.lime)
+    term.setTextColor(colors.red)
+    term.write("Tier 2 cloak enabled")
+  else
+    term.setBackgroundColor(colors.red)
+    term.setTextColor(colors.white)
+    term.write("Invalid assembly!")
+    term.setBackgroundColor(colors.black)
+    term.setTextColor(colors.white)
+    print()
+    print("In each of the 6 directions, you need to place exactly 2 Cloaking device coils, for a total of 12 coils.")
+    print("The 6 inner coils shall be exactly one block away from the core.")
+    print("The cloaking field will extend 5 blocks past the outer 6 coils.")
+    print("Power consumption scales with the amount of cloaked blocks.")
+  end
+end
+term.setBackgroundColor(colors.black)
+term.setTextColor(colors.white)
+print()

@@ -4,34 +4,40 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Random;
+
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
 import ic2.api.item.Items;
 
 public class WarpDriveConfig
 {
-	public static WarpDriveConfig i;
 	private static Configuration config;
-	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID;
+	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, componentID;
 //
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
-	public static boolean isGregLoaded			= false;
-	public static boolean isAELoaded			= false;
-	public static boolean isAdvSolPanelLoaded	= false;
-	public static boolean isASLoaded			= false;
-	public static boolean isAEExtraLoaded		= false;
-	public static boolean isICBMLoaded			= false;
-	public static boolean isMFFSLoaded			= false;
-	public static boolean isGraviSuiteLoaded	= false;
-	public static boolean isICLoaded			= false;
-	public static boolean isCCLoaded			= false;
+	public static boolean isGregLoaded						= false;
+	public static boolean isAppliedEnergisticsLoaded		= false;
+	public static boolean isAdvSolPanelLoaded				= false;
+	public static boolean isAtomicScienceLoaded				= false;
+	public static boolean isAEExtraLoaded					= false;
+	public static boolean isICBMLoaded						= false;
+	public static boolean isMFFSLoaded						= false;
+	public static boolean isGraviSuiteLoaded				= false;
+	public static boolean isICLoaded						= false;
+	public static boolean isCCLoaded						= false;
+	public static boolean isUndergroundBiomesLoaded			= false;
+	public static boolean isNetherOresLoaded				= false;
+	public static boolean isThermalExpansionLoaded			= false;
+	public static boolean isMetallurgyLoaded				= false;
+	public static boolean isAdvancedRepulsionSystemsLoaded	= false;
 	
 	/*
 	 * The variables that control which recipes should be loaded
@@ -40,19 +46,40 @@ public class WarpDriveConfig
 //
 	public static int[] IC2_Air;
 	public static int[] IC2_Empty;
-	public static int IC2_RubberTree;
+	public static int IC2_RubberWood;
 	public static ItemStack IC2_Resin;
-	public static int CC_Computer = 0, CC_peripheral = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0, GT_Ores = 0, GT_Granite = 0, GT_Machine = 0, ASP = 0, AS_Turbine = 0, ICBM_Machine = 0, ICBM_Missile = 0, MFFS_Field = 0;
+	public static Item IC2_fluidCell;
+	public static int CC_Computer = 0, CC_peripheral = 0, CC_Floppy = 0, CCT_Turtle = 0, CCT_Upgraded = 0, CCT_Advanced = 0;
+	public static int GT_Ores = 0, GT_Granite = 0, GT_Machine = 0;
+	public static int ASP = 0;
+	public static int AS_Turbine = 0, AS_deuteriumCell = 0;
+	public static int ICBM_Machine = 0, ICBM_Missile = 0, ICBM_Explosive = 0;
+	public static int GS_ultimateLappack = 0;
+	public static int UB_igneousStone = 0, UB_igneousCobblestone = 0, UB_metamorphicStone = 0, UB_metamorphicCobblestone = 0, UB_sedimentaryStone = 0;
+	public static int NetherOres_count;
+	public static int[] NetherOres_block;
+	public static int[][] Metallurgy_overworldOresBlock;
+	public static int[][] Metallurgy_netherOresBlock;
+	public static int[][] Metallurgy_endOresBlock;
+	public static ArrayList<Integer> forceFieldBlocks;
+
 	public static Set<Integer> SpaceHelmets, Jetpacks, MinerOres, MinerLogs, MinerLeaves, scannerIgnoreBlocks;
 	private static Class<?> AEBlocks;
 	private static Class<?> AEMaterials;
 	private static Class<?> AEItems;
 	public static ArrayList<int[]> CommonWorldGenOres;
-	public static Item AEExtraFDI;
+	public static Item AEExtra_fluidDrive;
+	public static Block AEExtra_certusQuartzTank;
 	
 	public static boolean debugMode = false;
 
 	// Mod config
+	// General
+	public static int G_SPACE_PROVIDER_ID = 14;
+	public static int G_SPACE_DIMENSION_ID = 2;
+	public static int G_HYPERSPACE_PROVIDER_ID = 15;
+	public static int G_HYPERSPACE_DIMENSION_ID = 3;
+
 	// Warp Core
     public static int WC_MAX_ENERGY_VALUE = 100000000;
     public static int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
@@ -61,12 +88,16 @@ public class WarpDriveConfig
     public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
     public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
     public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 15000;   // Maximum ship mass to jump on earth (15k blocks)
-    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 500; // Minimum ship volume value for
-    public static int WC_MAX_SHIP_SIDE = 100;
-    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;
+    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 3000;   // Maximum ship mass to jump on earth
+    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 1200; // Minimum ship volume value for hyperspace travel
+    public static int WC_MAX_SHIP_SIDE = 127;
+    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;	// FIXME update me
+    public static int WC_COLLISION_TOLERANCE_BLOCKS = 3;
+    public static int WC_WARMUP_SHORTJUMP_SECONDS = 10;
+    public static int WC_WARMUP_LONGJUMP_SECONDS = 30;
+    public static int WC_WARMUP_RANDOM_TICKS = 60;
     public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
-    public static int WC_ISOLATION_UPDATE_INTARVAL_SECONDS = 10;		
+    public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;		
 
     // Warp Radar
     public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
@@ -76,17 +107,19 @@ public class WarpDriveConfig
     
     // Mining Laser
 	public static int		ML_MAX_BOOSTERS_NUMBER = 1;
-	public static int		ML_SCAN_DELAY = 20 * 5;
-	public static int		ML_MINE_DELAY = 10;
-	public static int		ML_EU_PER_LAYER_SPACE = 100;
-	public static int		ML_EU_PER_LAYER_EARTH = 2500;
-	public static int		ML_EU_PER_BLOCK_SPACE = 10;
-	public static int 		ML_EU_PER_BLOCK_EARTH = 50;
+	public static int		ML_WARMUP_DELAY_TICKS = 20;
+	public static int		ML_SCAN_DELAY_TICKS = 10;
+	public static int		ML_MINE_DELAY_TICKS = 3;
+	public static int		ML_EU_PER_LAYER_SPACE = 2000;
+	public static int		ML_EU_PER_LAYER_EARTH = 10000;
+	public static int		ML_EU_PER_BLOCK_SPACE = 500;
+	public static int 		ML_EU_PER_BLOCK_EARTH = 2500;
+	public static double	ML_EU_MUL_ORESONLY = 4.0;
 	public static double	ML_EU_MUL_SILKTOUCH = 2.5;
-	public static double	ML_EU_MUL_FORTUNE   = 1.5;
-	public static double	ML_MAX_SPEED   = 10;
-	public static double	ML_MIN_SPEED   = 0.1;
-	public static int		ML_MAX_SIZE    = 128;
+	public static double	ML_EU_MUL_FORTUNE   = 2.5;
+//	public static double	ML_MAX_SPEED   = 10;
+//	public static double	ML_MIN_SPEED   = 0.1;
+	public static int		ML_MAX_RADIUS  = 6;
 	
 	//Tree farm
 	public static int TF_MAX_SIZE=32;
@@ -111,6 +144,11 @@ public class WarpDriveConfig
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+
+	// POWER REACTOR
+	public static int		PR_MAX_ENERGY = 10000000;
+	public static int		PR_TICK_TIME  = 20;
+	public static int		PR_MAX_LASERS = 3;
 	
 	// REACTOR MONITOR
 	public static int		RM_MAX_ENERGY = 1000000;
@@ -125,63 +163,54 @@ public class WarpDriveConfig
 	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
 	public static int CD_COIL_CAPTURE_BLOCKS = 5;
 
-	public static ItemStack getIC2Item(String id)
-	{
+	public static ItemStack getIC2Item(String id) {
 		return Items.getItem(id);
 	}
 
-	public static ItemStack getAEBlock(String id)
-	{
-		try
-		{
+	public static ItemStack getAEBlock(String id) {
+		try {
 			Object ret = AEBlocks.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEBlock failed for " + id);
 		}
 		return null;
 	}
 
-	public static ItemStack getAEMaterial(String id)
-	{
-		try
-		{
+	public static ItemStack getAEMaterial(String id) {
+		try {
 			Object ret = AEMaterials.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEMaterial failed for " + id);
 		}
 		return null;
 	}
 
-	public static ItemStack getAEItem(String id)
-	{
-		try
-		{
+	public static ItemStack getAEItem(String id) {
+		try {
 			Object ret = AEItems.getField(id).get(null);
 			if (ret instanceof ItemStack)
 				return (ItemStack)ret;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Call getAEItem failed for " + id);
 		}
 		return null;
 	}
 
-	public static void Init(Configuration configIn)
-	{
+	public static void preInit(Configuration configIn) {
 		config = configIn;
 	}
 
-	public static void loadWarpDriveConfig()
-	{		
+	public static void loadWarpDriveConfig() {
+		// General
+		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", 14).getInt();
+		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", -2).getInt();
+		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", 15).getInt();
+		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", -3).getInt();
+		
 		// Warp Core
 		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", 100000000).getInt();
 		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", 10).getInt();
@@ -193,10 +222,14 @@ public class WarpDriveConfig
 	    WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", 15000).getInt();   // Maximum ship mass to jump on earth (15k blocks)
 	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", 500).getInt(); // Minimum ship volume value for hyper space
 	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", 100).getInt(); 
+	    WC_COLLISION_TOLERANCE_BLOCKS = config.get("WarpCore", "collision_tolerance_blocks", 5).getInt();
 	    
-	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", 4).getInt(); 
+	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", 4).getInt();
+	    WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", 10).getInt();
+	    WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", 30).getInt();
+	    
 	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", 10).getInt(); 
-	    WC_ISOLATION_UPDATE_INTARVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", 10).getInt();		
+	    WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", 10).getInt();		
 	    
 	    // Warp Radar
 	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", 100000000).getInt();
@@ -233,17 +266,19 @@ public class WarpDriveConfig
 		
 	    // Mining Laser
 		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
-		ML_SCAN_DELAY = 20 * config.get("MiningLaser", "scan_delay_seconds", 5).getInt();
-		ML_MINE_DELAY = config.get("MiningLaser", "mine_delay_ticks", 10).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 100).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 2500).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 10).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 50).getInt();	  
-		ML_MAX_SIZE = config.get("MiningLaser", "max_size", 128).getInt();
+		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", 20).getInt();
+		ML_SCAN_DELAY_TICKS = config.get("MiningLaser", "scan_delay_ticks", 10).getInt();
+		ML_MINE_DELAY_TICKS = config.get("MiningLaser", "mine_delay_ticks", 3).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 2000).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 10000).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 500).getInt();
+		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 2500).getInt();	  
+		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", 5).getInt();
+		ML_EU_MUL_ORESONLY = config.get("MiningLaser", "oresonly_power_mul", 4.0).getDouble(4.0);
 		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
-		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 1.5).getDouble(1.5);
-		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
-		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
+		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 2.5).getDouble(2.5);
+//		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
+//		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
 		
 		// Tree Farm
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
@@ -253,7 +288,12 @@ public class WarpDriveConfig
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
-		
+
+		// Reactor
+		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
+		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update",20).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 4).getInt();
+
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
 		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
@@ -262,9 +302,8 @@ public class WarpDriveConfig
 		recipesIC2 = config.get("Recipes", "ic2_recipes",true).getBoolean(true);
 	}
 	
-	public static void Init2()
-	{
-		CommonWorldGenOres = new ArrayList<int[]>();
+	public static void load() {
+		CommonWorldGenOres = new ArrayList<int[]>(30);
 		CommonWorldGenOres.add(new int[] {Block.oreIron.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreGold.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreCoal.blockID, 0});
@@ -272,7 +311,9 @@ public class WarpDriveConfig
 		CommonWorldGenOres.add(new int[] {Block.oreLapis.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreRedstoneGlowing.blockID, 0});
 		CommonWorldGenOres.add(new int[] {Block.oreRedstone.blockID, 0});
-//
+		
+		forceFieldBlocks = new ArrayList<Integer>();
+
 		SpaceHelmets = new HashSet<Integer>();
 		Jetpacks = new HashSet<Integer>();
 		MinerOres = new HashSet<Integer>();
@@ -294,7 +335,7 @@ public class WarpDriveConfig
 		laserCamID = config.getBlock("lasercam", 512).getInt();
 		camID = config.getBlock("camera", 513).getInt();
 		monitorID = config.getBlock("monitor", 514).getInt();
-		iridiumID = config.getBlock("iridium", 515).getInt();
+		iridiumBlockID = config.getBlock("iridium", 515).getInt();
 		shipScannerID = config.getBlock("shipscanner", 516).getInt();
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
@@ -302,8 +343,11 @@ public class WarpDriveConfig
 		transporterID = config.getBlock("transporter", 520).getInt();
 		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
 		reactorMonitorID = config.getBlock("reactorMonitor",522).getInt();
+		powerLaserID = config.getBlock("powerLaser", 523).getInt();
+		powerReactorID = config.getBlock("powerReactor",524).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
+		componentID = config.getItem("component", 8701).getInt();
 		
 		isICLoaded = Loader.isModLoaded("IC2");
 		if (isICLoaded)
@@ -317,9 +361,9 @@ public class WarpDriveConfig
 		if (isGregLoaded)
 			loadGT();
 		
-		isAELoaded = Loader.isModLoaded("AppliedEnergistics");
-		if (isAELoaded)
-			loadAE();
+		isAppliedEnergisticsLoaded = Loader.isModLoaded("AppliedEnergistics");
+		if (isAppliedEnergisticsLoaded)
+			loadAppliedEnergistics();
 		
 		isAEExtraLoaded = Loader.isModLoaded("extracells");
 		if (isAEExtraLoaded)
@@ -329,9 +373,9 @@ public class WarpDriveConfig
 		if (isAdvSolPanelLoaded)
 			loadASP();
 		
-		isASLoaded = Loader.isModLoaded("AtomicScience");
-		if (isASLoaded)
-			loadAS();
+		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
+		if (isAtomicScienceLoaded)
+			loadAtomicScience();
 		
 		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
 		if (isICBMLoaded)
@@ -343,61 +387,87 @@ public class WarpDriveConfig
 		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded)
-			loadGS();
+			loadGraviSuite();
+		
+		isUndergroundBiomesLoaded = Loader.isModLoaded("UndergroundBiomes");
+		if (isUndergroundBiomesLoaded)
+			loadUndergroundBiomes();
+
+		isNetherOresLoaded = Loader.isModLoaded("NetherOres");
+		if (isNetherOresLoaded)
+			loadNetherOres();
+		
+		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
+		if (isThermalExpansionLoaded)
+			loadThermalExpansion();
+		
+		isMetallurgyLoaded = Loader.isModLoaded("Metallurgy3Core");
+		if (isMetallurgyLoaded) {
+			loadMetallurgy();
+		}
+
+		isAdvancedRepulsionSystemsLoaded = Loader.isModLoaded("AdvancedRepulsionSystems");
+		if (isAdvancedRepulsionSystemsLoaded) {
+			loadAdvancedRepulsionSystems();
+		}
 //
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		MinerOres.add(Block.obsidian.blockID);
 		MinerOres.add(Block.web.blockID);
 		MinerOres.add(Block.fence.blockID);
-		//MinerOres.add(Block.torchWood.blockID);
+		MinerOres.add(Block.torchWood.blockID);
+		MinerOres.add(Block.glowStone.blockID);
 		LoadOreDict();
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
 		scannerIgnoreBlocks.add(controllerID);
-		scannerIgnoreBlocks.add(iridiumID);
+		scannerIgnoreBlocks.add(iridiumBlockID);
 		
-		scannerIgnoreBlocks.add(Items.getItem("mfsUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
-		scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
-
-		// Do not scan ores and valuables
-		for (int[] t : CommonWorldGenOres) // each element of this set is pair [id, meta]
+		if (isICLoaded) {
+			scannerIgnoreBlocks.add(Items.getItem("mfsUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("mfeUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("cesuUnit").itemID);
+			scannerIgnoreBlocks.add(Items.getItem("batBox").itemID);
+		}
+		if (isICBMLoaded) {
+			scannerIgnoreBlocks.add(ICBM_Explosive);
+		}
+		if (isCCLoaded) {
+			 scannerIgnoreBlocks.add(CC_Computer);
+			 scannerIgnoreBlocks.add(CCT_Turtle);
+			 scannerIgnoreBlocks.add(CCT_Upgraded);
+			 scannerIgnoreBlocks.add(CCT_Advanced);
+		}
+		// Do not deploy ores and valuables
+		for (int[] t : CommonWorldGenOres) {// each element of this set is pair [id, meta]
 			scannerIgnoreBlocks.add(t[0]); // we adding ID only
+		}
 		
 		loadWarpDriveConfig();
 		config.save();
 	}
 	
-	private static void LoadOreDict()
-	{
+	private static void LoadOreDict() {
 		String[] oreNames = OreDictionary.getOreNames();
-		for(String oreName: oreNames)
-		{
+		for(String oreName: oreNames) {
 			String lowerOreName = oreName.toLowerCase();
-			if(oreName.substring(0,3).equals("ore"))
-			{
+			if (oreName.substring(0,3).equals("ore")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerOres.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added ore ID: "+i.itemID);
 				}
 			}
-			if(lowerOreName.contains("log"))
-			{
+			if (lowerOreName.contains("log")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerLogs.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added log ID: "+i.itemID);
 				}
 			}
-			if(lowerOreName.contains("leave") || lowerOreName.contains("leaf"))
-			{
+			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for(ItemStack i: item)
-				{
+				for(ItemStack i: item) {
 					MinerLeaves.add(i.itemID);
 					WarpDrive.debugPrint("WD: Added leaf ID: "+i.itemID);
 				}
@@ -414,33 +484,39 @@ public class WarpDriveConfig
 		Jetpacks.add(Items.getItem("electricJetpack").itemID);
 		IC2_Air = new int[] {Items.getItem("airCell").itemID, Items.getItem("airCell").getItemDamage()};
 		IC2_Empty = new int[] {Items.getItem("cell").itemID, Items.getItem("cell").getItemDamage()};
-		ItemStack rubberTree = Items.getItem("rubberWood");
-		ItemStack stickyResin = Items.getItem("resin");
-		if(rubberTree != null)
-			IC2_RubberTree = rubberTree.itemID;
-		IC2_Resin = stickyResin;
-		CommonWorldGenOres.add(new int[] {Items.getItem("uraniumOre").itemID, Items.getItem("uraniumOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("copperOre").itemID, Items.getItem("copperOre").getItemDamage()});
-		CommonWorldGenOres.add(new int[] {Items.getItem("tinOre").itemID, Items.getItem("tinOre").getItemDamage()});
+		ItemStack rubberWood = Items.getItem("rubberWood");
+		IC2_Resin = Items.getItem("resin");
+		if(rubberWood != null) {
+			IC2_RubberWood = rubberWood.itemID;
+		}
+		ItemStack ore = Items.getItem("uraniumOre");
+		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
+		ore = Items.getItem("copperOre");
+		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
+		ore = Items.getItem("tinOre");
+		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
+		ore = Items.getItem("leadOre");
+		if (ore != null) CommonWorldGenOres.add(new int[] {ore.itemID, ore.getItemDamage()});
+
 		MinerOres.add(Items.getItem("rubberWood").itemID);
-		AEExtraFDI = Items.getItem("FluidCell").getItem();
+		IC2_fluidCell = Items.getItem("FluidCell").getItem();
 	}
 
 	private static void loadCC()
 	{
 		try
 		{
-			Class<?> z = Class.forName("dan200.ComputerCraft");
+			Class<?> z = Class.forName("dan200.computercraft.ComputerCraft");
 			CC_Computer = z.getField("computerBlockID").getInt(null);
 			CC_peripheral = z.getField("peripheralBlockID").getInt(null);
-			z = Class.forName("dan200.CCTurtle");
+			CC_Floppy = z.getField("diskItemID").getInt(null);
 			CCT_Turtle = z.getField("turtleBlockID").getInt(null);
 			CCT_Upgraded = z.getField("turtleUpgradedBlockID").getInt(null);
 			CCT_Advanced = z.getField("turtleAdvancedBlockID").getInt(null);
 		}
 		catch (Exception e)
 		{
-			WarpDrive.debugPrint("WarpDriveConfig Error loading CC classes AWWW SHEEEEET NIGGA");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading ComputerCraft classes");
 			e.printStackTrace();
 		}
 	}
@@ -465,7 +541,7 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadAE()
+	private static void loadAppliedEnergistics()
 	{
 		try
 		{
@@ -476,9 +552,9 @@ public class WarpDriveConfig
 		}
 		catch (Exception e)
 		{
-			WarpDrive.debugPrint("WarpDriveConfig Error loading AE classes");
+			WarpDrive.debugPrint("WarpDriveConfig Error loading AppliedEnergistics classes");
 			e.printStackTrace();
-			isAELoaded = false;
+			isAppliedEnergisticsLoaded = false;
 		}
 	}
 
@@ -488,7 +564,10 @@ public class WarpDriveConfig
 		{
 			Class<?> z = Class.forName("extracells.ItemEnum");
 			Object z1 = z.getEnumConstants()[6];
-			AEExtraFDI = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
+			AEExtra_fluidDrive = (Item)z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
+			z = Class.forName("extracells.BlockEnum");
+			z1 = z.getEnumConstants()[9];
+			AEExtra_certusQuartzTank = (Block)z1.getClass().getDeclaredMethod("getBlockInstance").invoke(z1);
 		}
 		catch (Exception e)
 		{
@@ -516,110 +595,193 @@ public class WarpDriveConfig
 		}
 	}
 
-	private static void loadAS()
-	{
-		try
-		{
-			Class<?> z = Class.forName("atomicscience.AtomicScience");
-			CommonWorldGenOres.add(new int[] {((Block)z.getField("bHeOre").get(null)).blockID, 0});
-			AS_Turbine = ((Block)z.getField("bWoLun").get(null)).blockID;
-		}
-		catch (Exception e)
-		{
+	private static void loadAtomicScience() {
+		try {
+			Class<?> z = Class.forName("resonantinduction.atomic.Atomic");
+			CommonWorldGenOres.add(new int[] {((Block)z.getField("blockUraniumOre").get(null)).blockID, 0});
+			AS_Turbine = ((Block)z.getField("blockElectricTurbine").get(null)).blockID;
+			AS_deuteriumCell = ((Item)z.getField("itemDeuteriumCell").get(null)).itemID;
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading AS classes");
-			isASLoaded = false;
+			isAtomicScienceLoaded = false;
 		}
 	}
 
-	private static void loadICBM()
-	{
-		try
-		{
+	private static void loadICBM() {
+		try {
 			Class<?> z = Class.forName("icbm.core.ICBMCore");
 			CommonWorldGenOres.add(new int[] {((Block)z.getField("blockSulfurOre").get(null)).blockID, 0});
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block)z.getField("blockMachine").get(null)).blockID;
 			ICBM_Missile = ((Item)z.getField("itemMissile").get(null)).itemID;
-		}
-		catch (Exception e)
-		{
+			ICBM_Explosive = ((Block)z.getField("blockExplosive").get(null)).blockID;
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
 
-	private static void loadMFFS()
-	{
-		try
-		{
+	private static void loadMFFS() {
+		try {
 			Class<?> z = Class.forName("mffs.ModularForceFieldSystem");
-			MFFS_Field = ((Block)z.getField("blockForceField").get(null)).blockID;
-		}
-		catch (Exception e)
-		{
+			int blockId = ((Block)z.getField("blockForceField").get(null)).blockID;
+			forceFieldBlocks.add(blockId);
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading MFFS classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
 
-	private static void loadGS()
-	{
-		try
-		{
+	private static void loadGraviSuite() {
+		try {
 			Class<?> z = Class.forName("gravisuite.GraviSuite");
 			if (z.getField("ultimateSolarHelmet").get(null) != null)
 				SpaceHelmets.add(((Item)z.getField("ultimateSolarHelmet").get(null)).itemID);
 			Jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
 			Jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
-		}
-		catch (Exception e)
-		{
+			GS_ultimateLappack = z.getField("ultimateLappackID").getInt(null) + 256;
+		} catch (Exception e) {
 			WarpDrive.debugPrint("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
 	}
 
-	public static int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon)
-	{
-		if (isMoon)
-		{
-			if (random.nextInt(100) == 1)
-				if (random.nextBoolean())
-					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?1:0};
-				else
-					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?9:8};
-			else if (random.nextInt(666) == 1)
-				return new int[] {Block.netherrack.blockID, 0};
-			else if (random.nextInt(1000) == 1)
-				return new int[] {Block.whiteStone.blockID, 0};
+	private static void loadUndergroundBiomes() {
+		try {
+			Class<?> z = Class.forName("exterminatorJeff.undergroundBiomes.common.UndergroundBiomes");
+			UB_igneousStone           = ((Block)z.getField("igneousStone").get(null)).blockID;
+			UB_igneousCobblestone     = ((Block)z.getField("igneousCobblestone").get(null)).blockID;
+			UB_metamorphicStone       = ((Block)z.getField("metamorphicStone").get(null)).blockID;
+			UB_metamorphicCobblestone = ((Block)z.getField("metamorphicCobblestone").get(null)).blockID;
+			UB_sedimentaryStone       = ((Block)z.getField("sedimentaryStone").get(null)).blockID;
+			WarpDrive.debugPrint("WarpDriveConfig found UndergroundBiomes blocks " + UB_igneousStone + ", " + UB_igneousCobblestone + ", " + UB_metamorphicStone + ", " + UB_metamorphicCobblestone + ", " + UB_sedimentaryStone);
+		} catch (Exception e) {
+			WarpDrive.debugPrint("WarpDriveConfig Error loading UndergroundBiomes classes");
+			e.printStackTrace();
+			isUndergroundBiomesLoaded = false;
 		}
-		else
-		{
-			if (random.nextInt(25) == 1)
-				if (random.nextBoolean())
-					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?1:0};
-				else
-					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?9:8};
-			else if (random.nextInt(50) == 1)
-				return new int[] {Block.netherrack.blockID, 0};
-			else if (random.nextInt(150) == 1)
-				return new int[] {Block.whiteStone.blockID, 0};
+	}
+
+	private static void loadNetherOres() {
+		try {
+			NetherOres_count = 21;	// FIXME: extract it properly
+/*			Class<?> z = Class.forName("powercrystals.netherores.ores.Ores");
+			NO_netherOresCount = z.getField("values").get(null).length;
+			WarpDrive.debugPrint("WarpDriveConfig found NetherOres count " + NO_netherOresCount);
+			
+			z = Class.forName("powercrystals.netherores.NetherOresCore");
+			for (int i = 0; i < (NO_netherOresCount + 15) / 16; i++)
+			{
+				NO_netherOresBlock[i] = ((Block[])z.getDeclaredField("blockNetherOres").get(null))[i].blockID;
+				WarpDrive.debugPrint("WarpDriveConfig found NetherOres blockId " + NO_netherOresBlock[i]);
+			}*/
+			NetherOres_block = new int[(NetherOres_count + 15) / 16];
+			NetherOres_block[0] = 1440;
+			NetherOres_block[1] = 1442;
+			System.out.println("WarpDriveConfig found " + NetherOres_count + " NetherOres");
 		}
-		if (corrupted && random.nextBoolean())
+		catch (Exception e)
+		{
+			System.out.println("WarpDriveConfig Error loading NetherOres classes");
+			e.printStackTrace();
+			isNetherOresLoaded = false;
+		}
+	}
+	
+	private static void loadThermalExpansion() {
+		try {
+//			TEEnergyCell = Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
+//			TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
+		} catch (Exception e) {
+			System.out.println("WarpDriveConfig Error loading ThermalExpansion classes");
+			e.printStackTrace();
+			isThermalExpansionLoaded = false;
+		}
+	}
+	
+	private static void loadMetallurgy() {
+		try {
+			Metallurgy_overworldOresBlock = new int[][] { { 905, 7}, { 905, 8}, { 905, 9}, { 905, 10}, { 905, 11}, { 905, 12}, { 906, 0}, { 906, 1}, { 906, 2}, { 906, 4}, { 906, 5}, { 906, 6}, { 906, 7}, { 906, 8}, { 906, 11}, { 906, 13}, { 906, 14} };   
+			Metallurgy_netherOresBlock = new int[][] { { 903, 0}, { 903, 1}, { 903, 2}, { 903, 3}, { 903, 4}, { 903, 5}, { 903, 6}, { 903, 7}, { 903, 8}, { 903, 9} };
+			Metallurgy_endOresBlock = new int[][] { { 900, 5}, { 900, 6} };   
+		} catch (Exception e) {
+			System.out.println("WarpDriveConfig Error loading Metallurgy classes");
+			e.printStackTrace();
+			isMetallurgyLoaded = false;
+		}
+	}
+	
+	private static void loadAdvancedRepulsionSystems() {
+		try {
+			Class<?> z = Class.forName("mods.immibis.ars.ARSMod");
+			int fieldBlockId = ((Block)z.getField("MFFSFieldblock").get(null)).blockID;
+			forceFieldBlocks.add(fieldBlockId);
+		} catch (Exception e) {
+			System.out.println("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
+			e.printStackTrace();
+			isAdvancedRepulsionSystemsLoaded = false;
+		}
+	}
+	
+	public static int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
+		if (isMoon) {
+			if (isGregLoaded && (random.nextInt(100) == 1)) {
+				if (random.nextBoolean()) {
+					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?1:0};
+				} else {
+					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?9:8};
+				}
+			} else if (random.nextInt(5) == 1) {
+				return new int[] {Block.netherrack.blockID, 0};
+			} else if (random.nextInt(15) == 1) {
+				return new int[] {Block.whiteStone.blockID, 0};
+			}
+		} else {
+			if (isGregLoaded && (random.nextInt(25) == 1)) {
+				if (random.nextBoolean()) {
+					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?1:0};
+				} else {
+					return new int[] {GT_Granite, (corrupted && random.nextBoolean())?9:8};
+				}
+			} else if (random.nextInt(6) == 1) {
+				return new int[] {Block.netherrack.blockID, 0};
+			} else if (random.nextInt(50) == 1) {
+				return new int[] {Block.whiteStone.blockID, 0};
+			}
+		}
+		if (corrupted && random.nextBoolean()) {
+			if (isUndergroundBiomesLoaded) {
+				int rnd = random.nextInt(8 + 8 + 2);
+				if (rnd < 8) {
+					return new int[] {UB_igneousCobblestone, rnd};
+				} else if (rnd < (8 + 8)) {
+					return new int[] {UB_metamorphicCobblestone, rnd - 8};
+				}
+			}
 			return new int[] {Block.cobblestone.blockID, 0};
+		}
+		if (isUndergroundBiomesLoaded) {
+			int rnd = random.nextInt(8 + 8 + 8 + 3);
+			if (rnd < 8) {
+				return new int[] {UB_igneousStone, rnd};
+			} else if (rnd < (8 + 8)) {
+				return new int[] {UB_metamorphicStone, rnd - 8};
+			}
+			else if (rnd < (8 + 8 + 8)) {
+				return new int[] {UB_sedimentaryStone, rnd - 8 - 8};
+			}
+		}
 		return new int[] {Block.stone.blockID, 0};
 	}
 
-	public static int[] getRandomSurfaceBlock(Random random, int blockID, int blockMeta, boolean bedrock)
-	{
-		if (bedrock && random.nextInt(1000) == 1)
+	public static int[] getRandomSurfaceBlock(Random random, int blockID, int blockMeta, boolean bedrock) {
+		if (bedrock && (random.nextInt(1000) == 1)) {
 			return new int[] {Block.bedrock.blockID, 0};
-		if (blockID == GT_Granite)
-			if (blockMeta == 0 || blockMeta == 1)
-			{
+		} else if (blockID == GT_Granite) {
+			if ((blockMeta == 0) || (blockMeta == 1)) {
 				int[] t;
 				t = getRandomOverworldBlock(random, blockID, blockMeta);
 				if (t[0] == blockID)
@@ -627,9 +789,7 @@ public class WarpDriveConfig
 				if (t[0] == blockID)
 					t = getRandomEndBlock(random, blockID, blockMeta);
 				return t;
-			}
-			else if (blockMeta == 8 || blockMeta == 9)
-			{
+			} else if ((blockMeta == 8) || (blockMeta == 9)) {
 				int[] t;
 				t = getRandomOverworldBlock(random, blockID, blockMeta);
 				if (t[0] == blockID)
@@ -638,25 +798,27 @@ public class WarpDriveConfig
 					t = getRandomOverworldBlock(random, blockID, blockMeta);
 				return t;
 			}
-		else if (blockID == Block.whiteStone.blockID)
+		} else if (blockID == Block.whiteStone.blockID) {
 			return getRandomEndBlock(random, blockID, blockMeta);
-		else if (blockID == Block.netherrack.blockID)
+		} else if (blockID == Block.netherrack.blockID) {
 			return getRandomNetherBlock(random, blockID, blockMeta);
+		}
 		return getRandomOverworldBlock(random, blockID, blockMeta);
 	}
 
 	public static int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta)
 	{
-		if (random.nextInt(25) == 5)
+		if (random.nextInt(25) == 5) {
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
-		else if (isAELoaded && random.nextInt(750) == 1)
+		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
+			return Metallurgy_overworldOresBlock[random.nextInt(Metallurgy_overworldOresBlock.length)];
+		} else if (isAppliedEnergisticsLoaded && random.nextInt(750) == 1) {
 			return new int[] {getAEBlock("blkQuartzOre").itemID, getAEBlock("blkQuartzOre").getItemDamage()};
-		else if (random.nextInt(250) == 1)
+		} else if (random.nextInt(250) == 1) {
 			return new int[] {Block.oreDiamond.blockID, 0};
-		else if (random.nextInt(10000) == 42)
-			return new int[] {iridiumID, 0};
-		if (isGregLoaded)
-		{
+		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
+			return new int[] {iridiumBlockID, 0};
+		} else if (isGregLoaded) {
 			if (random.nextInt(50) == 1)
 				return new int[] {GT_Ores, 5}; //Bauxite S /* Stone/Iron/Diamod pick | +S = Silktouch recommended */
 			else if (random.nextInt(50) == 1)
@@ -679,32 +841,33 @@ public class WarpDriveConfig
 		return new int[] {blockID, blockMeta};
 	}
 
-	public static int[] getRandomNetherBlock(Random random, int blockID, int blockMeta)
-	{
-		if (random.nextInt(10000) == 42)
-			return new int[] {iridiumID, 0};
-		else if (random.nextInt(25) == 1)
+	public static int[] getRandomNetherBlock(Random random, int blockID, int blockMeta) {
+		if (isICLoaded && (!isNetherOresLoaded) && (random.nextInt(10000) == 42)) {
+			return new int[] {iridiumBlockID, 0};
+		} else if (isNetherOresLoaded && (random.nextInt(25) == 1)) {
+			int rnd = random.nextInt(NetherOres_count);
+			return new int[] {NetherOres_block[rnd / 16], rnd % 16};
+		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
+			return Metallurgy_netherOresBlock[random.nextInt(Metallurgy_netherOresBlock.length)];
+		} else if (random.nextInt(25) == 1) {
 			return new int[] {Block.oreNetherQuartz.blockID, 0};
-		else if (isGregLoaded)
-		{
+		} else if (isGregLoaded)  {
 			if (random.nextInt(100) == 1)
 				return new int[] {GT_Ores, 6}; //Pyrite S+S
 			else if (random.nextInt(100) == 1)
 				return new int[] {GT_Ores, 8}; //Sphalerite S+S
 			else if (random.nextInt(500) == 1)
 				return new int[] {GT_Ores, 7}; //Cinnabar I+S
-		}
-		else if (random.nextInt(100) == 13)
+		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
 		return new int[] {blockID, blockMeta};
 	}
 
 	public static int[] getRandomEndBlock(Random random, int blockID, int blockMeta)
 	{
-		if (random.nextInt(10000) == 42)
-			return new int[] {iridiumID, 0};
-		else if (isGregLoaded)
-		{
+		if (isICLoaded && random.nextInt(10000) == 42) {
+			return new int[] { iridiumBlockID, 0 };
+		} else if (isGregLoaded) {
 			if (random.nextInt(250) == 1)
 				return new int[] {GT_Ores, 9}; //Tungstate I
 			else if (random.nextInt(500) == 1)
@@ -713,9 +876,15 @@ public class WarpDriveConfig
 				return new int[] {GT_Ores, 10}; //Cooperite=Sheldonite D
 			else if (random.nextInt(1000) == 1)
 				return new int[] {GT_Ores, 11}; //Olivine D+S
-		}
-		else if (random.nextInt(200) == 13)
+		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
+			return Metallurgy_endOresBlock[random.nextInt(Metallurgy_endOresBlock.length)];
+		} else if (random.nextInt(200) == 13) {
 			return CommonWorldGenOres.get(random.nextInt(CommonWorldGenOres.size()));
+		}
 		return new int[] {blockID, blockMeta};
 	}
+
+	public static boolean isAirBlock(World worldObj, int id, int x, int y, int z) {
+		return id == 0 || Block.blocksList[id] == null || Block.blocksList[id].isAirBlock(worldObj, x, y, z);
+    }
 }

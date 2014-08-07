@@ -1,28 +1,27 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cr0s.WarpDrive.CamRegistryItem;
-import cr0s.WarpDrive.WarpDrive;
-import dan200.computer.api.IComputerAccess;
-import dan200.computer.api.ILuaContext;
-import dan200.computer.api.IPeripheral;
+import cr0s.WarpDrive.*;
+import dan200.computercraft.api.peripheral.IComputerAccess;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkPosition;
 
-public class TileEntityCamera extends TileEntity implements IPeripheral
-{
+public class TileEntityCamera extends TileEntity implements IPeripheral {
+	private int dx, dz, dy;
+	private float yaw, pitch; // laser direction
 
 	private int frequency = -1;	// beam frequency
 
-	private String[] methodsArray =
-	{
+	private String[] methodsArray = {
 		"freq"
 	};
 
@@ -32,71 +31,66 @@ public class TileEntityCamera extends TileEntity implements IPeripheral
 	private int packetSendTicks = 20;
 
 	@Override
-	public void updateEntity()
-	{
+	public void updateEntity() {
 		// Update frequency on clients
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer())
-		{
-			if (packetSendTicks-- == 0)
-			{
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+			packetSendTicks--;
+			if (packetSendTicks == 0) {
 				packetSendTicks = 20 * 5;
 				sendFreqPacket();
 			}
-
 			return;
 		}
 
-		if (++ticks > 20 * REGISTRY_UPDATE_INTERVAL_SEC)
-		{
+		ticks++;
+		if (ticks > 20 * REGISTRY_UPDATE_INTERVAL_SEC) {
 			ticks = 0;
-			WarpDrive.instance.cams.updateInRegistry(new CamRegistryItem(this.frequency, new ChunkPosition(xCoord, yCoord, zCoord), worldObj).setType(0));
+			WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 		}
 	}
 
-	public int getFrequency()
-	{
+	public int getFrequency() {
 		return frequency;
 	}
 
-	public void setFrequency(int freq)
-	{
-		frequency = freq;
+	public void setFrequency(int parFrequency) {
+		if (frequency != parFrequency) {
+			frequency = parFrequency;
+			WarpDrive.debugPrint("" + this + " Frequency set to " + frequency);
+		}
+        WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 	}
 
+    @Override
+    public void onChunkUnload() {
+        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+        super.onChunkUnload();
+    }
+
 	@Override
-	public void readFromNBT(NBTTagCompound tag)
-	{
+	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound tag)
-	{
+	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
 	}
 
-	public void sendFreqPacket()
-	{
-		Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-		if (side == Side.SERVER)
-		{
+	public void sendFreqPacket() {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 			DataOutputStream outputStream = new DataOutputStream(bos);
 
-			try
-			{
-				// Write source vector
+			try {
 				outputStream.writeInt(xCoord);
 				outputStream.writeInt(yCoord);
 				outputStream.writeInt(zCoord);
-				outputStream.writeInt(this.frequency);
-			}
-			catch (Exception ex)
-			{
-				ex.printStackTrace();
+				outputStream.writeInt(frequency);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 			Packet250CustomPayload packet = new Packet250CustomPayload();
@@ -104,43 +98,39 @@ public class TileEntityCamera extends TileEntity implements IPeripheral
 			packet.data = bos.toByteArray();
 			packet.length = bos.size();
 			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
+//			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + frequency + "'");
 		}
 	}
 
 	// IPeripheral methods implementation
 	@Override
-	public String getType()
-	{
+	public String getType() {
 		return "camera";
 	}
 
 	@Override
-	public String[] getMethodNames()
-	{
+	public String[] getMethodNames() {
 		return methodsArray;
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
-	{
-		if (arguments.length == 1)
-			frequency = ((Double)arguments[0]).intValue();
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		if (arguments.length == 1) {
+			setFrequency(((Double)arguments[0]).intValue());
+		}
 		return new Integer[] { frequency };
 	}
 
 	@Override
-	public boolean canAttachToSide(int side)
-	{
-		return true;
+	public void attach(IComputerAccess computer) {
 	}
 
 	@Override
-	public void attach(IComputerAccess computer)
-	{
+	public void detach(IComputerAccess computer) {
 	}
 
 	@Override
-	public void detach(IComputerAccess computer)
-	{
+	public boolean equals(IPeripheral other) {
+		return other == this;
 	}
 }

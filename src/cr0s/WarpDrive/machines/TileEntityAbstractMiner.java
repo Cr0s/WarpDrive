@@ -12,8 +12,8 @@ import appeng.api.me.tiles.IGridMachine;
 import appeng.api.me.tiles.ITileCable;
 import appeng.api.me.util.IGridInterface;
 import appeng.api.me.util.IMEInventoryHandler;
-
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockFluid;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,6 +22,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridMachine, ITileCable
@@ -85,18 +86,13 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return worldObj.provider.dimensionId == 0;
 	}
 	
-	private IInventory findChest()
-	{
-		int[] xPos = {1,-1,0,0,0,0};
-		int[] yPos = {0,0,-1,1,0,0};
-		int[] zPos = {0,0,0,0,-1,1};
+	private IInventory findChest() {
 		TileEntity result = null;
 		
-		for(int i=0;i<6;i++)
-		{
-			result = worldObj.getBlockTileEntity(xCoord+xPos[i], yCoord+yPos[i], zCoord+zPos[i]);
-			if(result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory))
-			{
+		for(int i = 0; i < 6; i++) {
+			Vector3 sideOffset = adjacentSideOffsets[i];
+			result = worldObj.getBlockTileEntity(xCoord + sideOffset.intX(), yCoord + sideOffset.intY(), zCoord + sideOffset.intZ());
+			if (result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory)) {
 				return (IInventory) result;
 			}
 		}
@@ -151,11 +147,11 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return booster;
 	}
 	
-	protected int energy()
-	{
-		TileEntityParticleBooster a = booster();
-		if(a != null)
-			return booster().getCurrentEnergyValue();
+	protected int energy() {
+		TileEntityParticleBooster te = booster();
+		if (te != null) {
+			return te.getEnergyStored();
+		}
 		return 0;
 	}
 	
@@ -163,7 +159,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateLayerCost()
 	{
-		return isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.i.ML_EU_PER_LAYER_SPACE;
+		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
 	}
 	
 	protected int calculateBlockCost()
@@ -173,10 +169,10 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	
 	protected int calculateBlockCost(int blockID)
 	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.i.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.i.ML_EU_PER_BLOCK_SPACE;
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
 		if(silkTouch(blockID))
-			return (int) Math.round(enPerBlock * WarpDriveConfig.i.ML_EU_MUL_SILKTOUCH);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.i.ML_EU_MUL_FORTUNE, fortune())));
+			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune())));
 	}
 	
 	protected boolean isRoomForHarvest()
@@ -194,13 +190,30 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		}
 		return false;
 	}
-	
-	protected boolean canDig(int blockID)
-	{
-		if (Block.blocksList[blockID] != null)
-			return ((blockID == WarpDriveConfig.i.GT_Granite || blockID == WarpDriveConfig.i.GT_Ores || blockID == WarpDriveConfig.i.iridiumID || Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) && blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
-		else
-			return (blockID != WarpDriveConfig.i.MFFS_Field && blockID != Block.bedrock.blockID);
+
+	private boolean canDig(int blockID, int x, int y, int z) {// not used
+		// ignore air & fluids
+		if (!WarpDriveConfig.isAirBlock(worldObj, blockID, x, y, z) && Block.blocksList[blockID] != null && !(Block.blocksList[blockID] instanceof BlockFluid)) {
+			return false;
+		}
+		// check blacklist
+		if (blockID == Block.bedrock.blockID) {
+			return false;
+		}
+		if (WarpDriveConfig.forceFieldBlocks.contains(blockID)) {
+//			isMining = false;
+			return false;
+		}
+		// check whitelist
+		// WarpDriveConfig.MinerOres.contains(blockID) then true ?
+		else if (blockID == WarpDriveConfig.GT_Granite || blockID == WarpDriveConfig.GT_Ores || blockID == WarpDriveConfig.iridiumBlockID) {
+			return true;
+		}
+		// check default
+		else if ( (Block.blocksList[blockID] != null) && (Block.blocksList[blockID].blockResistance <= Block.obsidian.blockResistance) ) {
+			return true;
+		}
+		return false;
 	}
 	
 	//MINING FUNCTIONS
@@ -211,7 +224,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		sendLaserPacket(minerVector, valuable.clone().translate(0.5), r, g, b, 2 * WarpDriveConfig.i.ML_MINE_DELAY, 0, 50);
+		WarpDrive.sendLaserPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY_TICKS, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 	
@@ -242,7 +255,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		}
 		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
 		// Evaporate water
-			worldObj.playSoundEffect((double)((float)valuable.intX() + 0.5F), (double)((float)valuable.intY() + 0.5F), (double)((float)valuable.intZ() + 0.5F), "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
+			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 		return true;
 	}
@@ -271,7 +284,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return transferred;
 	}
 
-	private int putInChest(IInventory inventory, ItemStack itemStackSource)
+	private static int putInChest(IInventory inventory, ItemStack itemStackSource)
 	{
 		if (inventory == null || itemStackSource == null)
 		{
@@ -332,14 +345,12 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return transferred;
 	}
 	
-	protected boolean collectEnergyPacketFromBooster(int packet, boolean test)
+	protected boolean consumeEnergyFromBooster(int requiredEnergy, boolean simulate)
 	{
-		TileEntityParticleBooster b = booster();
-		if (b != null)
-			if (test)
-				return packet <= b.getCurrentEnergyValue();
-			else
-				return b.consumeEnergy(packet);
+		TileEntityParticleBooster te = booster();
+		if (te != null) {
+			return te.consumeEnergy(requiredEnergy, simulate);
+		}
 		return false;
 	}
 	
@@ -416,7 +427,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		refreshLoading(true);
 	}
 	
-	private ItemStack copyWithSize(ItemStack itemStack, int newSize)
+	private static ItemStack copyWithSize(ItemStack itemStack, int newSize)
 	{
 		ItemStack ret = itemStack.copy();
 		ret.stackSize = newSize;
@@ -424,6 +435,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	}
 	
 	//NBT DATA
+	@Override
 	public void readFromNBT(NBTTagCompound tag)
 	{
 		super.readFromNBT(tag);
@@ -436,6 +448,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		minerVector = minerVector.translate(0.5);
 	}
 	
+	@Override
 	public void writeToNBT(NBTTagCompound tag)
 	{
 		super.writeToNBT(tag);
@@ -444,11 +457,13 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	}
 	
 	//AE INTERFACE
+	@Override
 	public void setNetworkReady( boolean isReady )
 	{
 		isMEReady = isReady;
 	}
 	
+	@Override
 	public boolean isMachineActive()
 	{
 		return isMEReady;

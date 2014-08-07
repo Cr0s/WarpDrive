@@ -1,44 +1,31 @@
 package cr0s.WarpDrive.machines;
 
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
 import ic2.api.reactor.IReactor;
 import ic2.api.reactor.IReactorChamber;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.item.ItemReactorLaserFocus;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
-import net.minecraftforge.common.ForgeDirection;
-import net.minecraftforge.common.MinecraftForge;
 
-public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser implements IEnergySink
-{
-	private boolean addedToEnergyNet=false;
-	private double euPerHeat = 4;
-	
+public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	private final int workRate = 10;
-	private int tickCount = 0;
+	private int ticks = 0;
 	
-	double energyStored = 0;
-	
-	private Set<Object> findReactors() //returns either IReactor or IReactorChamber tileentity
-	{
-		int[] xD = {-2,2,0,0,0,0};
-		int[] yD = {0,0,-2,2,0,0};
-		int[] zD = {0,0,0,0,-2,2};
+	private Set<Object> findReactors() {//returns either IReactor or IReactorChamber tile entity
+		int[] xD = {-2, 2, 0, 0, 0, 0};
+		int[] yD = { 0, 0,-2, 2, 0, 0};
+		int[] zD = { 0, 0, 0, 0,-2, 2};
 		Set<Object> output = new HashSet<Object>();
-		for(int i=0;i<xD.length;i++)
-		{
+		for(int i = 0; i < xD.length; i++) {
 			int xO = xCoord + xD[i];
 			int yO = yCoord + yD[i];
 			int zO = zCoord + zD[i];
@@ -46,10 +33,9 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 			if(te == null)
 				continue;
 			
-			if(te instanceof IReactor)
+			if (te instanceof IReactor) {
 				output.add(te);
-			else if(te instanceof IReactorChamber)
-			{
+			} else if(te instanceof IReactorChamber) {
 				IReactor reactor = ((IReactorChamber)te).getReactor();
 				if(reactor == null)
 					continue;
@@ -69,25 +55,19 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 		return output;
 	}
 	
-	private boolean coolReactor(IReactor react)
-	{
+	private boolean coolReactor(IReactor react) {
 		boolean didCoolReactor = false;
-		for(int x=0;x<9;x++)
-		{
-			for(int y=0;y<6;y++)
-			{
+		for(int x = 0; x < 9; x++) {
+			for(int y = 0; y < 6; y++) {
 				ItemStack item = react.getItemAt(x, y);
-				if(item != null)
-				{
-					if(item.getItem() instanceof ItemReactorLaserFocus)
-					{
+				if (item != null) {
+					if(item.getItem() instanceof ItemReactorLaserFocus) {
 						int heat = item.getItemDamage();
-						int heatRemoval = (int) Math.floor(Math.min(energyStored/euPerHeat, (double) heat));
-						if(heatRemoval > 0)
-						{
+						int heatRemoval = (int) Math.floor(Math.min(getEnergyStored() / WarpDriveConfig.RM_EU_PER_HEAT, (double) heat));
+						if(heatRemoval > 0) {
 							didCoolReactor = true;
-							energyStored -= heatRemoval * euPerHeat;
-							item.setItemDamage(heat-heatRemoval);
+							consumeEnergy((int) Math.ceil(heatRemoval * WarpDriveConfig.RM_EU_PER_HEAT), false);
+							item.setItemDamage(heat - heatRemoval);
 						}
 					}
 				}
@@ -97,17 +77,15 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 	}
 	
 	@Override
-	public void updateEntity()
-	{
-		if(!addedToEnergyNet)
-		{
-			euPerHeat = WarpDriveConfig.RM_EU_PER_HEAT;
-			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-			addedToEnergyNet = true;
+	public void updateEntity() {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
 		}
+		super.updateEntity();
 		
-		if((tickCount++) % workRate == 0)
-		{
+		ticks++;
+		if (ticks > workRate)  {
+			ticks = 0;
 			Vector3 myPos = new Vector3(this).translate(0.5);
 			Set<Object> reactors = findReactors();
 			if(reactors.size() == 0)
@@ -127,7 +105,7 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 						if(coolReactor(react))
 						{
 							TileEntity te = (TileEntity)o;
-							sendLaserPacket(myPos,new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5),0f,0.8f,1f,20,0,20);
+							WarpDrive.sendLaserPacket(worldObj, myPos, new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5D), 0f, 0.8f, 1f, 20, 0, 20);
 						}
 					}
 				}
@@ -136,70 +114,27 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser imple
 	}
 	
 	@Override
-	public void writeToNBT(NBTTagCompound tag)
-	{
+	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setDouble("energyStored", energyStored);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound tag)
-	{
+	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		energyStored = tag.getDouble("energyStored");
 	}
 	
 	@Override
-	public boolean shouldChunkLoad()
-	{
+	public boolean shouldChunkLoad() {
 		return false;
 	}
 
 	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction)
-	{
-		return true;
+	public int getMaxEnergyStored() {
+		return WarpDriveConfig.RM_MAX_ENERGY;
 	}
 
 	@Override
-	public double demandedEnergyUnits()
-	{
-		return Math.max(0, WarpDriveConfig.RM_MAX_ENERGY-energyStored);
-	}
-
-	@Override
-	public double injectEnergyUnits(ForgeDirection directionFrom, double amount)
-	{
-		energyStored += amount;
-		return 0;
-	}
-
-	@Override
-	public int getMaxSafeInput()
-	{
+	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
-	
-	@Override
-    public void onChunkUnload()
-    {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-    }
-	
-	@Override
-    public void invalidate()
-    {
-        if (addedToEnergyNet)
-        {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
-
-        super.invalidate();
-    }
-
 }

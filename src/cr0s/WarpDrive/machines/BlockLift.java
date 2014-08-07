@@ -20,19 +20,17 @@ public class BlockLift extends BlockContainer
 {
     private Icon[] iconBuffer;
 
-    public BlockLift(int id, int texture, Material material)
-    {
+    public BlockLift(int id, int texture, Material material) {
         super(id, material);
         setHardness(0.5F);
 		setStepSound(Block.soundMetalFootstep);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("Laser lift");
+		setUnlocalizedName("warpdrive.machines.LaserLift");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
-    {
+    public void registerIcons(IconRegister par1IconRegister) {
         iconBuffer = new Icon[6];
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:liftSideOffline");
         iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:liftSideUp");
@@ -43,20 +41,16 @@ public class BlockLift extends BlockContainer
     }
 
     @Override
-    public Icon getIcon(int side, int metadata)
-    {
-        if (side == 1)
-        {
+    public Icon getIcon(int side, int metadata) {
+    	if (metadata > 2) {
+    		return iconBuffer[0];
+    	}
+        if (side == 1) {
             return iconBuffer[3 + metadata];
-        }
-        else if (side == 0)
-        {
-            if (metadata == 0)
-            {
+        } else if (side == 0) {
+            if (metadata == 0) {
                 return iconBuffer[3];
-            }
-            else
-            {
+            } else {
                 return iconBuffer[6 - metadata];
             }
         }
@@ -65,8 +59,7 @@ public class BlockLift extends BlockContainer
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1)
-    {
+    public TileEntity createNewTileEntity(World var1) {
         return new TileEntityLift();
     }
 
@@ -74,8 +67,7 @@ public class BlockLift extends BlockContainer
      * Returns the quantity of items to drop on block destruction.
      */
     @Override
-    public int quantityDropped(Random par1Random)
-    {
+    public int quantityDropped(Random par1Random) {
         return 1;
     }
 
@@ -83,8 +75,7 @@ public class BlockLift extends BlockContainer
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3)
-    {
+    public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
 
@@ -92,30 +83,24 @@ public class BlockLift extends BlockContainer
      * Called upon block activation (right click on the block.)
      */
     @Override
-    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9)
-    {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-        {
+    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return false;
         }
 
-        TileEntityLift booster = (TileEntityLift)par1World.getBlockTileEntity(par2, par3, par4);
-
-        if (booster != null)
-        {
-            par5EntityPlayer.addChatMessage("[Laser Lift] Energy level: " + booster.getCurrentEnergyValue());
+        WarpEnergyTE te = (WarpEnergyTE)par1World.getBlockTileEntity(par2, par3, par4);
+        if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
+        	par5EntityPlayer.addChatMessage(te.getStatus());
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6)
-    {
+    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
-
-        if (te != null)
-        {
+        if (te != null) {
             te.invalidate();
         }
     }

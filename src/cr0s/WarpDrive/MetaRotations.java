@@ -25,7 +25,7 @@ public class MetaRotations
         }
         else
         {
-            BlockMetaRotation rotation = (BlockMetaRotation)this.metaRotationMap.get(Integer.valueOf(block));
+            BlockMetaRotation rotation = metaRotationMap.get(Integer.valueOf(block));
             return rotation == null ? meta : rotation.getRotatedMeta(meta, rotate);
         }
     }
@@ -237,7 +237,8 @@ public class MetaRotations
         reader.close();
     }
     
-    public static int rotate90(int type, int data) {
+    public static int rotate90(int type, int parData) {
+    	int data = parData;
         switch (type) {
         case BlockID.MINECART_TRACKS:
             switch (data) {
@@ -398,23 +399,19 @@ public class MetaRotations
     }
    
     public static short rotateIC2MachineFacing90Reverse(short facing) {
-        switch(facing) // 3 5 2 4
+    	switch(facing) // 3 5 2 4
         {
             case 3:
-                facing = 5;
-                break;
+            	return 5;
 
             case 5:
-                facing = 2;
-                break;
+            	return 2;
 
             case 2:
-                facing = 4;
-                break;
+            	return 4;
 
             case 4:
-                facing = 3;
-                break;
+            	return 3;
         }    	
         return facing;
     }
@@ -434,20 +431,16 @@ public class MetaRotations
         switch(facing) // 0 4 2 1
         {
             case 0:
-                facing = 4;
-                break;
+            	return 4;
 
             case 4:
-                facing = 2;
-                break;
+            	return 2;
 
             case 2:
-                facing = 1;
-                break;
+            	return 1;
 
             case 1:
-                facing = 0;
-                break;
+            	return 0;
         }    	
         
         return facing;
@@ -457,20 +450,16 @@ public class MetaRotations
         switch(facing) // 3 5 2 4
         {
             case 3:
-                facing = 5;
-                break;
+            	return 5;
 
             case 5:
-                facing = 2;
-                break;
+            	return 2;
 
             case 2:
-                facing = 4;
-                break;
+            	return 4;
 
             case 4:
-                facing = 3;
-                break;
+            	return 3;
         }    	
         
         return facing;
@@ -485,8 +474,7 @@ public class MetaRotations
     }    
     
     public static int rotateCCBlock90Reverse(int dir) {
-        switch(dir)
-        {
+        switch(dir) {
             case 4:
                 return 3;
             case 3:
@@ -503,8 +491,7 @@ public class MetaRotations
     public static int rotateComputer90Reverse(int meta) {    	
     	int typeMeta = meta & 0x8;
     	
-        switch(meta - typeMeta)
-        {
+        switch(meta - typeMeta) {
             case 4:
                 return typeMeta + 3;
             case 3:
@@ -526,7 +513,8 @@ public class MetaRotations
      * @param data
      * @return
      */
-    public static int rotate90Reverse(int type, int data) {
+    public static int rotate90Reverse(int type, int parData) {
+    	int data = parData;
         switch (type) {
         case BlockID.MINECART_TRACKS:
             switch (data) {
