@@ -11,6 +11,7 @@ import cr0s.WarpDrive.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
@@ -181,18 +182,17 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral 
 	}
 	
 	private void explode() {
-		//r is radius, but there's gonna be a lot of repeating in the next bit of code so I'm using a really short variable name
-		int radius = (int) Math.floor(1.6 * Math.pow(containedEnergy, 0.125));
-		WarpDrive.debugPrint("explosion radius:" + radius);
+		// remove blocks randomly up to 6 blocks around (breaking whatever protection is there)
+		int radius = (int) Math.floor(0.6D * Math.pow(containedEnergy, 0.125));
+		WarpDrive.debugPrint(this + " Explosion radius: " + radius);
 		if (radius > 1) {
 			double c = 0.05 * Math.pow(containedEnergy, 0.125); // chance of a block being destroyed (ranges from 0.5 to 0.05)
-			WarpDrive.debugPrint("COE:" + c);
+			WarpDrive.debugPrint(this + " Chance of removal: " + c);
 			for(int x = xCoord - radius; x < xCoord + radius; x++) {
 				for(int y = yCoord - radius; y < yCoord + radius; y++) {
 					for(int z = zCoord - radius; z < zCoord + radius; z++) {
 						if (z != zCoord || y != yCoord || x != xCoord) {
-							double rn = worldObj.rand.nextDouble();
-							if (rn < c) {
+							if (worldObj.rand.nextDouble() < c) {
 								worldObj.setBlockToAir(x, y, z);
 							}
 						}
@@ -200,7 +200,17 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral 
 				}
 			}
 		}
+		// remove reactor
 		worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+		// set a few TnT augmented around reactor
+		for (int i = 0; i < 3; i++) {
+			worldObj.newExplosion((Entity) null,
+					xCoord + worldObj.rand.nextInt(3) - 0.5D,
+					yCoord + worldObj.rand.nextInt(3) - 0.5D,
+					zCoord + worldObj.rand.nextInt(3) - 0.5D,
+					4.0F + worldObj.rand.nextInt(3),
+					true, true);
+		}
 	}
 	
 	private void updateSideTextures() {
@@ -526,7 +536,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral 
 			releasedThisTick += dumped;
 			releasedThisCycle += dumped;
 			containedEnergy = Math.max(0, containedEnergy - dumped);
-			WarpDrive.debugPrint(this + " extracted " + dumped + " RF, down to " + containedEnergy);
+			// WarpDrive.debugPrint(this + " extracted " + dumped + " RF, down to " + containedEnergy);
 		}
 		
 		return dumped;

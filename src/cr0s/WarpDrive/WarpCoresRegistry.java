@@ -124,7 +124,7 @@ public class WarpCoresRegistry {
 			double d3 = c.xCoord - core.xCoord;
 			double d4 = c.yCoord - core.yCoord;
 			double d5 = c.zCoord - core.zCoord;
-			double distance2 = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+			double distance2 = d3 * d3 + d4 * d4 + d5 * d5;
 
 			if (distance2 <= ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1) * ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1)) {
 				// Compare warp-fields for intersection

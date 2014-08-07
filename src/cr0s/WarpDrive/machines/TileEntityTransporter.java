@@ -30,7 +30,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	private double lockStrengthMul = 1;
 	private boolean isLocked=false;
 	
-	private Vector3 centreOnMe = new Vector3(0.5,1,0.5);
+	private final static Vector3 centreOnMe = new Vector3(0.5D, 1.0D, 0.5D);
 	private Vector3 sourceVec = new Vector3();
 	private Vector3 destVec = new Vector3();
 	
@@ -219,12 +219,13 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			if (energyReq == null) {
 				return -1;
 			}
+			Vector3 modDest = destVec.clone().translate(centreOnMe);
 			for(Entity ent : entitiesToTransport) {
 				WarpDrive.debugPrint("" + this + " Handling entity " + ent.getEntityName());
 				if (consumeEnergy(energyReq, false)) {
 					WarpDrive.debugPrint("" + this + " Energy taken");
 					inflictNegativeEffect(ent, ls);
-					transportEnt(ent,destVec);
+					transportEnt(ent, modDest);
 					count++;
 				} else {
 					break;

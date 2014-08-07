@@ -17,11 +17,9 @@ import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
 public class BlockProtocol extends BlockContainer {
-    private Icon[] iconBuffer;
+	private Icon[] iconBuffer;
 
-    private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
-    //private final int ANIMATION_
-    //private int currentTexture;
+	private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
 
     public BlockProtocol(int id, int texture, Material material) {
         super(id, material);

@@ -31,6 +31,7 @@ public final class EntityCamera extends EntityLivingBase
 
     private Minecraft mc = Minecraft.getMinecraft();
 
+    private int dx = 0, dy = 0, dz = 0;
     private int zoomNumber = 0;
 
     private int closeWaitTicks = 0;
@@ -44,6 +45,8 @@ public final class EntityCamera extends EntityLivingBase
 		// TODO Auto-generated constructor stub
 	}
     
+	private boolean isCentered = true;
+
     public EntityCamera(World world, ChunkPosition pos, EntityPlayer player) {
         super(world);
         this.setInvisible(true);
@@ -91,7 +94,7 @@ public final class EntityCamera extends EntityLivingBase
             WarpDrive.instance.debugMessage = "Mouse " + Mouse.isButtonDown(0) + " " + Mouse.isButtonDown(1) + " " + Mouse.isButtonDown(2) + " " + Mouse.isButtonDown(3)
             			+ "\nBackspace " + Keyboard.isKeyDown(Keyboard.KEY_BACKSLASH) + " Space " + Keyboard.isKeyDown(Keyboard.KEY_SPACE) + " Shift " + "";
             // Perform zoom
-            if (Mouse.isButtonDown(0)) {
+            if (Mouse.isButtonDown(0)) {// FIXME merge: main is using right click with Mouse.isButtonDown(1), branch is using left click
             	zoomWaitTicks++;
             	if (zoomWaitTicks >= 2) {
             		zoomWaitTicks = 0;
@@ -115,7 +118,7 @@ public final class EntityCamera extends EntityLivingBase
 	            }
             }
             
-            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {// FIXME merge: main is using left click with Mouse.isButtonDown(0), branch is using space bar
             	fireWaitTicks++;
             	if (fireWaitTicks >= 2) {
                     fireWaitTicks = 0;
@@ -130,7 +133,6 @@ public final class EntityCamera extends EntityLivingBase
             }
             
             GameSettings gamesettings = mc.gameSettings;
-            int dx = 0, dy = 0, dz = 0;
             if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
                 dy = -1;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
@@ -143,9 +145,19 @@ public final class EntityCamera extends EntityLivingBase
                 dx = 1;
             } else if (Keyboard.isKeyDown(gamesettings.keyBindBack.keyCode)) {
                 dx = -1;
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_C)) { // centering view
+                dx = 0;
+                dy = 0;
+                dz = 0;
+            	isCentered = !isCentered;
+				return;
             }
 
-            setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+			if (isCentered) {
+				setPosition(xCoord + 0.5D, yCoord + 0.75D, zCoord + 0.5D);	
+			} else {
+				setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+            }
         }
     }
 

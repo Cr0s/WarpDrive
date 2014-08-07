@@ -5,7 +5,7 @@ import ic2.api.item.Items;
 import java.util.HashMap;
 import java.util.List;
 
-import cr0s.WarpDrive.CloakManager.CloakedArea;
+import cr0s.WarpDrive.CloakedArea;
 import cr0s.WarpDrive.api.IBreathingHelmet;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -60,8 +60,7 @@ public class SpaceEventHandler {
 			entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
 			return;
 		}
-		
-		if (entity instanceof EntityPlayerMP) { 
+		if (entity instanceof EntityPlayerMP) {
 			updatePlayerCloakState(entity);
 			
 			// skip players in creative
@@ -75,7 +74,6 @@ public class SpaceEventHandler {
 			return;
 		}
 		
-
 		// If entity is in vacuum, check and start consuming air cells
 		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			int id1 = entity.worldObj.getBlockId(x, y, z);
@@ -192,7 +190,7 @@ public class SpaceEventHandler {
 					for (CloakedArea area : cloaks) {
 						//WarpDrive.debugPrint("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
 						if (!area.isPlayerInArea(player.username) && area.isEntityWithinArea(player)) {
-							WarpDrive.instance.cloaks.playerEnteringCloakedArea(area, player);
+							area.playerEnteringCloakedArea(player);
 						}
 					}
 				} else {

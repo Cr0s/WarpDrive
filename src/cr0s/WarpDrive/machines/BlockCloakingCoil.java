@@ -72,6 +72,6 @@ public class BlockCloakingCoil extends Block {
             te.invalidate();
         }
 
-        super.breakBlock(par1World, par2, par3, par4, par5, par6);
-    }
+		super.breakBlock(par1World, par2, par3, par4, par5, par6);
+	}
 }

@@ -3,7 +3,8 @@ WarpDrive
 
 A warp drive mod for minecraft
 
-Modified by DarkholmeTenk
+See mcmod.info for credits
+
 Minecraft forum:
    http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
    
@@ -15,8 +16,9 @@ Wiki:
 
 Installation
 ============
-1. Download fresh build from: http://darkhol.me:8080/job/WarpDrive/
-2. Install latest 1.6.2 version of IC2, Applied Energistics and Computer Craft
+1. Download fresh build: http://kubach.tk/1.6.4/WarpDrive.zip
+2. Download fresh Core build: http://kubach.tk/1.6.4/WarpDriveCore.jar
+3. Install last version of IC2, Applied Energistics and Computer Craft
 
 Contact Us
 =============
