@@ -649,9 +649,6 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			case 3: // getFirstHit()
 				if (firstHit != null)
 				{
-					int blockID = hitBlockId;
-					int blockMeta = hitBlockMeta;
-					float blockResistance = hitBlockResistance;
 					Object[] info = { hitX, hitY, hitZ, hitBlockId, hitBlockMeta, (Float)hitBlockResistance };
 					return info;
 				}
