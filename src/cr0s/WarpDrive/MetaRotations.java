@@ -6,16 +6,24 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.block.Block;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.World;
+import ic2.api.network.NetworkHelper;
 
 public class MetaRotations
 {
     private File metaRotationsDirectory;
-    public Map<Integer, BlockMetaRotation> metaRotationMap = new HashMap<Integer, BlockMetaRotation>();
+    public Map<Integer, BlockMetaRotation> metaRotationMap = new HashMap();
 
     public int getRotatedMeta(int block, int meta, int rotate)
     {
@@ -25,7 +33,7 @@ public class MetaRotations
         }
         else
         {
-            BlockMetaRotation rotation = metaRotationMap.get(Integer.valueOf(block));
+            BlockMetaRotation rotation = (BlockMetaRotation)this.metaRotationMap.get(Integer.valueOf(block));
             return rotation == null ? meta : rotation.getRotatedMeta(meta, rotate);
         }
     }
@@ -237,8 +245,7 @@ public class MetaRotations
         reader.close();
     }
     
-    public static int rotate90(int type, int parData) {
-    	int data = parData;
+    public static int rotate90(int type, int data) {
         switch (type) {
         case BlockID.MINECART_TRACKS:
             switch (data) {
@@ -399,19 +406,23 @@ public class MetaRotations
     }
    
     public static short rotateIC2MachineFacing90Reverse(short facing) {
-    	switch(facing) // 3 5 2 4
+        switch(facing) // 3 5 2 4
         {
             case 3:
-            	return 5;
+                facing = 5;
+                break;
 
             case 5:
-            	return 2;
+                facing = 2;
+                break;
 
             case 2:
-            	return 4;
+                facing = 4;
+                break;
 
             case 4:
-            	return 3;
+                facing = 3;
+                break;
         }    	
         return facing;
     }
@@ -431,16 +442,20 @@ public class MetaRotations
         switch(facing) // 0 4 2 1
         {
             case 0:
-            	return 4;
+                facing = 4;
+                break;
 
             case 4:
-            	return 2;
+                facing = 2;
+                break;
 
             case 2:
-            	return 1;
+                facing = 1;
+                break;
 
             case 1:
-            	return 0;
+                facing = 0;
+                break;
         }    	
         
         return facing;
@@ -450,16 +465,20 @@ public class MetaRotations
         switch(facing) // 3 5 2 4
         {
             case 3:
-            	return 5;
+                facing = 5;
+                break;
 
             case 5:
-            	return 2;
+                facing = 2;
+                break;
 
             case 2:
-            	return 4;
+                facing = 4;
+                break;
 
             case 4:
-            	return 3;
+                facing = 3;
+                break;
         }    	
         
         return facing;
@@ -474,7 +493,8 @@ public class MetaRotations
     }    
     
     public static int rotateCCBlock90Reverse(int dir) {
-        switch(dir) {
+        switch(dir)
+        {
             case 4:
                 return 3;
             case 3:
@@ -491,7 +511,8 @@ public class MetaRotations
     public static int rotateComputer90Reverse(int meta) {    	
     	int typeMeta = meta & 0x8;
     	
-        switch(meta - typeMeta) {
+        switch(meta - typeMeta)
+        {
             case 4:
                 return typeMeta + 3;
             case 3:
@@ -513,8 +534,7 @@ public class MetaRotations
      * @param data
      * @return
      */
-    public static int rotate90Reverse(int type, int parData) {
-    	int data = parData;
+    public static int rotate90Reverse(int type, int data) {
         switch (type) {
         case BlockID.MINECART_TRACKS:
             switch (data) {

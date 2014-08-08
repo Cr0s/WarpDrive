@@ -1,8 +1,13 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
@@ -11,35 +16,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-/*
-2014-06-07 21:41:45 [Infos] [STDOUT] Generating star (class 0) at -579 257 1162
-2014-06-07 21:41:45 [Infos] [Minecraft-Client] [CHAT] /generate: generating star at -579, 257, 1162
-2014-06-07 21:41:45 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:41:45 [Infos] [STDOUT] [ESG] Saved 310248 blocks
-2014-06-07 21:41:45 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 95.646ms, total: 95.646ms
-2014-06-07 21:41:45 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:41:45 [Infos] [STDOUT] [ESG] Saved 23706 blocks
-2014-06-07 21:41:45 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 15.427ms, total: 15.427ms
 
-2014-06-07 21:42:03 [Infos] [STDOUT] Generating star (class 1) at -554 257 1045
-2014-06-07 21:42:03 [Infos] [Minecraft-Client] [CHAT] /generate: generating star at -554, 257, 1045
-2014-06-07 21:42:03 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:42:03 [Infos] [STDOUT] [ESG] Saved 1099136 blocks
-2014-06-07 21:42:03 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 37.404ms, total: 37.404ms
-2014-06-07 21:42:03 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:42:03 [Infos] [STDOUT] [ESG] Saved 50646 blocks
-2014-06-07 21:42:03 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 34.369ms, total: 34.369ms
-
-2014-06-07 21:42:39 [Infos] [STDOUT] Generating star (class 2) at -404 257 978
-2014-06-07 21:42:39 [Infos] [Minecraft-Client] [CHAT] /generate: generating star at -404, 257, 978
-2014-06-07 21:42:39 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:42:39 [Infos] [STDOUT] [ESG] Saved 2144432 blocks
-2014-06-07 21:42:39 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 85.523ms, total: 85.523ms
-2014-06-07 21:42:39 [Infos] [STDOUT] [ESG] Saving blocks...
-2014-06-07 21:42:40 [Infos] [STDOUT] [ESG] Saved 76699 blocks
-2014-06-07 21:42:40 [Infos] [STDOUT] [PROF] {EntitySphereGen.saveSphereBlocks} self: 9.286ms, total: 9.286ms
-
- */
 public final class EntitySphereGen extends Entity
 {
 	public int xCoord;
@@ -47,76 +24,77 @@ public final class EntitySphereGen extends Entity
 	public int zCoord;
 
 	private int radius;
-	private int[] defaultBlock;
+	private int[] block;
+	public int[] defaultBlock;
 	private boolean hollow;
-	private boolean fillingSphere; // new sphere blocks does not replace existing blocks (for gases & moons)
-	private boolean generateOres; // generate random surface blocks (ores) or fixed blockID
-	private int gasColor;
+	private boolean fillingSphere; // new sphere blocks does not replace existing blocks (for gases)
+	private boolean surfaceSphere; // generate random surface blocks or fixed blockID
 
-	private final int BLOCKS_PER_TICK = 5000;
+	private final int BLOCKS_PER_TICK = 10000;
 
 	private final int STATE_SAVING = 0;
 	private final int STATE_SETUP = 1;
-	private final int STATE_DELETE = 2;
-	private final int STATE_STOP = 3;
+	private final int STATE_STOP = 2;
+	private final int STATE_DELETE = 3;
 	private int state = STATE_DELETE;
-	private int ticksDelay = 0;
 
 	private int currentIndex = 0;
-	private int pregenSize = 0;
 
 	private ArrayList<JumpBlock> blocks;
 
-	public EntitySphereGen(World world) {
+	public EntitySphereGen(World world)
+	{
 		super(world);
+System.out.println("ZLO EntitySphereGen THE FUCK create");
 	}
 
-	public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere, boolean generateOres) {
+	public EntitySphereGen(World world, int x, int y, int z, int radius, int blockID, int blockMeta, boolean hollow, boolean fillingSphere)
+	{
 		super(world);
 		this.xCoord = x;
-		this.posX = x;
+		this.posX = (double) x;
 		this.yCoord = y;
-		this.posY = y;
+		this.posY = (double) y;
 		this.zCoord = z;
-		this.posZ = z;
+		this.posZ = (double) z;
 		this.radius = radius;
 		this.hollow = hollow;
 		this.fillingSphere = fillingSphere;
-		this.generateOres = generateOres;
-		this.gasColor = worldObj.rand.nextInt(12);
+		this.surfaceSphere = (blockID == 0);
 		this.state = STATE_SAVING;
-		this.pregenSize = (int)Math.ceil(Math.PI * 4.0F / 3.0F * Math.pow(radius + 1, 3));
-		blocks = new ArrayList<JumpBlock>(this.pregenSize);
-		this.defaultBlock = new int[] {blockID, blockMeta};
-		this.ticksDelay = world.rand.nextInt(60);
+		blocks = new ArrayList<JumpBlock>();
+		if (surfaceSphere)
+			defaultBlock = WarpDriveConfig.i.getDefaultSurfaceBlock(world.rand, world.rand.nextInt(10) > 8, true);
+		else
+			this.block = new int[] {blockID, blockMeta};
 	}
 
-	public void killEntity() {
+	public void killEntity()
+	{
 		this.state = STATE_STOP;
 		worldObj.removeEntity(this);
 	}
 
 	@Override
-	public void onUpdate() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+	public void onUpdate()
+	{
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+		{
 			return;
 		}
-		
-		if (ticksDelay > 0) {
-			ticksDelay--;
-			return;
-		}
-		
-		switch (this.state) {
+
+		switch (this.state)
+		{
 			case STATE_SAVING:
-				tickScheduleBlocks();
+				System.out.println("[ESG] Saving blocks...");
+				saveSphereBlocks();
 				this.state = STATE_SETUP;
 				break;
 			case STATE_SETUP:
 				if (currentIndex >= blocks.size() - 1)
 					this.state = STATE_DELETE;
 				else
-					tickPlaceBlocks();
+					setupBlocksTick();
 				break;
 			case STATE_DELETE:
 				currentIndex = 0;
@@ -125,12 +103,15 @@ public final class EntitySphereGen extends Entity
 		}
 	}
 
-	private void tickPlaceBlocks() {
+	private void setupBlocksTick()
+	{
+		LocalProfiler.start("EntitySphereGen.setupBlocksTick");
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, blocks.size() - currentIndex);
-//		LocalProfiler.start("[EntitySphereGen] Placing blocks: " + currentIndex + "/" + blocks.size());
+		System.out.println("[ESG] Setting up blocks: " + currentIndex + "/" + blocks.size() + " [bts: " + blocksToMove + "]");
 		int notifyFlag;
 
-		for (int index = 0; index < blocksToMove; index++) {
+		for (int index = 0; index < blocksToMove; index++)
+		{
 			if (currentIndex >= blocks.size())
 				break;
 			notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
@@ -139,105 +120,98 @@ public final class EntitySphereGen extends Entity
 			currentIndex++;
 		}
 
-//		LocalProfiler.stop();
+		LocalProfiler.stop();
 	}
 
-	private void tickScheduleBlocks() {
-//		LocalProfiler.start("EntitySphereGen.tickScheduleBlocks");
+	private void saveSphereBlocks()
+	{
 		radius += 0.5D; // Radius from center of block
 		double radiusSq = radius * radius; // Optimization to avoid square roots
 		double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow sphere
 		int ceilRadius = (int) Math.ceil(radius);
 
 		// Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
-		int[] block = defaultBlock;
-		for (int x = 0; x <= ceilRadius; x++) {
-			double x2 = (x + 0.5D) * (x + 0.5D); 
-			for (int y = 0; y <= ceilRadius; y++) {
-				double y2 = (y + 0.5D) * (y + 0.5D); 
-				for (int z = 0; z <= ceilRadius; z++) {
-					double z2 = (z + 0.5D) * (z + 0.5D); 
-					double dSq = x2 + y2 + z2; // Distance from current position to center
-					
+		for (int x = 0; x <= ceilRadius; x++)
+		{
+			for (int y = 0; y <= ceilRadius; y++)
+			{
+				for (int z = 0; z <= ceilRadius; z++)
+				{
+					double dSq = lengthSq(x, y, z); // Distance from current position to center
+
 					// Skip too far blocks
 					if (dSq > radiusSq)
 						continue;
 					// Hollow sphere condition
-					if ((hollow) && ((dSq < radius1Sq) || ((lengthSq(x + 1.5D, y + 0.5D, z + 0.5D) <= radiusSq) && (lengthSq(x + 0.5D, y + 1.5D, z + 0.5D) <= radiusSq) && (lengthSq(x + 0.5D, y + 0.5D, z + 1.5D) <= radiusSq))))
+					if ((hollow) && ((dSq < radius1Sq) || ((lengthSq(x + 1, y, z) <= radiusSq) && (lengthSq(x, y + 1, z) <= radiusSq) && (lengthSq(x, y, z + 1) <= radiusSq))))
 						continue;
-
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					// Add blocks to memory
 					addBlock(new JumpBlock(block[0], block[1], xCoord + x, yCoord + y, zCoord + z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord - x, yCoord + y, zCoord + z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord + x, yCoord - y, zCoord + z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord + x, yCoord + y, zCoord - z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord - x, yCoord - y, zCoord + z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord + x, yCoord - y, zCoord - z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord - x, yCoord + y, zCoord - z));
-					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
+					if (surfaceSphere)
+						block = WarpDriveConfig.i.getRandomSurfaceBlock(worldObj.rand, defaultBlock[0], defaultBlock[1], true);
 					addBlock(new JumpBlock(block[0], block[1], xCoord - x, yCoord - y, zCoord - z));
 				}
 			}
 		}
-		if (blocks != null) {
-			WarpDrive.debugPrint("[EntitySphereGen] Saved " + blocks.size() + " blocks (estimated to " + pregenSize + ")");
-		}
-//		LocalProfiler.stop();
+		if (blocks != null)
+			System.out.println("[ESG] Saved " + blocks.size() + " blocks");
 	}
 
-	private void addBlock(JumpBlock jb) {
-		if (blocks == null)
-			return;
-		// Replace water with random gas (ship in moon)
-		if (worldObj.getBlockId(jb.x, jb.y, jb.z) == Block.leaves.blockID) {
-			if (worldObj.rand.nextInt(50) != 1)
-			{
-				jb.blockID = WarpDriveConfig.gasID;
-				jb.blockMeta = gasColor;
-			}
-			blocks.add(jb);
-			return;
-		}
-		// Do not replace existing blocks if fillingSphere is true
+	private void addBlock(JumpBlock jb)
+	{
+		// Do not replace exitsting blocks if fillingSphere is true
 		if (fillingSphere && !worldObj.isAirBlock(jb.x, jb.y, jb.z))
+			return;
+		if (blocks == null)
 			return;
 		blocks.add(jb);
 	}
 
-	private static double lengthSq(double x, double y, double z) {
+	private static double lengthSq(double x, double y, double z)
+	{
 		return (x * x) + (y * y) + (z * z);
 	}
 
 	@Override
-	protected void readEntityFromNBT(NBTTagCompound tag) {
+	protected void readEntityFromNBT(NBTTagCompound tag)
+	{
 	}
 
 	@Override
-	protected void entityInit() {
+	protected void entityInit()
+	{
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound tag) {
+	protected void writeEntityToNBT(NBTTagCompound tag)
+	{
 	}
 
-	// Own implementation of setting blocks without light recalculation in optimization purposes
-	private static boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6) {
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
+	// Own implementation of setting blocks withow light recalculation in optimization purposes
+	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
+	{
+		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
+		{
 			if (y < 0)
 				return false;
 			else if (y >= 256)
@@ -245,12 +219,13 @@ public final class EntitySphereGen extends Entity
 			w.markBlockForUpdate(x, y, z);
 			Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
 			return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
-		} else {
-			return false;
 		}
+		else
+			return false;
 	}
 
-	private static boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta) {
+	public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
+	{
 		int j1 = z << 4 | x;
 		if (y >= c.precipitationHeightMap[j1] - 1)
 			c.precipitationHeightMap[j1] = -999;
@@ -290,9 +265,4 @@ public final class EntitySphereGen extends Entity
 		c.isModified = true;
 		return true;
 	}
-	
-    @Override
-    public boolean shouldRenderInPass(int pass) {
-        return false;
-    }	
 }

@@ -264,12 +264,12 @@ public class SpaceSkyRenderer extends IRenderHandler
         var2.draw();
     }
 
-    private static Vec3 getCustomSkyColor()
+    private Vec3 getCustomSkyColor()
     {
         return Vec3.fakePool.getVecFromPool(0.26796875D, 0.1796875D, 0.0D);
     }
 
-    public static float getSkyBrightness(float par1)
+    public float getSkyBrightness(float par1)
     {
         final float var2 = FMLClientHandler.instance().getClient().theWorld.getCelestialAngle(par1);
         float var3 = 1.0F - (MathHelper.sin(var2 * (float) Math.PI * 2.0F) * 2.0F + 0.25F);

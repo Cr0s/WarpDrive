@@ -1,58 +1,48 @@
 package cr0s.WarpDrive;
 
-import ic2.api.item.Items;
-
 import java.util.HashMap;
 import java.util.List;
 
-import cr0s.WarpDrive.CloakedArea;
-import cr0s.WarpDrive.api.IBreathingHelmet;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumGameType;
-import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 
 /**
- * 
+ * Обработчик событий в мире Space
  * @author Cr0s
  */
-public class SpaceEventHandler {
-	private HashMap<Integer, Integer> entity_airBlock;
-	private HashMap<String, Integer> player_airTank;
-	private HashMap<String, Integer> player_cloakTicks;
+public class SpaceEventHandler
+{
+	private HashMap<String, Integer> vacuumPlayers;
+	private HashMap<String, Integer> cloakPlayersTimers;
+	private long lastTimer = 0;
 	
-	private final int CLOAK_CHECK_TIMEOUT_TICKS = 100;
-	private final int AIR_BLOCK_TICKS = 20;
-	private final int AIR_TANK_TICKS = 300;
-	private final int AIR_DROWN_TICKS = 20;
+	private final int CLOAK_CHECK_TIMEOUT_SEC = 5;
 	
-	public SpaceEventHandler() 	{
-		entity_airBlock = new HashMap<Integer, Integer>();
-		player_airTank = new HashMap<String, Integer>();
-		player_cloakTicks = new HashMap<String, Integer>();
+	public SpaceEventHandler()
+	{
+		vacuumPlayers = new HashMap<String, Integer>();
+		cloakPlayersTimers = new HashMap<String, Integer>();
+		this.lastTimer = 0;
 	}
 
 	@ForgeSubscribe
-	public void livingUpdate(LivingUpdateEvent event) {
+	public void livingUpdate(LivingUpdateEvent event)
+	{
 		EntityLivingBase entity = event.entityLiving;
-		int x = MathHelper.floor_double(entity.posX);
-		int y = MathHelper.floor_double(entity.posY);
-		int z = MathHelper.floor_double(entity.posZ);
-		
-		// Instant kill if entity exceeds world's limit
-		if (x > WarpDrive.WORLD_LIMIT_BLOCKS || z > WarpDrive.WORLD_LIMIT_BLOCKS) {
-			if (entity instanceof EntityPlayerMP) {
-				if (((EntityPlayerMP)entity).capabilities.isCreativeMode) {
+
+		if (Math.abs(MathHelper.floor_double(entity.posX)) > WarpDrive.WORLD_LIMIT_BLOCKS || Math.abs(MathHelper.floor_double(entity.posZ)) > WarpDrive.WORLD_LIMIT_BLOCKS)
+		{
+			if (entity instanceof EntityPlayerMP)
+			{
+				if (((EntityPlayerMP)entity).capabilities.isCreativeMode)
+				{
 					return;
 				}
 			}
@@ -60,193 +50,153 @@ public class SpaceEventHandler {
 			entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
 			return;
 		}
-		if (entity instanceof EntityPlayerMP) {
+		if (entity instanceof EntityPlayerMP)
 			updatePlayerCloakState(entity);
-			
-			// skip players in creative
-			if (((EntityPlayerMP)entity).theItemInWorldManager.getGameType() == EnumGameType.CREATIVE) {
-				return;
-			}
-		}
-		
-		// skip dead or invulnerable entities
-		if (entity.isDead || entity.isEntityInvulnerable()) {
-			return;
-		}
-		
-		// If entity is in vacuum, check and start consuming air cells
-		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
-			int id1 = entity.worldObj.getBlockId(x, y, z);
-			int id2 = entity.worldObj.getBlockId(x, y - 1, z);
-			boolean inVacuum = (id1 != WarpDriveConfig.airID && id2 != WarpDriveConfig.airID);
-			Integer air;
-			if (!inVacuum) {// In space with air blocks
-				air = entity_airBlock.get(entity.entityId);
-				if (air == null) {
-					entity_airBlock.put(entity.entityId, AIR_BLOCK_TICKS);
-				} else if (air <= 1) {// time elapsed => consume air block
-					entity_airBlock.put(entity.entityId, AIR_BLOCK_TICKS);
-					
-					int metadata;
-					if (id1 == WarpDriveConfig.airID) {
-						metadata = entity.worldObj.getBlockMetadata(x, y, z);
-						if (metadata > 0 && metadata < 15) {
-							entity.worldObj.setBlockMetadataWithNotify(x, y, z, metadata - 1, 2);
-						}
-					} else {
-						metadata = entity.worldObj.getBlockMetadata(x, y - 1, z);
-						if (metadata > 0 && metadata < 15) {
-							entity.worldObj.setBlockMetadataWithNotify(x, y - 1, z, metadata - 1, 2);
-						}
-					}
-				} else {
-					entity_airBlock.put(entity.entityId, air - 1);
-				}
-			} else {// In space without air blocks
-				// Damage entity if in vacuum without protection
-				if (entity instanceof EntityPlayerMP) {
-					EntityPlayerMP player = (EntityPlayerMP)entity;
-					air = player_airTank.get(player.username);
 
-					boolean hasHelmet = false;
-					ItemStack helmetStack = player.getCurrentArmor(3);
-					if (helmetStack != null) {
-						Item helmet = helmetStack.getItem();
-						if (helmet instanceof IBreathingHelmet) {
-							IBreathingHelmet breathHelmet = (IBreathingHelmet)helmet;
-							if (breathHelmet.canBreath(player)) {
-								hasHelmet = true;
-								if (air == null) {// new player in space => grace period
-									player_airTank.put(player.username, AIR_TANK_TICKS);
-								} else if (air <= 1) {
-									if (breathHelmet.removeAir(player)) {
-										player_airTank.put(player.username, AIR_TANK_TICKS);
-									} else {
-										player_airTank.put(player.username, AIR_DROWN_TICKS);
-										player.attackEntityFrom(DamageSource.drown, 2.0F);
-									}
-								} else {
-									player_airTank.put(player.username, air - 1);
-								}
+		// If player in vaccum, check and start consuming air cells
+		if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
+		{
+			boolean inVacuum = isEntityInVacuum(entity);
+
+			// Damage entity if in vacuum without protection
+			if (inVacuum)
+			{
+				if (entity instanceof EntityPlayerMP)
+				{
+
+					if (((EntityPlayerMP)entity).getCurrentArmor(3) != null && WarpDriveConfig.i.SpaceHelmets.contains(((EntityPlayerMP)entity).getCurrentArmor(3).itemID))
+					{
+						Integer airValue = vacuumPlayers.get(((EntityPlayerMP)entity).username);
+
+						if (airValue == null)
+						{
+							vacuumPlayers.put(((EntityPlayerMP)entity).username, 300);
+							airValue = 300;
+						}
+
+						if (airValue <= 0)
+						{
+							if (consumeO2(((EntityPlayerMP)entity).inventory.mainInventory))
+							{
+								setPlayerAirValue(entity, 300);
+								((EntityPlayerMP)entity).inventory.addItemStackToInventory(new ItemStack(WarpDriveConfig.i.IC2_Air[0],1,0));
 							}
-						} else if (WarpDriveConfig.SpaceHelmets.contains(helmetStack.itemID)) {
-							hasHelmet = true;
-							if (air == null) {// new player in space => grace period
-								player_airTank.put(player.username, AIR_TANK_TICKS);
-							} else if (air <= 1) {
-								if (consumeO2(player.inventory.mainInventory, player)) {
-									player_airTank.put(player.username, AIR_TANK_TICKS);
-								} else {
-									player_airTank.put(player.username, AIR_DROWN_TICKS);
-									entity.attackEntityFrom(DamageSource.drown, 2.0F);
-								}
-							} else {
-								player_airTank.put(player.username, air - 1);
+							else
+							{
+								setPlayerAirValue(entity, 0);
+								entity.attackEntityFrom(DamageSource.drown, 1);
 							}
+						}
+						else
+						{
+							setPlayerAirValue(entity, airValue - 1);
 						}
 					}
-					
-					if (!hasHelmet) {
-						if (air == null) {// new player in space => grace period
-							player_airTank.put(player.username, AIR_TANK_TICKS);
-						} else if (air <= 1) {
-							player_airTank.put(player.username, AIR_DROWN_TICKS);
-							entity.attackEntityFrom(DamageSource.drown, 2.0F);
-						} else {
-							player_airTank.put(player.username, air - 1);
-						}
+					else
+					{
+						entity.attackEntityFrom(DamageSource.drown, 1);
 					}
 
 					// If player falling down, teleport on earth
-					if (entity.posY < -10.0D) {
-						player.mcServer.getConfigurationManager().transferPlayerToDimension(player, 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID), 0, x, 250, z));
-						player.setFire(30);
-						player.setPositionAndUpdate(entity.posX, 250.0D, entity.posZ);
+					if (entity.posY < -10.0D)
+					{
+						((EntityPlayerMP)entity).mcServer.getConfigurationManager().transferPlayerToDimension(((EntityPlayerMP) entity), 0, new SpaceTeleporter(DimensionManager.getWorld(WarpDrive.instance.spaceDimID), 0, MathHelper.floor_double(entity.posX), 250, MathHelper.floor_double(entity.posZ)));
+						((EntityPlayerMP)entity).setFire(30);
+						((EntityPlayerMP)entity).setPositionAndUpdate(entity.posX, 250D, entity.posZ);
 					}
-				} else {
-					entity_airBlock.put(entity.entityId, 0);
-					entity.attackEntityFrom(DamageSource.drown, 2.0F);
+				}
+				else
+				{
+					entity.attackEntityFrom(DamageSource.drown, 1);
 				}
 			}
 		}
 	}
 
-	private void updatePlayerCloakState(EntityLivingBase entity) {
+	private void updatePlayerCloakState(EntityLivingBase entity)
+	{
+		// Make sure for elapsed time is second after last update
+		if (System.currentTimeMillis() - this.lastTimer > 1000)
+			lastTimer = System.currentTimeMillis();
+		else 
+			return;
+		
 		try {
-			EntityPlayerMP player = (EntityPlayerMP)entity;
-			Integer cloakTicks = player_cloakTicks.get(player.username);
+			EntityPlayerMP p = (EntityPlayerMP)entity;
+			Integer cloakTicks = this.cloakPlayersTimers.get(p.username);
 			
-			if (cloakTicks == null) {
-				player_cloakTicks.put(player.username, 0);
+			if (cloakTicks == null)
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, 0);
+				
 				return;
 			}
 			
-			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_TICKS) {
-				player_cloakTicks.put(player.username, 0);
+			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_SEC)
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, 0);
 				
-				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(player.worldObj.provider.dimensionId, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), false);
-				if (cloaks.size() != 0) {
-					//WarpDrive.debugPrint("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
-					for (CloakedArea area : cloaks) {
-						//WarpDrive.debugPrint("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
-						if (!area.isPlayerInArea(player.username) && area.isEntityWithinArea(player)) {
-							area.playerEnteringCloakedArea(player);
+				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(p.worldObj.provider.dimensionId, MathHelper.floor_double(p.posX), MathHelper.floor_double(p.posY), MathHelper.floor_double(p.posZ), false);
+				if (cloaks.size() != 0)
+				{
+					//System.out.println("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
+					for (CloakedArea area : cloaks)
+					{
+						//System.out.println("[Cloak] Frequency: " + area.frequency + ". In: " + area.isPlayerInArea(p) + ", W: " + area.isPlayerWithinArea(p));
+						if (!area.isPlayerInArea(p) && area.isPlayerWithinArea(p))
+						{
+							WarpDrive.instance.cloaks.playerEnteringCloakedArea(area, p);
 						}
 					}
-				} else {
-					//WarpDrive.debugPrint("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
-					WarpDrive.instance.cloaks.checkPlayerLeftArea(player);
+				} else
+				{
+					//System.out.println("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
+					WarpDrive.instance.cloaks.checkPlayerLeavedArea(p);
 				}
-			} else {
-				player_cloakTicks.put(player.username, cloakTicks + 1);			
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			else
+			{
+				this.cloakPlayersTimers.remove(p.username);
+				this.cloakPlayersTimers.put(p.username, cloakTicks + 1);			
+			}
+		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
-	private static boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
-		for (int j = 0; j < inventory.length; ++j) {
-			if (inventory[j] != null && inventory[j].itemID == WarpDriveConfig.IC2_Air[0] && inventory[j].getItemDamage() == WarpDriveConfig.IC2_Air[1]) {
-				inventory[j].stackSize--;
-				if (inventory[j].stackSize <= 0) {
-					inventory[j] = null;
-				}
+	private void setPlayerAirValue(EntityLivingBase entity, Integer air)
+	{
+		vacuumPlayers.remove(((EntityPlayerMP)entity).username);
+		vacuumPlayers.put(((EntityPlayerMP)entity).username, air);
+	}
 
-				if (WarpDriveConfig.IC2_Empty.length != 0) {
-//					WarpDrive.debugPrint("giveEmptyCell");
-					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_Empty[0], 1, WarpDriveConfig.IC2_Empty[1]);
-					if (!entityPlayer.inventory.addItemStackToInventory(emptyCell)) {
-						World world = entityPlayer.worldObj;
-						EntityItem itemEnt = new EntityItem(world, entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ, emptyCell);
-						entityPlayer.worldObj.spawnEntityInWorld(itemEnt);
-					}
-				}
+	/**
+	 * Проверка, находится ли Entity в открытом космосе
+	 * @param e
+	 * @return
+	 */
+	private boolean isEntityInVacuum(Entity e)
+	{
+		int x = MathHelper.floor_double(e.posX);
+		int y = MathHelper.floor_double(e.posY);
+		int z = MathHelper.floor_double(e.posZ);
+		int id1 = e.worldObj.getBlockId(x, y, z);
+		int id2 = e.worldObj.getBlockId(x, y + 1, z);
+
+		if (id1 == WarpDriveConfig.i.airID || id2 == WarpDriveConfig.i.airID)
+			return false;
+		return true;
+	}
+
+	private boolean consumeO2(ItemStack[] i)
+	{
+		for (int j = 0; j < i.length; ++j)
+			if (i[j] != null && i[j].itemID == WarpDriveConfig.i.IC2_Air[0] && i[j].getItemDamage() == WarpDriveConfig.i.IC2_Air[1])
+			{
+				if (--i[j].stackSize <= 0)
+					i[j] = null;
 				return true;
 			}
-		}
 		return false;
 	}
-	
-    @ForgeSubscribe
-    public void livingFall(LivingFallEvent event)
-    {
-        EntityLivingBase entity = event.entityLiving;
-        float distance = event.distance;
-
-        if (entity instanceof EntityPlayer)
-        {
-            EntityPlayer player = (EntityPlayer) entity;
-            int check = MathHelper.ceiling_float_int(distance - 3.0F);
-
-            if (check > 0)
-            {
-                if ((player.getCurrentArmor(0) != null && player.getCurrentArmor(0).itemID == Items.getItem("quantumBoots").itemID) ||
-                        (player.getCurrentArmor(2) != null && WarpDriveConfig.Jetpacks.contains(player.getCurrentArmor(2).itemID)))
-                {
-                    event.setCanceled(true); // Don't damage player
-                }
-            }
-        }
-    }	
 }

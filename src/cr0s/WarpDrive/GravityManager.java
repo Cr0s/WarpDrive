@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,104 +9,79 @@ import net.minecraft.util.MathHelper;
 
 public class GravityManager
 {
-    private static double OVERWORLD_ENTITY_GRAVITY = 0.080000000000000002D;	// Default value from Vanilla
-    private static double OVERWORLD_ITEM_GRAVITY = 0.039999999105930328D;	// Default value from Vanilla
-    private static double OVERWORLD_ITEM_GRAVITY2 = 0.9800000190734863D;	// Default value from Vanilla
-    private static double HYPERSPACE_FIELD_ENTITY_GRAVITY = 0.035D;
-    private static double HYPERSPACE_VOID_ENTITY_JITTER = 0.005D;
-    private static double SPACE_FIELD_ENTITY_GRAVITY = 0.025D; // Lem 0.08D
-    private static double SPACE_FIELD_ITEM_GRAVITY = 0.02D;	// Lem 0.04D
-    private static double SPACE_FIELD_ITEM_GRAVITY2 = 0.60D; // Lem 0.9800000190734863D
-    private static double SPACE_VOID_GRAVITY = 0.001D; // Lem 0.0001D
-    private static double SPACE_VOID_GRAVITY_JETPACKSNEAK = 0.02D; // Lem 0.01D
-    private static double SPACE_VOID_GRAVITY_RAWSNEAK = 0.005D; // Lem 0.01D		0.001 = no mvt
+    private static double SPACE_GRAVITY = 0.0001D;
+    private static double SPACE_GRAVITY_SNEAK = 0.01D;
 
     public static double getGravityForEntity(EntityLivingBase entity)
     {
         // Is entity in space or hyper-space?
-        boolean inSpace = entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID;
-        boolean inHyperspace = entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
-        // entity.ticksExisted
+        boolean inSpace = entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID;
 
-        if (inSpace || inHyperspace)
+        if (inSpace)
         {
             boolean insideGravField = isEntityInGraviField(entity);
-            	
+
             if (insideGravField)
             {
-            	if (inSpace)
-            		return SPACE_FIELD_ENTITY_GRAVITY;
-            	else
-            		return HYPERSPACE_FIELD_ENTITY_GRAVITY;
+                return 0.08D;
             }
             else
             {
-            	double jitter = (entity.rand.nextDouble() - 0.5D) * 2.0D * HYPERSPACE_VOID_ENTITY_JITTER;
-            	if (inSpace)
-            		jitter = 0.0D;
                 if (entity instanceof EntityPlayer)
                 {
                     EntityPlayer player = (EntityPlayer)entity;
 
                     if (player.isSneaking())
                     {
-                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.Jetpacks.contains(player.getCurrentArmor(2).itemID))
+                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.i.Jetpacks.contains(player.getCurrentArmor(2).itemID))
                         {
-                            return SPACE_VOID_GRAVITY_JETPACKSNEAK;
+                            return SPACE_GRAVITY_SNEAK;
                         }
-                        else
-                        {
-                        	return SPACE_VOID_GRAVITY_RAWSNEAK;
-                        }
-                    }
-                    else
-                    {
-                    	// FIXME: compensate jetpack
                     }
                 }
 
-                return SPACE_VOID_GRAVITY + jitter;
+                return SPACE_GRAVITY;
             }
         }
 
-        return OVERWORLD_ENTITY_GRAVITY;
+        return 0.08D;
     }
 
     public static double getItemGravity(EntityItem entity)
     {
-        if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID)
+        if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
         {
             if (isEntityInGraviField(entity))
             {
-                return SPACE_FIELD_ITEM_GRAVITY;
+                return 0.03999999910593033D;
             }
             else
             {
-                return SPACE_VOID_GRAVITY;
+                return SPACE_GRAVITY;
             }
         }
         else
         {
-            return OVERWORLD_ITEM_GRAVITY; // On Earth
+            return 0.03999999910593033D; // On Earth
         }
     }
 
     public static double getItemGravity2(EntityItem entity)
     {
-        if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID)
+        if (entity.worldObj.provider.dimensionId == WarpDrive.instance.spaceDimID || entity.worldObj.provider.dimensionId == WarpDrive.instance.hyperSpaceDimID)
         {
             if (isEntityInGraviField(entity))
             {
-                return SPACE_FIELD_ITEM_GRAVITY2;
+                return 0.9800000190734863D;
             }
             else
             {
-                return SPACE_VOID_GRAVITY;
+                return SPACE_GRAVITY;
             }
         }
         else
         {
-            return OVERWORLD_ITEM_GRAVITY2;
+            return 0.9800000190734863D;
         }
     }
 

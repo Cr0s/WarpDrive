@@ -31,7 +31,7 @@ public class HyperSpaceGenerator extends ChunkProviderGenerate implements IChunk
     @Override
     public Chunk provideChunk(int par1, int par2)
     {
-        this.rand.setSeed(par1 * 341873128712L + par2 * 132897987541L);
+        this.rand.setSeed((long) par1 * 341873128712L + (long) par2 * 132897987541L);
         byte[] var3 = new byte[32768];
         generateTerrain(par1, par2, var3);
         //this.caveGenerator.generate(this, this.worldObj, par1, par2, var3);
