@@ -1,0 +1,101 @@
+radar = peripheral.wrap("bottom")
+radius = 500
+scale = 50
+
+w, h = term.getSize()
+
+term.clear()
+
+function colorScreen(color)
+  for a = 2,w-1 do
+         for b = 1,h do
+           paintutils.drawPixel(a,b,color)
+         end
+  end
+end
+
+function textOut(x, y, text, fg, bg)
+ term.setCursorPos(x, y)
+ term.setTextColor(fg)
+ term.setBackgroundColor(bg)
+ term.write(text)
+ local xt,yt = term.getCursorPos()
+ term.setCursorPos(1, yt + 1)
+end	
+
+function translateXZ(oldX, oldZ, i)
+	local x = radarX - oldX
+	local z = radarZ - oldZ
+	
+ x = x / (radius / scale)
+ z = z / (radius / scale)
+
+ x = x + (w / 2)
+ z = z + (h / 2)
+
+ 
+ x = math.floor(x);
+ z = math.floor(z);
+ 
+	return x,z
+end
+
+function drawContact(x, y, z, name, color)
+  local newX, newZ = translateXZ(x, z)
+  
+  paintutils.drawPixel(newX, newZ, color)
+  textOut(newX - 3, newZ + 1, "[" .. name .. "]", colors.white, colors.black)
+end
+
+function scanAndDraw()
+  if (radar.getEnergyLevel() < radius*radius) then
+    hh = math.floor(h / 2);
+    hw = math.floor(w / 2);
+    
+    paintutils.drawLine(hw - 5, hh - 1, hw + 5, hh - 1, colors.red);
+    paintutils.drawLine(hw - 5, hh, hw + 5, hh, colors.red);
+    textOut(hw - 4, hh,"LOW POWER", colors.white, colors.red);
+    paintutils.drawLine(hw - 5, hh + 1, hw + 5, hh + 1, colors.red);
+    sleep(1);
+    
+    return 0;
+  end;  
+  radar.scanRadius(radius);
+  sleep(2);
+  
+  redraw();
+  
+  numResults = radar.getResultsCount();
+  
+  if (numResults ~= 0) then
+    for i = 0, numResults-1 do
+      freq, cx, cy, cz = radar.getResult(i);
+      
+      drawContact(cx, cy, cz, freq, colors.red)
+    end
+  end
+  
+  drawContact(radarX, radarY, radarZ, "RAD", colors.yellow);
+end
+
+function redraw()
+   --shell.run("clear")
+   colorScreen(colors.green)
+   
+   paintutils.drawLine(1, 1, w, 1, colors.black)
+   
+   textOut(h, 1, "= Q-Radar v0.1 =", colors.white, colors.black)
+   
+   textOut(w - 3, 1, "[X]", colors.white, colors.red)
+   
+   paintutils.drawLine(1, h, w, h, colors.black);
+   textOut(4, h, "Energy: " .. radar.getEnergyLevel() .. " Eu | Scan radius: " .. radius, colors.white, colors.black)
+end
+
+mrun = true
+while (mrun) do
+ radarX, radarY, radarZ = radar.pos();
+ scanAndDraw();
+end
+
+term.clear();

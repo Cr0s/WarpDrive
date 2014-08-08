@@ -100,7 +100,7 @@ public class HyperSpaceProvider extends WorldProvider
 
         for (int var2 = 0; var2 <= 15; ++var2)
         {
-            float var3 = 1.0F - (float)var2 / 15.0F;
+            float var3 = 1.0F - var2 / 15.0F;
             this.lightBrightnessTable[var2] = (1.0F - var3) / (var3 * 3.0F + 1.0F) * (1.0F - var1) + var1;
         }
     }
@@ -124,14 +124,14 @@ public class HyperSpaceProvider extends WorldProvider
     {
         setCloudRenderer(new CloudRenderBlank());
         setSkyRenderer(new CloudRenderBlank());
-        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 1, (double) 0, (double) 0);
+        return this.worldObj.getWorldVec3Pool().getVecFromPool(1.0D, 0.0D, 0.0D);
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public Vec3 getFogColor(float par1, float par2)
     {
-        return this.worldObj.getWorldVec3Pool().getVecFromPool((double) 0.1, (double) 0, (double) 0);
+        return this.worldObj.getWorldVec3Pool().getVecFromPool(0.1D, 0.0D, 0.0D);
     }
 
     @SideOnly(Side.CLIENT)
@@ -150,7 +150,7 @@ public class HyperSpaceProvider extends WorldProvider
     @Override
     public int getRespawnDimension(EntityPlayerMP player)
     {
-        return WarpDrive.instance.hyperSpaceDimID;
+        return WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
     }
 
     @Override
@@ -190,8 +190,8 @@ public class HyperSpaceProvider extends WorldProvider
             worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ - 1, Block.glass.blockID, 0, 2);
             worldObj.setBlock(var5.posX, var5.posY + 2, var5.posZ - 1, Block.glass.blockID, 0, 2);
             worldObj.setBlock(var5.posX, var5.posY + 3, var5.posZ, Block.glass.blockID, 0, 2);
-            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, WarpDriveConfig.i.airID, 15, 2);
-            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ, WarpDriveConfig.i.airID, 15, 2);
+            worldObj.setBlock(var5.posX, var5.posY, var5.posZ, WarpDriveConfig.airID, 15, 2);
+            worldObj.setBlock(var5.posX, var5.posY + 1, var5.posZ, WarpDriveConfig.airID, 15, 2);
         }
 
         return var5;

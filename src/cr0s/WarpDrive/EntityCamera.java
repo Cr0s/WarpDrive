@@ -2,35 +2,24 @@ package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
-import cpw.mods.fml.relauncher.Side;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.util.List;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.settings.EnumOptions;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
+import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatMessageComponent;
-import net.minecraft.util.ChunkCoordinates;
-import net.minecraft.util.DamageSource;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
-import net.minecraft.entity.player.EntityPlayer;
 
 public final class EntityCamera extends EntityLivingBase
 {
@@ -38,145 +27,165 @@ public final class EntityCamera extends EntityLivingBase
     public int yCoord;
     public int zCoord;
 
-    private int ticks = 0;
     private EntityPlayer player;
 
     private Minecraft mc = Minecraft.getMinecraft();
-    private int dx, dy, dz;
 
+    private int dx = 0, dy = 0, dz = 0;
     private int zoomNumber = 0;
 
-    private int waitTicks = 2;
-    private int fireWaitTicks = 2;
+    private int closeWaitTicks = 0;
+    private int zoomWaitTicks = 0;
+    private int fireWaitTicks = 0;
+    private boolean isActive = true;
+    private int bootUpTicks = 20;
 
-    private float oldFOV;
-    private float oldSens;
-
+    public EntityCamera(World world) {
+        super(world);
+		// TODO Auto-generated constructor stub
+	}
+    
 	private boolean isCentered = true;
 
-    public EntityCamera(World world, ChunkPosition pos, EntityPlayer player)
-    {
+    public EntityCamera(World world, ChunkPosition pos, EntityPlayer player) {
         super(world);
         this.setInvisible(true);
         int x = pos.x;
         int y = pos.y;
         int z = pos.z;
         this.xCoord = x;
-        this.posX = (double) x;
+        this.posX = x;
         this.yCoord = y;
-        this.posY = (double) y;
+        this.posY = y;
         this.zCoord = z;
-        this.posZ = (double) z;
+        this.posZ = z;
         this.player = player;
     }
-
+    
+    private void closeCamera() {
+    	if (!isActive) {
+    		return;
+    	}
+    	    	
+		ClientCameraUtils.resetViewpoint();
+    	worldObj.removeEntity(this);
+    	isActive = false;
+    }
+    
     @Override
-    public void onEntityUpdate()
-    {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
-        {
+    public void onEntityUpdate() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+        	if (player == null || player.isDead) {
+        		WarpDrive.debugPrint("" + this + " Player is null or dead, closing camera...");
+        		closeCamera();
+        		return;
+        	}
+        	if (!ClientCameraUtils.isValidContext(worldObj)) {
+        		WarpDrive.debugPrint("" + this + " Invalid context, closing camera...");
+        		closeCamera();
+        		return;
+        	}
+        	
+        	int blockID = worldObj.getBlockId(xCoord, yCoord, zCoord);
             mc.renderViewEntity.rotationYaw = player.rotationYaw;
+            //mc.renderViewEntity.rotationYawHead = player.rotationYawHead;
             mc.renderViewEntity.rotationPitch = player.rotationPitch;
 
+            WarpDrive.instance.debugMessage = "Mouse " + Mouse.isButtonDown(0) + " " + Mouse.isButtonDown(1) + " " + Mouse.isButtonDown(2) + " " + Mouse.isButtonDown(3)
+            			+ "\nBackspace " + Keyboard.isKeyDown(Keyboard.KEY_BACKSLASH) + " Space " + Keyboard.isKeyDown(Keyboard.KEY_SPACE) + " Shift " + "";
             // Perform zoom
-            if (Mouse.isButtonDown(1) && waitTicks-- <= 0)
-            {
-                waitTicks = 4;
-                zoom();
+            if (Mouse.isButtonDown(0)) {// FIXME merge: main is using right click with Mouse.isButtonDown(1), branch is using left click
+            	zoomWaitTicks++;
+            	if (zoomWaitTicks >= 2) {
+            		zoomWaitTicks = 0;
+            		zoom();
+                }
+            } else {
+            	zoomWaitTicks = 0;
             }
 
-            if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
-            {
-                ClientCameraUtils.resetCam();
-                this.setDead();
+            if (bootUpTicks > 0) {
+            	bootUpTicks--;
+            } else {
+	            if (Mouse.isButtonDown(1)) {
+	            	closeWaitTicks++;
+	            	if (closeWaitTicks >= 2) {
+	            		closeWaitTicks = 0;
+	    	    		closeCamera();
+	            	}
+	            } else {
+	            	closeWaitTicks = 0;
+	            }
             }
-            else if (Mouse.isButtonDown(0) && fireWaitTicks-- <= 0)
-            {
-                fireWaitTicks = 1;
+            
+            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {// FIXME merge: main is using left click with Mouse.isButtonDown(0), branch is using space bar
+            	fireWaitTicks++;
+            	if (fireWaitTicks >= 2) {
+                    fireWaitTicks = 0;
 
-                // Make a shoot with camera-laser
-                if (worldObj.getBlockId(xCoord, yCoord, zCoord) == WarpDriveConfig.i.laserCamID)
-                {
-                    sendTargetPacket();
-                }
+                    // Make a shoot with camera-laser
+                    if (blockID == WarpDriveConfig.laserCamID) {
+                        sendTargetPacket();
+                    }
+            	}
+            } else {
+                fireWaitTicks = 0;
             }
-            else
-            {
-                if (Keyboard.isKeyDown(Keyboard.KEY_DOWN) && (dy != -2))
-                {
-                    dy = -1;
-                }
-                else if (Keyboard.isKeyDown(Keyboard.KEY_UP) && (dy != 2))
-                {
-                    dy = 2;
-                }
-                else if (Keyboard.isKeyDown(Keyboard.KEY_A) && (dz != -1))
-                {
-                    dz = -1;
-                }
-                else if (Keyboard.isKeyDown(Keyboard.KEY_D) && (dz != 1))
-                {
-                    dz = 1;
-                }
-                else if (Keyboard.isKeyDown(Keyboard.KEY_W) && (dx != 1))
-                {
-                    dx = 1;
-                }
-                else if (Keyboard.isKeyDown(Keyboard.KEY_S) && (dx != -1))
-                {
-                    dx = -1;
-                }
-				else if (Keyboard.isKeyDown(Keyboard.KEY_C)) //centering view
-                {
-					isCentered = !isCentered;
-					return;
-                }
+            
+            GameSettings gamesettings = mc.gameSettings;
+            if (Keyboard.isKeyDown(Keyboard.KEY_DOWN)) {
+                dy = -1;
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
+                dy = 2;
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindLeft.keyCode)) {
+                dz = -1;
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindRight.keyCode)) {
+                dz = 1;
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindForward.keyCode)) {
+                dx = 1;
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindBack.keyCode)) {
+                dx = -1;
+            } else if (Keyboard.isKeyDown(Keyboard.KEY_C)) { // centering view
+                dx = 0;
+                dy = 0;
+                dz = 0;
+            	isCentered = !isCentered;
+				return;
             }
 
-			if (isCentered)
-			{
-				this.setPosition(xCoord + 0.5, yCoord + 0.75, zCoord + 0.5);				
+			if (isCentered) {
+				setPosition(xCoord + 0.5D, yCoord + 0.75D, zCoord + 0.5D);	
 			} else {
-	            this.setPosition(xCoord + dx, yCoord + dy, zCoord + dz);			
-			}
-
-
-        }
-    }
-
-    public void zoom()
-    {
-        if (zoomNumber == 0)
-        {
-            this.oldFOV = mc.gameSettings.fovSetting;
-            this.oldSens = mc.gameSettings.mouseSensitivity;
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -0.75F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.4F);
-            ++zoomNumber;
-        }
-        else if (zoomNumber == 1)
-        {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.25F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.3F);
-            ++zoomNumber;
-        }
-        else if (zoomNumber == 2)
-        {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.6F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.15F);
-            zoomNumber = 3;
-        }
-        else if (zoomNumber == 3)
-        {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, this.oldFOV);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, this.oldSens);
-            zoomNumber = 0;
+				setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+            }
         }
     }
 
     @Override
-    public boolean shouldRenderInPass(int pass)
-    {
+    public void onUpdate() {
+    	super.onUpdate();
+        this.motionX = this.motionY = this.motionZ = 0.0D;
+    }
+    
+    public void zoom() {
+        if (zoomNumber == 0) {
+            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -0.75F);
+            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.4F);
+        } else if (zoomNumber == 1) {
+            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.25F);
+            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.3F);
+        } else if (zoomNumber == 2) {
+            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.6F);
+            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.15F);
+        } else if (zoomNumber == 3) {
+            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, WarpDrive.normalFOV);
+            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, WarpDrive.normalSensitivity);
+        }
+        zoomNumber = (zoomNumber + 1) % 4;
+    }
+
+    @Override
+    public boolean shouldRenderInPass(int pass) {
         return false;
     }
 
@@ -190,68 +199,52 @@ public final class EntityCamera extends EntityLivingBase
     @Override
     public void readEntityFromNBT(NBTTagCompound nbttagcompound)
     {
-        this.xCoord = nbttagcompound.getInteger("x");
-        this.yCoord = nbttagcompound.getInteger("y");
-        this.zCoord = nbttagcompound.getInteger("z");
+        xCoord = nbttagcompound.getInteger("x");
+        yCoord = nbttagcompound.getInteger("y");
+        zCoord = nbttagcompound.getInteger("z");
     }
-
-    /*@Override
-    protected void entityInit() {
-    }*/
 
     @Override
     public void writeEntityToNBT(NBTTagCompound nbttagcompound)
     {
-        nbttagcompound.setInteger("x", this.xCoord);
-        nbttagcompound.setInteger("y", this.yCoord);
-        nbttagcompound.setInteger("z", this.zCoord);
+        nbttagcompound.setInteger("x", xCoord);
+        nbttagcompound.setInteger("y", yCoord);
+        nbttagcompound.setInteger("z", zCoord);
     }
 
     @Override
-    public ItemStack getHeldItem()
-    {
+    public ItemStack getHeldItem() {
         return null;
     }
 
     @Override
-    public ItemStack getCurrentItemOrArmor(int i)
-    {
+    public ItemStack getCurrentItemOrArmor(int i) {
         return null;
     }
 
     @Override
-    public void setCurrentItemOrArmor(int i, ItemStack itemstack)
-    {
+    public void setCurrentItemOrArmor(int i, ItemStack itemstack) {
     }
 
     @Override
-    public ItemStack[] getLastActiveItems()
-    {
+    public ItemStack[] getLastActiveItems() {
         return null;
     }
 
-    // Camera frequency refresh to clients packet
-    public void sendTargetPacket()
-    {
-        Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-        if (side == Side.CLIENT)
-        {
+    // Camera orientation refresh to server packet
+    public void sendTargetPacket() {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
             DataOutputStream outputStream = new DataOutputStream(bos);
 
-            try
-            {
-                // Write source vector
+            try {
                 outputStream.writeInt(xCoord);
                 outputStream.writeInt(yCoord);
                 outputStream.writeInt(zCoord);
                 outputStream.writeFloat(mc.renderViewEntity.rotationYaw);
                 outputStream.writeFloat(mc.renderViewEntity.rotationPitch);
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             Packet250CustomPayload packet = new Packet250CustomPayload();
@@ -259,6 +252,7 @@ public final class EntityCamera extends EntityLivingBase
             packet.data = bos.toByteArray();
             packet.length = bos.size();
             PacketDispatcher.sendPacketToServer(packet);
+            WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") yawn " + mc.renderViewEntity.rotationYaw + " pitch " + mc.renderViewEntity.rotationPitch);
         }
     }
 

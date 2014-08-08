@@ -1,0 +1,119 @@
+if not term.isColor() then
+  print("Advanced computer required")
+  exit()
+end
+
+sides = peripheral.getNames()
+mininglasers = {}
+for key,side in pairs(sides) do
+  if peripheral.getType(side) == "mininglaser" then
+    print("Wrapping " .. side)
+    table.insert(mininglasers, peripheral.wrap(side))
+  end
+end
+
+
+noExit = true
+layerOffset = 1
+mineAll = true
+useDeuterium = false
+args = {...}
+if #args > 0 then
+  if args[1] == "help" or args[1] == "?" then
+    print("Usage: mine <layerOffset> <oreOnly> <useDeuterium>")
+    print()
+    print("Miner always mine below it, down to bedrock.")
+	print("Set layerOffset to define starting level.")
+    print("Power consumption will be much lower in space.")
+    print("Mining only ores is faster but more expensive...")
+	print("Use deuterium from ME system for silk touch.")
+    print("Mining laser can't go through forcefields.")
+    print("Mined chests will drop their contents.")
+    print()
+	noExit = false
+  else
+    layerOffset = tonumber( args[1] ) or 1
+  end
+  
+  if #args > 1 then
+    if args[2] == "false" or args[2] == "0" then
+      mineAll = false
+    end
+  end
+  
+  if #args > 2 then
+    if args[3] == "true" or args[3] == "1" then
+      useDeuterium = true
+    end
+  end
+end
+
+if #mininglasers == 0 then
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No mining laser detected")
+
+  noExit = false
+end
+if noExit then
+  for key,mininglaser in pairs(mininglasers) do
+    if not mininglaser.isMining() then
+      mininglaser.offset(layerOffset)
+      if mineAll then
+        if useDeuterium then
+          mininglaser.quarry(useDeuterium)
+        else
+          mininglaser.quarry()
+        end
+      else
+        if useDeuterium then
+          mininglaser.mine(useDeuterium)
+        else
+          mininglaser.mine()
+        end
+      end
+	end
+  end
+  sleep(1)
+end
+
+label = os.getComputerLabel()
+if label then
+else
+  label = "" .. os.getComputerID()
+end
+
+term.setTextColor(colors.blue)
+if noExit then
+  repeat
+    isMining = false
+    for key,mininglaser in pairs(mininglasers) do
+      status, energy, currentLayer, mined, total = mininglaser.state()
+  
+      term.setBackgroundColor(colors.black)
+      term.clear()
+      term.setBackgroundColor(colors.lime)
+      term.setCursorPos(1, 1)
+      term.write(label .. " - Mining laser " .. key .. " of " .. #mininglasers)
+      term.setBackgroundColor(colors.black)
+      term.setCursorPos(1, 3)
+      term.write("Status: " .. status .. "   ")
+      term.setBackgroundColor(colors.black)
+      term.setCursorPos(1, 5)
+      term.write("Energy level is " .. energy .. " EU")
+      term.setCursorPos(1, 7)
+      term.write("Mined " .. mined .. " out of " .. total .. " blocks at layer " .. currentLayer .. "   ")
+
+      if mininglaser.isMining() then
+        sleep(1)
+		isMining = true
+	  else
+	    sleep(0.1)
+      end
+	end
+  until not isMining
+end
+
+term.setBackgroundColor(colors.black)
+term.setTextColor(colors.white)
+print()

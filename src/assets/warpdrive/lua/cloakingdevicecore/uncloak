@@ -1,0 +1,28 @@
+if not term.isColor() then
+  print("Advanced computer required")
+  exit()
+end
+
+Side = { "bottom", "top", "back", "left", "right" }
+for i = 1,5 do
+  if peripheral.getType(Side[i]) == "cloakingdevicecore" then
+    warp = peripheral.wrap(Side[i])
+    break
+  else
+    warp = nil
+  end
+end
+
+if warp == nil then
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No cloak core detected")
+else
+  warp.disableCloakingField()
+  term.setBackgroundColor(colors.lightGray)
+  term.setTextColor(colors.black)
+  term.write("Cloak disabled")
+end
+term.setBackgroundColor(colors.black)
+term.setTextColor(colors.white)
+print()

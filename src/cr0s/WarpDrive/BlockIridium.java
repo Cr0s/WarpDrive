@@ -4,15 +4,17 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
 
 public class BlockIridium extends Block
 {
     public BlockIridium(int par1)
     {
         super(par1, Material.rock);
+        setHardness(0.8F);
+		setResistance(150 * 4);
+		setStepSound(Block.soundMetalFootstep);
+		setCreativeTab(WarpDrive.warpdriveTab);
+		setUnlocalizedName("warpdrive.blocks.IridiumBlock");
     }
 
     @Override
