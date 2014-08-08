@@ -4,6 +4,8 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.WorldServer;
 
 public class InvisibleCommand extends CommandBase
 {
@@ -23,6 +25,8 @@ public class InvisibleCommand extends CommandBase
     public void processCommand(ICommandSender icommandsender, String[] astring)
     {
         EntityPlayerMP player = (EntityPlayerMP)icommandsender;
+        MinecraftServer server = MinecraftServer.getServer();
+        int targetDim = WarpDrive.instance.spaceDimID;
 
         if (astring.length >= 1)
         {

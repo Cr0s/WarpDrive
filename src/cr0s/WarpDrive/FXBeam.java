@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.EffectRenderer;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.entity.EntityLivingBase;
@@ -57,8 +58,29 @@ public class FXBeam extends EntityFX
         this.particleMaxAge = age;
         this.energy = energy;
 
-        if (red == 1 && green == 0 && blue == 0) {
-            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
+        if (red == 1 && green == 0 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_red.png");
+        }
+        else if (red == 0 && green == 1 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_green.png");
+        }
+        else if (red == 0 && green == 0 && blue == 1)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy.png");
+        }
+        else if (red == 1 && green == 1 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_yellow.png");
+        }
+        else if (red == 1 && green == 0.5 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_orange.png");
+        }
+        else if (red == 0.5 && green == 0 && blue == 0.5)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
         }
 
         /**
@@ -100,8 +122,31 @@ public class FXBeam extends EntityFX
         this.particleMaxAge = age;
         this.energy = energy;
 
-        TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_grey.png");
-        
+        if (red == 1 && green == 0 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_red.png");
+        }
+        else if (red == 0 && green == 1 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_green.png");
+        }
+        else if (red == 0 && green == 0 && blue == 1)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy.png");
+        }
+        else if (red == 1 && green == 1 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_yellow.png");
+        }
+        else if (red == 1 && green == 0.5 && blue == 0)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_orange.png");
+        }
+        else if (red == 0.5 && green == 0 && blue == 0.5)
+        {
+            TEXTURE = new ResourceLocation("warpdrive", "textures/blocks/energy_violet.png");
+        }
+
         /**
          * Sets the particle age based on distance.
          */

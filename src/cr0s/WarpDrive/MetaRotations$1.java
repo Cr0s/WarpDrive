@@ -12,8 +12,7 @@ class MetaRotations$1 implements FilenameFilter
         this.this$0 = var1;
     }
 
-    @Override
-	public boolean accept(File f, String name)
+    public boolean accept(File f, String name)
     {
         return name.endsWith(".mrot");
     }

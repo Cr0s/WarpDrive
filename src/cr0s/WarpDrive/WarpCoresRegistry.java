@@ -1,29 +1,33 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
-import cr0s.WarpDrive.machines.TileEntityReactor;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 
 /** Registry of active Warp Cores in world
  * @author Cr0s
  */
-public class WarpCoresRegistry {
-	private LinkedList<TileEntityReactor> registry;
+public class WarpCoresRegistry
+{
+	private ArrayList<TileEntityReactor> registry;
 
-	public WarpCoresRegistry() {
-		registry = new LinkedList<TileEntityReactor>();
+	public WarpCoresRegistry()
+	{
+		registry = new ArrayList<TileEntityReactor>();
 	}
 
-	public int searchCoreInRegistry(TileEntityReactor core) {
+	public int searchCoreInRegistry(TileEntityReactor core)
+	{
 		int res = -1;
 
-		for (int i = 0; i < registry.size(); i++) {
+		for (int i = 0; i < registry.size(); i++)
+		{
 			TileEntityReactor c = registry.get(i);
 
-			if (c.xCoord == core.xCoord && c.yCoord == core.yCoord && c.zCoord == core.zCoord) {
+			if (c.xCoord == core.xCoord && c.yCoord == core.yCoord && c.zCoord == core.zCoord)
+			{
 				return i;
 			}
 		}
@@ -31,41 +35,49 @@ public class WarpCoresRegistry {
 		return res;
 	}
 
-	public boolean isCoreInRegistry(TileEntityReactor core) {
+	public boolean isCoreInRegistry(TileEntityReactor core)
+	{
 		return (searchCoreInRegistry(core) != -1);
 	}
 
-	public void updateInRegistry(TileEntityReactor core) {
+	public void updateInRegistry(TileEntityReactor core)
+	{
 		int idx = searchCoreInRegistry(core);
 
 		// update
-		if (idx != -1) {
+		if (idx != -1)
+		{
 			registry.set(idx, core);
-		} else {
+		}
+		else
+		{
 			registry.add(core);
 		}
 	}
 
-	public void removeFromRegistry(TileEntityReactor core) {
-		int idx = searchCoreInRegistry(core);
+	public void removeFromRegistry(TileEntityReactor core)
+	{
+		int idx;
 
-		if (idx != -1) {
+		if ((idx = searchCoreInRegistry(core)) != -1)
+		{
 			registry.remove(idx);
 		}
 	}
 
-	public ArrayList<TileEntityReactor> searchWarpCoresInRadius(int x, int y, int z, int radius) {
-		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>(registry.size());
+	public ArrayList<TileEntityReactor> searchWarpCoresInRadius(int x, int y, int z, int radius)
+	{
+		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>();
 
-		printRegistry();
-		for (TileEntityReactor c : registry) {
+		for (TileEntityReactor c : registry)
+		{
 			double d3 = c.xCoord - x;
 			double d4 = c.yCoord - y;
 			double d5 = c.zCoord - z;
 			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 
-//			if (distance <= radius && !(c.controller == null || c.controller.getMode() == 0) && !isCoreHidden(c)) {
-			if (distance <= radius && !isCoreHidden(c)) {
+			if (distance <= radius && !(c.controller == null || c.controller.getMode() == 0) && !isCoreHidden(c))
+			{
 				res.add(c);
 			}
 		}
@@ -73,22 +85,26 @@ public class WarpCoresRegistry {
 		return res;
 	}
 
-	public void printRegistry() {
+	public void printRegistry()
+	{
 		System.out.println("WarpCores registry:");
 		removeDeadCores();
 
-		for (TileEntityReactor c : registry) {
-			System.out.println("- " + c.coreFrequency + " (" + c.xCoord + ", " + c.yCoord + ", " + c.zCoord + ")");
+		for (TileEntityReactor c : registry)
+		{
+			System.out.println(c.coreFrequency + " (" + c.xCoord + "; " + c.yCoord + "; " + c.zCoord + ")");
 		}
 	}
 
 	final int LOWER_HIDE_POINT = 18;
-	private boolean isCoreHidden(TileEntityReactor core) {
-		if (core.isolationBlocksCount > 5) {
+	private boolean isCoreHidden(TileEntityReactor core)
+	{
+		if (core.isolationBlocksCount > 5)
+		{
 			int randomNumber = core.worldObj.rand.nextInt(150);
 
-			if (randomNumber < LOWER_HIDE_POINT + core.isolationBlocksCount) {
-				WarpDrive.debugPrint("" + this + " Core '" + core.coreFrequency + "' is hidden");
+			if (randomNumber < LOWER_HIDE_POINT + core.isolationBlocksCount)
+			{
 				return true;
 			}
 		}
@@ -96,27 +112,28 @@ public class WarpCoresRegistry {
 		return false;
 	}
 
-	public boolean isWarpCoreIntersectsWithOthers(TileEntityReactor core) {
-		StringBuilder reason = new StringBuilder();
+	public boolean isWarpCoreIntersectsWithOthers(TileEntityReactor core)
+	{
 		AxisAlignedBB aabb1, aabb2;
 		removeDeadCores();
-		
-		core.validateShipSpatialParameters(reason);
-		aabb1 = AxisAlignedBB.getBoundingBox(core.minX, core.minY, core.minZ, core.maxX, core.maxY, core.maxZ);
 
-		for (TileEntityReactor c : registry) {
+		for (TileEntityReactor c : registry)
+		{
 			// Skip cores in other worlds
-			if (c.worldObj != core.worldObj) {
+			if (c.worldObj != core.worldObj)
+			{
 				continue;
 			}
 
 			// Skip self
-			if (c.xCoord == core.xCoord && c.yCoord == core.yCoord && c.zCoord == core.zCoord) {
+			if (c.xCoord == core.xCoord && c.yCoord == core.yCoord && c.zCoord == core.zCoord)
+			{
 				continue;
 			}
 
 			// Skip offline warp cores
-			if (c.controller == null || c.controller.getMode() == 0 || !c.validateShipSpatialParameters(reason)) {
+			if (c.controller == null || c.controller.getMode() == 0 || !c.prepareToJump())
+			{
 				continue;
 			}
 
@@ -124,12 +141,19 @@ public class WarpCoresRegistry {
 			double d3 = c.xCoord - core.xCoord;
 			double d4 = c.yCoord - core.yCoord;
 			double d5 = c.zCoord - core.zCoord;
-			double distance2 = d3 * d3 + d4 * d4 + d5 * d5;
+			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
 
-			if (distance2 <= ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1) * ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1)) {
+			if (distance <= (2 * WarpDriveConfig.i.WC_MAX_SHIP_SIDE) - 1)
+			{
+				// Check for warpfields intersections
+				core.prepareToJump(); // calculate spatial parameters
+				c.prepareToJump();
 				// Compare warp-fields for intersection
+				aabb1 = AxisAlignedBB.getBoundingBox(core.minX, core.minY, core.minZ, core.maxX, core.maxY, core.maxZ);
 				aabb2 = AxisAlignedBB.getBoundingBox(c.minX, c.minY, c.minZ, c.maxX, c.maxY, c.maxZ);
-				if (aabb1.intersectsWith(aabb2)) {
+
+				if (aabb1.intersectsWith(aabb2))
+				{
 					return true;
 				}
 			}
@@ -138,18 +162,17 @@ public class WarpCoresRegistry {
 		return false;
 	}
 
-	public void removeDeadCores() {
-		LocalProfiler.start("WarpCoresRegistry Removing dead cores");
+	public void removeDeadCores()
+	{
+		LocalProfiler.start("WCR.removeDeadCores()");
+		ArrayList<TileEntityReactor> oldRegistry = (ArrayList<TileEntityReactor>) registry.clone();
 
-		TileEntityReactor c;
-		for (int i = registry.size() - 1; i >= 0; i--) {
-			c = registry.get(i);
-			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
-				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null)? c.xCoord : "?") + ", " + ((c != null)? c.yCoord : "?") + ", " + ((c != null)? c.zCoord : "?"));
-				registry.remove(i);
-			}
-		}
+		for (TileEntityReactor c : registry)
+			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.i.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid())
+				oldRegistry.remove(c);
 
+		// Update old registry to new witout dead cores
+		this.registry = (ArrayList<TileEntityReactor>) oldRegistry.clone();
 		LocalProfiler.stop();
 	}
 

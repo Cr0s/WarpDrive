@@ -203,14 +203,6 @@ public class Vector3 implements Cloneable
         return Math.sqrt(var2 * var2 + var4 * var4 + var6 * var6);
     }
 
-    public double distanceTo_square(Vector3 vector3)
-    {
-        double var2 = vector3.x - this.x;
-        double var4 = vector3.y - this.y;
-        double var6 = vector3.z - this.z;
-        return var2 * var2 + var4 * var4 + var6 * var6;
-    }
-
     /**
      * Multiplies the vector by negative one.
      */
@@ -493,26 +485,26 @@ public class Vector3 implements Cloneable
         return translateMatrix(getRotationMatrix(angle, axis), this.clone());
     }
 
-    public double[] getRotationMatrix(float angle_deg)
+    public double[] getRotationMatrix(float angle)
     {
         double[] matrix = new double[16];
         Vector3 axis = this.clone().normalize();
-        double xn = axis.x;
-        double yn = axis.y;
-        double zn = axis.z;
-        float angle_rad = angle_deg * 0.0174532925F;
-        float cos = (float) Math.cos(angle_rad);
+        double x = axis.x;
+        double y = axis.y;
+        double z = axis.z;
+        angle *= 0.0174532925D;
+        float cos = (float) Math.cos(angle);
         float ocos = 1.0F - cos;
-        float sin = (float) Math.sin(angle_rad);
-        matrix[0] = (xn * xn * ocos + cos);
-        matrix[1] = (yn * xn * ocos + zn * sin);
-        matrix[2] = (xn * zn * ocos - yn * sin);
-        matrix[4] = (xn * yn * ocos - zn * sin);
-        matrix[5] = (yn * yn * ocos + cos);
-        matrix[6] = (yn * zn * ocos + xn * sin);
-        matrix[8] = (xn * zn * ocos + yn * sin);
-        matrix[9] = (yn * zn * ocos - xn * sin);
-        matrix[10] = (zn * zn * ocos + cos);
+        float sin = (float) Math.sin(angle);
+        matrix[0] = (x * x * ocos + cos);
+        matrix[1] = (y * x * ocos + z * sin);
+        matrix[2] = (x * z * ocos - y * sin);
+        matrix[4] = (x * y * ocos - z * sin);
+        matrix[5] = (y * y * ocos + cos);
+        matrix[6] = (y * z * ocos + x * sin);
+        matrix[8] = (x * z * ocos + y * sin);
+        matrix[9] = (y * z * ocos - x * sin);
+        matrix[10] = (z * z * ocos + cos);
         matrix[15] = 1.0F;
         return matrix;
     }
@@ -541,12 +533,12 @@ public class Vector3 implements Cloneable
         double yawRadians = Math.toRadians(yaw);
         double pitchRadians = Math.toRadians(pitch);
         double rollRadians = Math.toRadians(roll);
-        double oldX = this.x;
-        double oldY = this.y;
-        double oldZ = this.z;
-        this.x = oldX * Math.cos(yawRadians) * Math.cos(pitchRadians) + oldZ * (Math.cos(yawRadians) * Math.sin(pitchRadians) * Math.sin(rollRadians) - Math.sin(yawRadians) * Math.cos(rollRadians)) + oldY * (Math.cos(yawRadians) * Math.sin(pitchRadians) * Math.cos(rollRadians) + Math.sin(yawRadians) * Math.sin(rollRadians));
-        this.z = oldX * Math.sin(yawRadians) * Math.cos(pitchRadians) + oldZ * (Math.sin(yawRadians) * Math.sin(pitchRadians) * Math.sin(rollRadians) + Math.cos(yawRadians) * Math.cos(rollRadians)) + oldY  * (Math.sin(yawRadians) * Math.sin(pitchRadians) * Math.cos(rollRadians) - Math.cos(yawRadians) * Math.sin(rollRadians));
-        this.y = -oldX * Math.sin(pitchRadians) + oldZ * Math.cos(pitchRadians) * Math.sin(rollRadians) + oldY * Math.cos(pitchRadians) * Math.cos(rollRadians);
+        double x = this.x;
+        double y = this.y;
+        double z = this.z;
+        this.x = x * Math.cos(yawRadians) * Math.cos(pitchRadians) + z * (Math.cos(yawRadians) * Math.sin(pitchRadians) * Math.sin(rollRadians) - Math.sin(yawRadians) * Math.cos(rollRadians)) + y * (Math.cos(yawRadians) * Math.sin(pitchRadians) * Math.cos(rollRadians) + Math.sin(yawRadians) * Math.sin(rollRadians));
+        this.z = x * Math.sin(yawRadians) * Math.cos(pitchRadians) + z * (Math.sin(yawRadians) * Math.sin(pitchRadians) * Math.sin(rollRadians) + Math.cos(yawRadians) * Math.cos(rollRadians)) + y * (Math.sin(yawRadians) * Math.sin(pitchRadians) * Math.cos(rollRadians) - Math.cos(yawRadians) * Math.sin(rollRadians));
+        this.y = -x * Math.sin(pitchRadians) + z * Math.cos(pitchRadians) * Math.sin(rollRadians) + y * Math.cos(pitchRadians) * Math.cos(rollRadians);
     }
 
     /**
@@ -560,13 +552,13 @@ public class Vector3 implements Cloneable
     public void rotate(double yaw)
     {
         double yawRadians = Math.toRadians(yaw);
-        double oldX = this.x;
-        double oldZ = this.z;
+        double x = this.x;
+        double z = this.z;
 
         if (yaw != 0)
         {
-            this.x = oldX * Math.cos(yawRadians) - oldZ * Math.sin(yawRadians);
-            this.z = oldX * Math.sin(yawRadians) + oldZ * Math.cos(yawRadians);
+            this.x = x * Math.cos(yawRadians) - z * Math.sin(yawRadians);
+            this.z = x * Math.sin(yawRadians) + z * Math.cos(yawRadians);
         }
     }
 
@@ -577,11 +569,11 @@ public class Vector3 implements Cloneable
      * @param rotationYaw
      * @param rotationPitch
      */
-    public static Vector3 getDeltaPositionFromRotation(float rotationYaw1, float rotationPitch1)
+    public static Vector3 getDeltaPositionFromRotation(float rotationYaw, float rotationPitch)
     {
-        float rotationYaw2 = rotationYaw1 + 90;
-        float rotationPitch2 = -rotationPitch1;
-        return new Vector3(Math.cos(Math.toRadians(rotationYaw2)), Math.sin(Math.toRadians(rotationPitch2)), Math.sin(Math.toRadians(rotationYaw2)));
+        rotationYaw = rotationYaw + 90;
+        rotationPitch = -rotationPitch;
+        return new Vector3(Math.cos(Math.toRadians(rotationYaw)), Math.sin(Math.toRadians(rotationPitch)), Math.sin(Math.toRadians(rotationYaw)));
     }
 
     /**

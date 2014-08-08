@@ -17,63 +17,57 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
-public class CloakedArea {
-	public int dimensionId = -666;
-	public int coreX, coreY, coreZ;
+public class CloakedArea
+{
+	public int frequency;
 	public AxisAlignedBB aabb;
-	private LinkedList<String> playersInArea;
+	public LinkedList<EntityPlayer> playersInArea;
 	public byte tier = 0;
+	public World world = null;
 	
-	public boolean isPlayerInArea(String username) {
-		for (String playerInArea : playersInArea) {
+	public boolean isPlayerInArea(EntityPlayer player) {
+		for (EntityPlayer p : this.playersInArea) {
 			//System.outprintln("[Cloak] Checking player: " + p.username + "(" + p.entityId + ")" + " =? " + player.username + " (" + p.entityId + ")");
-			if (playerInArea.equals(username))
+			if (p.username.equals(player.username))
 				return true;
 		}
-		
+
 		return false;
 	}
 	
-	public void removePlayer(String username) {
-		for (int i = 0; i < playersInArea.size(); i++) {
-			if (playersInArea.get(i).equals(username)) {
-				playersInArea.remove(i);
+	public void removePlayerFromArea(EntityPlayer p) {
+		for (int i = 0; i < this.playersInArea.size(); i++) {
+			if (this.playersInArea.get(i).username.equals(p.username)) {
+				this.playersInArea.remove(i);
 				return;
 			}
-		}
+		}		
 	}
 	
-	public void addPlayer(String username) {
-		if (!isPlayerInArea(username)) {
-			playersInArea.add(username);
-		}
+	public boolean isPlayerWithinArea(EntityPlayer player) {
+		return (aabb.minX <= player.posX && aabb.maxX >= player.posX && aabb.minY <= player.posY && aabb.maxY >= player.posY  && aabb.minZ <= player.posZ && aabb.maxZ >= player.posZ);
 	}
-	
-	public boolean isEntityWithinArea(Entity entity) {
-		return (aabb.minX <= entity.posX && aabb.maxX >= entity.posX && aabb.minY <= entity.posY && aabb.maxY >= entity.posY  && aabb.minZ <= entity.posZ && aabb.maxZ >= entity.posZ);
-	}
-	
-	public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
-		this.coreX = x;
-		this.coreY = y;
-		this.coreZ = z;
+			
+	public CloakedArea(World worldObj, int frequency, AxisAlignedBB aabb, byte tier) {
+		this.frequency = frequency;
 		this.aabb = aabb;
 		this.tier = tier;
-		this.playersInArea = new LinkedList<String>();
+		this.playersInArea = new LinkedList<EntityPlayer>();
 		
-		if (worldObj == null || aabb == null) {
+		if (worldObj == null || aabb == null)
 			return;
-		}
 		
-		this.dimensionId = worldObj.provider.dimensionId;
-					
+		this.world = worldObj;
+		
+		if (this.world == null)
+			return;
+		
 		try {
-			// Add all players currently inside the field
+			// Added all players, who inside the field
 			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
 			for (Entity e : list) {
-				if (e instanceof EntityPlayer) {
-					addPlayer(((EntityPlayer)e).username);
-				}
+				if (e instanceof EntityPlayer)
+					this.playersInArea.add((EntityPlayer)e);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -98,33 +92,36 @@ public class CloakedArea {
 		double midY = this.aabb.minY + (Math.abs(this.aabb.maxY - this.aabb.minY) / 2);
 		double midZ = this.aabb.minZ + (Math.abs(this.aabb.maxZ - this.aabb.minZ) / 2);
 		
-		for (int j = 0; j < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); j++) {
-			EntityPlayerMP entityPlayerMP = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(j);
+		for (int j = 0; j < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++j)
+		{
+			EntityPlayerMP entityplayermp = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(j);
 
-			if (entityPlayerMP.dimension == dimensionId) {
-				double d4 = midX - entityPlayerMP.posX;
-				double d5 = midY - entityPlayerMP.posY;
-				double d6 = midZ - entityPlayerMP.posZ;
+			if (entityplayermp.dimension == this.world.provider.dimensionId)
+			{
+				double d4 = midX - entityplayermp.posX;
+				double d5 = midY - entityplayermp.posY;
+				double d6 = midZ - entityplayermp.posZ;
 
-				if (Math.abs(d4) < RADIUS && Math.abs(d5) < RADIUS && Math.abs(d6) < RADIUS) {
+				if (d4 * d4 + d5 * d5 + d6 * d6 < RADIUS * RADIUS)
+				{
 					if (decloak) {
-						revealChunksToPlayer(entityPlayerMP);
-						revealEntityToPlayer(entityPlayerMP);
+						WarpDrive.instance.cloaks.revealChunksToPlayer(this, (EntityPlayer)entityplayermp);
+						WarpDrive.instance.cloaks.revealEntityToPlayer(this, (EntityPlayer)entityplayermp);							
 					}
 					
-					if (!isEntityWithinArea(entityPlayerMP) && !decloak) {
-						sendCloakPacketToPlayer(entityPlayerMP, false);
-					} else if (decloak) {
-						sendCloakPacketToPlayer(entityPlayerMP, true);
+					if (!isPlayerWithinArea((EntityPlayer)entityplayermp) && !decloak)
+							sendCloakPacketToPlayer((EntityPlayer)entityplayermp, false);
+					else if (decloak) {
+						sendCloakPacketToPlayer((EntityPlayer)entityplayermp, true);
 					}
 				}
 			}
-		}
+		}			
 	}
 	
 	public void sendCloakPacketToPlayer(EntityPlayer player, boolean decloak) {
 		//System.outprintln("[Cloak] Sending cloak packet to player " + player.username);
-		if (isPlayerInArea(player.username)) {
+		if (isPlayerInArea(player)) {
 			//System.outprintln("[Cloak] Player " + player.username + " is inside cloaking field");
 			return;
 		}
@@ -132,7 +129,8 @@ public class CloakedArea {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 		DataOutputStream outputStream = new DataOutputStream(bos);
 
-		try {
+		try
+		{
 			outputStream.writeInt((int) this.aabb.minX);
 			outputStream.writeInt((int) this.aabb.minY);
 			outputStream.writeInt((int) this.aabb.minZ);
@@ -144,15 +142,17 @@ public class CloakedArea {
 			outputStream.writeBoolean(decloak);
 		
 			outputStream.writeByte(this.tier);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex)
+		{
 			ex.printStackTrace();
 		}
-		
+
 		Packet250CustomPayload packet = new Packet250CustomPayload();
 		packet.channel = "WarpDriveCloaks";
 		packet.data = bos.toByteArray();
 		packet.length = bos.size();
-		
+
 		((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
 	}
 	
@@ -186,6 +186,9 @@ public class CloakedArea {
 
 				extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
 			}
+
+			int j2 = c.xPosition * 16 + x;
+			int k2 = c.zPosition * 16 + z;
 			extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
 
 			if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
@@ -199,46 +202,5 @@ public class CloakedArea {
 				return true;
 			}
 		}
-	}
-	
-	public void playerEnteringCloakedArea(EntityPlayer player) {
-		addPlayer(player.username);
-		revealChunksToPlayer(player);
-		revealEntityToPlayer(player);
-		sendCloakPacketToPlayer(player, false);
-	}
-
-	public void revealChunksToPlayer(EntityPlayer p) {
-		//System.outprintln("[Cloak] Revealing cloaked chunks in area " + area.frequency + " to player " + p.username);
-		for (int x = (int)aabb.minX; x <= (int)aabb.maxX; x++) {
-			for (int z = (int)aabb.minZ; z <= (int)aabb.maxZ; z++) {
-				for (int y = (int)aabb.minY; y <= (int)aabb.maxY; y++) {
-					if (p.worldObj.getBlockId(x, y, z) != 0) {
-						p.worldObj.markBlockForUpdate(x, y, z);
-					}
-				}
-			}
-		}
-		/*ArrayList<Chunk> chunksToSend = new ArrayList<Chunk>();
-		
-		for (int x = (int)aabb.minX >> 4; x <= (int)aabb.maxX >> 4; x++)
-			for (int z = (int)aabb.minZ >> 4; z <= (int)aabb.maxZ >> 4; z++) {
-				chunksToSend.add(p.worldObj.getChunkFromChunkCoords(x, z));
-			}
-		
-		//System.outprintln("[Cloak] Sending " + chunksToSend.size() + " chunks to player " + p.username);
-		((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(chunksToSend));
-		
-		//System.outprintln("[Cloak] Sending decloak packet to player " + p.username);
-		area.sendCloakPacketToPlayer(p, true); // decloak = true
-		*/
-	}
-	
-	public void revealEntityToPlayer(EntityPlayer p) {
-		List<Entity> list = p.worldObj.getEntitiesWithinAABBExcludingEntity(p, aabb);
-		
-		for (Entity e : list) {
-			((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(CloakManager.getPacketForThisEntity(e));
-		}
-	}
+	}		
 }
