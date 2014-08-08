@@ -66,7 +66,7 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 	private int hitZ = 0;
 	private int hitBlockId = 0;
 	private int hitBlockMeta = 0;
-	private float hitBlockResistance = 0;
+	private float hitBlockResistance = -1;
 
 	private int camUpdateTicks = 20;
 	private int registryUpdateTicks = 20 * 10;
@@ -649,9 +649,9 @@ public class TileEntityLaser extends TileEntity implements IPeripheral
 			case 3: // getFirstHit()
 				if (firstHit != null)
 				{
-					int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
-					int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
-					float blockResistance = Block.blocksList[blockID].blockResistance;
+					int blockID = hitBlockId;
+					int blockMeta = hitBlockMeta;
+					float blockResistance = hitBlockResistance;
 					Object[] info = { hitX, hitY, hitZ, hitBlockId, hitBlockMeta, (Float)hitBlockResistance };
 					return info;
 				}
