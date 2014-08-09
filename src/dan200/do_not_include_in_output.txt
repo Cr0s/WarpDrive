@@ -1,0 +1,3 @@
+This ComputerCraft 1.63 API as provided by its author.
+Those are only needed for compilation.
+Do not include those binaries in the mod package!
