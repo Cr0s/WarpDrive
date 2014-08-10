@@ -44,10 +44,10 @@ public class BlockCamera extends BlockContainer {
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World parWorld) {
         return new TileEntityCamera();
     }
-
+    
     /**
      * Returns the quantity of items to drop on block destruction.
      */
@@ -55,12 +55,12 @@ public class BlockCamera extends BlockContainer {
     public int quantityDropped(Random par1Random) {
         return 1;
     }
-
+    
     /**
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3)  {
+    public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
 
@@ -75,7 +75,7 @@ public class BlockCamera extends BlockContainer {
 
         // Get camera frequency
         TileEntity te = par1World.getBlockTileEntity(x, y, z);
-        if (te != null && te instanceof TileEntityCamera) {
+        if (te != null && te instanceof TileEntityCamera && (par5EntityPlayer.getHeldItem() == null)) {
             int frequency = ((TileEntityCamera)te).getFrequency();
 
             CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, frequency);

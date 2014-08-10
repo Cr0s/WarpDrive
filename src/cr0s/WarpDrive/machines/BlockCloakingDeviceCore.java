@@ -91,8 +91,6 @@ public class BlockCloakingDeviceCore extends BlockContainer {
         if (te != null && te instanceof TileEntityCloakingDeviceCore) {
         	((TileEntityCloakingDeviceCore)te).isEnabled = false;
        		((TileEntityCloakingDeviceCore)te).disableCloakingField();
-        	
-            te.invalidate();
         }
 
         super.breakBlock(par1World, par2, par3, par4, par5, par6);

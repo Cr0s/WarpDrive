@@ -25,27 +25,27 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 		"freq"
 	};
 
-	private final int REGISTRY_UPDATE_INTERVAL_SEC = 10;
-	private int ticks = 0;
+	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 10 * 20;
+	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 
+	private int registryUpdateTicks = 20;
 	private int packetSendTicks = 20;
 
 	@Override
 	public void updateEntity() {
-		// Update frequency on clients
+		// Update frequency on clients (recovery mechanism, no need to go too fast)
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			packetSendTicks--;
-			if (packetSendTicks == 0) {
-				packetSendTicks = 20 * 5;
+			if (packetSendTicks <= 0) {
+				packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
 				sendFreqPacket();
 			}
-			return;
-		}
-
-		ticks++;
-		if (ticks > 20 * REGISTRY_UPDATE_INTERVAL_SEC) {
-			ticks = 0;
-			WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
+		} else {
+			registryUpdateTicks--;
+			if (registryUpdateTicks <= 0) {
+				registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
+				WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
+			}
 		}
 	}
 
@@ -57,16 +57,23 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 		if (frequency != parFrequency) {
 			frequency = parFrequency;
 			WarpDrive.debugPrint("" + this + " Frequency set to " + frequency);
+	        WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
+			sendFreqPacket();
 		}
-        WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 	}
-
+	
+	@Override
+	public void invalidate() {
+        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		super.invalidate();
+	}
+	
     @Override
     public void onChunkUnload() {
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
         super.onChunkUnload();
     }
-
+    
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);

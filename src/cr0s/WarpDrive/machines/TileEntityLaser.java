@@ -33,8 +33,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	private int dx, dz, dy;
 	public float yaw, pitch; // laser direction
 
-	private int beamFrequency = -1;	// beam frequency
-	private int cameraFrequency = -1;	   // camera frequency
+	private int beamFrequency = -1;
+	private int cameraFrequency = -1;
 	private float r, g, b;	  // beam color (corresponds to frequency)
 
 	public boolean isEmitting = false;
@@ -54,22 +54,28 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	
 	private MovingObjectPosition firstHit = null;
 
-	private int camUpdateTicks = 20;
-	private int registryUpdateTicks = 20 * 10;
+	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 10 * 20;
+	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
+
+	private int registryUpdateTicks = 20;
+	private int packetSendTicks = 20;
 
 	@Override
 	public void updateEntity() {
 		if (isWithCamera()) {
-			registryUpdateTicks--;
-			if (registryUpdateTicks == 0 && FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-				registryUpdateTicks = 20 * 10;
-				WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
-			}
-
-			camUpdateTicks--;
-			if (camUpdateTicks == 0) {
-				camUpdateTicks = 20 * 5; // 5 seconds
-				sendFreqPacket();  // send own cam frequency to clients
+			// Update frequency on clients (recovery mechanism, no need to go too fast)
+			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+				packetSendTicks--;
+				if (packetSendTicks <= 0) {
+					packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
+					sendFreqPacket();
+				}
+			} else {
+				registryUpdateTicks--;
+				if (registryUpdateTicks <= 0) {
+					registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
+					WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
+				}
 			}
 		}
 
@@ -436,6 +442,12 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		super.writeToNBT(tag);
 		tag.setInteger("beamFrequency", beamFrequency);
 		tag.setInteger("cameraFrequency", cameraFrequency);
+	}
+	
+	@Override
+	public void invalidate() {
+        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		super.invalidate();
 	}
 
     @Override

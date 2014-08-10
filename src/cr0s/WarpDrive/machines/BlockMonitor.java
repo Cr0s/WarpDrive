@@ -75,7 +75,6 @@ public class BlockMonitor extends BlockContainer {
 
         if (te != null && te instanceof TileEntityMonitor && (par5EntityPlayer.getHeldItem() == null)) {
             int frequency = ((TileEntityMonitor)te).getFrequency();
-            WarpDrive.instance.cams.removeDeadCams(par1World);
             CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, frequency);
             if (cam == null) {
             	par5EntityPlayer.addChatMessage(getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!");

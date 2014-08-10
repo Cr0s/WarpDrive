@@ -64,14 +64,4 @@ public class BlockCloakingCoil extends Block {
     public int idDropped(int par1, Random par2Random, int par3) {
         return this.blockID;
     }
-
-    @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
-        TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
-        if (te != null) {
-            te.invalidate();
-        }
-
-		super.breakBlock(par1World, par2, par3, par4, par5, par6);
-	}
 }

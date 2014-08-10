@@ -104,7 +104,6 @@ public class BlockReactor extends BlockContainer {
         TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
         if (te != null && te instanceof TileEntityReactor) {
             WarpDrive.instance.warpCores.removeFromRegistry((TileEntityReactor)te);
-            te.invalidate();
         }
 
         WarpDrive.instance.warpCores.removeDeadCores();

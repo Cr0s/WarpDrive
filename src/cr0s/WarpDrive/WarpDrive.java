@@ -148,7 +148,7 @@ public class WarpDrive implements LoadingCallback {
 			return;
 		}
 		if (WarpDriveConfig.debugMode) {
-			System.out.println(out);
+			System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + out);
 		}
 	}
 
