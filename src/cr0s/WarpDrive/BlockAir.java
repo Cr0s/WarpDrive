@@ -238,8 +238,7 @@ public class BlockAir extends Block
         if (new_concentration > 14) {
         	new_concentration = 14;
         }
-        if (concentration != new_concentration)
-        {
+        if (concentration != new_concentration) {
         	if (concentration == 15) {
         		if ( (xp_blockId != WarpDriveConfig.airgenID) && (xn_blockId != WarpDriveConfig.airgenID)
         		  && (yp_blockId != WarpDriveConfig.airgenID) && (yn_blockId != WarpDriveConfig.airgenID)
@@ -261,7 +260,7 @@ public class BlockAir extends Block
         // Check and setup air to adjacent blocks
         if (xp_isAir) {
         	if (xp_blockId == this.blockID) {
-        		if (xp_concentration != 15) {
+        		if (xp_concentration != mid_concentration && xp_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x + 1, y, z, mid_concentration, 2);
         		}
         	} else {
@@ -271,7 +270,7 @@ public class BlockAir extends Block
 
         if (xn_isAir) {
         	if (xn_blockId == this.blockID) {
-        		if (xn_concentration != 15) {
+        		if (xn_concentration != mid_concentration && xn_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x - 1, y, z, mid_concentration, 2);
         		}
         	} else {
@@ -281,7 +280,7 @@ public class BlockAir extends Block
 
         if (yp_isAir) {
         	if (yp_blockId == this.blockID) {
-        		if (yp_concentration != 15) {
+        		if (yp_concentration != mid_concentration && yp_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x, y + 1, z, mid_concentration, 2);
         		}
         	} else {
@@ -291,7 +290,7 @@ public class BlockAir extends Block
 
         if (yn_isAir) {
         	if (yn_blockId == this.blockID) {
-        		if (yn_concentration != 15) {
+        		if (yn_concentration != mid_concentration && yn_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x, y - 1, z, mid_concentration, 2);
         		}
         	} else {
@@ -301,7 +300,7 @@ public class BlockAir extends Block
 
         if (zp_isAir) {
         	if (zp_blockId == this.blockID) {
-        		if (zp_concentration != 15) {
+        		if (zp_concentration != mid_concentration && zp_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x, y, z + 1, mid_concentration, 2);
         		}
         	} else {
@@ -311,7 +310,7 @@ public class BlockAir extends Block
 
         if (zn_isAir) {
         	if (zn_blockId == this.blockID) {
-        		if (zn_concentration != 15) {
+        		if (zn_concentration != mid_concentration && zn_concentration != 15) {
         			worldObj.setBlockMetadataWithNotify(x, y, z - 1, mid_concentration, 2);
         		}
         	} else {

@@ -70,8 +70,10 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         if (++ticks >= BLOCK_UPDATE_INTERVAL) {
             core = findCoreBlock();
             if (core != null) {
-                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 1 + 2);  // Activated
-            } else {
+            	if (mode != getBlockMetadata()) {
+            		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 1 + 2);  // Activated
+            	}
+            } else if (getBlockMetadata() != 0) {
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);  // Inactive
             }
 

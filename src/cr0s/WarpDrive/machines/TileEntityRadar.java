@@ -35,7 +35,7 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 		super.updateEntity();
 
 		try {
-			if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 2) {
+			if (getBlockMetadata() == 2) {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
 					WarpDrive.debugPrint("" + this + " Scanning over " + scanRadius + " radius...");
@@ -103,7 +103,9 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				scanRadius = radius;
 				cooldownTime = 0;
 				results = null;
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
+				if (getBlockMetadata() != 2) {
+					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
+				}
 				return new Boolean[] { true };
 
 			case 2: // getResultsCount
@@ -146,7 +148,7 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
         computer.mount("/radar", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar"));
         computer.mount("/scan", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/scan"));
         computer.mount("/ping", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/ping"));
-        if (worldObj.getBlockMetadata(xCoord, yCoord, zCoord) == 0) {
+        if (getBlockMetadata() == 0) {
         	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
         }
 	}

@@ -196,7 +196,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private void updateMetadata(int metadata) {
 		int blockId = worldObj.getBlockId(xCoord, yCoord, zCoord);
-		if (blockId == WarpDriveConfig.miningLaserID) {
+		if (blockId == WarpDriveConfig.miningLaserID && getBlockMetadata() != metadata) {
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 2);
 		}
 	}

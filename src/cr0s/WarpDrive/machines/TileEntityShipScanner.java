@@ -186,7 +186,9 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 	private void switchState(int newState) {
 		this.state = newState;
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, newState, 2);
+		if (getBlockMetadata() != newState) {
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, newState, 2);
+		}
 	}
 
 	private TileEntityReactor searchWarpCore() {

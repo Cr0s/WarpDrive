@@ -44,11 +44,15 @@ public class TileEntityLift extends WarpEnergyTE {
 
             if (getEnergyStored() != MAX_ENERGY_VALUE || !isEnabled) {
                 mode = 0;
-                worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);    // disabled
+                if (getBlockMetadata() != 0) {
+                	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2);    // disabled
+                }
                 return;
             }
 
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 2); // current mode
+            if (getBlockMetadata() != mode) {
+            	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 2); // current mode
+            }
 
             // Launch a beam: search non-air blocks under lift
             for (int ny = yCoord - 1; ny > 0; ny--) {

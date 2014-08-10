@@ -83,13 +83,21 @@ public class TileEntityReactor extends WarpEnergyTE
         
         // Update state
         if (cooldownTime > 0) { // cooling down (2)
-        	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
+        	if (getBlockMetadata() != 2) {
+        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
+        	}
         } else if (controller == null) { // not connected (0)
-        	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+        	if (getBlockMetadata() != 0) {
+        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+        	}
         } else if (controller.isJumpFlag() || this.controller.isSummonAllFlag() || !this.controller.getToSummon().isEmpty()) { // active (1)
-        	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+        	if (getBlockMetadata() != 1) {
+        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
+        	}
         } else { // inactive
-        	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+        	if (getBlockMetadata() != 0) {
+        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);
+        	}
         }
         
         // Update warp core in cores registry

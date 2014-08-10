@@ -20,20 +20,26 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
 		}
 		super.updateEntity();
 
+		if (this.isInvalid()) {
+			return;
+		}
+		
         // Air generator works only in spaces
-        if (this.tileEntityInvalid || (worldObj.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID && worldObj.provider.dimensionId != WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID)) {
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
+        if (worldObj.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID && worldObj.provider.dimensionId != WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
+        	if (getBlockMetadata() != 0) {
+        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
+        	}
             return;
         }
 
         cooldownTicks++;
         if (cooldownTicks > AIR_GENERATION_TICKS) {
         	if (consumeEnergy(EU_PER_NEWAIRBLOCK, true)) {
-	        	if (this.blockMetadata != 1) {
+	        	if (getBlockMetadata() != 1) {
 	        		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2); // set enabled texture
 	        	}
         	} else {
-            	if (this.blockMetadata != 0) {
+            	if (getBlockMetadata() != 0) {
             		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
             	}
         	}

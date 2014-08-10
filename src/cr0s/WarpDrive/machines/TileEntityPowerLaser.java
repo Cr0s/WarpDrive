@@ -73,12 +73,13 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	}
 	
 	private void setMetadata() {
-		int meta = 0;
-		if(side != ForgeDirection.UNKNOWN) {
-			meta = side.ordinal() - 1;
+		int metadata = 0;
+		if (side != ForgeDirection.UNKNOWN) {
+			metadata = side.ordinal() - 1;
 		}
-		//WarpDrive.debugPrint("META:" + meta);
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, meta, 3);
+		if (getBlockMetadata() != metadata) {
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 3);
+		}
 	}
 	
 	public TileEntityParticleBooster scanForBooster() {

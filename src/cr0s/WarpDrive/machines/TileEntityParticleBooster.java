@@ -19,7 +19,10 @@ public class TileEntityParticleBooster extends WarpEnergyTE {
         if (ticks > 20) {
             ticks = 0;
             
-            worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, Math.max(0, Math.min(10, Math.round((getEnergyStored() * 10) / WarpDriveConfig.PB_MAX_ENERGY_VALUE))), 3);
+            int metadata = Math.max(0, Math.min(10, Math.round((getEnergyStored() * 10) / WarpDriveConfig.PB_MAX_ENERGY_VALUE)));
+            if (getBlockMetadata() != metadata) {
+            	worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 3);
+            }
         }
     }
 

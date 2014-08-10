@@ -224,8 +224,9 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral 
 		int energyNibble = (int) Math.max(0, Math.min(3, Math.round( 4.0D * containedEnergy / getMaxEnergyStored())));
 		
 		int metadata = 4 * instabilityNibble + energyNibble;
-		// WarpDrive.debugPrint("updateSideTextures " + metadata);
-		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 3);
+		if (getBlockMetadata() != metadata) {
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 3);
+		}
 	}
 	
 	private boolean shouldExplode() {
