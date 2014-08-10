@@ -32,7 +32,7 @@ public class CamRegistry {
         return null;
     }
 
-    public CamRegistryItem getCamByPosition(World worldObj, ChunkPosition position) {
+    private CamRegistryItem getCamByPosition(World worldObj, ChunkPosition position) {
 		CamRegistryItem cam = null;
     	for (Iterator<CamRegistryItem> it = registry.iterator(); it.hasNext(); ) {
     		cam = it.next();
@@ -50,8 +50,13 @@ public class CamRegistry {
     		return false;
     	}
     	
-        if ( (worldObj.getBlockId(cam.position.x, cam.position.y, cam.position.z) != WarpDriveConfig.camID)
-          && (worldObj.getBlockId(cam.position.x, cam.position.y, cam.position.z) != WarpDriveConfig.laserCamID) ) {
+    	if (!worldObj.getChunkFromBlockCoords(cam.position.x, cam.position.z).isChunkLoaded) {
+        	WarpDrive.debugPrint("Reporting an 'unloaded' camera in dimension " + cam.dimensionId + " at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
+        	return false;
+    	}
+    	int blockId = worldObj.getBlockId(cam.position.x, cam.position.y, cam.position.z);
+        if ( (blockId != WarpDriveConfig.camID)
+          && (blockId != WarpDriveConfig.laserCamID) ) {
         	WarpDrive.debugPrint("Reporting a 'dead' camera in dimension " + cam.dimensionId + " at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
             return false;
         }
@@ -59,7 +64,7 @@ public class CamRegistry {
         return true;
     }
 
-    public void removeDeadCams(World worldObj) {
+    private void removeDeadCams(World worldObj) {
 //		LocalProfiler.start("CamRegistry Removing dead cameras");
 
 		CamRegistryItem cam = null;
@@ -70,7 +75,7 @@ public class CamRegistry {
 				it.remove();
 			}
 		}
-
+		
 //		LocalProfiler.stop();
     }
 
@@ -81,11 +86,10 @@ public class CamRegistry {
     		registry.remove(cam);
     	}
     }
+    
     public void updateInRegistry(World worldObj, ChunkPosition position, int frequency, int type) {
-    	updateInRegistry(worldObj, new CamRegistryItem(worldObj, position, frequency, type));
-    }
-    	
-    private void updateInRegistry(World worldObj, CamRegistryItem cam) {
+    	CamRegistryItem cam = new CamRegistryItem(worldObj, position, frequency, type);
+		// WarpDrive.debugPrint("updateInRegistry " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
         removeDeadCams(worldObj);
 
         if (isCamAlive(worldObj, cam)) {
@@ -95,7 +99,7 @@ public class CamRegistry {
                 registry.add(cam);
             } else if (existingCam.frequency != cam.frequency) {
 				WarpDrive.debugPrint("Updating 'live' camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + " to frequency '" + cam.frequency + "'");
-                registry.add(cam);
+                existingCam.frequency = cam.frequency;
             }
         } else {
 			WarpDrive.debugPrint("Unable to update 'dead' camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
@@ -104,7 +108,6 @@ public class CamRegistry {
 
 	public void printRegistry(World worldObj) {
 		System.out.println("Cameras registry for dimension " + worldObj.provider.dimensionId + ":");
-		removeDeadCams(worldObj);
 
 		for (CamRegistryItem cam : registry) {
 			System.out.println("- " + cam.frequency + " (" + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + ")");
