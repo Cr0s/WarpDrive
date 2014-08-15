@@ -107,11 +107,18 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral 
 		lasersReceived++;
 		
 		if (lasersReceived <= maxLasers) {
-			double consumeRateIncrease = 1 + Math.pow(Math.E, lastGenerationRate / 63095); // FIXME Math.pow(this.getMaxEnergyStored(), 0.6D)
+			final double LaserMaxAmount = 1600D / 0.26D;
+			double normalisedAmount = Math.min(1.0D, Math.max(0.0D, amount / LaserMaxAmount)); // 0.0 to 1.0
+			double baseLaserEffect = 0.5D + 0.5D * Math.cos(Math.PI - (1.0D + Math.log10(0.1D + 0.9D * normalisedAmount)) * Math.PI); // 0.0 to 1.0
+			double energyFactor = 1.0D - (0.5D * containedEnergy) / getMaxEnergyStored(); // 0.5 to 1.0
+			double randomVariation = 0.8D + 0.4D * worldObj.rand.nextDouble(); // 0.8 to 1.2
+			double amountToRemove = 10.0D * baseLaserEffect * energyFactor * randomVariation; // 0.0 to 12.0
+			
+			/* double consumeRateIncrease = 1 + Math.pow(Math.E, lastGenerationRate / 63095); // FIXME Math.pow(this.getMaxEnergyStored(), 0.6D)
 			double randomVariation = 0.4 + worldObj.rand.nextDouble();
-			double amountToRemove = Math.min(Math.pow(amount * randomVariation, (1.0 / 3)) * consumeRateIncrease, 75);
+			double amountToRemove = Math.min(Math.pow(amount * randomVariation, (1.0 / 3)) * consumeRateIncrease, 75);/**/
 			int side = from.ordinal() - 2;
-			// WarpDrive.debugPrint("Instability on " + from.toString() + " decreased by " + String.format("%.1f", amountToRemove) + " after consumming " + amount);
+			// WarpDrive.debugPrint("Instability on " + from.toString() + " decreased by " + String.format("%.1f", amountToRemove) + " after consuming " + amount);
 			instabilityValues[side] = Math.max(0, instabilityValues[side] - amountToRemove);
 		} else {
 			WarpDrive.debugPrint("Too many lasers received, instability increasing...");
