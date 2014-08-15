@@ -21,7 +21,7 @@ public class WarpDriveConfig
 {
 	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, componentID;
+	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, powerStoreID, componentID;
 //
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -157,6 +157,9 @@ public class WarpDriveConfig
 	public static int		PR_MAX_ENERGY = 10000000;
 	public static int		PR_TICK_TIME  = 20;
 	public static int		PR_MAX_LASERS = 3;
+	
+	// POWER STORE
+	public static int		PS_MAX_ENERGY = 1000000;
 	
 	// REACTOR MONITOR
 	public static int		RM_MAX_ENERGY = 1000000;
@@ -299,9 +302,12 @@ public class WarpDriveConfig
 
 		// Reactor
 		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
-		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update",20).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 4).getInt();
-
+		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update", 5).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 7).getInt();
+		
+		// Store
+		PS_MAX_ENERGY = config.get("Power Store", "max_energy", 10000000).getInt();
+		
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
 		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
@@ -350,9 +356,10 @@ public class WarpDriveConfig
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
 		transporterID = config.getBlock("transporter", 520).getInt();
 		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
-		reactorMonitorID = config.getBlock("reactorMonitor",522).getInt();
+		reactorMonitorID = config.getBlock("reactorMonitor", 522).getInt();
 		powerLaserID = config.getBlock("powerLaser", 523).getInt();
-		powerReactorID = config.getBlock("powerReactor",524).getInt();
+		powerReactorID = config.getBlock("powerReactor", 524).getInt();
+		powerStoreID = config.getBlock("powerStore", 525).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
