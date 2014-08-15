@@ -18,6 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
 public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPeripheral {
@@ -458,7 +459,12 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
-
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
+    }
+    
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;

@@ -17,6 +17,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.*;
 
@@ -1027,7 +1028,7 @@ public class TileEntityReactor extends WarpEnergyTE
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
 	}
-
+    
     @Override
     public double demandedEnergyUnits() {
         if (this.controller != null && controller.getMode() == 0) {
@@ -1036,10 +1037,15 @@ public class TileEntityReactor extends WarpEnergyTE
 
         return super.demandedEnergyUnits();
     }
-
+    
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;
+    }
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
     }
 
     @Override

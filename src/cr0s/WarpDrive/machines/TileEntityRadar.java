@@ -9,6 +9,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import java.util.ArrayList;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
 public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
@@ -173,4 +174,9 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 	public boolean equals(IPeripheral other) {
 		return other == this;
 	}
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
+    }
 }

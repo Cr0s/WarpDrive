@@ -1,8 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
 public class TileEntityParticleBooster extends WarpEnergyTE {
@@ -45,5 +45,10 @@ public class TileEntityParticleBooster extends WarpEnergyTE {
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;
+    }
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
     }
 }

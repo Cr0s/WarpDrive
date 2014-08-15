@@ -7,6 +7,7 @@ import java.util.List;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
 public class TileEntityLift extends WarpEnergyTE {
@@ -164,12 +165,17 @@ public class TileEntityLift extends WarpEnergyTE {
         super.writeToNBT(tag);
     }
 
-    // IEnergySink methods implementation
     @Override
     public int getMaxEnergyStored() {
     	return MAX_ENERGY_VALUE;
     }
     
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
+    }
+    
+    // IEnergySink methods implementation
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;

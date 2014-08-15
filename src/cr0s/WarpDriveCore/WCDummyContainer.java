@@ -21,7 +21,7 @@ public class WCDummyContainer extends DummyModContainer
         ModMetadata meta = getMetadata();
         meta.modId = "WarpDriveCore";
         meta.name = "WarpDriveCore";
-        meta.version = "1.0.0.1";
+        meta.version = "1.0.0.2";
         meta.credits = "Cr0s";
         meta.authorList = Arrays.asList("cr0s");
         meta.description = "";

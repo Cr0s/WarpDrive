@@ -3,6 +3,7 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.ForgeDirection;
 
 public class TileEntityAirGenerator extends WarpEnergyTE {
     private final int EU_PER_NEWAIRBLOCK = 12;
@@ -100,5 +101,10 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
     @Override
     public int getMaxSafeInput() {
         return Integer.MAX_VALUE;
+    }
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
     }
 }

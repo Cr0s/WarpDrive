@@ -21,6 +21,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraftforge.common.ForgeDirection;
 
 public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
@@ -263,16 +264,32 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 					
 					if (blockID != 0) {
 						TileEntity te = worldObj.getBlockTileEntity(core.minX + x, core.minY + y, core.minZ + z);
-						if (te != null && !(te instanceof IInventory))
-						{
+						if (te != null) {
 							try {
 								NBTTagCompound tileTag = new NBTTagCompound();
 								te.writeToNBT(tileTag);
 								
+								// Clear inventory.
+								if (te instanceof IInventory) {
+									TileEntity tmp_te = TileEntity.createAndLoadEntity(tileTag);
+									if (tmp_te instanceof IInventory) {
+										for (int i = 0; i < ((IInventory)tmp_te).getSizeInventory(); i++) {
+											((IInventory)tmp_te).setInventorySlotContents(i, null);
+										}
+									}
+									tmp_te.writeToNBT(tileTag);
+								}
+
 								// Remove energy from energy storages
 								if (te instanceof IEnergyTile) {
-									if (tileTag.hasKey("energy"))
+									// IC2
+									if (tileTag.hasKey("energy")) {
 										tileTag.setInteger("energy", 0);
+									}
+									// Gregtech
+									if (tileTag.hasKey("mStoredEnergy")) {
+										tileTag.setInteger("mStoredEnergy", 0);
+									}
 								}
 								
 								// Transform TE's coordinates from local axis to .schematic offset-axis
@@ -583,6 +600,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
+    }
 	
 	public boolean moveBlockSimple(JumpBlock shipBlock)
 	{

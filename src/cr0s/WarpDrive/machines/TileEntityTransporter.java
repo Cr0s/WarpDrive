@@ -49,11 +49,6 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			"help" };
 	
 	@Override
-	public int getMaxEnergyStored() {
-		return WarpDriveConfig.TR_MAX_ENERGY;
-	}
-	
-	@Override
 	public void updateEntity() {
 		super.updateEntity();
 		
@@ -386,12 +381,18 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	public void detach(IComputerAccess computer) {}
 	
 	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection direction) {
-		if (direction.equals(ForgeDirection.UP))
-			return false;
-		return super.acceptsEnergyFrom(emitter, direction);
+	public int getMaxEnergyStored() {
+		return WarpDriveConfig.TR_MAX_ENERGY;
 	}
-
+	
+	@Override
+	public boolean canInputEnergy(ForgeDirection from) {
+		if (from == ForgeDirection.UP) {
+			return false;
+		}
+		return true;
+	}
+	
 	@Override
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;

@@ -15,6 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
+import net.minecraftforge.common.ForgeDirection;
 
 public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	private final int workRate = 10;
@@ -137,4 +138,9 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
+    
+    @Override
+    public boolean canInputEnergy(ForgeDirection from) {
+    	return true;
+    }
 }
