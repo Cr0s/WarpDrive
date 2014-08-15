@@ -142,13 +142,14 @@ public class WarpDrive implements LoadingCallback {
 	public void init(FMLInitializationEvent event) {
 // FIXME		FMLInterModComms.sendMessage("Waila", "register", "cr0s.WarpDrive.client.WailaHandler.callbackRegister");
 	}
+
+	public static void print(String out) {
+		System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + out);
+	}
 	
 	public static void debugPrint(String out) {
-		if (WarpDriveConfig.debugMode == false) {
-			return;
-		}
 		if (WarpDriveConfig.debugMode) {
-			System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + out);
+			print(out);
 		}
 	}
 
