@@ -1,5 +1,6 @@
 package cr0s.WarpDrive;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +12,8 @@ import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import ic2.api.item.Items;
 
@@ -23,6 +26,7 @@ public class WarpDriveConfig
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
+	public static boolean isForgeMultipartLoaded			= false;
 	public static boolean isGregLoaded						= false;
 	public static boolean isAppliedEnergisticsLoaded		= false;
 	public static boolean isAdvSolPanelLoaded				= false;
@@ -44,6 +48,10 @@ public class WarpDriveConfig
 	 */
 	public static boolean recipesIC2			= true;
 //
+	public static Method forgeMultipart_helper_createTileFromNBT = null;
+	public static Method forgeMultipart_helper_sendDescPacket = null;
+	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
+
 	public static int[] IC2_Air;
 	public static int[] IC2_Empty;
 	public static int IC2_RubberWood;
@@ -349,6 +357,11 @@ public class WarpDriveConfig
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
 		
+		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
+		if (isForgeMultipartLoaded) {
+			loadForgeMultipart();
+		}
+		
 		isICLoaded = Loader.isModLoaded("IC2");
 		if (isICLoaded)
 			loadIC2();
@@ -475,6 +488,20 @@ public class WarpDriveConfig
 		}
 	}
 
+	private static void loadForgeMultipart() {
+		try {
+			Class forgeMultipart_helper = Class.forName("codechicken.multipart.MultipartHelper");
+			forgeMultipart_helper_createTileFromNBT =  forgeMultipart_helper.getDeclaredMethod("createTileFromNBT", World.class, NBTTagCompound.class);
+			forgeMultipart_helper_sendDescPacket = forgeMultipart_helper.getDeclaredMethod("sendDescPacket", World.class, TileEntity.class);
+			Class forgeMultipart_tileMultipart = Class.forName("codechicken.multipart.TileMultipart");
+			forgeMultipart_tileMultipart_onChunkLoad = forgeMultipart_tileMultipart.getDeclaredMethod("onChunkLoad");
+		} catch (Exception e) {
+			isForgeMultipartLoaded = false;
+			WarpDrive.debugPrint("WarpDriveConfig Error loading ForgeMultipart classes");
+			e.printStackTrace();
+		}
+	}
+	
 	private static void loadIC2()
 	{
 		ASP = Items.getItem("solarPanel").itemID;

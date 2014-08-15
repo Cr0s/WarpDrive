@@ -493,7 +493,8 @@ public class EntityJump extends Entity
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 		WarpDrive.debugPrint("" + this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
 		TileEntity te;
-		Class<?> c;
+		Class<?> teClass;
+		Class<?> teSuperclass;
 		for (int index = 0; index < blocksToMove; index++) {
 			if (currentIndexInShip >= ship.length) {
 				break;
@@ -513,42 +514,40 @@ public class EntityJump extends Entity
 			
 			te = targetWorld.getBlockTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
 			if (te != null) {
-				c = te.getClass();
-				if (c.getName().equals("atomicscience.jiqi.TTurbine")) {
-					try
-					{
-						if (c.getField("shiDa").getBoolean(te))
+				teClass = te.getClass();
+				// WarpDrive.debugPrint("Tile at " + jb.x + ", " + jb.y + ", " + jb.z + " is " + teClass + " derived from " + teClass.getSuperclass());
+				if (teClass.getName().equals("atomicscience.jiqi.TTurbine")) {
+					try {
+						if (teClass.getField("shiDa").getBoolean(te))
 							ASTurbines.add(te);
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
+						WarpDrive.print("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
 				} else if (te instanceof TileEntityReactor) {
 					WarpDrive.instance.warpCores.removeFromRegistry((TileEntityReactor)te);
 				}
 				
-				c = c.getSuperclass();
-				if (c.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock") || c.getName().equals("ic2.core.block.TileEntityBlock") || c.getName().contains("ic2.core.block.generator")) {
-					try
-					{
-						Method method;
-						method = c.getDeclaredMethod("onUnloaded", (Class<?>[])null);
-						method.invoke(te, (Object[])null);
-						method = c.getDeclaredMethod("onLoaded", (Class<?>[])null);
-						method.invoke(te, (Class<?>)null);
-					}
-					catch (Exception e)
-					{
+				teSuperclass = teClass.getSuperclass();
+				if (   teSuperclass.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock")
+					|| teSuperclass.getName().equals("ic2.core.block.TileEntityBlock")
+					|| teSuperclass.getName().contains("ic2.core.block.generator")) {
+					try {
+						Method onUnloaded = teSuperclass.getDeclaredMethod("onUnloaded");
+						Method onLoaded = teSuperclass.getDeclaredMethod("onLoaded");
+						if (onUnloaded != null && onLoaded != null) {
+							onUnloaded.invoke(te);
+							onLoaded.invoke(te);
+						}
+					} catch (Exception e) {
+						WarpDrive.print("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
 					te.updateContainingBlockInfo();
-					try
-					{
+					try {
 						NetworkHelper.updateTileEntityField(te, "facing");
-					}
-					catch (Exception e)
-					{
+					} catch (Exception e) {
+						WarpDrive.print("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
 				}
@@ -1096,16 +1095,15 @@ public class EntityJump extends Entity
 		}
 	}/**/
 
-	private boolean moveBlockSimple(int indexInShip)
-	{
-		try
-		{
-			JumpBlock shipBlock = ship[indexInShip];
+	private boolean moveBlockSimple(int indexInShip) {
+		JumpBlock shipBlock = null;
+		try {
+			shipBlock = ship[indexInShip];
 
 			if (shipBlock == null) {
 				return false;
 			}
-
+			
 			int oldX = shipBlock.x;
 			int oldY = shipBlock.y;
 			int oldZ = shipBlock.z;
@@ -1123,7 +1121,6 @@ public class EntityJump extends Entity
 			}
 
 			NBTTagCompound oldnbt = new NBTTagCompound();
-			boolean unlockToValidate = false;
 			// 145 Anvil, 146 Trapped chest, 149 inactive redstone comparator, 156 Quartz stair, 159 Stained clay
 			if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145)
 			{
@@ -1132,30 +1129,25 @@ public class EntityJump extends Entity
 				oldnbt.setInteger("y", newY);
 				oldnbt.setInteger("z", newZ);
 				
-				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ"))	// Mekanism 6.0.4.44
-				{
+				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ"))	{ // Mekanism 6.0.4.44
 					WarpDrive.debugPrint("[JUMP] moveBlockSimple: TileEntity from Mekanism detected");
 					oldnbt.setInteger("mainX", oldnbt.getInteger("mainX") + moveX);
 					oldnbt.setInteger("mainY", oldnbt.getInteger("mainY") + moveY);
 					oldnbt.setInteger("mainZ", oldnbt.getInteger("mainZ") + moveZ);
-					unlockToValidate = true;
-				} else if (oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart")
-				{
-					WarpDrive.debugPrint("[JUMP] moveBlockSimple: TileEntity from Forge multipart detected at " + oldX + ", " + oldY + ", " + oldZ);
-					unlockToValidate = true;
-				} else {
-//					WarpDrive.debugPrint("[JUMP] moveBlockSimple: TileEntity from other detected");
 				}
+				
 				TileEntity newTileEntity = null;
-				if (blockID == WarpDriveConfig.CC_Computer || blockID == WarpDriveConfig.CC_peripheral || blockID == WarpDriveConfig.CCT_Turtle || blockID == WarpDriveConfig.CCT_Upgraded || blockID == WarpDriveConfig.CCT_Advanced)
-				{
+				boolean	isForgeMultipart = false;
+				if (oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart" && WarpDriveConfig.isForgeMultipartLoaded) {
+					isForgeMultipart = true;
+					newTileEntity = (TileEntity) WarpDriveConfig.forgeMultipart_helper_createTileFromNBT.invoke(null, targetWorld, oldnbt);
+					
+				} else if (blockID == WarpDriveConfig.CC_Computer || blockID == WarpDriveConfig.CC_peripheral || blockID == WarpDriveConfig.CCT_Turtle || blockID == WarpDriveConfig.CCT_Upgraded || blockID == WarpDriveConfig.CCT_Advanced) {
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
-				}
-				else if (blockID == WarpDriveConfig.AS_Turbine)
-				{
-					if (oldnbt.hasKey("zhuYao"))
-					{
+					
+				} else if (blockID == WarpDriveConfig.AS_Turbine) {
+					if (oldnbt.hasKey("zhuYao")) {
 						NBTTagCompound nbt1 = oldnbt.getCompoundTag("zhuYao");
 						nbt1.setDouble("x", newX);
 						nbt1.setDouble("y", newY);
@@ -1165,29 +1157,31 @@ public class EntityJump extends Entity
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				}
 				
-				if (newTileEntity == null)
+				if (newTileEntity == null) {
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
+				}
 				
 				newTileEntity.worldObj = targetWorld;
-				if (unlockToValidate)
-				{
-//					targetWorld.isRemote = false;
-					newTileEntity.validate();
-//					targetWorld.isRemote = true;
-				}
-				else
-				{
-					newTileEntity.validate();
-				}
+				newTileEntity.validate();
 				
 				worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
 				targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+				if (isForgeMultipart) {
+					WarpDriveConfig.forgeMultipart_tileMultipart_onChunkLoad.invoke(newTileEntity);
+					WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
+				}
 			}
-		}
-		catch (Exception exception)
-		{
+		} catch (Exception exception) {
 			exception.printStackTrace();
-			WarpDrive.debugPrint("[JUMP] moveBlockSimple exception Idx " + indexInShip);
+			String coordinates = "";
+			try {
+				if (shipBlock != null) {
+					coordinates = " at " + shipBlock.x + ", " + shipBlock.y + ", " + shipBlock.z + " blockId " + shipBlock.blockID + ":" + shipBlock.blockMeta;
+				}
+			} catch (Exception dropMe) {
+				coordinates = " (unknown coordinates)";
+			}
+			WarpDrive.print(this + " moveBlockSimple exception index " + indexInShip + coordinates);
 			return false;
 		}
 
