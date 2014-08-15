@@ -3,46 +3,25 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.WarpBlockContainer;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
-public class BlockPowerReactor extends BlockContainer {
+public class BlockPowerReactor extends WarpBlockContainer {
 	Icon[] iconBuffer = new Icon[17];
 	
 	public BlockPowerReactor(int id) {
-        super(id, Material.iron);
-        setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
-		setCreativeTab(WarpDrive.warpdriveTab);
+        super(id);
 		setUnlocalizedName("warpdrive.power.Reactor");
     }
 
 	@Override
 	public TileEntity createNewTileEntity(World world) {
 		return new TileEntityPowerReactor();
-	}
-	
-	@Override
-	public void onBlockAdded(World w,int x, int y,int z) {
-		super.onBlockAdded(w, x, y, z);
-		
-		TileEntity te = w.getBlockTileEntity(x, y, z);
-		if(te instanceof TileEntityPowerReactor) {
-			((TileEntityPowerReactor)te).updateNeighbours();
-		}
-	}
-	
-	@Override
-	public void onNeighborBlockChange(World w,int x,int y,int z,int b) {
-		TileEntity te = w.getBlockTileEntity(x, y, z);
-		if(te instanceof TileEntityPowerReactor) {
-			((TileEntityPowerReactor)te).updateNeighbours();
-		}
 	}
 	
 	@Override
