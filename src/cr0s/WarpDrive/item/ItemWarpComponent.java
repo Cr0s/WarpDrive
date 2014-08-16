@@ -6,6 +6,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.api.IAirCanister;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.creativetab.CreativeTabs;
@@ -14,16 +15,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 
-public class ItemWarpComponent extends Item {	
+public class ItemWarpComponent extends Item implements IAirCanister {	
 	private Icon[] potentialIcons;
-	private String[] potentialUnlocalized = new String[7];
+	private String[] potentialUnlocalized = new String[9];
 	private ItemStack[] cachedIS;
 	
-	private int id;
-
 	public ItemWarpComponent(int par1) {
 		super(par1);
-		id = par1;
 		setHasSubtypes(true);
 		//this.setMaxDamage(potentialUnlocalized.length);
 		setUnlocalizedName("warpdrive.crafting.Malformed");
@@ -36,6 +34,8 @@ public class ItemWarpComponent extends Item {
 		potentialUnlocalized[4] = "ReactorCore";
 		potentialUnlocalized[5] = "InterfaceComputer";
 		potentialUnlocalized[6] = "InterfacePower";
+		potentialUnlocalized[7] = "PowerCore";
+		potentialUnlocalized[8] = "AirCanEmpty";
 		
 		potentialIcons = new Icon[potentialUnlocalized.length];
 		cachedIS = new ItemStack[potentialUnlocalized.length];
@@ -49,6 +49,10 @@ public class ItemWarpComponent extends Item {
 			return cachedIS[damage];
 		}
 		return null;
+	}
+	
+	public ItemStack getISNoCache(int amount,int damage) {
+		return new ItemStack(WarpDrive.componentItem, amount, damage);
 	}
 	
 	public void registerRecipes() {
@@ -88,8 +92,29 @@ public class ItemWarpComponent extends Item {
 				'g', Item.goldNugget,
 				'r', Item.redstone,
 				'i', Item.ingotIron));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(7),false,"glg","ldl","glg",
+				'g', Item.goldNugget,
+				'l', "dyeBlue",
+				'd', Item.diamond));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(8),false,"gcg","g g","gcg",
+				'g', Block.glass,
+				'c', getIS(0)));
 	}
 	
+	public boolean doesMatch(ItemStack is, String unlocalised) {
+		if (is == null) {
+			return false;
+		}
+		if (!(is.getItem() instanceof ItemWarpComponent)) {
+				return false;
+		}
+		String data = potentialUnlocalized[is.getItemDamage()];
+		WarpDrive.debugPrint(data);
+		return data.equals(unlocalised);
+	}
+
 	@Override
 	public void registerIcons(IconRegister par1IconRegister) {
 		for(int i = 0; i < potentialUnlocalized.length; i++) {
@@ -118,7 +143,35 @@ public class ItemWarpComponent extends Item {
 	@Override
 	@SideOnly(Side.CLIENT)
     public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List) {
-		for(int i = 0; i < potentialUnlocalized.length; i++)
+		for(int i = 0; i < potentialUnlocalized.length; i++) {
 			par3List.add(new ItemStack(par1, 1, i));
+		}
     }
+	
+	//For empty air cans
+	@Override
+	public ItemStack fullDrop(ItemStack is) {
+		if (doesMatch(is,"AirCanEmpty")) {
+			return WarpDrive.airCanItem.fullDrop(is);
+		}
+		return null;
+	}	
+	
+	@Override
+	public ItemStack emptyDrop(ItemStack is) {
+		if (doesMatch(is,"AirCanEmpty")) {
+			return WarpDrive.airCanItem.emptyDrop(is);
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean canContainAir(ItemStack is) {
+		return doesMatch(is,"AirCanEmpty");
+	}
+	
+	@Override
+	public boolean containsAir(ItemStack is) {
+		return false;
+	}
 }

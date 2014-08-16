@@ -5,7 +5,8 @@ import ic2.api.item.Items;
 import java.util.HashMap;
 import java.util.List;
 
-import cr0s.WarpDrive.CloakedArea;
+import cr0s.WarpDrive.data.CloakedArea;
+import cr0s.WarpDrive.world.SpaceTeleporter;
 import cr0s.WarpDrive.api.IBreathingHelmet;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -114,13 +115,14 @@ public class SpaceEventHandler {
 						Item helmet = helmetStack.getItem();
 						if (helmet instanceof IBreathingHelmet) {
 							IBreathingHelmet breathHelmet = (IBreathingHelmet)helmet;
+							int airTicks = breathHelmet.ticksPerCanDamage();
 							if (breathHelmet.canBreath(player)) {
 								hasHelmet = true;
 								if (air == null) {// new player in space => grace period
-									player_airTank.put(player.username, AIR_TANK_TICKS);
+									player_airTank.put(player.username, airTicks);
 								} else if (air <= 1) {
 									if (breathHelmet.removeAir(player)) {
-										player_airTank.put(player.username, AIR_TANK_TICKS);
+										player_airTank.put(player.username, airTicks);
 									} else {
 										player_airTank.put(player.username, AIR_DROWN_TICKS);
 										player.attackEntityFrom(DamageSource.drown, 2.0F);

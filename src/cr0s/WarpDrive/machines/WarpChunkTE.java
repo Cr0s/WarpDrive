@@ -17,55 +17,60 @@ public abstract class WarpChunkTE extends WarpEnergyTE
 	protected ChunkCoordIntPair minChunk = null;
 	protected ChunkCoordIntPair maxChunk = null;
 	
-	boolean areChunksLoaded = false;
-	boolean isRefreshing = false;
-	
-	public void refreshLoading(boolean force)
-	{
-		if(isRefreshing)
-			return;
+	protected boolean areChunksLoaded = false;
+	private boolean isRefreshing = false;
+
+	// OVERRIDES
+	@Override
+	public void updateEntity() {
+		if (shouldChunkLoad() != areChunksLoaded) {
+			refreshLoading();
+		}
 		
-		isRefreshing = true;
-		boolean load = shouldChunkLoad();
-		if(ticketList.size() != 0)
-		{
-			if(load && (!areChunksLoaded || force))
-			{
+		if (shouldChunkLoad()) {
+			handleLoadedTick();
+		}
+	}
+	
+	public void handleLoadedTick() {
+
+	}
+	
+	public synchronized void refreshLoading(boolean force) {
+		boolean loadRequested = shouldChunkLoad();
+		if (ticketList.size() != 0) {
+			if (loadRequested && (!areChunksLoaded || force)) {
 				int ticketSize = ticketList.get(0).getMaxChunkListDepth();
 				ArrayList<ChunkCoordIntPair> chunkList = getChunksToLoad();
-				int numTicketsRequired = (int) Math.ceil((double) chunkList.size() / ticketSize);
-				if(ticketList.size() != numTicketsRequired)
-				{
-					for(int i=ticketList.size();i<numTicketsRequired;i++)
+				int numTicketsRequired = (int) Math.ceil((double) chunkList.size() / ticketSize); // FIXME there should be only one ticket per requesting TileEntity
+				if (ticketList.size() != numTicketsRequired) {
+					for(int i = ticketList.size(); i < numTicketsRequired; i++) { 
 						WarpDrive.instance.getTicket(this);
+					}
 				}
 				
 				int tickNum = 0;
-				int chunkInTick = 0;
+				int chunkInTicket = 0;
 				
 				Ticket t = ticketList.get(0);
-				for(ChunkCoordIntPair chunk:chunkList)
-				{
-					if(chunkInTick >= ticketSize)
-					{
-						chunkInTick = 0;
+				for(ChunkCoordIntPair chunk:chunkList) {
+					if (chunkInTicket >= ticketSize) {
+						chunkInTicket = 0;
 						tickNum++;
 						t = ticketList.get(tickNum);
 					}
 					
 					WarpDrive.debugPrint("Attempting to force chunk" + chunk);
 					ForgeChunkManager.forceChunk(t, chunk);
-					chunkInTick++;
+					chunkInTicket++;
 				}
 				areChunksLoaded = true;
-			}
-			else if(!load)
-			{
-				for(Ticket ticket:ticketList)
-				{
+			} else if(!loadRequested) {
+				for(Ticket ticket:ticketList) {
 					ImmutableSet<ChunkCoordIntPair> chunks = ticket.getChunkList();
-					for(ChunkCoordIntPair chunk:chunks)
+					for(ChunkCoordIntPair chunk:chunks) {
 						ForgeChunkManager.unforceChunk(ticket, chunk);
+					}
 					
 					ForgeChunkManager.releaseTicket(ticket);
 					WarpDrive.instance.removeTicket(ticket);
@@ -73,21 +78,16 @@ public abstract class WarpChunkTE extends WarpEnergyTE
 				ticketList.clear();
 				areChunksLoaded = false;
 			}
-		}
-		else if(load)
-		{
+		} else if(loadRequested) {
 			WarpDrive.instance.registerChunkLoadTE(this);
 		}
-		isRefreshing = false;
 	}
 	
-	public void refreshLoading()
-	{
+	public void refreshLoading() {
 		refreshLoading(false);
 	}
 	
-	public void giveTicket(Ticket t)
-	{
+	public void giveTicket(Ticket t) {
 		ticketList.add(t);
 	}
 	

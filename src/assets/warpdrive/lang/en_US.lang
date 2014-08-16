@@ -6,6 +6,11 @@ item.warpdrive.crafting.LaserCore.name=Laser Core
 item.warpdrive.crafting.ReactorCore.name=Reactor Core
 item.warpdrive.crafting.InterfaceComputer.name=Computer Interface
 item.warpdrive.crafting.InterfacePower.name=Power Interface
+item.warpdrive.crafting.PowerCore.name=Energy Core
+item.warpdrive.crafting.AirCanEmpty.name=Empty Air Canister
+
+item.warpdrive.useful.AirCanFull.name=Air Canister
+item.warpdrive.armor.Helmet.name=Warp Helmet
 
 tile.warpdrive.blocks.Air.name=Air Block
 tile.warpdrive.blocks.Gas.name=Gas Block
@@ -14,6 +19,7 @@ tile.warpdrive.blocks.IridiumBlock.name=Iridium Block
 item.warpdrive.items.ReactorLaserFocus.name=Reactor Laser Focus
 tile.warpdrive.power.Reactor.name=Enantiomorphic Reactor
 tile.warpdrive.power.Laser.name=Aurbis Reactor Stabilisation Laser
+tile.warpdrive.power.Store.name=Anuic Energy Store
 tile.warpdrive.machines.WarpCore.name=Warp Drive Core
 tile.warpdrive.machines.WarpProtocol.name=Warp Drive Controller
 tile.warpdrive.machines.WarpRadar.name=Warp Radar

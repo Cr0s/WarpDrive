@@ -4,6 +4,8 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.WarpDriveConfig;
+import cr0s.WarpDrive.api.IAirCanister;
 
 import java.util.Random;
 
@@ -11,7 +13,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
@@ -84,17 +89,36 @@ public class BlockAirGenerator extends BlockContainer
     }
 
     @Override
-    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer player, int par6, float par7, float par8, float par9) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return false;
         }
-
+        
         WarpEnergyTE te = (WarpEnergyTE)par1World.getBlockTileEntity(par2, par3, par4);
-        if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-        	par5EntityPlayer.addChatMessage(te.getStatus());
-            return true;
+        if (te != null) {
+        	ItemStack heldItemStack = player.getHeldItem();
+        	if (heldItemStack == null) {
+	        	player.addChatMessage(te.getStatus());
+	            return true;
+	        } else { 
+	        	Item heldItem = heldItemStack.getItem();
+	           	if (heldItem != null && (heldItem instanceof IAirCanister)) {
+	           		IAirCanister airCanister = (IAirCanister)heldItem;
+	           		if (airCanister.canContainAir(heldItemStack) && te.consumeEnergy(WarpDriveConfig.AG_RF_PER_CANISTER, true)) {
+	           			player.inventory.decrStackSize(player.inventory.currentItem, 1);
+	           			ItemStack toAdd = airCanister.fullDrop(heldItemStack);
+	           			if (toAdd != null) {
+	           				if (!player.inventory.addItemStackToInventory(toAdd)) {
+	           					EntityItem ie = new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, toAdd);
+	           					player.worldObj.spawnEntityInWorld(ie);
+	           				}
+	           				te.consumeEnergy(WarpDriveConfig.AG_RF_PER_CANISTER, false);
+	           			}
+	           		}
+	           	}
+        	}
         }
-
+        
         return false;
     }
 }
