@@ -69,7 +69,7 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	
 	
 	protected boolean consumeEnergy(int amount, boolean simulate) {
-		if(getEnergyStored() >= amount) {
+		if (getEnergyStored() >= amount) {
 			if (!simulate) {
 				energyStored_internal -= amount;
 			}
@@ -177,7 +177,7 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	
 	@Override
 	public void drawEnergy(double amount) {
-		consumeEnergy(convertEUtoInternal(amount), false);
+		energyOutputDone(convertEUtoInternal(amount));
 	}
 	
 	@Override
