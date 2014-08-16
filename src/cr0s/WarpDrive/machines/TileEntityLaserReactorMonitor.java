@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.item.ItemReactorLaserFocus;

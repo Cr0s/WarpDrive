@@ -13,8 +13,13 @@ import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.WarpDrive.block.*;
+import cr0s.WarpDrive.command.*;
+import cr0s.WarpDrive.data.*;
 import cr0s.WarpDrive.item.*;
 import cr0s.WarpDrive.machines.*;
+import cr0s.WarpDrive.render.*;
+import cr0s.WarpDrive.world.*;
 import dan200.computercraft.api.ComputerCraftAPI;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +32,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet250CustomPayload;
@@ -35,6 +41,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.EnumHelper;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
@@ -88,6 +95,10 @@ public class WarpDrive implements LoadingCallback {
 	public static Item reactorLaserFocusItem;
 	public static ItemWarpComponent componentItem;
 	
+	public static EnumArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[]{1, 3, 2, 1}, 15);
+	public static ItemWarpArmor helmetItem;
+	public static ItemWarpAircan airCanItem;
+	
 	public static BiomeGenBase spaceBiome;
 	public World space;
 	public SpaceWorldGenerator spaceWorldGenerator;
@@ -106,7 +117,7 @@ public class WarpDrive implements LoadingCallback {
 	public static CommonProxy proxy;
 
 	public WarpCoresRegistry warpCores;
-	public JumpGatesRegistry jumpGates;
+	public JumpgatesRegistry jumpgates;
 	
 	public CloakManager cloaks;
 
@@ -306,7 +317,12 @@ public class WarpDrive implements LoadingCallback {
 		// COMPONENT ITEMS
 		componentItem = new ItemWarpComponent(WarpDriveConfig.componentID);
 		GameRegistry.registerItem(componentItem, "component");		
-				
+		
+		helmetItem = new ItemWarpArmor(WarpDriveConfig.helmetID, 0);
+		GameRegistry.registerItem(helmetItem, "helmet");
+		
+		airCanItem = new ItemWarpAircan(WarpDriveConfig.aircanID);
+		GameRegistry.registerItem(airCanItem, "aircanFull");
 		 
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
@@ -334,6 +350,8 @@ public class WarpDrive implements LoadingCallback {
 		space = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 		
+		WarpDriveConfig.postInit();
+		
 		if (WarpDriveConfig.isICLoaded && WarpDriveConfig.recipesIC2) {
 			initIC2Recipes();
 		}
@@ -345,7 +363,7 @@ public class WarpDrive implements LoadingCallback {
 		}
 		
 		warpCores = new WarpCoresRegistry();
-		jumpGates = new JumpGatesRegistry();
+		jumpgates = new JumpgatesRegistry();
 		cams = new CamRegistry();
 	}
 	
@@ -476,6 +494,20 @@ public class WarpDrive implements LoadingCallback {
 				'o', componentItem.getIS(4),
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
+		
+		//Power Store
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerStoreBlock), false, "ipi","isi","ici",
+				'i', Item.ingotIron,
+				's', componentItem.getIS(7),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
+		
+		//Helmet
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg",
+				'i', Item.ingotIron,
+				'w', Block.cloth,
+				'g', Block.glass,
+				'c', componentItem.getIS(8)));
 	}
 	
 	private static void initAETERecipes() {
@@ -691,7 +723,7 @@ public class WarpDrive implements LoadingCallback {
 				Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
 				if(t != null)
 				{
-					te.giveTicket(t);
+					te.giveTicket(t);	// FIXME calling the caller is a bad idea
 					if(refreshLoading)
 						te.refreshLoading();
 					return t;
@@ -709,7 +741,7 @@ public class WarpDrive implements LoadingCallback {
 			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
 			if(t != null)
 			{
-				te.giveTicket(t);
+				te.giveTicket(t);	// FIXME calling the caller is a bad idea
 				if(refreshLoading)
 					te.refreshLoading();
 				return t;

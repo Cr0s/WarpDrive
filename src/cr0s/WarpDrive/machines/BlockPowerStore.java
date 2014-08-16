@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
-import cr0s.WarpDrive.WarpBlockContainer;
 
 public class BlockPowerStore extends WarpBlockContainer {
 	private Icon iconBuffer;

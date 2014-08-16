@@ -3,7 +3,7 @@ package cr0s.WarpDrive.machines;
 import java.util.ArrayList;
 import java.util.List;
 
-import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import net.minecraft.entity.Entity;
@@ -142,55 +142,34 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		String str = methodArray[method];
-		if (str == "energy") {
+		String methodName = methodArray[method];
+		if (methodName.equals("energy")) {
 			return new Object[] { getEnergyStored(), getMaxEnergyStored() };
-		}
-		
-		if (str == "source") {
+		} else if (methodName.equals("source")) {
 			return setVec3(true,arguments);
-		}
-		
-		if (str == "dest") {
+		} else if (methodName.equals("dest")) {
 			return setVec3(false,arguments);
-		}
-		
-		if (str == "lock") {
+		} else if (methodName.equals("lock")) {
 			return new Object[] { lock(sourceVec, destVec) };
-		}
-		
-		if(str == "release")
-		{
+		} else if (methodName.equals("release")) {
 			unlock();
 			return null;
-		}
-		
-		if(str == "lockStrength") {
+		} else if (methodName.equals("lockStrength")) {
 			return new Object[] { getLockStrength() };
-		}
-		
-		if(str == "energize") {
+		} else if (methodName.equals("energize")) {
 			return new Object[] { energize () };
-		}
-		
-		if(str == "powerBoost") {
-			try
-			{
-				if(arguments.length >= 1)
+		} else if (methodName.equals("powerBoost")) {
+			try {
+				if (arguments.length >= 1) {
 					powerBoost = clamp(toDouble(arguments[0]),1,WarpDriveConfig.TR_MAX_BOOST_MUL);
-			}
-			catch(NumberFormatException e)
-			{
+				}
+			} catch(NumberFormatException e) {
 				powerBoost = 1;
 			}
 			return new Object[] { powerBoost };
-		}
-		
-		if (str == "energyCost") {
+		} else if (methodName.equals("energyCost")) {
 			return new Object[] { energyCost() };
-		}
-		
-		if (str == "help") {
+		} else if (methodName.equals("help")) {
 			return new Object[] { helpStr(arguments) };
 		}
 		

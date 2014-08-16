@@ -21,8 +21,9 @@ public class WarpDriveConfig
 {
 	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, powerStoreID, componentID;
-//
+	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, powerStoreID, chunkLoaderID, componentID;
+	public static int helmetID, chestID, pantsID, bootsID, aircanID;
+	
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
@@ -130,14 +131,17 @@ public class WarpDriveConfig
 	public static int		ML_MAX_RADIUS  = 6;
 	
 	//Tree farm
-	public static int TF_MAX_SIZE=32;
+	public static int		TF_MAX_SIZE=32;
+	
+	//Air generator
+	public static int		AG_RF_PER_CANISTER = 80;
 	
 	//Transporter
-	public static int     TR_MAX_ENERGY=10000000;
-	public static boolean TR_RELATIVE_COORDS=false;
-	public static double  TR_EU_PER_METRE=100;
-	public static double  TR_MAX_SCAN_RANGE=4;
-	public static double  TR_MAX_BOOST_MUL=4;
+	public static int		TR_MAX_ENERGY = 10000000;
+	public static boolean	TR_RELATIVE_COORDS = false;
+	public static double	TR_EU_PER_METRE = 100;
+	public static double	TR_MAX_SCAN_RANGE = 4;
+	public static double	TR_MAX_BOOST_MUL = 4;
 	
 	// Laser Emitter
 	public static int		LE_MAX_BOOSTERS_NUMBER = 10;
@@ -168,11 +172,21 @@ public class WarpDriveConfig
 	public static String schemaLocation = "/home/cros/mc_site/schematics/";
 	
 	// Cloaking device core
-	public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
-	public static int CD_ENERGY_PER_BLOCK_TIER1 = 1000;
-	public static int CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
-	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
-	public static int CD_COIL_CAPTURE_BLOCKS = 5;
+	public static int		CD_MAX_CLOAKING_FIELD_SIDE = 100;
+	public static int		CD_ENERGY_PER_BLOCK_TIER1 = 1000;
+	public static int		CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
+	public static int		CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
+	public static int		CD_COIL_CAPTURE_BLOCKS = 5;
+	
+	// Laser Lift
+	public static int		LL_MAX_ENERGY = 2400;
+	public static int		LL_LIFT_ENERGY = 800;
+	public static int		LL_TICK_RATE = 10;
+	
+	// Chunk Loader
+	public static int		CL_MAX_ENERGY = 1000000;
+	public static int		CL_MAX_DISTANCE = 2;
+	public static int		CL_RF_PER_CHUNKTICK = 320;
 
 	public static ItemStack getIC2Item(String id) {
 		return Items.getItem(id);
@@ -308,6 +322,9 @@ public class WarpDriveConfig
 		// Store
 		PS_MAX_ENERGY = config.get("Power Store", "max_energy", 10000000).getInt();
 		
+		// Air generator
+		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", 20).getInt();
+		
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
 		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
@@ -360,9 +377,15 @@ public class WarpDriveConfig
 		powerLaserID = config.getBlock("powerLaser", 523).getInt();
 		powerReactorID = config.getBlock("powerReactor", 524).getInt();
 		powerStoreID = config.getBlock("powerStore", 525).getInt();
+		chunkLoaderID = config.getBlock("chunkLoader", 526).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
+		aircanID = config.getItem("aircanFull", 8706).getInt();
+		helmetID = config.getItem("helmet", 8702).getInt();
+		chestID = config.getItem("chest", 8703).getInt();
+		pantsID = config.getItem("pants", 8704).getInt();
+		bootsID = config.getItem("boots", 8705).getInt();
 		
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
@@ -437,7 +460,7 @@ public class WarpDriveConfig
 		MinerOres.add(Block.fence.blockID);
 		MinerOres.add(Block.torchWood.blockID);
 		MinerOres.add(Block.glowStone.blockID);
-		LoadOreDict();
+		
 		// Ignore WarpDrive blocks (which potentially will be duplicated by cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(coreID);
 		scannerIgnoreBlocks.add(controllerID);
@@ -465,6 +488,10 @@ public class WarpDriveConfig
 		
 		loadWarpDriveConfig();
 		config.save();
+	}
+	
+	public static void postInit() {
+		LoadOreDict();
 	}
 	
 	private static void LoadOreDict() {

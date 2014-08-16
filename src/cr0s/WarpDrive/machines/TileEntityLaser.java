@@ -24,6 +24,7 @@ import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
 import cr0s.WarpDrive.*;
+import cr0s.WarpDrive.data.Vector3;
 
 public class TileEntityLaser extends WarpTE implements IPeripheral {
 	//magic constants
@@ -54,7 +55,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	
 	private MovingObjectPosition firstHit = null;
 
-	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 10 * 20;
+	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 15 * 20;
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 
 	private int registryUpdateTicks = 20;

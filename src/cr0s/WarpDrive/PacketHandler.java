@@ -14,6 +14,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.Player;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.machines.TileEntityCamera;
 import cr0s.WarpDrive.machines.TileEntityLaser;
 import cr0s.WarpDrive.machines.TileEntityMonitor;

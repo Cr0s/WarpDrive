@@ -2,6 +2,10 @@ package cr0s.WarpDrive;
 
 import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.EntityRegistry;
+import cr0s.WarpDrive.data.Vector3;
+import cr0s.WarpDrive.render.EntityCamera;
+import cr0s.WarpDrive.world.EntitySphereGen;
+import cr0s.WarpDrive.world.EntityStarCore;
 
 public class CommonProxy
 {

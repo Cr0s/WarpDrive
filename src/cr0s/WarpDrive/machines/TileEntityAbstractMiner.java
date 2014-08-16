@@ -21,7 +21,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
@@ -467,15 +467,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	public boolean isMachineActive()
 	{
 		return isMEReady;
-	}
-	
-	//OVERRIDES
-	@Override
-	public void updateEntity()
-	{
-		if(shouldChunkLoad() != areChunksLoaded)
-			refreshLoading();
-		
 	}
 	
 	@Override

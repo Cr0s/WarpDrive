@@ -29,6 +29,7 @@ import appeng.api.me.tiles.ITileCable;
 import appeng.api.me.util.IGridInterface;
 import appeng.api.me.util.IMEInventoryHandler;
 import cr0s.WarpDrive.*;
+import cr0s.WarpDrive.data.Vector3;
 
 public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IGridMachine, ITileCable {
 	Boolean powerStatus = false;

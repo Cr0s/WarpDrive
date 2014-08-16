@@ -49,8 +49,8 @@ public class TileEntityPowerStore extends WarpEnergyTE implements IPeripheral {
 	
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		String name = methodArray[method];
-		if (name == "energy") {
+		String methodName = methodArray[method];
+		if (methodName == "energy") {
 			return getEnergyObject();
 		}
 		return null;

@@ -3,7 +3,7 @@ package cr0s.WarpDrive.machines;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.WarpDrive.CamRegistryItem;
+import cr0s.WarpDrive.data.CamRegistryItem;
 import cr0s.WarpDrive.WarpDrive;
 
 import java.util.Random;

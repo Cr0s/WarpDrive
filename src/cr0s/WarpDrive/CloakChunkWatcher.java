@@ -1,7 +1,7 @@
 package cr0s.WarpDrive;
 
 import java.util.ArrayList;
-import cr0s.WarpDrive.CloakedArea;
+import cr0s.WarpDrive.data.CloakedArea;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.event.ForgeSubscribe;

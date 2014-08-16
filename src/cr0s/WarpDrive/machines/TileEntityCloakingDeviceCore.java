@@ -2,7 +2,8 @@ package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
-import cr0s.WarpDrive.CloakedArea;
+import cr0s.WarpDrive.data.CloakedArea;
+import cr0s.WarpDrive.data.Vector3;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -402,10 +403,9 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	public String[] getMethodNames() {
 		return methodsArray;
 	}
-
+	
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-			int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
 		case 0: // setFieldTier(1 or 2)
 			if (arguments.length == 1) {

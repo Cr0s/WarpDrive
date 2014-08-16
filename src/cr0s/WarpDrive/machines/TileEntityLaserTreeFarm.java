@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -245,26 +245,22 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		String methodStr = methodsArray[method];
-		if (methodStr == "start") {
+		String methodName = methodsArray[method];
+		if (methodName.equals("start")) {
 			if (!active) {
 				mode = 0;
 				totalHarvested = 0;
 				active = true;
 			}
 			return new Boolean[] { true };
-		}
-		
-		if (methodStr == "stop") {
+		} else if (methodName.equals("stop")) {
 			active = false;
-		}
-		
-		if (methodStr == "area") {
+		} else if (methodName.equals("area")) {
 			try {
 				if (arguments.length == 1) {
 					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
 					zSize = xSize;
-				} else if(arguments.length == 2) {
+				} else if (arguments.length == 2) {
 					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
 					zSize = clamp(toInt(arguments[1]),3,WarpDriveConfig.TF_MAX_SIZE);
 				}
@@ -274,9 +270,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			}
 			defineMiningArea(xSize,zSize);
 			return new Integer[] { xSize , zSize };
-		}
-		
-		if (methodStr == "leaves") {
+		} else if (methodName.equals("leaves")) {
 			try {
 				if (arguments.length > 0) {
 					doLeaves = toBool(arguments[0]);
@@ -285,18 +279,14 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 				
 			}
 			return new Boolean[] { doLeaves };
-		}
-		
-		if (methodStr == "silkTouch") {
+		} else if (methodName.equals("silkTouch")) {
 			try {
 				silkTouch(arguments[0]);
 			} catch(Exception e) {
 				silkTouch(false);
 			}
 			return new Object[] { silkTouch() };
-		}
-		
-		if (methodStr == "silkTouchLeaves") {
+		} else if (methodName.equals("silkTouchLeaves")) {
 			try {
 				if (arguments.length >= 1) {
 					silkTouchLeaves = toBool(arguments[0]);
@@ -305,9 +295,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 				silkTouchLeaves = false;
 			}
 			return new Object[] { silkTouchLeaves };
-		}
-		
-		if (methodStr == "treetap") {
+		} else if (methodName.equals("treetap")) {
 			try {
 				if (arguments.length >= 1) {
 					treeTap = toBool(arguments[0]);
@@ -316,9 +304,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 				treeTap = false;
 			}
 			return new Object[] { treeTap };
-		}
-		
-		if (methodStr == "state") {
+		} else if (methodName.equals("state")) {
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
 			return new Object[] { state, xSize, zSize, energy(), totalHarvested };
 		}

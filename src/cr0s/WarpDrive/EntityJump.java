@@ -1,7 +1,12 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.data.JumpBlock;
+import cr0s.WarpDrive.data.MovingEntity;
+import cr0s.WarpDrive.data.TransitionPlane;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.machines.TileEntityReactor;
+import cr0s.WarpDrive.world.SpaceTeleporter;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import ic2.api.network.NetworkHelper;
 
@@ -330,7 +335,6 @@ public class EntityJump extends Entity
 		moveX = moveY = moveZ = 0;
 		
 		TransitionPlane overworld = new TransitionPlane(0, 0, 0, 5000, 5000, 0, 0);
-		Vector3 exit; //FIXME
 		if (toSpace) {
 			if (worldObj.provider.dimensionId == overworld.dimensionId) {
 				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition

@@ -1,6 +1,6 @@
 package cr0s.WarpDrive.machines;
 
-import cr0s.WarpDrive.Vector3;
+import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDriveCore.IBlockUpdateDetector;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -180,24 +180,24 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context,int methodID, Object[] arguments) throws Exception {
-		String method = methodArray[methodID];
-		if (method.equals("energy")) {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		String methodName = methodArray[method];
+		if (methodName.equals("energy")) {
 			scanForBooster();
 			if (booster == null) {
 				return new Object[] { 0,0 };
 			} else {
 				return new Object[] { booster.getEnergyStored(), booster.getMaxEnergyStored() };
 			}
-		} else if (method.equals("hasReactor")) {
+		} else if (methodName.equals("hasReactor")) {
 			return new Object[] { scanForReactor() != null };
-		} else if (method.equals("sendLaser")) {
+		} else if (methodName.equals("sendLaser")) {
 			if (arguments.length >= 1) {
 				laserReactor(toInt(arguments[0]));
 			}
-		} else if(method.equals("help")) {
+		} else if (methodName.equals("help")) {
 			return new Object[] {helpStr(arguments)};
-		} else if(method.equals("side")) {
+		} else if (methodName.equals("side")) {
 			return new Object[] { side.ordinal() - 2 };
 		}
 		return null;

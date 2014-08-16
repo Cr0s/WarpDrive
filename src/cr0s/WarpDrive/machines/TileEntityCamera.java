@@ -25,7 +25,7 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 		"freq"
 	};
 
-	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 10 * 20;
+	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 15 * 20;
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 
 	private int registryUpdateTicks = 20;
