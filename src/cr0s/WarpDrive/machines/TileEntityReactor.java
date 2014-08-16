@@ -20,6 +20,8 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.*;
+import cr0s.WarpDrive.data.Jumpgate;
+import cr0s.WarpDrive.world.SpaceTeleporter;
 
 /**
  * @author Cr0s
@@ -265,7 +267,9 @@ public class TileEntityReactor extends WarpEnergyTE
                         return;                    	
                     }
 
+                    WarpDrive.debugPrint("!!! pre doJump");
                     doJump();
+                    WarpDrive.debugPrint("!!! after doJump");
                     cooldownTime = WarpDriveConfig.WC_COOLDOWN_INTERVAL_SECONDS * 20;
                     controller.setJumpFlag(false);
                 } else {
@@ -554,7 +558,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
-    private boolean isShipInJumpgate(JumpGate jg, StringBuilder reason)
+    private boolean isShipInJumpgate(Jumpgate jg, StringBuilder reason)
     {
         AxisAlignedBB aabb = jg.getGateAABB();
         WarpDrive.debugPrint("[TEWarpCore] Jumpgate " + jg.name + " AABB is " + aabb);
@@ -655,7 +659,7 @@ public class TileEntityReactor extends WarpEnergyTE
     {
         // Search nearest jump-gate
         String gateName = controller.getTargetJumpgateName();
-        JumpGate targetGate = WarpDrive.instance.jumpGates.findGateByName(gateName);
+        Jumpgate targetGate = WarpDrive.instance.jumpgates.findGateByName(gateName);
 
         if (targetGate == null)
         {
@@ -671,7 +675,7 @@ public class TileEntityReactor extends WarpEnergyTE
         int destX = gateX;
         int destY = gateY;
         int destZ = gateZ;
-        JumpGate nearestGate = WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord);
+        Jumpgate nearestGate = WarpDrive.instance.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 
 		StringBuilder reason = new StringBuilder();
         if (!isShipInJumpgate(nearestGate, reason))
@@ -740,6 +744,7 @@ public class TileEntityReactor extends WarpEnergyTE
             this.controller.setJumpFlag(false);
             return;
         }
+        WarpDrive.debugPrint("!!! doJump after EnergyCheck");
 
         String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
         if (currentMode == this.MODE_GATE_JUMP) {
@@ -755,11 +760,11 @@ public class TileEntityReactor extends WarpEnergyTE
 
         	// Check ship size for hyper-space jump
             if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
-	            JumpGate nearestGate = null;
-	            if (WarpDrive.instance.jumpGates == null) {
+	            Jumpgate nearestGate = null;
+	            if (WarpDrive.instance.jumpgates == null) {
 	            	System.out.println("" + this + " WarpDrive.instance.jumpGates is NULL!");
 	            } else {
-	            	nearestGate = WarpDrive.instance.jumpGates.findNearestGate(xCoord, yCoord, zCoord);
+	            	nearestGate = WarpDrive.instance.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 	            }
 
 	            StringBuilder reason = new StringBuilder();
@@ -782,6 +787,7 @@ public class TileEntityReactor extends WarpEnergyTE
             	messageToAllPlayersOnShip("Insufficient energy level");
             	return;
             }
+            WarpDrive.debugPrint("!!! doJump after EnergyConsumption");
 
             if (this.currentMode == this.MODE_BASIC_JUMP) {
                 distance += shipLength;
@@ -803,7 +809,9 @@ public class TileEntityReactor extends WarpEnergyTE
             jump.minY = minY;
             jump.shipLength = shipLength;
             jump.on = true;
+            WarpDrive.debugPrint("!!! doJump after entity creation");
             worldObj.spawnEntityInWorld(jump);
+            WarpDrive.debugPrint("!!! doJump after entity spawning");
         }
     }
 
