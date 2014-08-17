@@ -7,9 +7,9 @@ item.warpdrive.crafting.ReactorCore.name=Reactor Core
 item.warpdrive.crafting.InterfaceComputer.name=Computer Interface
 item.warpdrive.crafting.InterfacePower.name=Power Interface
 item.warpdrive.crafting.PowerCore.name=Energy Core
-item.warpdrive.crafting.AirCanEmpty.name=Empty Air Canister
+item.warpdrive.crafting.AirCanisterEmpty.name=Empty Air Canister
 
-item.warpdrive.useful.AirCanFull.name=Air Canister
+item.warpdrive.items.AirCanisterFull.name=Air Canister
 item.warpdrive.armor.Helmet.name=Warp Helmet
 
 tile.warpdrive.blocks.Air.name=Air Block

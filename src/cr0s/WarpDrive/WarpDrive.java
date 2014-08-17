@@ -97,7 +97,7 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static EnumArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[]{1, 3, 2, 1}, 15);
 	public static ItemWarpArmor helmetItem;
-	public static ItemWarpAircan airCanItem;
+	public static ItemWarpAirCanister airCanisterItem;
 	
 	public static BiomeGenBase spaceBiome;
 	public World space;
@@ -109,7 +109,7 @@ public class WarpDrive implements LoadingCallback {
     public static float normalFOV = 70.0F;
     public static float normalSensitivity = 1.0F;
 
-	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive","Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
+	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
 	
 	@Instance("WarpDrive")
 	public static WarpDrive instance;
@@ -321,9 +321,9 @@ public class WarpDrive implements LoadingCallback {
 		helmetItem = new ItemWarpArmor(WarpDriveConfig.helmetID, 0);
 		GameRegistry.registerItem(helmetItem, "helmet");
 		
-		airCanItem = new ItemWarpAircan(WarpDriveConfig.aircanID);
-		GameRegistry.registerItem(airCanItem, "aircanFull");
-		 
+		airCanisterItem = new ItemWarpAirCanister(WarpDriveConfig.airCanisterID);
+		GameRegistry.registerItem(airCanisterItem, "airCanisterFull");
+		
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
 		

@@ -9,20 +9,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;
 
-public class ItemWarpAircan extends Item implements IAirCanister {
+public class ItemWarpAirCanister extends Item implements IAirCanister {
 	Icon icon;
-	public ItemWarpAircan(int id) {
+	public ItemWarpAirCanister(int id) {
 		super(id);
 		setMaxDamage(20);
 		setCreativeTab(WarpDrive.warpdriveTab);
 		setMaxStackSize(1);
-		setUnlocalizedName("warpdrive.useful.AirCanFull");
+		setUnlocalizedName("warpdrive.items.AirCanisterFull");
 	}
 	
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void registerIcons(IconRegister ir) {
-		icon = ir.registerIcon("warpdrive:aircanFull");
+		icon = ir.registerIcon("warpdrive:componentAirCanisterFull");
 	}
 	
 	@Override
@@ -38,12 +38,12 @@ public class ItemWarpAircan extends Item implements IAirCanister {
  
 	@Override
 	public ItemStack fullDrop(ItemStack can) {
-		return new ItemStack(WarpDrive.airCanItem,1);
+		return new ItemStack(WarpDrive.airCanisterItem,1);
 	}
 	
 	@Override
 	public boolean canContainAir(ItemStack can) {
-		if (can != null && can.getItem() instanceof ItemWarpAircan) {
+		if (can != null && can.getItem() instanceof ItemWarpAirCanister) {
 			return can.getItemDamage() > 0;
 		}
 		return false;

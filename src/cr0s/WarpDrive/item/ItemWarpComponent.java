@@ -35,7 +35,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 		potentialUnlocalized[5] = "InterfaceComputer";
 		potentialUnlocalized[6] = "InterfacePower";
 		potentialUnlocalized[7] = "PowerCore";
-		potentialUnlocalized[8] = "AirCanEmpty";
+		potentialUnlocalized[8] = "AirCanisterEmpty";
 		
 		potentialIcons = new Icon[potentialUnlocalized.length];
 		cachedIS = new ItemStack[potentialUnlocalized.length];
@@ -151,23 +151,23 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	//For empty air cans
 	@Override
 	public ItemStack fullDrop(ItemStack is) {
-		if (doesMatch(is,"AirCanEmpty")) {
-			return WarpDrive.airCanItem.fullDrop(is);
+		if (doesMatch(is, "AirCanisterEmpty")) {
+			return WarpDrive.airCanisterItem.fullDrop(is);
 		}
 		return null;
 	}	
 	
 	@Override
 	public ItemStack emptyDrop(ItemStack is) {
-		if (doesMatch(is,"AirCanEmpty")) {
-			return WarpDrive.airCanItem.emptyDrop(is);
+		if (doesMatch(is, "AirCanisterEmpty")) {
+			return WarpDrive.airCanisterItem.emptyDrop(is);
 		}
 		return null;
 	}
 	
 	@Override
 	public boolean canContainAir(ItemStack is) {
-		return doesMatch(is,"AirCanEmpty");
+		return doesMatch(is, "AirCanisterEmpty");
 	}
 	
 	@Override

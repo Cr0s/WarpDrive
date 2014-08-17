@@ -22,7 +22,7 @@ public class WarpDriveConfig
 	private static Configuration config;
 	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
 	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, powerStoreID, chunkLoaderID, componentID;
-	public static int helmetID, chestID, pantsID, bootsID, aircanID;
+	public static int helmetID, chestID, pantsID, bootsID, airCanisterID;
 	
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -158,8 +158,8 @@ public class WarpDriveConfig
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
 
 	// POWER REACTOR
-	public static int		PR_MAX_ENERGY = 10000000;
-	public static int		PR_TICK_TIME  = 20;
+	public static int		PR_MAX_ENERGY = 100000000;
+	public static int		PR_TICK_TIME  = 5;
 	public static int		PR_MAX_LASERS = 3;
 	
 	// POWER STORE
@@ -381,7 +381,7 @@ public class WarpDriveConfig
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
-		aircanID = config.getItem("aircanFull", 8706).getInt();
+		airCanisterID = config.getItem("airCanisterFull", 8706).getInt();
 		helmetID = config.getItem("helmet", 8702).getInt();
 		chestID = config.getItem("chest", 8703).getInt();
 		pantsID = config.getItem("pants", 8704).getInt();
