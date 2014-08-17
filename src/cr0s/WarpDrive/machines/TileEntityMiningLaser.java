@@ -298,48 +298,13 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (useDeiterium && grid != null && AENetworkReady)
+		if (useDeiterium && grid != null)
 		{
 			IMEInventoryHandler cellArray = grid.getCellArray();
 			if (cellArray != null && block.canSilkHarvest(worldObj, null, i, j, k, blockMeta)) {
-				int consume = isQuarry ? 15 : 1000;
-				
-				IAEItemStack entryToAEIS1 = null;
-				long contained1 = 0;
-				if (WarpDriveConfig.AEExtra_fluidDrive != null) {
-					entryToAEIS1 = Util.createItemStack(new ItemStack(WarpDriveConfig.AEExtra_fluidDrive, consume, FluidRegistry.getFluidID("deuterium")));
-					contained1 = cellArray.countOfItemType(entryToAEIS1);
-				}
-				IAEItemStack entryToAEIS2 = null;
-				long contained2 = 0;
-				if (WarpDriveConfig.IC2_fluidCell != null) {
-					entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, consume, FluidRegistry.getFluidID("deuterium")));
-					contained2 = cellArray.countOfItemType(entryToAEIS2);
-				}
-				IAEItemStack entryToAEIS3 = null;
-				long contained3 = 0;
-				if (WarpDriveConfig.AS_deuteriumCell != 0) {
-					entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, consume, FluidRegistry.getFluidID("deuterium")));
-					contained3 = cellArray.countOfItemType(entryToAEIS3);
-				}
-				
-				if (contained1 + contained2 + contained3 >= consume) {
-					if (contained1 > 0) {
-						cellArray.extractItems(entryToAEIS1);
-					}
-					if (contained2 > 0 && contained1 < consume) {
-						entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, (int)(consume - contained2), FluidRegistry.getFluidID("deuterium")));
-						cellArray.extractItems(entryToAEIS2);
-					}
-					if (contained3 > 0 && contained1 + contained2 < consume) {
-						entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, (int)(consume - contained1 - contained2), FluidRegistry.getFluidID("deuterium")));
-						cellArray.extractItems(entryToAEIS3);
-					}
-					
-					ArrayList<ItemStack> t = new ArrayList<ItemStack>();
-					t.add(new ItemStack(blockID, 1, blockMeta));
-					return t;
-				}
+				ArrayList<ItemStack> t = new ArrayList<ItemStack>();
+				t.add(new ItemStack(blockID, 1, blockMeta));
+				return t;
 			}
 		}
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, 0);

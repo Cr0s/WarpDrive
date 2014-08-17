@@ -61,8 +61,6 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
  * @author Cr0s
  */
 public class WarpDrive implements LoadingCallback {
-	// World limits
-	public final static int WORLD_LIMIT_BLOCKS = 100000;
 
 	public static Block warpCore;
 	public static Block protocolBlock;

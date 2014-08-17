@@ -454,6 +454,8 @@ public class WarpDriveConfig
 			loadAdvancedRepulsionSystems();
 		}
 //
+		MinerOres.add(iridiumBlockID);
+		MinerOres.add(Block.oreCoal.blockID);
 		MinerOres.add(Block.oreNetherQuartz.blockID);
 		MinerOres.add(Block.obsidian.blockID);
 		MinerOres.add(Block.web.blockID);

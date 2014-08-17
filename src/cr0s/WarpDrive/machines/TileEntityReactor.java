@@ -36,7 +36,7 @@ public class TileEntityReactor extends WarpEnergyTE
     public final int JUMP_DOWN = -2;
     int dx, dz;
     int direction;
-    int distance;
+    public int distance;
 
     public int maxX, maxY, maxZ;
     public int minX, minY, minZ;
@@ -279,6 +279,10 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
+	public int getMode() {
+		return currentMode;
+	}
+	
     public void messageToAllPlayersOnShip(String msg) {
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX + 0.99D, this.maxY + 0.99D, this.maxZ + 0.99D);
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
@@ -938,7 +942,7 @@ public class TileEntityReactor extends WarpEnergyTE
         return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU." + ((cooldownTime <= 0) ? "" : (" " + (cooldownTime / 20) + " s left of cooldown."));
     }
 
-    private static int calculateRequiredEnergy(int currentMode, int shipVolume, int jumpDistance)  {
+    public static int calculateRequiredEnergy(int currentMode, int shipVolume, int jumpDistance)  {
         switch (currentMode) {
         	case MODE_TELEPORT:
         		return WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;

@@ -49,18 +49,7 @@ public class SpaceEventHandler {
 		int x = MathHelper.floor_double(entity.posX);
 		int y = MathHelper.floor_double(entity.posY);
 		int z = MathHelper.floor_double(entity.posZ);
-		
-		// Instant kill if entity exceeds world's limit
-		if (x > WarpDrive.WORLD_LIMIT_BLOCKS || z > WarpDrive.WORLD_LIMIT_BLOCKS) {
-			if (entity instanceof EntityPlayerMP) {
-				if (((EntityPlayerMP)entity).capabilities.isCreativeMode) {
-					return;
-				}
-			}
 
-			entity.attackEntityFrom(DamageSource.outOfWorld, 9000);
-			return;
-		}
 		if (entity instanceof EntityPlayerMP) {
 			updatePlayerCloakState(entity);
 			
