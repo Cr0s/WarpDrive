@@ -337,13 +337,6 @@ public class EntityJump extends Entity
 		TransitionPlane overworld = new TransitionPlane(0, 0, 0, 5000, 5000, 0, 0);
 		if (toSpace) {
 			if (worldObj.provider.dimensionId == overworld.dimensionId) {
-				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition
-					LocalProfiler.stop();
-					String msg = "Ship is outside worldborder, unable to transition to space!";
-					messageToAllPlayersOnShip(msg);
-					killEntity(msg);
-					return;
-				}
 				moveX = overworld.spaceCenterX - overworld.dimensionCenterX;
 				moveZ = overworld.spaceCenterZ - overworld.dimensionCenterZ;
 			} else {
@@ -352,13 +345,6 @@ public class EntityJump extends Entity
 			}
 			targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		} else if (fromSpace) {
-			if (!overworld.isValidFromSpace(new Vector3(this))) {// invalid transition, cancel transition
-				LocalProfiler.stop();
-				String msg = "Ship is outside worldborder, unable to transition from space!";
-				messageToAllPlayersOnShip(msg);
-				killEntity(msg);
-				return;
-			}
 			moveX = overworld.dimensionCenterX - overworld.spaceCenterX;
 			moveZ = overworld.dimensionCenterZ - overworld.spaceCenterZ;
 			targetWorld = DimensionManager.getWorld(0);
