@@ -40,7 +40,7 @@ public class GravityManager
             }
             else
             {
-            	double jitter = (entity.rand.nextDouble() - 0.5D) * 2.0D * HYPERSPACE_VOID_ENTITY_JITTER;
+            	double jitter = (entity.worldObj.rand.nextDouble() - 0.5D) * 2.0D * HYPERSPACE_VOID_ENTITY_JITTER;
             	if (inSpace)
             		jitter = 0.0D;
                 if (entity instanceof EntityPlayer)
