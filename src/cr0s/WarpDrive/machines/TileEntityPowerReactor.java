@@ -23,20 +23,20 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 	// generation & instability is 'per tick'
 	private static final int PR_MIN_GENERATION = 4;
 	private static final int PR_MAX_GENERATION = 64000;
-	private static final double PR_MIN_INSTABILITY = 0.005D;
-	private static final double PR_MAX_INSTABILITY = 0.600D;
+	private static final double PR_MIN_INSTABILITY = 0.004D;
+	private static final double PR_MAX_INSTABILITY = 0.060D;
 	
 	// laser stabilization is per shot
 	// target is to consume 10% max output power every second, hence 2.5% per side
 	// laser efficiency is 33% at 16% power (target spot), 50% at 24% power, 84% at 50% power, etc.
-	// PR_MAX_GENERATION / (40 * 0.16) => ~10k max laser energy
-	private static final double PR_MAX_LASER_ENERGY = 10000.0D;
+	// 10% * 20 * PR_MAX_GENERATION / (4 * 0.16) => ~200kRF => ~ max laser energy
+	private static final double PR_MAX_LASER_ENERGY = 200000.0D;
 	private static final double PR_MAX_LASER_EFFECT = PR_MAX_INSTABILITY * 20 / 0.33D;
 	
 	private int tickCount = 0;
 	
-	private double[] instabilityValues = new double[4]; // no instability = 0, explosion = 100
-	private double lasersReceived = 0;
+	private double[] instabilityValues = { 0.0D, 0.0D, 0.0D, 0.0D }; // no instability = 0, explosion = 100
+	private float lasersReceived = 0;
 	private int lastGenerationRate = 0;
 	private int releasedThisTick = 0;	// amount of energy released during current tick update
 	private int releasedThisCycle = 0;	// amount of energy released during current cycle
@@ -66,12 +66,6 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 			"help" // returns help on arg0 function
 	};
 	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
-	
-	{
-		for(int i = 0; i < 4; i++) {
-			instabilityValues[i] = 0;
-		}
-	}
 	
 	private void increaseInstability(ForgeDirection from, boolean isNatural) {
 		if (canOutputEnergy(from) || hold) {
@@ -109,9 +103,9 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 			return;
 		}
 		
-		lasersReceived = lasersReceived + 1.0D;
+		lasersReceived = Math.min(10.0F, lasersReceived + 1.0F);
 		double nospamFactor = 1.0;
-		if (lasersReceived > WarpDriveConfig.PR_MAX_LASERS) {
+		if (lasersReceived > 1.0F) {
 			nospamFactor = 0.5;
 			worldObj.newExplosion((Entity) null, xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ, 1, false, false);
 			// increaseInstability(from, false);
@@ -123,7 +117,12 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		double amountToRemove = PR_MAX_LASER_EFFECT * baseLaserEffect * randomVariation * nospamFactor;
 		
 		int side = from.ordinal() - 2;
-		if (side == 3) WarpDrive.debugPrint("Instability on " + from.toString() + " decreased by " + String.format("%.1f", amountToRemove) + "/" + PR_MAX_LASER_EFFECT + " after consuming " + amount + "/" + PR_MAX_LASER_ENERGY + " (nospamFactor is " + nospamFactor + ")");
+		
+		/*
+		if (side == 3) WarpDrive.debugPrint("Instability on " + from.toString() + " decreased by " + String.format("%.1f", amountToRemove) + "/" + String.format("%.1f", PR_MAX_LASER_EFFECT)
+				+ " after consuming " + amount + "/" + PR_MAX_LASER_ENERGY + " lasersReceived is " + String.format("%.1f", lasersReceived) + " hence nospamFactor is " + nospamFactor);
+		/**/
+		
 		instabilityValues[side] = Math.max(0, instabilityValues[side] - amountToRemove);
 		
 		updateSideTextures();
@@ -157,7 +156,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
         
         releasedThisTick = 0;
         
-        lasersReceived = lasersReceived - 0.2;
+        lasersReceived = Math.max(0.0F, lasersReceived - WarpDriveConfig.PR_MAX_LASERS / 20F);
 		tickCount++;
 		if (tickCount < WarpDriveConfig.PR_TICK_TIME) {
 			return;
