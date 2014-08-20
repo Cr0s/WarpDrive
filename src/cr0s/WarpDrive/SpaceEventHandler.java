@@ -5,6 +5,7 @@ import ic2.api.item.Items;
 import java.util.HashMap;
 import java.util.List;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.data.CloakedArea;
 import cr0s.WarpDrive.world.SpaceTeleporter;
 import cr0s.WarpDrive.api.IBreathingHelmet;
@@ -45,13 +46,17 @@ public class SpaceEventHandler {
 
 	@ForgeSubscribe
 	public void livingUpdate(LivingUpdateEvent event) {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+            return;
+        }
+
 		EntityLivingBase entity = event.entityLiving;
 		int x = MathHelper.floor_double(entity.posX);
 		int y = MathHelper.floor_double(entity.posY);
 		int z = MathHelper.floor_double(entity.posZ);
 		
 		// Instant kill if entity exceeds world's limit
-		if (x > WarpDrive.WORLD_LIMIT_BLOCKS || z > WarpDrive.WORLD_LIMIT_BLOCKS) {
+		if (WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS > 0 && (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)) {
 			if (entity instanceof EntityPlayerMP) {
 				if (((EntityPlayerMP)entity).capabilities.isCreativeMode) {
 					return;
@@ -77,8 +82,8 @@ public class SpaceEventHandler {
 		
 		// If entity is in vacuum, check and start consuming air cells
 		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
-			int id1 = entity.worldObj.getBlockId(x, y, z);
-			int id2 = entity.worldObj.getBlockId(x, y - 1, z);
+			int id1 = entity.worldObj.getBlockId(x, y    , z);
+			int id2 = entity.worldObj.getBlockId(x, y + 1, z);
 			boolean inVacuum = (id1 != WarpDriveConfig.airID && id2 != WarpDriveConfig.airID);
 			Integer air;
 			if (!inVacuum) {// In space with air blocks
@@ -95,9 +100,9 @@ public class SpaceEventHandler {
 							entity.worldObj.setBlockMetadataWithNotify(x, y, z, metadata - 1, 2);
 						}
 					} else {
-						metadata = entity.worldObj.getBlockMetadata(x, y - 1, z);
+						metadata = entity.worldObj.getBlockMetadata(x, y + 1, z);
 						if (metadata > 0 && metadata < 15) {
-							entity.worldObj.setBlockMetadataWithNotify(x, y - 1, z, metadata - 1, 2);
+							entity.worldObj.setBlockMetadataWithNotify(x, y + 1, z, metadata - 1, 2);
 						}
 					}
 				} else {
@@ -165,7 +170,7 @@ public class SpaceEventHandler {
 						player.setFire(30);
 						player.setPositionAndUpdate(entity.posX, 250.0D, entity.posZ);
 					}
-				} else {
+				} else {// (in space, no air block and not a player)
 					entity_airBlock.put(entity.entityId, 0);
 					entity.attackEntityFrom(DamageSource.drown, 2.0F);
 				}

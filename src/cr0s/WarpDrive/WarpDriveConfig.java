@@ -3,11 +3,14 @@ package cr0s.WarpDrive;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.Random;
 
 import cpw.mods.fml.common.Loader;
+import cr0s.WarpDrive.data.TransitionPlane;
 import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.Property;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
@@ -48,7 +51,8 @@ public class WarpDriveConfig
 	 * The variables that control which recipes should be loaded
 	 */
 	public static boolean recipesIC2			= true;
-//
+
+	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
 	public static Method forgeMultipart_helper_sendDescPacket = null;
 	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
@@ -88,6 +92,10 @@ public class WarpDriveConfig
 	public static int G_SPACE_DIMENSION_ID = 2;
 	public static int G_HYPERSPACE_PROVIDER_ID = 15;
 	public static int G_HYPERSPACE_DIMENSION_ID = 3;
+	public static int G_SPACE_WORLDBORDER_BLOCKS = 100000;	// 0 to disable
+	
+	// Transition planes
+	public static TransitionPlane[] G_TRANSITIONPLANES = null;
 
 	// Warp Core
     public static int WC_MAX_ENERGY_VALUE = 100000000;
@@ -235,6 +243,28 @@ public class WarpDriveConfig
 		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", -2).getInt();
 		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", 15).getInt();
 		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", -3).getInt();
+		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", 100000, "World border applies to hyperspace & space, set to 0 to disable it").getInt();
+		
+		// General
+		config.addCustomCategoryComment("TransitionPlane", "Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
+					+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
+		String[] transitionNames = { "overworld" };
+		transitionNames = config.get("TransitionPlane", "names", transitionNames, "this is the list of transition planes defined hereafter").getStringList();
+		int[] defaultPlane = {0, 0, 0, 30000000, 30000000, 0, 0}; // 30000000 is Minecraft limit for SetBlock
+		G_TRANSITIONPLANES = new TransitionPlane[transitionNames.length];
+		int index = 0;
+		for (String name : transitionNames) {
+			int[] plane = config.get("TransitionPlane", name, defaultPlane, "dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, SpaceCenterX, SpaceCenterZ").getIntList();
+			if (plane.length != 7) {
+				WarpDrive.print("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
+				plane = defaultPlane.clone();
+			}
+			TransitionPlane newPlane = new TransitionPlane(plane[0], plane[1], plane[2], plane[3], plane[4], plane[5], plane[6]);
+			WarpDrive.print("Adding '" + name + "' as " + newPlane.toString());
+			G_TRANSITIONPLANES[index] = newPlane;
+		}
+		// FIXME: check transition planes aren't overlapping
+		// FIXME: check transition planes have valid dimension id
 		
 		// Warp Core
 		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", 100000000).getInt();

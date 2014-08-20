@@ -26,6 +26,10 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 	private static final double PR_MIN_INSTABILITY = 0.004D;
 	private static final double PR_MAX_INSTABILITY = 0.060D;
 	
+	// explosion parameters
+	private static final int PR_MAX_EXPLOSION_RADIUS = 6; 
+	private static final double PR_MAX_EXPLOSION_REMOVAL_CHANCE = 0.1D; 
+	
 	// laser stabilization is per shot
 	// target is to consume 10% max output power every second, hence 2.5% per side
 	// laser efficiency is 33% at 16% power (target spot), 50% at 24% power, 84% at 50% power, etc.
@@ -103,7 +107,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 			return;
 		}
 		
-		lasersReceived = Math.min(10.0F, lasersReceived + 1.0F);
+		lasersReceived = Math.min(10.0F, lasersReceived + 1F / WarpDriveConfig.PR_MAX_LASERS);
 		double nospamFactor = 1.0;
 		if (lasersReceived > 1.0F) {
 			nospamFactor = 0.5;
@@ -156,7 +160,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
         
         releasedThisTick = 0;
         
-        lasersReceived = Math.max(0.0F, lasersReceived - WarpDriveConfig.PR_MAX_LASERS / 20F);
+        lasersReceived = Math.max(0.0F, lasersReceived - 0.05F);
 		tickCount++;
 		if (tickCount < WarpDriveConfig.PR_TICK_TIME) {
 			return;
@@ -184,15 +188,15 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 	}
 	
 	private void explode() {
-		// remove blocks randomly up to 6 blocks around (breaking whatever protection is there)
-		int radius = (int) Math.floor(0.6D * Math.pow(containedEnergy, 0.125));
-		WarpDrive.debugPrint(this + " Explosion radius: " + radius);
+		// remove blocks randomly up to x blocks around (breaking whatever protection is there)
+		double normalizedEnergy = containedEnergy / (double)WarpDriveConfig.PR_MAX_ENERGY; 
+		int radius = (int) Math.round(PR_MAX_EXPLOSION_RADIUS * Math.pow(normalizedEnergy, 0.125));
+		double c = PR_MAX_EXPLOSION_REMOVAL_CHANCE * Math.pow(normalizedEnergy, 0.125);
+		WarpDrive.debugPrint(this + " Explosion radius is " + radius + ", Chance of removal is " + c);
 		if (radius > 1) {
-			double c = 0.05 * Math.pow(containedEnergy, 0.125); // chance of a block being destroyed (ranges from 0.5 to 0.05)
-			WarpDrive.debugPrint(this + " Chance of removal: " + c);
-			for(int x = xCoord - radius; x < xCoord + radius; x++) {
-				for(int y = yCoord - radius; y < yCoord + radius; y++) {
-					for(int z = zCoord - radius; z < zCoord + radius; z++) {
+			for(int x = xCoord - radius; x <= xCoord + radius; x++) {
+				for(int y = yCoord - radius; y <= yCoord + radius; y++) {
+					for(int z = zCoord - radius; z <= zCoord + radius; z++) {
 						if (z != zCoord || y != yCoord || x != xCoord) {
 							if (worldObj.rand.nextDouble() < c) {
 								worldObj.setBlockToAir(x, y, z);
@@ -236,10 +240,15 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		for(int i = 0; i < 4; i++) {
 			exploding = exploding || (instabilityValues[i] >= 100);
 		}
+		exploding &= worldObj.rand.nextBoolean();
 		
-		if (exploding) {
+		if (exploding && worldObj.rand.nextBoolean()) {
 			active = false;
-			WarpDrive.debugPrint("EXPLODE!");
+	        WarpDrive.print(this + String.format(" Explosion trigerred, Instability is [%.2f, %.2f, %.2f, %.2f], Energy stored is %d, Laser received is %.2f, %s", new Object[] {
+	           		instabilityValues[0], instabilityValues[1], instabilityValues[2], instabilityValues[3],
+	           		this.containedEnergy,
+	           		this.lasersReceived,
+	           		this.active ? "ACTIVE" : "INACTIVE" }));
 		}
 		return exploding;
 	}
@@ -518,4 +527,12 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		active = nbt.getBoolean("active");
 	}
 
+	@Override
+	public String toString() {
+		return String.format("%s \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] {
+			getClass().getSimpleName(),
+			this.connectedComputers == null ? "~NULL~" : this.connectedComputers,
+			worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+			Double.valueOf(xCoord), Double.valueOf(yCoord), Double.valueOf(zCoord)});
+	}
 }

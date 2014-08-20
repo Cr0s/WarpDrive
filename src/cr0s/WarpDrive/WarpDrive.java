@@ -61,9 +61,6 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
  * @author Cr0s
  */
 public class WarpDrive implements LoadingCallback {
-	// World limits
-	public final static int WORLD_LIMIT_BLOCKS = 100000;
-
 	public static Block warpCore;
 	public static Block protocolBlock;
 	public static Block radarBlock;
@@ -512,13 +509,14 @@ public class WarpDrive implements LoadingCallback {
 	
 	private static void initAETERecipes() {
 		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
+		ItemStack resonantEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellResonant", 1);
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
 		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
 		ItemStack quantumEntangledSingularity = WarpDriveConfig.getAEMaterial("matQuantumEntangledSingularity");
 		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEBlock("blkQuartzLamp");
 		vibrantQuartzGlass.setItemDamage(4);
 		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
-		antimatter.setItemDamage(1);
+		antimatter.setItemDamage(0);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
 		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack, 1, 0);
 
@@ -541,14 +539,15 @@ public class WarpDrive implements LoadingCallback {
 			'o', floppy,
 			'f', fluixCrystal);
 		
-		// top = Iridium plate, Ultimate lappack, Iridium plate
-		// middle = Singularity, 1 gram antimatter, Singularity
+		// top = Iridium plate, Resonant Energycell, Iridium plate
+		// middle = Singularity, 125 milligram antimatter, Singularity
 		// bottom = Iridium plate, Ultimate lappack, Iridium plate
-		GameRegistry.addRecipe(new ItemStack(powerReactorBlock), "ili", "sas", "ili",
+		GameRegistry.addRecipe(new ItemStack(powerReactorBlock), "iri", "sas", "ili",
 			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 			's', quantumEntangledSingularity,
 			'a', antimatter,
-			'l', ultimateLappack);
+			'l', ultimateLappack,
+			'r', resonantEnergycell);
 		
 		// top = Advanced circuit, Advanced alloy, Advanced alloy
 		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass

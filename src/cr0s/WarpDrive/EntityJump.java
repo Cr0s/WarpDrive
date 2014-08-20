@@ -334,7 +334,8 @@ public class EntityJump extends Entity
 		betweenWorlds = fromSpace || toSpace || isHyperspaceJump;
 		moveX = moveY = moveZ = 0;
 		
-		TransitionPlane overworld = new TransitionPlane(0, 0, 0, 5000, 5000, 0, 0);
+		TransitionPlane overworld = WarpDriveConfig.G_TRANSITIONPLANES[0];
+		
 		if (toSpace) {
 			if (worldObj.provider.dimensionId == overworld.dimensionId) {
 				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition

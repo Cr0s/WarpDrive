@@ -40,13 +40,13 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	 * @param chunkProvider
 	 */
 	@Override
-	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider)
-	{
-		if (world.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID)
+	public void generate(Random random, int chunkX, int chunkZ, World world, IChunkProvider chunkGenerator, IChunkProvider chunkProvider) {
+		if (world.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID) {
 			return;
+		}
 		int x = (chunkX * 16) + (5 - random.nextInt(10));
 		int z = (chunkZ * 16) + (5 - random.nextInt(10));
-		if (Math.abs(x) > WarpDrive.WORLD_LIMIT_BLOCKS || Math.abs(z) > WarpDrive.WORLD_LIMIT_BLOCKS)
+		if (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)
 			return;
 		int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
 		// Moon setup
