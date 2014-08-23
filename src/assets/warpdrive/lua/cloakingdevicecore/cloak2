@@ -18,7 +18,6 @@ if warp == nil then
   term.setTextColor(colors.white)
   term.write("No cloak core detected")
 else
-  warp.setFieldFrequency(1337)
   warp.setFieldTier(2)
   warp.enableCloakingField()
   if warp.isAssemblyValid() then

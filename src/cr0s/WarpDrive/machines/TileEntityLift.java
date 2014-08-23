@@ -117,13 +117,13 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
                 }
             }
         } else if (mode == MODE_DOWN) {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY + 2, zmin, xmax, yCoord + 2, zmax);
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY + 3, zmin, xmax, yCoord + 2, zmax);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
             if (list != null) {
                 for (Object o : list) {
                     if (o != null && o instanceof EntityLivingBase && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
 						((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, firstUncoveredY + 1, zCoord + 0.5f);
-						WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 1, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
+						WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 0.5, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true);
                     }
