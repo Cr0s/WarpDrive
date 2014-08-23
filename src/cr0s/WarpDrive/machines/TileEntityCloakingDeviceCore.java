@@ -70,7 +70,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 			updateTicks = ((tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			isValid = validateAssembly();
-			isCloaking = WarpDrive.instance.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord); 
+			isCloaking = WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord); 
 			if (!isEnabled) {// disabled
 				if (isCloaking) {// disabled, cloaking => stop cloaking
 					WarpDrive.debugPrint("" + this + " Disabled, cloak field going down...");
@@ -85,14 +85,14 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 						setCoilsState(true);
 						
 						// Register cloak
-						WarpDrive.instance.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, xCoord, yCoord, zCoord, tier);
+						WarpDrive.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, xCoord, yCoord, zCoord, tier);
 						if (!soundPlayed) {
 							soundPlayed = true;
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cloak", 4F, 1F);
 						}
 						
 						// Refresh the field
-						CloakedArea area = WarpDrive.instance.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
+						CloakedArea area = WarpDrive.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
 						if (area != null) {
 							area.sendCloakPacketToPlayersEx(false); // recloak field
 						}
@@ -108,7 +108,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 						if (hasEnoughPower) {// enabled, cloaking and able to
 							// IDLE
 							// Refresh the field	!!! LemTest 2014-07-12
-							CloakedArea area = WarpDrive.instance.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
+							CloakedArea area = WarpDrive.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
 							if (area != null) {
 								area.sendCloakPacketToPlayersEx(false); // recloak field
 							}
@@ -228,8 +228,8 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 
 	public void disableCloakingField() {
 		setCoilsState(false);
-		if (WarpDrive.instance.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord)) {
-			WarpDrive.instance.cloaks.removeCloakedArea(worldObj, xCoord, yCoord, zCoord);
+		if (WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord)) {
+			WarpDrive.cloaks.removeCloakedArea(worldObj, xCoord, yCoord, zCoord);
 			
 			if (!soundPlayed) {
 				soundPlayed = true;

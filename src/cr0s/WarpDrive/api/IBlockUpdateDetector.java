@@ -1,4 +1,4 @@
-package cr0s.WarpDriveCore;
+package cr0s.WarpDrive.api;
 
 public interface IBlockUpdateDetector
 {

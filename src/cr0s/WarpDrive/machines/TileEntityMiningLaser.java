@@ -9,6 +9,7 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import java.util.ArrayList;
 import java.util.List;
 
+import cofh.api.transport.IItemConduit;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFluid;
 import net.minecraft.entity.item.EntityItem;
@@ -17,6 +18,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.FluidRegistry;
 import appeng.api.WorldCoord;
@@ -243,13 +245,28 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
 			if (stacks != null) {
 				boolean overflow = false;
+				int qtyLeft = 0;
+				ItemStack stackLeft = null;
 				for (ItemStack stack : stacks) {
-					if (grid != null && AENetworkReady) {
-						putInGrid(stack);
-					} else {
-						if (!putInChest(findChest(), stack)) {
-							WarpDrive.debugPrint("" + this + " Overflow detected");
-							overflow = true;
+					qtyLeft = putInGrid(stack);
+/*					if (qtyLeft > 0) { // FIXME: untested
+						stackLeft = copyWithSize(stack, qtyLeft);
+						qtyLeft = putInPipe(stackLeft);
+					}/**/
+					if (qtyLeft > 0) {
+						stackLeft = copyWithSize(stack, qtyLeft);
+						qtyLeft = putInChest(findChest(), stackLeft);
+					}
+					if (qtyLeft > 0) {
+						WarpDrive.debugPrint("" + this + " Overflow detected");
+						overflow = true;
+						int transfer;
+						while (qtyLeft > 0) {
+							transfer = Math.min(qtyLeft, stack.getMaxStackSize());
+							ItemStack dropItemStack = copyWithSize(stack, transfer);
+							EntityItem itemEnt = new EntityItem(worldObj, xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D, dropItemStack);
+							worldObj.spawnEntityInWorld(itemEnt);
+							qtyLeft -= transfer;
 						}
 					}
 				}
@@ -345,23 +362,38 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		return block.getBlockDropped(worldObj, i, j, k, blockMeta, 0);
 	}
 
-	public int putInGrid(ItemStack itemStackSource)
-	{
-		int transferred = itemStackSource.stackSize;
-		IMEInventoryHandler cellArray = grid.getCellArray();
-		if (cellArray != null)
-		{
-			IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
-			if (ret != null)
-				transferred -= ret.getStackSize();
-		}
-		return transferred;
+	private int putInGrid(ItemStack itemStackSource) {
+ 		int qtyLeft = itemStackSource.stackSize;
+ 		if (grid != null && AENetworkReady) {
+ 			IMEInventoryHandler cellArray = grid.getCellArray();
+ 			if (cellArray != null) {
+ 				IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
+ 				if (ret != null) {
+ 					qtyLeft -= ret.getStackSize();
+ 				}
+ 			}
+ 		}
+ 		return qtyLeft;
 	}
 
-	public boolean putInChest(IInventory inventory, ItemStack itemStackSource) {
+	private int putInPipe(ItemStack itemStackSource) {
+		ItemStack itemStackLeft = itemStackSource.copy();
+		for(ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
+			TileEntity te = worldObj.getBlockTileEntity(xCoord + direction.offsetX, yCoord + direction.offsetY, zCoord + direction.offsetZ);
+			if (te != null && te instanceof IItemConduit) {
+				WarpDrive.debugPrint("dumping to pipe");
+				itemStackLeft = ((IItemConduit)te).insertItem(direction.getOpposite(), itemStackLeft);
+				if (itemStackLeft == null) {
+					return 0;
+				}
+			}
+		}
+		return itemStackLeft.stackSize;
+	}
+	
+	private int putInChest(IInventory inventory, ItemStack itemStackSource) {
 		if (itemStackSource == null) {
-			stop();
-			return false;
+			return 0;
 		}
 
 		int qtyLeft = itemStackSource.stackSize;
@@ -383,7 +415,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				itemStack.stackSize += transfer;
 				qtyLeft -= transfer;
 				if (qtyLeft <= 0) {
-					return true;
+					return 0;
 				}
 			}
 	
@@ -404,20 +436,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				qtyLeft -= transfer;
 	
 				if (qtyLeft <= 0) {
-					return true;
+					return 0;
 				}
 			}
 		}
-
-		while (qtyLeft > 0) {
-			transfer = Math.min(qtyLeft, itemStackSource.getMaxStackSize());
-			ItemStack dropItemStack = copyWithSize(itemStackSource, transfer);
-			EntityItem itemEnt = new EntityItem(worldObj, xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D, dropItemStack);
-			worldObj.spawnEntityInWorld(itemEnt);
-			qtyLeft -= transfer;
-		}
 		
-		return false;
+		return qtyLeft;
 	}
 
 	public static ItemStack copyWithSize(ItemStack itemStack, int newSize)

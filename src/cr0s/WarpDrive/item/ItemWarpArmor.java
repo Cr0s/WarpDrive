@@ -1,19 +1,14 @@
 package cr0s.WarpDrive.item;
 
-import java.util.Random;
-
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.api.IAirCanister;
 import cr0s.WarpDrive.api.IBreathingHelmet;
 import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Icon;

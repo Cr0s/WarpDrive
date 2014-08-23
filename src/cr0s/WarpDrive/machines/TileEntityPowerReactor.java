@@ -7,7 +7,7 @@ import java.util.Set;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
-import cr0s.WarpDriveCore.IBlockUpdateDetector;
+import cr0s.WarpDrive.api.IBlockUpdateDetector;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;

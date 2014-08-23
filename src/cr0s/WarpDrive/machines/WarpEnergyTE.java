@@ -9,7 +9,8 @@ import ic2.api.energy.tile.IEnergySource;
 import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDriveCore.IBlockUpdateDetector;
+import cr0s.WarpDrive.api.IBlockUpdateDetector;
+import cr0s.WarpDrive.data.EnumUpgradeTypes;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
@@ -23,6 +24,20 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	
 	private int scanTickCount = -1;
 	private IEnergyHandler[] TE_energyHandlers = new IEnergyHandler[ForgeDirection.VALID_DIRECTIONS.length];
+	protected HashMap<EnumUpgradeTypes,Integer> upgrades = new HashMap<EnumUpgradeTypes,Integer>();
+ 	
+	public Object[] getUpgrades()
+	{
+		Object[] retVal = new Object[EnumUpgradeTypes.values().length];
+		for(EnumUpgradeTypes type : EnumUpgradeTypes.values())
+		{
+			int am = 0;
+			if(upgrades.containsKey(type))
+				am = upgrades.get(type);
+			retVal[type.ordinal()] = type.toString() + ":" + am;
+		}	
+		return retVal;
+	}
 	
 	// WarpDrive methods
 	protected static int convertInternalToRF(int energy) {
@@ -69,6 +84,23 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	
 	
 	protected boolean consumeEnergy(int amount, boolean simulate) {
+		int amountUpgraded = amount;
+		if (upgrades.containsKey(EnumUpgradeTypes.Power)) {
+			double valueMul = Math.pow(0.8,upgrades.get(EnumUpgradeTypes.Power));
+			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
+		}
+		
+		if (upgrades.containsKey(EnumUpgradeTypes.Range)) {
+			double valueMul = Math.pow(1.2,upgrades.get(EnumUpgradeTypes.Range));
+			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
+		}
+		
+		if (upgrades.containsKey(EnumUpgradeTypes.Speed)) {
+			double valueMul = Math.pow(1.2,upgrades.get(EnumUpgradeTypes.Speed));
+			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
+		}
+		// FIXME: upgrades balancing & implementation to be done...
+		
 		if (getEnergyStored() >= amount) {
 			if (!simulate) {
 				energyStored_internal -= amount;
@@ -272,6 +304,14 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
         if (energyStored_internal > getMaxEnergyStored()) {
         	energyStored_internal = getMaxEnergyStored();
         }
+        if (tag.hasKey("upgrades")) {
+        	NBTTagCompound upgradeTag = tag.getCompoundTag("upgrades");
+        	for(EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
+        		if (upgradeTag.hasKey(type.toString()) && upgradeTag.getInteger(type.toString()) !=  0) {
+	        		upgrades.put(type, upgradeTag.getInteger(type.toString()));
+        		}
+        	}
+        }
     }
 	
     @Override
@@ -281,6 +321,15 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
         	energyStored_internal = 0;
         }
         tag.setInteger("energy", this.energyStored_internal);
+        if (upgrades.size() > 0) {
+        	NBTTagCompound upgradeTag = new NBTTagCompound();
+        	for(EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
+        		if (upgrades.containsKey(type)) {
+        			upgradeTag.setInteger(type.toString(), upgrades.get(type));
+        		}
+        	}
+        	tag.setCompoundTag("upgrades", upgradeTag);
+        }
     }
     
     // WarpDrive overrides

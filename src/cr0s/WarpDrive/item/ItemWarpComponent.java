@@ -23,7 +23,6 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	public ItemWarpComponent(int par1) {
 		super(par1);
 		setHasSubtypes(true);
-		//this.setMaxDamage(potentialUnlocalized.length);
 		setUnlocalizedName("warpdrive.crafting.Malformed");
 		setCreativeTab(WarpDrive.warpdriveTab);
 		

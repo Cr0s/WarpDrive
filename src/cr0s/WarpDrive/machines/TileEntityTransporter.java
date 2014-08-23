@@ -2,7 +2,10 @@ package cr0s.WarpDrive.machines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import cr0s.WarpDrive.api.IUpgradable;
+import cr0s.WarpDrive.data.EnumUpgradeTypes;
 import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
@@ -20,11 +23,13 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
+public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, IUpgradable
 {
 	private double scanRange=2;
 	
 	private int scanDist = 4;
+	
+	private double beaconEffect = 0;
 	private double powerBoost = 1;
 	private double baseLockStrength=-1;
 	private double lockStrengthMul = 1;
@@ -46,6 +51,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			"energy",
 			"powerBoost",
 			"energyCost",
+			"upgrades",
 			"help" };
 	
 	@Override
@@ -94,6 +100,10 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 				return "powerBoost(boostAmount): sets the level of power to use (1 being default), returns the level of power\npowerBoost(): returns the level of power";
 			} else if(fun.equals("energycost")) {
 				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
+			} else if(fun.equals("upgrades")) {
+				return WarpDrive.defUpgradeStr;
+			} else if(fun.equals("energy")) {
+ 				return WarpDrive.defEnergyStr;
 			}
 		}
 		return WarpDrive.defHelpStr;
@@ -243,31 +253,60 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 			ent.attackEntityFrom(teleDam, 1);
 		}
 	}
-	
-	private double beaconScan(int xV, int yV, int zV)	// FIXME: never used
+		
+	private double beaconScan(int xV, int yV, int zV)
 	{
+		WarpDrive.debugPrint("BeaconScan:" + xV + ","+yV + "," + zV);
 		double beacon = 0;
-		for(int x=xV-scanDist;x<=xV+scanDist;x++)
+		int beaconCount = 0;
+		int xL = xV - scanDist;
+		int xU = xV + scanDist;
+		int yL = yV - scanDist;
+		int yU = yV + scanDist;
+		int zL = zV - scanDist;
+		int zU = zV + scanDist;
+		for(int x=xL;x<=xU;x++)
 		{
-			for(int y=yV-scanDist;y<=yV+scanDist;y++)
+			for(int y=yL;y<=yU;y++)
 			{
-				if(y < 0 || y > 254)
+				if(y < 0 || y > 254) {
 					continue;
+				}
 				
-				for(int z=xV-scanDist;z<=xV+scanDist;z++)
+				for(int z=zL;z<=zU;z++)
 				{
-					if(worldObj.getBlockId(x, y, z) != WarpDriveConfig.transportBeaconID)
+					if(worldObj.getBlockId(x, y, z) != WarpDriveConfig.transportBeaconID) {
 						continue;
-					double dist = Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);
-					
-					if(worldObj.getBlockMetadata(x, y, z) == 0)
+					}
+					double dist = 1 + Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);
+					beaconCount++;
+					if (worldObj.getBlockMetadata(x, y, z) == 0) {
 						beacon += 1/dist;
-					else
+					} else {
 						beacon -= 1/dist;
+					}
 				}
 			}
 		}
+		if (beaconCount > 0) {
+			beacon /= Math.sqrt(beaconCount);
+		}
 		return beacon;
+	}
+
+	private double beaconScan(Vector3 s, Vector3 d)
+	{
+		s = absoluteVector(s);
+		d = absoluteVector(d);
+		return beaconScan(toInt(s.x),toInt(s.y),toInt(s.z)) + beaconScan(toInt(d.x),toInt(d.y),toInt(d.z));
+	}
+
+	private Vector3 absoluteVector(Vector3 a)
+	{
+		if(WarpDriveConfig.TR_RELATIVE_COORDS)
+			return a.clone().translate(new Vector3(this));
+		else
+			return a;
 	}
 	
 	private double calculatePower(Vector3 d)
@@ -283,7 +322,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	private static double calculatePower(Vector3 s, Vector3 d)
 	{
 		double dist = s.distanceTo(d);
-		return clamp(Math.pow(Math.E, -dist / 100) * (1/dist),0,1);
+		return clamp(Math.pow(Math.E, -dist / 300), 0, 1);
 	}
 	
 	private static double min(double... ds)
@@ -296,8 +335,11 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	
 	private double getLockStrength() {
 		if (isLocked) {
-			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost - 1), 0, 1);
-		}
+			double upgradeBoost = 1;
+			if (upgrades.containsKey(EnumUpgradeTypes.Range))
+				upgradeBoost = Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Range));
+			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost-1) * upgradeBoost * (1 + beaconEffect), 0, 1);
+		}	
 		return -1;
 	}
 
@@ -309,6 +351,8 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	private double lock(Vector3 source,Vector3 dest) {
  		if (source != null && dest != null) {
   			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
+  			beaconEffect = beaconScan(source, dest);
+  			WarpDrive.debugPrint("BEACON:" + beaconEffect);
   			baseLockStrength = basePower;
   			lockStrengthMul  = 1;
   			isLocked = true;
@@ -361,7 +405,11 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.TR_MAX_ENERGY;
+		int max = WarpDriveConfig.TR_MAX_ENERGY;
+		if (upgrades.containsKey(EnumUpgradeTypes.Energy)) {
+			max = (int) Math.floor(max * Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Energy)));
+		}
+		return max;
 	}
 	
 	@Override
@@ -411,5 +459,39 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+
+	@Override
+	public boolean takeUpgrade(EnumUpgradeTypes upgradeType, boolean simulate)
+	{
+		int max = 0;
+		if(upgradeType == EnumUpgradeTypes.Energy)
+			max = 2;
+		else if(upgradeType == EnumUpgradeTypes.Power)
+			max = 4;
+		else if(upgradeType == EnumUpgradeTypes.Range)
+			max = 4;
+		
+		if(max == 0)
+			return false;
+		
+		if(upgrades.containsKey(upgradeType))
+			if(upgrades.get(upgradeType) >= max)
+				return false;
+		
+		if(!simulate)
+		{
+			int c = 0;
+			if(upgrades.containsKey(upgradeType))
+				c = upgrades.get(upgradeType);
+			upgrades.put(upgradeType, c+1);
+		}
+		return true;
+	}
+
+	@Override
+	public Map<EnumUpgradeTypes,Integer> getInstalledUpgrades()
+	{
+		return upgrades;
 	}
 }

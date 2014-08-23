@@ -35,9 +35,12 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.EnumArmorMaterial;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraftforge.common.Configuration;
 import net.minecraftforge.common.DimensionManager;
@@ -88,9 +91,12 @@ public class WarpDrive implements LoadingCallback {
 
 	public static Block iridiumBlock;
 	public static Block transportBeaconBlock;
+	public static Block chunkLoaderBlock;
+	public static BlockDecorative decorativeBlock;
 	
 	public static Item reactorLaserFocusItem;
 	public static ItemWarpComponent componentItem;
+	public static ItemWarpUpgrade upgradeItem;
 	
 	public static EnumArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[]{1, 3, 2, 1}, 15);
 	public static ItemWarpArmor helmetItem;
@@ -113,12 +119,11 @@ public class WarpDrive implements LoadingCallback {
 	@SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
 	public static CommonProxy proxy;
 
-	public WarpCoresRegistry warpCores;
-	public JumpgatesRegistry jumpgates;
-	
-	public CloakManager cloaks;
+	public static WarpCoresRegistry warpCores;
+	public static JumpgatesRegistry jumpgates;
+	public static CloakManager cloaks;
 
-	public CamRegistry cams;
+	public static CamRegistry cams;
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
     public String debugMessage = "";
@@ -127,8 +132,7 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
 	public static String defEnergyStr = "energy(): returns currently contained energy, max contained energy";
-
-	private LinkedList<Ticket> warpTickets = new LinkedList<Ticket>();
+	public static String defUpgradeStr = "upgrades(): returns a list of currently installed upgrades";
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
@@ -288,13 +292,9 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class,"reactorMonitor");
 		
 		// TRANSPORT BEACON
-		/*transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID)
-			.setHardness(0.5F)
-			.setStepSound(Block.soundMetalFootstep)
-			.setCreativeTab(CreativeTabs.tabRedstone)
-			.setUnlocalizedName("warpdrive.blocks.TransporterBeacon");
+		transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID);
 		
-		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");*/
+		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");
 	        
 		// POWER STUFF
 		powerReactorBlock = new BlockPowerReactor(WarpDriveConfig.powerReactorID);
@@ -306,6 +306,15 @@ public class WarpDrive implements LoadingCallback {
 		powerStoreBlock = new BlockPowerStore(WarpDriveConfig.powerStoreID);
 		GameRegistry.registerBlock(powerStoreBlock,"powerStore");
 		GameRegistry.registerTileEntity(TileEntityPowerStore.class, "powerStore");
+		
+		// CHUNK LOADER
+		chunkLoaderBlock = new BlockChunkLoader(WarpDriveConfig.chunkLoaderID);
+		GameRegistry.registerBlock(chunkLoaderBlock, "chunkLoader");
+		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, "chunkLoader");
+		
+		// DECORATIVE
+		decorativeBlock = new BlockDecorative(WarpDriveConfig.decorativeID);
+		GameRegistry.registerBlock(decorativeBlock, ItemBlockDecorative.class, "decorative");
 		
 		// REACTOR LASER FOCUS
 		reactorLaserFocusItem = new ItemReactorLaserFocus(WarpDriveConfig.reactorLaserFocusID);
@@ -320,6 +329,9 @@ public class WarpDrive implements LoadingCallback {
 		
 		airCanisterItem = new ItemWarpAirCanister(WarpDriveConfig.airCanisterID);
 		GameRegistry.registerItem(airCanisterItem, "airCanisterFull");
+		
+		upgradeItem = new ItemWarpUpgrade(WarpDriveConfig.upgradeID);
+		GameRegistry.registerItem(upgradeItem, "upgrade");
 		
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
@@ -366,6 +378,9 @@ public class WarpDrive implements LoadingCallback {
 	
 	private static void initVanillaRecipes() {
 		componentItem.registerRecipes();
+		decorativeBlock.initRecipes();
+		upgradeItem.initRecipes();
+		
 		//WarpCore
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(warpCore), false, "ipi", "ici", "idi",
 				'i', Item.ingotIron,
@@ -478,14 +493,14 @@ public class WarpDrive implements LoadingCallback {
 				'n', Item.goldNugget));
 		
 		//Power Laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii","ilg","ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii", "ilg", "ici",
 				'i', Item.ingotIron,
 				'g', Block.glass,
 				'c', componentItem.getIS(5),
 				'l', componentItem.getIS(3)));
 		
 		//Power Reactor
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi","gog","ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi", "gog", "ici",
 				'i', Item.ingotIron,
 				'g', Block.glass,
 				'o', componentItem.getIS(4),
@@ -493,11 +508,18 @@ public class WarpDrive implements LoadingCallback {
 				'p', componentItem.getIS(6)));
 		
 		//Power Store
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerStoreBlock), false, "ipi","isi","ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerStoreBlock), false, "ipi", "isi", "ici",
 				'i', Item.ingotIron,
 				's', componentItem.getIS(7),
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
+		
+		//Chunk Loader
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(chunkLoaderBlock), false, "ipi", "ici", "ifi",
+				'i', Item.ingotIron,
+				'p', componentItem.getIS(6),
+				'c', componentItem.getIS(0),
+				'f', componentItem.getIS(5)));
 		
 		//Helmet
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg",
@@ -701,45 +723,12 @@ public class WarpDrive implements LoadingCallback {
 		event.registerServerCommand(new DebugCommand());
 	}
 	
-	private ArrayList<Ticket> worldTickets(World worldObj) {
-		ArrayList<Ticket> worldTicks = new ArrayList<Ticket>(warpTickets.size());
-		for(Ticket t: warpTickets) {
-			if (t.world.equals(worldObj)) {
-				worldTicks.add(t);
-			}
-		}
-		return worldTicks;
-	}
-	
 	public Ticket registerChunkLoadTE(WarpChunkTE te, boolean refreshLoading) {
 		World worldObj = te.worldObj;
-		ArrayList<Ticket> worldTicks = worldTickets(worldObj);
-		boolean isWorldTicketed = worldTicks.size() != 0;
-		if(isWorldTicketed)
-		{
-			if(ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0)
-			{
-				Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
-				if(t != null)
-				{
-					te.giveTicket(t);	// FIXME calling the caller is a bad idea
-					if(refreshLoading)
-						te.refreshLoading();
-					return t;
-				}
-				else {
-					WarpDrive.debugPrint("Ticket not granted");
-				}
-			}
-			else {
-				WarpDrive.debugPrint("No tickets left!");
-			}
-		}
-		else
+		if (ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0)
 		{
 			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
-			if(t != null)
-			{
+			if (t != null) {
 				te.giveTicket(t);	// FIXME calling the caller is a bad idea
 				if(refreshLoading)
 					te.refreshLoading();
@@ -750,31 +739,57 @@ public class WarpDrive implements LoadingCallback {
 				WarpDrive.debugPrint("Ticket not granted");
 			}
 		}
+		else
+		{
+			WarpDrive.debugPrint("No tickets left!");
+		}
 		return null;
 	}
 	
 	public Ticket registerChunkLoadTE(WarpChunkTE te)
 	{
-		return registerChunkLoadTE(te,true);
+		return registerChunkLoadTE(te, true);
 	}
 	
 	public Ticket getTicket(WarpChunkTE te)
 	{
-		return registerChunkLoadTE(te,false);
+		return registerChunkLoadTE(te, false);
 	}
 	
-	public void removeTicket(Ticket t)
-	{
-		for(Ticket ticket:warpTickets)
-			if(t.equals(ticket))
-				warpTickets.remove(ticket);
-	}
-
 	@Override
 	public void ticketsLoaded(List<Ticket> tickets, World world)
 	{
 		for (Ticket ticket : tickets)
+		{
+			NBTTagCompound data = ticket.getModData();
+			if(data != null)
+			{
+				int w = data.getInteger("ticketWorldObj");
+				int x = data.getInteger("ticketX");
+				int y = data.getInteger("ticketY");
+				int z = data.getInteger("ticketZ");
+				if(w != 0 || x != 0 || y != 0 || z != 0)
+				{
+					WorldServer ws = DimensionManager.getWorld(w);
+					if(ws != null)
+					{
+						TileEntity te = ws.getBlockTileEntity(x, y, z);
+						if(te != null && te instanceof WarpChunkTE)
+						{
+							if(((WarpChunkTE)te).shouldChunkLoad())
+							{
+								WarpDrive.debugPrint("[TicketCallback] Regiving Ticket!");
+								((WarpChunkTE)te).giveTicket(ticket);
+								((WarpChunkTE)te).refreshLoading(true);
+								return;
+							}
+						}
+					}
+				}
+			}
+
 			ForgeChunkManager.releaseTicket(ticket);
+		}
 	}
 
 	

@@ -6,14 +6,15 @@ import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
-public class BlockBeacon extends Block
+public class BlockTransportBeacon extends Block
 {
-	public BlockBeacon(int par1)
+	public BlockTransportBeacon(int par1)
 	{
 		super(par1, Material.iron);
         setHardness(0.5F);

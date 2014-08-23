@@ -1,8 +1,8 @@
 package cr0s.WarpDrive.machines;
 
+import cr0s.WarpDrive.api.IBlockUpdateDetector;
 import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDriveCore.IBlockUpdateDetector;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
