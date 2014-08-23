@@ -1,0 +1,865 @@
+if not term.isColor() then
+	print("Advanced computer required")
+	exit()
+end
+
+Style = {
+	CDefault = colors.white,
+	BGDefault = colors.blue,
+
+	CTitle = colors.black,
+	BGTitle = colors.cyan,
+
+	CWarning = colors.white,
+	BGWarning = colors.red,
+
+	CSuccess = colors.white,
+	BGSuccess = colors.lime,
+
+	CDisabled = colors.gray,
+	BGDisabled = colors.blue
+}
+
+-----------------------------------------------------------
+
+function SetColorDefault()
+	term.setBackgroundColor(Style.BGDefault)
+	term.setTextColor(Style.CDefault)
+end
+
+function SetColorTitle()
+	term.setBackgroundColor(Style.BGTitle)
+	term.setTextColor(Style.CTitle)
+end
+
+function SetColorWarning()
+	term.setBackgroundColor(Style.BGWarning)
+	term.setTextColor(Style.CWarning)
+end
+
+function SetColorSuccess()
+	term.setBackgroundColor(Style.BGSuccess)
+	term.setTextColor(Style.CSuccess)
+end
+
+function SetColorDisabled()
+	term.setBackgroundColor(Style.BGDisabled)
+	term.setTextColor(Style.CDisabled)
+end
+
+function Clear()
+	SetColorDefault()
+	term.clear()
+	term.setCursorPos(1,1)
+end
+
+function Show(Text)
+	term.write(Text)
+	local xt,yt = term.getCursorPos()
+	term.setCursorPos(1, yt + 1)
+end
+
+function ShowTitle(Text)
+	SetColorTitle()
+	term.setCursorPos((51 - Text:len()) / 2, 1)
+	Show(Text)
+	SetColorDefault()
+end
+
+function ShowMenu(Text)
+	term.write(Text)
+	local xt, yt = term.getCursorPos()
+	for i = xt, 51 do
+		term.write(" ")
+	end
+	term.setCursorPos(1, yt+1)
+end
+
+clearWarningTick = -1
+function ShowWarning(Text)
+	SetColorWarning()
+	term.setCursorPos((51 - Text:len() - 2) / 2, 19)
+	term.write(" "..Text.." ")
+	SetColorDefault()
+	clearWarningTick = 5
+end
+
+function FormatFloat(value, nbchar)
+	return string.sub(string.format("               %f", value), -nbchar)
+end
+function FormatInteger(value, nbchar)
+	return string.sub(string.format("               %d", value), -nbchar)
+end
+
+function Confirm()
+	ShowWarning("Are you sure? (y/n)")
+	local event, keycode = os.pullEvent("key")
+	if keycode == 21 then
+		return true
+	else
+		return false
+	end
+end
+
+function boolToYesNo(bool)
+	if bool then
+		return "YES"
+	else
+		return "no"
+	end
+end
+
+cloaking_highTier = false
+cloaking_currentKey = 1
+function cloaking_key(keycode)
+	if keycode == 31 then -- S
+		cloaking_start()
+		return true
+	elseif keycode == 25 then -- P
+		cloaking_stop()
+		return true
+	elseif keycode == 20 then -- T
+		cloaking_highTier = not cloaking_highTier
+		return true
+	end
+	return false
+end
+
+function cloaking_page()
+	Clear()
+	ShowTitle(label .. " - Cloaking status")
+
+	cloakingcore = nil
+	if cloakingcores ~= nil then
+		if cloaking_currentKey > #cloakingcores then
+			cloaking_currentKey = 1
+		end
+		cloakingcore = cloakingcores[cloaking_currentKey]
+	end
+	
+	term.setCursorPos(1, 2)
+	if #cloakingcores == 0 then
+		SetColorDisabled()
+		term.write("No cloaking core detected...")
+	elseif cloakingcore == nil then
+		SetColorWarning()
+		term.write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores .. " is invalid")
+	else
+		SetColorDefault()
+		term.write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores)
+		isAssemblyValid = cloakingcore.isAssemblyValid()
+		energy = cloakingcore.getEnergyLevel()
+		isEnabled = true -- cloakingcore.isEnabled()
+		
+		if not isAssemblyValid then
+			SetColorWarning()
+			term.setCursorPos(1, 3)
+			term.write("Invalid assembly!")
+			SetColorDefault()
+			term.setCursorPos(1, 4)
+			print("In each direction, you need to place exactly 2 Cloaking device coils, for a total of 12 coils.")
+			print("The 6 inner coils shall be exactly one block away from the core.")
+			print("The cloaking field will extend 5 blocks past the outer 6 coils.")
+			print("Power consumption scales with the amount of cloaked blocks.")
+		else
+			term.setCursorPos(1, 4)
+			term.write("Assembly is valid")
+			
+			if energy < 50000 then
+				SetColorWarning()
+			else
+				SetColorDefault()
+			end
+			term.setCursorPos(1, 6)
+			term.write("Energy level is " .. energy .. " EU")
+
+			term.setCursorPos(1, 8)
+			if isEnabled then
+				if energy <= 100 then
+					SetColorWarning()
+				else
+					SetColorSuccess()
+				end
+				term.write("Cloak is enabled")
+			else
+				SetColorNormal()
+				term.write("Cloak is disabled")
+			end
+		end
+	end
+	sleep(0.1)
+	cloaking_currentKey = cloaking_currentKey + 1
+	
+	SetColorDefault()
+	term.setCursorPos(1, 12)
+	term.write("  -----------------------------------------------")
+	term.setCursorPos(1, 13)
+	if cloaking_highTier then
+		term.write("Cloak tier: HIGH")
+	else
+		term.write("Cloak tier: low")
+	end
+
+	SetColorTitle()
+	term.setCursorPos(1, 16)
+	ShowMenu("S - Start cloaking, P - stoP cloaking")
+	term.setCursorPos(1, 17)
+	ShowMenu("T - change low/high Tier")
+end
+
+function cloaking_start()
+	for key,cloakingcore in pairs(cloakingcores) do
+		cloakingcore.disableCloakingField()
+		if cloaking_highTier then
+			cloakingcore.setFieldTier(2)
+		else
+			cloakingcore.setFieldTier(1)
+		end
+		cloakingcore.enableCloakingField()
+	end
+end
+
+function cloaking_stop()
+	for key,cloakingcore in pairs(cloakingcores) do
+		cloakingcore.disableCloakingField()
+	end
+end
+mining_currentKey = 1
+mining_layerOffset = 1
+mining_mineAll = true
+mining_useDeuterium = false
+function mining_key(keycode)
+	if keycode == 31 then -- S
+		mining_start()
+		return true
+	elseif keycode == 25 then -- P
+		mining_stop()
+		return true
+	elseif keycode == 30 then -- A
+		mining_mineAll = not mining_mineAll
+		return true
+	elseif keycode == 32 then -- D
+		mining_useDeuterium = not mining_useDeuterium
+		return true
+	elseif keycode == 74 then -- -
+		mining_layerOffset = mining_layerOffset - 1
+		if mining_layerOffset < 1 then
+			mining_layerOffset = 1
+		end
+		return true
+	elseif keycode == 78 then -- +
+		mining_layerOffset = mining_layerOffset + 1
+		return true
+	end
+	return false
+end
+
+function mining_page()
+	Clear()
+	ShowTitle(label .. " - Mining status")
+
+	mininglaser = nil
+	if mininglasers ~= nil then
+		if mining_currentKey > #mininglasers then
+			mining_currentKey = 1
+		end
+		mininglaser = mininglasers[mining_currentKey]
+	end
+	
+	term.setCursorPos(1, 2)
+	if #mininglasers == 0 then
+		SetColorDisabled()
+		term.write("No mining laser detected...")
+	elseif mininglaser == nil then
+		SetColorWarning()
+		term.write("Mining laser " .. mining_currentKey .. " of " .. #mininglasers .. " is invalid")
+	else
+		SetColorDefault()
+		term.write("Mining laser " .. mining_currentKey .. " of " .. #mininglasers)
+		status, energy, currentLayer, mined, total = mininglaser.state()
+		term.setCursorPos(1, 3)
+		term.write("Status: " .. status .. "   ")
+		term.setCursorPos(1, 5)
+		term.write("Energy level is " .. energy .. " EU")
+		term.setCursorPos(1, 7)
+		term.write("Mined " .. mined .. " out of " .. total .. " blocks at layer " .. currentLayer .. "   ")
+	end
+	sleep(0.1)
+	mining_currentKey = mining_currentKey + 1
+	
+	SetColorDefault()
+	term.setCursorPos(1, 11)
+	term.write("  -----------------------------------------------")
+	term.setCursorPos(1, 12)
+	term.write("Layer offset: " .. mining_layerOffset)
+	term.setCursorPos(1, 13)
+	term.write("Mine all: " .. boolToYesNo(mining_mineAll))
+	term.setCursorPos(1, 14)
+	term.write("Use Deuterium: " .. boolToYesNo(mining_useDeuterium))
+
+	SetColorTitle()
+	term.setCursorPos(1, 16)
+	ShowMenu("S Start mining, P stoP mining")
+	term.setCursorPos(1, 17)
+	ShowMenu("A mine All, D use Deuterium, +/- increase offset")
+end
+
+function mining_start()
+	for key,mininglaser in pairs(mininglasers) do
+		if not mininglaser.isMining() then
+			mininglaser.offset(mining_layerOffset)
+			if mining_mineAll then
+				if mining_useDeuterium then
+					mininglaser.quarry(mining_useDeuterium)
+				else
+					mininglaser.quarry()
+				end
+			else
+				if mining_useDeuterium then
+					mininglaser.mine(mining_useDeuterium)
+				else
+					mininglaser.mine()
+				end
+			end
+		end
+	end
+end
+function mining_stop()
+  if #mininglasers == 0 then
+    term.setBackgroundColor(colors.red)
+    term.setTextColor(colors.white)
+    term.write("No mining laser detected")
+  else
+    for key,mininglaser in pairs(mininglasers) do
+      term.setCursorPos(1, 2 + key)
+      if not mininglaser.isMining() then
+        SetColorDisabled()
+        term.write("Mining laser " .. key .. " of " .. #mininglasers .. " is already stopped")
+      else
+        mininglaser.stop()
+        SetColorSuccess()
+        term.write("Mining laser " .. key .. " of " .. #mininglasers .. " has been stopped")
+  	  end
+    end
+  end
+end
+-- ---------------------------------------------------------
+
+label = os.getComputerLabel()
+if not label then
+  label = "" .. os.getComputerID()
+end
+
+-- initial scanning
+Clear()
+ShowTitle(label .. " - Connecting...")
+
+sides = peripheral.getNames()
+reactor = nil
+mininglasers = {}
+reactorlasers = {}
+cloakingcores = {}
+warpcore = nil
+for key,side in pairs(sides) do
+  sleep(0)
+  if peripheral.getType(side) == "warpcore" then
+    print("Wrapping " .. side)
+    warpcore = peripheral.wrap(side)
+  end
+  if peripheral.getType(side) == "warpdriveReactor" then
+    print("Wrapping " .. side)
+    reactor =  peripheral.wrap(side)
+  end
+  if peripheral.getType(side) == "warpdriveReactorLaser" then
+    print("Wrapping " .. side)
+    table.insert(reactorlasers, peripheral.wrap(side))
+  end
+  if peripheral.getType(side) == "mininglaser" then
+    print("Wrapping " .. side)
+    table.insert(mininglasers, peripheral.wrap(side))
+  end
+  if peripheral.getType(side) == "cloakingdevicecore" then
+    print("Wrapping " .. side)
+    table.insert(cloakingcores, peripheral.wrap(side))
+  end
+end
+-- sleep(1)
+
+
+-- peripherals status
+function connections_page()
+	Clear()
+	ShowTitle(label .. " - Connections")
+
+	Show("")
+	if warpcore == nil then
+		SetColorDisabled()
+		Show("No warpcore controller detected")
+	else
+		SetColorSuccess()
+		Show("Warpcore controller detected")
+	end
+
+	if reactor == nil then
+		SetColorDisabled()
+		Show("No reactor detected")
+	else
+		SetColorSuccess()
+		Show("Warpcore reactor detected")
+	end
+
+	if #reactorlasers == 0 then
+		SetColorDisabled()
+		Show("No reactor laser detected")
+	elseif #reactorlasers == 1 then
+		SetColorSuccess()
+		Show("1 reactor laser detected")
+	else
+		SetColorSuccess()
+		Show(#reactorlasers .. " reactor lasers detected")
+	end
+
+	if #mininglasers == 0 then
+		SetColorDisabled()
+		Show("No mining laser detected")
+	elseif #mininglasers == 1 then
+		SetColorSuccess()
+		Show("1 mining laser detected")
+	else
+		SetColorSuccess()
+		Show(#mininglasers .. " mining lasers detected")
+	end
+
+	if #cloakingcores == 0 then
+		SetColorDisabled()
+		Show("No cloaking core detected")
+	elseif #cloakingcores == 1 then
+		SetColorSuccess()
+		Show("1 cloaking core detected")
+	else
+		SetColorSuccess()
+		Show(#cloakingcores .. " cloaking cores detected")
+	end
+end
+
+-- reactor handling
+reactor_mode = 0
+reactor_rate = 100
+reactor_targetStability = 50
+reactor_energyLevel = 10000
+reactor_output = 0
+function reactor_key(keycode)
+	if keycode == 31 then -- S
+		reactor_start()
+		return true
+	elseif keycode == 25 then -- P
+		reactor_stop()
+		return true
+	elseif keycode == 38 then -- L
+		reactor_laser()
+		return true
+	elseif keycode == 24 then -- O
+		reactor_mode = (reactor_mode + 1) % 4
+		reactor_setMode()
+		return true
+	elseif keycode == 34 then -- G
+		reactor_rate = reactor_rate / 10
+		reactor_setMode()
+		return true
+	elseif keycode == 20 then -- T
+		reactor_rate = reactor_rate * 10
+		reactor_setMode()
+		return true
+	elseif keycode == 36 then -- J
+		reactor_energyLevel = reactor_energyLevel / 10
+		reactor_setLaser()
+		return true
+	elseif keycode == 22 then -- U
+		reactor_energyLevel = reactor_energyLevel * 10
+		reactor_setLaser()
+		return true
+	elseif keycode == 74 then -- -
+		reactor_targetStability = reactor_targetStability - 1
+		reactor_setTargetStability()
+		return true
+	elseif keycode == 78 then -- +
+		reactor_targetStability = reactor_targetStability + 1
+		reactor_setTargetStability()
+		return true
+	elseif keycode == 46 then -- C
+		reactor_config()
+		return true
+	end
+	return false
+end
+
+function reactor_page()
+	Clear()
+	ShowTitle(label .. " - Reactor status")
+
+	term.setCursorPos(1, 2)
+	if reactor == nil then
+		SetColorDisabled()
+		term.write("Reactor not detected")
+	else
+		SetColorDefault()
+		term.write("Reactor stability")
+		instabilities = {reactor.instability()}
+		average = 0
+		for key,instability in pairs(instabilities) do
+			term.setCursorPos(12, 2 + key)
+			stability = math.floor((100.0 - instability) * 10) / 10
+			if stability >= reactor_targetStability then
+				SetColorSuccess()
+			else
+				SetColorWarning()
+			end
+			term.write(FormatFloat(stability, 5) .. " %")
+			average = average + instability
+		end
+		average = average / #instabilities
+
+		SetColorDefault()
+		energy = {reactor.energy()}
+		term.setCursorPos(1, 7)
+		term.write("Energy   : ")
+		if energy[1] ~= nil then
+			term.write(FormatInteger(energy[1], 10) .. " / " .. energy[2] .. " RF +" .. FormatInteger(reactor_output, 5) .. " RF/t")
+		else
+			term.write("???")
+		end
+		term.setCursorPos(1, 8)
+		term.write("Outputing: ")
+		if energy[1] ~= nil then
+			term.write(energy[3] .. " RF/t")
+		end
+
+		SetColorDefault()
+		term.setCursorPos(1, 9)
+		term.write("Activated: ")
+		isActive = reactor.getActive()
+		if isActive then SetColorSuccess() else SetColorDefault() end
+		term.write(boolToYesNo(isActive))
+	end
+
+	if #reactorlasers == 0 then
+		SetColorDisabled()
+		term.setCursorPos(30, 2)
+		term.write("Lasers not detected")
+	else
+		SetColorDefault()
+		term.setCursorPos(30, 2)
+		term.write("Lasers")
+
+		for key,reactorlaser in pairs(reactorlasers) do
+			side = reactorlaser.side()
+			if side ~= nil then
+				SetColorDefault()
+				term.setCursorPos(4, 3 + side)
+				term.write("Side " .. side .. ":")
+				term.setCursorPos(30, 3 + side)
+				energy = reactorlaser.energy()
+				if not reactorlaser.hasReactor() then
+					SetColorDisabled()
+				elseif energy > 3 * reactor_energyLevel then
+					SetColorSuccess()
+				else
+					SetColorWarning()
+				end
+				term.write(FormatInteger(reactorlaser.energy(), 6))
+			end
+		end
+	end
+
+	SetColorDefault()
+	term.setCursorPos(1, 10)
+	term.write("  -----------------------------------------------")
+	term.setCursorPos(1, 11)
+	term.write("Output mode     : ")
+	if reactor_mode == 0 then
+		SetColorDisabled()
+		term.write("hold")
+	elseif reactor_mode == 1 then
+		term.write("manual/unlimited")
+	elseif reactor_mode == 2 then
+		term.write("surplus above " .. reactor_rate .. " RF")
+	else
+		term.write("rated at " .. reactor_rate .. " RF")
+	end
+	SetColorDefault()
+	term.setCursorPos(1, 12)
+	term.write("Target stability: " .. reactor_targetStability .. "%")
+	term.setCursorPos(1, 13)
+	term.write("Laser amount    : " .. reactor_energyLevel)
+	
+	SetColorTitle()
+	term.setCursorPos(1, 14)
+	ShowMenu("S - Start reactor, P - Stop reactor, L - Use lasers")
+	term.setCursorPos(1, 15)
+	ShowMenu("O - Output mode, C - Configuration")
+	term.setCursorPos(1, 16)
+	ShowMenu("+/- - Target stability, U/J - Laser amount")
+	term.setCursorPos(1, 17)
+	ShowMenu("G/T - Output rate/threshold")
+end
+
+function reactor_setMode()
+	if reactor_rate < 1 then
+		reactor_rate = 1
+	elseif reactor_rate > 100000 then
+		reactor_rate = 100000
+	end
+	if reactor ~= nil then
+		if reactor_mode == 0 then
+			reactor.release(false)
+		elseif reactor_mode == 1 then
+			reactor.release(true)
+		elseif reactor_mode == 2 then
+			reactor.releaseAbove(reactor_rate)
+		else
+			reactor.releaseRate(reactor_rate)
+		end
+	end
+end
+
+function reactor_setLaser()
+	if reactor_energyLevel < 1 then
+		reactor_energyLevel = 1
+	elseif reactor_energyLevel > 100000 then
+		reactor_energyLevel = 100000
+	end
+end
+
+function reactor_setTargetStability()
+	if reactor_targetStability < 1 then
+		reactor_targetStability = 1
+	elseif reactor_targetStability > 100 then
+		reactor_targetStability = 100
+	end
+end
+
+function reactor_start()
+	if reactor ~= nil then
+		reactor_setMode()
+		reactor.setActive(true)
+	end
+end
+
+function reactor_stop()
+	if reactor ~= nil then
+		reactor.setActive(false)
+	end
+end
+
+function reactor_laser(side)
+	for key,reactorlaser in pairs(reactorlasers) do
+		if (side == nil) or (reactorlaser.side() == side) then
+			energy = reactorlaser.sendLaser(reactor_energyLevel)
+		end
+	end
+end
+
+function reactor_pulse(output)
+	reactor_output = output
+	instabilities = {reactor.instability()}
+	for key,instability in pairs(instabilities) do
+		stability = math.floor((100.0 - instability) * 10) / 10
+		if stability < reactor_targetStability then
+			reactor_laser(key - 1)
+		end
+	end
+end
+
+function reactor_config()
+	Clear()
+	ShowTitle(label .. " - Reactor configuration")
+	
+	term.setCursorPos(1, 2)
+	if reactor == nil then
+		SetColorDisabled()
+		term.write("Reactor not detected")
+	else
+		SetColorDefault()
+		term.setCursorPos(1, 4)
+		term.write("Reactor output rate (" .. reactor_rate .. " RF): ")
+		reactor_rate = readInput(reactor_rate)
+		reactor_setMode()
+		term.setCursorPos(1, 5)
+		term.write("Reactor output rate set")
+		
+		term.setCursorPos(1, 7)
+		term.write("Laser energy level (" .. reactor_energyLevel .. "): ")
+		reactor_energyLevel = readInput(reactor_energyLevel)
+		reactor_setLaser()
+		term.setCursorPos(1, 8)
+		term.write("Laser energy level set")
+		
+		term.setCursorPos(1, 10)
+		term.write("Reactor target stability (" .. reactor_targetStability .. "%): ")
+		reactor_targetStability = readInput(reactor_targetStability)
+		reactor_setTargetStability()
+		term.setCursorPos(1, 11)
+		term.write("Reactor target stability set")
+	end
+end
+
+function reactor_init()
+	if reactor ~= nil then
+		isActive, strMode, releaseRate = reactor.getActive()
+		if strMode == "OFF" then
+			reactor_mode = 0
+		elseif strMode == "MANUAL" then
+			reactor_mode = 1
+		elseif strMode == "ABOVE" then
+			reactor_mode = 2
+		elseif strMode == "RATE" then
+			reactor_mode = 3
+		else
+			reactor_mode = 0
+		end
+	end
+end
+
+function readInput(currentValue)
+	inputAbort = false
+	input = string.format(currentValue)
+	x, y = term.getCursorPos()
+	repeat
+		SetColorDefault()
+		term.setCursorPos(x, y)
+		term.write(input .. "            ")
+		input = string.sub(input, -9)
+		
+		params = {os.pullEventRaw()}
+		eventName = params[1]
+		side = params[2]
+		if side == nil then side = "none" end
+		if eventName == "key" then
+			keycode = params[2]
+			if keycode >= 2 and keycode <= 10 then -- 1 to 9
+				input = input .. string.format(keycode - 1)
+			elseif keycode == 11 or keycode == 82 then -- 0 & keypad 0
+				input = input .. "0"
+			elseif keycode >= 79 and keycode <= 81 then -- keypad 1 to 3
+				input = input .. string.format(keycode - 78)
+			elseif keycode >= 75 and keycode <= 87 then -- keypad 4 to 6
+				input = input .. string.format(keycode - 71)
+			elseif keycode >= 71 and keycode <= 73 then -- keypad 7 to 9
+				input = input .. string.format(keycode - 64)
+			elseif keycode == 14 then -- Backspace
+				input = string.sub(input, 1, string.len(input) - 1)
+			elseif keycode == 211 then -- Delete
+				input = ""
+			elseif keycode == 28 then -- Enter
+				inputAbort = true
+			else
+				ShowWarning("Key " .. keycode .. " is invalid")
+			end
+		elseif eventName == "char" then
+			-- drop it
+		elseif eventName == "reactorPulse" then
+			reactor_pulse(params[2])
+	--	elseif eventName == "reactorDeactivation" then
+	--		ShowWarning("Reactor deactivated")
+	--		os.sleep(0.2)
+	--	elseif eventName == "reactorActivation" then
+	--		ShowWarning("Reactor activated")
+	--		os.sleep(0.2)
+		elseif eventName == "terminate" then
+			inputAbort = true
+		else
+			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		end
+	until inputAbort
+	if input == "" then
+		return currentValue
+	else
+		return tonumber(input)
+	end
+end
+
+function menu_common()
+	term.setCursorPos(1, 18)
+	SetColorTitle()
+	ShowMenu("1 Reactor, 2 Cloak, 3 Mining, 4 Core, 5 Laser, eXit")
+end
+
+reactor_init()
+abort = false
+refresh = true
+page = connections_page
+keyHandler = nil
+repeat
+	if clearWarningTick >= 0 then
+		clearWarningTick = clearWarningTick - 1
+		if clearWarningTick == 0 then
+			refresh = true
+		end
+	end
+	-- if (refresh and clearWarningTick <= 0) then
+	if refresh then
+		page()
+		menu_common()
+		refresh = false
+	end
+	params = {os.pullEventRaw()}
+	eventName = params[1]
+	side = params[2]
+	if side == nil then side = "none" end
+	if eventName == "key" then
+		keycode = params[2]
+		if keycode == 45 then -- x for eXit
+			os.pullEventRaw()
+			abort = true
+		elseif keycode == 2 then -- 1
+			page = reactor_page
+			keyHandler = reactor_key
+			refresh = true
+		elseif keycode == 3 then -- 2
+			page = cloaking_page
+			keyHandler = cloaking_key
+			refresh = true
+		elseif keycode == 4 then -- 3
+			page = mining_page
+			keyHandler = mining_key
+			refresh = true
+		elseif keycode == 5 then -- 4
+			page = core_page
+			keyHandler = core_key
+			refresh = true
+		elseif keycode == 6 then -- 6
+			page = laser_page
+			keyHandler = laser_key
+			refresh = true
+		elseif keyHandler ~= nil and keyHandler(keycode) then
+			refresh = true
+			os.sleep(0)
+		else
+			ShowWarning("Key " .. keycode .. " is invalid")
+			os.sleep(0.2)
+		end
+		-- func(unpack(params))
+		-- abort, refresh = false, false
+	elseif eventName == "char" then
+		-- drop it
+	elseif eventName == "reactorPulse" then
+		reactor_pulse(params[2])
+		refresh = (page == reactor_page)
+--	elseif eventName == "reactorDeactivation" then
+--		ShowWarning("Reactor deactivated")
+--		os.sleep(0.2)
+--	elseif eventName == "reactorActivation" then
+--		ShowWarning("Reactor activated")
+--		os.sleep(0.2)
+	elseif eventName == "terminate" then
+		abort = true
+	else
+		ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		refresh = true
+		os.sleep(0.2)
+	end
+until abort
+
+term.setBackgroundColor(colors.black)
+term.setTextColor(colors.white)
+print()

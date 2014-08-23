@@ -309,6 +309,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		connectedComputers.put(id, computer);
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 	        computer.mount("/power", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power"));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
 			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
 		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power/startup"));
 			}
