@@ -298,7 +298,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 	{
 		s = absoluteVector(s);
 		d = absoluteVector(d);
-		return beaconScan(toInt(s.x),toInt(s.y),toInt(s.z)) + beaconScan(toInt(d.x),toInt(d.y),toInt(d.z));
+		return beaconScan(toInt(s.x), toInt(s.y), toInt(s.z)) + beaconScan(toInt(d.x), toInt(d.y), toInt(d.z));
 	}
 
 	private Vector3 absoluteVector(Vector3 a)
@@ -350,7 +350,7 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
  	
 	private double lock(Vector3 source,Vector3 dest) {
  		if (source != null && dest != null) {
-  			double basePower = min(calculatePower(source),calculatePower(dest),calculatePower(source,dest));
+  			double basePower = min(calculatePower(source), calculatePower(dest), calculatePower(source,dest));
   			beaconEffect = beaconScan(source, dest);
   			WarpDrive.debugPrint("BEACON:" + beaconEffect);
   			baseLockStrength = basePower;
