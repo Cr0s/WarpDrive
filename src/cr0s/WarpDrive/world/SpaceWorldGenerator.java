@@ -46,8 +46,9 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		}
 		int x = (chunkX * 16) + (5 - random.nextInt(10));
 		int z = (chunkZ * 16) + (5 - random.nextInt(10));
-		if (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)
+		if (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS) {
 			return;
+		}
 		int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
 		// Moon setup
 		if (random.nextInt(700) == 1)
@@ -105,6 +106,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 			}
 		}
 		
+		/*
 		// Place bedrock blocks
 		world.setBlock(x + coreRadius     , y2                  , z                  , Block.bedrock.blockID, 0, 0);
 		world.setBlock(x - coreRadius     , y2                  , z                  , Block.bedrock.blockID, 0, 0);
@@ -124,6 +126,8 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		world.setBlock(x                  , y2                  , z - moonRadius + 10, Block.bedrock.blockID, 0, 0);
 		world.setBlock(x                  , y2 + moonRadius - 10, z                  , Block.bedrock.blockID, 0, 0);
 		world.setBlock(x                  , y2 - moonRadius + 10, z                  , Block.bedrock.blockID, 0, 0);
+		/**/
+		
 		// Generate moon's blocks
 		generateSphereEntity(world, x, y2, z, moonRadius, false, block[0], block[1], true);
 		// Generate moon's atmosphere

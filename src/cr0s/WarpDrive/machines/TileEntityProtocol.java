@@ -53,7 +53,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         "set_beacon_frequency", "get_dx", "get_dz",					// 16, 17, 18
         "set_core_frequency", "is_in_space", "is_in_hyperspace",	// 19, 20, 21
         "set_target_jumpgate",										// 22
-        "isAttached"												// 23
+        "isAttached","get_energy_required"							// 23, 24
     };
 
     private int ticks = 0;
@@ -354,6 +354,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     public void attach(IComputerAccess computer)  {
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
 			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
 		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
 			}
@@ -639,6 +640,19 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
                 	return new Object[] { (boolean)(core.controller != null) };
                 }
                 break;
+			case 24: //get_energy_required(distance)
+                if (arguments.length != 1) {
+                    return new Integer[] { -1 };
+                }
+                try {
+                	argInt0 = ((Double)arguments[0]).intValue();
+                } catch(Exception e) {
+                	return new Integer[] { -1 };
+                }
+                if (core != null) {
+                	return new Object[] { (int)(core.calculateRequiredEnergy(getMode(), core.shipVolume, argInt0)) };
+                }
+				break;
         }
 
         return new Integer[] { 0 };
