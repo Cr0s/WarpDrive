@@ -352,8 +352,12 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     @Override
     public void attach(IComputerAccess computer)  {
-        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
-        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
+		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
+	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
+			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
+		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
+			}
+		}
     }
 
     @Override
@@ -584,7 +588,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 	                    }
 	                    return new Object[] { core.shipVolume };
                 	} catch(Exception e) {
-                		if (WarpDriveConfig.debugMode) {
+                		if (WarpDriveConfig.G_DEBUGMODE) {
                 			e.printStackTrace();
                 		}
                 		return null; 

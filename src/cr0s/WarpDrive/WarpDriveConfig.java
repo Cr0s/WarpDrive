@@ -81,11 +81,6 @@ public class WarpDriveConfig
 	public static boolean isThermalExpansionLoaded			= false;
 	public static boolean isMetallurgyLoaded				= false;
 	public static boolean isAdvancedRepulsionSystemsLoaded	= false;
-	
-	/*
-	 * The variables that control which recipes should be loaded
-	 */
-	public static boolean recipesIC2			= true;
 
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
@@ -119,43 +114,67 @@ public class WarpDriveConfig
 	public static Item AEExtra_fluidDrive;
 	public static Block AEExtra_certusQuartzTank;
 	
-	public static boolean debugMode = false;
 
-	// Mod config
+	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
-	public static int G_SPACE_PROVIDER_ID = 14;
-	public static int G_SPACE_DIMENSION_ID = 2;
-	public static int G_HYPERSPACE_PROVIDER_ID = 15;
-	public static int G_HYPERSPACE_DIMENSION_ID = 3;
-	public static int G_SPACE_WORLDBORDER_BLOCKS = 100000;	// 0 to disable
+	public static int		G_SPACE_PROVIDER_ID = 14;
+	public static int		G_SPACE_DIMENSION_ID = -2;
+	public static int		G_HYPERSPACE_PROVIDER_ID = 15;
+	public static int		G_HYPERSPACE_DIMENSION_ID = -3;
+	public static int		G_SPACE_WORLDBORDER_BLOCKS = 100000;
+	public static final int	LUA_SCRIPTS_NONE = 0;
+	public static final int	LUA_SCRIPTS_TEMPLATES = 1;
+	public static final int	LUA_SCRIPTS_ALL = 2;
+	public static int		G_LUA_SCRIPTS = LUA_SCRIPTS_ALL;
+	public static boolean	G_DEBUGMODE = false;
+	public static String	G_SCHEMALOCATION = "/home/cros/mc_site/schematics/";
 	
+	public static boolean	G_ENABLE_IC2_RECIPES		= true;
+	public static boolean	G_ENABLE_VANILLA_RECIPES	= false;
+	public static boolean	G_ENABLE_TDK_RECIPES		= false;
+
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
 
 	// Warp Core
-    public static int WC_MAX_ENERGY_VALUE = 100000000;
-    public static int WC_ENERGY_PER_BLOCK_MODE1 = 10; // eU
-    public static int WC_ENERGY_PER_DISTANCE_MODE1 = 100; // eU
-    public static int WC_ENERGY_PER_BLOCK_MODE2 = 1000; // eU
-    public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000; // eU
-    public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000; // eU
-    public static int WC_MAX_JUMP_DISTANCE = 128;   // Maximum jump length value
-    public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 3000;   // Maximum ship mass to jump on earth
-    public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 1200; // Minimum ship volume value for hyperspace travel
-    public static int WC_MAX_SHIP_SIDE = 127;
-    public static int WC_COOLDOWN_INTERVAL_SECONDS = 4;	// FIXME update me
-    public static int WC_COLLISION_TOLERANCE_BLOCKS = 3;
-    public static int WC_WARMUP_SHORTJUMP_SECONDS = 10;
-    public static int WC_WARMUP_LONGJUMP_SECONDS = 30;
-    public static int WC_WARMUP_RANDOM_TICKS = 60;
-    public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
-    public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;		
+    public static int		WC_MAX_ENERGY_VALUE = 100000000;
+    public static int		WC_ENERGY_PER_BLOCK_MODE1 = 10;
+    public static int		WC_ENERGY_PER_DISTANCE_MODE1 = 100;
+    public static int		WC_ENERGY_PER_BLOCK_MODE2 = 1000;
+    public static int		WC_ENERGY_PER_DISTANCE_MODE2 = 1000;
+    public static int		WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000;
+    public static int		WC_MAX_JUMP_DISTANCE = 128;
+    public static int		WC_MAX_SHIP_VOLUME_ON_SURFACE = 3000;
+    public static int		WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 1200;
+    public static int		WC_MAX_SHIP_SIDE = 127;
+    public static int		WC_COOLDOWN_INTERVAL_SECONDS = 30;
+    public static int		WC_COLLISION_TOLERANCE_BLOCKS = 3;
+    public static int		WC_WARMUP_SHORTJUMP_SECONDS = 10;
+    public static int		WC_WARMUP_LONGJUMP_SECONDS = 30;
+    public static int		WC_WARMUP_RANDOM_TICKS = 60;
+    public static int		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+    public static int		WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;		
 
     // Warp Radar
-    public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
+    public static int		WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
     
     // Particle Booster
-    public static int PB_MAX_ENERGY_VALUE = 100000;
+    public static int		PB_MAX_ENERGY_VALUE = 100000;
+	
+	// Laser Emitter
+	public static int		LE_MAX_BOOSTERS_NUMBER = 10;
+	public static int		LE_MAX_LASER_ENERGY = 4000000;
+	public static int		LE_EMIT_DELAY_TICKS = 20 * 3;
+	public static int		LE_EMIT_SCAN_DELAY_TICKS = 10;
+	
+	public static double	LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
+	public static int		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
+	public static int		LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
+	public static int		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
+	public static int		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
+	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
     
     // Mining Laser
 	public static int		ML_MAX_BOOSTERS_NUMBER = 1;
@@ -168,58 +187,41 @@ public class WarpDriveConfig
 	public static int 		ML_EU_PER_BLOCK_EARTH = 2500;
 	public static double	ML_EU_MUL_ORESONLY = 4.0;
 	public static double	ML_EU_MUL_SILKTOUCH = 2.5;
-	public static double	ML_EU_MUL_FORTUNE   = 2.5;
-//	public static double	ML_MAX_SPEED   = 10;
-//	public static double	ML_MIN_SPEED   = 0.1;
-	public static int		ML_MAX_RADIUS  = 6;
+	public static double	ML_DEUTERIUM_MUL_SILKTOUCH = 1.0;
+	public static double	ML_EU_MUL_FORTUNE = 2.5;
+	public static int		ML_MAX_RADIUS = 6;
 	
-	//Tree farm
-	public static int		TF_MAX_SIZE=32;
+	// Tree farm
+	public static int		TF_MAX_SIZE = 16;
 	
-	//Air generator
-	public static int		AG_RF_PER_CANISTER = 80;
-	
-	//Transporter
-	public static int		TR_MAX_ENERGY = 10000000;
-	public static boolean	TR_RELATIVE_COORDS = false;
-	public static double	TR_EU_PER_METRE = 100;
-	public static double	TR_MAX_SCAN_RANGE = 4;
-	public static double	TR_MAX_BOOST_MUL = 4;
-	
-	// Laser Emitter
-	public static int		LE_MAX_BOOSTERS_NUMBER = 10;
-	public static int		LE_MAX_LASER_ENERGY = 4000000;
-	public static int		LE_EMIT_DELAY_TICKS = 20 * 3;
-	public static int		LE_EMIT_SCAN_DELAY_TICKS = 10;
-	public static double	LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
-	public static int		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
-	public static int		LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
-	public static int		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
-	public static int		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
-	public static int		LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
-	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
-	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
+	// Cloaking device core
+	public static int		CD_MAX_CLOAKING_FIELD_SIDE = 100;
+	public static int		CD_ENERGY_PER_BLOCK_TIER1 = 125;
+	public static int		CD_ENERGY_PER_BLOCK_TIER2 = 500; 
+	public static int		CD_FIELD_REFRESH_INTERVAL_SECONDS = 3;
+	public static int		CD_COIL_CAPTURE_BLOCKS = 5;
 
-	// POWER REACTOR
+	// Air generator
+	public static int		AG_RF_PER_CANISTER = 20;
+	
+	// Reactor monitor
+	public static int		RM_MAX_ENERGY = 1000000;
+	public static double	RM_EU_PER_HEAT = 2;
+	
+	// Transporter
+	public static int		TR_MAX_ENERGY = 1000000;
+	public static boolean	TR_RELATIVE_COORDS = true;
+	public static double	TR_EU_PER_METRE = 100;
+	// public static double	TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
+	public static double	TR_MAX_BOOST_MUL = 4;
+
+	// Power reactor
 	public static int		PR_MAX_ENERGY = 100000000;
 	public static int		PR_TICK_TIME  = 5;
 	public static int		PR_MAX_LASERS = 6;
 	
-	// POWER STORE
+	// Power store
 	public static int		PS_MAX_ENERGY = 1000000;
-	
-	// REACTOR MONITOR
-	public static int		RM_MAX_ENERGY = 1000000;
-	public static double	RM_EU_PER_HEAT = 2;
-	
-	public static String schemaLocation = "/home/cros/mc_site/schematics/";
-	
-	// Cloaking device core
-	public static int		CD_MAX_CLOAKING_FIELD_SIDE = 100;
-	public static int		CD_ENERGY_PER_BLOCK_TIER1 = 1000;
-	public static int		CD_ENERGY_PER_BLOCK_TIER2 = 5000; 
-	public static int		CD_FIELD_REFRESH_INTERVAL_SECONDS = 10;
-	public static int		CD_COIL_CAPTURE_BLOCKS = 5;
 	
 	// Laser Lift
 	public static int		LL_MAX_ENERGY = 2400;
@@ -274,13 +276,20 @@ public class WarpDriveConfig
 
 	public static void loadWarpDriveConfig() {
 		// General
-		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", 14).getInt();
-		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", -2).getInt();
-		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", 15).getInt();
-		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", -3).getInt();
-		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", 100000, "World border applies to hyperspace & space, set to 0 to disable it").getInt();
+		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID).getInt();
+		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", G_SPACE_DIMENSION_ID).getInt();
+		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", G_HYPERSPACE_PROVIDER_ID).getInt();
+		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID).getInt();
+		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS, "World border applied to hyperspace & space, set to 0 to disable it").getInt();
+		G_LUA_SCRIPTS = config.get("General", "lua_scripts", G_LUA_SCRIPTS, "LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt();
+		G_DEBUGMODE = config.get("General", "debug_mode", G_DEBUGMODE).getBoolean(false);
+		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION).getString();
 		
-		// General
+		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
+		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
+		G_ENABLE_TDK_RECIPES = config.get("General", "enable_TDK_recipes", G_ENABLE_TDK_RECIPES, "Mixed recipes for TDK packs by Lem'ADEC (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion").getBoolean(false);
+
+		// TransitionPlane
 		config.addCustomCategoryComment("TransitionPlane", "Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
 					+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
 		String[] transitionNames = { "overworld" };
@@ -302,100 +311,96 @@ public class WarpDriveConfig
 		// FIXME: check transition planes have valid dimension id
 		
 		// Warp Core
-		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", 100000000).getInt();
-		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", 10).getInt();
-		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", 100).getInt();
-	    WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", 1000).getInt();
-	    WC_ENERGY_PER_BLOCK_MODE2 = config.get("WarpCore", "energy_per_block_mode2", 1000).getInt();
-	    WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_per_entity_to_space", 1000000).getInt();
-	    WC_MAX_JUMP_DISTANCE = config.get("WarpCore", "max_jump_distance", 128).getInt();
-	    WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", 15000).getInt();   // Maximum ship mass to jump on earth (15k blocks)
-	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", 500).getInt(); // Minimum ship volume value for hyper space
-	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", 100).getInt(); 
-	    WC_COLLISION_TOLERANCE_BLOCKS = config.get("WarpCore", "collision_tolerance_blocks", 5).getInt();
+		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE).getInt();
+		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", WC_ENERGY_PER_BLOCK_MODE1).getInt();
+		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", WC_ENERGY_PER_DISTANCE_MODE1).getInt();
+	    WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", WC_ENERGY_PER_DISTANCE_MODE2).getInt();
+	    WC_ENERGY_PER_BLOCK_MODE2 = config.get("WarpCore", "energy_per_block_mode2", WC_ENERGY_PER_BLOCK_MODE2).getInt();
+	    WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_per_entity_to_space", WC_ENERGY_PER_ENTITY_TO_SPACE).getInt();
+	    WC_MAX_JUMP_DISTANCE = config.get("WarpCore", "max_jump_distance", WC_MAX_JUMP_DISTANCE, "Maximum jump lenght value in blocks").getInt();
+	    WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", WC_MAX_SHIP_VOLUME_ON_SURFACE, "Maximum ship mass (in blocks) to jump on earth").getInt();
+	    WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE, "Minimum ship mass (in blocks) to enter or exit hyperspace without a jumpgate").getInt();
+	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", WC_MAX_SHIP_SIDE, "Maximum ship size on each axis in blocks").getInt(); 
+	    WC_COLLISION_TOLERANCE_BLOCKS = config.get("WarpCore", "collision_tolerance_blocks", WC_COLLISION_TOLERANCE_BLOCKS, "Tolerance in block in case of collision before causing damages...").getInt();
+	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", WC_COOLDOWN_INTERVAL_SECONDS, "Cooldown seconds to wait after jumping").getInt();
+	    WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", WC_WARMUP_SHORTJUMP_SECONDS).getInt();
+	    WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump threeshold is 50 blocks").getInt();
 	    
-	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", 4).getInt();
-	    WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", 10).getInt();
-	    WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", 30).getInt();
-	    
-	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", 10).getInt(); 
-	    WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", 10).getInt();		
+	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt(); 
+	    WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt();		
 	    
 	    // Warp Radar
-	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", 100000000).getInt();
+	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", WR_MAX_ENERGY_VALUE).getInt();
 	    
 	    // Particle Booster
-	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", 100000).getInt();
+	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", PB_MAX_ENERGY_VALUE).getInt();
 		
 		// Laser Emitter
-		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", 10).getInt();
-		LE_MAX_LASER_ENERGY = config.get("LaserEmitter", "max_laser_energy", 4000000).getInt();
-		LE_EMIT_DELAY_TICKS = config.get("LaserEmitter", "emit_delay_ticks", 60).getInt();
-		LE_EMIT_SCAN_DELAY_TICKS = config.get("LaserEmitter", "emit_scan_delay_ticks", 10).getInt();
+		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", LE_MAX_BOOSTERS_NUMBER).getInt();
+		LE_MAX_LASER_ENERGY = config.get("LaserEmitter", "max_laser_energy", LE_MAX_LASER_ENERGY).getInt();
+		LE_EMIT_DELAY_TICKS = config.get("LaserEmitter", "emit_delay_ticks", LE_EMIT_DELAY_TICKS).getInt();
+		LE_EMIT_SCAN_DELAY_TICKS = config.get("LaserEmitter", "emit_scan_delay_ticks", LE_EMIT_SCAN_DELAY_TICKS).getInt();
 		
 		// Laser Emitter tweaks
-		LE_COLLECT_ENERGY_MULTIPLIER = config.get("LaserEmitterTweaks", "collect_energy_multiplier", 0.6D).getDouble(0.6D);
-		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "beam_length_per_energy_divider", 5000).getInt();
-		LE_ENTITY_HIT_SET_ON_FIRE_TIME = config.get("LaserEmitterTweaks", "entity_hit_set_on_fire_time", 100).getInt();
-		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "entity_hit_damage_per_energy_divider", 10000).getInt();
-		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = config.get("LaserEmitterTweaks", "entity_hit_explosion_laser_energy", 1000000).getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY = config.get("LaserEmitterTweaks", "block_hit_consume_energy", 70000).getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_block_resistance", 1000).getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_distance", 10).getInt();
-		
-		// Cloaking device core
-		CD_MAX_CLOAKING_FIELD_SIDE = config.get("CloakingDevice", "max_cloaking_field_side", 100).getInt();
-		CD_ENERGY_PER_BLOCK_TIER1 = config.get("CloakingDevice", "energy_per_block_tier1", 125).getInt();
-		CD_ENERGY_PER_BLOCK_TIER2 = config.get("CloakingDevice", "energy_per_block_tier2", 500).getInt();	
-		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", 3).getInt();	
-		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", 5).getInt();
-		
-		// Dark's modifications
-		debugMode = config.get("Dark's stuff", "debug_mode", false).getBoolean(false);
-		schemaLocation = config.get("Dark's stuff", "schematic_location", schemaLocation).getString();
+		LE_COLLECT_ENERGY_MULTIPLIER = config.get("LaserEmitterTweaks", "collect_energy_multiplier", LE_COLLECT_ENERGY_MULTIPLIER).getDouble(0.6D);
+		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "beam_length_per_energy_divider", LE_BEAM_LENGTH_PER_ENERGY_DIVIDER).getInt();
+		LE_ENTITY_HIT_SET_ON_FIRE_TIME = config.get("LaserEmitterTweaks", "entity_hit_set_on_fire_time", LE_ENTITY_HIT_SET_ON_FIRE_TIME).getInt();
+		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "entity_hit_damage_per_energy_divider", LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER).getInt();
+		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = config.get("LaserEmitterTweaks", "entity_hit_explosion_laser_energy", LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY = config.get("LaserEmitterTweaks", "block_hit_consume_energy", LE_BLOCK_HIT_CONSUME_ENERGY).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_block_resistance", LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE).getInt();
+		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_distance", LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE).getInt();
 		
 	    // Mining Laser
-		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", 1).getInt();
-		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", 20).getInt();
-		ML_SCAN_DELAY_TICKS = config.get("MiningLaser", "scan_delay_ticks", 10).getInt();
-		ML_MINE_DELAY_TICKS = config.get("MiningLaser", "mine_delay_ticks", 3).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", 2000).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", 10000).getInt();	 
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", 500).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", 2500).getInt();	  
-		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", 5).getInt();
-		ML_EU_MUL_ORESONLY = config.get("MiningLaser", "oresonly_power_mul", 4.0).getDouble(4.0);
-		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", 2.5).getDouble(2.5);
-		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", 2.5).getDouble(2.5);
-//		ML_MAX_SPEED   = config.get("MiningLaser", "max_speed_mul", 10).getDouble(10);
-//		ML_MIN_SPEED   = config.get("MiningLaser", "min_speed_mul", 0.1).getDouble(0.1);
+		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", ML_MAX_BOOSTERS_NUMBER).getInt();
+		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", ML_WARMUP_DELAY_TICKS).getInt();
+		ML_SCAN_DELAY_TICKS = config.get("MiningLaser", "scan_delay_ticks", ML_SCAN_DELAY_TICKS).getInt();
+		ML_MINE_DELAY_TICKS = config.get("MiningLaser", "mine_delay_ticks", ML_MINE_DELAY_TICKS).getInt();
+		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", ML_EU_PER_LAYER_SPACE).getInt();
+		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", ML_EU_PER_LAYER_EARTH).getInt();	 
+		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", ML_EU_PER_BLOCK_SPACE).getInt();
+		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", ML_EU_PER_BLOCK_EARTH).getInt();	  
+		ML_EU_MUL_ORESONLY = config.get("MiningLaser", "oresonly_power_mul", ML_EU_MUL_ORESONLY).getDouble(4.0);
+		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", ML_EU_MUL_SILKTOUCH).getDouble(2.5);
+		ML_DEUTERIUM_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_deuterium_mul", ML_DEUTERIUM_MUL_SILKTOUCH).getDouble(1.0);
+		ML_EU_MUL_FORTUNE   = config.get("MiningLaser", "fortune_power_base", ML_EU_MUL_FORTUNE).getDouble(2.5);
+		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", ML_MAX_RADIUS).getInt();
 		
 		// Tree Farm
-		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", 16).getInt();
+		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", TF_MAX_SIZE).getInt();
 		
-		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", 1000000).getInt();	
-		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", true).getBoolean(true);
-		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", 100).getDouble(100);
-		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", 4).getInt();
-
-		// Reactor
-		PR_MAX_ENERGY = config.get("Reactor", "max_energy", 100000000).getInt();
-		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update", 5).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", 6).getInt();
-		
-		// Store
-		PS_MAX_ENERGY = config.get("Power Store", "max_energy", 10000000).getInt();
+		// Cloaking device core
+		CD_MAX_CLOAKING_FIELD_SIDE = config.get("CloakingDevice", "max_cloaking_field_side", CD_MAX_CLOAKING_FIELD_SIDE).getInt();
+		CD_ENERGY_PER_BLOCK_TIER1 = config.get("CloakingDevice", "energy_per_block_tier1", CD_ENERGY_PER_BLOCK_TIER1).getInt();
+		CD_ENERGY_PER_BLOCK_TIER2 = config.get("CloakingDevice", "energy_per_block_tier2", CD_ENERGY_PER_BLOCK_TIER2).getInt();	
+		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", CD_FIELD_REFRESH_INTERVAL_SECONDS).getInt();	
+		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", CD_COIL_CAPTURE_BLOCKS, "Extra blocks covered after the outer coils").getInt();
 		
 		// Air generator
-		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", 20).getInt();
+		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
 		
 		// Reactor monitor
-		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", 1000000).getInt();
-		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", 2).getDouble(2);
+		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
+		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", RM_EU_PER_HEAT).getDouble(2);
 		
-		// Recipes config
-		recipesIC2 = config.get("Recipes", "ic2_recipes",true).getBoolean(true);
+		// Transporter
+		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();	
+		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
+		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100);
+		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getInt();
+
+		// Power reactor
+		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
+		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update", PR_TICK_TIME).getInt();
+		PR_MAX_LASERS = config.get("Reactor", "max_lasers", PR_MAX_LASERS).getInt();
+		
+		// Power store
+		PS_MAX_ENERGY = config.get("PowerStore", "max_energy", PS_MAX_ENERGY).getInt();
+		
+		// Laser lift
+		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
+		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
+		LL_TICK_RATE = config.get("LaserLift", "tick_rate", LL_TICK_RATE).getInt();
 	}
 	
 	public static void load() {

@@ -161,7 +161,7 @@ public class WarpDrive implements LoadingCallback {
 	}
 	
 	public static void debugPrint(String out) {
-		if (WarpDriveConfig.debugMode) {
+		if (WarpDriveConfig.G_DEBUGMODE) {
 			print(out);
 		}
 	}
@@ -364,13 +364,13 @@ public class WarpDrive implements LoadingCallback {
 		
 		WarpDriveConfig.postInit();
 		
-		if (WarpDriveConfig.isICLoaded && WarpDriveConfig.recipesIC2) {
+		if (WarpDriveConfig.isICLoaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
 			initIC2Recipes();
 		}
-		if (WarpDriveConfig.isAppliedEnergisticsLoaded && WarpDriveConfig.isThermalExpansionLoaded) {
+		if (WarpDriveConfig.isAppliedEnergisticsLoaded && WarpDriveConfig.isThermalExpansionLoaded && WarpDriveConfig.isAtomicScienceLoaded && WarpDriveConfig.G_ENABLE_TDK_RECIPES) {
 			initAETERecipes();
 		}
-		if (!WarpDriveConfig.recipesIC2) {
+		if (WarpDriveConfig.G_ENABLE_VANILLA_RECIPES) {
 			initVanillaRecipes();
 		}
 		
