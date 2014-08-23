@@ -286,6 +286,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(transporterBlock, "transporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class,"transporter");
 		
+		// REACTOR MONITOR
 		reactorMonitorBlock = new BlockLaserReactorMonitor(WarpDriveConfig.reactorMonitorID, Material.rock);
 		
 		GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
@@ -296,13 +297,15 @@ public class WarpDrive implements LoadingCallback {
 		
 		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");
 	        
-		// POWER STUFF
+		// POWER REACTOR, LASER, STORE
 		powerReactorBlock = new BlockPowerReactor(WarpDriveConfig.powerReactorID);
 		GameRegistry.registerBlock(powerReactorBlock,"powerReactor");
 		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, "powerReactor");
+		
 		powerLaserBlock   = new BlockPowerLaser(WarpDriveConfig.powerLaserID);
 		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
 		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, "powerLaser");
+		
 		powerStoreBlock = new BlockPowerStore(WarpDriveConfig.powerStoreID);
 		GameRegistry.registerBlock(powerStoreBlock,"powerStore");
 		GameRegistry.registerTileEntity(TileEntityPowerStore.class, "powerStore");
@@ -513,6 +516,13 @@ public class WarpDrive implements LoadingCallback {
 				's', componentItem.getIS(7),
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
+		
+		//Transport Beacon
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transportBeaconBlock), false, " e ", "ldl", " s ",
+				'e', Item.enderPearl,
+				'l', "dyeBlue",
+				'd', Item.diamond,
+				's', Item.stick));
 		
 		//Chunk Loader
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(chunkLoaderBlock), false, "ipi", "ici", "ifi",
