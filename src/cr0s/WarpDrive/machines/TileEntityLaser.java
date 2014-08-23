@@ -7,7 +7,9 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -49,6 +51,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		"getBoosterDXDZ",	// 4
 		"camFreq"		// 5
 	};
+	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
 
 	public int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
@@ -91,6 +94,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			isEmitting = false;
 			emitBeam(Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY));
 			energyFromOtherBeams = 0;
+			sendEvent("laserSend", null);
 		}
 	}
 
@@ -145,7 +149,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		float directionz = yawz * pitchhorizontal;
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
 		Vector3.translate(beamVector, lookVector);
-		Vector3 reachPoint = beamVector.clone().translate(beamVector.clone(), beamVector.clone().scale(lookVector.clone(), beamLengthBlocks));
+		Vector3 reachPoint = Vector3.translate(beamVector.clone(), Vector3.scale(lookVector.clone(), beamLengthBlocks));
 		WarpDrive.debugPrint("" + this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
@@ -561,10 +565,25 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	@Override
 	public void attach(IComputerAccess computer) {
+		int id = computer.getID();
+		connectedComputers.put(id, computer);
 	}
 
 	@Override
 	public void detach(IComputerAccess computer) {
+		int id = computer.getID();
+		if (connectedComputers.containsKey(id)) {
+			connectedComputers.remove(id);
+		}
+	}
+	
+	private void sendEvent(String eventName, Object[] arguments) {
+		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
+		Set<Integer> keys = connectedComputers.keySet();
+		for(Integer key:keys) {
+			IComputerAccess comp = connectedComputers.get(key);
+			comp.queueEvent(eventName, arguments);
+		}
 	}
 
 	@Override
