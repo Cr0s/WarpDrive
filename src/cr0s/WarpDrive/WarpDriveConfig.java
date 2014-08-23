@@ -177,19 +177,32 @@ public class WarpDriveConfig
 	public static int		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
     
     // Mining Laser
+	// BuildCraft quarry values for reference
+	// - harvesting one block is 60 MJ/block = 600 RF/block = ~145 EU/block
+	// - maximum speed is 3.846 ticks per blocks
+	// - overall consumption varies from 81.801 to 184.608 MJ/block (depending on speed) = up to 1846.08 RF/block = up to ~448 EU/block
+	// - at radius 5, one layer takes ~465 ticks ((ML_MAX_RADIUS * 2 + 1) ^ 2 * 3.846)
+	// - overall consumption is ((ML_MAX_RADIUS * 2 + 1) ^ 2) * 448 => ~ 54208 EU/layer
+	// WarpDrive mining laser in comparison
+	// - each mined layer is scanned twice
+	// - default ore generation: 1 ore out of 25 blocks
+	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE / ((ML_MAX_RADIUS * 2 + 1) ^ 2) + ML_EU_PER_BLOCK_SPACE => ~ 356 EU/block
+	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE + ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE => ~ 43150 EU/layer
+	// - overall consumption in 'ores, space' is ML_EU_PER_LAYER_SPACE + ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE * ML_EU_MUL_ORESONLY / 25 => ~ 28630 EU/layer
+	// - at radius 5, one layer takes 403 ticks (2 * ML_SCAN_DELAY_TICKS + ML_MINE_DELAY_TICKS * (ML_MAX_RADIUS * 2 + 1) ^ 2)
 	public static int		ML_MAX_BOOSTERS_NUMBER = 1;
 	public static int		ML_WARMUP_DELAY_TICKS = 20;
-	public static int		ML_SCAN_DELAY_TICKS = 10;
+	public static int		ML_SCAN_DELAY_TICKS = 20;
 	public static int		ML_MINE_DELAY_TICKS = 3;
-	public static int		ML_EU_PER_LAYER_SPACE = 2000;
-	public static int		ML_EU_PER_LAYER_EARTH = 10000;
-	public static int		ML_EU_PER_BLOCK_SPACE = 500;
-	public static int 		ML_EU_PER_BLOCK_EARTH = 2500;
-	public static double	ML_EU_MUL_ORESONLY = 4.0;
+	public static int		ML_EU_PER_LAYER_SPACE = 25000;
+	public static int		ML_EU_PER_LAYER_EARTH = 35000;
+	public static int		ML_EU_PER_BLOCK_SPACE = 150; 
+	public static int 		ML_EU_PER_BLOCK_EARTH = 300;
+	public static double	ML_EU_MUL_ORESONLY = 5.0;	// lower value encourages to keep the land 'clean'
 	public static double	ML_EU_MUL_SILKTOUCH = 2.5;
 	public static double	ML_DEUTERIUM_MUL_SILKTOUCH = 1.0;
 	public static double	ML_EU_MUL_FORTUNE = 2.5;
-	public static int		ML_MAX_RADIUS = 6;
+	public static int		ML_MAX_RADIUS = 5;
 	
 	// Tree farm
 	public static int		TF_MAX_SIZE = 16;
