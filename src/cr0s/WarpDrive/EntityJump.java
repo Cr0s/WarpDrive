@@ -530,7 +530,7 @@ public class EntityJump extends Entity
 						e.printStackTrace();
 					}
 				} else if (te instanceof TileEntityReactor) {
-					WarpDrive.instance.warpCores.removeFromRegistry((TileEntityReactor)te);
+					WarpDrive.warpCores.removeFromRegistry((TileEntityReactor)te);
 				}
 				
 				teSuperclass = teClass.getSuperclass();

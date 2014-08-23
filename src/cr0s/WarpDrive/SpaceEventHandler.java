@@ -191,7 +191,7 @@ public class SpaceEventHandler {
 			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_TICKS) {
 				player_cloakTicks.put(player.username, 0);
 				
-				List<CloakedArea> cloaks = WarpDrive.instance.cloaks.getCloaksForPoint(player.worldObj.provider.dimensionId, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), false);
+				List<CloakedArea> cloaks = WarpDrive.cloaks.getCloaksForPoint(player.worldObj.provider.dimensionId, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ), false);
 				if (cloaks.size() != 0) {
 					//WarpDrive.debugPrint("[Cloak] Player inside " + cloaks.size() + " cloaked areas");
 					for (CloakedArea area : cloaks) {
@@ -202,7 +202,7 @@ public class SpaceEventHandler {
 					}
 				} else {
 					//WarpDrive.debugPrint("[Cloak] Player is not inside any cloak fields. Check, which field player may left...");
-					WarpDrive.instance.cloaks.checkPlayerLeftArea(player);
+					WarpDrive.cloaks.checkPlayerLeftArea(player);
 				}
 			} else {
 				player_cloakTicks.put(player.username, cloakTicks + 1);			

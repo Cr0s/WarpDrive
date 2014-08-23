@@ -104,10 +104,11 @@ public class TileEntityReactor extends WarpEnergyTE
         }
         
         // Update warp core in cores registry
-        if (++registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
+        registryUpdateTicks++;
+        if (registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
             registryUpdateTicks = 0;
-            WarpDrive.instance.warpCores.updateInRegistry(this);
-//            WarpDrive.instance.registry.printRegistry();
+            WarpDrive.warpCores.updateInRegistry(this);
+//            WarpDrive.warpCores.printRegistry();
 //            WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag " + (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime); 
 
             TileEntity c = findControllerBlock();
@@ -120,7 +121,8 @@ public class TileEntityReactor extends WarpEnergyTE
             controller = (TileEntityProtocol)c;
         }
 
-        if (++isolationUpdateTicks > WarpDriveConfig.WC_ISOLATION_UPDATE_INTERVAL_SECONDS * 20) {
+        isolationUpdateTicks++;
+        if (isolationUpdateTicks > WarpDriveConfig.WC_ISOLATION_UPDATE_INTERVAL_SECONDS * 20) {
             isolationUpdateTicks = 0;
             updateIsolationState();
         }
@@ -255,13 +257,13 @@ public class TileEntityReactor extends WarpEnergyTE
                         return;
                     }
 
-                    if (WarpDrive.instance.warpCores.isWarpCoreIntersectsWithOthers(this)) {
+                    if (WarpDrive.warpCores.isWarpCoreIntersectsWithOthers(this)) {
                         controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Warp field intersects with other ship's field. Cannot jump.");
                         return;
                     }
 
-                    if (WarpDrive.instance.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false)) {
+                    if (WarpDrive.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false)) {
                         controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Core is inside a cloaking field. Aborting. Disable cloaking field to jump!");
                         return;                    	
@@ -659,7 +661,7 @@ public class TileEntityReactor extends WarpEnergyTE
     {
         // Search nearest jump-gate
         String gateName = controller.getTargetJumpgateName();
-        Jumpgate targetGate = WarpDrive.instance.jumpgates.findGateByName(gateName);
+        Jumpgate targetGate = WarpDrive.jumpgates.findGateByName(gateName);
 
         if (targetGate == null)
         {
@@ -675,7 +677,7 @@ public class TileEntityReactor extends WarpEnergyTE
         int destX = gateX;
         int destY = gateY;
         int destZ = gateZ;
-        Jumpgate nearestGate = WarpDrive.instance.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
+        Jumpgate nearestGate = WarpDrive.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 
 		StringBuilder reason = new StringBuilder();
         if (!isShipInJumpgate(nearestGate, reason))
@@ -761,10 +763,10 @@ public class TileEntityReactor extends WarpEnergyTE
         	// Check ship size for hyper-space jump
             if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
 	            Jumpgate nearestGate = null;
-	            if (WarpDrive.instance.jumpgates == null) {
+	            if (WarpDrive.jumpgates == null) {
 	            	System.out.println("" + this + " WarpDrive.instance.jumpGates is NULL!");
 	            } else {
-	            	nearestGate = WarpDrive.instance.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
+	            	nearestGate = WarpDrive.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 	            }
 
 	            StringBuilder reason = new StringBuilder();
@@ -1063,7 +1065,7 @@ public class TileEntityReactor extends WarpEnergyTE
         coreFrequency = tag.getString("corefrequency");
         isolationBlocksCount = tag.getInteger("isolation");
         cooldownTime = tag.getInteger("cooldownTime");
-        WarpDrive.instance.warpCores.updateInRegistry(this);
+        WarpDrive.warpCores.updateInRegistry(this);
     }
 
     @Override
@@ -1077,19 +1079,19 @@ public class TileEntityReactor extends WarpEnergyTE
 
     @Override
     public void onChunkUnload() {
-        WarpDrive.instance.warpCores.removeFromRegistry(this);
+        WarpDrive.warpCores.removeFromRegistry(this);
         super.onChunkUnload();
     }
 
     @Override
     public void validate() {
         super.validate();
-        WarpDrive.instance.warpCores.updateInRegistry(this);
+        WarpDrive.warpCores.updateInRegistry(this);
     }
 
     @Override
     public void invalidate() {
-        WarpDrive.instance.warpCores.removeFromRegistry(this);
+        WarpDrive.warpCores.removeFromRegistry(this);
         super.invalidate();
     }
 
