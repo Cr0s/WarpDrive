@@ -23,9 +23,44 @@ import ic2.api.item.Items;
 public class WarpDriveConfig
 {
 	private static Configuration config;
-	public static int coreID, controllerID, radarID, isolationID, airID, airgenID, gasID, laserID, miningLaserID, particleBoosterID, liftID, laserCamID, camID, monitorID, iridiumBlockID, shipScannerID, cloakCoreID, cloakCoilID;
-	public static int laserTreeFarmID, transporterID, transportBeaconID, reactorLaserFocusID, reactorMonitorID, powerReactorID, powerLaserID, powerStoreID, chunkLoaderID, componentID;
-	public static int helmetID, chestID, pantsID, bootsID, airCanisterID;
+	// Blocks
+	public static int coreID;
+	public static int controllerID;
+	public static int radarID;
+	public static int isolationID;
+	public static int airID;
+	public static int airgenID;
+	public static int gasID;
+	public static int laserID;
+	public static int miningLaserID;
+	public static int particleBoosterID;
+	public static int liftID;
+	public static int laserCamID;
+	public static int camID;
+	public static int monitorID;
+	public static int iridiumBlockID;
+	public static int shipScannerID;
+	public static int cloakCoreID;
+	public static int cloakCoilID;
+	public static int laserTreeFarmID;
+	public static int transporterID;
+	public static int transportBeaconID;
+	public static int reactorLaserFocusID;
+	public static int reactorMonitorID;
+	public static int powerReactorID;
+	public static int powerLaserID;
+	public static int powerStoreID;
+	public static int chunkLoaderID;
+	public static int decorativeID;
+	
+	// Items
+	public static int componentID;
+	public static int helmetID;
+	public static int chestID;
+	public static int pantsID;
+	public static int bootsID;
+	public static int airCanisterID;
+	public static int upgradeID;
 	
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -408,14 +443,16 @@ public class WarpDriveConfig
 		powerReactorID = config.getBlock("powerReactor", 524).getInt();
 		powerStoreID = config.getBlock("powerStore", 525).getInt();
 		chunkLoaderID = config.getBlock("chunkLoader", 526).getInt();
+		decorativeID = config.getBlock("decorative",527).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
-		airCanisterID = config.getItem("airCanisterFull", 8706).getInt();
 		helmetID = config.getItem("helmet", 8702).getInt();
 		chestID = config.getItem("chest", 8703).getInt();
 		pantsID = config.getItem("pants", 8704).getInt();
 		bootsID = config.getItem("boots", 8705).getInt();
+		airCanisterID = config.getItem("airCanisterFull", 8706).getInt();
+		upgradeID = config.getItem("upgrade", 8707).getInt();
 		
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
