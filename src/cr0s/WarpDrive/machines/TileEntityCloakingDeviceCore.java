@@ -107,11 +107,12 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 					} else {// enabled, cloaking and valid
 						if (hasEnoughPower) {// enabled, cloaking and able to
 							// IDLE
-							// Refresh the field	!!! LemTest 2014-07-12
+							// Refresh the field FIXME: workaround to re-synchronize players
 							CloakedArea area = WarpDrive.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
 							if (area != null) {
 								area.sendCloakPacketToPlayersEx(false); // recloak field
 							}
+							setCoilsState(true);
 						} else {// loosing power
 							WarpDrive.debugPrint("" + this + " Low power, cloak field is collapsing...");
 							disableCloakingField();
