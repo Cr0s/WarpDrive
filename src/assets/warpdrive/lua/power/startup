@@ -1,4 +1,4 @@
-monitor_textScale = 1.0
+monitor_textScale = 0.5
 
 Style = {
 	CDefault = colors.white,
@@ -92,7 +92,7 @@ end
 
 function WriteCentered(y, text)
 	SetCursorPos((51 - text:len()) / 2, y)
-	Write(text)
+	term.write(text)
 	if monitors ~= nil then
 		for key,monitor in pairs(monitors) do
 			sizeX, sizeY = monitor.getSize()
@@ -429,8 +429,10 @@ if not label then
 end
 
 -- initial scanning
+monitors = {}
 Clear()
 ShowTitle(label .. " - Connecting...")
+WriteLn("")
 
 sides = peripheral.getNames()
 reactor = nil
@@ -440,24 +442,30 @@ cloakingcores = {}
 warpcore = nil
 for key,side in pairs(sides) do
   sleep(0)
+  if peripheral.getType(side) == "monitor" then
+    WriteLn("Wrapping " .. side)
+	lmonitor = peripheral.wrap(side)
+    table.insert(monitors, lmonitor)
+	lmonitor.setTextScale(monitor_textScale)
+  end
   if peripheral.getType(side) == "warpcore" then
-    print("Wrapping " .. side)
+    WriteLn("Wrapping " .. side)
     warpcore = peripheral.wrap(side)
   end
   if peripheral.getType(side) == "warpdriveReactor" then
-    print("Wrapping " .. side)
+    WriteLn("Wrapping " .. side)
     reactor =  peripheral.wrap(side)
   end
   if peripheral.getType(side) == "warpdriveReactorLaser" then
-    print("Wrapping " .. side)
+    WriteLn("Wrapping " .. side)
     table.insert(reactorlasers, peripheral.wrap(side))
   end
   if peripheral.getType(side) == "mininglaser" then
-    print("Wrapping " .. side)
+    WriteLn("Wrapping " .. side)
     table.insert(mininglasers, peripheral.wrap(side))
   end
   if peripheral.getType(side) == "cloakingdevicecore" then
-    print("Wrapping " .. side)
+    WriteLn("Wrapping " .. side)
     table.insert(cloakingcores, peripheral.wrap(side))
   end
 end
@@ -470,6 +478,17 @@ function connections_page()
 	ShowTitle(label .. " - Connections")
 
 	WriteLn("")
+	if #monitors == 0 then
+		SetColorDisabled()
+		WriteLn("No Monitor detected")
+	elseif #monitors == 1 then
+		SetColorSuccess()
+		WriteLn("1 monitor detected")
+	else
+		SetColorSuccess()
+		WriteLn(#monitors .. " Monitors detected")
+	end
+
 	if warpcore == nil then
 		SetColorDisabled()
 		WriteLn("No warpcore controller detected")
@@ -665,10 +684,10 @@ function reactor_page()
 		Write("rated at " .. reactor_rate .. " RF")
 	end
 	SetColorDefault()
-	SetCursorPos(1, 12)
+	SetCursorPos( 1, 12)
 	Write("Target stability: " .. reactor_targetStability .. "%")
-	SetCursorPos(1, 13)
-	Write("Laser amount    : " .. reactor_energyLevel)
+	SetCursorPos(30, 12)
+	Write("Laser amount: " .. reactor_energyLevel)
 	
 	SetColorTitle()
 	SetCursorPos(1, 14)
