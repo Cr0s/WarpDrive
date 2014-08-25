@@ -34,7 +34,7 @@ import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 
 public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IGridMachine, ITileCable {
-	Boolean powerStatus = false;
+	private Boolean powerStatus = false;
 	private IGridInterface grid;
 
 	private int dx, dz, dy;
@@ -42,7 +42,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		return currentState != STATE_IDLE; 
 	}
 	private boolean isQuarry = false;
-	private boolean useDeiterium = false;
+	private boolean enableSilktouch = false;
 	private boolean AENetworkReady = false;
 
 	private String[] methodsArray = {
@@ -315,47 +315,56 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		Block block = Block.blocksList[blockID];
 		if (block == null)
 			return null;
-		if (useDeiterium && grid != null && AENetworkReady)
-		{
-			IMEInventoryHandler cellArray = grid.getCellArray();
-			if (cellArray != null && block.canSilkHarvest(worldObj, null, i, j, k, blockMeta)) {
-				int consume = isQuarry ? 15 : 1000;
-				
-				IAEItemStack entryToAEIS1 = null;
-				long contained1 = 0;
-				if (WarpDriveConfig.AEExtra_fluidDrive != null) {
-					entryToAEIS1 = Util.createItemStack(new ItemStack(WarpDriveConfig.AEExtra_fluidDrive, consume, FluidRegistry.getFluidID("deuterium")));
-					contained1 = cellArray.countOfItemType(entryToAEIS1);
-				}
-				IAEItemStack entryToAEIS2 = null;
-				long contained2 = 0;
-				if (WarpDriveConfig.IC2_fluidCell != null) {
-					entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, consume, FluidRegistry.getFluidID("deuterium")));
-					contained2 = cellArray.countOfItemType(entryToAEIS2);
-				}
-				IAEItemStack entryToAEIS3 = null;
-				long contained3 = 0;
-				if (WarpDriveConfig.AS_deuteriumCell != 0) {
-					entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, consume, FluidRegistry.getFluidID("deuterium")));
-					contained3 = cellArray.countOfItemType(entryToAEIS3);
-				}
-				
-				if (contained1 + contained2 + contained3 >= consume) {
-					if (contained1 > 0) {
-						cellArray.extractItems(entryToAEIS1);
+		if (enableSilktouch && block.canSilkHarvest(worldObj, null, i, j, k, blockMeta)) {
+			if (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0) {
+				ArrayList<ItemStack> isBlock = new ArrayList<ItemStack>();
+				isBlock.add(new ItemStack(blockID, 1, blockMeta));
+				return isBlock;
+			} else {
+				if (grid != null && AENetworkReady) {
+					IMEInventoryHandler cellArray = grid.getCellArray();
+					if (cellArray != null) {
+						int consume = isQuarry ? 15 : 1000;
+						
+						IAEItemStack entryToAEIS1 = null;
+						long contained1 = 0;
+						if (WarpDriveConfig.AEExtra_fluidDrive != null) {
+							entryToAEIS1 = Util.createItemStack(new ItemStack(WarpDriveConfig.AEExtra_fluidDrive, consume, FluidRegistry.getFluidID("deuterium")));
+							contained1 = cellArray.countOfItemType(entryToAEIS1);
+						}
+						IAEItemStack entryToAEIS2 = null;
+						long contained2 = 0;
+						if (WarpDriveConfig.IC2_fluidCell != null) {
+							entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, consume, FluidRegistry.getFluidID("deuterium")));
+							contained2 = cellArray.countOfItemType(entryToAEIS2);
+						}
+						IAEItemStack entryToAEIS3 = null;
+						long contained3 = 0;
+						if (WarpDriveConfig.AS_deuteriumCell != 0) {
+							entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, consume, FluidRegistry.getFluidID("deuterium")));
+							contained3 = cellArray.countOfItemType(entryToAEIS3);
+						}
+						
+						if (contained1 + contained2 + contained3 >= consume) {
+							if (contained1 > 0) {
+								cellArray.extractItems(entryToAEIS1);
+							}
+							if (contained2 > 0 && contained1 < consume) {
+								entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, (int)(consume - contained2), FluidRegistry.getFluidID("deuterium")));
+								cellArray.extractItems(entryToAEIS2);
+							}
+							if (contained3 > 0 && contained1 + contained2 < consume) {
+								entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, (int)(consume - contained1 - contained2), FluidRegistry.getFluidID("deuterium")));
+								cellArray.extractItems(entryToAEIS3);
+							}
+							
+							ArrayList<ItemStack> isBlock = new ArrayList<ItemStack>();
+							isBlock.add(new ItemStack(blockID, 1, blockMeta));
+							return isBlock;
+						}
 					}
-					if (contained2 > 0 && contained1 < consume) {
-						entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, (int)(consume - contained2), FluidRegistry.getFluidID("deuterium")));
-						cellArray.extractItems(entryToAEIS2);
-					}
-					if (contained3 > 0 && contained1 + contained2 < consume) {
-						entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, (int)(consume - contained1 - contained2), FluidRegistry.getFluidID("deuterium")));
-						cellArray.extractItems(entryToAEIS3);
-					}
-					
-					ArrayList<ItemStack> t = new ArrayList<ItemStack>();
-					t.add(new ItemStack(blockID, 1, blockMeta));
-					return t;
+				} else {
+					// Missing AE connection
 				}
 			}
 		}
@@ -363,13 +372,15 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	}
 
 	private int putInGrid(ItemStack itemStackSource) {
- 		int qtyLeft = itemStackSource.stackSize;
+		int qtyLeft = itemStackSource.stackSize;
  		if (grid != null && AENetworkReady) {
  			IMEInventoryHandler cellArray = grid.getCellArray();
  			if (cellArray != null) {
  				IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
  				if (ret != null) {
- 					qtyLeft -= ret.getStackSize();
+ 					qtyLeft = (int) ret.getStackSize();
+ 				} else {
+ 					qtyLeft = 0;
  				}
  			}
  		}
@@ -607,7 +618,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		currentState = tag.getInteger("currentState");
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
-		useDeiterium = tag.getBoolean("useDeiterium");
+		enableSilktouch = tag.getBoolean("enableSilktouch");
 		if (currentState == STATE_MINING) {
 			scanLayer();
 		}
@@ -619,7 +630,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		tag.setInteger("currentState", currentState);
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
-		tag.setBoolean("useDeiterium", useDeiterium);
+		tag.setBoolean("enableSilktouch", enableSilktouch);
 	}
 	
 	// ComputerCraft
@@ -646,7 +657,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				delayTicksWarmup = 0;
 				currentState = STATE_WARMUP;
 				currentLayer = yCoord - layerOffset - 1;
-				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
+				enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
 				return new Boolean[] { true };
 
 			case 1: // stop()
@@ -665,7 +676,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				delayTicksScan = 0;
 				currentState = STATE_WARMUP;
 				currentLayer = yCoord - layerOffset - 1;
-				useDeiterium = (arguments.length == 1 && FluidRegistry.isFluidRegistered("deuterium"));
+				enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
 				return new Boolean[] { true };
 
 			case 4: // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
@@ -713,7 +724,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 			} else {
 				state = "Mining ores";
 			}
-			if (useDeiterium) {
+			if (enableSilktouch) {
 				state = state + " using Deuterium";
 			}
 		}
