@@ -43,8 +43,15 @@ public class WarpDriveConfig
 	public static int cloakCoreID;
 	public static int cloakCoilID;
 	public static int laserTreeFarmID;
+	public static int transporterID;
+	public static int transportBeaconID;
 	public static int reactorLaserFocusID;
 	public static int reactorMonitorID;
+	public static int powerReactorID;
+	public static int powerLaserID;
+	public static int powerStoreID;
+	public static int chunkLoaderID;
+	public static int decorativeID;
 	
 	// Items
 	public static int componentID;
@@ -447,7 +454,14 @@ public class WarpDriveConfig
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
 		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
+		transporterID = config.getBlock("transporter", 520).getInt();
+		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
 		reactorMonitorID = config.getBlock("reactorMonitor", 522).getInt();
+		powerLaserID = config.getBlock("powerLaser", 523).getInt();
+		powerReactorID = config.getBlock("powerReactor", 524).getInt();
+		powerStoreID = config.getBlock("powerStore", 525).getInt();
+		chunkLoaderID = config.getBlock("chunkLoader", 526).getInt();
+		decorativeID = config.getBlock("decorative",527).getInt();
 		
 		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
