@@ -570,59 +570,65 @@ public class EntityJump extends Entity
 	 */
 	private void saveShip(int shipSize) {
 		LocalProfiler.start("EntityJump.saveShip");
-		ship = new JumpBlock[shipSize];
-
-		if (ship == null) {
-			killEntity("Unable to allocate memory (ship is null!)");
-			LocalProfiler.stop();
-			return;
-		}
-
-		int index = 0;
-		int xc1 = minX >> 4;
-		int xc2 = maxX >> 4;
-		int zc1 = minZ >> 4;
-		int zc2 = maxZ >> 4;
-
-		for (int xc = xc1; xc <= xc2; xc++)
-		{
-			int x1 = Math.max(minX, xc << 4);
-			int x2 = Math.min(maxX, (xc << 4) + 15);
-
-			for (int zc = zc1; zc <= zc2; zc++)
-			{
-				int z1 = Math.max(minZ, zc << 4);
-				int z2 = Math.min(maxZ, (zc << 4) + 15);
-
-				for (int y = minY; y <= maxY; y++)
-				{
-					for (int x = x1; x <= x2; x++)
-					{
-						for (int z = z1; z <= z2; z++)
-						{
-							int blockID = worldObj.getBlockId(x, y, z);
-
-							// Skip air blocks
-							if (worldObj.isAirBlock(x, y, z) && (blockID != WarpDriveConfig.airID))
-							{
-								continue;
-							}
-
-							int blockMeta = worldObj.getBlockMetadata(x, y, z);
-							TileEntity tileentity = worldObj.getBlockTileEntity(x, y, z);
-							ship[index] = new JumpBlock(blockID, blockMeta, tileentity, x, y, z);
-							if (ship[index] == null)
-							{
-								WarpDrive.debugPrint("" + this + " Unable to allocate memory (ship[" + index + "] is null!)");
-							}
+		try {
+			int reactorChamber = WarpDriveConfig.isICLoaded ? WarpDriveConfig.getIC2Item("reactorChamber").itemID : 0;
+			
+			ship = new JumpBlock[shipSize];
+			JumpBlock placeAfter[] = new JumpBlock[shipSize];	// blocks and tile entities to be placed at the end, and removed first
+			
+			int indexPlaceNormal = 0;
+			int indexPlaceAfter = 0;
+			int xc1 = minX >> 4;
+			int xc2 = maxX >> 4;
+			int zc1 = minZ >> 4;
+			int zc2 = maxZ >> 4;
+			
+			for (int xc = xc1; xc <= xc2; xc++) {
+				int x1 = Math.max(minX, xc << 4);
+				int x2 = Math.min(maxX, (xc << 4) + 15);
+				
+				for (int zc = zc1; zc <= zc2; zc++) {
+					int z1 = Math.max(minZ, zc << 4);
+					int z2 = Math.min(maxZ, (zc << 4) + 15);
 					
-							index++;
+					for (int y = minY; y <= maxY; y++) {
+						for (int x = x1; x <= x2; x++) {
+							for (int z = z1; z <= z2; z++) {
+								int blockID = worldObj.getBlockId(x, y, z);
+								
+								// Skip air blocks
+								if (worldObj.isAirBlock(x, y, z) && (blockID != WarpDriveConfig.airID)) {
+									continue;
+								}
+								
+								int blockMeta = worldObj.getBlockMetadata(x, y, z);
+								TileEntity tileEntity = worldObj.getBlockTileEntity(x, y, z);
+								JumpBlock jumpBlock = new JumpBlock(blockID, blockMeta, tileEntity, x, y, z);
+								
+								if (tileEntity == null || blockID != reactorChamber) {
+									ship[indexPlaceNormal] = jumpBlock;
+									indexPlaceNormal++;
+								} else {
+									placeAfter[indexPlaceAfter] = jumpBlock;
+									indexPlaceAfter++;
+								}
+							}
 						}
 					}
 				}
 			}
+			
+			for (int index = 0; index < indexPlaceAfter; index++) {
+				ship[indexPlaceNormal] = placeAfter[index];
+				indexPlaceNormal++;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			killEntity("Exception during jump preparation (saveShip)!");
+			LocalProfiler.stop();
+			return;
 		}
-
+		
 		WarpDrive.debugPrint("" + this + " Ship saved as " + ship.length + " blocks");
 		LocalProfiler.stop();
 	}
@@ -1126,9 +1132,7 @@ public class EntityJump extends Entity
 			}
 
 			NBTTagCompound oldnbt = new NBTTagCompound();
-			// 145 Anvil, 146 Trapped chest, 149 inactive redstone comparator, 156 Quartz stair, 159 Stained clay
-			if (shipBlock.blockTileEntity != null && blockID != 159 && blockID != 149 && blockID != 156 && blockID != 146 && blockID != 145)
-			{
+			if (shipBlock.blockTileEntity != null) {
 				shipBlock.blockTileEntity.writeToNBT(oldnbt);
 				oldnbt.setInteger("x", newX);
 				oldnbt.setInteger("y", newY);
