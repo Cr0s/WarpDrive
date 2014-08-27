@@ -989,8 +989,6 @@ public class EntityJump extends Entity
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
 				}
-				else if (blockID == WarpDriveConfig.i.GT_Machine)
-					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				else if (blockID == WarpDriveConfig.i.AS_Turbine)
 				{
 					if (oldnbt.hasKey("zhuYao"))
@@ -1001,21 +999,17 @@ public class EntityJump extends Entity
 						nbt1.setDouble("z", newZ);
 						oldnbt.setTag("zhuYao", nbt1);
 					}
+					
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				}
-				else
-				{
-					newTileEntity = targetWorld.getBlockTileEntity(newX, newY, newZ);
-					if (newTileEntity == null)
-					{
-						System.out.println("[EJ] Error moving tileEntity! TE is null");
-						return false;
-					}
-					newTileEntity.invalidate();
-					newTileEntity.readFromNBT(oldnbt);
+
+				if (newTileEntity == null) {
+					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				}
+				
 				newTileEntity.worldObj = targetWorld;
 				newTileEntity.validate();
+				
 				worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
 				targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
 			}
