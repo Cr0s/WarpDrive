@@ -9,6 +9,7 @@ import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -29,18 +30,18 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         nodemap.put("netLoginHandler", "jy");
         nodemap.put("confManagerClass", "hn");
         nodemap.put("createPlayerMethod", "a");
-        nodemap.put("createPlayerDesc", (new StringBuilder()).append("(Ljava/lang/String;)L").append((String)nodemap.get("playerMP")).append(";").toString());
+        nodemap.put("createPlayerDesc", "(Ljava/lang/String;)L" + nodemap.get("playerMP") + ";");
         nodemap.put("respawnPlayerMethod", "a");
-        nodemap.put("respawnPlayerDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("playerMP")).append(";IZ)L").append((String)nodemap.get("playerMP")).append(";").toString());
+        nodemap.put("respawnPlayerDesc", "(L" + nodemap.get("playerMP") + ";IZ)L" + nodemap.get("playerMP") + ";");
         nodemap.put("itemInWorldManagerClass", "jw");
         nodemap.put("attemptLoginMethodBukkit", "attemptLogin");
-        nodemap.put("attemptLoginDescBukkit", (new StringBuilder()).append("(L").append((String)nodemap.get("netLoginHandler")).append(";Ljava/lang/String;Ljava/lang/String;)L").append((String)nodemap.get("playerMP")).append(";").toString());
+        nodemap.put("attemptLoginDescBukkit", "(L" + nodemap.get("netLoginHandler") + ";Ljava/lang/String;Ljava/lang/String;)L" + nodemap.get("playerMP") + ";");
         nodemap.put("playerControllerClass", "bdc");
         nodemap.put("playerClient", "bdi");
         nodemap.put("netClientHandler", "bcw");
         nodemap.put("createClientPlayerMethod", "a");
-        nodemap.put("createClientPlayerDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("worldClass")).append(";)L").append((String)nodemap.get("playerClient")).append(";").toString());
-        nodemap.put("entityLivingClass", "of");
+        nodemap.put("createClientPlayerDesc", "(L" + nodemap.get("worldClass") + ";)L" + nodemap.get("playerClient") + ";");
+        nodemap.put("entityLivingBaseClass", "of");
         nodemap.put("moveEntityMethod", "e");
         nodemap.put("moveEntityDesc", "(FF)V");
         nodemap.put("entityItemClass", "ss");
@@ -58,7 +59,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         nodemap.put("thePlayer", "h");
         nodemap.put("displayGui", "a");
         nodemap.put("guiScreen", "awe");
-        nodemap.put("displayGuiDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("guiScreen")).append(";)V").toString());
+        nodemap.put("displayGuiDesc", "(L" + nodemap.get("guiScreen") + ";)V");
         nodemap.put("runTick", "k");
         nodemap.put("runTickDesc", "()V");
         nodemap.put("clickMiddleMouseButton", "W");
@@ -72,12 +73,12 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         nodemap.put("getSkyColorMethod", "a");
         nodemap.put("vecClass", "atc");
         nodemap.put("entityClass", "nn");
-        nodemap.put("getFogColorDesc", (new StringBuilder()).append("(F)L").append((String)nodemap.get("vecClass")).append(";").toString());
-        nodemap.put("getSkyColorDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("entityClass")).append(";F)L").append((String)nodemap.get("vecClass")).append(";").toString());
+        nodemap.put("getFogColorDesc", "(F)L" + nodemap.get("vecClass") + ";");
+        nodemap.put("getSkyColorDesc", "(L" + nodemap.get("entityClass") + ";F)L" + nodemap.get("vecClass") + ";");
         nodemap.put("guiSleepClass", "avm");
         nodemap.put("wakeEntityMethod", "g");
         nodemap.put("wakeEntityDesc", "()V");
-        nodemap.put("orientCameraDesc", (new StringBuilder()).append("(L").append((String)nodemap.get("minecraft")).append(";L").append((String)nodemap.get("entityLivingClass")).append(";)V").toString());
+        nodemap.put("orientCameraDesc", "(L" + nodemap.get("minecraft") + ";L" + nodemap.get("entityLivingBaseClass") + ";)V");
     }
 
     @Override
@@ -89,9 +90,9 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
             return bytes;
         }
 
-        if (name.replace('.', '/').equals(nodemap.get("entityLivingClass")))
+        if (name.replace('.', '/').equals(nodemap.get("entityLivingBaseClass")))
         {
-            bytes = transformEntityLiving(bytes);
+            bytes = transformEntityLivingBase(bytes);
         }
         else if (name.replace('.', '/').equals(nodemap.get("entityItemClass")))
         {
@@ -133,8 +134,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
                         if (nodeAt.cst.equals(Double.valueOf(0.039999999105930328D)))
                         {
-                            VarInsnNode beforeNode = new VarInsnNode(25, 0);
-                            MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getItemGravity", (new StringBuilder()).append("(L").append((String)nodemap.get("entityItemClass")).append(";)D").toString());
+                            VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+                            MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity", "(L" + nodemap.get("entityItemClass") + ";)D");
                             methodnode.instructions.insertBefore(nodeAt, beforeNode);
                             methodnode.instructions.set(nodeAt, overwriteNode);
                             injectionCount++;
@@ -142,8 +143,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
                         if (nodeAt.cst.equals(Double.valueOf(0.98000001907348633D)))
                         {
-                            VarInsnNode beforeNode = new VarInsnNode(25, 0);
-                            MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getItemGravity2", (new StringBuilder()).append("(L").append((String)nodemap.get("entityItemClass")).append(";)D").toString());
+                            VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+                            MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity2", "(L" + nodemap.get("entityItemClass") + ";)D");
                             methodnode.instructions.insertBefore(nodeAt, beforeNode);
                             methodnode.instructions.set(nodeAt, overwriteNode);
                             injectionCount++;
@@ -159,11 +160,11 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         ClassWriter writer = new ClassWriter(1);
         node.accept(writer);
         bytes = writer.toByteArray();
-        System.out.println((new StringBuilder()).append("[WDCore] WarpDrive successfully injected bytecode into: ").append(node.name).append(" (").append(injectionCount).append(" / ").append(operationCount).append(")").toString());
+        System.out.println("[WDCore] WarpDrive successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
         return bytes;
     }
 
-    private byte[] transformEntityLiving(byte[] bytes)
+    private byte[] transformEntityLivingBase(byte[] bytes)
     {
         ClassNode node = new ClassNode();
         ClassReader reader = new ClassReader(bytes);
@@ -195,8 +196,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
                         if (nodeAt.cst.equals(Double.valueOf(0.080000000000000002D)))
                         {
-                            VarInsnNode beforeNode = new VarInsnNode(25, 0);
-                            MethodInsnNode overwriteNode = new MethodInsnNode(184, GRAVITY_MANAGER_CLASS, "getGravityForEntity", (new StringBuilder()).append("(L").append((String)nodemap.get("entityLivingClass")).append(";)D").toString());
+                            VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+                            MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getGravityForEntity", "(L" + nodemap.get("entityLivingBaseClass") + ";)D");
                             methodnode.instructions.insertBefore(nodeAt, beforeNode);
                             methodnode.instructions.set(nodeAt, overwriteNode);
                             injectionCount++;
@@ -212,7 +213,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
         ClassWriter writer = new ClassWriter(1);
         node.accept(writer);
         bytes = writer.toByteArray();
-        System.out.println((new StringBuilder()).append("[WDCore] WarpDrive successfully injected bytecode into: ").append(node.name).append(" (").append(injectionCount).append(" / ").append(operationCount).append(")").toString());
+        System.out.println("[WDCore] WarpDrive successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
         return bytes;
     }
 }
