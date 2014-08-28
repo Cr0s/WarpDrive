@@ -62,8 +62,9 @@ public class PacketHandler implements IPacketHandler
             
             //WarpDrive.debugPrint("[Cloak Packet] Received " + ((decloak) ? "DEcloaked" : "cloaked") + "area: (" + minX + "; " + minY + "; " + minZ + ") -> (" + maxX + "; " + maxY + "; " + maxZ + ")");            
             
-            if (minX <= player.posX && maxX >= player.posY && minY <= player.posZ && maxY >= player.posX  && minZ <= player.posY && maxZ >= player.posZ)
+            if (minX <= player.posX && (maxX + 1) > player.posY && minY <= player.posZ && (maxY + 1) > player.posX  && minZ <= player.posY && (maxZ + 1) > player.posZ) {
             	return;
+            }
             
 			// Hide the area
 			if (!decloak) {
@@ -73,7 +74,9 @@ public class PacketHandler implements IPacketHandler
 			    World worldObj = player.worldObj;
 			    int cloakBlockID = (tier == 1) ? WarpDriveConfig.gasID : 0;
 			    int cloakBlockMetadata = (tier == 1) ? 5 : 0;
-				for (int y = minY; y <= maxY; y++) {
+			    int minYmap = Math.max(  0, minY);
+			    int maxYmap = Math.min(255, maxY);
+				for (int y = minYmap; y <= maxYmap; y++) {
 					for (int x = minX; x <= maxX; x++) {
 						for(int z = minZ; z <= maxZ; z++) {
 			    			if (worldObj.getBlockId(x, y, z) != 0) {
@@ -85,14 +88,14 @@ public class PacketHandler implements IPacketHandler
 			    
 				//WarpDrive.debugPrint("[Cloak Packet] Removing entity...");
 			    // Hide any entities inside area
-			    AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ);
+			    AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
 			    List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
 			    for (Entity e : list) {
 			    	worldObj.removeEntity(e);
 			    	((WorldClient)worldObj).removeEntityFromWorld(e.entityId);
 			    }
             } else { // reveal the area
-            	player.worldObj.markBlockRangeForRenderUpdate(minX + 1, minY + 1, minZ + 1, maxX + 1, maxY + 1, maxZ + 1);
+            	player.worldObj.markBlockRangeForRenderUpdate(minX - 1, Math.max(0, minY - 1), minZ - 1, maxX + 1, Math.min(255, maxY + 1), maxZ + 1);
             	
             	// Make some graphics
             	int numLasers = 80 + player.worldObj.rand.nextInt(50);
