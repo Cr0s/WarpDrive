@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cpw.mods.fml.common.network.FMLNetworkHandler;
+import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.data.CloakedArea;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLeashKnot;
@@ -64,14 +65,13 @@ public class CloakManager {
 		this.cloaks = new LinkedList<CloakedArea>();
 	}
 
-	public boolean isInCloak(int dimensionID, int x, int y, int z, boolean chunk) {
-		for (int i = 0; i < this.cloaks.size(); i++) {
-			if (this.cloaks.get(i).dimensionId != dimensionID)
+	public boolean isCloaked(int dimensionID, int x, int y, int z) {
+		for (CloakedArea area : this.cloaks) {
+			if (area.dimensionId != dimensionID) {
 				continue;
+			}
 			
-			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
-			
-			if (axisalignedbb.minX <= x && axisalignedbb.maxX >= x && (chunk || (axisalignedbb.minY <= y && axisalignedbb.maxY >= y)) && axisalignedbb.minZ <= z && axisalignedbb.maxZ >= z) {
+			if (area.aabb.minX <= x && area.aabb.maxX >= x && area.aabb.minY <= y && area.aabb.maxY >= y && area.aabb.minZ <= z && area.aabb.maxZ >= z) {
 				return true;
 			}
 		}
@@ -79,20 +79,19 @@ public class CloakManager {
 		return false;
 	}
 	
-	public ArrayList<CloakedArea> getCloaksForPoint(int dimensionID, int x, int y, int z, boolean chunk) {
-		ArrayList<CloakedArea> res = new ArrayList<CloakedArea>();
-		
-		for (int i = 0; i < this.cloaks.size(); i++) {
-			if (this.cloaks.get(i).dimensionId != dimensionID)
+	public boolean checkChunkLoaded(EntityPlayerMP player, int chunkPosX, int chunkPosZ) {
+		for (CloakedArea area : this.cloaks) {
+			if (area.dimensionId != player.worldObj.provider.dimensionId) {
 				continue;
-			
-			AxisAlignedBB axisalignedbb = this.cloaks.get(i).aabb;
-			if (axisalignedbb.minX <= x && axisalignedbb.maxX >= x && (chunk || (axisalignedbb.minY <= y && axisalignedbb.maxY >= y)) && axisalignedbb.minZ <= z && axisalignedbb.maxZ >= z) {
-				res.add(cloaks.get(i));
 			}
-		}		
+			
+			if ( area.aabb.minX <= (chunkPosX << 4 + 15) && area.aabb.maxX >= (chunkPosX << 4)
+			  && area.aabb.minZ <= (chunkPosZ << 4 + 15) && area.aabb.maxZ >= (chunkPosZ << 4) ) {
+				area.sendCloakPacketToPlayer(player, false);
+			}
+		}
 		
-		return res;
+		return false;
 	}
 	
 	public boolean isAreaExists(World worldObj, int x, int y, int z) {
@@ -105,13 +104,13 @@ public class CloakManager {
 	
 	public void removeCloakedArea(World worldObj, int x, int y, int z) {
 		int index = 0;
-		for (int i = 0; i < this.cloaks.size(); i++){
+		for (int i = 0; i < this.cloaks.size(); i++) {
 			if (this.cloaks.get(i).coreX == x && this.cloaks.get(i).coreY == y && this.cloaks.get(i).coreZ == z && this.cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
 				this.cloaks.get(i).sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
 				index = i;
 				break;
 			}
-		}		
+		}
 		
 		cloaks.remove(index);
 	}
@@ -125,14 +124,9 @@ public class CloakManager {
 		return null;
 	}
 	
-	public void checkPlayerLeftArea(EntityPlayer player) {
+	public void updatePlayer(EntityPlayer player) {
 		for (CloakedArea area : this.cloaks) {
-			if (!area.isEntityWithinArea(player) && area.isPlayerInArea(player.username)) {
-				area.removePlayer(player.username);
-				//System.outprintln("[Cloak] Player " + p.username + " has leaved cloaked area " + area.frequency);
-				MinecraftServer.getServer().getConfigurationManager().sendToAllNearExcept(player, player.posX, player.posY, player.posZ, 100, player.worldObj.provider.dimensionId, getPacketForThisEntity(player));
-				area.sendCloakPacketToPlayer(player, false);
-			}
+			area.updatePlayer(player);
 		}
 	}
 	

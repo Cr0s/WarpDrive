@@ -263,7 +263,7 @@ public class TileEntityReactor extends WarpEnergyTE
                         return;
                     }
 
-                    if (WarpDrive.cloaks.isInCloak(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, false)) {
+                    if (WarpDrive.cloaks.isCloaked(worldObj.provider.dimensionId, xCoord, yCoord, zCoord)) {
                         controller.setJumpFlag(false);
                         messageToAllPlayersOnShip("Core is inside a cloaking field. Aborting. Disable cloaking field to jump!");
                         return;                    	

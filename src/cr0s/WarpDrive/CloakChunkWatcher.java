@@ -9,20 +9,11 @@ import net.minecraftforge.event.world.ChunkWatchEvent;
 
 public class CloakChunkWatcher {
 	@ForgeSubscribe
-	public void chunkLoaded(ChunkWatchEvent event)
-	{
-		EntityPlayerMP p = event.player;
+	public void chunkLoaded(ChunkWatchEvent event) {
 		ChunkCoordIntPair chunk = event.chunk;
 		
 		// Check chunk for locating in cloaked areas
-		ArrayList<CloakedArea> cloaks = WarpDrive.cloaks.getCloaksForPoint(p.worldObj.provider.dimensionId, chunk.getCenterXPos(), 0, chunk.getCenterZPosition(), true);
-		if (cloaks.size() == 0)
-			return;
-		
-		//Chunk c = p.worldObj.getChunkFromChunkCoords(chunk.chunkXPos, chunk.chunkZPos);
-		for (CloakedArea area : cloaks) {
-			area.sendCloakPacketToPlayer(p, false);
-		}
+		WarpDrive.cloaks.checkChunkLoaded(event.player, chunk.chunkXPos, chunk.chunkZPos);
 		
 		/*List<Chunk> list = new ArrayList<Chunk>();
 		list.add(c);
