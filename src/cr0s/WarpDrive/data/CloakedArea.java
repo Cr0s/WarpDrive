@@ -7,7 +7,9 @@ import java.util.List;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.FMLNetworkHandler;
+import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.AxisAlignedBB;
@@ -24,17 +26,18 @@ public class CloakedArea {
 	private LinkedList<String> playersInArea;
 	public byte tier = 0;
 	
-	public boolean isPlayerInArea(String username) {
+	public boolean isPlayerListedInArea(String username) {
 		for (String playerInArea : playersInArea) {
-			//System.outprintln("[Cloak] Checking player: " + p.username + "(" + p.entityId + ")" + " =? " + player.username + " (" + p.entityId + ")");
-			if (playerInArea.equals(username))
+			//WarpDrive.debugPrint("" + this + " Checking player: " + p.username + "(" + p.entityId + ")" + " =? " + player.username + " (" + p.entityId + ")");
+			if (playerInArea.equals(username)) {
 				return true;
+			}
 		}
 		
 		return false;
 	}
 	
-	public void removePlayer(String username) {
+	private void removePlayer(String username) {
 		for (int i = 0; i < playersInArea.size(); i++) {
 			if (playersInArea.get(i).equals(username)) {
 				playersInArea.remove(i);
@@ -43,14 +46,16 @@ public class CloakedArea {
 		}
 	}
 	
-	public void addPlayer(String username) {
-		if (!isPlayerInArea(username)) {
+	private void addPlayer(String username) {
+		if (!isPlayerListedInArea(username)) {
 			playersInArea.add(username);
 		}
 	}
 	
-	public boolean isEntityWithinArea(Entity entity) {
-		return (aabb.minX <= entity.posX && aabb.maxX >= entity.posX && aabb.minY <= entity.posY && aabb.maxY >= entity.posY  && aabb.minZ <= entity.posZ && aabb.maxZ >= entity.posZ);
+	public boolean isEntityWithinArea(EntityLivingBase entity) {
+		return (aabb.minX <= entity.posX                   && (aabb.maxX + 1) > entity.posX
+			 && aabb.minY <= (entity.posY + entity.height) && (aabb.maxY + 1) > entity.posY
+			 && aabb.minZ <= entity.posZ                   && (aabb.maxZ + 1) > entity.posZ);
 	}
 	
 	public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
@@ -66,7 +71,7 @@ public class CloakedArea {
 		}
 		
 		this.dimensionId = worldObj.provider.dimensionId;
-					
+		
 		try {
 			// Add all players currently inside the field
 			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
@@ -79,16 +84,6 @@ public class CloakedArea {
 			e.printStackTrace();
 		}
 	}		
-	
-	public Chunk obscureChunkBlocksWithinArea(Chunk chunk) {
-		for (int x = (int)this.aabb.minX; x < (int)this.aabb.maxX; x++)
-			for (int z = (int)this.aabb.minZ; z < (int)this.aabb.maxZ; z++)
-				for (int y = (int)this.aabb.minY; y < (int)this.aabb.maxY; y++)	{
-					myChunkSBIDWMT(chunk, x & 15, y, z & 15, 0, 0);
-				}
-		
-		return chunk;
-	}
 	
 	// Sending only if field changes: sets up or collapsing
 	public void sendCloakPacketToPlayersEx(boolean decloak) {
@@ -123,15 +118,14 @@ public class CloakedArea {
 	}
 	
 	public void sendCloakPacketToPlayer(EntityPlayer player, boolean decloak) {
-		//System.outprintln("[Cloak] Sending cloak packet to player " + player.username);
-		if (isPlayerInArea(player.username)) {
-			//System.outprintln("[Cloak] Player " + player.username + " is inside cloaking field");
+		if (isPlayerListedInArea(player.username)) {
+			WarpDrive.debugPrint("" + this + " Player " + player.username + " is inside, no cloak packet to send");
 			return;
 		}
-
+		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
 		DataOutputStream outputStream = new DataOutputStream(bos);
-
+		
 		try {
 			outputStream.writeInt((int) this.aabb.minX);
 			outputStream.writeInt((int) this.aabb.minY);
@@ -142,12 +136,13 @@ public class CloakedArea {
 			outputStream.writeInt((int) this.aabb.maxZ);
 			
 			outputStream.writeBoolean(decloak);
-		
+			
 			outputStream.writeByte(this.tier);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		
+		// WarpDrive.debugPrint("" + this + " Sending cloak packet to player " + player.username);
 		Packet250CustomPayload packet = new Packet250CustomPayload();
 		packet.channel = "WarpDriveCloaks";
 		packet.data = bos.toByteArray();
@@ -156,63 +151,32 @@ public class CloakedArea {
 		((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
 	}
 	
-	public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
-	{
-		int j1 = z << 4 | x;
-
-		if (y >= c.precipitationHeightMap[j1] - 1)
-		{
-			c.precipitationHeightMap[j1] = -999;
-		}
-
-		int l1 = c.getBlockID(x, y, z);
-		int i2 = c.getBlockMetadata(x, y, z);
-
-		if (l1 == blockId && i2 == blockMeta)
-		{
-			return false;
-		}
-		else
-		{
-			ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
-			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-
-			if (extendedblockstorage == null)
-			{
-				if (blockId == 0)
-				{
-					return false;
-				}
-
-				extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
+	public void updatePlayer(EntityPlayer player) {
+		if (isEntityWithinArea(player)) {
+			if (!isPlayerListedInArea(player.username)) {
+				WarpDrive.debugPrint("" + this + " Player " + player.username + " has entered");
+				addPlayer(player.username);
+				revealChunksToPlayer(player);
+				revealEntityToPlayer(player);
+				sendCloakPacketToPlayer(player, false);
 			}
-			extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
-
-			if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
-			{
-				return false;
-			}
-			else
-			{
-				extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
-				c.isModified = true;
-				return true;
+		} else {
+			if (isPlayerListedInArea(player.username)) {
+				WarpDrive.debugPrint("" + this + " Player " + player.username + " has left");
+				removePlayer(player.username);
+				MinecraftServer.getServer().getConfigurationManager().sendToAllNearExcept(player, player.posX, player.posY, player.posZ, 100, player.worldObj.provider.dimensionId, CloakManager.getPacketForThisEntity(player));
+				sendCloakPacketToPlayer(player, false);
 			}
 		}
-	}
-	
-	public void playerEnteringCloakedArea(EntityPlayer player) {
-		addPlayer(player.username);
-		revealChunksToPlayer(player);
-		revealEntityToPlayer(player);
-		sendCloakPacketToPlayer(player, false);
 	}
 
 	public void revealChunksToPlayer(EntityPlayer p) {
-		//System.outprintln("[Cloak] Revealing cloaked chunks in area " + area.frequency + " to player " + p.username);
+		WarpDrive.debugPrint("" + this + " Revealing cloaked blocks to player " + p.username);
+		int minY = (int) Math.max(  0, aabb.minY);
+		int maxY = (int) Math.min(255, aabb.maxY);
 		for (int x = (int)aabb.minX; x <= (int)aabb.maxX; x++) {
 			for (int z = (int)aabb.minZ; z <= (int)aabb.maxZ; z++) {
-				for (int y = (int)aabb.minY; y <= (int)aabb.maxY; y++) {
+				for (int y = minY; y <= maxY; y++) {
 					if (p.worldObj.getBlockId(x, y, z) != 0) {
 						p.worldObj.markBlockForUpdate(x, y, z);
 					}
@@ -240,5 +204,14 @@ public class CloakedArea {
 		for (Entity e : list) {
 			((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(CloakManager.getPacketForThisEntity(e));
 		}
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s @ DIM%d %d, %d, %d %s", new Object[] {
+           		getClass().getSimpleName(),
+           		Integer.valueOf(dimensionId),
+           		Integer.valueOf(coreX), Integer.valueOf(coreY), Integer.valueOf(coreZ),
+           		aabb.toString()});
 	}
 }
