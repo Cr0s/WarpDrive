@@ -28,7 +28,7 @@ public class CloakedArea {
 	
 	public boolean isPlayerListedInArea(String username) {
 		for (String playerInArea : playersInArea) {
-			//WarpDrive.debugPrint("" + this + " Checking player: " + p.username + "(" + p.entityId + ")" + " =? " + player.username + " (" + p.entityId + ")");
+			// WarpDrive.debugPrint("" + this + " Checking player: " + p.username + "(" + p.entityId + ")" + " =? " + player.username + " (" + p.entityId + ")");
 			if (playerInArea.equals(username)) {
 				return true;
 			}
@@ -154,7 +154,7 @@ public class CloakedArea {
 	public void updatePlayer(EntityPlayer player) {
 		if (isEntityWithinArea(player)) {
 			if (!isPlayerListedInArea(player.username)) {
-				WarpDrive.debugPrint("" + this + " Player " + player.username + " has entered");
+				// WarpDrive.debugPrint("" + this + " Player " + player.username + " has entered");
 				addPlayer(player.username);
 				revealChunksToPlayer(player);
 				revealEntityToPlayer(player);
@@ -162,7 +162,7 @@ public class CloakedArea {
 			}
 		} else {
 			if (isPlayerListedInArea(player.username)) {
-				WarpDrive.debugPrint("" + this + " Player " + player.username + " has left");
+				// WarpDrive.debugPrint("" + this + " Player " + player.username + " has left");
 				removePlayer(player.username);
 				MinecraftServer.getServer().getConfigurationManager().sendToAllNearExcept(player, player.posX, player.posY, player.posZ, 100, player.worldObj.provider.dimensionId, CloakManager.getPacketForThisEntity(player));
 				sendCloakPacketToPlayer(player, false);
@@ -171,7 +171,7 @@ public class CloakedArea {
 	}
 
 	public void revealChunksToPlayer(EntityPlayer p) {
-		WarpDrive.debugPrint("" + this + " Revealing cloaked blocks to player " + p.username);
+		// WarpDrive.debugPrint("" + this + " Revealing cloaked blocks to player " + p.username);
 		int minY = (int) Math.max(  0, aabb.minY);
 		int maxY = (int) Math.min(255, aabb.maxY);
 		for (int x = (int)aabb.minX; x <= (int)aabb.maxX; x++) {

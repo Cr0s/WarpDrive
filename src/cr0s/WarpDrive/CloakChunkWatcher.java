@@ -21,6 +21,5 @@ public class CloakChunkWatcher {
 		// Send obscured chunk
 		System.out.println("[Cloak] Sending to player " + p.username + " obscured chunk at (" + chunk.chunkXPos + "; " + chunk.chunkZPos + ")");
 		((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(list));*/
-		
 	}
 }
