@@ -79,7 +79,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		int side = from.ordinal() - 2;
 		if (containedEnergy > WarpDriveConfig.PR_TICK_TIME * PR_MIN_GENERATION * 100) {
 			double amountToIncrease = WarpDriveConfig.PR_TICK_TIME * Math.max(PR_MIN_INSTABILITY, PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.PR_MAX_ENERGY, 0.1));
-			//WarpDrive.debugPrint("InsInc" + amountToIncrease);
+			// WarpDrive.debugPrint("InsInc" + amountToIncrease);
 			instabilityValues[side] += amountToIncrease * (isNatural ? 1.0D : 0.25D);
 		} else {
 			double amountToDecrease = WarpDriveConfig.PR_TICK_TIME * Math.max(PR_MIN_INSTABILITY, instabilityValues[side] * 0.02D);
@@ -138,16 +138,16 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 			stabilityOffset *= Math.max(0.01D, instabilityValues[i] / 100.0D);
 		}
 		
-		//WarpDrive.debugPrint("INSOFF" + stabilityOffset);
-		
 		if (active) {// producing, instability increase output, you want to take the risk
 			int amountToGenerate = (int)Math.ceil( WarpDriveConfig.PR_TICK_TIME * (0.5D + stabilityOffset) * (PR_MIN_GENERATION + PR_MAX_GENERATION * Math.pow(containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY, 0.6D)));
 			containedEnergy = Math.min(containedEnergy + amountToGenerate, WarpDriveConfig.PR_MAX_ENERGY);
 			lastGenerationRate = amountToGenerate / WarpDriveConfig.PR_TICK_TIME;
+			// WarpDrive.debugPrint("Generated " + amountToGenerate);
 		} else {// decaying over 20s without producing power, you better have power for those lasers
 			int amountToDecay = (int)( WarpDriveConfig.PR_TICK_TIME * (1.0D - stabilityOffset) * (PR_MIN_GENERATION + containedEnergy * 0.01D) );
 			containedEnergy = Math.max(0, containedEnergy - amountToDecay);
 			lastGenerationRate = 0;
+			// WarpDrive.debugPrint("Decayed " + amountToDecay);
 		}
 	}
 	
@@ -158,6 +158,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
         }
         super.updateEntity();
         
+        // WarpDrive.debugPrint("tickCount " + tickCount + " releasedThisTick " + releasedThisTick + " lasersReceived " + lasersReceived + " releasedThisCycle " + releasedThisCycle + " containedEnergy " + containedEnergy);
         releasedThisTick = 0;
         
         lasersReceived = Math.max(0.0F, lasersReceived - 0.05F);
@@ -417,28 +418,6 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 			}
 			
 			return new Object[] { MODE_STRING[releaseMode], releaseAbove };
-		} else if (methodName.equals("debugLaser")) {
-			//WarpDrive.debugPrint("debugMethod");
-			int side = toInt(arguments[0]);
-			int amount = toInt(arguments[1]);
-			
-			ForgeDirection d;
-			if (side == 0) {
-				d = ForgeDirection.NORTH;
-			} else if (side == 1) {
-				d = ForgeDirection.SOUTH;
-			} else if (side == 2) {
-				d = ForgeDirection.WEST;
-			} else if (side == 3) {
-				d = ForgeDirection.EAST;
-			} else {
-				d = ForgeDirection.UP;
-			}
-			
-			if (amount < containedEnergy) {
-				containedEnergy -= amount;
-				decreaseInstability(d,amount);
-			}
 		} else if (methodName.equals("help")) {
 			return new Object[] { helpStr(arguments) };
 		}
@@ -461,16 +440,20 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		if (hold) {// still loading/booting => hold output
 			return 0;
 		}
+		int result = 0;
 		int capacity = Math.max(0, 2 * lastGenerationRate - releasedThisTick); 
 		if (releaseMode == MODE_MANUAL_RELEASE) {
-			return convertRFtoInternal(Math.min(Math.max(0, containedEnergy               ), capacity));
+			result = Math.min(Math.max(0, containedEnergy               ), capacity);
+	        // WarpDrive.debugPrint("PotentialOutput Manual " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
 		} else if (releaseMode == MODE_RELEASE_ABOVE) {
-			return convertRFtoInternal(Math.min(Math.max(0, containedEnergy - releaseAbove), capacity));
+			result = Math.min(Math.max(0, containedEnergy - releaseAbove), capacity);
+	        // WarpDrive.debugPrint("PotentialOutput Above " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
 		} else if (releaseMode == MODE_RELEASE_AT_RATE) {
 			int remainingRate = Math.max(0, releaseRate - releasedThisTick);
-			return convertRFtoInternal(Math.min(Math.max(0, containedEnergy               ), Math.min(remainingRate, capacity)));
+			result = Math.min(Math.max(0, containedEnergy               ), Math.min(remainingRate, capacity));
+	        // WarpDrive.debugPrint("PotentialOutput Rated " + result + " RF (" + convertRFtoInternal(result) + " internal) remainingRate " + remainingRate + " RF/t capacity " + capacity);
 		}
-		return 0;
+		return convertRFtoInternal(result);
 	}
 	
 	@Override
@@ -482,14 +465,15 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 	}
 	
 	@Override
-	protected void energyOutputDone(int energyOutput) {
-		int energyOutput_RF = convertInternalToRF(energyOutput);
+	protected void energyOutputDone(int energyOutput_internal) {
+		int energyOutput_RF = convertInternalToRF(energyOutput_internal);
 		containedEnergy -= energyOutput_RF;
 		if (containedEnergy < 0) {
 			containedEnergy = 0;
 		}
         releasedThisTick += energyOutput_RF;
         releasedThisCycle += energyOutput_RF;
+        // WarpDrive.debugPrint("OutputDone " + energyOutput_internal + " (" + energyOutput_RF + " RF)");
 	}
 	
 	@Override

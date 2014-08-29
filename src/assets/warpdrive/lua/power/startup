@@ -189,7 +189,7 @@ function readInputNumber(currentValue)
 		SetColorDefault()
 		SetCursorPos(x, y)
 		Write(input .. "            ")
-		local input = string.sub(input, -9)
+		input = string.sub(input, -9)
 		
 		local params = { os.pullEventRaw() }
 		local eventName = params[1]
@@ -890,7 +890,7 @@ function core_page()
 		WriteLn("Core:")
 		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
 		local energy = warpcore.get_energy_level()
-		WriteLn(" Energy           = " .. math.floor(energy / 1000000).." % ("..energy.."EU)")
+		WriteLn(" Energy           = " .. math.floor(energy / 1000000) .. " % (" .. energy .. "EU)")
 		WriteLn(" Attached players = " .. warpcore.get_attached_players())
 		WriteLn("Dimensions:")
 		WriteLn(" Front, Right, Up = " .. core_front .. ", " .. core_right .. ", " .. core_up)
@@ -1036,7 +1036,7 @@ function reactor_page()
 		average = average / #instabilities
 
 		SetColorDefault()
-		energy = { reactor.energy() }
+		local energy = { reactor.energy() }
 		SetCursorPos(1, 7)
 		Write("Energy   : ")
 		if energy[1] ~= nil then
@@ -1068,14 +1068,14 @@ function reactor_page()
 		Write("Lasers")
 
 		for key,reactorlaser in pairs(reactorlasers) do
-			side = reactorlaser.side()
+			local side = reactorlaser.side()
 			if side ~= nil then
 				side = side % 4
 				SetColorDefault()
 				SetCursorPos(4, 3 + side)
 				Write("Side " .. side .. ":")
 				SetCursorPos(30, 3 + side)
-				energy = reactorlaser.energy()
+				local energy = reactorlaser.energy()
 				if not reactorlaser.hasReactor() then
 					SetColorDisabled()
 				elseif energy > 3 * data.reactor_laserAmount then
