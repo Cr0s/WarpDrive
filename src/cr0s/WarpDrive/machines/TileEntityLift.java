@@ -167,22 +167,20 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     }
 
     @Override
-    public String[] getMethodNames()
-    {
+    public String[] getMethodNames() {
     	return methodsArray;
     }
 
-    public String helpStr(Object[] args)
-    {
-    	if(args.length == 1)
-    	{
-    		String fun = args[0].toString().toLowerCase();
-    		if(fun.equals("energy"))
+    public String helpStr(Object[] args) {
+    	if (args.length == 1) {
+    		String methodName = args[0].toString().toLowerCase();
+    		if (methodName.equals("energy")) {
     			return WarpDrive.defEnergyStr;
-    		else if(fun.equals("mode"))
+    		} else if (methodName.equals("mode")) {
     			return "mode(\"up\" or \"down\" or \"redstone\"): sets the mode\nmode(): returns the current mode";
-    		else if(fun.equals("active"))
+    		} else if (methodName.equals("active")) {
     			return "active(boolean): sets whether the laser is active\nactive(): returns whether the laser is active";
+    		}
     	}
     	return WarpDrive.defHelpStr;
     }
@@ -215,8 +213,7 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
 				computerEnabled = toBool(args[0]);
     		}
     		return new Object[] { computerEnabled ? false : isEnabled };
-    	}
-    	else if (methodName.equals("help")) {
+    	} else if (methodName.equals("help")) {
     		return new Object[] { helpStr(args) };
     	}
     	return null;

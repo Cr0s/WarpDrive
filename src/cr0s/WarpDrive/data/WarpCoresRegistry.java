@@ -59,6 +59,7 @@ public class WarpCoresRegistry {
 
 	public ArrayList<TileEntityReactor> searchWarpCoresInRadius(int x, int y, int z, int radius) {
 		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>(registry.size());
+		removeDeadCores();
 
 		printRegistry();
 		for (TileEntityReactor c : registry) {
@@ -141,7 +142,7 @@ public class WarpCoresRegistry {
 		return false;
 	}
 
-	public void removeDeadCores() {
+	private void removeDeadCores() {
 		LocalProfiler.start("WarpCoresRegistry Removing dead cores");
 
 		TileEntityReactor c;

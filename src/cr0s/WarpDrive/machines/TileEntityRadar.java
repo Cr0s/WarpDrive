@@ -40,7 +40,6 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
 					WarpDrive.debugPrint("" + this + " Scanning over " + scanRadius + " radius...");
-					WarpDrive.warpCores.removeDeadCores();
 					results = WarpDrive.warpCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
 					WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results");
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
