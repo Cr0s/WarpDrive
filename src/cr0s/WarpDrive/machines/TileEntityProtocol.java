@@ -44,16 +44,21 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     boolean ready = false;                // Ready to operate (valid assembly)
 
     public String[] methodsArray = {
-        "dim_getp", "dim_setp",										// 0, 1
-        "dim_getn", "dim_setn",										// 2, 3
-        "set_mode", "set_distance", "set_direction",				// 4, 5, 6
-        "get_attached_players", "summon", "summon_all",				// 7, 8, 9
-        "get_x", "get_y", "get_z",									// 10, 11, 12
-        "get_energy_level", "do_jump", "get_ship_size",				// 13, 14, 15
-        "set_beacon_frequency", "get_dx", "get_dz",					// 16, 17, 18
-        "set_core_frequency", "is_in_space", "is_in_hyperspace",	// 19, 20, 21
-        "set_target_jumpgate",										// 22
-        "isAttached","get_energy_required"							// 23, 24
+        "dim_getp", "dim_setp",
+        "dim_getn", "dim_setn",
+        "set_mode",
+        "set_distance", "set_direction",
+        "get_attached_players", "summon", "summon_all",
+        "get_x", "get_y", "get_z",
+        "get_energy_level", /* "get_energy_max",/**/
+        "do_jump",
+        "get_ship_size",
+        "set_beacon_frequency",
+        "get_dx", "get_dz",
+        "set_core_frequency",
+        "is_in_space", "is_in_hyperspace",
+        "set_target_jumpgate",
+        "isAttached", "get_energy_required"
     };
 
     private int ticks = 0;
@@ -422,241 +427,231 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     @Override
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-    	int argInt0, argInt1, argInt2;
-        //WarpDrive.debugPrint("[ProtoBlock] Method " + method + " " + methodsArray[method] + " called!");
-        switch (method) {
-            case 0: // dim_getp ()
-                return new Integer[] { getFront(), getRight(), getUp() };
-                
-            case 1: // dim_setp (front, right, up)
-                if (arguments.length != 3) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                	argInt1 = ((Double)arguments[1]).intValue();
-                	argInt2 = ((Double)arguments[2]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-                if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-                	return new Integer[] { -1 };
-                }
-
-                System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
-                setFront(((Double)arguments[0]).intValue());
-                setRight(((Double)arguments[1]).intValue());
-                setUp(((Double)arguments[2]).intValue());
-                WarpDrive.warpCores.removeDeadCores();
-                break;
-
-            case 2: // dim_getn ()
-                return new Integer[] { getBack(), getLeft(), getDown() };
-                
-            case 3: // dim_setn (back, left, down)
-                if (arguments.length != 3) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                	argInt1 = ((Double)arguments[1]).intValue();
-                	argInt2 = ((Double)arguments[2]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-                if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-                	return new Integer[] { -1 };
-                }
-                
-                System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
-                setBack(argInt0);
-                setLeft(argInt1);
-                setDown(argInt2);
-                WarpDrive.warpCores.removeDeadCores();
-                break;
-
-            case 4: // set_mode (mode)
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-
-                setMode(argInt0);
-                break;
-
-            case 5: // set_distance (distance)
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-
-                setJumpDistance(argInt0);
-                break;
-
-            case 6: // set_direction (dir)
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-
-                setDirection(argInt0);
-                break;
-
-            case 7: // get_attached_players
-                String list = "";
-
-                for (int i = 0; i < this.players.size(); i++) {
-                    String nick = this.players.get(i);
-                    list += nick + ((i == this.players.size() - 1) ? "" : ",");
-                }
-
-                if (players.isEmpty()) {
-                    list = "";
-                }
-
-                return new Object[] { list };
-
-            case 8: // summon
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-
-                if (argInt0 >= 0 && argInt0 < players.size()) {
-                    setToSummon(players.get(argInt0));
-                }
-                break;
-
-            case 9: // summon_all
-                this.setSummonAllFlag(true);
-                break;
-
-            case 10: // get_x
-                if (core == null) {
-                    return null;
-                }
-
-                return new Object[] { core.xCoord };
-
-            case 11: // get_y
-                if (core == null) {
-                    return null;
-                }
-
-                return new Object[] { core.yCoord };
-
-            case 12: // get_z
-                if (core == null) {
-                    return null;
-                }
-
-                return new Object[] { core.zCoord };
-
-            case 13: // get_energy_value
-                if (core == null) {
-                	return null;
-                }
-
-                return new Object[] { (core.getEnergyStored() ) };
-
-            case 14: // do_jump
-                doJump();
-                break;
-
-            case 15: // get_ship_size
-                if (core != null) {
-                	StringBuilder reason = new StringBuilder();
-                	try {
-	                    if (!core.validateShipSpatialParameters(reason)) {
-	                    	core.messageToAllPlayersOnShip(reason.toString());
-	                    	return null;
-	                    }
-	                    return new Object[] { core.shipVolume };
-                	} catch(Exception e) {
-                		if (WarpDriveConfig.G_DEBUGMODE) {
-                			e.printStackTrace();
-                		}
-                		return null; 
-                	}
-                }
-                break;
-
-            case 16: // set_beacon_frequency
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-
-                setBeaconFrequency((String)arguments[0]);
-                break;
-
-            case 17: // get_dx
-                if (core != null) {
-                    return new Object[] { core.dx };
-                }
-                break;
-
-            case 18: // get_dz
-                if (core != null) {
-                    return new Object[] { core.dz };
-                }
-                break;
-
-            case 19: // set_core_frequency
-                if (arguments.length == 1 && (core != null)) {
-                    core.coreFrequency = ((String)arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
-                }
-                break;
-
-            case 20: // is_in_space
-                return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
-                
-            case 21: // is_in_hyperspace
-                return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
-                
-            case 22: // set_target_jumpgate
-                if (arguments.length == 1) {
-                    setTargetJumpgateName((String)arguments[0]);
-                }
-                break;
-                
-            case 23: // isAttached
-                if (core != null) {
-                	return new Object[] { (boolean)(core.controller != null) };
-                }
-                break;
-			case 24: //get_energy_required(distance)
-                if (arguments.length != 1) {
-                    return new Integer[] { -1 };
-                }
-                try {
-                	argInt0 = ((Double)arguments[0]).intValue();
-                } catch(Exception e) {
-                	return new Integer[] { -1 };
-                }
-                if (core != null) {
-                	return new Object[] { (int)(core.calculateRequiredEnergy(getMode(), core.shipVolume, argInt0)) };
-                }
-				break;
-        }
-
-        return new Integer[] { 0 };
-    }
+		int argInt0, argInt1, argInt2;
+		String methodName = methodsArray[method];
+		
+		if (methodName.equals("dim_getp")) {
+			return new Integer[] { getFront(), getRight(), getUp() };
+			
+		} else if (methodName.equals("dim_setp")) {// dim_setp (front, right, up)
+			if (arguments.length != 3) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+				argInt1 = ((Double) arguments[1]).intValue();
+				argInt2 = ((Double) arguments[2]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+				return new Integer[] { -1 };
+			}
+			
+			System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+			setFront(((Double) arguments[0]).intValue());
+			setRight(((Double) arguments[1]).intValue());
+			setUp(((Double) arguments[2]).intValue());
+			
+		} else if (methodName.equals("dim_getn")) {
+			return new Integer[] { getBack(), getLeft(), getDown() };
+			
+		} else if (methodName.equals("dim_setn")) {// dim_setn (back, left, down)
+			if (arguments.length != 3) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+				argInt1 = ((Double) arguments[1]).intValue();
+				argInt2 = ((Double) arguments[2]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+				return new Integer[] { -1 };
+			}
+			
+			System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+			setBack(argInt0);
+			setLeft(argInt1);
+			setDown(argInt2);
+			
+		} else if (methodName.equals("set_mode")) {// set_mode (mode)
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			
+			setMode(argInt0);
+			
+		} else if (methodName.equals("set_distance")) {// set_distance (distance)
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			
+			setJumpDistance(argInt0);
+			
+		} else if (methodName.equals("set_direction")) {// set_direction (dir)
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			
+			setDirection(argInt0);
+			
+		} else if (methodName.equals("get_attached_players")) {// get_attached_players
+			String list = "";
+			
+			for (int i = 0; i < this.players.size(); i++) {
+				String nick = this.players.get(i);
+				list += nick + ((i == this.players.size() - 1) ? "" : ",");
+			}
+			
+			if (players.isEmpty()) {
+				list = "";
+			}
+			
+			return new Object[] { list };
+			
+		} else if (methodName.equals("summon")) {// summon
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			
+			if (argInt0 >= 0 && argInt0 < players.size()) {
+				setToSummon(players.get(argInt0));
+			}
+			
+		} else if (methodName.equals("summon_all")) {// summon_all
+			this.setSummonAllFlag(true);
+			
+		} else if (methodName.equals("get_x")) {// get_x
+			if (core == null) {
+				return null;
+			}
+			
+			return new Object[] { core.xCoord };
+			
+		} else if (methodName.equals("get_y")) {// get_y
+			if (core == null) {
+				return null;
+			}
+			
+			return new Object[] { core.yCoord };
+			
+		} else if (methodName.equals("get_z")) {// get_z
+			if (core == null) {
+				return null;
+			}
+			
+			return new Object[] { core.zCoord };
+			
+		} else if (methodName.equals("get_energy_level")) {// get_energy_level
+			if (core == null) {
+				return null;
+			}
+			
+			return new Object[] { core.getEnergyStored() };
+			
+		} else if (methodName.equals("get_energy_max")) {// get_energy_max
+			if (core == null) {
+				return null;
+			}
+			
+			return new Object[] { core.getMaxEnergyStored() };
+			
+		} else if (methodName.equals("get_energy_required")) {// get_energy_required(distance)
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			try {
+				argInt0 = ((Double) arguments[0]).intValue();
+			} catch (Exception e) {
+				return new Integer[] { -1 };
+			}
+			if (core != null) {
+				return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipVolume, argInt0)) };
+			}
+			
+		} else if (methodName.equals("do_jump")) {// do_jump
+			doJump();
+			
+		} else if (methodName.equals("get_ship_size")) {// get_ship_size
+			if (core != null) {
+				StringBuilder reason = new StringBuilder();
+				try {
+					if (!core.validateShipSpatialParameters(reason)) {
+						core.messageToAllPlayersOnShip(reason.toString());
+						return null;
+					}
+					return new Object[] { core.shipVolume };
+				} catch (Exception e) {
+					if (WarpDriveConfig.G_DEBUGMODE) {
+						e.printStackTrace();
+					}
+					return null;
+				}
+			}
+			
+		} else if (methodName.equals("set_beacon_frequency")) {// set_beacon_frequency
+			if (arguments.length != 1) {
+				return new Integer[] { -1 };
+			}
+			
+			setBeaconFrequency((String) arguments[0]);
+			
+		} else if (methodName.equals("get_dx")) {// get_dx
+			if (core != null) {
+				return new Object[] { core.dx };
+			}
+			
+		} else if (methodName.equals("get_dz")) {// get_dz
+			if (core != null) {
+				return new Object[] { core.dz };
+			}
+			
+		} else if (methodName.equals("set_core_frequency")) {// set_core_frequency
+			if (arguments.length == 1 && (core != null)) {
+				core.coreFrequency = ((String) arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
+			}
+			
+		} else if (methodName.equals("is_in_space")) {// is_in_space
+			return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
+			
+		} else if (methodName.equals("is_in_hyperspace")) {// is_in_hyperspace
+			return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
+			
+		} else if (methodName.equals("set_target_jumpgate")) {// set_target_jumpgate
+			if (arguments.length == 1) {
+				setTargetJumpgateName((String) arguments[0]);
+			}
+			
+		} else if (methodName.equals("isAttached")) {// isAttached
+			if (core != null) {
+				return new Object[] { (boolean) (core.controller != null) };
+			}
+		}
+		
+		return new Integer[] { 0 };
+	}
 
     /**
      * @return the targetJumpgateName

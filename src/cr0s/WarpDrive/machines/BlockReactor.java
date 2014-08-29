@@ -106,7 +106,6 @@ public class BlockReactor extends BlockContainer {
             WarpDrive.warpCores.removeFromRegistry((TileEntityReactor)te);
         }
 
-        WarpDrive.warpCores.removeDeadCores();
         super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }
