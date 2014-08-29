@@ -50,7 +50,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         "set_distance", "set_direction",
         "get_attached_players", "summon", "summon_all",
         "get_x", "get_y", "get_z",
-        "get_energy_level", "get_energy_max", "get_energy_required",
+        "get_energy_level", /* "get_energy_max",/**/
         "do_jump",
         "get_ship_size",
         "set_beacon_frequency",
@@ -58,7 +58,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         "set_core_frequency",
         "is_in_space", "is_in_hyperspace",
         "set_target_jumpgate",
-        "isAttached"        
+        "isAttached", "get_energy_required"
     };
 
     private int ticks = 0;
