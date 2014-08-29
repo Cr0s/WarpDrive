@@ -156,10 +156,24 @@ end
 ----------- Formatting & popups
 
 function FormatFloat(value, nbchar)
-	return string.sub(string.format("               %f", value), -nbchar)
+	local str = "?"
+	if value ~= nil then
+		str = string.format("%f", value)
+	end
+	if nbchar ~= nil then
+		str = string.sub("               " .. str, -nbchar)
+	end
+	return str
 end
 function FormatInteger(value, nbchar)
-	return string.sub(string.format("               %d", value), -nbchar)
+	local str = "?"
+	if value ~= nil then
+		str = string.format("%d", value)
+	end
+	if nbchar ~= nil then
+		str = string.sub("               " .. str, -nbchar)
+	end
+	return str
 end
 
 function Confirm()
@@ -232,6 +246,7 @@ function readInputNumber(currentValue)
 			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
 		end
 	until inputAbort
+	SetCursorPos(1, y + 1)
 	if input == "" then
 		return currentValue
 	else
@@ -286,6 +301,7 @@ function readInputText(currentValue)
 			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
 		end
 	until inputAbort
+	SetCursorPos(1, y + 1)
 	if input == "" then
 		return currentValue
 	else
@@ -671,17 +687,17 @@ end
 
 function core_writeDirection()
 	if data.core_direction == 1 then
-		Write(" Direction        = Up")
+		WriteLn(" Direction        = Up")
 	elseif data.core_direction == 2 then
-		Write(" Direction        = Down")
+		WriteLn(" Direction        = Down")
 	elseif data.core_direction == 0 then
-		Write(" Direction        = Front")
+		WriteLn(" Direction        = Front")
 	elseif data.core_direction == 180 then
-		Write(" Direction        = Back")
+		WriteLn(" Direction        = Back")
 	elseif data.core_direction == 90 then
-		Write(" Direction        = Left")
+		WriteLn(" Direction        = Left")
 	elseif data.core_direction == 255 then
-		Write(" Direction        = Right")
+		WriteLn(" Direction        = Right")
 	end
 end
 
@@ -793,7 +809,7 @@ function core_page_setDirection()
 		ShowMenu("Use directional keys")
 		ShowMenu("W/S keys for Up/Down")
 		ShowMenu("Enter - confirm")
-		SetColorDeflt()
+		SetColorDefault()
 		local event, keycode = os.pullEvent("key")
 		if keycode == 200 then
 			data.core_direction = 0
@@ -831,6 +847,7 @@ function core_page_setDimensions()
 	warpcore.dim_setp(core_front, core_right, core_up)
 	warpcore.dim_setn(core_back, core_left, core_down)
 	core_shipSize = warpcore.get_ship_size()
+	if core_shipSize == nil then core_shipSize = 0 end
 end
 
 function core_page_summon()
@@ -842,7 +859,7 @@ function core_page_summon()
 	SetColorTitle()
 	ShowMenu("Enter player number")
 	ShowMenu("or press enter to summon everyone")
-	SetColorDeflt()
+	SetColorDefault()
 	
 	Write(":")
 	local input = readInputNumber("")
@@ -890,17 +907,25 @@ function core_page()
 		WriteLn("Core:")
 		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
 		local energy = warpcore.get_energy_level()
-		WriteLn(" Energy           = " .. math.floor(energy / 1000000) .. " % (" .. energy .. "EU)")
-		WriteLn(" Attached players = " .. warpcore.get_attached_players())
+		if energy == nil then energy = 0 end
+		local energyMax = 10000000
+		if warpcore.get_energy_max ~= nil then
+			energyMax = warpcore.get_energy_max()
+			if energyMax == nil then energyMax = 1 end
+		end
+		WriteLn(" Energy           = " .. math.floor(energy / energyMax) .. " % (" .. energy .. "EU)")
+		local players = warpcore.get_attached_players()
+		if players == nil then players = "-" end
+		WriteLn(" Attached players = " .. players)
 		WriteLn("Dimensions:")
-		WriteLn(" Front, Right, Up = " .. core_front .. ", " .. core_right .. ", " .. core_up)
-		WriteLn(" Back, Left, Down = " .. core_back .. ", " .. core_left .. ", " .. core_down)
-		WriteLn(" Size             = " .. core_weight .. " blocks")
-		WriteLn("core_warp data:")
+		WriteLn(" Front, Right, Up = " .. FormatInteger(core_front) .. ", " .. FormatInteger(core_right) .. ", " .. FormatInteger(core_up))
+		WriteLn(" Back, Left, Down = " .. FormatInteger(core_back) .. ", " .. FormatInteger(core_left) .. ", " .. FormatInteger(core_down))
+		WriteLn(" Size             = " .. core_shipSize .. " blocks")
+		WriteLn("Warp data:")
 		core_writeDirection()
 		local dest = core_computeNewCoordinates(X, Y, Z)
 		WriteLn(" Distance         = " .. core_realDistance .. " (" .. core_jumpCost .. "EU, " .. math.floor(energy / core_jumpCost) .. " jumps)")
-		WriteLn(" Dest.coordinates = " .. dest.x .. ", " .. dest.y .. ", " .. dest.z)
+		WriteLn(" Dest.coordinates = " .. FormatInteger(dest.x) .. ", " .. FormatInteger(dest.y) .. ", " .. FormatInteger(dest.z))
 		if data.core_summon then
 			WriteLn(" Summon after     = Yes")
 		else
@@ -919,29 +944,36 @@ function core_page()
 end
 
 function core_key(keycode)
-	if keycode == 31 then
+	if keycode == 31 then -- S
 		core_page_setDirection()
 		core_page_setDistance()
 		data_save()
-	elseif keycode == 50 then
+		return true
+	elseif keycode == 50 then -- M
 		if data.core_summon then
 			data.core_summon = false
 		else
 			data.core_summon = true
 		end
 		data_save()
-	elseif keycode == 32 then
+		return true
+	elseif keycode == 32 then -- D
 		core_page_setDimensions()
 		data_save()
-	elseif keycode == 36 then
+		return true
+	elseif keycode == 36 then -- J
 		core_warp()
-	elseif keycode == 46 then
+		return true
+	elseif keycode == 46 then -- C
 		core_page_summon()
-	elseif keycode == 48 then
+		return true
+	elseif keycode == 48 then -- B
 		core_page_jumpToBeacon()
-	elseif keycode == 34 then
+		return true
+	elseif keycode == 34 then -- G
 		core_page_jumpToGate()
-	elseif keycode == 35 then
+		return true
+	elseif keycode == 35 then -- H
 		rs.setOutput(alarm_side, true)
 		if Confirm() then
 			rs.setOutput(alarm_side, false)
@@ -949,9 +981,12 @@ function core_key(keycode)
 			warpcore.do_jump()
 		end
 		rs.setOutput(alarm_side, false)
+		return true
 	elseif keycode == 49 then
 		data_setName()
+		return true
 	end
+	return false
 end
 
 ----------- Reactor support
@@ -1445,5 +1480,13 @@ if data.core_summon then
 	data_save()
 end
 
+-- clear screens on exit
 SetMonitorColorFrontBack(colors.white, colors.black)
-print()
+term.clear()
+if monitors ~= nil then
+	for key,monitor in pairs(monitors) do
+		monitor.clear()
+	end
+end
+SetCursorPos(1,1)
+Write("")
