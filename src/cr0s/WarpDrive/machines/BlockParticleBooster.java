@@ -79,17 +79,19 @@ public class BlockParticleBooster extends BlockContainer {
      * Called upon block activation (right click on the block.)
      */
     @Override
-    public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return false;
-        }
-
-        WarpEnergyTE te = (WarpEnergyTE)par1World.getBlockTileEntity(par2, par3, par4);
-        if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-        	par5EntityPlayer.addChatMessage(te.getStatus());
-            return true;
-        }
-
-        return false;
-    }
+	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return false;
+		}
+		
+		if (par5EntityPlayer.getHeldItem() == null) {
+			TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+			if (te != null && te instanceof WarpEnergyTE) {
+				par5EntityPlayer.addChatMessage(((WarpEnergyTE) te).getStatus());
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

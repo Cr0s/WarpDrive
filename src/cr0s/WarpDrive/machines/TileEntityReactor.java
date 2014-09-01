@@ -234,10 +234,12 @@ public class TileEntityReactor extends WarpEnergyTE
                             messageToAllPlayersOnShip(reason.toString());
                             return;
                         }
+                        WarpDrive.debugPrint("!!! makePlayersOnShipDrunk targetCooldown " + targetCooldown);
                         makePlayersOnShipDrunk(targetCooldown + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
                     }
 
                     if (!soundPlayed && (soundThreshold > warmupTime)) {
+                        WarpDrive.debugPrint("!!! playSoundEffect soundThreshold " + soundThreshold  + " warmupTime " + warmupTime);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, soundFile, 4F, 1F);
                         soundPlayed = true;
                     }
