@@ -241,15 +241,15 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		for(int i = 0; i < 4; i++) {
 			exploding = exploding || (instabilityValues[i] >= 100);
 		}
-		exploding &= worldObj.rand.nextBoolean();
+		exploding &= (worldObj.rand.nextInt(4) == 2);
 		
-		if (exploding && worldObj.rand.nextBoolean()) {
-			active = false;
+		if (exploding) {
 	        WarpDrive.print(this + String.format(" Explosion trigerred, Instability is [%.2f, %.2f, %.2f, %.2f], Energy stored is %d, Laser received is %.2f, %s", new Object[] {
 	           		instabilityValues[0], instabilityValues[1], instabilityValues[2], instabilityValues[3],
 	           		this.containedEnergy,
 	           		this.lasersReceived,
 	           		this.active ? "ACTIVE" : "INACTIVE" }));
+			active = false;
 		}
 		return exploding;
 	}
