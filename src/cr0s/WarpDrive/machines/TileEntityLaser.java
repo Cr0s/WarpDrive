@@ -515,11 +515,20 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				
 			case 3: // getFirstHit()
 				if (firstHit != null) {
-					int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
-					int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
-					float blockResistance = Block.blocksList[blockID].blockResistance;
-					Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, blockResistance };
-					return info;
+					try {
+						int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+						int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+						float blockResistance = -2;
+						if (Block.blocksList[blockID] != null) {
+							blockResistance = Block.blocksList[blockID].blockResistance;
+						}
+						Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, blockResistance };
+						firstHit = null;
+						return info;
+					} catch (Exception e) {
+						e.printStackTrace();
+						return new Integer[] { 0, 0, 0, 0, 0, -3 };
+					}
 				} else {
 					return new Integer[] { 0, 0, 0, 0, 0, -1 };
 				}
