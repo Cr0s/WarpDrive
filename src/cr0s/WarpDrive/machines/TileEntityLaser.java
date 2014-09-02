@@ -72,7 +72,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				packetSendTicks--;
 				if (packetSendTicks <= 0) {
 					packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
-					sendFreqPacket();
+					PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, cameraFrequency);
 				}
 			} else {
 				registryUpdateTicks--;
@@ -328,10 +328,10 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		if (cameraFrequency != parCameraFrequency) {
 			WarpDrive.debugPrint("" + this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
 			cameraFrequency = parCameraFrequency;
+	        // force update through main thread since CC runs on server as 'client'
+	        packetSendTicks = 0;
+	        registryUpdateTicks = 0;
 		}
-        if (worldObj != null) {
-        	WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
-        }
 	}
 
 	private TileEntityParticleBooster findFirstBooster() {
@@ -548,30 +548,6 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		return null;
 	}
 
-	// Camera frequency refresh to clients packet
-	public void sendFreqPacket() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				outputStream.writeInt(xCoord);
-				outputStream.writeInt(yCoord);
-				outputStream.writeInt(zCoord);
-				outputStream.writeInt(cameraFrequency);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveFreq";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
-//			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + cameraFrequency + "'");
-		}
-	}
-
 	@Override
 	public void attach(IComputerAccess computer) {
 		int id = computer.getID();
@@ -598,5 +574,16 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s/%d Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+       		getClass().getSimpleName(),
+       		Integer.valueOf(hashCode()),
+       		beamFrequency,
+       		cameraFrequency,
+       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+       		xCoord, yCoord, zCoord});
 	}
 }

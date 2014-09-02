@@ -100,7 +100,7 @@ public class CamRegistry {
 				WarpDrive.debugPrint("Adding 'live' camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + " with frequency '" + cam.frequency + "'");
                 registry.add(cam);
             } else if (existingCam.frequency != cam.frequency) {
-				WarpDrive.debugPrint("Updating 'live' camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + " to frequency '" + cam.frequency + "'");
+				WarpDrive.debugPrint("Updating 'live' camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + " from frequency '" + existingCam.frequency + "' to frequency '" + cam.frequency + "'");
                 existingCam.frequency = cam.frequency;
             }
         } else {
