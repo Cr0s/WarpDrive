@@ -101,9 +101,9 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	public void addBeamEnergy(int amount) {
 		if (isEmitting) {
 			energyFromOtherBeams += amount;
-			WarpDrive.debugPrint("[LE] Added energy: " + amount);
+			WarpDrive.debugPrint(this + " Added energy " + amount);
 		} else {
-			WarpDrive.debugPrint("[LE] Ignored energy: " + amount);
+			WarpDrive.debugPrint(this + " Ignored energy " + amount);
 		}
 	}
 
@@ -150,7 +150,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = Vector3.translate(beamVector.clone(), Vector3.scale(lookVector.clone(), beamLengthBlocks));
-		WarpDrive.debugPrint("" + this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
+		WarpDrive.debugPrint(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
@@ -314,7 +314,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	
 	public void setBeamFrequency(int parBeamFrequency) {
 		if (beamFrequency != parBeamFrequency) {
-			WarpDrive.debugPrint("" + this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
+			WarpDrive.debugPrint(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
 			beamFrequency = parBeamFrequency;
 		}
 		updateColor();
@@ -326,7 +326,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	public void setCameraFrequency(int parCameraFrequency) {
 		if (cameraFrequency != parCameraFrequency) {
-			WarpDrive.debugPrint("" + this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
+			WarpDrive.debugPrint(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
 			cameraFrequency = parCameraFrequency;
 	        // force update through main thread since CC runs on server as 'client'
 	        packetSendTicks = 0;
@@ -553,7 +553,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		int id = computer.getID();
 		connectedComputers.put(id, computer);
 	}
-
+	
 	@Override
 	public void detach(IComputerAccess computer) {
 		int id = computer.getID();
@@ -570,7 +570,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			comp.queueEvent(eventName, arguments);
 		}
 	}
-
+	
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
