@@ -36,7 +36,6 @@ public class TileEntityReactor extends WarpEnergyTE
     public final int JUMP_DOWN = -2;
     public int dx, dz;
     private int direction;
-    private int distance;
 
     public int maxX, maxY, maxZ;
     public int minX, minY, minZ;
@@ -180,14 +179,14 @@ public class TileEntityReactor extends WarpEnergyTE
             case MODE_GATE_JUMP:
                 if (controller.isJumpFlag()) {
                     // Compute warm-up time
-                   	int targetCooldown = 0;
+                   	int targetWarmup = 0;
                    	switch (currentMode) {
 	                    case MODE_BASIC_JUMP:
 	                    case MODE_LONG_JUMP:
-	                    	if (distance < 50) {
-	                    		targetCooldown = (WarpDriveConfig.WC_WARMUP_SHORTJUMP_SECONDS) * 20 / 3;
+	                    	if (controller.getDistance() < 50) {
+	                    		targetWarmup = WarpDriveConfig.WC_WARMUP_SHORTJUMP_SECONDS * 20;
 	                    	} else {
-	                    		targetCooldown = (WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS) * 20;
+	                    		targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
 	                    	}
 	                    	break;
 	                    	
@@ -195,20 +194,20 @@ public class TileEntityReactor extends WarpEnergyTE
 	                    case MODE_HYPERSPACE:
 	                    case MODE_GATE_JUMP:
 	                    default:
-	                    	targetCooldown = (WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS) * 20;
+	                    	targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
 	                    	break;
                     }
                    	// Select best sound file and  adjust offset
                 	int soundThreshold = 0;
                    	String soundFile = "";
-                	if (targetCooldown < 10 * 20) {
-                		soundThreshold = targetCooldown - 4 * 20;
+                	if (targetWarmup < 10 * 20) {
+                		soundThreshold = targetWarmup - 4 * 20;
                 		soundFile = "warpdrive:warp_4s";
-                	} else if (targetCooldown > 29 * 20) {
-                		soundThreshold = targetCooldown - 30 * 20;
+                	} else if (targetWarmup > 29 * 20) {
+                		soundThreshold = targetWarmup - 30 * 20;
                 		soundFile = "warpdrive:warp_30s";
                 	} else {
-                		soundThreshold = targetCooldown - 10 * 20;
+                		soundThreshold = targetWarmup - 10 * 20;
                 		soundFile = "warpdrive:warp_10s";	
                 	}
                    	// Add random duration
@@ -235,18 +234,18 @@ public class TileEntityReactor extends WarpEnergyTE
                             messageToAllPlayersOnShip(reason.toString());
                             return;
                         }
-                        WarpDrive.debugPrint("!!! makePlayersOnShipDrunk targetCooldown " + targetCooldown);
-                        makePlayersOnShipDrunk(targetCooldown + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
+                        // WarpDrive.debugPrint(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
+                        makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
                     }
 
                     if (!soundPlayed && (soundThreshold > warmupTime)) {
-                        WarpDrive.debugPrint("!!! playSoundEffect soundThreshold " + soundThreshold  + " warmupTime " + warmupTime);
+                        // WarpDrive.debugPrint(this + " Playing sound effect '" + soundFile + "' soundThreshold " + soundThreshold  + " warmupTime " + warmupTime);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, soundFile, 4F, 1F);
                         soundPlayed = true;
                     }
 
                     // Awaiting cool-down time
-                    if (warmupTime < (targetCooldown + randomWarmupAddition)) {
+                    if (warmupTime < (targetWarmup + randomWarmupAddition)) {
                     	warmupTime++;
                         return;
                     }
@@ -272,9 +271,7 @@ public class TileEntityReactor extends WarpEnergyTE
                         return;                    	
                     }
 
-                    WarpDrive.debugPrint("!!! pre doJump");
                     doJump();
-                    WarpDrive.debugPrint("!!! after doJump");
                     cooldownTime = WarpDriveConfig.WC_COOLDOWN_INTERVAL_SECONDS * 20;
                     controller.setJumpFlag(false);
                 } else {
@@ -405,8 +402,7 @@ public class TileEntityReactor extends WarpEnergyTE
         shipBack  = controller.getBack();
         shipLeft  = controller.getLeft();
         shipDown  = controller.getDown();
-        distance  = Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, controller.getDistance());
-
+        
         int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
 
         if (Math.abs(dx) > 0) {
@@ -527,7 +523,7 @@ public class TileEntityReactor extends WarpEnergyTE
         // Now make jump to a beacon
         if (isBeaconFound) {
             // Consume energy
-            if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
+            if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
 	            System.out.println("" + this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 	            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 	            jump.maxX = maxX;
@@ -708,7 +704,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
 
         // Consume energy
-        if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
+        if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
 	        System.out.println("[TE-WC] Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 	        EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 	        jump.maxX = maxX;
@@ -726,6 +722,7 @@ public class TileEntityReactor extends WarpEnergyTE
     }
 
     private void doJump() {
+    	int distance = controller.getDistance();
     	int requiredEnergy = calculateRequiredEnergy(currentMode, shipVolume, distance);
 
         if (!consumeEnergy(requiredEnergy, true)) {
@@ -733,7 +730,6 @@ public class TileEntityReactor extends WarpEnergyTE
             this.controller.setJumpFlag(false);
             return;
         }
-        WarpDrive.debugPrint("!!! doJump after EnergyCheck");
 
         String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
         if (currentMode == this.MODE_GATE_JUMP) {
@@ -776,7 +772,6 @@ public class TileEntityReactor extends WarpEnergyTE
             	messageToAllPlayersOnShip("Insufficient energy level");
             	return;
             }
-            WarpDrive.debugPrint("!!! doJump after EnergyConsumption");
 
             if (this.currentMode == this.MODE_BASIC_JUMP) {
                 distance += shipLength;
@@ -798,9 +793,7 @@ public class TileEntityReactor extends WarpEnergyTE
             jump.minY = minY;
             jump.shipLength = shipLength;
             jump.on = true;
-            WarpDrive.debugPrint("!!! doJump after entity creation");
             worldObj.spawnEntityInWorld(jump);
-            WarpDrive.debugPrint("!!! doJump after entity spawning");
         }
     }
 

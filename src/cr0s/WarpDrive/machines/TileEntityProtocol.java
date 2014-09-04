@@ -86,13 +86,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         }
     }
 
-    private void setJumpDistance(int distance) {
-        System.out.println("Setting jump distance: " + distance);
-        this.distance = distance;
-    }
-
     private void setMode(int mode) {
-        // System.out.println("Setting mode: " + mode);
+        // WarpDrive.print("Setting mode: " + mode);
         this.mode = mode;
     }
 
@@ -106,7 +101,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         } else {
         	this.direction = dir;
         }
-        //WarpDrive.debugPrint("" + this + " Direction set to " + this.direction);
+        // WarpDrive.print("" + this + " Direction set to " + this.direction);
     }
 
     private void doJump() {
@@ -309,11 +304,11 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     public void setDistance(int distance) {
-        this.distance = distance;
+        this.distance = Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance);
+    	WarpDrive.debugPrint(this + " Jump distance updated to " + distance);
     }
 
-    public int getDistance()
-    {
+    public int getDistance() {
         return this.distance;
     }
 
@@ -498,7 +493,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			
-			setJumpDistance(argInt0);
+			setDistance(argInt0);
 			
 		} else if (methodName.equals("set_direction")) {// set_direction (dir)
 			if (arguments.length != 1) {
