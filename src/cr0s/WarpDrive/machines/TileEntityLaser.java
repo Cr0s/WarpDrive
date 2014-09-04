@@ -72,7 +72,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				packetSendTicks--;
 				if (packetSendTicks <= 0) {
 					packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
-					sendFreqPacket();
+					PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, cameraFrequency);
 				}
 			} else {
 				registryUpdateTicks--;
@@ -101,9 +101,9 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	public void addBeamEnergy(int amount) {
 		if (isEmitting) {
 			energyFromOtherBeams += amount;
-			WarpDrive.debugPrint("[LE] Added energy: " + amount);
+			WarpDrive.debugPrint(this + " Added energy " + amount);
 		} else {
-			WarpDrive.debugPrint("[LE] Ignored energy: " + amount);
+			WarpDrive.debugPrint(this + " Ignored energy " + amount);
 		}
 	}
 
@@ -150,7 +150,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = Vector3.translate(beamVector.clone(), Vector3.scale(lookVector.clone(), beamLengthBlocks));
-		WarpDrive.debugPrint("" + this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
+		WarpDrive.debugPrint(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 		int distanceTravelled = 0; //distance travelled from beam emitter to previous hit if there were any
@@ -314,7 +314,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	
 	public void setBeamFrequency(int parBeamFrequency) {
 		if (beamFrequency != parBeamFrequency) {
-			WarpDrive.debugPrint("" + this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
+			WarpDrive.debugPrint(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
 			beamFrequency = parBeamFrequency;
 		}
 		updateColor();
@@ -326,12 +326,12 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	public void setCameraFrequency(int parCameraFrequency) {
 		if (cameraFrequency != parCameraFrequency) {
-			WarpDrive.debugPrint("" + this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
+			WarpDrive.debugPrint(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
 			cameraFrequency = parCameraFrequency;
+	        // force update through main thread since CC runs on server as 'client'
+	        packetSendTicks = 0;
+	        registryUpdateTicks = 0;
 		}
-        if (worldObj != null) {
-        	WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
-        }
 	}
 
 	private TileEntityParticleBooster findFirstBooster() {
@@ -548,36 +548,12 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		return null;
 	}
 
-	// Camera frequency refresh to clients packet
-	public void sendFreqPacket() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				outputStream.writeInt(xCoord);
-				outputStream.writeInt(yCoord);
-				outputStream.writeInt(zCoord);
-				outputStream.writeInt(cameraFrequency);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveFreq";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
-//			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + cameraFrequency + "'");
-		}
-	}
-
 	@Override
 	public void attach(IComputerAccess computer) {
 		int id = computer.getID();
 		connectedComputers.put(id, computer);
 	}
-
+	
 	@Override
 	public void detach(IComputerAccess computer) {
 		int id = computer.getID();
@@ -594,9 +570,20 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			comp.queueEvent(eventName, arguments);
 		}
 	}
-
+	
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s/%d Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+       		getClass().getSimpleName(),
+       		Integer.valueOf(hashCode()),
+       		beamFrequency,
+       		cameraFrequency,
+       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+       		xCoord, yCoord, zCoord});
 	}
 }

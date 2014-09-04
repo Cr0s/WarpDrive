@@ -1,7 +1,9 @@
 package cr0s.WarpDrive;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -9,9 +11,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.Player;
 import cr0s.WarpDrive.data.Vector3;
@@ -161,7 +165,7 @@ public class PacketHandler implements IPacketHandler
             int y = inputStream.readInt();
             int z = inputStream.readInt();
             int frequency = inputStream.readInt();
-//            WarpDrive.debugPrint("Received frequency packet: (" + x + ", " + y + ", " + z + ") frequency '" + frequency + "'");
+            // WarpDrive.debugPrint("Received frequency packet: (" + x + ", " + y + ", " + z + ") frequency '" + frequency + "'");
             TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
             if (te != null) {
                 if (te instanceof TileEntityMonitor) {
@@ -170,11 +174,13 @@ public class PacketHandler implements IPacketHandler
                     ((TileEntityCamera)te).setFrequency(frequency);
                 } else if (te instanceof TileEntityLaser) {
                     ((TileEntityLaser)te).setCameraFrequency(frequency);
+                } else {
+                    WarpDrive.print("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
                 }
+            } else {
+                WarpDrive.print("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -227,6 +233,29 @@ public class PacketHandler implements IPacketHandler
 		{
 			e.printStackTrace();
 			return;
+		}
+	}
+	
+	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream outputStream = new DataOutputStream(bos);
+
+			try {
+				outputStream.writeInt(xCoord);
+				outputStream.writeInt(yCoord);
+				outputStream.writeInt(zCoord);
+				outputStream.writeInt(frequency);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			Packet250CustomPayload packet = new Packet250CustomPayload();
+			packet.channel = "WarpDriveFreq";
+			packet.data = bos.toByteArray();
+			packet.length = bos.size();
+			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, dimensionId, packet);
+			// WarpDrive.debugPrint("Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + frequency + "'");
 		}
 	}
 }
