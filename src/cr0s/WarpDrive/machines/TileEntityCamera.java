@@ -41,7 +41,7 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 			registryUpdateTicks--;
 			if (registryUpdateTicks <= 0) {
 				registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
-				WarpDrive.debugPrint("" + this + " Updating registry (" + frequency + ")");
+				// WarpDrive.debugPrint("" + this + " Updating registry (" + frequency + ")");
 				WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 			}
 		}
