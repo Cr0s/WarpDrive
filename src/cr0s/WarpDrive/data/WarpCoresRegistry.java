@@ -62,15 +62,15 @@ public class WarpCoresRegistry {
 		removeDeadCores();
 
 		printRegistry();
-		for (TileEntityReactor c : registry) {
-			double d3 = c.xCoord - x;
-			double d4 = c.yCoord - y;
-			double d5 = c.zCoord - z;
-			double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
+		int radius2 = radius * radius;
+		for (TileEntityReactor core : registry) {
+			double dX = core.xCoord - x;
+			double dY = core.yCoord - y;
+			double dZ = core.zCoord - z;
+			double distance2 = dX * dX + dY * dY + dZ * dZ;
 
-//			if (distance <= radius && !(c.controller == null || c.controller.getMode() == 0) && !isCoreHidden(c)) {
-			if (distance <= radius && !isCoreHidden(c)) {
-				res.add(c);
+			if (distance2 <= radius2 && ! core.isHidden()) {
+				res.add(core);
 			}
 		}
 
@@ -78,26 +78,13 @@ public class WarpCoresRegistry {
 	}
 
 	public void printRegistry() {
-		System.out.println("WarpCores registry:");
+		WarpDrive.print("WarpCores registry:");
 		removeDeadCores();
 
-		for (TileEntityReactor c : registry) {
-			System.out.println("- " + c.coreFrequency + " (" + c.xCoord + ", " + c.yCoord + ", " + c.zCoord + ")");
+		for (TileEntityReactor core : registry) {
+			WarpDrive.print("- Frequency '" + core.coreFrequency + "' @ '" + core.worldObj.provider.getDimensionName() + "' " + core.xCoord + ", " + core.yCoord + ", " + core.zCoord
+					+ " with " + core.isolationBlocksCount + " isolation blocks");
 		}
-	}
-
-	final int LOWER_HIDE_POINT = 18;
-	private boolean isCoreHidden(TileEntityReactor core) {
-		if (core.isolationBlocksCount > 5) {
-			int randomNumber = core.worldObj.rand.nextInt(150);
-
-			if (randomNumber < LOWER_HIDE_POINT + core.isolationBlocksCount) {
-				WarpDrive.debugPrint("" + this + " Core '" + core.coreFrequency + "' is hidden");
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	public boolean isWarpCoreIntersectsWithOthers(TileEntityReactor core) {

@@ -65,6 +65,7 @@ public class TileEntityReactor extends WarpEnergyTE
     public String coreFrequency = "default";
 
     public int isolationBlocksCount = 0;
+    public double isolationRate = 0.0D;
     public int isolationUpdateTicks = 0;
 
     public TileEntityProtocol controller;
@@ -297,58 +298,42 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
-    private void updateIsolationState()
-    {
-        // Search block in cube around core with side 10
-        int xmax, ymax, zmax, x1, x2, z1, z2;
+    private void updateIsolationState() {
+        // Search block in cube around core
+        int xmax, ymax, zmax;
         int xmin, ymin, zmin;
-        final int ISOLATION_CUBE_SIDE = 6;
-        x1 = xCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        x2 = xCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
+        xmin = xCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+        xmax = xCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
 
-        if (x1 < x2)
-        {
-            xmin = x1;
-            xmax = x2;
-        }
-        else
-        {
-            xmin = x2;
-            xmax = x1;
-        }
+        zmin = zCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+        zmax = zCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
 
-        z1 = zCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        z2 = zCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
-
-        if (z1 < z2)
-        {
-            zmin = z1;
-            zmax = z2;
-        }
-        else
-        {
-            zmin = z2;
-            zmax = z1;
-        }
-
-        ymax = yCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        ymin = yCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
-        this.isolationBlocksCount = 0;
+        // scan 1 block higher to encourage putting isolation block on both ground and ceiling
+        ymin = Math.max(  0, yCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
+        ymax = Math.min(255, yCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
+        
+        int newCount = 0;
 
         // Search for warp isolation blocks
-        for (int y = ymin; y <= ymax; y++)
-        {
-            for (int x = xmin; x <= xmax; x++)
-            {
-                for (int z = zmin; z <= zmax; z++)
-                {
-                    if (worldObj.getBlockId(x, y, z) == WarpDriveConfig.isolationID)
-                    {
-                        this.isolationBlocksCount++;
+        for (int y = ymin; y <= ymax; y++) {
+            for (int x = xmin; x <= xmax; x++) {
+                for (int z = zmin; z <= zmax; z++) {
+                    if (worldObj.getBlockId(x, y, z) == WarpDriveConfig.isolationID) {
+                    	newCount++;
                     }
                 }
             }
         }
+        isolationBlocksCount = newCount;
+		if (isolationBlocksCount >= WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS) {
+			isolationRate = WarpDriveConfig.WR_MIN_ISOLATION_EFFECT
+					+ (isolationBlocksCount - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS)		// bonus blocks
+					* (WarpDriveConfig.WR_MAX_ISOLATION_EFFECT - WarpDriveConfig.WR_MIN_ISOLATION_EFFECT)
+					/ (WarpDriveConfig.WR_MAX_ISOLATION_BLOCKS - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS);
+		} else {
+			isolationRate = 0.0D;
+		}
+        // WarpDrive.debugPrint(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
     }
 
     private void makePlayersOnShipDrunk(int tickDuration) {
@@ -939,7 +924,8 @@ public class TileEntityReactor extends WarpEnergyTE
 
     @Override
     public String getStatus() {
-        return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU." + ((cooldownTime <= 0) ? "" : (" " + (cooldownTime / 20) + " s left of cooldown."));
+        return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU."
+        		+ ((cooldownTime > 0) ? ("\n" + (cooldownTime / 20) + " s left of cooldown.") : ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
     }
 
     public static int calculateRequiredEnergy(int currentMode, int shipVolume, int jumpDistance)  {
@@ -1035,6 +1021,15 @@ public class TileEntityReactor extends WarpEnergyTE
     public int getCooldown() {
     	return cooldownTime;
     }
+
+	public boolean isHidden() {
+		if (cooldownTime <= 0 && worldObj.rand.nextDouble() < isolationRate) {
+			// WarpDrive.debugPrint(this + " Core '" + coreFrequency + "' is hidden");
+			return true;
+		}
+
+		return false;
+	}
     
     @Override
 	public int getMaxEnergyStored() {
