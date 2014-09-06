@@ -17,7 +17,21 @@ Style = {
 	BGSuccess = colors.lime,
 
 	CDisabled = colors.gray,
-	BGDisabled = colors.blue
+	BGDisabled = colors.blue,
+
+	CRadarmap = colors.gray,
+	BGRadarmap = colors.green,
+
+	CRadarborder = colors.gray,
+	BGRadarborder = colors.green,
+
+	CRadarself = colors.white,
+	BGRadarself = colors.lime,
+	TxtRadarself = "H",
+	
+	CRadarother = colors.white,
+	BGRadarother = colors.black,
+	TxtRadarother = "*"
 }
 
 if not term.isColor() then
@@ -76,6 +90,14 @@ function SetColorDisabled()
 	SetMonitorColorFrontBack(Style.CDisabled, Style.BGDisabled)
 end
 
+function SetColorRadarmap()
+	SetMonitorColorFrontBack(Style.CRadarmap, Style.BGRadarmap)
+end
+
+function SetColorRadarmap()
+	SetMonitorColorFrontBack(Style.CRadarborder, Style.BGRadarborder)
+end
+
 function Clear()
 	clearWarningTick = -1
 	SetColorDefault()
@@ -101,8 +123,12 @@ end
 
 function WriteLn(Text)
 	Write(Text)
-	local xt, yt = term.getCursorPos()
-	SetCursorPos(1, yt + 1)
+	local x, y = term.getCursorPos()
+	local width, height = term.getSize()
+	if y > height - 1 then
+		y = 1
+	end
+	SetCursorPos(1, y + 1)
 end
 
 function WriteCentered(y, text)
@@ -197,6 +223,9 @@ end
 function readInputNumber(currentValue)
 	local inputAbort = false
 	local input = string.format(currentValue)
+	if input == "0" then
+		input = ""
+	end
 	local x, y = term.getCursorPos()
 	repeat
 		ClearWarning()
@@ -232,6 +261,10 @@ function readInputNumber(currentValue)
 			end
 		elseif eventName == "char" then
 			-- drop it
+		elseif eventName == "redstone" then
+			redstone_event(params[2])
+		elseif eventName == "timer" then
+			timer_event(params[2])
 		elseif eventName == "reactorPulse" then
 			reactor_pulse(params[2])
 	--	elseif eventName == "reactorDeactivation" then
@@ -287,6 +320,10 @@ function readInputText(currentValue)
 			else
 				ShowWarning("Char #" .. string.byte(char) .. " is invalid")
 			end
+		elseif eventName == "redstone" then
+			redstone_event(params[2])
+		elseif eventName == "timer" then
+			timer_event(params[2])
 		elseif eventName == "reactorPulse" then
 			reactor_pulse(params[2])
 	--	elseif eventName == "reactorDeactivation" then
@@ -343,6 +380,16 @@ function redstone_event()
 		showWarning(message)
 	end
 end
+
+
+----------- Timer support
+
+function timer_event(timerId)
+	if timerId == radar_timerId then
+		radar_timerEvent()
+	end
+end
+
 
 ----------- Cloaking support
 
@@ -489,6 +536,9 @@ function mining_key(keycode)
 	elseif keycode == 78 then -- +
 		mining_layerOffset = mining_layerOffset + 1
 		return true
+	elseif keycode == 46 then -- C
+		mining_page_config()
+		return true
 	end
 	return false
 end
@@ -539,7 +589,16 @@ function mining_page()
 	SetCursorPos(1, 16)
 	ShowMenu("S - Start mining, P - stoP mining, A - mine All")
 	SetCursorPos(1, 17)
-	ShowMenu("D - use Deuterium, +/- - adjust offset")
+	ShowMenu("D - use Deuterium, +/-/C - adjust offset")
+end
+
+function mining_page_config()
+	ShowTitle(label .. " - Mining configuration")
+	Write(" Layer offset (".. mining_layerOffset ..") : ")
+	mining_layerOffset = readInputNumber(mining_layerOffset)
+	if mining_layerOffset < 1 then
+		mining_layerOffset = 1
+	end
 end
 
 function mining_start()
@@ -774,7 +833,6 @@ function core_page_setDistance()
 	ShowTitle("<==== Set distance ====>")
 	SetCursorPos(1, 2)
 	
-	data.core_distance = 0
 	core_computeRealDistance()
 	local maximumDistance = core_minimumDistance + 127
 	if core_isInHyper then
@@ -1271,6 +1329,369 @@ function reactor_init()
 	end
 end
 
+----------- Radar support
+
+data.radar_monitorIndex = 0
+data.radar_radius = 0
+data.radar_autoscan = false
+data.radar_autoscanDelay = 3
+data.radar_results = {}
+radar_listOffset = 0
+radar_timerId = -1
+radar_timerLength = 1
+radar_scale = 1
+function radar_key(keycode)
+	if keycode == 31 then -- S
+		data.radar_autoscan = false
+		return radar_scan()
+	elseif keycode == 30 then -- A
+		data.radar_autoscan = true
+		return radar_scan()
+	elseif keycode == 25 then -- P
+		data.radar_autoscan = false
+		return true
+	elseif keycode == 49 then -- N
+		radar_setMonitorIndex(data.radar_monitorIndex + 1)
+		return true
+	elseif keycode == 34 then -- G
+		radar_scale = math.max(0.001, radar_scale / 10)
+		radar_drawMap()
+		return true
+	elseif keycode == 20 then -- T
+		radar_scale = math.min(1000, radar_scale * 10)
+		radar_drawMap()
+		return true
+	elseif keycode == 36 then -- J
+		radar_listOffset = math.max(0, radar_listOffset - 4)
+		return true
+	elseif keycode == 22 then -- U
+		radar_listOffset = math.min(#radar_results - 1, radar_listOffset + 4)
+		return true
+	elseif keycode == 74 then -- -
+		radar_setRadius(data.radar_radius - 100)
+		data_save()
+		return true
+	elseif keycode == 78 then -- +
+		if data.radar_radius < 100 then
+			radar_setRadius(100)
+		else
+			radar_setRadius(data.radar_radius + 100)
+		end
+		data_save()
+		return true
+	elseif keycode == 46 then -- C
+		radar_config()
+		data_save()
+		return true
+	end
+	return false
+end
+
+function radar_page()
+	local resultsPerPage = 5
+	ShowTitle(label .. " - Radar map")
+
+	SetCursorPos(1, 2)
+	if radar == nil then
+		SetColorDisabled()
+		Write("Radar not detected")
+	else
+		SetColorDefault()
+		local lastResultShown = radar_listOffset + resultsPerPage
+		if lastResultShown >= #radar_results then
+			lastResultShown = #radar_results - 1
+		end
+		Write("Displaying results " .. radar_listOffset .. " to " .. lastResultShown .. " of " .. #radar_results)
+		for i = radar_listOffset, lastResultShown do
+			SetCursorPos(12, 2 + i - radar_listOffset)
+			Write("'" .. radar_result[i].frequency .. "' @ " .. radar_result[i].x .. ", " .. radar_result[i].y .. ", " .. radar_result[i].z)
+		end
+
+		SetColorDefault()
+		local energy = { radar.getEnergyLevel() }
+		SetCursorPos(1, 12)
+		Write("Energy: ")
+		if energy ~= nil then
+			if energy > radar_radius * radar_radius then
+				SetColorSuccess()
+			else
+				SetColorWarning()
+			end
+			Write(FormatInteger(energy, 10) .. " EU")
+		else
+			Write("???")
+		end
+		SetCursorPos(1, 13)
+		Write("Radius: " .. radar_radius)
+
+		SetCursorPos(1, 14)
+		Write("Autoscan: ")
+		if radar_autoscan then SetColorSuccess() else SetColorDefault() end
+		Write(boolToYesNo(radar_autoscan))
+
+		SetCursorPos(30, 14)
+		Write("Delay " .. radar_autoscanDelay .. "s")
+	end
+	
+	SetColorTitle()
+	SetCursorPos(1, 15)
+	ShowMenu("S - Scan once, A - Autoscan, P - Stop autoscan")
+	SetCursorPos(1, 16)
+	ShowMenu("+/- - Scan radius, U/J - Scroll list")
+	SetCursorPos(1, 17)
+	ShowMenu("T/G - Scale, N - Next monitor, C - Configuration")
+end
+
+function radar_page_config()
+	ShowTitle(label .. " - Radar configuration")
+	
+	SetCursorPos(1, 2)
+	if radar == nil then
+		SetColorDisabled()
+		Write("No radar detected")
+	else
+		SetColorDefault()
+		SetCursorPos(1, 3)
+		Write("Radar scan radius (" .. data.radar_radius .. " blocks): ")
+		radar_setRadius(readInputNumber(data.radar_radius))
+		
+		SetCursorPos(1, 4)
+		Write("Autoscan delay in seconds (" .. data.radar_autoscanDelay .. "): ")
+		radar_setAutoscanDelay(readInputNumber(data.radar_autoscanDelay))
+		
+		SetCursorPos(1, 5)
+		Write("Output monitor (" .. data.radar_monitorIndex .. "/" .. #monitors .. "): ")
+		radar_setMonitorIndex(readInputNumber(data.radar_monitorIndex))
+	end
+end
+
+function radar_setRadius(newRadius)
+	if newRadius < 1 then
+		data.radar_radius = 1
+	elseif newRadius >= 10000 then
+		data.radar_radius = 10000
+	else
+		data.radar_radius = newRadius
+	end
+	data_save()
+end
+
+function radar_setAutoscanDelay(newAutoscanDelay)
+	if newAutoscanDelay < 1 then
+		data.radar_autoscanDelay = 1
+	elseif newAutoscanDelay >= 3600 then	-- 1 hour
+		data.radar_autoscanDelay = 3600
+	else
+		data.radar_autoscanDelay = newAutoscanDelay
+	end
+	data_save()
+end
+
+function radar_setMonitorIndex(newIndex)
+	if #monitors == 0 or newIndex < -1 then
+		data.radar_monitorIndex = -1
+	elseif newIndex >= #monitors then
+		data.radar_monitorIndex = #monitors - 1
+	else
+		data.radar_monitorIndex = newIndex
+	end
+	data_save()
+end
+
+function radar_scan()
+	if radar == nil then
+		radar_drawWarning("No radar")
+		return false
+	end
+	if (radar.getEnergyLevel() < radius * radius) then
+		radar_drawWarning("LOW POWER")
+		return false
+	end
+	if radar_timerId ~= -1 then
+		radar_drawWarning("Already scanning...")
+		return false
+	end
+	radar_timerId = os.startTimer(radar_timerLength)
+
+	radar.scanRadius(radius);
+	radar_drawWarning("Scanning...")
+	return false
+end
+
+function radar_scanDone()
+	local numResults = radar.getResultsCount();
+	data.radar_results = {}
+
+	if (numResults ~= 0) then
+		for i = 0, numResults - 1 do
+			data.radar_results[i] = { radar.getResult(i) }
+		end
+	end
+	radar_drawMap()
+end
+
+function draw_text(monitor, x, y, text, textColor, backgroundColor)
+	if monitor == nil then
+		term.setCursorPos(x, y)
+		if textColor ~= nil then term.setTextColor(textColor) end
+		if backgroundColor ~= nil then term.setBackgroundColor(backgroundColor) end
+		term.write(text)
+		local xt, yt = term.getCursorPos()
+		term.setCursorPos(1, yt + 1)
+	else
+		monitor.setCursorPos(x, y)
+		if textColor ~= nil then monitor.setTextColor(textColor) end
+		if backgroundColor ~= nil then monitor.setBackgroundColor(backgroundColor) end
+		monitor.write(text)
+		local xt, yt = monitor.getCursorPos()
+		monitor.setCursorPos(1, yt + 1)
+	end
+end	
+
+function draw_warning(monitor, text)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	local centerX = math.floor(screenWidth / 2);
+	local centerY = math.floor(screenHeight / 2);
+	local halfWidth = math.ceil(string.len(text) / 2);
+	local blank = string.sub("                              ", - (string.len(text) + 2))
+
+	draw_text(monitor, centerX - halfWidth - 1, centerY - 1, blank, colors.white, colors.red);
+	draw_text(monitor, centerX - halfWidth - 1, centerY    , " " .. text .. "  ", colors.white, colors.red);
+	draw_text(monitor, centerX - halfWidth - 1, centerY + 1, blank, colors.white, colors.red);
+end
+
+function draw_title(monitor, text)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	local centerX = math.floor(screenWidth / 2);
+	local halfWidth = math.ceil(string.len(text) / 2);
+
+	draw_text(monitor, centerX - halfWidth - 1, 1, text, nil, nil);
+end
+
+function radar_drawContact(monitor, resultX, resultY, resultZ, resultFrequency, resultType)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+
+	local screenX = (radarX - resultX) * radar_scale / data.radar_radius
+	local screenZ = (radarZ - resultZ) * radar_scale / data.radar_radius
+	local visible = true
+	
+	if screenX < -1 or screenX > -1 or screenY < -1 or screenY > 1 then
+		screenX = math.min(1, math.max(-1, screenX))
+		screenY = math.min(1, math.max(-1, screenY))
+		visible = false
+	end
+	
+	screenX = math.floor(screenX * (screenWidth  - 2) + (screenWidth  / 2) + 0.5)
+	screenY = math.floor(screenY * (screenHeight - 2) + (screenHeight / 2) + 0.5)
+
+	draw_text(monitor, screenX, screenY, Style.TextRadarother, Style.CRadarother, Style.BGRadarother)
+	if visible then
+		local text = "[" .. resultFrequency .. "]"
+		screenX = math.min(screenWidth - 1, math.max(2, screenX - string.len(text) / 2))
+		if screenY == (screenHeight - 1) then
+			screenY = screenY - 1
+		else
+			screenY = screenY + 1
+		end
+		draw_text(monitor, screenX, screenY, text, Style.CRadarother, Style.BGRadarother)
+	end
+end
+
+function radar_drawMap()
+	local screenWidth, screenHeight, x, y
+	local monitor = nil
+	if data.radar_monitorIndex >= 0 and radar_monitorIndex < #monitors then
+		monitor = monitors[radar.radar_monitorIndex]
+	end
+	-- center
+	SetColorRadarmap()
+	if monitor == nil then
+		term.clear()
+		screenWidth, screenHeight = term.getSize()
+	else
+		monitor.clear()
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	-- borders
+	SetColorRadarborder()
+	for x = 1, screenWidth do
+		if monitor == nil then
+			term.setCursorPos(x, 1)
+			term.write(" ")
+			term.setCursorPos(x, screenHeight)
+			term.write(" ")
+		else
+			monitor.setCursorPos(x, 1)
+			monitor.write(" ")
+			monitor.setCursorPos(x, screenHeight)
+			monitor.write(" ")
+		end
+	end
+	for y = 2, screenHeight - 1 do
+		if monitor == nil then
+			term.setCursorPos(1, y)
+			term.write(" ")
+			term.setCursorPos(screenWidth, y)
+			term.write(" ")
+		else
+			monitor.setCursorPos(1, y)
+			monitor.write(" ")
+			monitor.setCursorPos(screenWidth, y)
+			monitor.write(" ")
+		end
+	end
+	-- title
+   	draw_title(monitor, label .. " - Radar map")
+	-- status
+	local text = "Scan radius: " .. radius
+	if radar ~= nil then
+		text = text .. " | Energy: " .. radar.getEnergyLevel() .. " EU | " -- .. radar.status()
+	end
+	radar_drawText(monitor, 4, screenHeight, text, nil, nil)
+	-- results
+	for i = 0, #radar_results - 1 do
+		local resultFrequency, resultX, resultY, resultZ, resultType = radar_results[i]
+
+		radar_drawContact(resultX, resultY, resultZ, resultFrequency, resultType)
+	end
+end
+
+radar_waitingNextScan = false
+function radar_timerEvent()
+	if radar_waitingNextScan then
+		radar_waitingNextScan = false
+		radar_scan() -- will restart timer
+	else
+		local numResults = radar.getResultsCount();
+		if numResults ~= -1 then
+			radar_scanDone()
+			if data.radar_autoscan then
+				radar_waitingNextScan = true
+				radar_timerId = os.startTimer(data.radar_autoscanDelay)
+			else -- single scan done
+				radar_timerId = -1
+			end
+		else -- still scanning
+			radar_timerId = os.startTimer(radar_timerLength)
+		end
+	end
+end
+
 ----------- Boot sequence 
 label = os.getComputerLabel()
 if not label then
@@ -1288,34 +1709,33 @@ mininglasers = {}
 reactorlasers = {}
 cloakingcores = {}
 warpcore = nil
+radar = nil
 for key,side in pairs(sides) do
-  sleep(0)
-  if peripheral.getType(side) == "monitor" then
-    WriteLn("Wrapping " .. side)
-	lmonitor = peripheral.wrap(side)
-    table.insert(monitors, lmonitor)
-	lmonitor.setTextScale(monitor_textScale)
-  end
-  if peripheral.getType(side) == "warpcore" then
-    WriteLn("Wrapping " .. side)
-    warpcore = peripheral.wrap(side)
-  end
-  if peripheral.getType(side) == "warpdriveReactor" then
-    WriteLn("Wrapping " .. side)
-    reactor =  peripheral.wrap(side)
-  end
-  if peripheral.getType(side) == "warpdriveReactorLaser" then
-    WriteLn("Wrapping " .. side)
-    table.insert(reactorlasers, peripheral.wrap(side))
-  end
-  if peripheral.getType(side) == "mininglaser" then
-    WriteLn("Wrapping " .. side)
-    table.insert(mininglasers, peripheral.wrap(side))
-  end
-  if peripheral.getType(side) == "cloakingdevicecore" then
-    WriteLn("Wrapping " .. side)
-    table.insert(cloakingcores, peripheral.wrap(side))
-  end
+	sleep(0)
+	if peripheral.getType(side) == "monitor" then
+		WriteLn("Wrapping " .. side)
+		lmonitor = peripheral.wrap(side)
+		table.insert(monitors, lmonitor)
+		lmonitor.setTextScale(monitor_textScale)
+	elseif peripheral.getType(side) == "warpcore" then
+		WriteLn("Wrapping " .. side)
+		warpcore = peripheral.wrap(side)
+	elseif peripheral.getType(side) == "warpdriveReactor" then
+		WriteLn("Wrapping " .. side)
+		reactor =  peripheral.wrap(side)
+	elseif peripheral.getType(side) == "warpdriveReactorLaser" then
+		WriteLn("Wrapping " .. side)
+		table.insert(reactorlasers, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "mininglaser" then
+		WriteLn("Wrapping " .. side)
+		table.insert(mininglasers, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "cloakingdevicecore" then
+		WriteLn("Wrapping " .. side)
+		table.insert(cloakingcores, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "radar" then
+		WriteLn("Wrapping " .. side)
+		radar = peripheral.wrap(side);
+	end
 end
 -- sleep(1)
 
@@ -1390,6 +1810,14 @@ function connections_page()
 		SetColorSuccess()
 		WriteLn(#cloakingcores .. " cloaking cores detected")
 	end
+
+	if radar == nil then
+		SetColorDisabled()
+		WriteLn("No radar detected")
+	else
+		SetColorSuccess()
+		WriteLn("Warpcore radar detected")
+	end
 end
 
 -- waiting for warp core to boot up
@@ -1400,7 +1828,7 @@ end
 function menu_common()
 	SetCursorPos(1, 18)
 	SetColorTitle()
-	ShowMenu("1 Reactor, 2 Cloak, 3 Mining, 4 Core, 5 Laser, eXit")
+	ShowMenu("1 Reactor, 2 Cloak, 3 Mining, 4 Core, 5 Radar, eXit")
 end
 
 reactor_init()
@@ -1425,25 +1853,29 @@ repeat
 		if keycode == 45 then -- x for eXit
 			os.pullEventRaw()
 			abort = true
-		elseif keycode == 2 then -- 1
+		elseif keycode == 11 or keycode == 82 then -- 0
+			page = connections_page
+			keyHandler = nil
+			refresh = true
+		elseif keycode == 2 or keycode == 79 then -- 1
 			page = reactor_page
 			keyHandler = reactor_key
 			refresh = true
-		elseif keycode == 3 then -- 2
+		elseif keycode == 3 or keycode == 80 then -- 2
 			page = cloaking_page
 			keyHandler = cloaking_key
 			refresh = true
-		elseif keycode == 4 then -- 3
+		elseif keycode == 4 or keycode == 81 then -- 3
 			page = mining_page
 			keyHandler = mining_key
 			refresh = true
-		elseif keycode == 5 then -- 4
+		elseif keycode == 5 or keycode == 75 then -- 4
 			page = core_page
 			keyHandler = core_key
 			refresh = true
-		elseif keycode == 6 then -- 6
-			page = laser_page
-			keyHandler = laser_key
+		elseif keycode == 6  or keycode == 76 then -- 5
+			page = radar_page
+			keyHandler = radar_key
 			refresh = true
 		elseif keyHandler ~= nil and keyHandler(keycode) then
 			refresh = true
@@ -1456,6 +1888,10 @@ repeat
 		-- abort, refresh = false, false
 	elseif eventName == "char" then
 		-- drop it
+	elseif eventName == "redstone" then
+		redstone_event(params[2])
+	elseif eventName == "timer" then
+		timer_event(params[2])
 	elseif eventName == "reactorPulse" then
 		reactor_pulse(params[2])
 		refresh = (page == reactor_page)
