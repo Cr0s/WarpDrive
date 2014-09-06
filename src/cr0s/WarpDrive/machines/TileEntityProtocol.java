@@ -304,7 +304,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     public void setDistance(int distance) {
-        this.distance = Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance);
+        this.distance = Math.max(1, Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance));
     	WarpDrive.debugPrint(this + " Jump distance updated to " + distance);
     }
 
@@ -495,6 +495,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 			
 			setDistance(argInt0);
 			
+			return new Integer[] { getDistance() };
 		} else if (methodName.equals("set_direction")) {// set_direction (dir)
 			if (arguments.length != 1) {
 				return new Integer[] { -1 };
