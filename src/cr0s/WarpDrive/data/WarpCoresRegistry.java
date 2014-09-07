@@ -7,6 +7,7 @@ import cr0s.WarpDrive.LocalProfiler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.machines.TileEntityReactor;
+import cr0s.WarpDrive.machines.TileEntityReactor.ReactorMode;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 
@@ -107,7 +108,7 @@ public class WarpCoresRegistry {
 			}
 
 			// Skip offline warp cores
-			if (c.controller == null || c.controller.getMode() == 0 || !c.validateShipSpatialParameters(reason)) {
+			if (c.controller == null || c.controller.getMode() == ReactorMode.IDLE || !c.validateShipSpatialParameters(reason)) {
 				continue;
 			}
 
