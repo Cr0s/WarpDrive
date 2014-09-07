@@ -27,11 +27,11 @@ Style = {
 
 	CRadarself = colors.white,
 	BGRadarself = colors.lime,
-	TxtRadarself = "H",
+	TextRadarself = "R",
 	
-	CRadarother = colors.white,
-	BGRadarother = colors.black,
-	TxtRadarother = "*"
+	CRadarother = colors.black,
+	BGRadarother = colors.red,
+	TextRadarother = "#"
 }
 
 if not term.isColor() then
@@ -687,6 +687,9 @@ function data_read()
 	if data.radar_autoscan == nil then data.radar_autoscan = false; end
 	if data.radar_autoscanDelay == nil then data.radar_autoscanDelay = 3; end
 	if data.radar_results == nil then data.radar_results = {}; end
+	if data.radar_scale == nil then data.radar_scale = 500; end
+	if data.radar_offsetX == nil then data.radar_offsetX = 0; end
+	if data.radar_offsetY == nil then data.radar_offsetY = 0; end
 end
 
 function data_explode(separator, data)
@@ -810,7 +813,7 @@ function core_computeRealDistance()
 		elseif data.core_direction == 90 or data.core_direction == 255 then
 			core_shipLength = core_left + core_right + 1
 		end
-		core_realDistance = data.core_distance + core_shipLength
+		core_realDistance = data.core_distance + core_shipLength - 1
 		core_jumpCost = (10 * core_shipSize) + (100 * data.core_distance)
 	end
 end
@@ -866,28 +869,27 @@ end
 
 function core_page_setDistance()
 	ShowTitle("<==== Set distance ====>")
-	SetCursorPos(1, 2)
 	
 	core_computeRealDistance()
 	local maximumDistance = core_shipLength + 127
-	if core_isInHyper then
-		Write("Distance * 100 (min " .. core_shipLength .. ", max " .. maximumDistance .. "): ")
-	else
-		Write("Distance (min " .. (core_shipLength + 1) .. ", max " .. maximumDistance .. "): ")
+	local userEntry = core_realDistance
+	if userEntry <= 1 then
+		userEntry = 0
 	end
+	repeat
+		SetCursorPos(1, 2)
+		if core_isInHyper then
+			Write("Distance * 100 (min " .. core_shipLength .. ", max " .. maximumDistance .. "): ")
+		else
+			Write("Distance (min " .. (core_shipLength + 1) .. ", max " .. maximumDistance .. "): ")
+		end
+		userEntry = readInputNumber(userEntry)
+		if userEntry <= core_shipLength or userEntry > maximumDistance then
+			ShowWarning("Wrong distance. Try again.")
+		end
+	until userEntry > core_shipLength and userEntry <= maximumDistance
 	
-	if data.core_distance <= 1 then
-		data.core_distance = readInputNumber(0)
-	else
-		data.core_distance = readInputNumber(data.core_distance)
-	end
-	if data.core_distance == nil then data.core_distance = 1 end
-	if data.core_distance < core_shipLength or data.core_distance > maximumDistance then
-		data.core_distance = 1
-		ShowWarning("Wrong distance. Try again.")
-	else
-		data.core_distance = data.core_distance - core_shipLength
-	end
+	data.core_distance = userEntry - core_shipLength + 1
 	core_computeRealDistance()
 end
 
@@ -1030,7 +1032,7 @@ function core_page()
 	SetCursorPos(1, 15)
 	SetColorTitle()
 	ShowMenu("D - Dimensions, M - Toggle summon, N - Ship name")
-	ShowMenu("S - Set core_warp Data, J - Jump, G - Jump to JumpGate")
+	ShowMenu("S - Set Warp Data, J - Jump, G - Jump to JumpGate")
 	ShowMenu("B - Jump to Beacon, H - Jump to Hyperspace")
 	ShowMenu("C - core_page_summon crew")
 end
@@ -1370,12 +1372,16 @@ end
 radar_listOffset = 0
 radar_timerId = -1
 radar_timerLength = 1
-radar_scale = 1
+data.radar_scale = 1
+radar_x = 0
+radar_y = 0
+radar_z = 0
 
 function radar_boot()
 	if radar ~= nil then
 		WriteLn("Booting Radar...")
 		if data.radar_monitorIndex > 0 then
+			radar_x, radar_y, radar_z = radar.pos()
 			radar_drawMap()
 		end
 	end
@@ -1399,30 +1405,63 @@ function radar_key(keycode)
 		radar_drawMap()
 		return true
 	elseif keycode == 34 then -- G
-		radar_scale = math.max(0.001, radar_scale / 10)
-		radar_drawMap()
-		return true
-	elseif keycode == 20 then -- T
-		radar_scale = math.min(1000, radar_scale * 10)
-		radar_drawMap()
-		return true
-	elseif keycode == 36 then -- J
-		radar_listOffset = math.max(0, radar_listOffset - 4)
-		return true
-	elseif keycode == 22 then -- U
-		radar_listOffset = math.min(#data.radar_results - 1, radar_listOffset + 4)
-		return true
-	elseif keycode == 74 then -- -
 		radar_setRadius(data.radar_radius - 100)
 		data_save()
 		return true
-	elseif keycode == 78 then -- +
+	elseif keycode == 20 then -- T
 		if data.radar_radius < 100 then
 			radar_setRadius(100)
 		else
 			radar_setRadius(data.radar_radius + 100)
 		end
 		data_save()
+		return true
+	elseif keycode == 36 then -- J
+		radar_listOffset = math.max(0, radar_listOffset - 3)
+		return true
+	elseif keycode == 22 then -- U
+		radar_listOffset = math.min(#data.radar_results - 1, radar_listOffset + 3)
+		return true
+	elseif keycode == 74 then -- -
+		data.radar_scale = math.min(10000, math.floor(data.radar_scale * 1.2 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 78 then -- +
+		data.radar_scale = math.max(20, math.floor(data.radar_scale * 0.8 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 199 then -- home
+		data.radar_offsetX = 0;
+		data.radar_offsetY = 0;
+		data.radar_scale = 20
+		for i = 0, #data.radar_results - 1 do
+			data.radar_scale = math.max(data.radar_scale, math.max(math.abs(radar_x - data.radar_results[i].x), math.abs(radar_z - data.radar_results[i].z)))
+		end
+		data.radar_scale = math.min(10000, math.floor(data.radar_scale * 1.1 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 203 then -- left
+		data.radar_offsetX = data.radar_offsetX - 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 205 then -- right
+		data.radar_offsetX = data.radar_offsetX + 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 200 then -- up
+		data.radar_offsetY = data.radar_offsetY - 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 208 then -- down
+		data.radar_offsetY = data.radar_offsetY + 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
 		return true
 	elseif keycode == 46 then -- C
 		radar_page_config()
@@ -1433,7 +1472,8 @@ function radar_key(keycode)
 end
 
 function radar_page()
-	local resultsPerPage = 5
+	local radar_resultsPerPage = 9
+	
 	ShowTitle(label .. " - Radar map")
 
 	SetCursorPos(1, 2)
@@ -1442,14 +1482,19 @@ function radar_page()
 		Write("Radar not detected")
 	else
 		SetColorDefault()
-		local lastResultShown = radar_listOffset + resultsPerPage
-		if lastResultShown >= #data.radar_results then
-			lastResultShown = #data.radar_results - 1
-		end
-		Write("Displaying results " .. radar_listOffset .. " to " .. lastResultShown .. " of " .. #data.radar_results)
-		for i = radar_listOffset, lastResultShown do
-			SetCursorPos(12, 2 + i - radar_listOffset)
-			Write("'" .. radar_result[i].frequency .. "' @ " .. radar_result[i].x .. ", " .. radar_result[i].y .. ", " .. radar_result[i].z)
+		if #data.radar_results == 0 then
+			Write("No contacts in range...")
+		else
+			local lastResultShown = radar_listOffset + radar_resultsPerPage - 1
+			if lastResultShown >= #data.radar_results then
+				lastResultShown = #data.radar_results - 1
+			end
+			Write("Displaying results " .. (radar_listOffset + 1) .. " to " .. (lastResultShown + 1) .. " of " .. #data.radar_results)
+			for i = radar_listOffset, lastResultShown do
+				SetCursorPos(4, 3 + i - radar_listOffset)
+				Write(FormatInteger(data.radar_results[i].x, 7) .. ", " .. FormatInteger(data.radar_results[i].y, 4) .. ", " .. FormatInteger(data.radar_results[i].z, 7))
+				Write(": " .. data.radar_results[i].frequency)
+			end
 		end
 
 		SetColorDefault()
@@ -1488,9 +1533,9 @@ function radar_page()
 	SetCursorPos(1, 15)
 	ShowMenu("S - Scan once, A - Autoscan, P - Stop autoscan")
 	SetCursorPos(1, 16)
-	ShowMenu("+/- - Scan radius, U/J - Scroll list")
+	ShowMenu("T/G - Scan radius, U/J - Scroll list")
 	SetCursorPos(1, 17)
-	ShowMenu("T/G - Scale, N - Next monitor, C - Configuration")
+	ShowMenu("+/- - Scale, N - Next monitor, C - Configuration")
 end
 
 function radar_page_config()
@@ -1578,12 +1623,15 @@ end
 function radar_scanDone()
 	local numResults = radar.getResultsCount();
 	data.radar_results = {}
-	Clear()
-	WriteLn("res = " .. numResults)
 	if (numResults ~= 0) then
-		for i = 0, numResults - 1 do
-			data.radar_results[i] = { radar.getResult(i) }
+		for i = 0, numResults do
+			local frequency, x, y, z = radar.getResult(i)
+			if frequency == "default" then
+				frequency = "?"
+			end
+			data.radar_results[i] = { x = x, y = y, z = z, frequency = frequency, kind = "core" }
 		end
+		data.radar_scale = data.radar_radius
 	end
 	data_save()
 	radar_drawMap()
@@ -1636,31 +1684,36 @@ function draw_centeredText(monitor, y, text)
 	draw_text(monitor, x, y, text, nil, nil);
 end
 
-function radar_drawContact(monitor, resultX, resultY, resultZ, resultFrequency, resultType)
+function radar_drawContact(monitor, contact)
+	SetCursorPos(2, 2)
 	local screenWidth, screenHeight
 	if monitor == nil then
 		screenWidth, screenHeight = term.getSize()
 	else
 		screenWidth, screenHeight = monitor.getSize()
 	end
-
-	local screenX = (radarX - resultX) * radar_scale / data.radar_radius
-	local screenZ = (radarZ - resultZ) * radar_scale / data.radar_radius
+	
+	local screenX = (radar_x + data.radar_offsetX - contact.x) / data.radar_scale
+	local screenY = (radar_z + data.radar_offsetY - contact.z) / data.radar_scale
 	local visible = true
 	
-	if screenX < -1 or screenX > -1 or screenY < -1 or screenY > 1 then
+	if screenX <= -1 or screenX >= 1 or screenY <= -1 or screenY >= 1 then
 		screenX = math.min(1, math.max(-1, screenX))
 		screenY = math.min(1, math.max(-1, screenY))
 		visible = false
 	end
 	
-	screenX = math.floor(screenX * (screenWidth  - 2) + (screenWidth  / 2) + 0.5)
-	screenY = math.floor(screenY * (screenHeight - 2) + (screenHeight / 2) + 0.5)
-
-	draw_text(monitor, screenX, screenY, Style.TextRadarother, Style.CRadarother, Style.BGRadarother)
+	screenX = math.floor(screenX * (screenWidth  - 3) / 2 + ((screenWidth  - 1)  / 2) + 1.5)
+	screenY = math.floor(screenY * (screenHeight - 3) / 2 + ((screenHeight - 1) / 2) + 1.5)
+	
+	if contact.kind == "self" then
+		draw_text(monitor, screenX, screenY, Style.TextRadarself, Style.CRadarself, Style.BGRadarself)
+	else
+		draw_text(monitor, screenX, screenY, Style.TextRadarother, Style.CRadarother, Style.BGRadarother)
+	end
 	if visible then
-		local text = "[" .. resultFrequency .. "]"
-		screenX = math.min(screenWidth - 1, math.max(2, screenX - string.len(text) / 2))
+		local text = contact.frequency
+		screenX = math.min(screenWidth - 1 - string.len(text), math.max(2, math.floor(screenX - string.len(text) / 2 + 0.5)))
 		if screenY == (screenHeight - 1) then
 			screenY = screenY - 1
 		else
@@ -1711,20 +1764,25 @@ function radar_drawMap()
 		end
 	end
 	-- title
-   	draw_centeredText(monitor, 1, label .. " - Radar map")
+	local text = label .. " - Radar map"
+	if #data.radar_results == 0 then
+		text = text .. " (no contacts)"
+	else
+		text = text .. " (" .. #data.radar_results .. " contacts)"
+	end
+   	draw_centeredText(monitor, 1, text)
 	-- status
 	local text = "Scan radius: " .. data.radar_radius
 	if radar ~= nil then
-		text = text .. " | Energy: " .. radar.getEnergyLevel() .. " EU "
+		text = text .. " | Energy: " .. radar.getEnergyLevel() .. " EU"
 	end
-	text = text .. " | Contacts: " .. #data.radar_results
+	text = text .. " | Scale: " .. data.radar_scale
 	draw_centeredText(monitor, screenHeight, text)
 	-- results
 	SetCursorPos(1, 12)
+	radar_drawContact(monitor, {x = radar_x, y = radar_y, z = radar_z, frequency = "", kind = "self"})
 	for i = 0, #data.radar_results - 1 do
-		local resultFrequency, resultX, resultY, resultZ, resultType = data.radar_results[i]
-
-		radar_drawContact(resultX, resultY, resultZ, resultFrequency, resultType)
+		radar_drawContact(monitor, data.radar_results[i])
 	end
 	
 	-- restore defaults
