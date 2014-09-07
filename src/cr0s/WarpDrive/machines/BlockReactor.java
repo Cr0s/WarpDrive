@@ -89,11 +89,12 @@ public class BlockReactor extends BlockContainer {
             return false;
         }
 
-        TileEntityReactor reactor = (TileEntityReactor)par1World.getBlockTileEntity(par2, par3, par4);
-
-        if (reactor != null && (par5EntityPlayer.getHeldItem() == null)) {
-            par5EntityPlayer.addChatMessage(reactor.getStatus());
-            return true;
+        if (par5EntityPlayer.getHeldItem() == null) {
+        	TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+        	if (te != null && te instanceof TileEntityReactor) {
+                par5EntityPlayer.addChatMessage(((TileEntityReactor)te).getStatus());
+                return true;
+        	}
         }
 
         return false;
@@ -106,7 +107,6 @@ public class BlockReactor extends BlockContainer {
             WarpDrive.warpCores.removeFromRegistry((TileEntityReactor)te);
         }
 
-        WarpDrive.warpCores.removeDeadCores();
         super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 }

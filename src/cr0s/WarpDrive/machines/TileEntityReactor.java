@@ -36,7 +36,6 @@ public class TileEntityReactor extends WarpEnergyTE
     public final int JUMP_DOWN = -2;
     public int dx, dz;
     private int direction;
-    private int distance;
 
     public int maxX, maxY, maxZ;
     public int minX, minY, minZ;
@@ -46,15 +45,26 @@ public class TileEntityReactor extends WarpEnergyTE
     public int shipUp, shipDown;
     public int shipLength;
     public int shipVolume;
-    private int currentMode = 0;
+    private ReactorMode currentMode = ReactorMode.IDLE;
 
-    private static final byte MODE_TELEPORT = 3;
-//    private static final byte MODE_IDLE = 0;
-    private static final byte MODE_BASIC_JUMP = 1; // 0-128
-    private static final byte MODE_LONG_JUMP = 2;  // 0-12800
-    private static final byte MODE_BEACON_JUMP = 4;     // Jump ship by beacon
-    private static final byte MODE_HYPERSPACE = 5;      // Jump to Hyperspace
-    private static final byte MODE_GATE_JUMP = 6;       // Jump via jumpgate
+    public enum ReactorMode {
+    	IDLE			( 0 ),
+    	BASIC_JUMP		( 1 ),	// 0-128
+    	LONG_JUMP		( 2 ),	// 0-12800
+    	TELEPORT		( 3 ),
+    	BEACON_JUMP		( 4 ),	// Jump ship by beacon
+    	HYPERSPACE		( 5 ),	// Jump to/from Hyperspace
+    	GATE_JUMP		( 6 );	// Jump via jumpgate
+    	
+    	private final int code;
+    	ReactorMode(int code) {
+    		this.code = code;
+		}
+    	
+    	public int getCode() {
+    		return code;
+    	}
+    }
     
     private int warmupTime = 0;
     private int cooldownTime = 0;
@@ -65,6 +75,7 @@ public class TileEntityReactor extends WarpEnergyTE
     public String coreFrequency = "default";
 
     public int isolationBlocksCount = 0;
+    public double isolationRate = 0.0D;
     public int isolationUpdateTicks = 0;
 
     public TileEntityProtocol controller;
@@ -156,7 +167,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
 
         switch (currentMode) {
-            case MODE_TELEPORT:
+            case TELEPORT:
                 if (worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord)) {
 	                if (isChestSummonMode()) {
 	                	chestTeleportUpdateTicks++;
@@ -172,42 +183,42 @@ public class TileEntityReactor extends WarpEnergyTE
                 }
                 break;
 
-            case MODE_BASIC_JUMP:
-            case MODE_LONG_JUMP:
-            case MODE_BEACON_JUMP:
-            case MODE_HYPERSPACE:
-            case MODE_GATE_JUMP:
+            case BASIC_JUMP:
+            case LONG_JUMP:
+            case BEACON_JUMP:
+            case HYPERSPACE:
+            case GATE_JUMP:
                 if (controller.isJumpFlag()) {
                     // Compute warm-up time
-                   	int targetCooldown = 0;
+                   	int targetWarmup = 0;
                    	switch (currentMode) {
-	                    case MODE_BASIC_JUMP:
-	                    case MODE_LONG_JUMP:
-	                    	if (distance < 50) {
-	                    		targetCooldown = (WarpDriveConfig.WC_WARMUP_SHORTJUMP_SECONDS) * 20 / 3;
+	                    case BASIC_JUMP:
+	                    case LONG_JUMP:
+	                    	if (controller.getDistance() < 50) {
+	                    		targetWarmup = WarpDriveConfig.WC_WARMUP_SHORTJUMP_SECONDS * 20;
 	                    	} else {
-	                    		targetCooldown = (WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS) * 20;
+	                    		targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
 	                    	}
 	                    	break;
 	                    	
-	                    case MODE_BEACON_JUMP:
-	                    case MODE_HYPERSPACE:
-	                    case MODE_GATE_JUMP:
+	                    case BEACON_JUMP:
+	                    case HYPERSPACE:
+	                    case GATE_JUMP:
 	                    default:
-	                    	targetCooldown = (WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS) * 20;
+	                    	targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
 	                    	break;
                     }
                    	// Select best sound file and  adjust offset
                 	int soundThreshold = 0;
                    	String soundFile = "";
-                	if (targetCooldown < 10 * 20) {
-                		soundThreshold = targetCooldown - 4 * 20;
+                	if (targetWarmup < 10 * 20) {
+                		soundThreshold = targetWarmup - 4 * 20;
                 		soundFile = "warpdrive:warp_4s";
-                	} else if (targetCooldown > 29 * 20) {
-                		soundThreshold = targetCooldown - 30 * 20;
+                	} else if (targetWarmup > 29 * 20) {
+                		soundThreshold = targetWarmup - 30 * 20;
                 		soundFile = "warpdrive:warp_30s";
                 	} else {
-                		soundThreshold = targetCooldown - 10 * 20;
+                		soundThreshold = targetWarmup - 10 * 20;
                 		soundFile = "warpdrive:warp_10s";	
                 	}
                    	// Add random duration
@@ -234,16 +245,18 @@ public class TileEntityReactor extends WarpEnergyTE
                             messageToAllPlayersOnShip(reason.toString());
                             return;
                         }
-                        makePlayersOnShipDrunk(targetCooldown + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
+                        // WarpDrive.debugPrint(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
+                        makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
                     }
 
                     if (!soundPlayed && (soundThreshold > warmupTime)) {
+                        // WarpDrive.debugPrint(this + " Playing sound effect '" + soundFile + "' soundThreshold " + soundThreshold  + " warmupTime " + warmupTime);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, soundFile, 4F, 1F);
                         soundPlayed = true;
                     }
 
                     // Awaiting cool-down time
-                    if (warmupTime < (targetCooldown + randomWarmupAddition)) {
+                    if (warmupTime < (targetWarmup + randomWarmupAddition)) {
                     	warmupTime++;
                         return;
                     }
@@ -269,9 +282,7 @@ public class TileEntityReactor extends WarpEnergyTE
                         return;                    	
                     }
 
-                    WarpDrive.debugPrint("!!! pre doJump");
                     doJump();
-                    WarpDrive.debugPrint("!!! after doJump");
                     cooldownTime = WarpDriveConfig.WC_COOLDOWN_INTERVAL_SECONDS * 20;
                     controller.setJumpFlag(false);
                 } else {
@@ -295,58 +306,42 @@ public class TileEntityReactor extends WarpEnergyTE
         }
     }
 
-    private void updateIsolationState()
-    {
-        // Search block in cube around core with side 10
-        int xmax, ymax, zmax, x1, x2, z1, z2;
+    private void updateIsolationState() {
+        // Search block in cube around core
+        int xmax, ymax, zmax;
         int xmin, ymin, zmin;
-        final int ISOLATION_CUBE_SIDE = 6;
-        x1 = xCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        x2 = xCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
+        xmin = xCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+        xmax = xCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
 
-        if (x1 < x2)
-        {
-            xmin = x1;
-            xmax = x2;
-        }
-        else
-        {
-            xmin = x2;
-            xmax = x1;
-        }
+        zmin = zCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+        zmax = zCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
 
-        z1 = zCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        z2 = zCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
-
-        if (z1 < z2)
-        {
-            zmin = z1;
-            zmax = z2;
-        }
-        else
-        {
-            zmin = z2;
-            zmax = z1;
-        }
-
-        ymax = yCoord + ((ISOLATION_CUBE_SIDE / 2) - 1);
-        ymin = yCoord - ((ISOLATION_CUBE_SIDE / 2) - 1);
-        this.isolationBlocksCount = 0;
+        // scan 1 block higher to encourage putting isolation block on both ground and ceiling
+        ymin = Math.max(  0, yCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
+        ymax = Math.min(255, yCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
+        
+        int newCount = 0;
 
         // Search for warp isolation blocks
-        for (int y = ymin; y <= ymax; y++)
-        {
-            for (int x = xmin; x <= xmax; x++)
-            {
-                for (int z = zmin; z <= zmax; z++)
-                {
-                    if (worldObj.getBlockId(x, y, z) == WarpDriveConfig.isolationID)
-                    {
-                        this.isolationBlocksCount++;
+        for (int y = ymin; y <= ymax; y++) {
+            for (int x = xmin; x <= xmax; x++) {
+                for (int z = zmin; z <= zmax; z++) {
+                    if (worldObj.getBlockId(x, y, z) == WarpDriveConfig.isolationID) {
+                    	newCount++;
                     }
                 }
             }
         }
+        isolationBlocksCount = newCount;
+		if (isolationBlocksCount >= WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS) {
+			isolationRate = WarpDriveConfig.WR_MIN_ISOLATION_EFFECT
+					+ (isolationBlocksCount - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS)		// bonus blocks
+					* (WarpDriveConfig.WR_MAX_ISOLATION_EFFECT - WarpDriveConfig.WR_MIN_ISOLATION_EFFECT)
+					/ (WarpDriveConfig.WR_MAX_ISOLATION_BLOCKS - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS);
+		} else {
+			isolationRate = 0.0D;
+		}
+        // WarpDrive.debugPrint(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
     }
 
     private void makePlayersOnShipDrunk(int tickDuration) {
@@ -418,8 +413,7 @@ public class TileEntityReactor extends WarpEnergyTE
         shipBack  = controller.getBack();
         shipLeft  = controller.getLeft();
         shipDown  = controller.getDown();
-        distance  = Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, controller.getDistance());
-
+        
         int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
 
         if (Math.abs(dx) > 0) {
@@ -540,7 +534,7 @@ public class TileEntityReactor extends WarpEnergyTE
         // Now make jump to a beacon
         if (isBeaconFound) {
             // Consume energy
-            if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
+            if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
 	            System.out.println("" + this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 	            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 	            jump.maxX = maxX;
@@ -721,7 +715,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
 
         // Consume energy
-        if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, distance), false)) {
+        if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
 	        System.out.println("[TE-WC] Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 	        EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 	        jump.maxX = maxX;
@@ -739,6 +733,7 @@ public class TileEntityReactor extends WarpEnergyTE
     }
 
     private void doJump() {
+    	int distance = controller.getDistance();
     	int requiredEnergy = calculateRequiredEnergy(currentMode, shipVolume, distance);
 
         if (!consumeEnergy(requiredEnergy, true)) {
@@ -746,18 +741,17 @@ public class TileEntityReactor extends WarpEnergyTE
             this.controller.setJumpFlag(false);
             return;
         }
-        WarpDrive.debugPrint("!!! doJump after EnergyCheck");
 
         String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
-        if (currentMode == this.MODE_GATE_JUMP) {
+        if (currentMode == ReactorMode.GATE_JUMP) {
             System.out.println("" + this + " Performing gate jump of " + shipInfo);
             doGateJump();
             return;
-        } else if (currentMode == this.MODE_BEACON_JUMP) {
+        } else if (currentMode == ReactorMode.BEACON_JUMP) {
             System.out.println("" + this + " Performing beacon jump of " + shipInfo);
             doBeaconJump();
             return;
-        } else if (currentMode == this.MODE_HYPERSPACE) {
+        } else if (currentMode == ReactorMode.HYPERSPACE) {
             System.out.println("" + this + " Performing hyperspace jump of " + shipInfo);
 
         	// Check ship size for hyper-space jump
@@ -776,33 +770,32 @@ public class TileEntityReactor extends WarpEnergyTE
                     return;
                 }
             }
-        } else if (currentMode == this.MODE_BASIC_JUMP) {
+        } else if (currentMode == ReactorMode.BASIC_JUMP) {
             System.out.println("" + this + " Performing basic jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
-        } else if (currentMode == this.MODE_LONG_JUMP) {
+        } else if (currentMode == ReactorMode.LONG_JUMP) {
             System.out.println("" + this + " Performing long jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
         } else {
             System.out.println("" + this + " Performing some jump #" + currentMode + " of " + shipInfo);
         }
         
-        if (currentMode == this.MODE_BASIC_JUMP || currentMode == this.MODE_LONG_JUMP || currentMode == MODE_HYPERSPACE) {
+        if (currentMode == ReactorMode.BASIC_JUMP || currentMode == ReactorMode.LONG_JUMP || currentMode == ReactorMode.HYPERSPACE) {
             if (!consumeEnergy(requiredEnergy, false)) {
             	messageToAllPlayersOnShip("Insufficient energy level");
             	return;
             }
-            WarpDrive.debugPrint("!!! doJump after EnergyConsumption");
 
-            if (this.currentMode == this.MODE_BASIC_JUMP) {
+            if (this.currentMode == ReactorMode.BASIC_JUMP) {
                 distance += shipLength;
             }
 
-            if (currentMode == this.MODE_LONG_JUMP && (direction != -1) && (direction != -2)) {
+            if (currentMode == ReactorMode.LONG_JUMP && (direction != -1) && (direction != -2)) {
                 if (worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
                     distance *= 100;
                 }
             }
 
             WarpDrive.debugPrint("" + this + " Distance adjusted to " + distance + " blocks.");
-            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, (currentMode == MODE_HYPERSPACE), distance, direction, false, 0, 0, 0);
+            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, (currentMode == ReactorMode.HYPERSPACE), distance, direction, false, 0, 0, 0);
             jump.maxX = maxX;
             jump.minX = minX;
             jump.maxZ = maxZ;
@@ -811,9 +804,7 @@ public class TileEntityReactor extends WarpEnergyTE
             jump.minY = minY;
             jump.shipLength = shipLength;
             jump.on = true;
-            WarpDrive.debugPrint("!!! doJump after entity creation");
             worldObj.spawnEntityInWorld(jump);
-            WarpDrive.debugPrint("!!! doJump after entity spawning");
         }
     }
 
@@ -937,27 +928,28 @@ public class TileEntityReactor extends WarpEnergyTE
 
     @Override
     public String getStatus() {
-        return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU." + ((cooldownTime <= 0) ? "" : (" " + (cooldownTime / 20) + " s left of cooldown."));
+        return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU."
+        		+ ((cooldownTime > 0) ? ("\n" + (cooldownTime / 20) + " s left of cooldown.") : ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
     }
 
-    public static int calculateRequiredEnergy(int currentMode, int shipVolume, int jumpDistance)  {
+    public static int calculateRequiredEnergy(ReactorMode currentMode, int shipVolume, int jumpDistance)  {
         switch (currentMode) {
-        	case MODE_TELEPORT:
+        	case TELEPORT:
         		return WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;
 
-            case MODE_BASIC_JUMP:
+            case BASIC_JUMP:
             	return (WarpDriveConfig.WC_ENERGY_PER_BLOCK_MODE1 * shipVolume) + (WarpDriveConfig.WC_ENERGY_PER_DISTANCE_MODE1 * jumpDistance);
 
-            case MODE_LONG_JUMP:
+            case LONG_JUMP:
             	return (WarpDriveConfig.WC_ENERGY_PER_BLOCK_MODE2 * shipVolume) + (WarpDriveConfig.WC_ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
 
-            case MODE_HYPERSPACE:
+            case HYPERSPACE:
             	return WarpDriveConfig.WC_MAX_ENERGY_VALUE / 10; // 10% of maximum
 
-            case MODE_BEACON_JUMP:
+            case BEACON_JUMP:
             	return WarpDriveConfig.WC_MAX_ENERGY_VALUE / 2;  // half of maximum
 
-            case MODE_GATE_JUMP:
+            case GATE_JUMP:
             	return 2 * shipVolume;
         }
 
@@ -1033,6 +1025,15 @@ public class TileEntityReactor extends WarpEnergyTE
     public int getCooldown() {
     	return cooldownTime;
     }
+
+	public boolean isHidden() {
+		if (cooldownTime <= 0 && worldObj.rand.nextDouble() < isolationRate) {
+			// WarpDrive.debugPrint(this + " Core '" + coreFrequency + "' is hidden");
+			return true;
+		}
+
+		return false;
+	}
     
     @Override
 	public int getMaxEnergyStored() {
@@ -1041,7 +1042,7 @@ public class TileEntityReactor extends WarpEnergyTE
     
     @Override
     public double demandedEnergyUnits() {
-        if (this.controller != null && controller.getMode() == 0) {
+        if (this.controller != null && controller.getMode() == ReactorMode.IDLE) {
             return 0.0D;
         }
 

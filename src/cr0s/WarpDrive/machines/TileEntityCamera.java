@@ -16,9 +16,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkPosition;
 
 public class TileEntityCamera extends TileEntity implements IPeripheral {
-	private int dx, dz, dy;
-	private float yaw, pitch; // laser direction
-
 	private int frequency = -1;	// beam frequency
 
 	private String[] methodsArray = {
@@ -38,12 +35,13 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 			packetSendTicks--;
 			if (packetSendTicks <= 0) {
 				packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
-				sendFreqPacket();
+				PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, frequency);
 			}
 		} else {
 			registryUpdateTicks--;
 			if (registryUpdateTicks <= 0) {
 				registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
+				// WarpDrive.debugPrint("" + this + " Updating registry (" + frequency + ")");
 				WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 			}
 		}
@@ -56,20 +54,23 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	public void setFrequency(int parFrequency) {
 		if (frequency != parFrequency) {
 			frequency = parFrequency;
-			WarpDrive.debugPrint("" + this + " Frequency set to " + frequency);
-	        WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
-			sendFreqPacket();
+			WarpDrive.debugPrint("" + this + " Camera frequency set to " + frequency);
+	        // force update through main thread since CC runs on server as 'client'
+	        packetSendTicks = 0;
+	        registryUpdateTicks = 0;
 		}
 	}
 	
 	@Override
 	public void invalidate() {
+		WarpDrive.debugPrint("" + this + " invalidated");
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 	
     @Override
     public void onChunkUnload() {
+		WarpDrive.debugPrint("" + this + " onChunkUnload");
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
         super.onChunkUnload();
     }
@@ -78,35 +79,14 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
+		WarpDrive.debugPrint("" + this + " readFromNBT");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
-	}
-
-	public void sendFreqPacket() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				outputStream.writeInt(xCoord);
-				outputStream.writeInt(yCoord);
-				outputStream.writeInt(zCoord);
-				outputStream.writeInt(frequency);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveFreq";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
-//			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + frequency + "'");
-		}
+		WarpDrive.debugPrint("" + this + " writeToNBT");
 	}
 
 	// IPeripheral methods implementation
@@ -139,5 +119,15 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s/%d \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+       		getClass().getSimpleName(),
+       		Integer.valueOf(hashCode()),
+       		frequency,
+       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+       		xCoord, yCoord, zCoord});
 	}
 }

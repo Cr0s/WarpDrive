@@ -62,29 +62,48 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	}
 	
 	// Methods to override
+	/**
+	 * Should return the maximum amount of energy that can be stored (measured in internal energy units).
+	 */
 	public int getMaxEnergyStored() {
 		return 0;
 	}
 	
+	/**
+	 * Should return the maximum amount of energy that can be output (measured in internal energy units).
+	 */
 	public int getPotentialEnergyOutput() {
 		return 0;
 	}
 	
-	protected void energyOutputDone(int energyOutput) {
-		return;
+	/**
+	 * Remove energy from storage, called after actual output happened (measured in internal energy units).
+	 * Override this to use custom storage or measure output statistics.
+	 */
+	protected void energyOutputDone(int energyOutput_internal) {
+		consumeEnergy(energyOutput_internal, false);
 	}
 	
+	/**
+	 * Should return true if that direction can receive energy.
+	 */
 	public boolean canInputEnergy(ForgeDirection from) {
 		return false;
 	}
 	
+	/**
+	 * Should return true if that direction can output energy.
+	 */
 	public boolean canOutputEnergy(ForgeDirection to) {
 		return false;
 	}
 	
-	
-	protected boolean consumeEnergy(int amount, boolean simulate) {
-		int amountUpgraded = amount;
+	/**
+	 * Consume energy from storage for internal usage or after outputting (measured in internal energy units).
+	 * Override this to use custom storage or measure energy consumption statistics (internal usage or output).
+	 */
+	protected boolean consumeEnergy(int amount_internal, boolean simulate) {
+		int amountUpgraded = amount_internal;
 		if (upgrades.containsKey(EnumUpgradeTypes.Power)) {
 			double valueMul = Math.pow(0.8,upgrades.get(EnumUpgradeTypes.Power));
 			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
@@ -101,15 +120,19 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 		}
 		// FIXME: upgrades balancing & implementation to be done...
 		
-		if (getEnergyStored() >= amount) {
+		if (getEnergyStored() >= amount_internal) {
 			if (!simulate) {
-				energyStored_internal -= amount;
+				energyStored_internal -= amount_internal;
 			}
 			return true;
 		}
 		return false;
 	}
 	
+	/**
+	 * Consume all internal energy and return it's value (measured in internal energy units).
+	 * Override this to use custom storage or measure energy consumption statistics of this kind.
+	 */
 	protected int consumeAllEnergy() {
 		int temp = energyStored_internal;
 		energyStored_internal = 0;
@@ -117,12 +140,12 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 	}
 	
 	public Object[] getEnergyObject() {
-		return new Object[]{ getEnergyStored(), getMaxEnergyStored() };
+		return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 	}
 
     public String getStatus() {
     	if (getMaxEnergyStored() != 0) {
-    		return getBlockType().getLocalizedName() + " energy level is " + getEnergyStored() + "/" + getMaxEnergyStored() + " EU.";
+    		return getBlockType().getLocalizedName() + " energy level is " + convertInternalToEU(getEnergyStored()) + "/" + convertInternalToEU(getMaxEnergyStored()) + " EU.";
     	} else {
     		return getBlockType().getLocalizedName();
     	}
@@ -135,7 +158,7 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
-
+        
         // IndustrialCraft2
         if (!addedToEnergyNet) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
@@ -179,16 +202,16 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     }
     
     @Override
-    public double injectEnergyUnits(ForgeDirection from, double amount) {
-        double leftover = 0;
-        energyStored_internal += Math.round(amount) / EU_PER_INTERNAL;
-
+    public double injectEnergyUnits(ForgeDirection from, double amount_EU) {
+        int leftover_internal = 0;
+        energyStored_internal += convertEUtoInternal(amount_EU);
+        
         if (energyStored_internal > getMaxEnergyStored()) {
-            leftover = (energyStored_internal - getMaxEnergyStored());
+        	leftover_internal = (energyStored_internal - getMaxEnergyStored());
             energyStored_internal = getMaxEnergyStored();
         }
-
-        return leftover * EU_PER_INTERNAL;
+        
+        return convertInternalToEU(leftover_internal);
     }
     
     @Override
@@ -204,12 +227,12 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     // IndustrialCraft IEnergySource interface
 	@Override
 	public double getOfferedEnergy() {
-		return convertEUtoInternal(getPotentialEnergyOutput());
+		return convertInternalToEU(getPotentialEnergyOutput());
 	}
 	
 	@Override
-	public void drawEnergy(double amount) {
-		energyOutputDone(convertEUtoInternal(amount));
+	public void drawEnergy(double amount_EU) {
+		energyOutputDone(convertEUtoInternal(amount_EU));
 	}
 	
 	@Override
@@ -220,36 +243,38 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     
     // ThermalExpansion IEnergyHandler interface
 	@Override
-	public int receiveEnergy(ForgeDirection from, int maxReceive, boolean simulate) {
+	public int receiveEnergy(ForgeDirection from, int maxReceive_RF, boolean simulate) {
 		if (!canInputEnergy(from)) {
 			return 0;
 		}
 		
-		int maxStored = getMaxEnergyStored(from);
-		if (maxStored == 0) {
+		int maxStored_RF = getMaxEnergyStored(from);
+		if (maxStored_RF == 0) {
 			return 0;
 		}
-		int energyStored = getEnergyStored(from);
+		int energyStored_RF = getEnergyStored(from);
 		
-		int toAdd = Math.min(maxReceive, maxStored - energyStored);
+		int toAdd_RF = Math.min(maxReceive_RF, maxStored_RF - energyStored_RF);
 		if (!simulate) {
-			energyStored_internal = Math.min(getMaxEnergyStored(), energyStored_internal + convertInternalToRF(toAdd));
+			energyStored_internal = Math.min(getMaxEnergyStored(), energyStored_internal + convertRFtoInternal(toAdd_RF));
 		}
 		
-		return toAdd;
+		return toAdd_RF;
 	}
 	
 	@Override
-	public int extractEnergy(ForgeDirection from, int maxExtract, boolean simulate) {
+	public int extractEnergy(ForgeDirection from, int maxExtract_RF, boolean simulate) {
 		if (!canOutputEnergy(from)) {
 			return 0;
 		}
 		
-		int energyExtracted = Math.min(convertRFtoInternal(maxExtract), getPotentialEnergyOutput());
+		int potentialEnergyOutput_internal = getPotentialEnergyOutput();
+		int energyExtracted_internal = Math.min(convertRFtoInternal(maxExtract_RF), potentialEnergyOutput_internal);
 		if (!simulate) {
-			energyOutputDone(energyExtracted);
+			energyOutputDone(energyExtracted_internal);
+			// WarpDrive.debugPrint("extractEnergy Potential " + potentialEnergyOutput_internal + " EU, Requested " + maxExtract_RF + " RF, energyExtracted_internal " + energyExtracted_internal + "(" + convertInternalToRF(energyExtracted_internal) + " RF)");
 		}
-		return energyExtracted;
+		return convertInternalToRF(energyExtracted_internal);
 	}
 	
 	@Override
@@ -276,13 +301,13 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 		if (ieh == null || worldObj.getBlockTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ) == null) {
 			return;
 		}
-		int potentialEnergyOutput = getPotentialEnergyOutput();
-		if (potentialEnergyOutput > 0) {
-			int energyToOutput = ieh.receiveEnergy(from.getOpposite(), convertInternalToRF(potentialEnergyOutput), true);
-			if (energyToOutput > 0) {
-				int energyOutputed = ieh.receiveEnergy(from.getOpposite(), energyToOutput, false);
-				energyOutputDone(energyOutputed);
-				// WarpDrive.debugPrint(this + " output " + energyOutput + " RF, down to " + containedEnergy);
+		int potentialEnergyOutput_internal = getPotentialEnergyOutput();
+		if (potentialEnergyOutput_internal > 0) {
+			int energyToOutput_RF = ieh.receiveEnergy(from.getOpposite(), convertInternalToRF(potentialEnergyOutput_internal), true);
+			if (energyToOutput_RF > 0) {
+				int energyOutputed_RF = ieh.receiveEnergy(from.getOpposite(), energyToOutput_RF, false);
+				energyOutputDone(convertRFtoInternal(energyOutputed_RF));
+				// WarpDrive.debugPrint("ForcedOutputEnergy Potential " + potentialEnergyOutput_internal + " EU, Actual output " + energyOutputed_RF + " RF, simulated at " + energyToOutput_RF + " RF");
 			}
 		}
 	}

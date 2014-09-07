@@ -1,6 +1,7 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -22,15 +23,16 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral {
 		"freq"
 	};
 
+	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 	private int packetSendTicks = 20;
 
 	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			packetSendTicks--;
-			if (packetSendTicks == 0) {
-				packetSendTicks = 20 * 5;
-				sendFreqPacket();
+			if (packetSendTicks <= 0) {
+				packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
+				PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, frequency);
 			}
 			return;
 		}
@@ -44,6 +46,8 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral {
 		if (frequency != parFrequency) {
 			frequency = parFrequency;
 			WarpDrive.debugPrint("" + this + " Monitor frequency set to " + frequency);
+	        // force update through main thread since CC runs on server as 'client'
+	        packetSendTicks = 0;
 		}
 	}
 
@@ -78,29 +82,6 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral {
 		return new Integer[] { frequency };
 	}
 
-	public void sendFreqPacket() {
-		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				outputStream.writeInt(xCoord);
-				outputStream.writeInt(yCoord);
-				outputStream.writeInt(zCoord);
-				outputStream.writeInt(frequency);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			Packet250CustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveFreq";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, worldObj.provider.dimensionId, packet);
-//			WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + frequency + "'");
-		}
-	}
-
 	@Override
 	public void attach(IComputerAccess computer) {
 	}
@@ -112,5 +93,15 @@ public class TileEntityMonitor extends TileEntity implements IPeripheral {
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+	
+	@Override
+	public String toString() {
+        return String.format("%s/%d \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+       		getClass().getSimpleName(),
+       		Integer.valueOf(hashCode()),
+       		frequency,
+       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+       		xCoord, yCoord, zCoord});
 	}
 }

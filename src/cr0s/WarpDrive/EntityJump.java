@@ -1170,14 +1170,19 @@ public class EntityJump extends Entity
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 				}
 				
-				newTileEntity.worldObj = targetWorld;
-				newTileEntity.validate();
+				if (newTileEntity != null) {
+					newTileEntity.worldObj = targetWorld;
+					newTileEntity.validate();
 				
-				worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
-				targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-				if (isForgeMultipart) {
-					WarpDriveConfig.forgeMultipart_tileMultipart_onChunkLoad.invoke(newTileEntity);
-					WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
+					worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
+					targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
+					if (isForgeMultipart) {
+						WarpDriveConfig.forgeMultipart_tileMultipart_onChunkLoad.invoke(newTileEntity);
+						WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
+					}
+				} else {
+					WarpDrive.print(this + " moveBlockSimple failed to create new tile entity at " + shipBlock.x + ", " + shipBlock.y + ", " + shipBlock.z + " blockId " + shipBlock.blockID + ":" + shipBlock.blockMeta);
+					WarpDrive.print("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
 				}
 			}
 		} catch (Exception exception) {

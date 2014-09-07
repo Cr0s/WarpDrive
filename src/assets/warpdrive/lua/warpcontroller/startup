@@ -170,7 +170,12 @@ function ShowInfo()
  Show("Core:")
  Show(" x, y, z          = "..X..", "..Y..", "..Z)
  local energy = warp.get_energy_level()
- Show(" Energy           = "..math.floor(energy / 1000000).." % ("..energy.."EU)")
+ local energyMax = 100000000
+ if warp.get_energy_max ~= nil then
+  energyMax = warp.get_energy_max()
+  if energyMax == nil then energyMax = 1 end
+ end
+ Show(" Energy           = "..math.floor(100 * energy / energyMax).." % ("..energy.."EU)")
  Show(" Attached players = "..warp.get_attached_players())
  Show("Dimensions:")
  Show(" Front, Right, Up = "..GFront..", "..GRight..", "..GUp)

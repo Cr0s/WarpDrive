@@ -42,9 +42,6 @@ public class WarpDriveConfig
 	public static int shipScannerID;
 	public static int cloakCoreID;
 	public static int cloakCoilID;
-	public static int laserTreeFarmID;
-	public static int reactorLaserFocusID;
-	public static int reactorMonitorID;
 	
 	// Items
 	public static int componentID;
@@ -150,6 +147,11 @@ public class WarpDriveConfig
 
     // Warp Radar
     public static int		WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
+    public static int		WR_MAX_ISOLATION_RANGE = 2;
+    public static int		WR_MIN_ISOLATION_BLOCKS = 5;
+    public static int		WR_MAX_ISOLATION_BLOCKS = 132;
+    public static double	WR_MIN_ISOLATION_EFFECT = 0.12;
+    public static double	WR_MAX_ISOLATION_EFFECT = 1.00;
     
     // Particle Booster
     public static int		PB_MAX_ENERGY_VALUE = 100000;
@@ -209,26 +211,7 @@ public class WarpDriveConfig
 
 	// Air generator
 	public static int		AG_RF_PER_CANISTER = 20;
-	
-	// Reactor monitor
-	public static int		RM_MAX_ENERGY = 1000000;
-	public static double	RM_EU_PER_HEAT = 2;
-	
-	// Transporter
-	public static int		TR_MAX_ENERGY = 1000000;
-	public static boolean	TR_RELATIVE_COORDS = true;
-	public static double	TR_EU_PER_METRE = 100;
-	// public static double	TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
-	public static double	TR_MAX_BOOST_MUL = 4;
-
-	// Power reactor
-	public static int		PR_MAX_ENERGY = 100000000;
-	public static int		PR_TICK_TIME  = 5;
-	public static int		PR_MAX_LASERS = 6;
-	
-	// Power store
-	public static int		PS_MAX_ENERGY = 1000000;
-	
+		
 	// Laser Lift
 	public static int		LL_MAX_ENERGY = 2400;
 	public static int		LL_LIFT_ENERGY = 800;
@@ -329,14 +312,24 @@ public class WarpDriveConfig
 	    WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", WC_MAX_SHIP_SIDE, "Maximum ship size on each axis in blocks").getInt(); 
 	    WC_COLLISION_TOLERANCE_BLOCKS = config.get("WarpCore", "collision_tolerance_blocks", WC_COLLISION_TOLERANCE_BLOCKS, "Tolerance in block in case of collision before causing damages...").getInt();
 	    WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", WC_COOLDOWN_INTERVAL_SECONDS, "Cooldown seconds to wait after jumping").getInt();
-	    WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", WC_WARMUP_SHORTJUMP_SECONDS).getInt();
-	    WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump threeshold is 50 blocks").getInt();
+	    WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", WC_WARMUP_SHORTJUMP_SECONDS, "Short jump means less than 50 blocks").getInt();
+	    WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump means more than 50 blocks").getInt();
 	    
 	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt(); 
 	    WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt();		
 	    
 	    // Warp Radar
 	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", WR_MAX_ENERGY_VALUE).getInt();
+	    WR_MAX_ISOLATION_RANGE = config.get("WarpRadar", "max_isolation_range", WR_MAX_ISOLATION_RANGE, "radius around core where isolation blocks count (2 to 8), higher is lagger").getInt();
+	    WR_MAX_ISOLATION_RANGE = Math.min(8, Math.max(WR_MAX_ISOLATION_RANGE, 2));
+	    WR_MIN_ISOLATION_BLOCKS = config.get("WarpRadar", "min_isolation_blocks", WR_MIN_ISOLATION_BLOCKS, "number of isolation blocks required to get some isolation (0 to 20)").getInt();
+	    WR_MIN_ISOLATION_BLOCKS = Math.min(20, Math.max(WR_MIN_ISOLATION_BLOCKS, 0));
+	    WR_MAX_ISOLATION_BLOCKS = config.get("WarpRadar", "max_isolation_blocks", WR_MAX_ISOLATION_BLOCKS, "number of isolation blocks required to reach maximum effect (5 to 100)").getInt();
+	    WR_MAX_ISOLATION_BLOCKS = Math.min(100, Math.max(WR_MAX_ISOLATION_BLOCKS, 5));
+	    WR_MIN_ISOLATION_EFFECT = config.get("WarpRadar", "min_isolation_effect", WR_MIN_ISOLATION_EFFECT, "isolation effect achieved with min number of isolation blocks (0.01 to 0.95)").getDouble(0.12D);
+	    WR_MIN_ISOLATION_EFFECT = Math.min(0.95D, Math.max(WR_MIN_ISOLATION_EFFECT, 0.01D));
+	    WR_MAX_ISOLATION_EFFECT = config.get("WarpRadar", "max_isolation_effect", WR_MAX_ISOLATION_EFFECT, "isolation effect achieved with max number of isolation blocks (0.01 to 1.00)").getDouble(1.00D);
+	    WR_MAX_ISOLATION_EFFECT = Math.min(1.0D, Math.max(WR_MAX_ISOLATION_EFFECT, 0.01D));
 	    
 	    // Particle Booster
 	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", PB_MAX_ENERGY_VALUE).getInt();
@@ -385,24 +378,6 @@ public class WarpDriveConfig
 		// Air generator
 		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
 		
-		// Reactor monitor
-		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
-		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", RM_EU_PER_HEAT).getDouble(2);
-		
-		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();	
-		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
-		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100);
-		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getInt();
-
-		// Power reactor
-		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
-		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update", PR_TICK_TIME).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", PR_MAX_LASERS).getInt();
-		
-		// Power store
-		PS_MAX_ENERGY = config.get("PowerStore", "max_energy", PS_MAX_ENERGY).getInt();
-		
 		// Laser lift
 		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
 		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
@@ -446,10 +421,7 @@ public class WarpDriveConfig
 		shipScannerID = config.getBlock("shipscanner", 516).getInt();
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
-		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
-		reactorMonitorID = config.getBlock("reactorMonitor", 522).getInt();
 		
-		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
 		helmetID = config.getItem("helmet", 8702).getInt();
 		chestID = config.getItem("chest", 8703).getInt();
