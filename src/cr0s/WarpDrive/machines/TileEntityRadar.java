@@ -79,6 +79,10 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				return new Object[] { -1 };
 				
 			case 1: // scanRadius (radius)
+				// always clear results
+				results = null;
+				
+				// validate parameters
 				if (arguments.length != 1) {
 					return new Boolean[] { false };
 				}
@@ -88,21 +92,17 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				} catch(Exception e) {
 	               	return new Boolean[] { false };
 	            }
-				
 				if (radius <= 0 || radius > 10000) {
 					scanRadius = 0;
-					results = null;
 					return new Boolean[] { false };
 				}
 				if (!consumeEnergy(Math.max(radius, 100) * Math.max(radius, 100), false)) {
-					results = null;
 					return new Boolean[] { false };
 				}
 				
 				// Begin searching
 				scanRadius = radius;
 				cooldownTime = 0;
-				results = null;
 				if (getBlockMetadata() != 2) {
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
 				}
@@ -112,7 +112,7 @@ public class TileEntityRadar extends WarpEnergyTE implements IPeripheral {
 				if (results != null) {
 					return new Integer[] { results.size() };
 				}
-				return new Integer[] { 0 };
+				return new Integer[] { -1 };
 				
 			case 3: // getResult
 				if (arguments.length == 1 && (results != null)) {

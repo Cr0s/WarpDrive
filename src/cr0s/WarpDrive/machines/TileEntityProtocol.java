@@ -13,6 +13,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import cr0s.WarpDrive.*;
+import cr0s.WarpDrive.machines.TileEntityReactor.ReactorMode;
 
 /**
  * Protocol block tile entity
@@ -23,7 +24,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     // Variables
     private int distance = 0;
     private int direction = 0;
-    private int mode = 0;
+    private ReactorMode mode = ReactorMode.IDLE;
 
     private boolean jumpFlag = false;
     private boolean summonFlag = false;
@@ -75,8 +76,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         if (++ticks >= BLOCK_UPDATE_INTERVAL) {
             core = findCoreBlock();
             if (core != null) {
-            	if (mode != getBlockMetadata()) {
-            		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode, 1 + 2);  // Activated
+            	if (mode.getCode() != getBlockMetadata()) {
+            		worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, mode.getCode(), 1 + 2);  // Activated
             	}
             } else if (getBlockMetadata() != 0) {
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);  // Inactive
@@ -86,14 +87,12 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         }
     }
 
-    private void setJumpDistance(int distance) {
-        System.out.println("Setting jump distance: " + distance);
-        this.distance = distance;
-    }
-
     private void setMode(int mode) {
-        // System.out.println("Setting mode: " + mode);
-        this.mode = mode;
+    	ReactorMode[] modes = ReactorMode.values();
+    	if (mode >= 0 && mode <= modes.length) {
+    		this.mode = modes[mode];
+            WarpDrive.debugPrint(this + " Mode set to " + this.mode + " (" + this.mode.getCode() + ")");
+    	}
     }
 
     private void setDirection(int dir) {
@@ -106,7 +105,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         } else {
         	this.direction = dir;
         }
-        //WarpDrive.debugPrint("" + this + " Direction set to " + this.direction);
+        // WarpDrive.print("" + this + " Direction set to " + this.direction);
     }
 
     private void doJump() {
@@ -142,7 +141,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         super.writeToNBT(tag);
         updatePlayersString();
         tag.setString("players", playersString);
-        tag.setInteger("mode", this.mode);
+        tag.setInteger("mode", this.mode.getCode());
         tag.setInteger("front", this.front);
         tag.setInteger("right", this.right);
         tag.setInteger("up", this.up);
@@ -309,18 +308,18 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     public void setDistance(int distance) {
-        this.distance = distance;
+        this.distance = Math.max(1, Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance));
+    	WarpDrive.debugPrint(this + " Jump distance set to " + distance);
     }
 
-    public int getDistance()
-    {
+    public int getDistance() {
         return this.distance;
     }
 
     /**
      * @return the mode
      */
-    public int getMode() {
+    public ReactorMode getMode() {
         return mode;
     }
 
@@ -435,23 +434,25 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 			
 		} else if (methodName.equals("dim_setp")) {// dim_setp (front, right, up)
 			if (arguments.length != 3) {
-				return new Integer[] { -1 };
+				return new Integer[] { getFront(), getRight(), getUp() };
 			}
 			try {
 				argInt0 = ((Double) arguments[0]).intValue();
 				argInt1 = ((Double) arguments[1]).intValue();
 				argInt2 = ((Double) arguments[2]).intValue();
 			} catch (Exception e) {
-				return new Integer[] { -1 };
+				return new Integer[] { getFront(), getRight(), getUp() };
 			}
 			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-				return new Integer[] { -1 };
+				return new Integer[] { getFront(), getRight(), getUp() };
 			}
 			
 			System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
 			setFront(((Double) arguments[0]).intValue());
 			setRight(((Double) arguments[1]).intValue());
 			setUp(((Double) arguments[2]).intValue());
+			
+			return new Integer[] { getFront(), getRight(), getUp() };
 			
 		} else if (methodName.equals("dim_getn")) {
 			return new Integer[] { getBack(), getLeft(), getDown() };
@@ -465,16 +466,18 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				argInt1 = ((Double) arguments[1]).intValue();
 				argInt2 = ((Double) arguments[2]).intValue();
 			} catch (Exception e) {
-				return new Integer[] { -1 };
+				return new Integer[] { getBack(), getLeft(), getDown() };
 			}
 			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-				return new Integer[] { -1 };
+				return new Integer[] { getBack(), getLeft(), getDown() };
 			}
 			
 			System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
 			setBack(argInt0);
 			setLeft(argInt1);
 			setDown(argInt2);
+			
+			return new Integer[] { getBack(), getLeft(), getDown() };
 			
 		} else if (methodName.equals("set_mode")) {// set_mode (mode)
 			if (arguments.length != 1) {
@@ -498,8 +501,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			
-			setJumpDistance(argInt0);
+			setDistance(argInt0);
 			
+			return new Integer[] { getDistance() };
 		} else if (methodName.equals("set_direction")) {// set_direction (dir)
 			if (arguments.length != 1) {
 				return new Integer[] { -1 };
