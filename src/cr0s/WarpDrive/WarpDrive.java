@@ -75,7 +75,6 @@ public class WarpDrive implements LoadingCallback {
 	public static Block monitorBlock;
 	public static Block boosterBlock;
 	public static Block miningLaserBlock;
-	public static Block laserTreeFarmBlock;
 	public static Block liftBlock;
 	public static Block scannerBlock;
 	public static Block cloakBlock;
@@ -85,7 +84,6 @@ public class WarpDrive implements LoadingCallback {
 	public static Block powerReactorBlock;
 	public static Block powerLaserBlock;
 	public static Block powerStoreBlock;
-	
 	public static Block airBlock;
 	public static Block gasBlock;
 
@@ -94,7 +92,6 @@ public class WarpDrive implements LoadingCallback {
 	public static Block chunkLoaderBlock;
 	public static BlockDecorative decorativeBlock;
 	
-	public static Item reactorLaserFocusItem;
 	public static ItemWarpComponent componentItem;
 	public static ItemWarpUpgrade upgradeItem;
 	
@@ -239,12 +236,6 @@ public class WarpDrive implements LoadingCallback {
 		
 		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");
-		
-		// LASER TREE FARM
-		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID, 0, Material.rock);
-		
-		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
-		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class,"laserTreeFarmBlock");
 		
 		// PARTICLE BOOSTER
 		boosterBlock = new BlockParticleBooster(WarpDriveConfig.particleBoosterID, 0, Material.rock);
@@ -433,27 +424,12 @@ public class WarpDrive implements LoadingCallback {
 				'c', componentItem.getIS(5),
 				'l', componentItem.getIS(3)));
 		
-		//Tree farm laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock), false, "ili", "sts", "ici",
-				'i', Item.ingotIron,
-				's', "treeSapling",
-				't', componentItem.getIS(1),
-				'c', componentItem.getIS(5),
-				'l', componentItem.getIS(3)));
-		
 		//Laser Lift
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(liftBlock), false, "ipi", "rtr", "ili",
 				'i', Item.ingotIron,
 				'r', Item.redstone,
 				't', componentItem.getIS(1),
 				'l', componentItem.getIS(3),
-				'p', componentItem.getIS(6)));
-		
-		//Transporter
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, "iii", "ptc", "iii",
-				'i', Item.ingotIron,
-				't', componentItem.getIS(1),
-				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
 		
 		//Particle Booster
@@ -597,10 +573,10 @@ public class WarpDrive implements LoadingCallback {
 	
 	private static void initIC2Recipes() {
 		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
-				'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
-				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
-				'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
-			
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
+		
 		GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
 			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
@@ -671,30 +647,6 @@ public class WarpDrive implements LoadingCallback {
 			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
 			's', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'g', Block.glass);	
-	
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock),false,new Object[] {
-			"cwc", "wmw", "cwc",
-			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
-			'w', "logWood",
-			'm', miningLaserBlock }));
-		
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] {
-			"ece", "imi", "iei",
-			'e', Item.enderPearl,
-			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
-			'i', WarpDriveConfig.getIC2Item("plateiron"),
-			'm', WarpDriveConfig.getIC2Item("machine") }));
-		
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem),false,new Object[] {
-			" p ", "pdp", " p ",
-			'p', WarpDriveConfig.getIC2Item("plateiron"),
-			'd', "gemDiamond"}));
-		
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] {
-			"pdp", "dmd", "pdp",
-			'p', WarpDriveConfig.getIC2Item("plateiron"),
-			'd', "gemDiamond",
-			'm', WarpDriveConfig.getIC2Item("mfeUnit")}));
 		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi", 
 			'i', iridiumBlock,

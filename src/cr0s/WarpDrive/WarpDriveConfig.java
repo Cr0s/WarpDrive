@@ -42,16 +42,6 @@ public class WarpDriveConfig
 	public static int shipScannerID;
 	public static int cloakCoreID;
 	public static int cloakCoilID;
-	public static int laserTreeFarmID;
-	public static int transporterID;
-	public static int transportBeaconID;
-	public static int reactorLaserFocusID;
-	public static int reactorMonitorID;
-	public static int powerReactorID;
-	public static int powerLaserID;
-	public static int powerStoreID;
-	public static int chunkLoaderID;
-	public static int decorativeID;
 	
 	// Items
 	public static int componentID;
@@ -221,26 +211,7 @@ public class WarpDriveConfig
 
 	// Air generator
 	public static int		AG_RF_PER_CANISTER = 20;
-	
-	// Reactor monitor
-	public static int		RM_MAX_ENERGY = 1000000;
-	public static double	RM_EU_PER_HEAT = 2;
-	
-	// Transporter
-	public static int		TR_MAX_ENERGY = 1000000;
-	public static boolean	TR_RELATIVE_COORDS = true;
-	public static double	TR_EU_PER_METRE = 100;
-	// public static double	TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
-	public static double	TR_MAX_BOOST_MUL = 4;
-
-	// Power reactor
-	public static int		PR_MAX_ENERGY = 100000000;
-	public static int		PR_TICK_TIME  = 5;
-	public static int		PR_MAX_LASERS = 6;
-	
-	// Power store
-	public static int		PS_MAX_ENERGY = 1000000;
-	
+		
 	// Laser Lift
 	public static int		LL_MAX_ENERGY = 2400;
 	public static int		LL_LIFT_ENERGY = 800;
@@ -407,24 +378,6 @@ public class WarpDriveConfig
 		// Air generator
 		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
 		
-		// Reactor monitor
-		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
-		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", RM_EU_PER_HEAT).getDouble(2);
-		
-		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();	
-		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
-		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100);
-		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getInt();
-
-		// Power reactor
-		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
-		PR_TICK_TIME  = config.get("Reactor", "ticks_per_update", PR_TICK_TIME).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", PR_MAX_LASERS).getInt();
-		
-		// Power store
-		PS_MAX_ENERGY = config.get("PowerStore", "max_energy", PS_MAX_ENERGY).getInt();
-		
 		// Laser lift
 		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
 		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
@@ -468,17 +421,7 @@ public class WarpDriveConfig
 		shipScannerID = config.getBlock("shipscanner", 516).getInt();
 		cloakCoreID = config.getBlock("cloakcore", 517).getInt();
 		cloakCoilID = config.getBlock("cloakcoil", 518).getInt();
-		laserTreeFarmID = config.getBlock("lasertreefarm", 519).getInt();
-		transporterID = config.getBlock("transporter", 520).getInt();
-		transportBeaconID = config.getBlock("transportBeacon", 521).getInt();
-		reactorMonitorID = config.getBlock("reactorMonitor", 522).getInt();
-		powerLaserID = config.getBlock("powerLaser", 523).getInt();
-		powerReactorID = config.getBlock("powerReactor", 524).getInt();
-		powerStoreID = config.getBlock("powerStore", 525).getInt();
-		chunkLoaderID = config.getBlock("chunkLoader", 526).getInt();
-		decorativeID = config.getBlock("decorative",527).getInt();
 		
-		reactorLaserFocusID = config.getItem("reactorLaserFocus", 8700).getInt();
 		componentID = config.getItem("component", 8701).getInt();
 		helmetID = config.getItem("helmet", 8702).getInt();
 		chestID = config.getItem("chest", 8703).getInt();
