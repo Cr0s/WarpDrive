@@ -1372,7 +1372,6 @@ end
 radar_listOffset = 0
 radar_timerId = -1
 radar_timerLength = 1
-data.radar_scale = 1
 radar_x = 0
 radar_y = 0
 radar_z = 0
@@ -1815,6 +1814,9 @@ if not label then
 	label = "" .. os.getComputerID()
 end
 
+-- read configuration
+data_read()
+
 -- initial scanning
 monitors = {}
 ShowTitle(label .. " - Connecting...")
@@ -1855,9 +1857,6 @@ for key,side in pairs(sides) do
 	end
 end
 -- sleep(1)
-
--- read configuration
-data_read()
 
 if not os.getComputerLabel() and (warpcore ~= nil or reactor ~= nil) then
 	data_setName()
