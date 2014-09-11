@@ -300,7 +300,9 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 								tileTag.setInteger("z", te.zCoord - core.minZ);
 								
 								tileEntitiesList.appendTag(tileTag);
-							} catch (Exception e) {}
+							} catch (Exception exception) {
+								exception.printStackTrace();
+							}
 						}
 					}
 				}
@@ -646,7 +648,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	// Own implementation of setting blocks without light recalculation in optimization purposes
 	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
 	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) //FIXME magic numbers
+		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
 		{
 			if (y < 0)
 			{
