@@ -113,7 +113,7 @@ function Clear()
 			end
 		end
 	end
-	SetCursorPos(1,1)
+	SetCursorPos(1, 1)
 end
 
 function ClearLine()
@@ -126,7 +126,7 @@ function ClearLine()
 			end
 		end
 	end
-	SetCursorPos(1,1)
+	SetCursorPos(1, 1)
 end
 
 function WriteLn(Text)
@@ -358,10 +358,8 @@ function common_event(eventName, param)
 		reactor_pulse(param)
 --	elseif eventName == "reactorDeactivation" then
 --		ShowWarning("Reactor deactivated")
---		os.sleep(0.2)
 --	elseif eventName == "reactorActivation" then
 --		ShowWarning("Reactor activated")
---		os.sleep(0.2)
 	else
 		return false
 	end
@@ -1326,6 +1324,9 @@ end
 
 function reactor_pulse(output)
 	reactor_output = output
+	if reactor == nil then
+		os.reboot()
+	end
 	local instabilities = { reactor.instability() }
 	for key,instability in pairs(instabilities) do
 		local stability = math.floor((100.0 - instability) * 10) / 10
@@ -1382,6 +1383,9 @@ function radar_boot()
 		if data.radar_monitorIndex > 0 then
 			radar_x, radar_y, radar_z = radar.pos()
 			radar_drawMap()
+		end
+		if data.radar_autoscan then
+			radar_scan()
 		end
 	end
 end
@@ -1491,8 +1495,12 @@ function radar_page()
 			Write("Displaying results " .. (radar_listOffset + 1) .. " to " .. (lastResultShown + 1) .. " of " .. #data.radar_results)
 			for i = radar_listOffset, lastResultShown do
 				SetCursorPos(4, 3 + i - radar_listOffset)
-				Write(FormatInteger(data.radar_results[i].x, 7) .. ", " .. FormatInteger(data.radar_results[i].y, 4) .. ", " .. FormatInteger(data.radar_results[i].z, 7))
-				Write(": " .. data.radar_results[i].frequency)
+				if data.radar_results ~= nil then
+					Write(FormatInteger(data.radar_results[i].x, 7) .. ", " .. FormatInteger(data.radar_results[i].y, 4) .. ", " .. FormatInteger(data.radar_results[i].z, 7))
+					Write(": " .. data.radar_results[i].frequency)
+				else
+					Write("~nil~")
+				end
 			end
 		end
 
@@ -1608,7 +1616,7 @@ function radar_scan()
 		draw_warning(monitor, "LOW POWER")
 		return false
 	end
-	if radar_timerId ~= -1 then
+	if radar_timerId ~= -1 and radar.getResultsCount() == -1 then
 		draw_warning(monitor, "Already scanning...")
 		return false
 	end
@@ -1684,7 +1692,6 @@ function draw_centeredText(monitor, y, text)
 end
 
 function radar_drawContact(monitor, contact)
-	SetCursorPos(2, 2)
 	local screenWidth, screenHeight
 	if monitor == nil then
 		screenWidth, screenHeight = term.getSize()
@@ -2030,5 +2037,5 @@ if monitors ~= nil then
 		monitor.clear()
 	end
 end
-SetCursorPos(1,1)
+SetCursorPos(1, 1)
 Write("")
