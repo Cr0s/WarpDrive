@@ -601,7 +601,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
-    
+
+	public int getMaxEnergyStored() {
+		return MAX_ENERGY_VALUE;
+	}
+
     @Override
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
