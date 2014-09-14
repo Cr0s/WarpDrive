@@ -8,6 +8,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import ic2.api.energy.tile.IEnergyTile;
+import cofh.api.energy.IEnergyHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -294,6 +295,13 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 									}
 								}
 								
+								if (te instanceof IEnergyHandler) {
+									// Thermal Expansion
+									if (tileTag.hasKey("Energy")) {
+										tileTag.setInteger("Energy", 0);
+									}
+								}
+
 								// Transform TE's coordinates from local axis to .schematic offset-axis
 								tileTag.setInteger("x", te.xCoord - core.minX);
 								tileTag.setInteger("y", te.yCoord - core.minY);
@@ -601,7 +609,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
-    
+
+	public int getMaxEnergyStored() {
+		return MAX_ENERGY_VALUE;
+	}
+
     @Override
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
