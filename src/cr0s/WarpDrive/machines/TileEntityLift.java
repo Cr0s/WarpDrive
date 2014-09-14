@@ -48,9 +48,9 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
         	
             // Switching mode
             if (computerMode == MODE_DOWN || (computerMode == MODE_REDSTONE && worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))) {
-                mode = 2; // down
+                mode = MODE_DOWN;
             } else {
-                mode = 1; // up
+                mode = MODE_UP;
             }
             
             isEnabled = computerEnabled
@@ -81,9 +81,9 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
             }
             
             if (yCoord - firstUncoveredY > 0) {
-                if (mode == 1) {
-                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
-                } else if (mode == 2) {
+                if (mode == MODE_UP) {
+                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), new Vector3(this).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
+                } else if (mode == MODE_DOWN) {
                 	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 0f, 1f, 40, 0, 100);
                 }
             }
