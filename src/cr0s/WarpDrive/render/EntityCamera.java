@@ -2,6 +2,7 @@ package cr0s.WarpDrive.render;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
@@ -127,7 +128,7 @@ public final class EntityCamera extends EntityLivingBase
 
                     // Make a shoot with camera-laser
                     if (blockID == WarpDriveConfig.laserCamID) {
-                        sendTargetPacket();
+                    	PacketHandler.sendLaserTargetingPacket(xCoord, yCoord, zCoord, mc.renderViewEntity.rotationYaw, mc.renderViewEntity.rotationPitch);
                     }
             	}
             } else {
@@ -232,44 +233,4 @@ public final class EntityCamera extends EntityLivingBase
     public ItemStack[] getLastActiveItems() {
         return null;
     }
-
-    // Camera orientation refresh to server packet
-    public void sendTargetPacket() {
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-            DataOutputStream outputStream = new DataOutputStream(bos);
-
-            try {
-                outputStream.writeInt(xCoord);
-                outputStream.writeInt(yCoord);
-                outputStream.writeInt(zCoord);
-                outputStream.writeFloat(mc.renderViewEntity.rotationYaw);
-                outputStream.writeFloat(mc.renderViewEntity.rotationPitch);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            Packet250CustomPayload packet = new Packet250CustomPayload();
-            packet.channel = "WarpDriveLaserT";
-            packet.data = bos.toByteArray();
-            packet.length = bos.size();
-            PacketDispatcher.sendPacketToServer(packet);
-            WarpDrive.debugPrint("" + this + " Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") yawn " + mc.renderViewEntity.rotationYaw + " pitch " + mc.renderViewEntity.rotationPitch);
-        }
-    }
-
-    /*
-    @Override
-    public void sendChatToPlayer(ChatMessageComponent chatmessagecomponent) {
-    }
-
-    @Override
-    public boolean canCommandSenderUseCommand(int i, String s) {
-    	return false;
-    }
-
-    @Override
-    public ChunkCoordinates getPlayerCoordinates() {
-    	return new ChunkCoordinates(xCoord, yCoord, zCoord);
-    }*/
 }

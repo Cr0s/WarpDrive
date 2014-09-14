@@ -17,6 +17,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.IPacketHandler;
+import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
 import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.machines.TileEntityCamera;
@@ -24,25 +25,16 @@ import cr0s.WarpDrive.machines.TileEntityLaser;
 import cr0s.WarpDrive.machines.TileEntityMonitor;
 import net.minecraft.client.multiplayer.WorldClient;
 
-public class PacketHandler implements IPacketHandler
-{
+public class PacketHandler implements IPacketHandler {
 	@Override
-	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player)
-	{
-		if (packet.channel.equals("WarpDriveBeam"))
-		{
+	public void onPacketData(INetworkManager manager, Packet250CustomPayload packet, Player player) {
+		if (packet.channel.equals("WarpDriveBeam")) {
 			handleBeam(packet, (EntityPlayer)player);
-		}
-		else if (packet.channel.equals("WarpDriveFreq"))
-		{
+		} else if (packet.channel.equals("WarpDriveFreq")) {
 			handleFreqUpdate(packet, (EntityPlayer)player);
-		}
-		else if (packet.channel.equals("WarpDriveLaserT"))
-		{
+		} else if (packet.channel.equals("WarpDriveLaserT")) {
 			handleLaserTargeting(packet, (EntityPlayer)player);
-		}
-		else if (packet.channel.equals("WarpDriveCloaks")) 
-		{
+		} else if (packet.channel.equals("WarpDriveCloaks")) {
 			handleCloak(packet, (EntityPlayer)player);
 		}
 	}
@@ -130,12 +122,10 @@ public class PacketHandler implements IPacketHandler
         }    	
     }
 
-	public static void handleLaserTargeting(Packet250CustomPayload packet, EntityPlayer player)
-	{
+	public static void handleLaserTargeting(Packet250CustomPayload packet, EntityPlayer player) {
 	    DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 	
-	    try
-	    {
+	    try {
 	        int x = inputStream.readInt();
 	        int y = inputStream.readInt();
 	        int z = inputStream.readInt();
@@ -145,14 +135,9 @@ public class PacketHandler implements IPacketHandler
 	        TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
 	        if (te != null && te instanceof TileEntityLaser) {
 	            TileEntityLaser laser = (TileEntityLaser)te;
-	            laser.yaw = yaw;
-	            laser.pitch = pitch;
-	            laser.delayTicks = 0;
-	            laser.isEmitting = true;
+	            laser.initiateBeamEmission(yaw, pitch);
 	        }
-	    }
-	    catch (Exception e)
-	    {
+	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
 	}
@@ -185,8 +170,7 @@ public class PacketHandler implements IPacketHandler
         }
     }
 
-	private void handleBeam(Packet250CustomPayload packet, EntityPlayer player)
-	{
+	private void handleBeam(Packet250CustomPayload packet, EntityPlayer player) {
 		DataInputStream inputStream = new DataInputStream(new ByteArrayInputStream(packet.data));
 		Vector3 source, target;
 		double sx, sy, sz;
@@ -196,8 +180,7 @@ public class PacketHandler implements IPacketHandler
 		int energy;
 		World worldObj = player.worldObj;
 
-		try
-		{
+		try {
 			// Read source vector
 			sx = inputStream.readDouble();
 			sy = inputStream.readDouble();
@@ -221,16 +204,13 @@ public class PacketHandler implements IPacketHandler
 //            WarpDrive.debugPrint("Received beam packet from " + source + " to " + target + " as RGB " + r + " " + g + " " + b + " age " + age +" energy " + energy);
 
             // To avoid NPE at logging in
-            if (worldObj == null)
-            {
-                WarpDrive.debugPrint("WorldObj is null");
+            if (worldObj == null) {
+                WarpDrive.debugPrint("WorldObj is null, ignoring beam packet");
                 return;
             }
 
 			WarpDrive.proxy.renderBeam(worldObj, source.clone(), target.clone(), r, g, b, age, energy);
-		}
-		catch (IOException e)
-		{
+		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
@@ -256,6 +236,31 @@ public class PacketHandler implements IPacketHandler
 			packet.length = bos.size();
 			MinecraftServer.getServer().getConfigurationManager().sendToAllNear(xCoord, yCoord, zCoord, 100, dimensionId, packet);
 			// WarpDrive.debugPrint("Packet '" + packet.channel + "' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") '" + frequency + "'");
+		}
+	}
+
+	// LaserCamera shooting at target (client -> server)
+	public static void sendLaserTargetingPacket(int x, int y, int z, float yaw, float pitch) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+			DataOutputStream outputStream = new DataOutputStream(bos);
+			
+			try {
+				outputStream.writeInt(x);
+				outputStream.writeInt(y);
+				outputStream.writeInt(z);
+				outputStream.writeFloat(yaw);
+				outputStream.writeFloat(pitch);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			Packet250CustomPayload packet = new Packet250CustomPayload();
+			packet.channel = "WarpDriveLaserT";
+			packet.data = bos.toByteArray();
+			packet.length = bos.size();
+			PacketDispatcher.sendPacketToServer(packet);
+			WarpDrive.debugPrint("Packet '" + packet.channel + "' sent (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
 		}
 	}
 }
