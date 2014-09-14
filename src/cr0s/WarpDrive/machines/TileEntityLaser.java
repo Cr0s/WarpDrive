@@ -92,9 +92,10 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		if (isEmitting && ((beamFrequency != 1420 && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || ((beamFrequency == 1420) && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS))) {
 			delayTicks = 0;
 			isEmitting = false;
-			emitBeam(Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY));
+			int beamEnergy = Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY); 
+			emitBeam(beamEnergy);
 			energyFromOtherBeams = 0;
-			sendEvent("laserSend", null);
+			sendEvent("laserSend", new Object[] { beamFrequency, beamEnergy });
 		}
 	}
 
