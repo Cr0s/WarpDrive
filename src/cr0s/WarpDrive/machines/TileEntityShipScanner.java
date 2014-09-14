@@ -600,6 +600,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 	// IEnergySink methods implementation
 	@Override
+	public int getMaxEnergyStored() {
+		return MAX_ENERGY_VALUE;
+	}
+	
+	@Override
 	public int getMaxSafeInput() {
 		return Integer.MAX_VALUE;
 	}
