@@ -27,6 +27,10 @@ public abstract class WarpTE extends TileEntity
 	protected static double toDouble(Object o) {
 		return Double.parseDouble(o.toString());
 	}
+
+	protected static float toFloat(Object o) {
+		return Float.parseFloat(o.toString());
+	}
 	
 	protected static boolean toBool(Object o) {
 		if (o == null) {
