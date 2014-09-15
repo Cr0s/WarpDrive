@@ -1000,12 +1000,12 @@ function core_page()
 		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
 		local energy = warpcore.get_energy_level()
 		if energy == nil then energy = 0 end
-		local energyMax = 10000000
+		local energyMax = 100000000
 		if warpcore.get_energy_max ~= nil then
 			energyMax = warpcore.get_energy_max()
 			if energyMax == nil then energyMax = 1 end
 		end
-		WriteLn(" Energy           = " .. math.floor(energy / energyMax) .. " % (" .. energy .. "EU)")
+		WriteLn(" Energy           = " .. math.floor(energy / energyMax * 100) .. " % (" .. energy .. "EU)")
 		local players = warpcore.get_attached_players()
 		if players == nil then players = "-" end
 		WriteLn(" Attached players = " .. players)
