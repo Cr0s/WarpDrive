@@ -19,6 +19,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.IPacketHandler;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import cpw.mods.fml.common.network.Player;
+import cpw.mods.fml.relauncher.Side;
 import cr0s.WarpDrive.data.Vector3;
 import cr0s.WarpDrive.machines.TileEntityCamera;
 import cr0s.WarpDrive.machines.TileEntityLaser;
@@ -216,6 +217,81 @@ public class PacketHandler implements IPacketHandler {
 		}
 	}
 	
+    public static void sendBeamPacket(World worldObj, Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius) {
+        Side side = FMLCommonHandler.instance().getEffectiveSide();
+        if (side == Side.SERVER) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+            DataOutputStream outputStream = new DataOutputStream(bos);
+
+            try {
+                // Write source vector
+                outputStream.writeDouble(source.x);
+                outputStream.writeDouble(source.y);
+                outputStream.writeDouble(source.z);
+                // Write target vector
+                outputStream.writeDouble(dest.x);
+                outputStream.writeDouble(dest.y);
+                outputStream.writeDouble(dest.z);
+                // Write r, g, b of laser
+                outputStream.writeFloat(r);
+                outputStream.writeFloat(g);
+                outputStream.writeFloat(b);
+                // Write age
+                outputStream.writeByte(age);
+                // Write energy value
+                outputStream.writeInt(energy);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            Packet250CustomPayload packet = new Packet250CustomPayload();
+            packet.channel = "WarpDriveBeam";
+            packet.data = bos.toByteArray();
+            packet.length = bos.size();
+            if (source.distanceTo_square(dest) < 3600 /* 60 * 60 */) { 
+            	MinecraftServer.getServer().getConfigurationManager().sendToAllNear(
+            			(source.intX() + dest.intX()) / 2, (source.intY() + dest.intY()) / 2, (source.intZ() + dest.intZ()) / 2,
+            			radius, worldObj.provider.dimensionId, packet);
+            	return;
+            }
+        	MinecraftServer.getServer().getConfigurationManager().sendToAllNear(
+        			source.intX(), source.intY(), source.intZ(),
+        			radius, worldObj.provider.dimensionId, packet);
+            
+            ByteArrayOutputStream bos2 = new ByteArrayOutputStream(8);
+            DataOutputStream outputStream2 = new DataOutputStream(bos2);
+
+            try {
+                // Write source vector
+                outputStream2.writeDouble(source.x);
+                outputStream2.writeDouble(source.y);
+                outputStream2.writeDouble(source.z);
+                // Write target vector
+                outputStream2.writeDouble(dest.x);
+                outputStream2.writeDouble(dest.y);
+                outputStream2.writeDouble(dest.z);
+                // Write r, g, b of laser
+                outputStream2.writeFloat(r);
+                outputStream2.writeFloat(g);
+                outputStream2.writeFloat(b);
+                // Write age
+                outputStream2.writeByte(age);
+                // Write energy value
+                outputStream2.writeInt(energy);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
+            Packet250CustomPayload packet2 = new Packet250CustomPayload();
+            packet2.channel = "WarpDriveBeam";
+            packet2.data = bos.toByteArray();
+            packet2.length = bos.size();
+            MinecraftServer.getServer().getConfigurationManager().sendToAllNear(
+            		dest.intX(), dest.intY(), dest.intZ(),
+            		radius, worldObj.provider.dimensionId, packet2);
+        }
+    }
+
 	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);

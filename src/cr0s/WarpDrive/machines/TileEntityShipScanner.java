@@ -84,7 +84,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 		if (state == 0) { // inactive
 			if (++laserTicks > 20) {
-				WarpDrive.sendLaserPacket(worldObj,
+				PacketHandler.sendBeamPacket(worldObj,
 						new Vector3(this).translate(0.5D), new Vector3(core.xCoord, core.yCoord, core.zCoord).translate(0.5D),
 						0f, 1f, 0f, 40, 0, 100);
 				laserTicks = 0;
@@ -132,7 +132,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 							g = 0f;
 					}
 					
-					WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(x, core.maxY, randomZ).translate(0.5D), r, g, b, 15, 0, 100);
+					PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(x, core.maxY, randomZ).translate(0.5D), r, g, b, 15, 0, 100);
 				}
 			}
 			
@@ -175,7 +175,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 					if (worldObj.rand.nextInt(100) <= 10) {
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						
-						WarpDrive.sendLaserPacket(worldObj,
+						PacketHandler.sendBeamPacket(worldObj,
 								new Vector3(this).translate(0.5D),
 								new Vector3(newX + block.x, newY + block.y, newZ + block.z).translate(0.5D),
 								0f, 1f, 0f, 15, 0, 100);

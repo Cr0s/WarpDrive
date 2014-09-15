@@ -16,6 +16,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.packet.NetHandler;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -152,11 +153,11 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		}
 
 		Vector3 beamVector = new Vector3(this).translate(0.5D);
-		WarpDrive.debugPrint("" + this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
+		WarpDrive.debugPrint(this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
-		float pitchvertical = MathHelper.sin(-pitch * 0.017453292F);
+		float pitchvertical   =  MathHelper.sin(-pitch * 0.017453292F);
 		float directionx = yawx * pitchhorizontal;
 		float directionz = yawz * pitchhorizontal;
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
@@ -165,7 +166,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		WarpDrive.debugPrint(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
-		int distanceTravelled = 0; //distance traveled from beam sender to previous hit if there were any
+		int distanceTravelled = 0; // distance traveled from beam sender to previous hit if there were any
 		
 		// This is scanning beam, do not deal damage to blocks
 		if (beamFrequency == BEAM_FREQUENCY_SCANNING) {
@@ -178,12 +179,12 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 				if (Block.blocksList[firstHit_blockID] != null) {
 					firstHit_blockResistance = Block.blocksList[firstHit_blockID].blockResistance;
 				}
-				WarpDrive.sendLaserPacket(worldObj, beamVector, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
+				PacketHandler.sendBeamPacket(worldObj, beamVector, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
 			} else {
 				firstHit_blockID = -1;
 				firstHit_blockMeta = 0;
 				firstHit_blockResistance = -2;
-				WarpDrive.sendLaserPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
+				PacketHandler.sendBeamPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
   			}
  			
 			return;
@@ -275,7 +276,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			}
 		}
 
-		WarpDrive.instance.sendLaserPacket(worldObj, beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);
+		PacketHandler.sendBeamPacket(worldObj, beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);
 	}
 
 	public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
