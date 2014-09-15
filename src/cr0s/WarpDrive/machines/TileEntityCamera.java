@@ -63,14 +63,14 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	
 	@Override
 	public void invalidate() {
-		WarpDrive.debugPrint("" + this + " invalidated");
+		// WarpDrive.debugPrint("" + this + " invalidated");
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 	
     @Override
     public void onChunkUnload() {
-		WarpDrive.debugPrint("" + this + " onChunkUnload");
+		// WarpDrive.debugPrint("" + this + " onChunkUnload");
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
         super.onChunkUnload();
     }
@@ -79,14 +79,14 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
-		WarpDrive.debugPrint("" + this + " readFromNBT");
+		// WarpDrive.debugPrint("" + this + " readFromNBT");
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
-		WarpDrive.debugPrint("" + this + " writeToNBT");
+		// WarpDrive.debugPrint("" + this + " writeToNBT");
 	}
 
 	// IPeripheral methods implementation

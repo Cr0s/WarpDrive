@@ -75,14 +75,15 @@ public class BlockLaserCam extends BlockContainer {
 
         // Get camera frequency
         TileEntity te = par1World.getBlockTileEntity(x, y, z);
-        if (te != null && te instanceof TileEntityLaser && (par5EntityPlayer.getHeldItem() == null)) {
-            int beamFrequency = ((TileEntityLaser)te).getBeamFrequency();
+        if (!WarpDrive.instance.isOverlayEnabled && te != null && te instanceof TileEntityLaser && (par5EntityPlayer.getHeldItem() == null)) {
+        	int beamFrequency = ((TileEntityLaser)te).getBeamFrequency();
             int cameraFrequency = ((TileEntityLaser)te).getCameraFrequency();
 
             CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, cameraFrequency);
+            WarpDrive.debugPrint("cam detected as " + cam);
         	par5EntityPlayer.addChatMessage(getLocalizedName()
-        			+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!":"valid.") 
-        			+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!":"valid for laser-camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z));
+        			+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.") 
+        			+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z));
             return true;
         }
 

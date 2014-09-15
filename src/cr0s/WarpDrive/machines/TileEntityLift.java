@@ -48,9 +48,9 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
         	
             // Switching mode
             if (computerMode == MODE_DOWN || (computerMode == MODE_REDSTONE && worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))) {
-                mode = 2; // down
+                mode = MODE_DOWN;
             } else {
-                mode = 1; // up
+                mode = MODE_UP;
             }
             
             isEnabled = computerEnabled
@@ -81,10 +81,10 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
             }
             
             if (yCoord - firstUncoveredY > 0) {
-                if (mode == 1) {
-                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
-                } else if (mode == 2) {
-                	WarpDrive.instance.sendLaserPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 0f, 1f, 40, 0, 100);
+                if (mode == MODE_UP) {
+                	PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), new Vector3(this).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
+                } else if (mode == MODE_DOWN) {
+                	PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 0f, 1f, 40, 0, 100);
                 }
             }
             
@@ -110,7 +110,7 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
                 for (Object o : list) {
                     if (o != null && o instanceof EntityLivingBase && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
                         ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, yCoord + 1, zCoord + 0.5f);
-                        WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
+                        PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
                         worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
                         consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true);
                     }
@@ -123,7 +123,7 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
                 for (Object o : list) {
                     if (o != null && o instanceof EntityLivingBase && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
 						((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, firstUncoveredY + 1, zCoord + 0.5f);
-						WarpDrive.sendLaserPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 0.5, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
+						PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 0.5, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true);
                     }

@@ -115,10 +115,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 				double zmax = zCoord + WarpDriveConfig.ML_MAX_RADIUS + 1.0D;
 				double zmin = zCoord - WarpDriveConfig.ML_MAX_RADIUS + 0.0D;
 				double y = currentLayer + 1.0D;
-				WarpDrive.sendLaserPacket(worldObj, new Vector3(xmin, y, zmin), new Vector3(xmax, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
-				WarpDrive.sendLaserPacket(worldObj, new Vector3(xmax, y, zmin), new Vector3(xmax, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
-				WarpDrive.sendLaserPacket(worldObj, new Vector3(xmax, y, zmax), new Vector3(xmin, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
-				WarpDrive.sendLaserPacket(worldObj, new Vector3(xmin, y, zmax), new Vector3(xmin, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
+				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmin, y, zmin), new Vector3(xmax, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
+				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmax, y, zmin), new Vector3(xmax, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
+				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmax, y, zmax), new Vector3(xmin, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
+				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmin, y, zmax), new Vector3(xmin, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
 			} else if (delayTicksScan >= WarpDriveConfig.ML_SCAN_DELAY_TICKS) {
 				delayTicksScan = 0;
 				if (currentLayer <= 0) {
@@ -140,10 +140,10 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 					int offset = (yCoord - currentLayer) % (2 * r);
 					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.ML_SCAN_DELAY_TICKS));
 					double y = currentLayer + 1.0D;
-					WarpDrive.sendLaserPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r         ).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
-					WarpDrive.sendLaserPacket(worldObj, minerVector, new Vector3(xCoord + r         , y, zCoord + r - offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
-					WarpDrive.sendLaserPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r         ).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
-					WarpDrive.sendLaserPacket(worldObj, minerVector, new Vector3(xCoord - r         , y, zCoord - r + offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r         ).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r         , y, zCoord + r - offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r         ).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r         , y, zCoord - r + offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age, 0, 50);
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 					delayTicksMine = 0;
 					currentState = STATE_MINING;
@@ -190,7 +190,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 					delayTicksMine = Math.round(WarpDriveConfig.ML_MINE_DELAY_TICKS * 0.8F);
 				}
 				int age = Math.max(10, Math.round((4 + worldObj.rand.nextFloat()) * WarpDriveConfig.ML_MINE_DELAY_TICKS));
-				WarpDrive.sendLaserPacket(worldObj, minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).translate(0.5D), 1.0F, 1.0F, 0.0F, age, 0, 50);
+				PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).translate(0.5D), 1.0F, 1.0F, 0.0F, age, 0, 50);
 				worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 				harvestBlock(valuable);
 			}
