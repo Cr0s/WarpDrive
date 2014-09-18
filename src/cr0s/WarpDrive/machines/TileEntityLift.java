@@ -53,10 +53,7 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
                 mode = MODE_UP;
             }
             
-            isEnabled = computerEnabled
-            		&& worldObj.isAirBlock(xCoord, yCoord + 1, zCoord)
-            		&& worldObj.isAirBlock(xCoord, yCoord + 2, zCoord)
-            		&& worldObj.isAirBlock(xCoord, yCoord - 1, zCoord);
+            isEnabled = computerEnabled && isPassableBlock(yCoord + 1) && isPassableBlock(yCoord + 2) && isPassableBlock(yCoord - 1) && isPassableBlock(yCoord - 2);
             
             if (getEnergyStored() < WarpDriveConfig.LL_LIFT_ENERGY || !isEnabled) {
                 mode = MODE_INACTIVE;
@@ -71,28 +68,32 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
             }
             
             // Launch a beam: search non-air blocks under lift
-            for (int ny = yCoord - 1; ny > 0; ny--) {
-            	int blockId = worldObj.getBlockId(xCoord, ny, zCoord);
-            	// 63 & 68 = signs
-                if (blockId != 0 && blockId != 63 && blockId != 68 && !WarpDriveConfig.isAirBlock(worldObj, blockId, xCoord, ny, zCoord)) {
-                    firstUncoveredY = ny;
+            for (int ny = yCoord - 2; ny > 0; ny--) {
+            	if (!isPassableBlock(ny)) {
+                    firstUncoveredY = ny + 1;
                     break;
                 }
             }
             
-            if (yCoord - firstUncoveredY > 0) {
+            if (yCoord - firstUncoveredY >= 2) {
                 if (mode == MODE_UP) {
-                	PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), new Vector3(this).translate(0.5D), 0f, 1f, 0f, 40, 0, 100);
+                	PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), 0f, 1f, 0f, 40, 0, 100);
                 } else if (mode == MODE_DOWN) {
-                	PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5D), 0f, 0f, 1f, 40, 0, 100);
+                	PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 0f, 0f, 1f, 40, 0, 100);
                 }
+                
+                liftEntity();
             }
-            
-            liftEntity();
         }
     }
+    
+    private boolean isPassableBlock(int yPosition) {
+    	int blockId = worldObj.getBlockId(xCoord, yPosition, zCoord);
+    	// 63 & 68 are signs
+        return blockId == 0 || blockId == 63 || blockId == 68 || WarpDriveConfig.isAirBlock(worldObj, blockId, xCoord, yPosition, zCoord);
+    }
 
-    public void liftEntity() {
+    private void liftEntity() {
         final double CUBE_RADIUS = 0.4;
         double xmax, zmax;
         double xmin, zmin;
@@ -109,23 +110,23 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
             if (list != null) {
                 for (Object o : list) {
                     if (o != null && o instanceof EntityLivingBase && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
-                        ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, yCoord + 1, zCoord + 0.5f);
-                        PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
-                        worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
-                        consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true);
+                        ((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D);
+                        PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
+                        worldObj.playSoundEffect(xCoord + 0.5D, yCoord, zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
+                        consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, false);
                     }
                 }
             }
         } else if (mode == MODE_DOWN) {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY + 3, zmin, xmax, yCoord + 2, zmax);
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY + 2.5D, zmin, xmax, yCoord + 2.5D, zmax);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
             if (list != null) {
                 for (Object o : list) {
                     if (o != null && o instanceof EntityLivingBase && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
-						((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5f, firstUncoveredY + 1, zCoord + 0.5f);
-						PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5), new Vector3(xCoord, firstUncoveredY + 0.5, zCoord).translate(0.5), 1F, 1F, 0F, 40, 0, 100);
-						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
-						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true);
+						((EntityLivingBase)o).setPositionAndUpdate(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D);
+						PacketHandler.sendBeamPacket(worldObj, new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
+						worldObj.playSoundEffect(xCoord + 0.5D, yCoord, zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
+						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, false);
                     }
                 }
             }
@@ -133,14 +134,12 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound tag)
-    {
+    public void readFromNBT(NBTTagCompound tag) {
         super.readFromNBT(tag);
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound tag)
-    {
+    public void writeToNBT(NBTTagCompound tag) {
         super.writeToNBT(tag);
     }
 
