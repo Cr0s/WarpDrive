@@ -276,7 +276,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			}
 		}
 
-		PacketHandler.sendBeamPacket(worldObj, beamVector, endPoint, r, g, b, 50, energy, beamLengthBlocks);
+		PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D).translate(lookVector.scale(0.5D)), endPoint, r, g, b, 50, energy, beamLengthBlocks);
 	}
 
 	public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
