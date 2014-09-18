@@ -2,6 +2,7 @@ package cr0s.WarpDrive.machines;
 
 import cr0s.WarpDrive.api.IBlockUpdateDetector;
 import cr0s.WarpDrive.data.Vector3;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -109,7 +110,7 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		}
 		
 		if (useLaser == true) {
-			WarpDrive.sendLaserPacket(worldObj, myVec, reactorVec, 0.1F, 0.2F, 1.0F, 25, 50, 100);
+			PacketHandler.sendBeamPacket(worldObj, myVec, reactorVec, 0.1F, 0.2F, 1.0F, 25, 50, 100);
 			useLaser = false;
 		}
 	}

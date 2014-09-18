@@ -22,6 +22,7 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import cr0s.WarpDrive.data.Vector3;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 
@@ -224,7 +225,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		WarpDrive.sendLaserPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY_TICKS, 0, 50);
+		PacketHandler.sendBeamPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY_TICKS, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 	

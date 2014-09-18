@@ -8,6 +8,7 @@ import java.util.Set;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.data.Vector3;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.item.ItemReactorLaserFocus;
@@ -106,7 +107,7 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 						if(coolReactor(react))
 						{
 							TileEntity te = (TileEntity)o;
-							WarpDrive.sendLaserPacket(worldObj, myPos, new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5D), 0f, 0.8f, 1f, 20, 0, 20);
+							PacketHandler.sendBeamPacket(worldObj, myPos, new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5D), 0f, 0.8f, 1f, 20, 0, 20);
 						}
 					}
 				}
