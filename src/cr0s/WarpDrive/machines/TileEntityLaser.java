@@ -508,9 +508,9 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 						newPitch = toFloat(arguments[1]);
 						initiateBeamEmission(newYaw, newPitch);
 					} else if (arguments.length == 3) {
-						float deltaX = toFloat(arguments[0]);
-						float deltaY = toFloat(arguments[1]);
-						float deltaZ = - toFloat(arguments[2]);
+						float deltaX = - toFloat(arguments[0]);
+						float deltaY = - toFloat(arguments[1]);
+						float deltaZ =   toFloat(arguments[2]);
 						double horizontalDistance = MathHelper.sqrt_double(deltaX * deltaX + deltaZ * deltaZ);
 						newYaw = (float)(Math.atan2(deltaX, deltaZ) * 180.0D / Math.PI);
 						newPitch = (float)(Math.atan2(deltaY, horizontalDistance) * 180.0D / Math.PI);
