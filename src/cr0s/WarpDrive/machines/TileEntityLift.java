@@ -118,7 +118,7 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
                 }
             }
         } else if (mode == MODE_DOWN) {
-            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY + 2.5D, zmin, xmax, yCoord + 2.5D, zmax);
+            AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, Math.min(firstUncoveredY + 4.0D, yCoord), zmin, xmax, yCoord + 2.0D, zmax);
             List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
             if (list != null) {
                 for (Object o : list) {
