@@ -1,6 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -9,6 +11,14 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 import java.util.ArrayList;
 import java.util.List;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import cofh.api.transport.IItemConduit;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFluid;
@@ -33,7 +43,11 @@ import appeng.api.me.util.IMEInventoryHandler;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 
-public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IGridMachine, ITileCable {
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = WarpDriveConfig.modid_OpenComputers),
+	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = WarpDriveConfig.modid_ComputerCraft)
+})
+public class TileEntityMiningLaser extends TileEntity implements IPeripheral, Environment, IGridMachine, ITileCable {
 	private Boolean powerStatus = false;
 	private IGridInterface grid;
 
@@ -45,6 +59,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	private boolean enableSilktouch = false;
 	private boolean AENetworkReady = false;
 
+	private String peripheralName = "mininglaser";
 	private String[] methodsArray = {
 		"mine",		//0
 		"stop",		//1
@@ -53,6 +68,9 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		"state",	//4
 		"offset"	//5
 	};
+
+    protected Node node;
+    protected boolean addedToNetwork = false;
 
 	private int delayTicksWarmup = 0;
 	private int delayTicksScan = 0;
@@ -70,8 +88,28 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 
 	private int layerOffset = 1;
 
+	public TileEntityMiningLaser() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			initOC();
+    }
+    
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	private void initOC() {
+		node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	private void addToNetwork() {
+		if (!addedToNetwork) {
+			addedToNetwork = true;
+			Network.joinOrCreateNetwork(this);
+		}
+    }
+
 	@Override
 	public void updateEntity() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			addToNetwork();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
@@ -619,6 +657,8 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		isQuarry = tag.getBoolean("isQuarry");
 		currentLayer = tag.getInteger("currentLayer");
 		enableSilktouch = tag.getBoolean("enableSilktouch");
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	readFromNBT_OC(tag);
 		if (currentState == STATE_MINING) {
 			scanLayer();
 		}
@@ -631,21 +671,26 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 		tag.setBoolean("isQuarry", isQuarry);
 		tag.setInteger("currentLayer", currentLayer);
 		tag.setBoolean("enableSilktouch", enableSilktouch);
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	writeToNBT_OC(tag);
 	}
 	
 	// ComputerCraft
 	// IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String getType() {
-		return "mininglaser";
+		return peripheralName;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String[] getMethodNames() {
 		return methodsArray;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
 			case 0: // Mine()
@@ -737,6 +782,7 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void attach(IComputerAccess computer) {
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 	        computer.mount("/mininglaser", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser"));
@@ -748,10 +794,12 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void detach(IComputerAccess computer) {
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public boolean equals(IPeripheral other) {
 		return other == this;
 	}
@@ -831,5 +879,124 @@ public class TileEntityMiningLaser extends TileEntity implements IPeripheral, IG
                 getClass().getSimpleName(),
                 worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
                 Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord)});
+	}
+
+	// OpenComputers.
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onMessage(Message message) {}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onChunkUnload_OC() {
+		if (node != null) node.remove();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void invalidate_OC() {
+		if (node != null) node.remove();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void readFromNBT_OC(final NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if (node != null && node.host() == this) {
+			node.load(nbt.getCompoundTag("oc:node"));
+		}
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void writeToNBT_OC(final NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if (node != null && node.host() == this) {
+			final NBTTagCompound nodeNbt = new NBTTagCompound();
+			node.save(nodeNbt);
+			nbt.setTag("oc:node", nodeNbt);
+		}
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] mine(Context context, Arguments args) {
+		if (isMining()) {
+			return new Boolean[] { false };
+		}
+		isQuarry = false;
+		delayTicksWarmup = 0;
+		currentState = STATE_WARMUP;
+		currentLayer = yCoord - layerOffset - 1;
+		enableSilktouch = (args.count() == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		return new Boolean[] { true };
+
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] stop(Context context, Arguments args) {
+		stop();
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] isMining(Context context, Arguments args) {
+		return new Boolean[] { isMining() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] quarry(Context context, Arguments args) {
+		if (isMining()) {
+			return new Boolean[] { false };
+		}
+
+		isQuarry = true;
+		delayTicksScan = 0;
+		currentState = STATE_WARMUP;
+		currentLayer = yCoord - layerOffset - 1;
+		enableSilktouch = (args.count() == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		return new Boolean[] { true };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] state(Context context, Arguments args) {
+		int energy = getEnergyLevel();
+		String status = getStatus();
+		Integer retValuablesInLayer, retValuablesMined;
+		if (isMining()) {
+			retValuablesInLayer = valuablesInLayer.size();
+			retValuablesMined = valuableIndex;
+			
+			return new Object[] {status, energy, currentLayer, retValuablesMined, retValuablesInLayer};
+		}
+		return new Object[] {status, energy, currentLayer, 0, 0};
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] offset(Context context, Arguments args) {
+		if (args.count() == 1) {
+            try {
+            	layerOffset = Math.min(256,  Math.abs(args.checkInteger(0)));
+            } catch(Exception e) {
+            	return new Integer[] { layerOffset };
+            }
+		}
+		return new Integer[] { layerOffset };
 	}
 }

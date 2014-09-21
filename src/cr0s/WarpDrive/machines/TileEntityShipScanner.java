@@ -1,6 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.JumpBlock;
 import cr0s.WarpDrive.data.Vector3;
@@ -14,6 +16,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -26,7 +36,11 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = WarpDriveConfig.modid_OpenComputers),
+	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = WarpDriveConfig.modid_ComputerCraft)
+})
+public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral, Environment {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
 
 	private int state = 0; // 0 - inactive, 1 - active
@@ -48,6 +62,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private final int BLOCK_TO_DEPLOY_PER_TICK = 3000;
 	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
 	
+	private String peripheralName = "shipscanner";
 	private String[] methodsArray = {
 		"scan",					// 0
 		"fileName",		// 1
@@ -64,9 +79,33 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	
 	private int newX, newY, newZ;
 	
-	
+    int tickCount = 0;
+    
+    protected Node node;
+    protected boolean addedToNetwork = false;
+    
+    public TileEntityShipScanner() {
+    	if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+    		initOC();
+    }
+    
+    @Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+    private void initOC() {
+    	node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+    }
+    
+    @Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+    private void addToNetwork() {
+		if (!addedToNetwork) {
+			addedToNetwork = true;
+			Network.joinOrCreateNetwork(this);
+		}
+    }
+
 	@Override
 	public void updateEntity() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			addToNetwork();
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
 
@@ -530,26 +569,33 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	readFromNBT_OC(tag);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	writeToNBT_OC(tag);
 	}
 
 	// CC
 	// IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String getType() {
-		return "shipscanner";
+		return peripheralName;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String[] getMethodNames() {
 		return methodsArray;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
 		case 0: // scanShip()
@@ -597,10 +643,18 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
+	public boolean equals(IPeripheral other) {
+		return other == this;
+	}	
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void attach(IComputerAccess computer) {
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void detach(IComputerAccess computer) {
 	}
 
@@ -790,8 +844,92 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		}
 	}
 
+	// OpenComputers.
+
 	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}	
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onMessage(Message message) {}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void readFromNBT_OC(final NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if (node != null && node.host() == this) {
+			node.load(nbt.getCompoundTag("oc:node"));
+		}
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void writeToNBT_OC(final NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if (node != null && node.host() == this) {
+			final NBTTagCompound nodeNbt = new NBTTagCompound();
+			node.save(nodeNbt);
+			nbt.setTag("oc:node", nodeNbt);
+		}
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] scan(Context context, Arguments args) {
+		// Already scanning?
+		if (this.state == 1)
+			return new Object[] { false, 0, "Already scanning" };
+
+		if (core == null) {
+			return new Object[] { false, 1, "Warp-Core not found" };
+		} else if (consumeEnergy(core.shipVolume * EU_PER_BLOCK_SCAN, true)) {
+			scanShip();
+		} else {
+			return new Object[] { false, 2, "Not enough energy!" };
+		}
+		return null;
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] fileName(Context context, Arguments args) {
+		if (state != 0 && !schematicFileName.isEmpty())
+			return new Object[] { "Scanning in process. Please wait." };
+		return new Object[] { schematicFileName };
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] energy(Context context, Arguments args) {
+		return new Object[] { getEnergyStored() };
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] deploy(Context context, Arguments args) {
+		if (args.count() == 4) {
+			String fileName = args.checkString(0);
+			int x = args.checkInteger(1);
+			int y = args.checkInteger(2);
+			int z = args.checkInteger(3);
+			
+			if (!new File(SCHEMATICS_DIR + "/" + fileName).exists()) {
+				return new Object[] { 0, "Specified .schematic file not found!" };
+			} else
+			{
+				return deployShip(fileName, x, y, z);
+			}
+		} else {
+			return new Object[] { 4, ".schematic file name not specified or invalid arguments count!" };
+		}
+	}
 }

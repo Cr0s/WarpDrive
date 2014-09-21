@@ -1,6 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -11,6 +13,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -28,7 +38,11 @@ import net.minecraft.world.ChunkPosition;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 
-public class TileEntityLaser extends WarpTE implements IPeripheral {
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = WarpDriveConfig.modid_OpenComputers),
+	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = WarpDriveConfig.modid_ComputerCraft)
+})
+public class TileEntityLaser extends WarpTE implements IPeripheral, Environment {
 	//magic constants
 	private final int SCANNING_BEAM_LENGTH = 400;	//FIXME merge re-adding a non-used definition?
 	private final int SCANNING_BEAM_FREQ = 1420;
@@ -64,8 +78,33 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	private int registryUpdateTicks = 20;
 	private int packetSendTicks = 20;
 
+	private String peripheralName = "laser";
+
+    protected Node node;
+    protected boolean addedToNetwork = false;
+
+	public TileEntityLaser() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			initOC();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	private void initOC() {
+		node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+	}
+    
+    @Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+    private void addToNetwork() {
+		if (!addedToNetwork) {
+			addedToNetwork = true;
+			Network.joinOrCreateNetwork(this);
+		}
+    }
+
 	@Override
 	public void updateEntity() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			addToNetwork();
 		if (isWithCamera()) {
 			// Update frequency on clients (recovery mechanism, no need to go too fast)
 			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
@@ -94,7 +133,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 			isEmitting = false;
 			emitBeam(Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY));
 			energyFromOtherBeams = 0;
-			sendEvent("laserSend", null);
+			if (Loader.isModLoaded(WarpDriveConfig.modid_ComputerCraft))
+				sendEventCC("laserSend", null);
 		}
 	}
 
@@ -440,6 +480,8 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		super.readFromNBT(tag);
 		setBeamFrequency(tag.getInteger("beamFrequency"));
 		setCameraFrequency(tag.getInteger("cameraFrequency"));
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	readFromNBT_OC(tag);
 	}
 
 	@Override
@@ -447,32 +489,41 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 		super.writeToNBT(tag);
 		tag.setInteger("beamFrequency", beamFrequency);
 		tag.setInteger("cameraFrequency", cameraFrequency);
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	writeToNBT_OC(tag);
 	}
 	
 	@Override
 	public void invalidate() {
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	invalidate_OC();
 		super.invalidate();
 	}
 
     @Override
     public void onChunkUnload() {
         WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	onChunkUnload_OC();
         super.onChunkUnload();
     }
 
 	// IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String getType() {
-		return "laser";
+		return peripheralName;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String[] getMethodNames() {
 		return methodsArray;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method)
 		{
@@ -549,20 +600,23 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void attach(IComputerAccess computer) {
 		int id = computer.getID();
 		connectedComputers.put(id, computer);
 	}
 	
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void detach(IComputerAccess computer) {
 		int id = computer.getID();
 		if (connectedComputers.containsKey(id)) {
 			connectedComputers.remove(id);
 		}
 	}
-	
-	private void sendEvent(String eventName, Object[] arguments) {
+
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
+	private void sendEventCC(String eventName, Object[] arguments) {
 		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
 		Set<Integer> keys = connectedComputers.keySet();
 		for(Integer key:keys) {
@@ -572,6 +626,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	}
 	
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public boolean equals(IPeripheral other) {
 		return other == this;
 	}
@@ -585,5 +640,141 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
        		cameraFrequency,
        		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
        		xCoord, yCoord, zCoord});
+	}
+
+	// OpenComputers.
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onMessage(Message message) {}
+	
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onChunkUnload_OC() {
+		if (node != null) node.remove();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void invalidate_OC() {
+		if (node != null) node.remove();
+	}
+	
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void readFromNBT_OC(final NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if (node != null && node.host() == this) {
+			node.load(nbt.getCompoundTag("oc:node"));
+		}
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void writeToNBT_OC(final NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if (node != null && node.host() == this) {
+			final NBTTagCompound nodeNbt = new NBTTagCompound();
+			node.save(nodeNbt);
+			nbt.setTag("oc:node", nodeNbt);
+		}
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] emitBeam(Context context, Arguments args) {
+		// emitBeam(yaw, pitch)
+		// emitBeam(dx, dy, dz)
+		if (args.count() == 2) {
+			yaw = (float)args.checkDouble(0);
+			pitch = (float)args.checkDouble(1);
+			isEmitting = true;
+			delayTicks = 0;
+		} else if (args.count() == 3) {
+			double dx = args.checkDouble(0);
+			double dy = args.checkDouble(1);
+			double dz = -args.checkDouble(1);	//FIXME kostyl
+			double targetX = xCoord + dx;
+			double targetY = yCoord + dy;
+			double targetZ = zCoord + dz;
+			float xd = (float)(xCoord - targetX);
+			float yd = (float)(yCoord - targetY);
+			float zd = (float)(zCoord - targetZ);
+			double var7 = MathHelper.sqrt_double(xd * xd + zd * zd);
+			yaw = ((float)(Math.atan2(xd, zd) * 180.0D / Math.PI));
+			pitch = ((float)(Math.atan2(yd, var7) * 180.0D / Math.PI));
+			isEmitting = true;
+			delayTicks = 0;
+		}
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] pos(Context context, Arguments args) {
+		return new Integer[] { xCoord, yCoord, zCoord };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] freq(Context context, Arguments args) {
+		if (args.count() == 1) {
+			int parFrequency = args.checkInteger(0);
+			if ((parFrequency <= 65000) && (parFrequency > 0)) {
+				setBeamFrequency(parFrequency);
+			}
+		}
+		return new Integer[] { beamFrequency };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] getFirstHit(Context context, Arguments args) {
+		if (firstHit != null) {
+			try {
+				int blockID = worldObj.getBlockId(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				int blockMeta = worldObj.getBlockMetadata(firstHit.blockX, firstHit.blockY, firstHit.blockZ);
+				float blockResistance = -2;
+				if (Block.blocksList[blockID] != null) {
+					blockResistance = Block.blocksList[blockID].blockResistance;
+				}
+				Object[] info = { firstHit.blockX, firstHit.blockY, firstHit.blockZ, blockID, blockMeta, blockResistance };
+				firstHit = null;
+				return info;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new Integer[] { 0, 0, 0, 0, 0, -3 };
+			}
+		} else {
+			return new Integer[] { 0, 0, 0, 0, 0, -1 };
+		}
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] getBoosterDXDZ(Context context, Arguments args) {
+		findFirstBooster();
+		return new Integer[] { dx, dz };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] camFreq(Context context, Arguments args) {
+		if (isWithCamera()) {
+			if (args.count() == 1) {
+				setCameraFrequency(args.checkInteger(0));
+			}
+		}
+		return new Integer[] { cameraFrequency };
 	}
 }
