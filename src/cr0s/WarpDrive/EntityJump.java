@@ -334,35 +334,79 @@ public class EntityJump extends Entity
 		betweenWorlds = fromSpace || toSpace || isHyperspaceJump;
 		moveX = moveY = moveZ = 0;
 		
-		TransitionPlane overworld = WarpDriveConfig.G_TRANSITIONPLANES[0];
-		
 		if (toSpace) {
-			if (worldObj.provider.dimensionId == overworld.dimensionId) {
-				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition
-					LocalProfiler.stop();
-					String msg = "Ship is outside worldborder, unable to transition to space!";
-					messageToAllPlayersOnShip(msg);
-					killEntity(msg);
-					return;
-				}
-				moveX = overworld.spaceCenterX - overworld.dimensionCenterX;
-				moveZ = overworld.spaceCenterZ - overworld.dimensionCenterZ;
-			} else {
-				moveX = 0;
-				moveZ = 0;
+			Boolean planeFound = false;
+			Boolean planeValid = false;
+			int closestPlaneDistance = Integer.MAX_VALUE;
+			TransitionPlane closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
+				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+				if (worldObj.provider.dimensionId == transitionPlane.dimensionId) {
+					planeFound = true;
+					int planeDistance = transitionPlane.isValidToSpace(new Vector3(this)); 
+					if (planeDistance == 0) {
+						planeValid = true;
+						moveX = transitionPlane.spaceCenterX - transitionPlane.dimensionCenterX;
+						moveZ = transitionPlane.spaceCenterZ - transitionPlane.dimensionCenterZ;
+						targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
+					} else if (closestPlaneDistance > planeDistance) {
+						closestPlaneDistance = planeDistance;
+						closestTransitionPlane = transitionPlane;
+					}
+				} 
 			}
-			targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
-		} else if (fromSpace) {
-			if (!overworld.isValidFromSpace(new Vector3(this))) {// invalid transition, cancel transition
+			if (!planeFound) {
 				LocalProfiler.stop();
-				String msg = "Ship is outside worldborder, unable to transition from space!";
+				String msg = "Unable to reach space!\nThere's no valid transition plane for current dimension " + worldObj.provider.getDimensionName() + " (" + worldObj.provider.dimensionId + ")";
 				messageToAllPlayersOnShip(msg);
 				killEntity(msg);
 				return;
 			}
-			moveX = overworld.dimensionCenterX - overworld.spaceCenterX;
-			moveZ = overworld.dimensionCenterZ - overworld.spaceCenterZ;
-			targetWorld = DimensionManager.getWorld(0);
+			if (!planeValid) {
+				LocalProfiler.stop();
+				@SuppressWarnings("null")
+				String msg = "Ship is outside border, unable to reach space!\nClosest transition plane is ~" + closestPlaneDistance + " m away ("
+						+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
+						+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
+						+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
+						+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+				messageToAllPlayersOnShip(msg);
+				killEntity(msg);
+				return;
+			}
+		} else if (fromSpace) {
+			Boolean planeFound = false;
+			int closestPlaneDistance = Integer.MAX_VALUE;
+			TransitionPlane closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
+				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+				int planeDistance = transitionPlane.isValidFromSpace(new Vector3(this)); 
+				if (planeDistance == 0) {
+					planeFound = true;
+					moveX = transitionPlane.dimensionCenterX - transitionPlane.spaceCenterX;
+					moveZ = transitionPlane.dimensionCenterZ - transitionPlane.spaceCenterZ;
+					targetWorld = DimensionManager.getWorld(transitionPlane.dimensionId);
+				} else if (closestPlaneDistance > planeDistance) {
+					closestPlaneDistance = planeDistance;
+					closestTransitionPlane = transitionPlane;
+				}
+			}
+			if (!planeFound) {
+				LocalProfiler.stop();
+				String msg = "";
+				if (closestTransitionPlane == null) {
+					msg = "No transition plane defined, unable to enter atmosphere!";
+				} else {
+					msg = "No planet in range, unable to enter atmosphere!\nClosest transition plane is " + closestPlaneDistance + " m away ("
+							+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
+							+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
+							+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
+							+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+				}
+				messageToAllPlayersOnShip(msg);
+				killEntity(msg);
+				return;
+			}
 		} else if (isHyperspaceJump && isInHyperSpace) {
 			targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		} else if (isHyperspaceJump && isInSpace) {

@@ -35,7 +35,7 @@ public class TransitionPlane implements Cloneable
     }
 
     /**
-     * Makes a new copy of this Vector. Prevents variable referencing problems.
+     * Makes a new copy of this TransitionPlane. Prevents variable referencing problems.
      */
     @Override
     public TransitionPlane clone() {
@@ -43,18 +43,35 @@ public class TransitionPlane implements Cloneable
     }
 
     /**
-     * Compute transition.
+     * Check if current coordinates allow to take off from this dimension to reach space.
+     * It's up to caller to verify if this transition plane match current dimension.
      *
-     * @param world
-     * @return
+     * @param current position in the dimension
+     * @return distance to transition borders, 0 if take off is possible
      */
-
-    public boolean isValidToSpace(Vector3 currentPosition) {
-        return ( (Math.abs(currentPosition.x - dimensionCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - dimensionCenterZ) <= borderSizeZ) );
+    public int isValidToSpace(Vector3 currentPosition) {
+        if ( (Math.abs(currentPosition.x - dimensionCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - dimensionCenterZ) <= borderSizeZ) ) {
+        	return 0;
+        }
+        return (int) Math.sqrt(
+        		  Math.pow(Math.max(0D, Math.abs(currentPosition.x - dimensionCenterX) - borderSizeX), 2.0D)
+        		+ Math.pow(Math.max(0D, Math.abs(currentPosition.z - dimensionCenterZ) - borderSizeZ), 2.0D) );
     }
 
-    public boolean isValidFromSpace(Vector3 currentPosition) {
-        return ( (Math.abs(currentPosition.x - spaceCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - spaceCenterX) <= borderSizeZ) );
+    /**
+     * Check if current space coordinates allow to enter this dimension atmosphere from space.
+     * It's up to caller to verify if we're actually in space.
+     *
+     * @param current position in space
+     * @return distance to transition borders, 0 if entry is possible
+     */
+    public int isValidFromSpace(Vector3 currentPosition) {
+        if ( (Math.abs(currentPosition.x - spaceCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - spaceCenterZ) <= borderSizeZ) ) {
+        	return 0;
+        }
+        return (int) Math.sqrt(
+      		  Math.pow(Math.max(0D, Math.abs(currentPosition.x - spaceCenterX) - borderSizeX), 2.0D)
+      		+ Math.pow(Math.max(0D, Math.abs(currentPosition.z - spaceCenterZ) - borderSizeZ), 2.0D) );
     }
 
     public void readFromNBT(NBTTagCompound tag) {
