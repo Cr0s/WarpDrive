@@ -266,9 +266,8 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 						blockID = 0;
 					}
 					
-					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					localBlocks[x + (y * length + z) * width] = (byte) blockID;
-					localMetadata[x + (y * length + z) * width] = (byte) blockMetadata;
+					localMetadata[x + (y * length + z) * width] = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					if ((extraBlocks[x + (y * length + z) * width] = (byte) (blockID >> 8)) > 0) {
 						extra = true;
 					}
@@ -565,12 +564,12 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			
 			if (core == null) {
 				return new Object[] { false, 1, "Warp-Core not found" };
-			} else if (consumeEnergy(core.shipVolume * WarpDriveConfig.SS_EU_PER_BLOCK_SCAN, true)) {
+			} else if (!consumeEnergy(getScanningEnergyCost(core.shipVolume), true)) {
+				return new Object[] { false, 2, "Not enough energy!" };
+			} else {
 				StringBuilder reason = new StringBuilder();
 				boolean success = scanShip(reason);
 				return new Object[] { success, 3, reason.toString() };
-			} else {
-				return new Object[] { false, 2, "Not enough energy!" };
 			}
 			// break;
 			

@@ -7,6 +7,7 @@ import java.util.List;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.FMLNetworkHandler;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -108,47 +109,13 @@ public class CloakedArea {
 					}
 					
 					if (!isEntityWithinArea(entityPlayerMP) && !decloak) {
-						sendCloakPacketToPlayer(entityPlayerMP, false);
+						PacketHandler.sendCloakPacket(entityPlayerMP, aabb, tier, false);
 					} else if (decloak) {
-						sendCloakPacketToPlayer(entityPlayerMP, true);
+						PacketHandler.sendCloakPacket(entityPlayerMP, aabb, tier, true);
 					}
 				}
 			}
 		}
-	}
-	
-	public void sendCloakPacketToPlayer(EntityPlayer player, boolean decloak) {
-		if (isPlayerListedInArea(player.username)) {
-			WarpDrive.debugPrint("" + this + " Player " + player.username + " is inside, no cloak packet to send");
-			return;
-		}
-		
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-		DataOutputStream outputStream = new DataOutputStream(bos);
-		
-		try {
-			outputStream.writeInt((int) this.aabb.minX);
-			outputStream.writeInt((int) this.aabb.minY);
-			outputStream.writeInt((int) this.aabb.minZ);
-			
-			outputStream.writeInt((int) this.aabb.maxX);
-			outputStream.writeInt((int) this.aabb.maxY);
-			outputStream.writeInt((int) this.aabb.maxZ);
-			
-			outputStream.writeBoolean(decloak);
-			
-			outputStream.writeByte(this.tier);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-		
-		// WarpDrive.debugPrint("" + this + " Sending cloak packet to player " + player.username);
-		Packet250CustomPayload packet = new Packet250CustomPayload();
-		packet.channel = "WarpDriveCloaks";
-		packet.data = bos.toByteArray();
-		packet.length = bos.size();
-		
-		((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
 	}
 	
 	public void updatePlayer(EntityPlayer player) {
@@ -158,14 +125,14 @@ public class CloakedArea {
 				addPlayer(player.username);
 				revealChunksToPlayer(player);
 				revealEntityToPlayer(player);
-				sendCloakPacketToPlayer(player, false);
+				PacketHandler.sendCloakPacket(player, aabb, tier, false);
 			}
 		} else {
 			if (isPlayerListedInArea(player.username)) {
 				// WarpDrive.debugPrint("" + this + " Player " + player.username + " has left");
 				removePlayer(player.username);
 				MinecraftServer.getServer().getConfigurationManager().sendToAllNearExcept(player, player.posX, player.posY, player.posZ, 100, player.worldObj.provider.dimensionId, CloakManager.getPacketForThisEntity(player));
-				sendCloakPacketToPlayer(player, false);
+				PacketHandler.sendCloakPacket(player, aabb, tier, false);
 			}
 		}
 	}

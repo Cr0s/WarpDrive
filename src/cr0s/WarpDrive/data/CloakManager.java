@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cpw.mods.fml.common.network.FMLNetworkHandler;
+import cr0s.WarpDrive.PacketHandler;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.data.CloakedArea;
 import net.minecraft.entity.Entity;
@@ -87,7 +88,7 @@ public class CloakManager {
 			
 			if ( area.aabb.minX <= (chunkPosX << 4 + 15) && area.aabb.maxX >= (chunkPosX << 4)
 			  && area.aabb.minZ <= (chunkPosZ << 4 + 15) && area.aabb.maxZ >= (chunkPosZ << 4) ) {
-				area.sendCloakPacketToPlayer(player, false);
+				PacketHandler.sendCloakPacket(player, area.aabb, area.tier, false);
 			}
 		}
 		

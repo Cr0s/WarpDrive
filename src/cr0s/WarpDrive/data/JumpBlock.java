@@ -9,8 +9,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 
-public class JumpBlock
-{
+public class JumpBlock {
     public int blockID;
     public int blockMeta;
     public TileEntity blockTileEntity;
@@ -18,10 +17,10 @@ public class JumpBlock
     public int x;
     public int y;
     public int z;
-
+    
     public JumpBlock() {
     }
-
+    
     public JumpBlock(int i, int j, int k, int l, int i1) {
         blockID = i;
         blockMeta = j;
@@ -30,7 +29,7 @@ public class JumpBlock
         y = l;
         z = i1;
     }
-
+    
     public JumpBlock(int i, int j, TileEntity tileentity, int k, int l, int i1) {
         blockID = i;
         blockMeta = j;
@@ -40,7 +39,6 @@ public class JumpBlock
         z = i1;
     }
     
-
 	public boolean deploy(World targetWorld, int offsetX, int offsetY, int offsetZ) {
 		try {
 			int newX = x + offsetX;
@@ -118,7 +116,7 @@ public class JumpBlock
 			WarpDrive.print("moveBlockSimple exception at " + coordinates);
 			return false;
 		}
-
+		
 		return true;
 	}	
 	
@@ -138,11 +136,11 @@ public class JumpBlock
 			return false;
 		}
 	}
-
+	
 	// This code is a straight copy from Vanilla to remove lighting computations
 	public static boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta) {
 		int j1 = z << 4 | x;
-
+		
 		if (y >= c.precipitationHeightMap[j1] - 1) {
 			c.precipitationHeightMap[j1] = -999;
 		}
@@ -156,7 +154,7 @@ public class JumpBlock
 		} else {
 			ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
 			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-
+			
 			if (extendedblockstorage == null) {
 				if (blockId == 0) {
 					return false;
@@ -202,23 +200,23 @@ public class JumpBlock
 				}
 				/**/
 				TileEntity tileentity;
-
+				
 				if (blockId != 0) {
 					if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta)) {
 						tileentity = c.getChunkBlockTileEntity(x, y, z);
-
+						
 						if (tileentity == null) {
 							tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
 							c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
 						}
-
+						
 						if (tileentity != null) {
 							tileentity.updateContainingBlockInfo();
 							tileentity.blockMetadata = blockMeta;
 						}
 					}
 				}
-
+				
 				c.isModified = true;
 				return true;
 			}

@@ -9,6 +9,7 @@ import java.util.List;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.INetworkManager;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
@@ -76,8 +77,16 @@ public class PacketHandler implements IPacketHandler {
 				for (int y = minYmap; y <= maxYmap; y++) {
 					for (int x = minX; x <= maxX; x++) {
 						for(int z = minZ; z <= maxZ; z++) {
-			    			if (worldObj.getBlockId(x, y, z) != 0) {
-			    				worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
+							int blockID = worldObj.getBlockId(x, y, z);
+			    			if (blockID != 0) {
+								boolean isSafe = true;
+			    				if (blockID == WarpDriveConfig.CC_peripheral) {
+			    					int blockMetadata = worldObj.getBlockMetadata(x, y, z); 
+			    					isSafe = (blockMetadata != 2 && blockMetadata != 4);
+			    				}
+			    				if (isSafe) {
+			    					worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
+			    				}
 			    			}
 						}
 					}
@@ -338,5 +347,35 @@ public class PacketHandler implements IPacketHandler {
 			PacketDispatcher.sendPacketToServer(packet);
 			WarpDrive.debugPrint("Packet '" + packet.channel + "' sent (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
 		}
+	}
+	
+	// Sending cloaking area definition (server -> client)
+	public static void sendCloakPacket(EntityPlayer player, AxisAlignedBB aabb, int tier, boolean decloak) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
+		DataOutputStream outputStream = new DataOutputStream(bos);
+		
+		try {
+			outputStream.writeInt((int) aabb.minX);
+			outputStream.writeInt((int) aabb.minY);
+			outputStream.writeInt((int) aabb.minZ);
+			
+			outputStream.writeInt((int) aabb.maxX);
+			outputStream.writeInt((int) aabb.maxY);
+			outputStream.writeInt((int) aabb.maxZ);
+			
+			outputStream.writeBoolean(decloak);
+			
+			outputStream.writeByte(tier);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		// WarpDrive.debugPrint("" + this + " Sending cloak packet to player " + player.username);
+		Packet250CustomPayload packet = new Packet250CustomPayload();
+		packet.channel = "WarpDriveCloaks";
+		packet.data = bos.toByteArray();
+		packet.length = bos.size();
+		
+		((EntityPlayerMP)player).playerNetServerHandler.sendPacketToPlayer(packet);
 	}
 }
