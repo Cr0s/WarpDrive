@@ -1,5 +1,7 @@
 package cr0s.WarpDrive.machines;
 
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.FMLCommonHandler;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -11,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -29,7 +34,7 @@ import net.minecraft.world.ChunkPosition;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 
-public class TileEntityLaser extends WarpTE implements IPeripheral {
+public class TileEntityLaser extends WarpInterfacedTE {
 	private final int BEAM_FREQUENCY_SCANNING = 1420;
 	private final int BEAM_FREQUENCY_MAX = 65000;
 
@@ -42,15 +47,6 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 
 	public boolean isEmitting = false;
 
-	private String[] methodsArray =
-	{
-		"emitBeam",		// 0
-		"pos",			// 1
-		"freq",			// 2
-		"getFirstHit",		// 3
-		"getBoosterDXDZ",	// 4
-		"camFreq"		// 5
-	};
 	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
 
 	private int delayTicks = 0;
@@ -67,6 +63,18 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	private int registryUpdateTicks = 20;
 	private int packetSendTicks = 20;
 
+	public TileEntityLaser() {
+		peripheralName = "laser";
+		methodsArray = new String[] {
+			"emitBeam",			// 0
+			"pos",				// 1
+			"freq",				// 2
+			"getFirstHit",		// 3
+			"getBoosterDXDZ",	// 4
+			"camFreq"			// 5
+		};
+	}
+	
 	@Override
 	public void updateEntity() {
 		if (isWithCamera()) {
@@ -335,7 +343,7 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	}
 	
 	public void setBeamFrequency(int parBeamFrequency) {
-		if (beamFrequency != parBeamFrequency) {
+		if (beamFrequency != parBeamFrequency && (parBeamFrequency <= BEAM_FREQUENCY_MAX) && (parBeamFrequency > 0)) {
 			WarpDrive.debugPrint(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
 			beamFrequency = parBeamFrequency;
 		}
@@ -487,75 +495,116 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
     }
 
 	// IPeripheral methods implementation
-	@Override
-	public String getType() {
-		return "laser";
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] emitBeam(Context context, Arguments arguments) {
+		return emitBeam(argumentsOCtoCC(arguments));
 	}
 
-	@Override
-	public String[] getMethodNames() {
-		return methodsArray;
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] pos(Context context, Arguments arguments) {
+		return new Integer[] { xCoord, yCoord, zCoord };
 	}
 
-	@Override
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] freq(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			setBeamFrequency(arguments.checkInteger(0));
+		}
+		return new Integer[] { beamFrequency };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getFirstHit(Context context, Arguments arguments) {
+		return getFirstHit();
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getBoosterDXDZ(Context context, Arguments arguments) {
+		findFirstBooster();
+		return new Integer[] { dx, dz };
+	}
+
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] CamFreq(Context context, Arguments arguments) {
+		if (isWithCamera()) {
+			if (arguments.count() == 1) {
+				setCameraFrequency(arguments.checkInteger(0));
+			}
+			return new Integer[] { cameraFrequency };
+		}
+		return null;
+	}
+	
+	private Object[] emitBeam(Object[] arguments) {
+		try {
+			float newYaw, newPitch;
+			if (arguments.length == 2) {
+				newYaw = toFloat(arguments[0]);
+				newPitch = toFloat(arguments[1]);
+				initiateBeamEmission(newYaw, newPitch);
+			} else if (arguments.length == 3) {
+				float deltaX = - toFloat(arguments[0]);
+				float deltaY = - toFloat(arguments[1]);
+				float deltaZ =   toFloat(arguments[2]);
+				double horizontalDistance = MathHelper.sqrt_double(deltaX * deltaX + deltaZ * deltaZ);
+				newYaw = (float)(Math.atan2(deltaX, deltaZ) * 180.0D / Math.PI);
+				newPitch = (float)(Math.atan2(deltaY, horizontalDistance) * 180.0D / Math.PI);
+				initiateBeamEmission(newYaw, newPitch);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new Object[] { false };
+		}
+		return new Object[] { true };
+	}
+	
+	private Object[] getFirstHit() {
+		if (firstHit_position != null) {
+			try {
+				Object[] info = { firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ, firstHit_blockID, firstHit_blockMeta, firstHit_blockResistance };
+				firstHit_position = null;
+				firstHit_blockID = -1;
+				firstHit_blockMeta = 0;
+				firstHit_blockResistance = -2;
+				return info;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return new Integer[] { 0, 0, 0, 0, 0, -3 };
+			}
+		} else {
+			return new Integer[] { 0, 0, 0, 0, 0, -1 };
+		}
+	}
+
+	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
 			case 0: // emitBeam(yaw, pitch) or emitBeam(deltaX, deltaY, deltaZ)
-				try {
-					float newYaw, newPitch;
-					if (arguments.length == 2) {
-						newYaw = toFloat(arguments[0]);
-						newPitch = toFloat(arguments[1]);
-						initiateBeamEmission(newYaw, newPitch);
-					} else if (arguments.length == 3) {
-						float deltaX = - toFloat(arguments[0]);
-						float deltaY = - toFloat(arguments[1]);
-						float deltaZ =   toFloat(arguments[2]);
-						double horizontalDistance = MathHelper.sqrt_double(deltaX * deltaX + deltaZ * deltaZ);
-						newYaw = (float)(Math.atan2(deltaX, deltaZ) * 180.0D / Math.PI);
-						newPitch = (float)(Math.atan2(deltaY, horizontalDistance) * 180.0D / Math.PI);
-						initiateBeamEmission(newYaw, newPitch);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					return new Object[] { false };
-				}
-				return new Object[] { true };
+				return emitBeam(arguments);
 				
-			case 1: // getX
+			case 1: // pos
 				return new Integer[] { xCoord, yCoord, zCoord };
 				
-			case 2: // Freq
+			case 2: // freq
 				if (arguments.length == 1) {
-					int parFrequency = toInt(arguments[0]);
-					if ((parFrequency <= BEAM_FREQUENCY_MAX) && (parFrequency > 0)) {
-						setBeamFrequency(parFrequency);
-					}
+					setBeamFrequency(toInt(arguments[0]));
 				}
 				return new Integer[] { beamFrequency };
 				
 			case 3: // getFirstHit()
-				if (firstHit_position != null) {
-					try {
-						Object[] info = { firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ, firstHit_blockID, firstHit_blockMeta, firstHit_blockResistance };
-						firstHit_position = null;
-						firstHit_blockID = -1;
-						firstHit_blockMeta = 0;
-						firstHit_blockResistance = -2;
-						return info;
-					} catch (Exception e) {
-						e.printStackTrace();
-						return new Integer[] { 0, 0, 0, 0, 0, -3 };
-					}
-				} else {
-					return new Integer[] { 0, 0, 0, 0, 0, -1 };
-				}
+				return getFirstHit();
 				
 			case 4: // getBoosterDXDZ
 				findFirstBooster();
 				return new Integer[] { dx, dz };
 
-			case 5: // CamFreq (only for lasers with cam)
+			case 5: // camFreq (only for lasers with cam)
 				if (isWithCamera()) {
 					if (arguments.length == 1) {
 						setCameraFrequency(((Double)arguments[0]).intValue());
@@ -568,12 +617,14 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	}
 
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
 		int id = computer.getID();
 		connectedComputers.put(id, computer);
 	}
 	
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public void detach(IComputerAccess computer) {
 		int id = computer.getID();
 		if (connectedComputers.containsKey(id)) {
@@ -583,16 +634,13 @@ public class TileEntityLaser extends WarpTE implements IPeripheral {
 	
 	private void sendEvent(String eventName, Object[] arguments) {
 		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
-		Set<Integer> keys = connectedComputers.keySet();
-		for(Integer key:keys) {
-			IComputerAccess comp = connectedComputers.get(key);
-			comp.queueEvent(eventName, arguments);
+		if (WarpDriveConfig.isCCLoaded) {
+			Set<Integer> keys = connectedComputers.keySet();
+			for(Integer key:keys) {
+				IComputerAccess comp = connectedComputers.get(key);
+				comp.queueEvent(eventName, arguments);
+			}
 		}
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
 	}
 	
 	@Override
