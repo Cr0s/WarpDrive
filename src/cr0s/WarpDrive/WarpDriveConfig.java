@@ -154,6 +154,7 @@ public class WarpDriveConfig
     public static int		WC_WARMUP_RANDOM_TICKS = 60;
     public static int		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
     public static int		WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;		
+	public static String[]	WC_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
 
     // Warp Radar
     public static int		WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
@@ -353,6 +354,7 @@ public class WarpDriveConfig
 	    
 	    WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt(); 
 	    WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt();		
+		WC_UNLIMITED_PLAYERNAMES = config.get("WarpCore", "unlimited_playernames", WC_UNLIMITED_PLAYERNAMES, "List of player names which gives unlimited block counts to their ship").getStringList();
 	    
 	    // Warp Radar
 	    WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", WR_MAX_ENERGY_VALUE).getInt();

@@ -21,6 +21,7 @@ import net.minecraftforge.common.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Jumpgate;
+import cr0s.WarpDrive.data.MovingEntity;
 import cr0s.WarpDrive.world.SpaceTeleporter;
 
 /**
@@ -488,10 +489,23 @@ public class TileEntityReactor extends WarpEnergyTE
    	   		reason.append("Ship is too big (max is " + WarpDriveConfig.WC_MAX_SHIP_SIDE + " per side)");
             return false;
         }
+        
+		boolean isUnlimited = false;
+		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX + 0.99D, maxY + 0.99D, maxZ + 0.99D);
+		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
+		for (Object o : list) {
+			if (o == null || !(o instanceof EntityPlayer)) {
+				continue;
+			}
 
-        this.shipVolume = computeRealShipVolume();
-
-        if (shipVolume > WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0) {
+			String playerName = ((EntityPlayer)o).username;
+			for (String unlimiteName : WarpDriveConfig.WC_UNLIMITED_PLAYERNAMES) {
+				isUnlimited = isUnlimited || unlimiteName.equals(playerName);
+			}
+		}
+		
+        shipVolume = computeRealShipVolume();
+        if (!isUnlimited && shipVolume > WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0) {
    	   		reason.append("Ship is too big for the overworld (max is " + WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE + " blocks)");
             return false;
         }
