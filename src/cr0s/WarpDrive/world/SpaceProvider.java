@@ -119,7 +119,7 @@ public class SpaceProvider extends WorldProvider
     @Override
     public String getSaveFolder()
     {
-        return (dimensionId == 0 ? null : "WarpDrive/Space" + dimensionId);
+        return (dimensionId == 0 ? null : "WarpDriveSpace" + dimensionId);
     }
 
     /*@Override

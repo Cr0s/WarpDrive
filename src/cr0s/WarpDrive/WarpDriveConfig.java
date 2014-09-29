@@ -114,7 +114,6 @@ public class WarpDriveConfig
 	public static Item AEExtra_fluidDrive;
 	public static Block AEExtra_certusQuartzTank;
 	
-
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
 	public static int		G_SPACE_PROVIDER_ID = 14;
@@ -127,7 +126,8 @@ public class WarpDriveConfig
 	public static final int	LUA_SCRIPTS_ALL = 2;
 	public static int		G_LUA_SCRIPTS = LUA_SCRIPTS_ALL;
 	public static boolean	G_DEBUGMODE = false;
-	public static String	G_SCHEMALOCATION = "/home/cros/mc_site/schematics/";
+	public static String	G_SCHEMALOCATION = "warpDrive_schematics";
+	public static int		G_BLOCKS_PER_TICK = 3500;
 	
 	public static boolean	G_ENABLE_IC2_RECIPES		= true;
 	public static boolean	G_ENABLE_VANILLA_RECIPES	= false;
@@ -136,7 +136,7 @@ public class WarpDriveConfig
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
 
-	// Warp Core
+	// Warp Drive Core
     public static int		WC_MAX_ENERGY_VALUE = 100000000;
     public static int		WC_ENERGY_PER_BLOCK_MODE1 = 10;
     public static int		WC_ENERGY_PER_DISTANCE_MODE1 = 100;
@@ -163,6 +163,12 @@ public class WarpDriveConfig
     public static double	WR_MIN_ISOLATION_EFFECT = 0.12;
     public static double	WR_MAX_ISOLATION_EFFECT = 1.00;
     
+	// Ship Scanner
+	public static int		SS_MAX_ENERGY_VALUE = 500000000;
+	public static int		SS_EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
+	public static int		SS_EU_PER_BLOCK_DEPLOY = 5000;
+	public static int		SS_MAX_DEPLOY_RADIUS_BLOCKS = 50;
+	
     // Particle Booster
     public static int		PB_MAX_ENERGY_VALUE = 100000;
 	
@@ -294,15 +300,16 @@ public class WarpDriveConfig
 
 	public static void loadWarpDriveConfig() {
 		// General
-		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID).getInt();
-		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", G_SPACE_DIMENSION_ID).getInt();
-		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", G_HYPERSPACE_PROVIDER_ID).getInt();
-		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID).getInt();
+		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt();
+		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", G_SPACE_DIMENSION_ID, "Space dimension world ID").getInt();
+		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", G_HYPERSPACE_PROVIDER_ID, "Hyperspace dimension provider ID").getInt();
+		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID, "Hyperspace dimension world ID").getInt();
 		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS, "World border applied to hyperspace & space, set to 0 to disable it").getInt();
 		G_LUA_SCRIPTS = config.get("General", "lua_scripts", G_LUA_SCRIPTS, "LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt();
-		G_DEBUGMODE = config.get("General", "debug_mode", G_DEBUGMODE).getBoolean(false);
-		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION).getString();
-		
+		G_DEBUGMODE = config.get("General", "debug_mode", G_DEBUGMODE, "Detailled logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
+		G_BLOCKS_PER_TICK = config.get("General", "blocks_per_tick", G_BLOCKS_PER_TICK, "Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt();
+
 		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
 		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
 		G_ENABLE_TDK_RECIPES = config.get("General", "enable_TDK_recipes", G_ENABLE_TDK_RECIPES, "Mixed recipes for TDK packs by Lem'ADEC (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion").getBoolean(false);
@@ -329,7 +336,7 @@ public class WarpDriveConfig
 		// FIXME: check transition planes have valid dimension id
 		
 		// Warp Core
-		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE).getInt();
+		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
 		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", WC_ENERGY_PER_BLOCK_MODE1).getInt();
 		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", WC_ENERGY_PER_DISTANCE_MODE1).getInt();
 	    WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", WC_ENERGY_PER_DISTANCE_MODE2).getInt();
@@ -360,6 +367,18 @@ public class WarpDriveConfig
 	    WR_MAX_ISOLATION_EFFECT = config.get("WarpRadar", "max_isolation_effect", WR_MAX_ISOLATION_EFFECT, "isolation effect achieved with max number of isolation blocks (0.01 to 1.00)").getDouble(1.00D);
 	    WR_MAX_ISOLATION_EFFECT = Math.min(1.0D, Math.max(WR_MAX_ISOLATION_EFFECT, 0.01D));
 	    
+	    // Ship Scanner
+		SS_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", SS_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
+	    SS_EU_PER_BLOCK_SCAN = config.get("ShipScanner", "energy_per_block_when_scanning", SS_EU_PER_BLOCK_SCAN, "Energy consummed per block when scanning a ship (use -1 to consume everything)").getInt();
+	    if (SS_EU_PER_BLOCK_SCAN != -1) {
+	    	SS_EU_PER_BLOCK_SCAN = Math.min(SS_MAX_ENERGY_VALUE, Math.max(SS_EU_PER_BLOCK_SCAN, 1));
+	    }
+	    SS_EU_PER_BLOCK_DEPLOY = config.get("ShipScanner", "energy_per_block_when_deploying", SS_EU_PER_BLOCK_DEPLOY, "Energy consummed per block when deploying a ship (use -1 to consume everything)").getInt();
+	    if (SS_EU_PER_BLOCK_DEPLOY != -1) {
+	    	SS_EU_PER_BLOCK_DEPLOY = Math.min(SS_MAX_ENERGY_VALUE, Math.max(SS_EU_PER_BLOCK_DEPLOY, 1));
+	    }
+	    SS_MAX_DEPLOY_RADIUS_BLOCKS = config.get("ShipScanner", "max_deploy_radius_blocks", SS_MAX_DEPLOY_RADIUS_BLOCKS, "Max distance from ship scanner to ship core, measured in blocks").getInt();
+
 	    // Particle Booster
 	    PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", PB_MAX_ENERGY_VALUE).getInt();
 		

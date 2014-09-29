@@ -81,8 +81,6 @@ public class EntityJump extends Entity
 	private int state = STATE_IDLE;
 	private int currentIndexInShip = 0;
 
-	private final int BLOCKS_PER_TICK = 3500;
-
 	private List<MovingEntity> entitiesOnShip;
 	private List<TileEntity> ASTurbines;
 
@@ -334,35 +332,79 @@ public class EntityJump extends Entity
 		betweenWorlds = fromSpace || toSpace || isHyperspaceJump;
 		moveX = moveY = moveZ = 0;
 		
-		TransitionPlane overworld = WarpDriveConfig.G_TRANSITIONPLANES[0];
-		
 		if (toSpace) {
-			if (worldObj.provider.dimensionId == overworld.dimensionId) {
-				if (!overworld.isValidToSpace(new Vector3(this))) {// invalid transition, cancel transition
-					LocalProfiler.stop();
-					String msg = "Ship is outside worldborder, unable to transition to space!";
-					messageToAllPlayersOnShip(msg);
-					killEntity(msg);
-					return;
-				}
-				moveX = overworld.spaceCenterX - overworld.dimensionCenterX;
-				moveZ = overworld.spaceCenterZ - overworld.dimensionCenterZ;
-			} else {
-				moveX = 0;
-				moveZ = 0;
+			Boolean planeFound = false;
+			Boolean planeValid = false;
+			int closestPlaneDistance = Integer.MAX_VALUE;
+			TransitionPlane closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
+				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+				if (worldObj.provider.dimensionId == transitionPlane.dimensionId) {
+					planeFound = true;
+					int planeDistance = transitionPlane.isValidToSpace(new Vector3(this)); 
+					if (planeDistance == 0) {
+						planeValid = true;
+						moveX = transitionPlane.spaceCenterX - transitionPlane.dimensionCenterX;
+						moveZ = transitionPlane.spaceCenterZ - transitionPlane.dimensionCenterZ;
+						targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
+					} else if (closestPlaneDistance > planeDistance) {
+						closestPlaneDistance = planeDistance;
+						closestTransitionPlane = transitionPlane;
+					}
+				} 
 			}
-			targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
-		} else if (fromSpace) {
-			if (!overworld.isValidFromSpace(new Vector3(this))) {// invalid transition, cancel transition
+			if (!planeFound) {
 				LocalProfiler.stop();
-				String msg = "Ship is outside worldborder, unable to transition from space!";
+				String msg = "Unable to reach space!\nThere's no valid transition plane for current dimension " + worldObj.provider.getDimensionName() + " (" + worldObj.provider.dimensionId + ")";
 				messageToAllPlayersOnShip(msg);
 				killEntity(msg);
 				return;
 			}
-			moveX = overworld.dimensionCenterX - overworld.spaceCenterX;
-			moveZ = overworld.dimensionCenterZ - overworld.spaceCenterZ;
-			targetWorld = DimensionManager.getWorld(0);
+			if (!planeValid) {
+				LocalProfiler.stop();
+				@SuppressWarnings("null")
+				String msg = "Ship is outside border, unable to reach space!\nClosest transition plane is ~" + closestPlaneDistance + " m away ("
+						+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
+						+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
+						+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
+						+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+				messageToAllPlayersOnShip(msg);
+				killEntity(msg);
+				return;
+			}
+		} else if (fromSpace) {
+			Boolean planeFound = false;
+			int closestPlaneDistance = Integer.MAX_VALUE;
+			TransitionPlane closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
+				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+				int planeDistance = transitionPlane.isValidFromSpace(new Vector3(this)); 
+				if (planeDistance == 0) {
+					planeFound = true;
+					moveX = transitionPlane.dimensionCenterX - transitionPlane.spaceCenterX;
+					moveZ = transitionPlane.dimensionCenterZ - transitionPlane.spaceCenterZ;
+					targetWorld = DimensionManager.getWorld(transitionPlane.dimensionId);
+				} else if (closestPlaneDistance > planeDistance) {
+					closestPlaneDistance = planeDistance;
+					closestTransitionPlane = transitionPlane;
+				}
+			}
+			if (!planeFound) {
+				LocalProfiler.stop();
+				String msg = "";
+				if (closestTransitionPlane == null) {
+					msg = "No transition plane defined, unable to enter atmosphere!";
+				} else {
+					msg = "No planet in range, unable to enter atmosphere!\nClosest transition plane is " + closestPlaneDistance + " m away ("
+							+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
+							+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
+							+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
+							+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+				}
+				messageToAllPlayersOnShip(msg);
+				killEntity(msg);
+				return;
+			}
 		} else if (isHyperspaceJump && isInHyperSpace) {
 			targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		} else if (isHyperspaceJump && isInSpace) {
@@ -495,7 +537,7 @@ public class EntityJump extends Entity
 	 */
 	private void removeShip() {
 		LocalProfiler.start("EntityJump.removeShip");
-		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
+		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 		WarpDrive.debugPrint("" + this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
 		TileEntity te;
 		Class<?> teClass;
@@ -638,7 +680,7 @@ public class EntityJump extends Entity
 	 */
 	private void moveShip() {
 		LocalProfiler.start("EntityJump.moveShip");
-		int blocksToMove = Math.min(BLOCKS_PER_TICK, ship.length - currentIndexInShip);
+		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
 		WarpDrive.debugPrint("" + this + " Moving ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
 
 		for (int index = 0; index < blocksToMove; index++) {
@@ -646,7 +688,13 @@ public class EntityJump extends Entity
 				break;
 			}
 
-			moveBlockSimple(currentIndexInShip);
+			JumpBlock jb = ship[currentIndexInShip];
+			if (jb != null) {
+				jb.deploy(targetWorld, moveX, moveY, moveZ);
+				if (jb.blockID != WarpDriveConfig.CC_peripheral || (jb.blockMeta != 2 && jb.blockMeta != 4)) {
+					worldObj.removeBlockTileEntity(jb.x, jb.y, jb.z);
+				}
+			}
 			currentIndexInShip++;
 		}
 
@@ -1106,102 +1154,6 @@ public class EntityJump extends Entity
 		}
 	}/**/
 
-	private boolean moveBlockSimple(int indexInShip) {
-		JumpBlock shipBlock = null;
-		try {
-			shipBlock = ship[indexInShip];
-
-			if (shipBlock == null) {
-				return false;
-			}
-			
-			int oldX = shipBlock.x;
-			int oldY = shipBlock.y;
-			int oldZ = shipBlock.z;
-			int newX = oldX + moveX;
-			int newY = oldY + moveY;
-			int newZ = oldZ + moveZ;
-			int blockID = shipBlock.blockID;
-			int blockMeta = shipBlock.blockMeta;
-			mySetBlock(targetWorld, newX, newY, newZ, blockID, blockMeta, 2);
-
-			// Re-schedule air blocks update
-			if (blockID == WarpDriveConfig.airID) {
-				targetWorld.markBlockForUpdate(newX, newY, newZ);
-				targetWorld.scheduleBlockUpdate(newX, newY, newZ, blockID, 40 + targetWorld.rand.nextInt(20));
-			}
-
-			NBTTagCompound oldnbt = new NBTTagCompound();
-			if (shipBlock.blockTileEntity != null) {
-				shipBlock.blockTileEntity.writeToNBT(oldnbt);
-				oldnbt.setInteger("x", newX);
-				oldnbt.setInteger("y", newY);
-				oldnbt.setInteger("z", newZ);
-				
-				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ"))	{ // Mekanism 6.0.4.44
-					WarpDrive.debugPrint("[JUMP] moveBlockSimple: TileEntity from Mekanism detected");
-					oldnbt.setInteger("mainX", oldnbt.getInteger("mainX") + moveX);
-					oldnbt.setInteger("mainY", oldnbt.getInteger("mainY") + moveY);
-					oldnbt.setInteger("mainZ", oldnbt.getInteger("mainZ") + moveZ);
-				}
-				
-				TileEntity newTileEntity = null;
-				boolean	isForgeMultipart = false;
-				if (oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart" && WarpDriveConfig.isForgeMultipartLoaded) {
-					isForgeMultipart = true;
-					newTileEntity = (TileEntity) WarpDriveConfig.forgeMultipart_helper_createTileFromNBT.invoke(null, targetWorld, oldnbt);
-					
-				} else if (blockID == WarpDriveConfig.CC_Computer || blockID == WarpDriveConfig.CC_peripheral || blockID == WarpDriveConfig.CCT_Turtle || blockID == WarpDriveConfig.CCT_Upgraded || blockID == WarpDriveConfig.CCT_Advanced) {
-					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-					newTileEntity.invalidate();
-					
-				} else if (blockID == WarpDriveConfig.AS_Turbine) {
-					if (oldnbt.hasKey("zhuYao")) {
-						NBTTagCompound nbt1 = oldnbt.getCompoundTag("zhuYao");
-						nbt1.setDouble("x", newX);
-						nbt1.setDouble("y", newY);
-						nbt1.setDouble("z", newZ);
-						oldnbt.setTag("zhuYao", nbt1);
-					}
-					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-				}
-				
-				if (newTileEntity == null) {
-					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-				}
-				
-				if (newTileEntity != null) {
-					newTileEntity.worldObj = targetWorld;
-					newTileEntity.validate();
-				
-					worldObj.removeBlockTileEntity(oldX, oldY, oldZ);
-					targetWorld.setBlockTileEntity(newX, newY, newZ, newTileEntity);
-					if (isForgeMultipart) {
-						WarpDriveConfig.forgeMultipart_tileMultipart_onChunkLoad.invoke(newTileEntity);
-						WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
-					}
-				} else {
-					WarpDrive.print(this + " moveBlockSimple failed to create new tile entity at " + shipBlock.x + ", " + shipBlock.y + ", " + shipBlock.z + " blockId " + shipBlock.blockID + ":" + shipBlock.blockMeta);
-					WarpDrive.print("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
-				}
-			}
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			String coordinates = "";
-			try {
-				if (shipBlock != null) {
-					coordinates = " at " + shipBlock.x + ", " + shipBlock.y + ", " + shipBlock.z + " blockId " + shipBlock.blockID + ":" + shipBlock.blockMeta;
-				}
-			} catch (Exception dropMe) {
-				coordinates = " (unknown coordinates)";
-			}
-			WarpDrive.print(this + " moveBlockSimple exception index " + indexInShip + coordinates);
-			return false;
-		}
-
-		return true;
-	}
-
 	private static ArrayList<Object> removeDuplicates(List<TileEntity> l)
 	{
 		Set<TileEntity> s = new TreeSet<TileEntity>(new Comparator<TileEntity>()
@@ -1231,150 +1183,13 @@ public class EntityJump extends Entity
 	}
 
 	@Override
-	protected void entityInit()
-	{
+	protected void entityInit() {
 		//WarpDrive.debugPrint("" + this + " entityInit()");
 	}
 
 	@Override
-	protected void writeEntityToNBT(NBTTagCompound var1)
-	{
+	protected void writeEntityToNBT(NBTTagCompound var1) {
 		//WarpDrive.debugPrint("" + this + " writeEntityToNBT()");
-	}
-
-	// Own implementation of setting blocks without light recalculation in optimization purposes
-	private boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
-	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
-		{
-			if (y < 0)
-			{
-				return false;
-			}
-			else if (y >= 256)
-			{
-				return false;
-			}
-			else
-			{
-				w.markBlockForUpdate(x, y, z);
-				Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
-				return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	private boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
-	{
-		int j1 = z << 4 | x;
-
-		if (y >= c.precipitationHeightMap[j1] - 1)
-		{
-			c.precipitationHeightMap[j1] = -999;
-		}
-
-		//int k1 = c.heightMap[j1];
-		int l1 = c.getBlockID(x, y, z);
-		int i2 = c.getBlockMetadata(x, y, z);
-
-		if (l1 == blockId && i2 == blockMeta)
-		{
-			return false;
-		}
-		else
-		{
-			ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
-			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-
-			if (extendedblockstorage == null)
-			{
-				if (blockId == 0)
-				{
-					return false;
-				}
-
-				extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
-			}
-
-			int j2 = c.xPosition * 16 + x;
-			int k2 = c.zPosition * 16 + z;
-			extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
-
-			if (l1 != 0)
-			{
-				if (!c.worldObj.isRemote)
-				{
-					Block.blocksList[l1].breakBlock(c.worldObj, j2, y, k2, l1, i2);
-				}
-				else if (Block.blocksList[l1] != null && Block.blocksList[l1].hasTileEntity(i2))
-				{
-					TileEntity te = worldObj.getBlockTileEntity(j2, y, k2);
-
-					if (te != null && te.shouldRefresh(l1, blockId, i2, blockMeta, worldObj, j2, y, k2))
-					{
-						c.worldObj.removeBlockTileEntity(j2, y, k2);
-					}
-				}
-			}
-
-			if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
-			{
-				return false;
-			}
-			else
-			{
-				extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
-				// Removed light recalculations
-				/*if (flag)
-				{
-					c.generateSkylightMap();
-				}
-				else
-				{
-					if (c.getBlockLightOpacity(par1, par2, par3) > 0)
-					{
-						if (par2 >= k1)
-						{
-							c.relightBlock(par1, par2 + 1, par3);
-						}
-					}
-					else if (par2 == k1 - 1)
-					{
-						c.relightBlock(par1, par2, par3);
-					}
-
-					c.propagateSkylightOcclusion(par1, par3);
-				}*/
-				TileEntity tileentity;
-
-				if (blockId != 0)
-				{
-					if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta))
-					{
-						tileentity = c.getChunkBlockTileEntity(x, y, z);
-
-						if (tileentity == null)
-						{
-							tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
-							c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
-						}
-
-						if (tileentity != null)
-						{
-							tileentity.updateContainingBlockInfo();
-							tileentity.blockMetadata = blockMeta;
-						}
-					}
-				}
-
-				c.isModified = true;
-				return true;
-			}
-		}
 	}
 
 	private void FixASTurbines()

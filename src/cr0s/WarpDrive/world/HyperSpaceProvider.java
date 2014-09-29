@@ -111,7 +111,7 @@ public class HyperSpaceProvider extends WorldProvider
     @Override
     public String getSaveFolder()
     {
-        return (dimensionId == 0 ? null : "WarpDrive/HyperSpace" + dimensionId);
+        return (dimensionId == 0 ? null : "WarpDriveHyperSpace" + dimensionId);
     }
 
     @Override

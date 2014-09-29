@@ -138,7 +138,7 @@ public final class EntitySphereGen extends Entity
 				break;
 			notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
 			JumpBlock jb = blocks.get(currentIndex);
-			mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.blockID, jb.blockMeta, notifyFlag);
+			JumpBlock.mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.blockID, jb.blockMeta, notifyFlag);
 			currentIndex++;
 		}
 
@@ -236,62 +236,6 @@ public final class EntitySphereGen extends Entity
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound tag) {
-	}
-
-	// Own implementation of setting blocks without light recalculation in optimization purposes
-	private static boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6) {
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
-			if (y < 0)
-				return false;
-			else if (y >= 256)
-				return false;
-			w.markBlockForUpdate(x, y, z);
-			Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
-			return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
-		} else {
-			return false;
-		}
-	}
-
-	private static boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta) {
-		int j1 = z << 4 | x;
-		if (y >= c.precipitationHeightMap[j1] - 1)
-			c.precipitationHeightMap[j1] = -999;
-		int l1 = c.getBlockID(x, y, z);
-		int i2 = c.getBlockMetadata(x, y, z);
-		if (l1 == blockId && i2 == blockMeta)
-			return false;
-		ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
-		ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-		if (extendedblockstorage == null)
-		{
-			if (blockId == 0)
-				return false;
-			extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
-		}
-		int j2 = c.xPosition * 16 + x;
-		int k2 = c.zPosition * 16 + z;
-		extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
-		if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
-			return false;
-		extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
-		if (blockId != 0)
-			if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta))
-			{
-				TileEntity tileentity = c.getChunkBlockTileEntity(x, y, z);
-				if (tileentity == null)
-				{
-					tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
-					c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
-				}
-				else
-				{
-					tileentity.updateContainingBlockInfo();
-					tileentity.blockMetadata = blockMeta;
-				}
-			}
-		c.isModified = true;
-		return true;
 	}
 	
     @Override

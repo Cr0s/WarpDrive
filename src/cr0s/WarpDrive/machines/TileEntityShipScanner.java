@@ -26,12 +26,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.ForgeDirection;
 
 public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
-	private final int MAX_ENERGY_VALUE = 500000000; // 500kk eU
-
 	private int state = 0; // 0 - inactive, 1 - active
-	private int firstUncoveredY;
-
-	private boolean isEnabled = false;
 	private TileEntityReactor core = null;
 
 	int laserTicks = 0;
@@ -40,18 +35,11 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	
 	int warpCoreSearchTicks = 0;
 
-	// Config //TODO add to WarpDriveConfig
-	private final String SCHEMATICS_DIR = "warpDrive_schematics";
-	private final int EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume (including air)
-	private final int EU_PER_BLOCK_DEPLOY = 5000;
-	private final int BLOCK_TO_DEPLOY_PER_TICK = 3000;
-	private final int ALLOWED_DEPLOY_RADIUS = 50; // blocks
-	
 	private String[] methodsArray = {
-		"scan",					// 0
+		"scan",			// 0
 		"fileName",		// 1
-		"energy",			// 2
-		"deploy"	// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+		"energy",		// 2
+		"deploy"		// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
@@ -61,7 +49,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private int blocksToDeployCount;
 	private boolean isDeploying = false;
 	
-	private int newX, newY, newZ;
+	private int targetX, targetY, targetZ;
 	
 	
 	@Override
@@ -146,7 +134,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			
 			deployDelayTicks = 0;
 			
-			int blocks = Math.min(BLOCK_TO_DEPLOY_PER_TICK, blocksToDeployCount - currentDeployIndex);
+			int blocks = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, blocksToDeployCount - currentDeployIndex);
 
 			if (blocks == 0) {
 				isDeploying = false;
@@ -164,20 +152,20 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				}
 				
 				// Deploy single block
-				JumpBlock block = blocksToDeploy[currentDeployIndex];
+				JumpBlock jb = blocksToDeploy[currentDeployIndex];
 				
-				if (block != null &&
-					block.blockID != Block.bedrock.blockID &&
-					!WarpDriveConfig.scannerIgnoreBlocks.contains(block.blockID) &&
-					worldObj.isAirBlock(newX + block.x, newY + block.y, newZ + block.z)) {
-					moveBlockSimple(block);
+				if (jb != null &&
+					jb.blockID != Block.bedrock.blockID &&
+					!WarpDriveConfig.scannerIgnoreBlocks.contains(jb.blockID) &&
+					worldObj.isAirBlock(targetX + jb.x, targetY + jb.y, targetZ + jb.z)) {
+					jb.deploy(worldObj, targetX, targetY, targetZ);
 					
 					if (worldObj.rand.nextInt(100) <= 10) {
 						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 						
 						PacketHandler.sendBeamPacket(worldObj,
 								new Vector3(this).translate(0.5D),
-								new Vector3(newX + block.x, newY + block.y, newZ + block.z).translate(0.5D),
+								new Vector3(targetX + jb.x, targetY + jb.y, targetZ + jb.z).translate(0.5D),
 								0f, 1f, 0f, 15, 0, 100);
 					}
 				}
@@ -216,28 +204,46 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 		return result;
 	}
-
-	private void saveShipToSchematic(String fileName) {
+	
+	private int getScanningEnergyCost(int size) {
+		if (WarpDriveConfig.SS_EU_PER_BLOCK_SCAN > 0) {
+			return size * WarpDriveConfig.SS_EU_PER_BLOCK_SCAN;
+		} else {
+			return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
+		}
+	}
+	
+	private int getDeploymentEnergyCost(int size) {
+		if (WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY > 0) {
+			return size * WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY;
+		} else {
+			return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
+		}
+	}
+	
+	private boolean saveShipToSchematic(String fileName, StringBuilder reason) {
 		NBTTagCompound schematic = new NBTTagCompound("Schematic");
 
-		short width = (short) Math.abs(core.maxX - core.minX);
-		short length = (short) Math.abs(core.maxZ - core.minZ);
-		short height = (short) (core.maxY - core.minY);
+		short width  = (short) (core.maxX - core.minX + 1);
+		short length = (short) (core.maxZ - core.minZ + 1);
+		short height = (short) (core.maxY - core.minY + 1);
 		
-		width++;
-		height++;
-		length++;
+		if (width <= 0 || length <= 0 || height <= 0) {
+			reason.append("Invalid ship dimensions, nothing to scan");
+			return false;
+		}
 		
 		schematic.setShort("Width", width);
 		schematic.setShort("Length", length);
 		schematic.setShort("Height", height);
-	
 		
 		int size = width * length * height;
 		
 		// Consume energy
-		consumeEnergy(size * EU_PER_BLOCK_SCAN, false);
-		
+		if (!consumeEnergy(getScanningEnergyCost(size), false)) {
+			reason.append("Insufficient energy (" + getScanningEnergyCost(size) + " required)");
+			return false;
+		}
 		
 		byte localBlocks[] = new byte[size];
 		byte localMetadata[] = new byte[size];
@@ -257,9 +263,8 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 						blockID = 0;
 					}
 					
-					int blockMetadata = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					localBlocks[x + (y * length + z) * width] = (byte) blockID;
-					localMetadata[x + (y * length + z) * width] = (byte) blockMetadata;
+					localMetadata[x + (y * length + z) * width] = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					if ((extraBlocks[x + (y * length + z) * width] = (byte) (blockID >> 8)) > 0) {
 						extra = true;
 					}
@@ -328,6 +333,8 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		schematic.setTag("TileEntities", tileEntitiesList);		
 		
 		writeNBTToFile(fileName, schematic);
+		
+		return true;
 	}
 
 	private static void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
@@ -350,21 +357,26 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	}
 
 	// Begins ship scan
-	private void scanShip() {
+	private boolean scanShip(StringBuilder reason) {
 		// Enable scanner
 		switchState(1);
-		File f = new File(SCHEMATICS_DIR);
-		if (!f.exists() || !f.isDirectory())
+		File f = new File(WarpDriveConfig.G_SCHEMALOCATION);
+		if (!f.exists() || !f.isDirectory()) {
 			f.mkdirs();
+		}
 
 		// Generate unique file name
 		do {
 			schematicFileName = (new StringBuilder().append(core.coreFrequency)
 					.append(System.currentTimeMillis()).append(".schematic"))
 					.toString();
-		} while (new File(SCHEMATICS_DIR + "/" + schematicFileName).exists());
+		} while (new File(WarpDriveConfig.G_SCHEMALOCATION + "/" + schematicFileName).exists());
 
-		saveShipToSchematic(SCHEMATICS_DIR + "/" + schematicFileName);
+		if (!saveShipToSchematic(WarpDriveConfig.G_SCHEMALOCATION + "/" + schematicFileName, reason)) {
+			return false;
+		}
+		reason.append(schematicFileName);
+		return true;
 	}
 
 	private static NBTTagCompound readNBTFromFile(String fileName) {
@@ -387,73 +399,70 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		return null;
 	}
 	
-	// Returns result array for CC interface: [ code, "message" ]
-	private Object[] deployShip(String fileName, int offsetX, int offsetY, int offsetZ) {
-		NBTTagCompound schematic = readNBTFromFile(SCHEMATICS_DIR + "/" + fileName);
-		
+	// Returns error code and reason string
+	private int deployShip(String fileName, int offsetX, int offsetY, int offsetZ, StringBuilder reason) {
+		// Load schematic
+		NBTTagCompound schematic = readNBTFromFile(WarpDriveConfig.G_SCHEMALOCATION + "/" + fileName);
 		if (schematic == null) {
-			return new Object[] { -1, "Unknow error. Schematic NBT is null" };
+			reason.append("Schematic not found or unknow error reading it.");
+			return -1;
 		}
 		
+		// Compute geometry
 		short width = schematic.getShort("Width");
 		short height = schematic.getShort("Height");
 		short length = schematic.getShort("Length");
 		
-		int targetX = xCoord + offsetX;
-		int targetY = yCoord + offsetY;
-		int targetZ = zCoord + offsetZ;
+		targetX = xCoord + offsetX;
+		targetY = yCoord + offsetY;
+		targetZ = zCoord + offsetZ;
+		blocksToDeployCount = width * height * length;
 		
-		double d3 = xCoord - targetX;
-		double d4 = yCoord - targetY;
-		double d5 = zCoord - targetZ;
-		double distance = MathHelper.sqrt_double(d3 * d3 + d4 * d4 + d5 * d5);
-		
-		if (distance > ALLOWED_DEPLOY_RADIUS)
-			return new Object[] { 5, "Cannot deploy ship so far away from scanner." };
-		
-		int size = width* height * length;
-		
-		
-		// Check energy level
-		if (!consumeEnergy(size * EU_PER_BLOCK_DEPLOY, false)) {
-			String msg = "[ShipScanner] Not enough energy! Need at least " + (size * EU_PER_BLOCK_DEPLOY) + " EU";
-			WarpDrive.debugPrint(msg);
-			return new Object[] { 1, msg };
-		}
-		
-		// Check specified area for occupation by blocks
-		// If specified area occupied, break deploying with error message
-		int occupiedBlockCount = 0;
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				for (int z = 0; z < length; z++) {
-					if (!worldObj.isAirBlock(targetX + x, targetY + y, targetZ + z))
-						occupiedBlockCount++;
+		// Validate context
+		{
+			// Check distance
+			double dX = xCoord - targetX;
+			double dY = yCoord - targetY;
+			double dZ = zCoord - targetZ;
+			double distance = MathHelper.sqrt_double(dX * dX + dY * dY + dZ * dZ);
+			
+			if (distance > WarpDriveConfig.SS_MAX_DEPLOY_RADIUS_BLOCKS) {
+				reason.append("Cannot deploy ship so far away from scanner.");
+				return 5;
+			}
+			
+			// Consume energy
+			if (!consumeEnergy(getDeploymentEnergyCost(blocksToDeployCount), false)) {
+				reason.append("Insufficient energy (" + getDeploymentEnergyCost(blocksToDeployCount) + " required)");
+				return 1;
+			}
+			
+			// Check specified area for occupation by blocks
+			// If specified area occupied, break deploying with error message
+			int occupiedBlockCount = 0;
+			for (int x = 0; x < width; x++) {
+				for (int y = 0; y < height; y++) {
+					for (int z = 0; z < length; z++) {
+						if (!worldObj.isAirBlock(targetX + x, targetY + y, targetZ + z))
+							occupiedBlockCount++;
+					}
 				}
 			}
+			if (occupiedBlockCount > 0) {
+				reason.append("Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship.");
+				return 2;
+			}
 		}
-
-		if (occupiedBlockCount > 0) {
-			return new Object[] { 2, "Deploying area occupied with " + occupiedBlockCount + " blocks. Can't deploy ship." };
-		}
 		
-		// Set deployment vars
-		this.blocksToDeploy = new JumpBlock[size];
-		this.isDeploying = true;
-		this.currentDeployIndex = 0;
-		this.blocksToDeployCount = size;
-		
-		this.newX = targetX;
-		this.newY = targetY;
-		this.newZ = targetZ;
-		
+		// Set deployment variables
+		blocksToDeploy = new JumpBlock[blocksToDeployCount];
+		isDeploying = true;
+		currentDeployIndex = 0;
 		
 		// Read blocks and TileEntities from NBT to internal storage array
-		
 		byte localBlocks[] = schematic.getByteArray("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
 
-		boolean extra = schematic.hasKey("Add") || schematic.hasKey("AddBlocks");
 		byte extraBlocks[] = null;
 		byte extraBlocksNibble[] = null;
 		if (schematic.hasKey("AddBlocks")) {
@@ -468,7 +477,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		}
 		
 		// Load Tile Entities
-		NBTTagCompound[] tileEntities = new NBTTagCompound[size];
+		NBTTagCompound[] tileEntities = new NBTTagCompound[blocksToDeployCount];
 		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities");
 
 		for (int i = 0; i < tileEntitiesList.tagCount(); i++) {
@@ -484,41 +493,39 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				for (int z = 0; z < length; z++) {
+					int index = x + (y * length + z) * width;
 					JumpBlock jb = new JumpBlock();
-					
-					jb.blockID = (localBlocks[x + (y * length + z) * width]) & 0xFF;
-					if (extra)
-						jb.blockID |= ((extraBlocks[x + (y * length + z) * width]) & 0xFF) << 8;
-					
-					jb.blockMeta = (localMetadata[x + (y * length + z) * width]) & 0xFF;
-					jb.blockNBT = tileEntities[x + (y * length + z) * width];
-					
-					
 					
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
+					jb.blockID = (localBlocks[index]) & 0xFF;
+					if (extraBlocks != null) {
+						jb.blockID |= ((extraBlocks[index]) & 0xFF) << 8;
+					}
+					jb.blockMeta = (localMetadata[index]) & 0xFF;
+					jb.blockNBT = tileEntities[index];
 					
 					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
-						System.out.print("[ShipScanner] Saving block: " + Block.blocksList[jb.blockID].getUnlocalizedName() + ", TE: ");
-						if (tileEntities[x + (y * length + z) * width] == null) {
-							System.out.println("null!");
+						if (tileEntities[index] == null) {
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.blockID].getUnlocalizedName() + " (no tile entity)");
 						} else {
-							System.out.println(tileEntities[x + (y * length + z) * width].getString("id"));
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.blockID].getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
 						}
 						
-						blocksToDeploy[x + (y * length + z) * width] = jb;
+						blocksToDeploy[index] = jb;
 					} else {
 						jb = null;
 						
-						blocksToDeploy[x + (y * length + z) * width] = jb;
+						blocksToDeploy[index] = jb;
 					}
 				}
 			}
 		}
 		
 		switchState(1);
-		return new Object[] { 3, "Ship deployed." };
+		reason.append("Ship deploying...");
+		return 3;
 	}
 	
 	@Override
@@ -548,24 +555,28 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		switch (method) {
 		case 0: // scanShip()
 			// Already scanning?
-			if (this.state == 1)
+			if (this.state == 1) {
 				return new Object[] { false, 0, "Already scanning" };
-
+			}
+			
 			if (core == null) {
 				return new Object[] { false, 1, "Warp-Core not found" };
-			} else if (consumeEnergy(core.shipVolume * EU_PER_BLOCK_SCAN, true)) {
-				scanShip();
-			} else {
+			} else if (!consumeEnergy(getScanningEnergyCost(core.shipVolume), true)) {
 				return new Object[] { false, 2, "Not enough energy!" };
+			} else {
+				StringBuilder reason = new StringBuilder();
+				boolean success = scanShip(reason);
+				return new Object[] { success, 3, reason.toString() };
 			}
-			break;
-
+			// break;
+			
 		case 1: // getSchematicFileName()
-			if (state != 0 && !schematicFileName.isEmpty())
-				return new Object[] { "Scanning in process. Please wait." };
+			if (state != 0 && !schematicFileName.isEmpty()) {
+				return new Object[] { "Scanning in process. Please wait..." };
+			}
 			
 			return new Object[] { schematicFileName };
-
+			
 		case 2: // getEnergyLevel()
 			return new Object[] { getEnergyStored() };
 			
@@ -576,14 +587,15 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				int y = ((Double)arguments[2]).intValue();
 				int z = ((Double)arguments[3]).intValue();
 				
-				if (!new File(SCHEMATICS_DIR + "/" + fileName).exists()) {
-					return new Object[] { 0, "Specified .schematic file not found!" };
-				} else
-				{
-					return deployShip(fileName, x, y, z);
+				if (!new File(WarpDriveConfig.G_SCHEMALOCATION + "/" + fileName).exists()) {
+					return new Object[] { 0, "Specified .schematic file was not found!" };
+				} else {
+					StringBuilder reason = new StringBuilder();
+					int result = deployShip(fileName, x, y, z, reason);
+					return new Object[] { result, reason.toString() };
 				}
 			} else {
-				return new Object[] { 4, ".schematic file name not specified or invalid arguments count!" };
+				return new Object[] { 4, "Invalid arguments count, you need .schematic file name, offsetX, offsetY and offsetZ!" };
 			}
 		}
 		
@@ -601,7 +613,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	// IEnergySink methods implementation
 	@Override
 	public int getMaxEnergyStored() {
-		return MAX_ENERGY_VALUE;
+		return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
 	}
 	
 	@Override
@@ -614,177 +626,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
     	return true;
     }
 	
-	public boolean moveBlockSimple(JumpBlock shipBlock)
-	{
-		try
-		{
-			if (shipBlock == null)
-			{
-				return false;
-			}
-
-			int oldX = shipBlock.x;
-			int oldY = shipBlock.y;
-			int oldZ = shipBlock.z;
-
-			int blockID = shipBlock.blockID;
-			int blockMeta = shipBlock.blockMeta;
-			mySetBlock(worldObj, oldX + newX, oldY + newY, oldZ + newZ, blockID, blockMeta, 2);
-
-			NBTTagCompound oldnbt = new NBTTagCompound();
-			oldnbt = shipBlock.blockNBT;
-			if (oldnbt != null) {
-				TileEntity newTileEntity;
-				newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-				newTileEntity.worldObj = worldObj;
-				newTileEntity.validate();
-				worldObj.setBlockTileEntity(oldX + newX, oldY + newY, oldZ + newZ, newTileEntity);
-			}
-		}
-		catch (Exception exception)
-		{
-			exception.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}	
-	
-	// Own implementation of setting blocks without light recalculation in optimization purposes
-	public boolean mySetBlock(World w, int x, int y, int z, int blockId, int blockMeta, int par6)
-	{
-		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000)
-		{
-			if (y < 0)
-			{
-				return false;
-			}
-			else if (y >= 256)
-			{
-				return false;
-			}
-			else
-			{
-				w.markBlockForUpdate(x, y, z);
-				Chunk chunk = w.getChunkFromChunkCoords(x >> 4, z >> 4);
-				return myChunkSBIDWMT(chunk, x & 15, y, z & 15, blockId, blockMeta);
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	public boolean myChunkSBIDWMT(Chunk c, int x, int y, int z, int blockId, int blockMeta)
-	{
-		int j1 = z << 4 | x;
-
-		if (y >= c.precipitationHeightMap[j1] - 1)
-		{
-			c.precipitationHeightMap[j1] = -999;
-		}
-
-		//int k1 = c.heightMap[j1];
-		int l1 = c.getBlockID(x, y, z);
-		int i2 = c.getBlockMetadata(x, y, z);
-
-		if (l1 == blockId && i2 == blockMeta)
-		{
-			return false;
-		}
-		else
-		{
-			ExtendedBlockStorage[] storageArrays = c.getBlockStorageArray();
-			ExtendedBlockStorage extendedblockstorage = storageArrays[y >> 4];
-
-			if (extendedblockstorage == null)
-			{
-				if (blockId == 0)
-				{
-					return false;
-				}
-
-				extendedblockstorage = storageArrays[y >> 4] = new ExtendedBlockStorage(y >> 4 << 4, !c.worldObj.provider.hasNoSky);
-			}
-
-			int j2 = c.xPosition * 16 + x;
-			int k2 = c.zPosition * 16 + z;
-			extendedblockstorage.setExtBlockID(x, y & 15, z, blockId);
-
-			if (l1 != 0)
-			{
-				if (!c.worldObj.isRemote)
-				{
-					Block.blocksList[l1].breakBlock(c.worldObj, j2, y, k2, l1, i2);
-				}
-				else if (Block.blocksList[l1] != null && Block.blocksList[l1].hasTileEntity(i2))
-				{
-					TileEntity te = worldObj.getBlockTileEntity(j2, y, k2);
-
-					if (te != null && te.shouldRefresh(l1, blockId, i2, blockMeta, worldObj, j2, y, k2))
-					{
-						c.worldObj.removeBlockTileEntity(j2, y, k2);
-					}
-				}
-			}
-
-			if (extendedblockstorage.getExtBlockID(x, y & 15, z) != blockId)
-			{
-				return false;
-			}
-			else
-			{
-				extendedblockstorage.setExtBlockMetadata(x, y & 15, z, blockMeta);
-				// Removed light recalculations
-				/*if (flag)
-				{
-					c.generateSkylightMap();
-				}
-				else
-				{
-					if (c.getBlockLightOpacity(par1, par2, par3) > 0)
-					{
-						if (par2 >= k1)
-						{
-							c.relightBlock(par1, par2 + 1, par3);
-						}
-					}
-					else if (par2 == k1 - 1)
-					{
-						c.relightBlock(par1, par2, par3);
-					}
-
-					c.propagateSkylightOcclusion(par1, par3);
-				}*/
-				TileEntity tileentity;
-
-				if (blockId != 0)
-				{
-					if (Block.blocksList[blockId] != null && Block.blocksList[blockId].hasTileEntity(blockMeta))
-					{
-						tileentity = c.getChunkBlockTileEntity(x, y, z);
-
-						if (tileentity == null)
-						{
-							tileentity = Block.blocksList[blockId].createTileEntity(c.worldObj, blockMeta);
-							c.worldObj.setBlockTileEntity(j2, y, k2, tileentity);
-						}
-
-						if (tileentity != null)
-						{
-							tileentity.updateContainingBlockInfo();
-							tileentity.blockMetadata = blockMeta;
-						}
-					}
-				}
-
-				c.isModified = true;
-				return true;
-			}
-		}
-	}
-
 	@Override
 	public boolean equals(IPeripheral other) {
 		return other == this;
