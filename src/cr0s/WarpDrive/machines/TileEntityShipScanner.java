@@ -27,9 +27,6 @@ import net.minecraftforge.common.ForgeDirection;
 
 public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private int state = 0; // 0 - inactive, 1 - active
-	private int firstUncoveredY;
-
-	private boolean isEnabled = false;
 	private TileEntityReactor core = null;
 
 	int laserTicks = 0;
@@ -39,10 +36,10 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	int warpCoreSearchTicks = 0;
 
 	private String[] methodsArray = {
-		"scan",					// 0
+		"scan",			// 0
 		"fileName",		// 1
-		"energy",			// 2
-		"deploy"	// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+		"energy",		// 2
+		"deploy"		// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
 	};
 
 	private String schematicFileName;
