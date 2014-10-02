@@ -30,20 +30,20 @@ if radar.getEnergyLevel() < radius * radius then
   return
 end
 radar.scanRadius(radius)
-sleep(2)
+sleep(0.5)
 
 print("Scanning...")
 
-local seconds = 2
+local seconds = 0
 local count = nil
 repeat
   count = radar.getResultsCount()
   sleep(1)
   seconds = seconds + 1
-until count ~= nil or seconds > 10
+until (count ~= nil and count ~= -1) or seconds > 10
 print("took "..seconds.." seconds")
 
-if count ~= nil then
+if count ~= nil and count > 0 then
   for i=0, count-1 do
     freq, x, y, z = radar.getResult(i)
     print("Ship '"..freq.."' @ ("..x.. " " .. y .. " " .. z .. ")")
