@@ -1,5 +1,8 @@
 package cr0s.WarpDrive.machines;
 
+import java.util.HashMap;
+import java.util.Set;
+
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.Loader;
@@ -14,17 +17,19 @@ import li.cil.oc.api.network.Visibility;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import cr0s.WarpDrive.WarpDrive;
+import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.data.Vector3;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers"),
 	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
 })
-public abstract class WarpInterfacedTE extends WarpTE {
+public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, Environment {
 	WarpInterfacedTE() {
 		super();
 		if (Loader.isModLoaded("OpenComputers")) {
-			OC_node = Network.newNode((Environment)this, Visibility.Network).withComponent(peripheralName).create();
+			OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
 		}
 	}
 	
@@ -35,6 +40,9 @@ public abstract class WarpInterfacedTE extends WarpTE {
 	// OpenComputer specific properties
     protected Node		OC_node = null;
     protected boolean	OC_addedToNetwork = false;
+    
+    // ComputerCraft specific properties
+    protected HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
 	
 	// TileEntity overrides, notably for OpenComputer
 	@Override
@@ -104,51 +112,79 @@ public abstract class WarpInterfacedTE extends WarpTE {
 	}
 
     // ComputerCraft methods
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
  	public String getType() {
 		return peripheralName;
  	}
  
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
  	public String[] getMethodNames() {
  		return methodsArray;
  	}
  	
- 	/*
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
  	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
- 		...
- 	}/**/
+ 		// empty stub
+		return null;
+ 	}
 	
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
+		int id = computer.getID();
+		connectedComputers.put(id, computer);
 	}
 	
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public void detach(IComputerAccess computer) {
+		int id = computer.getID();
+		if (connectedComputers.containsKey(id)) {
+			connectedComputers.remove(id);
+		}
 	}
 	
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public boolean equals(IPeripheral other) {
+		// WarpDrive.debugPrint("WarpInterfacedTE.equals");
 		return other == this;
 	}
 	
+	protected void sendEvent(String eventName, Object[] arguments) {
+		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
+		if (WarpDriveConfig.isCCLoaded) {
+			Set<Integer> keys = connectedComputers.keySet();
+			for(Integer key:keys) {
+				IComputerAccess comp = connectedComputers.get(key);
+				comp.queueEvent(eventName, arguments);
+			}
+		}
+	}
+	
 	// OpenComputers methods
+	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public Node node() {
 		return OC_node;
 	}
 	
+	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onConnect(Node node) {
 		// nothing special
 	}
 	
+	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onDisconnect(Node node) {
 		// nothing special
 	}
 	
+	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onMessage(Message message) {
 		// nothing special
