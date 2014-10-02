@@ -47,8 +47,6 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	public boolean isEmitting = false;
 
-	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
-
 	private int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
 	
@@ -582,6 +580,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 	}
 
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
@@ -614,33 +613,6 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				return null;
 		}
 		return null;
-	}
-
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public void attach(IComputerAccess computer) {
-		int id = computer.getID();
-		connectedComputers.put(id, computer);
-	}
-	
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public void detach(IComputerAccess computer) {
-		int id = computer.getID();
-		if (connectedComputers.containsKey(id)) {
-			connectedComputers.remove(id);
-		}
-	}
-	
-	private void sendEvent(String eventName, Object[] arguments) {
-		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
-		if (WarpDriveConfig.isCCLoaded) {
-			Set<Integer> keys = connectedComputers.keySet();
-			for(Integer key:keys) {
-				IComputerAccess comp = connectedComputers.get(key);
-				comp.queueEvent(eventName, arguments);
-			}
-		}
 	}
 	
 	@Override

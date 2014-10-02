@@ -145,7 +145,7 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 
     public String getStatus() {
     	if (getMaxEnergyStored() != 0) {
-    		return getBlockType().getLocalizedName() + " energy level is " + convertInternalToEU(getEnergyStored()) + "/" + convertInternalToEU(getMaxEnergyStored()) + " EU.";
+    		return getBlockType().getLocalizedName() + String.format(" energy level is %.0f/%.0f EU.", convertInternalToEU(getEnergyStored()), convertInternalToEU(getMaxEnergyStored()));
     	} else {
     		return getBlockType().getLocalizedName();
     	}

@@ -942,7 +942,7 @@ public class TileEntityReactor extends WarpEnergyTE
 
     @Override
     public String getStatus() {
-        return getBlockType().getLocalizedName() + " '" + coreFrequency + "' energy level is " + getEnergyStored() + " EU."
+        return getBlockType().getLocalizedName() + String.format(" '%s' energy level is %.0f/%.0f EU.", coreFrequency, convertInternalToEU(getEnergyStored()), convertInternalToEU(getMaxEnergyStored()))
         		+ ((cooldownTime > 0) ? ("\n" + (cooldownTime / 20) + " s left of cooldown.") : ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
     }
 
