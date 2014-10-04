@@ -221,7 +221,10 @@ public class WarpDriveConfig
 	public static int		CL_MAX_ENERGY = 1000000;
 	public static int		CL_MAX_DISTANCE = 2;
 	public static int		CL_RF_PER_CHUNKTICK = 320;
-
+	
+	public static final String modid_OpenComputers = "OpenComputers";
+	public static final String modid_ComputerCraft = "ComputerCraft";
+	
 	public static ItemStack getIC2Item(String id) {
 		return Items.getItem(id);
 	}

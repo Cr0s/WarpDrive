@@ -1,6 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cr0s.WarpDrive.data.CloakedArea;
 import cr0s.WarpDrive.data.Vector3;
@@ -13,6 +15,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,9 +32,14 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
-public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPeripheral {
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = WarpDriveConfig.modid_OpenComputers),
+	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = WarpDriveConfig.modid_ComputerCraft)
+})
+public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPeripheral, Environment {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk EU
-	
+
+	private String peripheralName = "cloakingdevicecore";
 	private String[] methodsArray = {
 			"setFieldTier", // 0 setFieldTier(1 or 2)
 			"isAssemblyValid", // 1 - returns true or false
@@ -49,10 +64,33 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	
 	private boolean soundPlayed = false;
 	private int soundTicks = 0;
-	
+
+    protected Node node;
+    protected boolean addedToNetwork = false;
+
+    public TileEntityCloakingDeviceCore() {
+    	if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+    		initOC();
+    }
+
+    @Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+    private void initOC() {
+    	node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+    }
+    
+    @Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+    private void addToNetwork() {
+		if (!addedToNetwork) {
+			addedToNetwork = true;
+			Network.joinOrCreateNetwork(this);
+		}
+    }
+
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			addToNetwork();
 		if (!FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			return;
 		}
@@ -318,6 +356,8 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 		this.tier = tag.getByte("tier");
 //		this.frequency = tag.getInteger("frequency");
 		this.isEnabled = tag.getBoolean("enabled");
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	readFromNBT_OC(tag);
 	}
 
 	@Override
@@ -326,6 +366,8 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 		tag.setByte("tier", tier);
 //		tag.setInteger("frequency", frequency);
 		tag.setBoolean("enabled", isEnabled);
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	writeToNBT_OC(tag);
 	}
 
 	public int searchCoilInDirection(byte dx, byte dy, byte dz) {
@@ -396,16 +438,19 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	// CC
 	// IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String getType() {
-		return "cloakingdevicecore";
+		return peripheralName;
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public String[] getMethodNames() {
 		return methodsArray;
 	}
 	
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		switch (method) {
 		case 0: // setFieldTier(1 or 2)
@@ -440,6 +485,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void attach(IComputerAccess computer) {
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 			computer.mount("/cloakingdevicecore", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore"));
@@ -453,6 +499,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	}
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public void detach(IComputerAccess computer) {
 	}
 	
@@ -472,7 +519,101 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
     }
     
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public boolean equals(IPeripheral other) {
 		return other == this;
+	}
+
+	// OpenComputers.
+
+	@Override
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	public void onConnect(Node node) {}
+
+	@Override
+	public void onDisconnect(Node node) {}
+
+	@Override
+	public void onMessage(Message message) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (node != null) node.remove();
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void invalidate() {
+		super.invalidate();
+		if (node != null) node.remove();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void readFromNBT_OC(final NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if (node != null && node.host() == this) {
+			node.load(nbt.getCompoundTag("oc:node"));
+		}
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void writeToNBT_OC(final NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if (node != null && node.host() == this) {
+			final NBTTagCompound nodeNbt = new NBTTagCompound();
+			node.save(nodeNbt);
+			nbt.setTag("oc:node", nodeNbt);
+		}
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] setFieldTier(Context context, Arguments args) {
+		if (args.count() == 1) {
+			if ((args.checkInteger(0) != 1) && (args.checkInteger(0) != 2)) {
+				this.tier = 1;
+			} else {
+				this.tier = (byte)args.checkInteger(0);
+			}
+		}
+		return null;
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] isAssemblyValid(Context context, Arguments args) {
+		return new Object[] { (boolean)validateAssembly() };
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] getEnergyLevel(Context context, Arguments args) {
+		return getEnergyObject();
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] enableCloakingField(Context context, Arguments args) {
+		this.isEnabled = true;
+		return null;
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] disableCloakingField(Context context, Arguments args) {
+		this.isEnabled = false;
+		return null;
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] isEnabled(Context context, Arguments args) {
+		return new Object[] { this.isEnabled };
 	}
 }

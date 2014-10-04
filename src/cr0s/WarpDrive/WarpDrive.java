@@ -1,6 +1,7 @@
 package cr0s.WarpDrive;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -54,7 +55,7 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.6.0",
-	dependencies = "required-after:IC2; required-after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite; after:UndergroundBiomes; after:NetherOres")
+	dependencies = "required-after:IC2; after:OpenComputers; after:ComputerCraft; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite; after:UndergroundBiomes; after:NetherOres")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
@@ -116,8 +117,6 @@ public class WarpDrive implements LoadingCallback {
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
     public String debugMessage = "";
-	
-	public static WarpDrivePeripheralHandler peripheralHandler = new WarpDrivePeripheralHandler();
 	
 	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
 	public static String defEnergyStr = "energy(): returns currently contained energy, max contained energy";
@@ -289,8 +288,8 @@ public class WarpDrive implements LoadingCallback {
 			warpdriveTab.setBackgroundImageName("items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
-		
-		ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
+		if (Loader.isModLoaded(WarpDriveConfig.modid_ComputerCraft))
+			ComputerCraftAPI.registerPeripheralProvider(new WarpDrivePeripheralHandler());
 	}
 
 	@EventHandler

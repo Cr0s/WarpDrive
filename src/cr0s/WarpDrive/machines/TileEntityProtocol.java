@@ -1,6 +1,8 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -8,6 +10,14 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.util.ArrayList;
 
+import li.cil.oc.api.Network;
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import li.cil.oc.api.network.Visibility;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -19,7 +29,11 @@ import cr0s.WarpDrive.machines.TileEntityReactor.ReactorMode;
  * Protocol block tile entity
  * @author Cr0s
  */
-public class TileEntityProtocol extends TileEntity implements IPeripheral
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = WarpDriveConfig.modid_OpenComputers),
+	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = WarpDriveConfig.modid_ComputerCraft)
+})
+public class TileEntityProtocol extends TileEntity implements IPeripheral, Environment
 {
     // Variables
     private int distance = 0;
@@ -44,6 +58,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     boolean ready = false;                // Ready to operate (valid assembly)
 
+    private String peripheralName = "warpcore";
     public String[] methodsArray = {
         "dim_getp", "dim_setp",
         "dim_getn", "dim_setn",
@@ -62,13 +77,36 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         "isAttached", "get_energy_required"
     };
 
+    protected Node node;
+    protected boolean addedToNetwork = false;
+
     private int ticks = 0;
     private final int BLOCK_UPDATE_INTERVAL = 20 * 3; // 3 seconds
 
     private TileEntityReactor core = null;
 
+	public TileEntityProtocol() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			initOC();
+    }
+    
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	private void initOC() {
+		node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	private void addToNetwork() {
+		if (!addedToNetwork) {
+			addedToNetwork = true;
+			Network.joinOrCreateNetwork(this);
+		}
+    }
+
     @Override
     public void updateEntity() {
+		if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+			addToNetwork();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
@@ -134,6 +172,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         playersString = tag.getString("players");
         updatePlayersList();
         setBeaconFrequency(tag.getString("bfreq"));
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	readFromNBT_OC(tag);
     }
 
     @Override
@@ -152,6 +192,8 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         tag.setInteger("direction", this.direction);
         tag.setString("bfreq", getBeaconFrequency());
         // FIXME: shouldn't we save boolean jumpFlag, boolean summonFlag, String toSummon, String targetJumpgateName?
+        if (Loader.isModLoaded(WarpDriveConfig.modid_OpenComputers))
+        	writeToNBT_OC(tag);
     }
 
     public void attachPlayer(EntityPlayer entityPlayer) {
@@ -345,16 +387,19 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     @Override
+    @Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
     public String getType() {
-        return "warpcore";
+        return peripheralName;
     }
 
     @Override
+    @Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
     public String[] getMethodNames() {
         return methodsArray;
     }
 
     @Override
+    @Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
     public void attach(IComputerAccess computer)  {
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
@@ -366,6 +411,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     @Override
+    @Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
     public void detach(IComputerAccess computer) {
     }
 
@@ -425,6 +471,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     @Override
+    @Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		int argInt0, argInt1, argInt2;
 		String methodName = methodsArray[method];
@@ -674,6 +721,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
 	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_ComputerCraft)
 	public boolean equals(IPeripheral other) {
 		return other == this;
 	}
@@ -685,5 +733,317 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
        		core == null ? beaconFrequency : core.coreFrequency,
        		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
        		Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord)});
+	}
+
+	// OpenComputers.
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Node node() {
+		return node;
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onConnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onDisconnect(Node node) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onMessage(Message message) {}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if (node != null) node.remove();
+	}
+
+	@Override
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void invalidate() {
+		super.invalidate();
+		if (node != null) node.remove();
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void readFromNBT_OC(final NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if (node != null && node.host() == this) {
+			node.load(nbt.getCompoundTag("oc:node"));
+		}
+	}
+
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public void writeToNBT_OC(final NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if (node != null && node.host() == this) {
+			final NBTTagCompound nodeNbt = new NBTTagCompound();
+			node.save(nodeNbt);
+			nbt.setTag("oc:node", nodeNbt);
+		}
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] dim_getp(Context context, Arguments args) {
+		return new Integer[] { getFront(), getRight(), getUp() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] dim_setp(Context context, Arguments args) {
+		int argInt0, argInt1, argInt2;
+		if ((args.count() != 3) || !args.isInteger(0) || !args.isInteger(1) || !args.isInteger(2)) {
+			return new Integer[] { getFront(), getRight(), getUp() };
+		}
+		argInt0 = args.checkInteger(0);
+		argInt1 = args.checkInteger(1);
+		argInt2 = args.checkInteger(2);
+		if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+			return new Integer[] { getFront(), getRight(), getUp() };
+		}
+		System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+		setFront(args.checkInteger(0));
+		setRight(args.checkInteger(1));
+		setUp(args.checkInteger(2));
+		return new Integer[] { getFront(), getRight(), getUp() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] dim_getn(Context context, Arguments args) {
+		return new Integer[] { getBack(), getLeft(), getDown() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] dim_setn(Context context, Arguments args) {
+		int argInt0, argInt1, argInt2;
+		if ((args.count() != 3) || !args.isInteger(0) || !args.isInteger(1) || !args.isInteger(2)) {
+			return new Integer[] { -1 };
+		}
+		argInt0 = args.checkInteger(0);
+		argInt1 = args.checkInteger(1);
+		argInt2 = args.checkInteger(2);
+		if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+			return new Integer[] { getBack(), getLeft(), getDown() };
+		}
+		System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+		setBack(argInt0);
+		setLeft(argInt1);
+		setDown(argInt2);
+		return new Integer[] { getBack(), getLeft(), getDown() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_mode(Context context, Arguments args) {
+		if ((args.count() != 1) || !args.isInteger(0)) {
+			return new Integer[] { -1 };
+		}
+		setMode(args.checkInteger(0));
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_distance(Context context, Arguments args) {
+		if ((args.count() != 1) || !args.isInteger(0)) {
+			return new Integer[] { -1 };
+		}
+		setDistance(args.checkInteger(0));
+		return new Integer[] { getDistance() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_direction(Context context, Arguments args) {
+		if ((args.count() != 1) || !args.isInteger(0)) {
+			return new Integer[] { -1 };
+		}
+		setDirection(args.checkInteger(0));
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_attached_players(Context context, Arguments args) {
+		String list = "";
+		for (int i = 0; i < this.players.size(); i++) {
+			String nick = this.players.get(i);
+			list += nick + ((i == this.players.size() - 1) ? "" : ",");
+		}
+		if (players.isEmpty()) {
+			list = "";
+		}
+		return new Object[] { list };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] summon(Context context, Arguments args) {
+		int argInt0;
+		if ((args.count() != 1) || !args.isInteger(0)) {
+			return new Integer[] { -1 };
+		}
+		argInt0 = args.checkInteger(0);
+		if (argInt0 >= 0 && argInt0 < players.size()) {
+			setToSummon(players.get(argInt0));
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] summon_all(Context context, Arguments args) {
+		this.setSummonAllFlag(true);
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_x(Context context, Arguments args) {
+		if (core == null) {
+			return null;
+		}
+		return new Object[] { core.xCoord };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_y(Context context, Arguments args) {
+		if (core == null) {
+			return null;
+		}
+		return new Object[] { core.yCoord };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_z(Context context, Arguments args) {
+		if (core == null) {
+			return null;
+		}
+		return new Object[] { core.zCoord };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_energy_level(Context context, Arguments args) {
+		if (core == null) {
+			return null;
+		}
+		return new Object[] { core.getEnergyStored() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] do_jump(Context context, Arguments args) {
+		doJump();
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_ship_size(Context context, Arguments args) {
+		if (core != null) {
+			StringBuilder reason = new StringBuilder();
+			try {
+				if (!core.validateShipSpatialParameters(reason)) {
+					core.messageToAllPlayersOnShip(reason.toString());
+					return null;
+				}
+				return new Object[] { core.shipVolume };
+			} catch (Exception e) {
+				if (WarpDriveConfig.G_DEBUGMODE) {
+					e.printStackTrace();
+				}
+				return null;
+			}
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_beacon_frequency(Context context, Arguments args) {
+		if ((args.count() != 1) || !args.isString(0)) {
+			return new Integer[] { -1 };
+		}
+		setBeaconFrequency(args.checkString(0));
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_dx(Context context, Arguments args) {
+		if (core != null) {
+			return new Object[] { core.dx };
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_dz(Context context, Arguments args) {
+		if (core != null) {
+			return new Object[] { core.dz };
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_core_frequency(Context context, Arguments args) {
+		if (args.count() == 1 && (core != null)) {
+			core.coreFrequency = (args.checkString(0).replace("/", "").replace(".", "").replace("\\", "."));
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] is_in_space(Context context, Arguments args) {
+		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] is_in_hyperspace(Context context, Arguments args) {
+		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] set_target_jumpgate(Context context, Arguments args) {
+		if (args.count() == 1) {
+			setTargetJumpgateName(args.checkString(0));
+		}
+		return new Integer[] { 0 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] isAttached(Context context, Arguments args) {
+		if (core != null) {
+			return new Object[] { (boolean) (core.controller != null) };
+		}
+		return new Integer[] { 0 };
+	}
+
+	@Callback
+	@Optional.Method(modid = WarpDriveConfig.modid_OpenComputers)
+	public Object[] get_energy_required(Context context, Arguments args) {
+		if ((args.count() != 1) || !args.isInteger(0)) {
+			return new Integer[] { -1 };
+		}
+		if (core != null) {
+			return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipVolume, args.checkInteger(0))) };
+		}
+		return new Integer[] { 0 };
 	}
 }
