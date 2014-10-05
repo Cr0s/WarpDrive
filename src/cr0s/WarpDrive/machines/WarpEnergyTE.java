@@ -16,7 +16,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 
-public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
+public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
 	private static final double EU_PER_INTERNAL = 1.0D;

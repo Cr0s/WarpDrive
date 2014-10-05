@@ -100,6 +100,11 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
         }
  	}
     
+	@Override
+	public int hashCode() {
+		return (((((super.hashCode() + worldObj.provider.dimensionId << 4) + xCoord) << 4) + yCoord) << 4) + zCoord;
+	}
+	
     // Dirty cheap conversion methods
 	protected Object[] argumentsOCtoCC(Arguments args) {
 		Object[] arguments = new Object[args.count()];
@@ -151,9 +156,10 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	@Optional.Method(modid = "ComputerCraft")
 	public boolean equals(IPeripheral other) {
 		// WarpDrive.debugPrint("WarpInterfacedTE.equals");
-		return other == this;
+		return other.hashCode() == hashCode();
 	}
-	
+
+	// Computer abstraction methods
 	protected void sendEvent(String eventName, Object[] arguments) {
 		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
 		if (WarpDriveConfig.isCCLoaded) {

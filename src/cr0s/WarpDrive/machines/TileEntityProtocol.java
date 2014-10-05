@@ -1,10 +1,10 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.util.ArrayList;
 
@@ -19,8 +19,7 @@ import cr0s.WarpDrive.machines.TileEntityReactor.ReactorMode;
  * Protocol block tile entity
  * @author Cr0s
  */
-public class TileEntityProtocol extends TileEntity implements IPeripheral
-{
+public class TileEntityProtocol extends WarpInterfacedTE {
     // Variables
     private int distance = 0;
     private int direction = 0;
@@ -44,29 +43,32 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 
     boolean ready = false;                // Ready to operate (valid assembly)
 
-    public String[] methodsArray = {
-        "dim_getp", "dim_setp",
-        "dim_getn", "dim_setn",
-        "set_mode",
-        "set_distance", "set_direction",
-        "get_attached_players", "summon", "summon_all",
-        "get_x", "get_y", "get_z",
-        "get_energy_level", /* "get_energy_max",/**/
-        "do_jump",
-        "get_ship_size",
-        "set_beacon_frequency",
-        "get_dx", "get_dz",
-        "set_core_frequency",
-        "is_in_space", "is_in_hyperspace",
-        "set_target_jumpgate",
-        "isAttached", "get_energy_required"
-    };
-
     private int ticks = 0;
     private final int BLOCK_UPDATE_INTERVAL = 20 * 3; // 3 seconds
 
     private TileEntityReactor core = null;
 
+    public TileEntityProtocol() {
+    	peripheralName = "warpcore";
+    	methodsArray = new String[] {
+            "dim_getp", "dim_setp",
+            "dim_getn", "dim_setn",
+            "set_mode",
+            "set_distance", "set_direction",
+            "get_attached_players", "summon", "summon_all",
+            "get_x", "get_y", "get_z",
+            "get_energy_level", /* "get_energy_max",/**/
+            "do_jump",
+            "get_ship_size",
+            "set_beacon_frequency",
+            "get_dx", "get_dz",
+            "set_core_frequency",
+            "is_in_space", "is_in_hyperspace",
+            "set_target_jumpgate",
+            "isAttached", "get_energy_required"
+        };
+	}
+    
     @Override
     public void updateEntity() {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
@@ -350,31 +352,6 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         this.summonFlag = summonFlag;
     }
 
-    @Override
-    public String getType() {
-        return "warpcore";
-    }
-
-    @Override
-    public String[] getMethodNames() {
-        return methodsArray;
-    }
-
-    @Override
-    public void attach(IComputerAccess computer)  {
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
-			}
-		}
-    }
-
-    @Override
-    public void detach(IComputerAccess computer) {
-    }
-
     /**
      * @return the toSummon
      */
@@ -430,7 +407,22 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
         return null;
     }
 
+	// ComputerCraft IPeripheral methods implementation
     @Override
+	@Optional.Method(modid = "ComputerCraft")
+    public void attach(IComputerAccess computer)  {
+    	super.attach(computer);
+		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
+	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
+			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
+		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
+			}
+		}
+    }
+
+    @Override
+	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		int argInt0, argInt1, argInt2;
 		String methodName = methodsArray[method];
@@ -443,9 +435,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { getFront(), getRight(), getUp() };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
-				argInt1 = ((Double) arguments[1]).intValue();
-				argInt2 = ((Double) arguments[2]).intValue();
+				argInt0 = toInt(arguments[0]);
+				argInt1 = toInt(arguments[1]);
+				argInt2 = toInt(arguments[2]);
 			} catch (Exception e) {
 				return new Integer[] { getFront(), getRight(), getUp() };
 			}
@@ -454,9 +446,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 			}
 			
 			System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
-			setFront(((Double) arguments[0]).intValue());
-			setRight(((Double) arguments[1]).intValue());
-			setUp(((Double) arguments[2]).intValue());
+			setFront(argInt0);
+			setRight(argInt1);
+			setUp(argInt2);
 			
 			return new Integer[] { getFront(), getRight(), getUp() };
 			
@@ -468,9 +460,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
-				argInt1 = ((Double) arguments[1]).intValue();
-				argInt2 = ((Double) arguments[2]).intValue();
+				argInt0 = toInt(arguments[0]);
+				argInt1 = toInt(arguments[1]);
+				argInt2 = toInt(arguments[2]);
 			} catch (Exception e) {
 				return new Integer[] { getBack(), getLeft(), getDown() };
 			}
@@ -490,7 +482,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
+				argInt0 = toInt(arguments[0]);
 			} catch (Exception e) {
 				return new Integer[] { -1 };
 			}
@@ -502,7 +494,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
+				argInt0 = toInt(arguments[0]);
 			} catch (Exception e) {
 				return new Integer[] { -1 };
 			}
@@ -510,12 +502,13 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 			setDistance(argInt0);
 			
 			return new Integer[] { getDistance() };
+			
 		} else if (methodName.equals("set_direction")) {// set_direction (dir)
 			if (arguments.length != 1) {
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
+				argInt0 = toInt(arguments[0]);
 			} catch (Exception e) {
 				return new Integer[] { -1 };
 			}
@@ -541,7 +534,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
+				argInt0 = toInt(arguments[0]);
 			} catch (Exception e) {
 				return new Integer[] { -1 };
 			}
@@ -593,7 +586,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				return new Integer[] { -1 };
 			}
 			try {
-				argInt0 = ((Double) arguments[0]).intValue();
+				argInt0 = toInt(arguments[0]);
 			} catch (Exception e) {
 				return new Integer[] { -1 };
 			}
@@ -680,11 +673,6 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     {
         this.targetJumpgateName = targetJumpgateName;
     }
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
 	
 	@Override
 	public String toString() {

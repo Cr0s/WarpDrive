@@ -1,13 +1,13 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cr0s.WarpDrive.data.CloakedArea;
 import cr0s.WarpDrive.data.Vector3;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -22,17 +22,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
 
-public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPeripheral {
+public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk EU
-	
-	private String[] methodsArray = {
-			"setFieldTier", // 0 setFieldTier(1 or 2)
-			"isAssemblyValid", // 1 - returns true or false
-			"getEnergyLevel", // 2 
-			"enableCloakingField", // 3 enables field if assembled right
-			"disableCloakingField", // 4 disables cloaking field
-			"isEnabled" // 5 return true if currently enabled
-	};
 	
 	public boolean isEnabled = false;
 	public byte tier = 1; // cloaking field tier, 1 or 2
@@ -49,6 +40,18 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 	
 	private boolean soundPlayed = false;
 	private int soundTicks = 0;
+
+	public TileEntityCloakingDeviceCore() {
+		peripheralName = "cloakingdevicecore";
+		methodsArray = new String[] {
+				"setFieldTier", // 0 setFieldTier(1 or 2)
+				"isAssemblyValid", // 1 - returns true or false
+				"getEnergyLevel", // 2 
+				"enableCloakingField", // 3 enables field if assembled right
+				"disableCloakingField", // 4 disables cloaking field
+				"isEnabled" // 5 return true if currently enabled
+		};
+	}
 	
 	@Override
 	public void updateEntity() {
@@ -238,6 +241,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 			}
 		}
 	}
+	
 	public boolean countBlocksAndConsumeEnergy() {
 		int x, y, z, energyToConsume = 0;
 		volume = 0;
@@ -337,6 +341,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 		
 		return 0;
 	}
+	
 	public boolean validateAssembly() {
 		final int START_LENGTH = 2; // Step length from core block to main coils
 		
@@ -393,54 +398,11 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 		return true;
 	}
 
-	// CC
-	// IPeripheral methods implementation
+	// ComputerCraft IPeripheral methods implementation
 	@Override
-	public String getType() {
-		return "cloakingdevicecore";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return methodsArray;
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		switch (method) {
-		case 0: // setFieldTier(1 or 2)
-			if (arguments.length == 1) {
-				if (((Double)arguments[0]).byteValue() != 1 && ((Double)arguments[0]).byteValue() != 2) {
-					this.tier = 1;
-				} else {
-					this.tier = ((Double)arguments[0]).byteValue();
-				}
-			}
-			break;
-			
-		case 1: // isAssemblyValid()
-			return new Object[] { (boolean)validateAssembly() };
-
-		case 2: // getEnergyLevel()
-			return new Object[] { getEnergyStored() };
-			
-		case 3: // enableCloakingField()
-			this.isEnabled = true;
-			break;
-			
-		case 4: // disableCloakingField()
-			this.isEnabled = false;
-			break;
-			
-		case 5: // isEnabled()
-			return new Object[] { this.isEnabled };
-		}
-		
-		return null;
-	}
-
-	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
+		super.attach(computer);
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 			computer.mount("/cloakingdevicecore", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore"));
 	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
@@ -451,9 +413,32 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
 			}
 		}
 	}
-
+	
 	@Override
-	public void detach(IComputerAccess computer) {
+	@Optional.Method(modid = "ComputerCraft")
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+    	String methodName = methodsArray[method];
+    	if (methodName.equals("setFieldTier")) { // setFieldTier(1 or 2)
+			if (arguments.length == 1) {
+				if (toInt(arguments[0]) == 2) {
+					tier = 2;
+				} else {
+					tier = 1;
+				}
+			}
+    	} else if (methodName.equals("isAssemblyValid")) {
+			return new Object[] { (boolean)validateAssembly() };
+    	} else if (methodName.equals("getEnergyLevel")) {
+			return new Object[] { getEnergyStored() };
+    	} else if (methodName.equals("enableCloakingField")) {
+			isEnabled = true;
+    	} else if (methodName.equals("disableCloakingField")) {
+			isEnabled = false;
+    	} else if (methodName.equals("isEnabled")) {
+			return new Object[] { this.isEnabled };
+		}
+		
+		return null;
 	}
 	
 	@Override
@@ -470,9 +455,4 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE implements IPerip
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
-    
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
 }

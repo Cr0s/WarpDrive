@@ -1,6 +1,7 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 
 import java.util.List;
 
@@ -12,9 +13,8 @@ import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
+public class TileEntityLift extends WarpEnergyTE {
     private static final int MODE_REDSTONE = -1;
     private static final int MODE_INACTIVE = 0;
     private static final int MODE_UP = 1;
@@ -26,14 +26,17 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     private boolean computerEnabled = true;
     private int computerMode = MODE_REDSTONE;
     
-    private String[] methodsArray = {
-    	"energy",
-    	"mode",
-    	"active",
-    	"help"
-    };
+    private int tickCount = 0;
     
-    int tickCount = 0;
+    public TileEntityLift() {
+    	peripheralName = "warpdriveLaserLift";        
+        methodsArray = new String[] {
+        	"energy",
+        	"mode",
+        	"active",
+        	"help"
+        };
+	}
     
     @Override
     public void updateEntity() {
@@ -159,17 +162,6 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
         return Integer.MAX_VALUE;
     }
 
-
-    @Override
-    public String getType() {
-    	return "warpdriveLaserLift";
-    }
-
-    @Override
-    public String[] getMethodNames() {
-    	return methodsArray;
-    }
-
     public String helpStr(Object[] args) {
     	if (args.length == 1) {
     		String methodName = args[0].toString().toLowerCase();
@@ -184,7 +176,9 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     	return WarpDrive.defHelpStr;
     }
 
+    // ComputerCraft IPeripheral methods implementation
     @Override
+	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws Exception {
     	String methodName = methodsArray[method];
     	if (methodName.equals("energy")) {
@@ -217,24 +211,4 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     	}
     	return null;
     }
-    
-	@Override
-	public void attach(IComputerAccess computer) {
-
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-
-	}
-	
-	@Override
-	public int hashCode() {
-		return (((((super.hashCode() + worldObj.provider.dimensionId << 4) + xCoord) << 4) + yCoord) << 4) + zCoord;
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other.hashCode() == hashCode();
-	}
 }
