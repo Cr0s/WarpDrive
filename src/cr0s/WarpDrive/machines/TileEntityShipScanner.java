@@ -50,10 +50,11 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	public TileEntityShipScanner() {
 		peripheralName = "shipscanner";
 		methodsArray = new String[] {
-			"scan",			// 0
-			"fileName",		// 1
-			"getEnergyLevel",		// 2
-			"deploy"		// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
+			"scan",
+			"fileName",
+			"getEnergyLevel",
+			"deploy",
+			"state"
 		};
 	}
 	

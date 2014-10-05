@@ -54,21 +54,26 @@ public class TileEntityProtocol extends WarpInterfacedTE {
     public TileEntityProtocol() {
     	peripheralName = "warpcore";
     	methodsArray = new String[] {
-            "dim_getp", "dim_setp",
-            "dim_getn", "dim_setn",
-            "set_mode",
-            "set_distance", "set_direction",
-            "get_attached_players", "summon", "summon_all",
-            "get_x", "get_y", "get_z",
-            "get_energy_level", /* "get_energy_max",/**/
-            "do_jump",
-            "get_ship_size",
-            "set_beacon_frequency",
-            "get_dx", "get_dz",
-            "set_core_frequency",
-            "is_in_space", "is_in_hyperspace",
-            "set_target_jumpgate",
-            "isAttached", "get_energy_required"
+            "dim_positive",
+            "dim_negative",
+            "mode",
+            "distance",
+            "direction",
+            "getAttachedPlayers",
+            "summon",
+            "summonAll",
+            "pos",
+            "getEnergyLevel",
+            "jump",
+            "getShipSize",
+            "beaconFrequency",
+            "getOrientation",
+            "coreFrequency",
+            "isInSpace",
+            "isInHyperspace",
+            "targetJumpgate",
+            "isAttached",
+            "getEnergyRequired"
         };
 	}
     
