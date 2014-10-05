@@ -71,7 +71,7 @@ public class TileEntityReactor extends WarpEnergyTE
     public int randomWarmupAddition = 0;
 
     private int chestTeleportUpdateTicks = 0;
-    private int registryUpdateTicks = 0;
+    private int registryUpdateTicks = 15;
     public String coreFrequency = "default";
 
     public int isolationBlocksCount = 0;

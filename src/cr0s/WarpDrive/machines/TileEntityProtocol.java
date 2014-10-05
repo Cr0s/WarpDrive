@@ -224,84 +224,90 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     /**
-     * @return the front
+     * @return front size
      */
     public int getFront() {
         return front;
     }
 
     /**
-     * @param front the front to set
+     * @param front new front size
+     * @return front size
      */
     public void setFront(int front) {
         this.front = front;
     }
 
     /**
-     * @return the right
+     * @return right size
      */
     public int getRight() {
         return right;
     }
 
     /**
-     * @param right the right to set
+     * @param right new right size
+     * @return right size
      */
     public void setRight(int right) {
         this.right = right;
     }
 
     /**
-     * @return the up
+     * @return up size
      */
     public int getUp() {
         return up;
     }
 
     /**
-     * @param up the up to set
+     * @param up new up size
+     * @return up size
      */
     public void setUp(int up) {
         this.up = up;
     }
 
     /**
-     * @return the back
+     * @return back size
      */
     public int getBack() {
         return back;
     }
 
     /**
-     * @param back the back to set
+     * @param back new back size
+     * @return back size
      */
     public void setBack(int back) {
         this.back = back;
     }
 
     /**
-     * @return the left
+     * @return left size
      */
     public int getLeft() {
         return left;
     }
 
     /**
-     * @param left the left to set
+     * @param left new left size
+     * @return left size
      */
     public void setLeft(int left) {
         this.left = left;
     }
 
     /**
-     * @return the down
+     * @return down size
      */
     public int getDown() {
         return down;
     }
 
     /**
-     * @param down the down to set
+     * @param down new down size
+     * @return down size
      */
     public void setDown(int down) {
         this.down = down;
@@ -317,7 +323,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     /**
-     * @return the mode
+     * @return current reactor mode
      */
     public ReactorMode getMode() {
         return mode;
@@ -338,7 +344,7 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
     }
 
     /**
-     * @param summonFlag the summonFlag to set
+     * @param summonFlag to set
      */
     public void setSummonAllFlag(boolean summonFlag) {
         this.summonFlag = summonFlag;
@@ -604,7 +610,9 @@ public class TileEntityProtocol extends TileEntity implements IPeripheral
 				try {
 					if (!core.validateShipSpatialParameters(reason)) {
 						core.messageToAllPlayersOnShip(reason.toString());
-						return null;
+						if (core.controller == null) {
+							return null;
+						}
 					}
 					return new Object[] { core.shipVolume };
 				} catch (Exception e) {
