@@ -9,9 +9,8 @@ import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.WarpDriveConfig;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements IPeripheral {
+public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	Boolean active = false;
 	
 	private int mode = 0;
@@ -26,14 +25,17 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	
 	private int totalHarvested=0;
 	
-	private int scan=0;
+	private int scan = 0;
 	private int xSize = defSize;
 	private int zSize = defSize;
 	
 	LinkedList<Vector3> logs;
 	private int logIndex = 0;
 	
-	private String[] methodsArray = {
+	public TileEntityLaserTreeFarm() {
+		super();
+		peripheralName = "treefarmLaser";
+		methodsArray = new String[] {
 			"start",
 			"stop",
 			"area",
@@ -42,10 +44,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 			"silkTouchLeaves",
 			"treetap",
 			"state"
-	};
-	
-	public TileEntityLaserTreeFarm() {
-		super();
+		};
 	}
 	
 	@Override
@@ -233,16 +232,10 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		return active;
 	}
 
-	@Override
-	public String getType() {
-		return "treefarmLaser";
-	}
+	// OpenComputer callback methods
+	// FIXME: implement OpenComputers...
 
-	@Override
-	public String[] getMethodNames() {
-		return methodsArray;
-	}
-
+	// ComputerCraft IPeripheral methods implementation
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 		String methodName = methodsArray[method];
@@ -311,14 +304,6 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 		return null;
 	}
 
-	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-	}
-	
 	//ABSTRACT LASER IMPLEMENTATION
 	@Override
 	protected boolean silkTouch(int blockID) {
@@ -361,10 +346,5 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner implements 
 	@Override
 	protected float getColorB() {
 		return 0.4f;
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
 	}
 }

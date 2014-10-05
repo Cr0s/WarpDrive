@@ -21,9 +21,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraftforge.common.ForgeDirection;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, IUpgradable
+public class TileEntityTransporter extends WarpEnergyTE implements IUpgradable
 {
 	private double scanRange=2;
 	
@@ -41,18 +40,22 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 	
 	private TeleporterDamage teleDam = new TeleporterDamage("teleporter");
 	
-	private String[] methodArray = {
+	public TileEntityTransporter() {
+		super();
+		peripheralName = "transporter";
+		methodsArray = new String[] {
 			"source",
 			"dest",
 			"lock",
 			"release",
 			"lockStrength",
 			"energize",
-			"energy",
+			"getEnergyLevel",
 			"powerBoost",
 			"energyCost",
 			"upgrades",
 			"help" };
+	}
 	
 	@Override
 	public void updateEntity() {
@@ -67,12 +70,10 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 		}
 	}
 	
-	// IPeripheral overrides
-	@Override
-	public String getType() {
-		return "transporter";
-	}
-	
+	// OpenComputer callback methods
+	// FIXME: implement OpenComputers...
+
+	// ComputerCraft IPeripheral methods implementation
 	private static String helpStr(Object[] function) {
 		if (function != null && function.length > 0) {
 			String fun = function[0].toString().toLowerCase();
@@ -102,16 +103,11 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
 			} else if(fun.equals("upgrades")) {
 				return WarpDrive.defUpgradeStr;
-			} else if(fun.equals("energy")) {
+			} else if(fun.equals("getEnergyLevel")) {
  				return WarpDrive.defEnergyStr;
 			}
 		}
 		return WarpDrive.defHelpStr;
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return methodArray;
 	}
 	
 	private Object[] setVec3(boolean src,Object... arguments) {
@@ -152,8 +148,8 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		String methodName = methodArray[method];
-		if (methodName.equals("energy")) {
+		String methodName = methodsArray[method];
+		if (methodName.equals("getEnergyLevel")) {
 			return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 		} else if (methodName.equals("source")) {
 			return setVec3(true,arguments);
@@ -396,12 +392,6 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 		}
 		return output;
 	}
-
-	@Override
-	public void attach(IComputerAccess computer) {}
-
-	@Override
-	public void detach(IComputerAccess computer) {}
 	
 	@Override
 	public int getMaxEnergyStored() {
@@ -455,11 +445,6 @@ public class TileEntityTransporter extends WarpEnergyTE implements IPeripheral, 
 			return ChatMessageComponent.createFromText(mess);
 		}
     }
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
 
 	@Override
 	public boolean takeUpgrade(EnumUpgradeTypes upgradeType, boolean simulate)

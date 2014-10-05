@@ -11,13 +11,12 @@ import cr0s.WarpDrive.api.IBlockUpdateDetector;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral, IBlockUpdateDetector {
+public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdateDetector {
 	private int containedEnergy = 0;
 	
 	// generation & instability is 'per tick'
@@ -58,18 +57,20 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 	private int releaseAbove = 0;
 	
 	private boolean init = false;
-	
-	private String[] methodArray = {
-			"getActive",
-			"setActive", // boolean
-			"energy", // returns energy, maxenergy
+
+	public TileEntityPowerReactor() {
+		super();
+		peripheralName = "warpdriveReactor";
+		methodsArray = new String[] {
+			"active",
+			"energy", // returns energy, max energy, energy rate
 			"instability", // returns ins0,1,2,3
 			"release", // releases all energy
 			"releaseRate", // releases energy when more than arg0 is produced
 			"releaseAbove", // releases any energy above arg0 amount
 			"help" // returns help on arg0 function
-	};
-	private HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
+		};
+	}
 	
 	private void increaseInstability(ForgeDirection from, boolean isNatural) {
 		if (canOutputEnergy(from) || hold) {
@@ -293,59 +294,11 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 		}
 	}
 	
-	//COMPUTER INTERFACES
-	@Override
-	public String getType() {
-		return "warpdriveReactor";
-	}
+	// OpenComputer callback methods
+	// FIXME: implement OpenComputers...
 	
-	@Override
-	public String[] getMethodNames() {
-		return methodArray;
-	}
-	
-	@Override
-	public void attach(IComputerAccess computer) {
-		int id = computer.getID();
-		connectedComputers.put(id, computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-	        computer.mount("/power", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power/startup"));
-			}
-		}
-	}
-	
-	@Override
-	public void detach(IComputerAccess computer) {
-		int id = computer.getID();
-		if (connectedComputers.containsKey(id)) {
-			connectedComputers.remove(id);
-		}
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
-	
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		// computer is alive => start updating reactor
-		hold = false;
-		
-		String methodName = methodArray[method];
-		
-		if (methodName.equals("getActive")) {
-			if (releaseMode == MODE_DONT_RELEASE || releaseMode == MODE_MANUAL_RELEASE) {
-				return new Object[] { active, MODE_STRING[releaseMode], 0 };
-			} else if (releaseMode == MODE_RELEASE_ABOVE) {
-				return new Object[] { active, MODE_STRING[releaseMode], releaseAbove };
-			} else {
-				return new Object[] { active, MODE_STRING[releaseMode], releaseRate };
-			}
-		} else if (methodName.equals("setActive")) {
+	public Object[] active(Object[] arguments) throws Exception {
+		if (arguments.length == 1) {
 			boolean activate = false;
 			try {
 				activate = toBool(arguments[0]);
@@ -358,80 +311,123 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IPeripheral,
 				sendEvent("reactorActivation", null);
 			}
 			active = activate;
+		}
+		if (releaseMode == MODE_DONT_RELEASE || releaseMode == MODE_MANUAL_RELEASE) {
+			return new Object[] { active, MODE_STRING[releaseMode], 0 };
+		} else if (releaseMode == MODE_RELEASE_ABOVE) {
+			return new Object[] { active, MODE_STRING[releaseMode], releaseAbove };
+		} else {
+			return new Object[] { active, MODE_STRING[releaseMode], releaseRate };
+		}
+	}
+	
+	private Object[] release(Object[] arguments) throws Exception {
+		boolean doRelease = false;
+		if (arguments.length > 0) {
+			try {
+				doRelease = toBool(arguments[0]);
+			} catch(Exception e) {
+				throw new Exception("Function expects an boolean value");
+			}
+
+			releaseMode = doRelease ? MODE_MANUAL_RELEASE : MODE_DONT_RELEASE;
+			releaseAbove = 0;
+			releaseRate  = 0;
+		}
+		return new Object[] { releaseMode != MODE_DONT_RELEASE };
+	}
+	
+	private Object[] releaseRate(Object[] arguments) throws Exception {
+		int rate = -1;
+		try {
+			rate = toInt(arguments[0]);
+		} catch(Exception e) {
+			throw new Exception("Function expects an integer value");
+		}
+		
+		if (rate <= 0) {
+			releaseMode = MODE_DONT_RELEASE;
+			releaseRate = 0;
+		} else {
+/*				releaseAbove = (int)Math.ceil(Math.pow(rate, 1.0 / 0.6));
+			WarpDrive.debugPrint("releaseAbove " + releaseAbove);
+			releaseMode = MODE_RELEASE_ABOVE;/**/
+			// player has to adjust it
+			releaseRate = rate;
+			releaseMode = MODE_RELEASE_AT_RATE;
+		}
+		
+		return new Object[] { MODE_STRING[releaseMode], releaseRate };
+	}
+	
+	private Object[] releaseAbove(Object[] arguments) throws Exception {
+		int above = -1;
+		try {
+			above = toInt(arguments[0]);
+		} catch(Exception e) {
+			throw new Exception("Function expects an integer value");
+		}
+		
+		if (above <= 0) {
+			releaseMode = 0;
+			releaseAbove = MODE_DONT_RELEASE;
+		} else {
+			releaseMode = MODE_RELEASE_ABOVE;
+			releaseAbove = above;
+		}
+		
+		return new Object[] { MODE_STRING[releaseMode], releaseAbove };
+	}
+
+	// ComputerCraft IPeripheral methods implementation
+	@Override
+	public void attach(IComputerAccess computer) {
+		super.attach(computer);
+		int id = computer.getID();
+		connectedComputers.put(id, computer);
+		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
+	        computer.mount("/power", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power"));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
+			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
+		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power/startup"));
+			}
+		}
+	}
+	
+	@Override
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		// computer is alive => start updating reactor
+		hold = false;
+		
+		String methodName = methodsArray[method];
+		
+		if (methodName.equals("active")) {
+			return active(arguments);
+			
 		} else if (methodName.equals("energy")) {
 			return new Object[] { containedEnergy, WarpDriveConfig.PR_MAX_ENERGY, releasedLastCycle / WarpDriveConfig.PR_TICK_TIME };
+			
 		} else if (methodName.equals("instability")) {
 			Object[] retVal = new Object[4];
 			for(int i = 0; i < 4; i++) {
 				retVal[i] = instabilityValues[i];
 			}
 			return retVal;
-		} else if(methodName.equals("release"))  {
-			boolean doRelease = false;
-			if (arguments.length > 0) {
-				try {
-					doRelease = toBool(arguments[0]);
-				} catch(Exception e) {
-					throw new Exception("Function expects an boolean value");
-				}
-
-				releaseMode = doRelease ? MODE_MANUAL_RELEASE : MODE_DONT_RELEASE;
-				releaseAbove = 0;
-				releaseRate  = 0;
-			}
-			return new Object[] { releaseMode != MODE_DONT_RELEASE };
-		} else if(methodName.equals("releaseRate")) {
-			int rate = -1;
-			try {
-				rate = toInt(arguments[0]);
-			} catch(Exception e) {
-				throw new Exception("Function expects an integer value");
-			}
 			
-			if (rate <= 0) {
-				releaseMode = MODE_DONT_RELEASE;
-				releaseRate = 0;
-			} else {
-/*				releaseAbove = (int)Math.ceil(Math.pow(rate, 1.0 / 0.6));
-				WarpDrive.debugPrint("releaseAbove " + releaseAbove);
-				releaseMode = MODE_RELEASE_ABOVE;/**/
-				// player has to adjust it
-				releaseRate = rate;
-				releaseMode = MODE_RELEASE_AT_RATE;
-			}
+		} else if (methodName.equals("release"))  {
+			return release(arguments);
 			
-			return new Object[] { MODE_STRING[releaseMode], releaseRate };
-		} else if(methodName.equals("releaseAbove")) {
-			int above = -1;
-			try {
-				above = toInt(arguments[0]);
-			} catch(Exception e) {
-				throw new Exception("Function expects an integer value");
-			}
+		} else if (methodName.equals("releaseRate")) {
+			return releaseRate(arguments);
 			
-			if (above <= 0) {
-				releaseMode = 0;
-				releaseAbove = MODE_DONT_RELEASE;
-			} else {
-				releaseMode = MODE_RELEASE_ABOVE;
-				releaseAbove = above;
-			}
+		} else if (methodName.equals("releaseAbove")) {
+			return releaseAbove(arguments);
 			
-			return new Object[] { MODE_STRING[releaseMode], releaseAbove };
 		} else if (methodName.equals("help")) {
 			return new Object[] { helpStr(arguments) };
 		}
-			  
+		
 		return null;
-	}
-	
-	private void sendEvent(String eventName, Object[] arguments) {
-		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
-		Set<Integer> keys = connectedComputers.keySet();
-		for(Integer key:keys) {
-			IComputerAccess comp = connectedComputers.get(key);
-			comp.queueEvent(eventName, arguments);
-		}
 	}
 	
 	// POWER INTERFACES

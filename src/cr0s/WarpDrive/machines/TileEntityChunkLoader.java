@@ -11,9 +11,8 @@ import cr0s.WarpDrive.WarpDriveConfig;
 import cr0s.WarpDrive.api.IUpgradable;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityChunkLoader extends WarpChunkTE implements IPeripheral, IUpgradable
+public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 {
 	private boolean canLoad = false;
 	private boolean shouldLoad = false;
@@ -24,25 +23,25 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IPeripheral, I
 	int negDX, posDX, negDZ, posDZ;
 	int area = 1;
 	
-	private String[] methodArray = {
-			"energy",
+	public TileEntityChunkLoader() {
+		super();
+		negDX = 0;
+		negDZ = 0;
+		posDX = 0;
+		posDZ = 0;
+		peripheralName = "warpdriveChunkloader";
+		methodsArray = new String[] {
+			"getEnergyLevel",
 			"radius",
 			"bounds",
 			"active",
 			"upgrades",
 			"help"
-	};
-	
-	{
-		negDX = 0;
-		negDZ = 0;
-		posDX = 0;
-		posDZ = 0;
+		};
 	}
 	
 	@Override
-	public int getMaxEnergyStored()
-	{
+	public int getMaxEnergyStored() {
 		return WarpDriveConfig.CL_MAX_ENERGY;
 	}
 	
@@ -123,19 +122,11 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IPeripheral, I
 		nbt.setInteger("posDX", posDX);
 		nbt.setInteger("posDZ", posDZ);
 	}
-
-	@Override
-	public String getType()
-	{
-		return "warpdriveChunkloader";
-	}
-
-	@Override
-	public String[] getMethodNames()
-	{
-		return methodArray;
-	}
 	
+	// OpenComputer callback methods
+	// FIXME: implement OpenComputers...
+
+	// ComputerCraft IPeripheral methods implementation
 	private String helpStr(Object[] args)
 	{
 		if(args.length == 1)
@@ -156,13 +147,12 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IPeripheral, I
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception
-	{
-		String meth = methodArray[method];
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		String meth = methodsArray[method];
 		
-		if(meth.equals("energy"))
-			return getEnergyObject();
-		else if(meth.equals("radius"))
+		if(meth.equals("getEnergyLevel")) {
+			return getEnergyLevel();
+		} else if(meth.equals("radius"))
 		{
 			if(arguments.length == 1)
 			{
@@ -205,23 +195,7 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IPeripheral, I
 		
 		return null;
 	}
-
-	@Override
-	public void attach(IComputerAccess computer)
-	{	
-	}
-
-	@Override
-	public void detach(IComputerAccess computer)
-	{
-	}
-
-	@Override
-	public boolean equals(IPeripheral other)
-	{
-		return false;
-	}
-
+	
 	@Override
 	public boolean takeUpgrade(EnumUpgradeTypes upgradeType, boolean simulate)
 	{

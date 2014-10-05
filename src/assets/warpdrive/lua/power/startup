@@ -447,8 +447,8 @@ function cloaking_page()
 		SetColorDefault()
 		Write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores)
 		local isAssemblyValid = cloakingcore.isAssemblyValid()
-		local energy = cloakingcore.getEnergyLevel()
-		local isEnabled = true -- cloakingcore.isEnabled()
+		local energy, energyMax = cloakingcore.getEnergyLevel()
+		local isEnabled = cloakingcore.enable()
 		
 		if not isAssemblyValid then
 			SetColorWarning()
@@ -508,19 +508,19 @@ end
 
 function cloaking_start()
 	for key,cloakingcore in pairs(cloakingcores) do
-		cloakingcore.disableCloakingField()
+		cloakingcore.enable(false)
 		if cloaking_highTier then
-			cloakingcore.setFieldTier(2)
+			cloakingcore.tier(2)
 		else
-			cloakingcore.setFieldTier(1)
+			cloakingcore.tier(1)
 		end
-		cloakingcore.enableCloakingField()
+		cloakingcore.enable(true)
 	end
 end
 
 function cloaking_stop()
 	for key,cloakingcore in pairs(cloakingcores) do
-		cloakingcore.disableCloakingField()
+		cloakingcore.enable(false)
 	end
 end
 
@@ -720,7 +720,7 @@ function data_setName()
 	label = readInputText(label)
 	os.setComputerLabel(label)
 	if warpcore ~= nil then
-		warpcore.set_core_frequency(label)
+		warpcore.coreFrequency(label)
 	end
 	os.reboot()
 end
@@ -753,15 +753,14 @@ function core_boot()
 	Write(".")
 	core_front, core_right, core_up = warpcore.dim_getp()
 	core_back, core_left, core_down = warpcore.dim_getn()
-	core_isInHyper = warpcore.is_in_hyperspace()
+	core_isInHyper = warpcore.isInHyperspace()
 	
 	Write(".")
 	repeat
-		X = warpcore.get_x()
+		pos = warpcore.pos()
 		sleep(0.3)
-	until X ~= nil
-	Y = warpcore.get_y()
-	Z = warpcore.get_z()
+	until pos ~= nil
+	X, Y, Z = warpcore.pos()
 	Write(".")
 	repeat
 		isAttached = warpcore.isAttached()
@@ -770,7 +769,7 @@ function core_boot()
 	
 	Write(".")
 	repeat
-		core_shipSize = warpcore.get_ship_size()
+		core_shipSize = warpcore.getShipSize()
 		sleep(0.3)
 	until core_shipSize ~= nil 
 	
@@ -778,7 +777,7 @@ function core_boot()
 	core_computeRealDistance()
 	
 	Write(".")
-	warpcore.set_mode(1)
+	warpcore.mode(1)
 	WriteLn("")
 end
 
@@ -823,8 +822,7 @@ function core_computeNewCoordinates(cx, cy, cz)
 	elseif data.core_direction == 2 then
 		res.y = res.y - core_realDistance
 	end
-	local dx = warpcore.get_dx()
-	local dz = warpcore.get_dz()
+	local dx, dy, dz = warpcore.getOrientation()
 	if dx ~= 0 then
 		if data.core_direction == 0 then
 			res.x = res.x + (core_realDistance * dx)
@@ -853,14 +851,14 @@ function core_warp()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.set_direction(data.core_direction)
-		warpcore.set_distance(data.core_distance)
+		warpcore.direction(data.core_direction)
+		warpcore.distance(data.core_distance)
 		if core_isInHyper then
-			warpcore.set_mode(2)
+			warpcore.mode(2)
 		else
-			warpcore.set_mode(1)
+			warpcore.mode(1)
 		end
-		warpcore.do_jump()
+		warpcore.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
@@ -936,17 +934,17 @@ function core_page_setDimensions()
 	Write(" Down  (".. core_down ..") : ")
 	core_down = readInputNumber(core_down)
 	Write("Setting dimensions...")
-	warpcore.dim_setp(core_front, core_right, core_up)
-	warpcore.dim_setn(core_back, core_left, core_down)
-	core_shipSize = warpcore.get_ship_size()
+	warpcore.dim_positive(core_front, core_right, core_up)
+	warpcore.dim_negative(core_back, core_left, core_down)
+	core_shipSize = warpcore.getShipSize()
 	if core_shipSize == nil then core_shipSize = 0 end
 end
 
 function core_page_summon()
 	ShowTitle("<==== Summon players ====>")
-	local players = Explode(",", warpcore.get_attached_players())
-	for i = 1, #players do
-		Show(i..". "..players[i])
+	local playersString, playersArray = warpcore.getAttachedPlayers()
+	for i = 1, #playersArray do
+		Show(i..". "..playersArray[i])
 	end
 	SetColorTitle()
 	ShowMenu("Enter player number")
@@ -971,9 +969,9 @@ function core_page_jumpToBeacon()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.set_mode(4)
-		warpcore.set_beacon_frequency(freq)
-		warpcore.do_jump()
+		warpcore.mode(4)
+		warpcore.beaconFrequency(freq)
+		warpcore.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
@@ -986,9 +984,9 @@ function core_page_jumpToGate()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.set_mode(6)
-		warpcore.set_target_jumpgate(name)
-		warpcore.do_jump()
+		warpcore.mode(6)
+		warpcore.targetJumpgate(name)
+		warpcore.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
@@ -998,17 +996,13 @@ function core_page()
 	if warpcore ~= nil then
 		WriteLn("Core:")
 		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
-		local energy = warpcore.get_energy_level()
+		local energy, energyMax = warpcore.getEnergyLevel()
 		if energy == nil then energy = 0 end
-		local energyMax = 100000000
-		if warpcore.get_energy_max ~= nil then
-			energyMax = warpcore.get_energy_max()
-			if energyMax == nil then energyMax = 1 end
-		end
+		if energyMax == nil then energyMax = 1 end
 		WriteLn(" Energy           = " .. math.floor(energy / energyMax * 100) .. " % (" .. energy .. "EU)")
-		local players = warpcore.get_attached_players()
-		if players == nil then players = "-" end
-		WriteLn(" Attached players = " .. players)
+		local playersString, playersArray = warpcore.getAttachedPlayers()
+		if playersString == "" then players = "-" end
+		WriteLn(" Attached players = " .. playersString)
 		WriteLn("Dimensions:")
 		WriteLn(" Front, Right, Up = " .. FormatInteger(core_front) .. ", " .. FormatInteger(core_right) .. ", " .. FormatInteger(core_up))
 		WriteLn(" Back, Left, Down = " .. FormatInteger(core_back) .. ", " .. FormatInteger(core_left) .. ", " .. FormatInteger(core_down))
@@ -1069,8 +1063,8 @@ function core_key(keycode)
 		rs.setOutput(alarm_side, true)
 		if readConfirmation() then
 			rs.setOutput(alarm_side, false)
-			warpcore.set_mode(5)
-			warpcore.do_jump()
+			warpcore.mode(5)
+			warpcore.jump()
 		end
 		rs.setOutput(alarm_side, false)
 		return true
@@ -1088,7 +1082,7 @@ reactor_output = 0
 function reactor_boot()
 	if reactor ~= nil then
 		WriteLn("Booting Reactor...")
-		local isActive, strMode, releaseRate = reactor.getActive()
+		local isActive, strMode, releaseRate = reactor.active()
 		if strMode == "OFF" then
 			data.reactor_mode = 0
 		elseif strMode == "MANUAL" then
@@ -1199,7 +1193,7 @@ function reactor_page()
 		SetColorDefault()
 		SetCursorPos(1, 9)
 		Write("Activated: ")
-		isActive = reactor.getActive()
+		isActive = reactor.active()
 		if isActive then SetColorSuccess() else SetColorDefault() end
 		Write(boolToYesNo(isActive))
 	end
@@ -1304,13 +1298,13 @@ end
 function reactor_start()
 	if reactor ~= nil then
 		reactor_setMode()
-		reactor.setActive(true)
+		reactor.active(true)
 	end
 end
 
 function reactor_stop()
 	if reactor ~= nil then
-		reactor.setActive(false)
+		reactor.active(false)
 	end
 end
 

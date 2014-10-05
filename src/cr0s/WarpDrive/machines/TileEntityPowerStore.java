@@ -1,15 +1,20 @@
 package cr0s.WarpDrive.machines;
 
+import cpw.mods.fml.common.Optional;
 import cr0s.WarpDrive.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileEntityPowerStore extends WarpEnergyTE implements IPeripheral {
-	private String[] methodArray = {
-			"energy"
-	};
+public class TileEntityPowerStore extends WarpEnergyTE {
+	
+	public TileEntityPowerStore() {
+		super();
+		peripheralName = "warpdrivePowerStore";
+		methodsArray = new String[] {
+			"getEnergyLevel"
+		};
+	}
 	
 	@Override
 	public int getPotentialEnergyOutput() {
@@ -36,22 +41,12 @@ public class TileEntityPowerStore extends WarpEnergyTE implements IPeripheral {
 		return true;
 	}
 	
-	// ComputerCraft
-	@Override
-	public String getType() {
-		return "warpdrivePowerStore";
-	}
-	
-	@Override
-	public String[] getMethodNames() {
-		return methodArray;
-	}
-	
+	// ComputerCraft IPeripheral methods implementation
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		String methodName = methodArray[method];
-		if (methodName == "energy") {
-			return getEnergyObject();
+		String methodName = methodsArray[method];
+		if (methodName == "getEnergyLevel") {
+			return getEnergyLevel();
 		}
 		return null;
 	}
@@ -64,10 +59,5 @@ public class TileEntityPowerStore extends WarpEnergyTE implements IPeripheral {
 	@Override
 	public void detach(IComputerAccess computer) {
 		// nothing to see here
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return this == other;
 	}
 }
