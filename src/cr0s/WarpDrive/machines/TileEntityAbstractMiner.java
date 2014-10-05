@@ -28,7 +28,6 @@ import cr0s.WarpDrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridMachine, ITileCable
 {
-	
 	//FOR STORAGE
 	private boolean silkTouch = false;
 	private int fortuneLevel = 0;
