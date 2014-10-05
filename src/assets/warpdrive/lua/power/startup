@@ -751,8 +751,8 @@ function core_boot()
 	end
 	
 	Write(".")
-	core_front, core_right, core_up = warpcore.dim_getp()
-	core_back, core_left, core_down = warpcore.dim_getn()
+	core_front, core_right, core_up = warpcore.dim_positive()
+	core_back, core_left, core_down = warpcore.dim_negative()
 	core_isInHyper = warpcore.isInHyperspace()
 	
 	Write(".")
