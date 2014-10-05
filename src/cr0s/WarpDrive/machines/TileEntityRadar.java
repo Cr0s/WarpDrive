@@ -22,6 +22,7 @@ public class TileEntityRadar extends WarpEnergyTE {
 	private int cooldownTime = 0;
 	
 	public TileEntityRadar() {
+		super();
 		peripheralName = "radar";
 		methodsArray = new String[] {
 				"scanRadius",
@@ -43,9 +44,8 @@ public class TileEntityRadar extends WarpEnergyTE {
 			if (getBlockMetadata() == 2) {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
-					WarpDrive.debugPrint("" + this + " Scanning over " + scanRadius + " radius...");
 					results = WarpDrive.warpCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
-					WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results");
+					// WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results in " + scanRadius + " radius...");
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 					cooldownTime = 0;
 				}
