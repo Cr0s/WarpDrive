@@ -32,6 +32,7 @@ public class TileEntityLift extends WarpEnergyTE {
     private int tickCount = 0;
     
     public TileEntityLift() {
+    	super();
     	peripheralName = "warpdriveLaserLift";        
         methodsArray = new String[] {
         	"getEnergyLevel",
@@ -219,22 +220,22 @@ public class TileEntityLift extends WarpEnergyTE {
     // ComputerCraft IPeripheral methods implementation
     @Override
 	@Optional.Method(modid = "ComputerCraft")
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws Exception {
+    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
     	String methodName = methodsArray[method];
     	if (methodName.equals("getEnergyLevel")) {
     		return getEnergyLevel();
     		
 		} else if (methodName.equals("mode")) {
-			return mode(args);
+			return mode(arguments);
 			
 		} else if (methodName.equals("active")) {
-			if (args.length == 1) {
-				computerEnabled = toBool(args[0]);
+			if (arguments.length == 1) {
+				computerEnabled = toBool(arguments);
     		}
     		return new Object[] { computerEnabled ? false : isEnabled };
     		
     	} else if (methodName.equals("help")) {
-    		return new Object[] { helpStr(args) };
+    		return new Object[] { helpStr(arguments) };
     	}
     	return null;
     }

@@ -65,14 +65,15 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 	private int layerOffset = 1;
 
 	public TileEntityMiningLaser() {
+		super();
 		peripheralName = "mininglaser";
 		methodsArray = new String[] {
-				"mine",		//0
-				"stop",		//1
-				"isMining",	//2
-				"quarry",	//3
-				"state",	//4
-				"offset"	//5
+				"mine",
+				"stop",
+				"isMining",
+				"quarry",
+				"state",
+				"offset"
 			};
 	}
 
@@ -744,6 +745,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
 		super.attach(computer);
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {

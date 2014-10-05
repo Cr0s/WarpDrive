@@ -62,7 +62,7 @@ public class WarpCoresRegistry {
 		ArrayList<TileEntityReactor> res = new ArrayList<TileEntityReactor>(registry.size());
 		removeDeadCores();
 
-		printRegistry();
+		// printRegistry();
 		int radius2 = radius * radius;
 		for (TileEntityReactor core : registry) {
 			double dX = core.xCoord - x;

@@ -54,7 +54,20 @@ import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.7.0",
-	dependencies = "required-after:IC2; after:ComputerCraft; after:OpenComputer; after:CCTurtle; after:gregtech_addon; required-after:AppliedEnergistics; after:AdvancedSolarPanel; after:AtomicScience; after:ICBM|Explosion; after:MFFS; after:GraviSuite; after:UndergroundBiomes; after:NetherOres")
+	dependencies = "required-after:IC2;"
+			+ " required-after:CoFHCore;"
+			+ " after:ComputerCraft;" 
+			+ " after:OpenComputer;" 
+			+ " after:CCTurtle;" 
+			+ " after:gregtech_addon;" 
+			+ " required-after:AppliedEnergistics;" 
+			+ " after:AdvancedSolarPanel;" 
+			+ " after:AtomicScience;" 
+			+ " after:ICBM|Explosion;"
+			+ " after:MFFS;" 
+			+ " after:GraviSuite;" 
+			+ " after:UndergroundBiomes;" 
+			+ " after:NetherOres")
 @NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
 		"WarpDriveBeam", 
 		"WarpDriveFreq", 
@@ -126,7 +139,7 @@ public class WarpDrive implements LoadingCallback {
 	public int overlayType = 0;
     public String debugMessage = "";
 	
-	public static WarpDrivePeripheralHandler peripheralHandler = new WarpDrivePeripheralHandler();
+	public static WarpDrivePeripheralHandler peripheralHandler = null;
 	
 	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
 	public static String defEnergyStr = "getEnergyLevel(): returns currently contained energy, max contained energy";
@@ -346,13 +359,16 @@ public class WarpDrive implements LoadingCallback {
 		registerHyperSpaceDimension();
 		
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
-
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			warpdriveTab.setBackgroundImageName("items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 		
-		ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
+		if (WarpDriveConfig.isCCLoaded) {
+			peripheralHandler = new WarpDrivePeripheralHandler();
+			ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
+		}
 	}
 
 	@EventHandler
@@ -562,7 +578,7 @@ public class WarpDrive implements LoadingCallback {
 		
 		// top = advancedCircuit, floppy, advancedCircuit
 		// middle = advancedCircuit, advancedMachine, advancedCircuit
-		// bottom = advancedCircuit, flux crystal, advancedCircuit
+		// bottom = advancedCircuit, fluix crystal, advancedCircuit
 		GameRegistry.addRecipe(new ItemStack(protocolBlock), "coc", "cmc", "cfc",
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),

@@ -34,15 +34,15 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	}
 	
 	// Common computer properties
-	protected String peripheralName = "notImplemented";
+	protected String peripheralName = null;
 	protected String[] methodsArray = {};
 	
 	// OpenComputer specific properties
-    protected Node		OC_node = null;
-    protected boolean	OC_addedToNetwork = false;
-    
-    // ComputerCraft specific properties
-    protected HashMap<Integer,IComputerAccess> connectedComputers = new HashMap<Integer,IComputerAccess>();
+	protected Node		OC_node = null;
+	protected boolean	OC_addedToNetwork = false;
+	
+	// ComputerCraft specific properties
+	protected HashMap<Integer, IComputerAccess> connectedComputers = new HashMap<Integer, IComputerAccess>();
 	
 	// TileEntity overrides, notably for OpenComputer
 	@Override
@@ -56,56 +56,56 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 		}
 	}
 	
- 	@Override
- 	public void invalidate() {
-        if (Loader.isModLoaded("OpenComputers")) {
-    		if (OC_node != null) {
-    			OC_node.remove();
-    			OC_node = null;
-    		}
-        }
- 		super.invalidate();
- 	}
- 	
-    @Override
-    public void onChunkUnload() {
-        if (Loader.isModLoaded("OpenComputers")) {
-    		if (OC_node != null) {
-    			OC_node.remove();
-    			OC_node = null;
-    		}
-        }
-        super.onChunkUnload();
-    }
-    
-    @Override
-    public void readFromNBT(NBTTagCompound tag) {
- 		super.readFromNBT(tag);
-        if (Loader.isModLoaded("OpenComputers")) {
-    		if (OC_node != null && OC_node.host() == this) {
-    			OC_node.load(tag.getCompoundTag("oc:node"));
-    		}
-        }
- 	}
-    
-    @Override
-    public void writeToNBT(NBTTagCompound tag) {
- 		super.writeToNBT(tag);
-        if (Loader.isModLoaded("OpenComputers")) {
-    		if (OC_node != null && OC_node.host() == this) {
-    			final NBTTagCompound nodeNbt = new NBTTagCompound();
-    			OC_node.save(nodeNbt);
-    			tag.setTag("oc:node", nodeNbt);
-    		}
-        }
- 	}
-    
+	@Override
+	public void invalidate() {
+		if (Loader.isModLoaded("OpenComputers")) {
+			if (OC_node != null) {
+				OC_node.remove();
+				OC_node = null;
+			}
+		}
+		super.invalidate();
+	}
+	
+	@Override
+	public void onChunkUnload() {
+		if (Loader.isModLoaded("OpenComputers")) {
+			if (OC_node != null) {
+				OC_node.remove();
+				OC_node = null;
+			}
+		}
+		super.onChunkUnload();
+	}
+	
+	@Override
+	public void readFromNBT(NBTTagCompound tag) {
+		super.readFromNBT(tag);
+		if (Loader.isModLoaded("OpenComputers")) {
+			if (OC_node != null && OC_node.host() == this) {
+				OC_node.load(tag.getCompoundTag("oc:node"));
+			}
+		}
+	}
+	
+	@Override
+	public void writeToNBT(NBTTagCompound tag) {
+		super.writeToNBT(tag);
+		if (Loader.isModLoaded("OpenComputers")) {
+			if (OC_node != null && OC_node.host() == this) {
+				final NBTTagCompound nodeNbt = new NBTTagCompound();
+				OC_node.save(nodeNbt);
+				tag.setTag("oc:node", nodeNbt);
+			}
+		}
+	}
+	
 	@Override
 	public int hashCode() {
 		return (((((super.hashCode() + worldObj.provider.dimensionId << 4) + xCoord) << 4) + yCoord) << 4) + zCoord;
 	}
 	
-    // Dirty cheap conversion methods
+	// Dirty cheap conversion methods
 	protected Object[] argumentsOCtoCC(Arguments args) {
 		Object[] arguments = new Object[args.count()];
 		int index = 0;
@@ -115,26 +115,26 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 		}
 		return arguments;
 	}
-
-    // ComputerCraft methods
+	
+	// ComputerCraft methods
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
- 	public String getType() {
+	public String getType() {
 		return peripheralName;
- 	}
- 
+	}
+	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
- 	public String[] getMethodNames() {
- 		return methodsArray;
- 	}
- 	
+	public String[] getMethodNames() {
+		return methodsArray;
+	}
+	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
- 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
- 		// empty stub
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+		// empty stub
 		return null;
- 	}
+	}
 	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
@@ -158,7 +158,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 		// WarpDrive.debugPrint("WarpInterfacedTE.equals");
 		return other.hashCode() == hashCode();
 	}
-
+	
 	// Computer abstraction methods
 	protected void sendEvent(String eventName, Object[] arguments) {
 		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");

@@ -25,6 +25,7 @@ public class TileEntityMonitor extends WarpInterfacedTE {
 	private int packetSendTicks = 20;
 
 	public TileEntityMonitor() {
+		super();
 		peripheralName = "monitor";
 		methodsArray = new String[] {
 			"freq"

@@ -45,6 +45,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	private int soundTicks = 0;
 
 	public TileEntityCloakingDeviceCore() {
+		super();
 		peripheralName = "cloakingdevicecore";
 		methodsArray = new String[] {
 				"tier", // set field tier to 1 or 2, return field tier
