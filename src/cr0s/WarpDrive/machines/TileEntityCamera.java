@@ -28,6 +28,7 @@ public class TileEntityCamera extends WarpInterfacedTE {
 	private int packetSendTicks = 20;
 
 	public TileEntityCamera() {
+		super();
 		peripheralName = "camera";
 		methodsArray = new String[] {
 			"freq"

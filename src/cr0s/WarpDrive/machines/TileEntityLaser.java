@@ -61,6 +61,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 	private int packetSendTicks = 20;
 
 	public TileEntityLaser() {
+		super();
 		peripheralName = "laser";
 		methodsArray = new String[] {
 			"emitBeam",			// 0

@@ -52,7 +52,8 @@ public class TileEntityProtocol extends WarpInterfacedTE {
     private TileEntityReactor core = null;
 
     public TileEntityProtocol() {
-    	peripheralName = "warpcore";
+    	super();
+		peripheralName = "warpcore";
     	methodsArray = new String[] {
             "dim_positive",
             "dim_negative",

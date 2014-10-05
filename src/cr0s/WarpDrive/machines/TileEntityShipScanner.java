@@ -48,6 +48,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	private int targetX, targetY, targetZ;
 
 	public TileEntityShipScanner() {
+		super();
 		peripheralName = "shipscanner";
 		methodsArray = new String[] {
 			"scan",

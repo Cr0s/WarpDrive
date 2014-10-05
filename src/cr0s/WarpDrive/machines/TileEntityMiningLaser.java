@@ -65,14 +65,15 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 	private int layerOffset = 1;
 
 	public TileEntityMiningLaser() {
+		super();
 		peripheralName = "mininglaser";
 		methodsArray = new String[] {
-				"mine",		//0
-				"stop",		//1
-				"isMining",	//2
-				"quarry",	//3
-				"state",	//4
-				"offset"	//5
+				"mine",
+				"stop",
+				"isMining",
+				"quarry",
+				"state",
+				"offset"
 			};
 	}
 

@@ -32,6 +32,7 @@ public class TileEntityLift extends WarpEnergyTE {
     private int tickCount = 0;
     
     public TileEntityLift() {
+    	super();
     	peripheralName = "warpdriveLaserLift";        
         methodsArray = new String[] {
         	"getEnergyLevel",
