@@ -5,6 +5,9 @@ import cpw.mods.fml.common.Optional;
 
 import java.util.List;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -31,7 +34,7 @@ public class TileEntityLift extends WarpEnergyTE {
     public TileEntityLift() {
     	peripheralName = "warpdriveLaserLift";        
         methodsArray = new String[] {
-        	"energy",
+        	"getEnergyLevel",
         	"mode",
         	"active",
         	"help"
@@ -162,10 +165,47 @@ public class TileEntityLift extends WarpEnergyTE {
         return Integer.MAX_VALUE;
     }
 
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] mode(Context context, Arguments arguments) {
+		return mode(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] active(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			computerEnabled = arguments.checkBoolean(0);
+		}
+		return new Object[] { computerEnabled ? false : isEnabled };
+	}
+	
+	private Object[] mode(Object[] arguments) {
+		if (arguments.length == 1) {
+			if (arguments[0].toString().equals("up")) {
+				computerMode = MODE_UP;
+			} else if(arguments[0].toString().equals("down")) {
+				computerMode = MODE_DOWN;
+			} else {
+				computerMode = MODE_REDSTONE;
+			}
+		}
+		switch (computerMode) {
+			case -1:
+				return new Object[] { "redstone" };
+			case 1:
+				return new Object[] { "up" };
+			case 2:
+				return new Object[] { "down" };
+		}
+		return null;
+	}
+
     public String helpStr(Object[] args) {
     	if (args.length == 1) {
     		String methodName = args[0].toString().toLowerCase();
-    		if (methodName.equals("energy")) {
+    		if (methodName.equals("getEnergyLevel")) {
     			return WarpDrive.defEnergyStr;
     		} else if (methodName.equals("mode")) {
     			return "mode(\"up\" or \"down\" or \"redstone\"): sets the mode\nmode(): returns the current mode";
@@ -181,31 +221,18 @@ public class TileEntityLift extends WarpEnergyTE {
 	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws Exception {
     	String methodName = methodsArray[method];
-    	if (methodName.equals("energy")) {
-    		return getEnergyObject();
+    	if (methodName.equals("getEnergyLevel")) {
+    		return getEnergyLevel();
+    		
 		} else if (methodName.equals("mode")) {
-			if (args.length == 1) {
-				if (args[0].toString().equals("up")) {
-					computerMode = MODE_UP;
-				} else if(args[0].toString().equals("down")) {
-					computerMode = MODE_DOWN;
-				} else {
-					computerMode = MODE_REDSTONE;
-				}
-			}
-			switch (computerMode) {
-				case -1:
-					return new Object[] { "redstone" };
-				case 1:
-					return new Object[] { "up" };
-				case 2:
-					return new Object[] { "down" };
-			}
+			return mode(args);
+			
 		} else if (methodName.equals("active")) {
 			if (args.length == 1) {
 				computerEnabled = toBool(args[0]);
     		}
     		return new Object[] { computerEnabled ? false : isEnabled };
+    		
     	} else if (methodName.equals("help")) {
     		return new Object[] { helpStr(args) };
     	}

@@ -8,6 +8,9 @@ import dan200.computercraft.api.lua.ILuaContext;
 
 import java.util.ArrayList;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -236,7 +239,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param front new front size
      * @return front size
      */
-    public void setFront(int front) {
+    private void setFront(int front) {
         this.front = front;
     }
 
@@ -251,7 +254,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param right new right size
      * @return right size
      */
-    public void setRight(int right) {
+    private void setRight(int right) {
         this.right = right;
     }
 
@@ -266,7 +269,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param up new up size
      * @return up size
      */
-    public void setUp(int up) {
+    private void setUp(int up) {
         this.up = up;
     }
 
@@ -281,7 +284,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param back new back size
      * @return back size
      */
-    public void setBack(int back) {
+    private void setBack(int back) {
         this.back = back;
     }
 
@@ -296,7 +299,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param left new left size
      * @return left size
      */
-    public void setLeft(int left) {
+    private void setLeft(int left) {
         this.left = left;
     }
 
@@ -311,11 +314,11 @@ public class TileEntityProtocol extends WarpInterfacedTE {
      * @param down new down size
      * @return down size
      */
-    public void setDown(int down) {
+    private void setDown(int down) {
         this.down = down;
     }
 
-    public void setDistance(int distance) {
+    private void setDistance(int distance) {
         this.distance = Math.max(1, Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance));
     	WarpDrive.debugPrint(this + " Jump distance set to " + distance);
     }
@@ -407,6 +410,314 @@ public class TileEntityProtocol extends WarpInterfacedTE {
         return null;
     }
 
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] dim_positive(Context context, Arguments arguments) {
+		return dim_positive(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] dim_negative(Context context, Arguments arguments) {
+		return dim_negative(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] mode(Context context, Arguments arguments) {
+		return mode(argumentsOCtoCC(arguments));
+	}
+
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] distance(Context context, Arguments arguments) {
+		return distance(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] direction(Context context, Arguments arguments) {
+		return direction(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getAttachedPlayers(Context context, Arguments arguments) {
+		return getAttachedPlayers(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] summon(Context context, Arguments arguments) {
+		return summon(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] summon_all(Context context, Arguments arguments) {
+		setSummonAllFlag(true);
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] pos(Context context, Arguments arguments) {
+		if (core == null) {
+			return null;
+		}
+		
+		return new Object[] { core.xCoord, core.yCoord, core.zCoord };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getEnergyLevel(Context context, Arguments arguments) {
+		if (core == null) {
+			return null;
+		}
+		
+		return core.getEnergyLevel();
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getEnergyRequired(Context context, Arguments arguments) {
+		if (core == null) {
+			return null;
+		}
+		
+		return core.getEnergyLevel();
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] jump(Context context, Arguments arguments) {
+		doJump();
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getShipSize(Context context, Arguments arguments) {
+		return getShipSize(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] beaconFrequency(Context context, Arguments arguments) {
+		return beaconFrequency(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getOrientation(Context context, Arguments arguments) {
+		if (core != null) {
+			return new Object[] { core.dx, 0, core.dz };
+		}
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] coreFrequency(Context context, Arguments arguments) {
+		return coreFrequency(argumentsOCtoCC(arguments));
+	}
+
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] isInSpace(Context context, Arguments arguments) {
+		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
+	}
+
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] isInHyperspace(Context context, Arguments arguments) {
+		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] targetJumpgate(Context context, Arguments arguments) {
+		return targetJumpgate(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] isAttached(Context context, Arguments arguments) {
+		if (core != null) {
+			return new Object[] { (boolean) (core.controller != null) };
+		}
+		return null;
+	}
+	
+	private Object[] dim_positive(Object[] arguments) {
+		try {
+			if (arguments.length == 3) {
+				int argInt0, argInt1, argInt2;
+				argInt0 = toInt(arguments[0]);
+				argInt1 = toInt(arguments[1]);
+				argInt2 = toInt(arguments[2]);
+				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+					return new Integer[] { getFront(), getRight(), getUp() };
+				}
+				System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+				setFront(argInt0);
+				setRight(argInt1);
+				setUp(argInt2);
+			}
+		} catch (Exception e) {
+			return new Integer[] { getFront(), getRight(), getUp() };
+		}
+		
+		return new Integer[] { getFront(), getRight(), getUp() };
+	}
+	
+	private Object[] dim_negative(Object[] arguments) {
+		try {
+			if (arguments.length == 3) {
+				int argInt0, argInt1, argInt2;
+				argInt0 = toInt(arguments[0]);
+				argInt1 = toInt(arguments[1]);
+				argInt2 = toInt(arguments[2]);
+				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
+					return new Integer[] { getBack(), getLeft(), getDown() };
+				}
+				System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+				setBack(argInt0);
+				setLeft(argInt1);
+				setDown(argInt2);
+			}
+		} catch (Exception e) {
+			return new Integer[] { getBack(), getLeft(), getDown() };
+		}
+		
+		return new Integer[] { getBack(), getLeft(), getDown() };
+	}
+	
+	private Object[] mode(Object[] arguments) {
+		try {
+			if (arguments.length == 1) {
+				setMode(toInt(arguments[0]));
+			}
+		} catch (Exception e) {
+			return new Integer[] { mode.getCode() };
+		}
+		
+		return new Integer[] { mode.getCode() };
+	}
+	
+	private Object[] distance(Object[] arguments) {
+		try {
+			if (arguments.length == 1) {
+				setDistance(toInt(arguments[0]));
+			}
+		} catch (Exception e) {
+			return new Integer[] { getDistance() };
+		}
+		
+		return new Integer[] { getDistance() };
+	}
+	
+	private Object[] direction(Object[] arguments) {
+		try {
+			if (arguments.length == 1) {
+				setDirection(toInt(arguments[0]));
+			}
+		} catch (Exception e) {
+			return new Integer[] { getDirection() };
+		}
+		
+		return new Integer[] { getDirection() };
+	}
+	
+	private Object[] getAttachedPlayers(Object[] arguments) {
+		String list = "";
+		
+		if (!players.isEmpty()) {
+			for (int i = 0; i < players.size(); i++) {
+				String nick = players.get(i);
+				list += nick + ((i == players.size() - 1) ? "" : ",");
+			}
+		}
+		
+		return new Object[] { list, players };
+	}
+	
+	private Object[] summon(Object[] arguments) {
+		int playerIndex = -1;
+		if (arguments.length != 1) {
+			return new Object[] { false };
+		}
+		try {
+			playerIndex = toInt(arguments[0]);
+		} catch (Exception e) {
+			return new Object[] { false };
+		}
+		
+		if (playerIndex >= 0 && playerIndex < players.size()) {
+			setToSummon(players.get(playerIndex));
+			return new Object[] { true };
+		}
+		return new Object[] { false };
+	}
+
+	private Object[] getEnergyRequired(Object[] arguments) {
+		try {
+			if (arguments.length == 1 && core != null) {
+				return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipVolume, toInt(arguments[0]))) };
+			}
+		} catch (Exception e) {
+			return new Integer[] { -1 };
+		}
+		return new Integer[] { -1 };
+	}
+	
+	private Object[] getShipSize(Object[] arguments) {
+		if (core == null) {
+			return null;
+		}
+		StringBuilder reason = new StringBuilder();
+		try {
+			if (!core.validateShipSpatialParameters(reason)) {
+				core.messageToAllPlayersOnShip(reason.toString());
+				if (core.controller == null) {
+					return null;
+				}
+			}
+			return new Object[] { core.shipVolume };
+		} catch (Exception e) {
+			if (WarpDriveConfig.G_DEBUGMODE) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+	}
+
+	private Object[] beaconFrequency(Object[] arguments) {
+		if (arguments.length == 1) {
+			setBeaconFrequency((String) arguments[0]);
+		}
+		return new Object[] { beaconFrequency };
+	}
+	
+	private Object[] coreFrequency(Object[] arguments) { 
+		if (core == null) {
+			return null;
+		}
+		if (arguments.length == 1) {
+			core.coreFrequency = ((String) arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
+		}
+		return new Object[] { core.coreFrequency };
+	}
+	
+	private Object[] targetJumpgate(Object[] arguments) { 
+		if (arguments.length == 1) {
+			setTargetJumpgateName((String) arguments[0]);
+		}
+		return new Object[] { targetJumpgateName };
+	}
+
 	// ComputerCraft IPeripheral methods implementation
     @Override
 	@Optional.Method(modid = "ComputerCraft")
@@ -424,230 +735,75 @@ public class TileEntityProtocol extends WarpInterfacedTE {
     @Override
 	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		int argInt0, argInt1, argInt2;
 		String methodName = methodsArray[method];
 		
-		if (methodName.equals("dim_getp")) {
-			return new Integer[] { getFront(), getRight(), getUp() };
+		if (methodName.equals("dim_positive")) {// dim_positive (front, right, up)
+			return dim_positive(arguments);
 			
-		} else if (methodName.equals("dim_setp")) {// dim_setp (front, right, up)
-			if (arguments.length != 3) {
-				return new Integer[] { getFront(), getRight(), getUp() };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-				argInt1 = toInt(arguments[1]);
-				argInt2 = toInt(arguments[2]);
-			} catch (Exception e) {
-				return new Integer[] { getFront(), getRight(), getUp() };
-			}
-			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-				return new Integer[] { getFront(), getRight(), getUp() };
-			}
+		} else if (methodName.equals("dim_negative")) {// dim_negative (back, left, down)
+			return dim_negative(arguments);
 			
-			System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
-			setFront(argInt0);
-			setRight(argInt1);
-			setUp(argInt2);
+		} else if (methodName.equals("mode")) {// mode (mode)
+			return mode(arguments);
 			
-			return new Integer[] { getFront(), getRight(), getUp() };
+		} else if (methodName.equals("distance")) {// distance (distance)
+			return distance(arguments);
 			
-		} else if (methodName.equals("dim_getn")) {
-			return new Integer[] { getBack(), getLeft(), getDown() };
+		} else if (methodName.equals("direction")) {// direction (direction)
+			return direction(arguments);
 			
-		} else if (methodName.equals("dim_setn")) {// dim_setn (back, left, down)
-			if (arguments.length != 3) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-				argInt1 = toInt(arguments[1]);
-				argInt2 = toInt(arguments[2]);
-			} catch (Exception e) {
-				return new Integer[] { getBack(), getLeft(), getDown() };
-			}
-			if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
-				return new Integer[] { getBack(), getLeft(), getDown() };
-			}
+		} else if (methodName.equals("getAttachedPlayers")) {
+			return getAttachedPlayers(arguments);
 			
-			System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
-			setBack(argInt0);
-			setLeft(argInt1);
-			setDown(argInt2);
+		} else if (methodName.equals("summon")) {
+			return summon(arguments);
 			
-			return new Integer[] { getBack(), getLeft(), getDown() };
+		} else if (methodName.equals("summon_all")) {
+			setSummonAllFlag(true);
 			
-		} else if (methodName.equals("set_mode")) {// set_mode (mode)
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-			} catch (Exception e) {
-				return new Integer[] { -1 };
-			}
-			
-			setMode(argInt0);
-			
-		} else if (methodName.equals("set_distance")) {// set_distance (distance)
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-			} catch (Exception e) {
-				return new Integer[] { -1 };
-			}
-			
-			setDistance(argInt0);
-			
-			return new Integer[] { getDistance() };
-			
-		} else if (methodName.equals("set_direction")) {// set_direction (dir)
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-			} catch (Exception e) {
-				return new Integer[] { -1 };
-			}
-			
-			setDirection(argInt0);
-			
-		} else if (methodName.equals("get_attached_players")) {// get_attached_players
-			String list = "";
-			
-			for (int i = 0; i < this.players.size(); i++) {
-				String nick = this.players.get(i);
-				list += nick + ((i == this.players.size() - 1) ? "" : ",");
-			}
-			
-			if (players.isEmpty()) {
-				list = "";
-			}
-			
-			return new Object[] { list };
-			
-		} else if (methodName.equals("summon")) {// summon
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-			} catch (Exception e) {
-				return new Integer[] { -1 };
-			}
-			
-			if (argInt0 >= 0 && argInt0 < players.size()) {
-				setToSummon(players.get(argInt0));
-			}
-			
-		} else if (methodName.equals("summon_all")) {// summon_all
-			this.setSummonAllFlag(true);
-			
-		} else if (methodName.equals("get_x")) {// get_x
+		} else if (methodName.equals("pos")) {
 			if (core == null) {
 				return null;
 			}
 			
-			return new Object[] { core.xCoord };
+			return new Object[] { core.xCoord, core.yCoord, core.zCoord };
 			
-		} else if (methodName.equals("get_y")) {// get_y
+		} else if (methodName.equals("getEnergyLevel")) {
 			if (core == null) {
 				return null;
 			}
 			
-			return new Object[] { core.yCoord };
+			return core.getEnergyLevel();
 			
-		} else if (methodName.equals("get_z")) {// get_z
-			if (core == null) {
-				return null;
-			}
+		} else if (methodName.equals("getEnergyRequired")) {// getEnergyRequired(distance)
+			return getEnergyRequired(arguments);
 			
-			return new Object[] { core.zCoord };
-			
-		} else if (methodName.equals("get_energy_level")) {// get_energy_level
-			if (core == null) {
-				return null;
-			}
-			
-			return new Object[] { core.getEnergyStored() };
-			
-		} else if (methodName.equals("get_energy_max")) {// get_energy_max
-			if (core == null) {
-				return null;
-			}
-			
-			return new Object[] { core.getMaxEnergyStored() };
-			
-		} else if (methodName.equals("get_energy_required")) {// get_energy_required(distance)
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
-			try {
-				argInt0 = toInt(arguments[0]);
-			} catch (Exception e) {
-				return new Integer[] { -1 };
-			}
-			if (core != null) {
-				return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipVolume, argInt0)) };
-			}
-			
-		} else if (methodName.equals("do_jump")) {// do_jump
+		} else if (methodName.equals("jump")) {
 			doJump();
 			
-		} else if (methodName.equals("get_ship_size")) {// get_ship_size
+		} else if (methodName.equals("getShipSize")) {
+			return getShipSize(arguments);
+			
+		} else if (methodName.equals("beaconFrequency")) {
+			return beaconFrequency(arguments);
+			
+		} else if (methodName.equals("getOrientation")) {
 			if (core != null) {
-				StringBuilder reason = new StringBuilder();
-				try {
-					if (!core.validateShipSpatialParameters(reason)) {
-						core.messageToAllPlayersOnShip(reason.toString());
-						if (core.controller == null) {
-							return null;
-						}
-					}
-					return new Object[] { core.shipVolume };
-				} catch (Exception e) {
-					if (WarpDriveConfig.G_DEBUGMODE) {
-						e.printStackTrace();
-					}
-					return null;
-				}
+				return new Object[] { core.dx, 0, core.dz };
 			}
+			return null;
 			
-		} else if (methodName.equals("set_beacon_frequency")) {// set_beacon_frequency
-			if (arguments.length != 1) {
-				return new Integer[] { -1 };
-			}
+		} else if (methodName.equals("coreFrequency")) {
+			return coreFrequency(arguments);
 			
-			setBeaconFrequency((String) arguments[0]);
-			
-		} else if (methodName.equals("get_dx")) {// get_dx
-			if (core != null) {
-				return new Object[] { core.dx };
-			}
-			
-		} else if (methodName.equals("get_dz")) {// get_dz
-			if (core != null) {
-				return new Object[] { core.dz };
-			}
-			
-		} else if (methodName.equals("set_core_frequency")) {// set_core_frequency
-			if (arguments.length == 1 && (core != null)) {
-				core.coreFrequency = ((String) arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
-			}
-			
-		} else if (methodName.equals("is_in_space")) {// is_in_space
+		} else if (methodName.equals("isInSpace")) {
 			return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
 			
-		} else if (methodName.equals("is_in_hyperspace")) {// is_in_hyperspace
+		} else if (methodName.equals("isInHyperspace")) {
 			return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
 			
-		} else if (methodName.equals("set_target_jumpgate")) {// set_target_jumpgate
-			if (arguments.length == 1) {
-				setTargetJumpgateName((String) arguments[0]);
-			}
+		} else if (methodName.equals("targetJumpgate")) {
+			return targetJumpgate(arguments);
 			
 		} else if (methodName.equals("isAttached")) {// isAttached
 			if (core != null) {
@@ -669,9 +825,8 @@ public class TileEntityProtocol extends WarpInterfacedTE {
     /**
      * @param targetJumpgateName the targetJumpgateName to set
      */
-    public void setTargetJumpgateName(String targetJumpgateName)
-    {
-        this.targetJumpgateName = targetJumpgateName;
+    public void setTargetJumpgateName(String parTargetJumpgateName) {
+        targetJumpgateName = parTargetJumpgateName;
     }
 	
 	@Override

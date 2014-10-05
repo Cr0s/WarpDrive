@@ -9,6 +9,9 @@ import dan200.computercraft.api.lua.ILuaContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import cofh.api.transport.IItemConduit;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFluid;
@@ -650,6 +653,94 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 		tag.setInteger("currentLayer", currentLayer);
 		tag.setBoolean("enableSilktouch", enableSilktouch);
 	}
+
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] mine(Context context, Arguments arguments) {
+		return mine(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] stop(Context context, Arguments arguments) {
+		stop();
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] isMining(Context context, Arguments arguments) {
+		return new Boolean[] { isMining() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] quarry(Context context, Arguments arguments) {
+		return quarry(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] state(Context context, Arguments arguments) {
+		return state(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] offset(Context context, Arguments arguments) {
+		return offset(argumentsOCtoCC(arguments));
+	}
+	
+	private Object[] mine(Object[] arguments) {
+		if (isMining()) {
+			return new Boolean[] { false };
+		}
+		
+		isQuarry = false;
+		delayTicksWarmup = 0;
+		currentState = STATE_WARMUP;
+		currentLayer = yCoord - layerOffset - 1;
+		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		return new Boolean[] { true };
+	}
+	
+	private Object[] quarry(Object[] arguments) {
+		if (isMining()) {
+			return new Boolean[] { false };
+		}
+
+		isQuarry = true;
+		delayTicksScan = 0;
+		currentState = STATE_WARMUP;
+		currentLayer = yCoord - layerOffset - 1;
+		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		return new Boolean[] { true };
+	}
+	
+	private Object[] state(Object[] arguments) {
+		int energy = getEnergyLevel();
+		String status = getStatus();
+		Integer retValuablesInLayer, retValuablesMined;
+		if (isMining()) {
+			retValuablesInLayer = valuablesInLayer.size();
+			retValuablesMined = valuableIndex;
+			
+			return new Object[] {status, energy, currentLayer, retValuablesMined, retValuablesInLayer};
+		}
+		return new Object[] {status, energy, currentLayer, 0, 0};
+	}
+	
+	private Object[] offset(Object[] arguments) {
+		if (arguments.length == 1) {
+            try {
+            	layerOffset = Math.min(256, Math.abs(toInt(arguments[0])));
+            } catch(Exception e) {
+            	return new Integer[] { layerOffset };
+            }
+		}
+		return new Integer[] { layerOffset };
+	}
 	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
@@ -669,16 +760,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
     	String methodName = methodsArray[method];
     	if (methodName.equals("mine")) {
-			if (isMining()) {
-				return new Boolean[] { false };
-			}
-			
-			isQuarry = false;
-			delayTicksWarmup = 0;
-			currentState = STATE_WARMUP;
-			currentLayer = yCoord - layerOffset - 1;
-			enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
-			return new Boolean[] { true };
+    		return mine(arguments);
 			
 		} else if (methodName.equals("stop")) {
 			stop();
@@ -687,38 +769,13 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			return new Boolean[] { isMining() };
 			
 		} else if (methodName.equals("quarry")) {
-			if (isMining()) {
-				return new Boolean[] { false };
-			}
+    		return quarry(arguments);
 
-			isQuarry = true;
-			delayTicksScan = 0;
-			currentState = STATE_WARMUP;
-			currentLayer = yCoord - layerOffset - 1;
-			enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
-			return new Boolean[] { true };
-			
 		} else if (methodName.equals("state")) { // State is: state, energy, currentLayer, valuablesMined, valuablesInLayer = getMinerState()
-			int energy = getEnergyLevel();
-			String status = getStatus();
-			Integer retValuablesInLayer, retValuablesMined;
-			if (isMining()) {
-				retValuablesInLayer = valuablesInLayer.size();
-				retValuablesMined = valuableIndex;
-				
-				return new Object[] {status, energy, currentLayer, retValuablesMined, retValuablesInLayer};
-			}
-			return new Object[] {status, energy, currentLayer, 0, 0};
+    		return state(arguments);
 			
 		} else if (methodName.equals("offset")) {
-			if (arguments.length == 1) {
-                try {
-                	layerOffset = Math.min(256, Math.abs(toInt(arguments[0])));
-                } catch(Exception e) {
-                	return new Integer[] { layerOffset };
-                }
-			}
-			return new Integer[] { layerOffset };
+    		return offset(arguments);
 		}
 		return null;
 	}

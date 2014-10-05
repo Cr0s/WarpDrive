@@ -9,6 +9,9 @@ import dan200.computercraft.api.lua.ILuaContext;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
@@ -90,6 +93,16 @@ public class TileEntityCamera extends WarpInterfacedTE {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
 		// WarpDrive.debugPrint("" + this + " writeToNBT");
+	}
+
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] freq(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			setFrequency(arguments.checkInteger(0));
+		}
+		return new Integer[] { frequency };
 	}
 
 	// ComputerCraft IPeripheral methods implementation

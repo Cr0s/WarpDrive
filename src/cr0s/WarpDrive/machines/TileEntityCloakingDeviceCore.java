@@ -13,6 +13,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
@@ -44,12 +47,10 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public TileEntityCloakingDeviceCore() {
 		peripheralName = "cloakingdevicecore";
 		methodsArray = new String[] {
-				"setFieldTier", // 0 setFieldTier(1 or 2)
-				"isAssemblyValid", // 1 - returns true or false
-				"getEnergyLevel", // 2 
-				"enableCloakingField", // 3 enables field if assembled right
-				"disableCloakingField", // 4 disables cloaking field
-				"isEnabled" // 5 return true if currently enabled
+				"tier", // set field tier to 1 or 2, return field tier
+				"isAssemblyValid", // returns true or false
+				"getEnergyLevel", 
+				"enable" // set field enable state (true or false), return true if enabled
 		};
 	}
 	
@@ -398,6 +399,35 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		return true;
 	}
 
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] tier(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			if (arguments.checkInteger(0) == 2) {
+				tier = 2;
+			} else {
+				tier = 1;
+			}
+		}
+		return new Integer[] { (int)tier };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] isAssemblyValid(Context context, Arguments arguments) {
+		return new Object[] { (boolean)validateAssembly() };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] enable(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			isEnabled = arguments.checkBoolean(0);
+		}
+		return new Object[] { isEnabled };
+	}
+
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
@@ -418,7 +448,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
     	String methodName = methodsArray[method];
-    	if (methodName.equals("setFieldTier")) { // setFieldTier(1 or 2)
+    	if (methodName.equals("tier")) {
 			if (arguments.length == 1) {
 				if (toInt(arguments[0]) == 2) {
 					tier = 2;
@@ -426,16 +456,19 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 					tier = 1;
 				}
 			}
+			return new Integer[] { (int)tier };
+			
     	} else if (methodName.equals("isAssemblyValid")) {
 			return new Object[] { (boolean)validateAssembly() };
+			
     	} else if (methodName.equals("getEnergyLevel")) {
-			return new Object[] { getEnergyStored() };
-    	} else if (methodName.equals("enableCloakingField")) {
-			isEnabled = true;
-    	} else if (methodName.equals("disableCloakingField")) {
-			isEnabled = false;
-    	} else if (methodName.equals("isEnabled")) {
-			return new Object[] { this.isEnabled };
+			return getEnergyLevel();
+			
+    	} else if (methodName.equals("enable")) {
+			if (arguments.length == 1) {
+				isEnabled = toBool(arguments[0]);
+			}
+			return new Object[] { isEnabled };
 		}
 		
 		return null;

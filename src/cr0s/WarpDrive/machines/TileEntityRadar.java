@@ -8,6 +8,9 @@ import dan200.computercraft.api.lua.ILuaContext;
 
 import java.util.ArrayList;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeDirection;
 import cr0s.WarpDrive.*;
@@ -21,12 +24,11 @@ public class TileEntityRadar extends WarpEnergyTE {
 	public TileEntityRadar() {
 		peripheralName = "radar";
 		methodsArray = new String[] {
-				"scanRay",			// 0
-				"scanRadius",		// 1
-				"getResultsCount",	// 2
-				"getResult",		// 3
-				"getEnergyLevel",	// 4
-				"pos"				// 5
+				"scanRadius",
+				"getResultsCount",
+				"getResult",
+				"getEnergyLevel",
+				"pos"
 			};
 	}
 	
@@ -63,6 +65,84 @@ public class TileEntityRadar extends WarpEnergyTE {
 		super.writeToNBT(tag);
 	}
 
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] scanRadius(Context context, Arguments arguments) {
+		return scanRadius(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getResultsCount(Context context, Arguments arguments) {
+		if (results != null) {
+			return new Integer[] { results.size() };
+		}
+		return new Integer[] { -1 };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getResult(Context context, Arguments arguments) {
+		return getResult(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] pos(Context context, Arguments arguments) {
+		return new Integer[] { xCoord, yCoord, zCoord };
+	}
+	
+	private Object[] scanRadius(Object[] arguments) {
+		// always clear results
+		results = null;
+		
+		// validate parameters
+		if (arguments.length != 1) {
+			return new Boolean[] { false };
+		}
+		int radius;
+		try {
+			radius = toInt(arguments[0]);
+		} catch(Exception e) {
+           	return new Boolean[] { false };
+        }
+		if (radius <= 0 || radius > 10000) {
+			scanRadius = 0;
+			return new Boolean[] { false };
+		}
+		if (!consumeEnergy(Math.max(radius, 100) * Math.max(radius, 100), false)) {
+			return new Boolean[] { false };
+		}
+		
+		// Begin searching
+		scanRadius = radius;
+		cooldownTime = 0;
+		if (getBlockMetadata() != 2) {
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
+		}
+		return new Boolean[] { true };
+	}
+	private Object[] getResult(Object[] arguments) {
+		if (arguments.length == 1 && (results != null)) {
+			int index;
+			try {
+				index = toInt(arguments[0]);
+			} catch(Exception e) {
+				return new Object[] { "FAIL", 0, 0, 0 };
+			}
+			if (index >= 0 && index < results.size()) {
+				TileEntityReactor res = results.get(index);
+				if (res != null)
+				{
+					int yAddition = (res.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
+					return new Object[] { res.coreFrequency, res.xCoord, res.yCoord + yAddition, res.zCoord };
+				}
+			}
+		}
+		return new Object[] { "FAIL", 0, 0, 0 };
+	}
+
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	public void attach(IComputerAccess computer) {
@@ -90,38 +170,8 @@ public class TileEntityRadar extends WarpEnergyTE {
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
 	   	String methodName = methodsArray[method];
-		if (methodName.equals("scanRay")) {// scanRay (toX, toY, toZ)
-			return new Object[] { -1 };
-			
-		} else if (methodName.equals("scanRadius")) {// scanRadius (radius)
-			// always clear results
-			results = null;
-			
-			// validate parameters
-			if (arguments.length != 1) {
-				return new Boolean[] { false };
-			}
-			int radius;
-			try {
-				radius = toInt(arguments[0]);
-			} catch(Exception e) {
-               	return new Boolean[] { false };
-            }
-			if (radius <= 0 || radius > 10000) {
-				scanRadius = 0;
-				return new Boolean[] { false };
-			}
-			if (!consumeEnergy(Math.max(radius, 100) * Math.max(radius, 100), false)) {
-				return new Boolean[] { false };
-			}
-			
-			// Begin searching
-			scanRadius = radius;
-			cooldownTime = 0;
-			if (getBlockMetadata() != 2) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 2, 1 + 2);
-			}
-			return new Boolean[] { true };
+		if (methodName.equals("scanRadius")) {// scanRadius (radius)
+			return scanRadius(arguments);
 
 		} else if (methodName.equals("getResultsCount")) {
 			if (results != null) {
@@ -130,26 +180,10 @@ public class TileEntityRadar extends WarpEnergyTE {
 			return new Integer[] { -1 };
 			
 		} else if (methodName.equals("getResult")) {
-			if (arguments.length == 1 && (results != null)) {
-				int index;
-				try {
-					index = toInt(arguments[0]);
-				} catch(Exception e) {
-					return new Object[] { "FAIL", 0, 0, 0 };
-				}
-				if (index >= 0 && index < results.size()) {
-					TileEntityReactor res = results.get(index);
-					if (res != null)
-					{
-						int yAddition = (res.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
-						return new Object[] { res.coreFrequency, res.xCoord, res.yCoord + yAddition, res.zCoord };
-					}
-				}
-			}
-			return new Object[] { "FAIL", 0, 0, 0 };
+			return getResult(arguments);
 			
 		} else if (methodName.equals("getEnergyLevel")) {
-			return new Integer[] { getEnergyStored() };
+			return getEnergyLevel();
 				
 		} else if (methodName.equals("pos")) {
 			return new Integer[] { xCoord, yCoord, zCoord };
