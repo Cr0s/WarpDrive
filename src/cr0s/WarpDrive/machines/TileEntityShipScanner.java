@@ -1,18 +1,21 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.JumpBlock;
 import cr0s.WarpDrive.data.Vector3;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 import ic2.api.energy.tile.IEnergyTile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -25,8 +28,8 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
-	private int state = 0; // 0 - inactive, 1 - active
+public class TileEntityShipScanner extends WarpEnergyTE {
+	private boolean isActive = false;
 	private TileEntityReactor core = null;
 
 	int laserTicks = 0;
@@ -34,13 +37,6 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	int deployDelayTicks = 0;
 	
 	int warpCoreSearchTicks = 0;
-
-	private String[] methodsArray = {
-		"scan",			// 0
-		"fileName",		// 1
-		"energy",		// 2
-		"deploy"		// 3 deployShipFromSchematic(file, offsetX, offsetY, offsetZ)
-	};
 
 	private String schematicFileName;
 	
@@ -50,7 +46,17 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	private boolean isDeploying = false;
 	
 	private int targetX, targetY, targetZ;
-	
+
+	public TileEntityShipScanner() {
+		peripheralName = "shipscanner";
+		methodsArray = new String[] {
+			"scan",
+			"fileName",
+			"getEnergyLevel",
+			"deploy",
+			"state"
+		};
+	}
 	
 	@Override
 	public void updateEntity() {
@@ -66,18 +72,18 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 		// Warp core is not found
 		if (!isDeploying && core == null) {
-			switchState(0); // disable scanner
+			setActive(false); // disable scanner
 			return;
 		}
 
-		if (state == 0) { // inactive
+		if (!isActive) {// inactive
 			if (++laserTicks > 20) {
 				PacketHandler.sendBeamPacket(worldObj,
 						new Vector3(this).translate(0.5D), new Vector3(core.xCoord, core.yCoord, core.zCoord).translate(0.5D),
 						0f, 1f, 0f, 40, 0, 100);
 				laserTicks = 0;
 			}
-		} else if (state == 1 && !isDeploying) { // active: scanning
+		} else if (!isDeploying) {// active and scanning
 			if (++laserTicks > 5) {
 				laserTicks = 0;
 				
@@ -125,10 +131,10 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			}
 			
 			if (++scanTicks > 20 * (1 + core.shipVolume / 10)) {
-				switchState(0);
+				setActive(false); // disable scanner
 				scanTicks = 0;
 			}
-		} if (state == 1 && isDeploying) { // active: deploying
+		} else {// active and deploying
 			if (++deployDelayTicks < 20)
 				return;
 			
@@ -138,7 +144,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 
 			if (blocks == 0) {
 				isDeploying = false;
-				switchState(0);
+				setActive(false); // disable scanner
 				return;
 			}
 			
@@ -147,7 +153,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 				if (currentDeployIndex >= blocksToDeployCount)
 				{
 					isDeploying = false;
-					switchState(0);
+					setActive(false); // disable scanner
 					break;
 				}
 				
@@ -175,10 +181,10 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		}
 	}
 
-	private void switchState(int newState) {
-		this.state = newState;
-		if (getBlockMetadata() != newState) {
-			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, newState, 2);
+	private void setActive(boolean newState) {
+		isActive = newState;
+		if ((getBlockMetadata() == 1) == newState) {
+			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, isActive ? 1 : 0, 2);
 		}
 	}
 
@@ -359,7 +365,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 	// Begins ship scan
 	private boolean scanShip(StringBuilder reason) {
 		// Enable scanner
-		switchState(1);
+		setActive(true);
 		File f = new File(WarpDriveConfig.G_SCHEMALOCATION);
 		if (!f.exists() || !f.isDirectory()) {
 			f.mkdirs();
@@ -523,7 +529,7 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 			}
 		}
 		
-		switchState(1);
+		setActive(true);
 		reason.append("Ship deploying...");
 		return 3;
 	}
@@ -538,76 +544,105 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
 		super.writeToNBT(tag);
 	}
 
-	// CC
-	// IPeripheral methods implementation
-	@Override
-	public String getType() {
-		return "shipscanner";
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] scan(Context context, Arguments arguments) {
+		return scan(argumentsOCtoCC(arguments));
 	}
 
-	@Override
-	public String[] getMethodNames() {
-		return methodsArray;
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] filename(Context context, Arguments arguments) {
+		return filename(argumentsOCtoCC(arguments));
 	}
 
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		switch (method) {
-		case 0: // scanShip()
-			// Already scanning?
-			if (this.state == 1) {
-				return new Object[] { false, 0, "Already scanning" };
-			}
-			
-			if (core == null) {
-				return new Object[] { false, 1, "Warp-Core not found" };
-			} else if (!consumeEnergy(getScanningEnergyCost(core.shipVolume), true)) {
-				return new Object[] { false, 2, "Not enough energy!" };
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] deploy(Context context, Arguments arguments) {
+		return deploy(argumentsOCtoCC(arguments));
+	}
+	
+	private Object[] scan(Object[] arguments) {
+		// Already scanning?
+		if (isActive) {
+			return new Object[] { false, 0, "Already active" };
+		}
+		
+		if (core == null) {
+			return new Object[] { false, 1, "Warp-Core not found" };
+		} else if (!consumeEnergy(getScanningEnergyCost(core.shipVolume), true)) {
+			return new Object[] { false, 2, "Not enough energy!" };
+		} else {
+			StringBuilder reason = new StringBuilder();
+			boolean success = scanShip(reason);
+			return new Object[] { success, 3, reason.toString() };
+		}
+	}
+	
+	private Object[] filename(Object[] arguments) {
+		if (isActive && !schematicFileName.isEmpty()) {
+			if (isDeploying) {
+				return new Object[] { "Deployment in progress. Please wait..." };
 			} else {
-				StringBuilder reason = new StringBuilder();
-				boolean success = scanShip(reason);
-				return new Object[] { success, 3, reason.toString() };
-			}
-			// break;
-			
-		case 1: // getSchematicFileName()
-			if (state != 0 && !schematicFileName.isEmpty()) {
-				return new Object[] { "Scanning in process. Please wait..." };
-			}
-			
-			return new Object[] { schematicFileName };
-			
-		case 2: // getEnergyLevel()
-			return new Object[] { getEnergyStored() };
-			
-		case 3: // deployShipFromSchematic(schematicFileName, offsetX, offsetY, offsetZ)
-			if (arguments.length == 4) {
-				String fileName = (String)arguments[0];
-				int x = ((Double)arguments[1]).intValue();
-				int y = ((Double)arguments[2]).intValue();
-				int z = ((Double)arguments[3]).intValue();
-				
-				if (!new File(WarpDriveConfig.G_SCHEMALOCATION + "/" + fileName).exists()) {
-					return new Object[] { 0, "Specified .schematic file was not found!" };
-				} else {
-					StringBuilder reason = new StringBuilder();
-					int result = deployShip(fileName, x, y, z, reason);
-					return new Object[] { result, reason.toString() };
-				}
-			} else {
-				return new Object[] { 4, "Invalid arguments count, you need .schematic file name, offsetX, offsetY and offsetZ!" };
+				return new Object[] { "Scan in progress. Please wait..." };
 			}
 		}
 		
+		return new Object[] { schematicFileName };
+	}
+	
+	private Object[] deploy(Object[] arguments) {
+		if (arguments.length == 4) {
+			String fileName = (String)arguments[0];
+			int x = toInt(arguments[1]);
+			int y = toInt(arguments[2]);
+			int z = toInt(arguments[3]);
+			
+			if (!new File(WarpDriveConfig.G_SCHEMALOCATION + "/" + fileName).exists()) {
+				return new Object[] { 0, "Specified .schematic file was not found!" };
+			} else {
+				StringBuilder reason = new StringBuilder();
+				int result = deployShip(fileName, x, y, z, reason);
+				return new Object[] { result, reason.toString() };
+			}
+		} else {
+			return new Object[] { 4, "Invalid arguments count, you need .schematic file name, offsetX, offsetY and offsetZ!" };
+		}
+	}
+	
+	private Object[] state(Object[] arguments) {
+		if (!isActive) {
+			return new Object[] { false, "IDLE", 0, 0 };
+		} else if (!isDeploying) {
+			return new Object[] { true, "Scanning", 0, 0 };
+		} else {
+			return new Object[] { true, "Deploying", currentDeployIndex, blocksToDeployCount };
+		}
+	}
+	
+	// ComputerCraft IPeripheral methods implementation
+	@Override
+	@Optional.Method(modid = "ComputerCraft")
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	   	String methodName = methodsArray[method];
+		if (methodName.equals("scan")) {
+			return scan(arguments);
+			
+		} else if (methodName.equals("fileName")) {
+			return filename(arguments);
+			
+		} else if (methodName.equals("getEnergyLevel")) {
+			return getEnergyLevel();
+			
+		} else if (methodName.equals("deploy")) {// deploy(schematicFileName, offsetX, offsetY, offsetZ)
+			return deploy(arguments);
+			
+		} else if (methodName.equals("state")) {
+			return state(arguments);
+		}
+		
 		return null;
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
 	}
 
 	// IEnergySink methods implementation
@@ -625,9 +660,4 @@ public class TileEntityShipScanner extends WarpEnergyTE implements IPeripheral {
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}	
 }

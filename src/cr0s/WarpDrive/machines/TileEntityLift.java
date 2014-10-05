@@ -1,9 +1,13 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 
 import java.util.List;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
@@ -12,9 +16,8 @@ import cr0s.WarpDrive.*;
 import cr0s.WarpDrive.data.Vector3;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
+public class TileEntityLift extends WarpEnergyTE {
     private static final int MODE_REDSTONE = -1;
     private static final int MODE_INACTIVE = 0;
     private static final int MODE_UP = 1;
@@ -26,14 +29,17 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     private boolean computerEnabled = true;
     private int computerMode = MODE_REDSTONE;
     
-    private String[] methodsArray = {
-    	"energy",
-    	"mode",
-    	"active",
-    	"help"
-    };
+    private int tickCount = 0;
     
-    int tickCount = 0;
+    public TileEntityLift() {
+    	peripheralName = "warpdriveLaserLift";        
+        methodsArray = new String[] {
+        	"getEnergyLevel",
+        	"mode",
+        	"active",
+        	"help"
+        };
+	}
     
     @Override
     public void updateEntity() {
@@ -159,21 +165,47 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
         return Integer.MAX_VALUE;
     }
 
-
-    @Override
-    public String getType() {
-    	return "warpdriveLaserLift";
-    }
-
-    @Override
-    public String[] getMethodNames() {
-    	return methodsArray;
-    }
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] mode(Context context, Arguments arguments) {
+		return mode(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] active(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			computerEnabled = arguments.checkBoolean(0);
+		}
+		return new Object[] { computerEnabled ? false : isEnabled };
+	}
+	
+	private Object[] mode(Object[] arguments) {
+		if (arguments.length == 1) {
+			if (arguments[0].toString().equals("up")) {
+				computerMode = MODE_UP;
+			} else if(arguments[0].toString().equals("down")) {
+				computerMode = MODE_DOWN;
+			} else {
+				computerMode = MODE_REDSTONE;
+			}
+		}
+		switch (computerMode) {
+			case -1:
+				return new Object[] { "redstone" };
+			case 1:
+				return new Object[] { "up" };
+			case 2:
+				return new Object[] { "down" };
+		}
+		return null;
+	}
 
     public String helpStr(Object[] args) {
     	if (args.length == 1) {
     		String methodName = args[0].toString().toLowerCase();
-    		if (methodName.equals("energy")) {
+    		if (methodName.equals("getEnergyLevel")) {
     			return WarpDrive.defEnergyStr;
     		} else if (methodName.equals("mode")) {
     			return "mode(\"up\" or \"down\" or \"redstone\"): sets the mode\nmode(): returns the current mode";
@@ -184,57 +216,26 @@ public class TileEntityLift extends WarpEnergyTE implements IPeripheral {
     	return WarpDrive.defHelpStr;
     }
 
+    // ComputerCraft IPeripheral methods implementation
     @Override
+	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] args) throws Exception {
     	String methodName = methodsArray[method];
-    	if (methodName.equals("energy")) {
-    		return getEnergyObject();
+    	if (methodName.equals("getEnergyLevel")) {
+    		return getEnergyLevel();
+    		
 		} else if (methodName.equals("mode")) {
-			if (args.length == 1) {
-				if (args[0].toString().equals("up")) {
-					computerMode = MODE_UP;
-				} else if(args[0].toString().equals("down")) {
-					computerMode = MODE_DOWN;
-				} else {
-					computerMode = MODE_REDSTONE;
-				}
-			}
-			switch (computerMode) {
-				case -1:
-					return new Object[] { "redstone" };
-				case 1:
-					return new Object[] { "up" };
-				case 2:
-					return new Object[] { "down" };
-			}
+			return mode(args);
+			
 		} else if (methodName.equals("active")) {
 			if (args.length == 1) {
 				computerEnabled = toBool(args[0]);
     		}
     		return new Object[] { computerEnabled ? false : isEnabled };
+    		
     	} else if (methodName.equals("help")) {
     		return new Object[] { helpStr(args) };
     	}
     	return null;
     }
-    
-	@Override
-	public void attach(IComputerAccess computer) {
-
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-
-	}
-	
-	@Override
-	public int hashCode() {
-		return (((((super.hashCode() + worldObj.provider.dimensionId << 4) + xCoord) << 4) + yCoord) << 4) + zCoord;
-	}
-	
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other.hashCode() == hashCode();
-	}
 }

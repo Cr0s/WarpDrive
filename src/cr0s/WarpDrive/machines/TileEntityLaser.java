@@ -5,7 +5,6 @@ import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.common.FMLCommonHandler;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -492,7 +491,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
         super.onChunkUnload();
     }
 
-	// IPeripheral methods implementation
+	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	private Object[] emitBeam(Context context, Arguments arguments) {
@@ -580,37 +579,33 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 	}
 
+	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		switch (method) {
-			case 0: // emitBeam(yaw, pitch) or emitBeam(deltaX, deltaY, deltaZ)
-				return emitBeam(arguments);
-				
-			case 1: // pos
-				return new Integer[] { xCoord, yCoord, zCoord };
-				
-			case 2: // freq
+    	String methodName = methodsArray[method];
+    	if (methodName.equals("emitBeam")) { // emitBeam(yaw, pitch) or emitBeam(deltaX, deltaY, deltaZ)
+			return emitBeam(arguments);
+    	} else if (methodName.equals("pos")) {
+			return new Integer[] { xCoord, yCoord, zCoord };
+    	} else if (methodName.equals("freq")) {
+			if (arguments.length == 1) {
+				setBeamFrequency(toInt(arguments[0]));
+			}
+			return new Integer[] { beamFrequency };
+    	} else if (methodName.equals("getFirstHit")) {
+    		return getFirstHit();
+    	} else if (methodName.equals("getBoosterDXDZ")) {
+    		findFirstBooster();
+    		return new Integer[] { dx, dz };
+    	} else if (methodName.equals("camFreq")) { // camFreq (only for lasers with cam)
+			if (isWithCamera()) {
 				if (arguments.length == 1) {
-					setBeamFrequency(toInt(arguments[0]));
+					setCameraFrequency(toInt(arguments[0]));
 				}
-				return new Integer[] { beamFrequency };
-				
-			case 3: // getFirstHit()
-				return getFirstHit();
-				
-			case 4: // getBoosterDXDZ
-				findFirstBooster();
-				return new Integer[] { dx, dz };
-
-			case 5: // camFreq (only for lasers with cam)
-				if (isWithCamera()) {
-					if (arguments.length == 1) {
-						setCameraFrequency(((Double)arguments[0]).intValue());
-					}
-					return new Integer[] { cameraFrequency };
-				}
-				return null;
+				return new Integer[] { cameraFrequency };
+			}
+			return null;
 		}
 		return null;
 	}

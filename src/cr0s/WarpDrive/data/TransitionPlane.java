@@ -9,8 +9,7 @@ import net.minecraft.nbt.NBTTagCompound;
  * @author LemADEC
  */
 
-public class TransitionPlane implements Cloneable
-{
+public class TransitionPlane implements Cloneable {
     public int	dimensionId;
 	public int  dimensionCenterX, dimensionCenterZ;
 	public int  borderSizeX, borderSizeZ;

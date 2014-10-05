@@ -25,7 +25,8 @@ if radius < 1 or radius > 9999 then
   return
 end
 
-if radar.getEnergyLevel() < radius * radius then
+energy, energyMax = radar.getEnergyLevel()
+if energy < radius * radius then
   print("Low energy level...")
   return
 end

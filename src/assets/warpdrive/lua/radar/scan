@@ -60,7 +60,8 @@ function drawContact(x, y, z, name, color)
 end
 
 function scanAndDraw()
-  if (radar.getEnergyLevel() < radius*radius) then
+  local energy, energyMax = radar.getEnergyLevel()
+  if (energy < radius*radius) then
     hh = math.floor(h / 2);
     hw = math.floor(w / 2);
     
@@ -101,7 +102,8 @@ function redraw()
    textOut(w - 3, 1, "[X]", colors.white, colors.red)
    
    paintutils.drawLine(1, h, w, h, colors.black);
-   textOut(4, h, "Energy: " .. radar.getEnergyLevel() .. " Eu | Scan radius: " .. radius, colors.white, colors.black)
+   local energy, energyMax = radar.getEnergyLevel()
+   textOut(4, h, "Energy: " .. energy .. " EU | Scan radius: " .. radius, colors.white, colors.black)
 end
 
 mrun = true

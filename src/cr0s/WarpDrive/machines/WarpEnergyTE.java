@@ -2,12 +2,16 @@ package cr0s.WarpDrive.machines;
 
 import java.util.HashMap;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cr0s.WarpDrive.WarpDrive;
 import cr0s.WarpDrive.api.IBlockUpdateDetector;
 import cr0s.WarpDrive.data.EnumUpgradeTypes;
@@ -16,7 +20,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 
-public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
+public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
 	private static final double EU_PER_INTERNAL = 1.0D;
@@ -139,7 +143,7 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
 		return temp;
 	}
 	
-	public Object[] getEnergyObject() {
+	public Object[] getEnergyLevel() {
 		return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 	}
 
@@ -150,7 +154,13 @@ public abstract class WarpEnergyTE extends WarpTE implements IEnergyHandler, IEn
     		return getBlockType().getLocalizedName();
     	}
     }
-    
+	
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] getEnergyLevel(Context context, Arguments arguments) {
+		return getEnergyLevel();
+	}
     
 	// Minecraft overrides
     @Override

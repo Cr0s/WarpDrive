@@ -18,7 +18,7 @@ if warp == nil then
   term.setTextColor(colors.white)
   term.write("No cloak core detected")
 else
-  warp.disableCloakingField()
+  warp.enable(false)
   term.setBackgroundColor(colors.lightGray)
   term.setTextColor(colors.black)
   term.write("Cloak disabled")

@@ -1,26 +1,25 @@
 package cr0s.WarpDrive.machines;
 
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cr0s.WarpDrive.*;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 
+import li.cil.oc.api.network.Arguments;
+import li.cil.oc.api.network.Callback;
+import li.cil.oc.api.network.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkPosition;
 
-public class TileEntityCamera extends TileEntity implements IPeripheral {
+public class TileEntityCamera extends WarpInterfacedTE {
 	private int frequency = -1;	// beam frequency
-
-	private String[] methodsArray = {
-		"freq"
-	};
 
 	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 15 * 20;
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
@@ -28,6 +27,13 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 	private int registryUpdateTicks = 20;
 	private int packetSendTicks = 20;
 
+	public TileEntityCamera() {
+		peripheralName = "camera";
+		methodsArray = new String[] {
+			"freq"
+		};
+	}
+	
 	@Override
 	public void updateEntity() {
 		// Update frequency on clients (recovery mechanism, no need to go too fast)
@@ -89,36 +95,28 @@ public class TileEntityCamera extends TileEntity implements IPeripheral {
 		// WarpDrive.debugPrint("" + this + " writeToNBT");
 	}
 
-	// IPeripheral methods implementation
-	@Override
-	public String getType() {
-		return "camera";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return methodsArray;
-	}
-
-	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-		if (arguments.length == 1) {
-			setFrequency(((Double)arguments[0]).intValue());
+	// OpenComputer callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	private Object[] freq(Context context, Arguments arguments) {
+		if (arguments.count() == 1) {
+			setFrequency(arguments.checkInteger(0));
 		}
 		return new Integer[] { frequency };
 	}
 
+	// ComputerCraft IPeripheral methods implementation
 	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
+	@Optional.Method(modid = "ComputerCraft")
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+    	String methodName = methodsArray[method];
+    	if (methodName.equals("freq")) {
+			if (arguments.length == 1) {
+				setFrequency(toInt(arguments[0]));
+			}
+			return new Integer[] { frequency };
+    	}
+    	return null;
 	}
 	
 	@Override

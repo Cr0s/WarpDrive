@@ -18,8 +18,8 @@ if warp == nil then
   term.setTextColor(colors.white)
   term.write("No cloak core detected")
 else
-  warp.setFieldTier(0)
-  warp.enableCloakingField()
+  warp.tier(1)
+  warp.enable(true)
   if warp.isAssemblyValid() then
     term.setBackgroundColor(colors.lime)
     term.setTextColor(colors.blue)
