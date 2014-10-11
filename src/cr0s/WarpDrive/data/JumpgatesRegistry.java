@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import cr0s.WarpDrive.WarpDrive;
+
 public final class JumpgatesRegistry {
     private File db;
     private ArrayList<Jumpgate> gates = new ArrayList<Jumpgate>();
@@ -17,7 +19,7 @@ public final class JumpgatesRegistry {
     //@SideOnly(Side.CLIENT)
     public JumpgatesRegistry() {
         db = new File("gates.txt");
-        System.out.println("Gates.txt file: " + db);
+        WarpDrive.print("Gates.txt file: " + db);
         
         if (db != null && !db.exists()) {
         	try {
@@ -46,7 +48,7 @@ public final class JumpgatesRegistry {
     }
 
     public void loadGates() throws IOException {
-        System.out.println("[JUMP GATES] Loading jump gates from gates.txt...");
+    	WarpDrive.print("[JUMP GATES] Loading jump gates from gates.txt...");
         BufferedReader bufferedreader;
         bufferedreader = new BufferedReader(new FileReader(db));
         String s1;
@@ -56,7 +58,7 @@ public final class JumpgatesRegistry {
         }
 
         bufferedreader.close();
-        System.out.println("[JUMP GATES] Loaded " + gates.size() + " jump gates.");
+        WarpDrive.print("[JUMP GATES] Loaded " + gates.size() + " jump gates.");
     }
 
     public void addGate(Jumpgate jg) {

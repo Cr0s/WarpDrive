@@ -41,6 +41,6 @@ public class LocalProfiler
 
         long self = (dt - e.internal) / 1000; // in microseconds
         long total = dt / 1000;
-        System.out.println("[PROF] {" + e.name + "} self: " + (self / 1000F) + "ms, total: " + (total / 1000F) + "ms");
+        WarpDrive.print("[PROF] {" + e.name + "} self: " + (self / 1000F) + "ms, total: " + (total / 1000F) + "ms");
     }
 }

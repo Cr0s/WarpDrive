@@ -109,10 +109,10 @@ public class CamRegistry {
     }
 
 	public void printRegistry(World worldObj) {
-		System.out.println("Cameras registry for dimension " + worldObj.provider.dimensionId + ":");
+		WarpDrive.print("Cameras registry for dimension " + worldObj.provider.dimensionId + ":");
 
 		for (CamRegistryItem cam : registry) {
-			System.out.println("- " + cam.frequency + " (" + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + ")");
+			WarpDrive.print("- " + cam.frequency + " (" + cam.position.x + ", " + cam.position.y + ", " + cam.position.z + ")");
 		}
 	}
 }

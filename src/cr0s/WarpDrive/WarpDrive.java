@@ -157,7 +157,7 @@ public class WarpDrive implements LoadingCallback {
 
 			normalFOV = mc.gameSettings.fovSetting;
 		    normalSensitivity = mc.gameSettings.mouseSensitivity;
-		    System.out.println("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
+		    WarpDrive.print("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
 		}
 	}
 	

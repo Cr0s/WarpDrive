@@ -25,10 +25,12 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	public final int YELLOW_GIANT_RADIUS = 64;
 	public final int YELLOW_SUPERGIANT_RADIUS = 80;
 
+	// Upper than 200 nothing should generate naturally (safe place)
+	public static int Y_LIMIT_HARD_MAX = 200;
 	// Upper than 128 almost nothing will be generated
-	public final int Y_LIMIT = 128;
+	public static int Y_LIMIT_SOFT_MAX = 128;
 	// Lower limit
-	public final int Y_LIMIT_DOWN = 55;
+	public static int Y_LIMIT_SOFT_MIN = 55;
 
 	/**
 	 * Generator for chunk
@@ -49,7 +51,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		if (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS) {
 			return;
 		}
-		int y = Y_LIMIT_DOWN + random.nextInt(Y_LIMIT - Y_LIMIT_DOWN);
+		int y = Y_LIMIT_SOFT_MIN + random.nextInt(Y_LIMIT_SOFT_MAX - Y_LIMIT_SOFT_MIN);
 		// Moon setup
 		if (random.nextInt(700) == 1)
 			generateMoon(world, x, y, z);
@@ -84,8 +86,8 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	public static void generateMoon(World world, int x, int y, int z) {
 		int coreRadius = 5 + world.rand.nextInt(12);
 		int moonRadius = coreRadius + 5 + world.rand.nextInt(26);
-		int y2 = Math.max(moonRadius + 6, Math.min(y, 255 - moonRadius - 6));
-		System.out.println("Generating moon at " + x + " " + y2 + " " + z);
+		int y2 = Math.max(moonRadius + 6, Math.min(y, Y_LIMIT_HARD_MAX - moonRadius - 6));
+		WarpDrive.print("Generating moon at " + x + " " + y2 + " " + z);
 
 		int[] block = WarpDriveConfig.getDefaultSurfaceBlock(world.rand, world.rand.nextInt(10) > 8, true);
 
@@ -148,11 +150,11 @@ public class SpaceWorldGenerator implements IWorldGenerator
 	public void generateStar(World world, int x, int y, int z, Integer type) {
 		Integer starClass = type == -1 ? world.rand.nextInt(3) : type;
 		Integer y2 = y;
-		System.out.println("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
+		WarpDrive.print("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
 
 		switch (starClass) {
 			case 0: // red dwarf
-				y2 = Math.max(RED_DWARF_RADIUS + 6, Math.min(y, 255 - RED_DWARF_RADIUS - 6));
+				y2 = Math.max(RED_DWARF_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - RED_DWARF_RADIUS - 6));
 				generateSphereEntity(world, x, y2, z, RED_DWARF_RADIUS, false, Block.blockRedstone.blockID, 0, false);
 				// Heliosphere of red gas
 				generateGasSphereEntity(world, x, y2, z, RED_DWARF_RADIUS + 6, true, 1);
@@ -160,7 +162,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 				break;
 
 			case 1:
-				y2 = Math.max(YELLOW_GIANT_RADIUS + 6, Math.min(y, 255 - YELLOW_GIANT_RADIUS - 6));
+				y2 = Math.max(YELLOW_GIANT_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - YELLOW_GIANT_RADIUS - 6));
 				generateSphereEntity(world, x, y2, z, YELLOW_GIANT_RADIUS, false, Block.glowStone.blockID, 0, false);
 				// Heliosphere of yellow gas
 				generateGasSphereEntity(world, x, y2, z, YELLOW_GIANT_RADIUS + 6, true, 3);
@@ -168,7 +170,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 				break;
 
 			case 2:
-				y2 = Math.max(YELLOW_SUPERGIANT_RADIUS + 6, Math.min(y, 255 - YELLOW_SUPERGIANT_RADIUS - 6));
+				y2 = Math.max(YELLOW_SUPERGIANT_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - YELLOW_SUPERGIANT_RADIUS - 6));
 				generateSphereEntity(world, x, y2, z, YELLOW_SUPERGIANT_RADIUS, false, Block.glowStone.blockID, 0, false);
 				// Heliosphere of yellow gas
 				generateGasSphereEntity(world, x, y2, z, YELLOW_SUPERGIANT_RADIUS + 6, true, 3);
@@ -191,7 +193,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		int x2 = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int y2 = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		System.out.println("Generating small ship at " + x2 + "," + y2 + "," + z2);
+		WarpDrive.print("Generating small ship at " + x2 + "," + y2 + "," + z2);
 		new WorldGenSmallShip(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
 	}
 
@@ -199,7 +201,7 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		int x2 = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int y2 = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		System.out.println("Generating small ship at " + x2 + "," + y2 + "," + z2);
+		WarpDrive.print("Generating small ship at " + x2 + "," + y2 + "," + z2);
 		new WorldGenStation(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
 	}
 
@@ -276,8 +278,8 @@ public class SpaceWorldGenerator implements IWorldGenerator
 		int numOfSmallAsteroids = Math.round((1.0F - bigRatio) * surfaceSmall / surfacePerAsteroid);
 		int numOfClouds = Math.round(numOfBigAsteroids * 1.0F / (10.0F + world.rand.nextInt(10)));
 		int maxHeight = 70 + world.rand.nextInt(50);
-		int y2 = Math.min(240 - maxHeight, Math.max(y1, maxHeight));
-		System.out.println("Generating asteroid field at " + x + "," + y2 + "," + z
+		int y2 = Math.min(Y_LIMIT_HARD_MAX - maxHeight, Math.max(y1, maxHeight));
+		WarpDrive.print("Generating asteroid field at " + x + "," + y2 + "," + z
 					+ " qty " + numOfBigAsteroids + ", " + numOfSmallAsteroids + ", " + numOfClouds
 					+ " over " + maxDistance + ", " + maxHeight + " surfacePerAsteroid " + String.format("%.1f", surfacePerAsteroid));
 		

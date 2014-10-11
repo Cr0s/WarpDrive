@@ -866,11 +866,11 @@ public class WarpDriveConfig
 			NetherOres_block = new int[(NetherOres_count + 15) / 16];
 			NetherOres_block[0] = 1440;
 			NetherOres_block[1] = 1442;
-			System.out.println("WarpDriveConfig found " + NetherOres_count + " NetherOres");
+			WarpDrive.debugPrint("WarpDriveConfig found " + NetherOres_count + " NetherOres");
 		}
 		catch (Exception e)
 		{
-			System.out.println("WarpDriveConfig Error loading NetherOres classes");
+			WarpDrive.print("WarpDriveConfig Error loading NetherOres classes");
 			e.printStackTrace();
 			isNetherOresLoaded = false;
 		}
@@ -881,7 +881,7 @@ public class WarpDriveConfig
 //			TEEnergyCell = Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
 //			TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
 		} catch (Exception e) {
-			System.out.println("WarpDriveConfig Error loading ThermalExpansion classes");
+			WarpDrive.print("WarpDriveConfig Error loading ThermalExpansion classes");
 			e.printStackTrace();
 			isThermalExpansionLoaded = false;
 		}
@@ -893,7 +893,7 @@ public class WarpDriveConfig
 			Metallurgy_netherOresBlock = new int[][] { { 903, 0}, { 903, 1}, { 903, 2}, { 903, 3}, { 903, 4}, { 903, 5}, { 903, 6}, { 903, 7}, { 903, 8}, { 903, 9} };
 			Metallurgy_endOresBlock = new int[][] { { 900, 5}, { 900, 6} };   
 		} catch (Exception e) {
-			System.out.println("WarpDriveConfig Error loading Metallurgy classes");
+			WarpDrive.print("WarpDriveConfig Error loading Metallurgy classes");
 			e.printStackTrace();
 			isMetallurgyLoaded = false;
 		}
@@ -905,7 +905,7 @@ public class WarpDriveConfig
 			int fieldBlockId = ((Block)z.getField("MFFSFieldblock").get(null)).blockID;
 			forceFieldBlocks.add(fieldBlockId);
 		} catch (Exception e) {
-			System.out.println("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
+			WarpDrive.print("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
 			e.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}

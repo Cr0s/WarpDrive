@@ -160,7 +160,7 @@ public class EntityJump extends Entity
 		}
 
 		if (!on) {
-			System.out.println("" + this + " Removing from onUpdate...");
+			WarpDrive.print(this + " Removing from onUpdate...");
 			worldObj.removeEntity(this);
 			return;
 		}
@@ -174,7 +174,7 @@ public class EntityJump extends Entity
 
 		ticks++;
 		if (state == STATE_IDLE) {
-			WarpDrive.debugPrint("" + this + " Preparing to jump...");
+			WarpDrive.debugPrint(this + " Preparing to jump...");
 			prepareToJump();
 			if (on) {
 				state = STATE_JUMPING;
@@ -299,7 +299,7 @@ public class EntityJump extends Entity
 		if (entitiesOnShip == null) {
 			reactor.messageToAllPlayersOnShip(msg);
 		} else {
-			System.out.println("" + this + " messageToAllPlayersOnShip: " + msg);
+			WarpDrive.print("" + this + " messageToAllPlayersOnShip: " + msg);
 			for (MovingEntity me : entitiesOnShip) {
 				if (me.entity instanceof EntityPlayer) {
 					((EntityPlayer)me.entity).addChatMessage("[" + ((reactor != null && reactor.coreFrequency.length() > 0) ? reactor.coreFrequency : "WarpCore") + "] " + msg);
@@ -753,7 +753,7 @@ public class EntityJump extends Entity
 				WarpDrive.debugPrint("" + this + " Reporting " + collisionAtTarget.size() + " collisions coordinates "
 						+ blowPoints + " blowPoints with massCorrection of " + String.format("%.2f", massCorrection) + " => strength " + String.format("%.2f", collisionStrength) );
 			} else {
-				System.out.println("WarpDrive error: unable to compute collision points, ignoring...");
+				WarpDrive.print("WarpDrive error: unable to compute collision points, ignoring...");
 			}
 		}
 
