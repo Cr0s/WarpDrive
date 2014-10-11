@@ -10,7 +10,7 @@ public class SoundHandler {
     @ForgeSubscribe
     public void onSoundLoad(SoundLoadEvent event) {
         try {
-            System.out.println("[WarpDrive] Registering sound files...");
+        	WarpDrive.debugPrint("[WarpDrive] Registering sound files...");
             event.manager.addSound("warpdrive:warp_4s.ogg");
             event.manager.addSound("warpdrive:warp_10s.ogg");
             event.manager.addSound("warpdrive:warp_30s.ogg");

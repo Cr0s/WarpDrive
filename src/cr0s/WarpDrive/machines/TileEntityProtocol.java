@@ -567,7 +567,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
 					return new Integer[] { getFront(), getRight(), getUp() };
 				}
-				System.out.println("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+				WarpDrive.debugPrint("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
 				setFront(argInt0);
 				setRight(argInt1);
 				setUp(argInt2);
@@ -589,7 +589,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
 					return new Integer[] { getBack(), getLeft(), getDown() };
 				}
-				System.out.println("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+				WarpDrive.debugPrint("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
 				setBack(argInt0);
 				setLeft(argInt1);
 				setDown(argInt2);

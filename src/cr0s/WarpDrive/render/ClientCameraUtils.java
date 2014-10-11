@@ -19,11 +19,11 @@ public class ClientCameraUtils {
         Minecraft mc = Minecraft.getMinecraft();
 
         if (parPlayerEntity == null) {
-            System.out.println("[WarpDrive] setupViewpoint with null player => denied");
+        	WarpDrive.print("[WarpDrive] setupViewpoint with null player => denied");
             return;
         }
         if (entityCamera == null) {
-            System.out.println("[WarpDrive] setupViewpoint with null camera => denied");
+        	WarpDrive.print("[WarpDrive] setupViewpoint with null camera => denied");
             return;
         }
 
@@ -53,7 +53,7 @@ public class ClientCameraUtils {
     		entityPlayer = null;
             WarpDrive.debugPrint("Resetting viewpoint");
     	} else {
-            System.out.println("[WarpDrive] reseting viewpoint with invalid player entity ?!?");
+    		WarpDrive.print("[WarpDrive] reseting viewpoint with invalid player entity ?!?");
     	}
         
     	Keyboard.enableRepeatEvents(false);
@@ -72,11 +72,11 @@ public class ClientCameraUtils {
     		return false;
     	}
     	if (worldObj.getBlockId(check1_x, check1_y, check1_z) != check1_blockId) {
-            System.out.println("[WarpDrive] checking viewpoint, found invalid block1 at (" + check1_x + ", " + check1_y + ", " + check1_z + ")");
+    		WarpDrive.print("[WarpDrive] checking viewpoint, found invalid block1 at (" + check1_x + ", " + check1_y + ", " + check1_z + ")");
     		return false;
     	}
     	if (worldObj.getBlockId(check2_x, check2_y, check2_z) != check2_blockId) {
-            System.out.println("[WarpDrive] checking viewpoint, found invalid block2 at (" + check2_x + ", " + check2_y + ", " + check2_z + ")");
+    		WarpDrive.print("[WarpDrive] checking viewpoint, found invalid block2 at (" + check2_x + ", " + check2_y + ", " + check2_z + ")");
     		return false;
     	}
     	return true;
