@@ -297,7 +297,7 @@ public class TileEntityReactor extends WarpEnergyTE
         AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX + 0.99D, this.maxY + 0.99D, this.maxZ + 0.99D);
         List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
-        System.out.println("" + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client":"Server") + this + " messageToAllPlayersOnShip: " + msg);
+        WarpDrive.print("" + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client":"Server") + this + " messageToAllPlayersOnShip: " + msg);
         for (Object o : list) {
             if (o == null || !(o instanceof EntityPlayer)) {
                 continue;
@@ -549,7 +549,7 @@ public class TileEntityReactor extends WarpEnergyTE
         if (isBeaconFound) {
             // Consume energy
             if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
-	            System.out.println("" + this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
+            	WarpDrive.print(this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 	            EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 	            jump.maxX = maxX;
 	            jump.minX = minX;
@@ -564,7 +564,7 @@ public class TileEntityReactor extends WarpEnergyTE
             	messageToAllPlayersOnShip("Insufficient energy level");
             }
         } else {
-            System.out.println("" + this + " Beacon '" + freq + "' is unknown.");
+        	WarpDrive.print(this + " Beacon '" + freq + "' is unknown.");
         }
     }
 
@@ -608,7 +608,7 @@ public class TileEntityReactor extends WarpEnergyTE
 		}
         if (shipVolume != countBlocksTotal)
         {
-        	System.out.println("" + this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
+        	WarpDrive.print(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
         }
         WarpDrive.debugPrint("Ship has " + countBlocksInside + " / " + shipVolume + " blocks (" + percent + "%) in jumpgate '" + jg.name + "'");
         // At least 80% of ship must be inside jumpgate
@@ -725,12 +725,12 @@ public class TileEntityReactor extends WarpEnergyTE
                 return;
             }
 
-            System.out.println("[GATE] Place found over " + (10 - numTries) + " tries.");
+            WarpDrive.print("[GATE] Place found over " + (10 - numTries) + " tries.");
         }
 
         // Consume energy
         if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
-	        System.out.println("[TE-WC] Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
+        	WarpDrive.print(this + " Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 	        EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 	        jump.maxX = maxX;
 	        jump.minX = minX;
@@ -758,21 +758,21 @@ public class TileEntityReactor extends WarpEnergyTE
 
         String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
         if (currentMode == ReactorMode.GATE_JUMP) {
-            System.out.println("" + this + " Performing gate jump of " + shipInfo);
+        	WarpDrive.print(this + " Performing gate jump of " + shipInfo);
             doGateJump();
             return;
         } else if (currentMode == ReactorMode.BEACON_JUMP) {
-            System.out.println("" + this + " Performing beacon jump of " + shipInfo);
+        	WarpDrive.print(this + " Performing beacon jump of " + shipInfo);
             doBeaconJump();
             return;
         } else if (currentMode == ReactorMode.HYPERSPACE) {
-            System.out.println("" + this + " Performing hyperspace jump of " + shipInfo);
+        	WarpDrive.print(this + " Performing hyperspace jump of " + shipInfo);
 
         	// Check ship size for hyper-space jump
             if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
 	            Jumpgate nearestGate = null;
 	            if (WarpDrive.jumpgates == null) {
-	            	System.out.println("" + this + " WarpDrive.instance.jumpGates is NULL!");
+	            	WarpDrive.print(this + " WarpDrive.instance.jumpGates is NULL!");
 	            } else {
 	            	nearestGate = WarpDrive.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 	            }
@@ -785,11 +785,11 @@ public class TileEntityReactor extends WarpEnergyTE
                 }
             }
         } else if (currentMode == ReactorMode.BASIC_JUMP) {
-            System.out.println("" + this + " Performing basic jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
+        	WarpDrive.print(this + " Performing basic jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
         } else if (currentMode == ReactorMode.LONG_JUMP) {
-            System.out.println("" + this + " Performing long jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
+        	WarpDrive.print(this + " Performing long jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
         } else {
-            System.out.println("" + this + " Performing some jump #" + currentMode + " of " + shipInfo);
+        	WarpDrive.print(this + " Performing some jump #" + currentMode + " of " + shipInfo);
         }
         
         if (currentMode == ReactorMode.BASIC_JUMP || currentMode == ReactorMode.LONG_JUMP || currentMode == ReactorMode.HYPERSPACE) {
@@ -887,7 +887,7 @@ public class TileEntityReactor extends WarpEnergyTE
 
             if (checkPlayerInventory(chest, player))
             {
-                System.out.println("" + this + " Summoning " + player.username);
+            	WarpDrive.print(this + " Summoning " + player.username);
                 summonPlayer(player, xCoord, yCoord + 2, zCoord);
             }
         }
@@ -916,7 +916,7 @@ public class TileEntityReactor extends WarpEnergyTE
         }
 
         if (keyLength < MIN_KEY_LENGTH) {
-            System.out.println("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
+        	WarpDrive.print("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
             return false;
         }
 
