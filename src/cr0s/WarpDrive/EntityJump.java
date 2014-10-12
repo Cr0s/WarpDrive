@@ -143,7 +143,6 @@ public class EntityJump extends Entity
 			WarpDrive.debugPrint("" + this + " Killing jump entity... (" + reason + ")");
 		}
 
-//		unlockWorlds();
 		unforceChunks();
 		worldObj.removeEntity(this);
 	}

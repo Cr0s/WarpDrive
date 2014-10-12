@@ -81,6 +81,7 @@ public class WarpDriveConfig
 	public static boolean isThermalExpansionLoaded			= false;
 	public static boolean isMetallurgyLoaded				= false;
 	public static boolean isAdvancedRepulsionSystemsLoaded	= false;
+	public static boolean isMagicalCropsLoaded				= false;
 
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
@@ -574,6 +575,8 @@ public class WarpDriveConfig
 		if (isAdvancedRepulsionSystemsLoaded) {
 			loadAdvancedRepulsionSystems();
 		}
+		
+		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
 //
 		MinerOres.add(iridiumBlockID);
 		MinerOres.add(Block.oreCoal.blockID);
@@ -956,7 +959,11 @@ public class WarpDriveConfig
 				return new int[] {UB_metamorphicStone, rnd - 8};
 			}
 			else if (rnd < (8 + 8 + 8)) {
-				return new int[] {UB_sedimentaryStone, rnd - 8 - 8};
+				if (rnd == 8 + 8 + 8) {
+					return new int[] {205, 0};	// emasher Limestone
+				} else {
+					return new int[] {UB_sedimentaryStone, rnd - 8 - 8};
+				}
 			}
 		}
 		return new int[] {Block.stone.blockID, 0};
@@ -1003,6 +1010,8 @@ public class WarpDriveConfig
 			return new int[] {Block.oreDiamond.blockID, 0};
 		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
 			return new int[] {iridiumBlockID, 0};
+		} else if (!isMagicalCropsLoaded && (random.nextInt(100) == 56)) {
+			return new int[] {3108, 0};	// Essence ore
 		} else if (isGregLoaded) {
 			if (random.nextInt(50) == 1)
 				return new int[] {GT_Ores, 5}; //Bauxite S /* Stone/Iron/Diamod pick | +S = Silktouch recommended */
@@ -1036,6 +1045,8 @@ public class WarpDriveConfig
 			return Metallurgy_netherOresBlock[random.nextInt(Metallurgy_netherOresBlock.length)];
 		} else if (random.nextInt(25) == 1) {
 			return new int[] {Block.oreNetherQuartz.blockID, 0};
+		} else if (!isMagicalCropsLoaded && (random.nextInt(100) == 56)) {
+			return new int[] {3109, 0};	// Nether essence ore
 		} else if (isGregLoaded)  {
 			if (random.nextInt(100) == 1)
 				return new int[] {GT_Ores, 6}; //Pyrite S+S
