@@ -203,25 +203,25 @@ public class WarpDrive implements LoadingCallback {
 		// CORE CONTROLLER
 		protocolBlock = new BlockProtocol(0, Material.rock);
 		
-		GameRegistry.registerBlock(protocolBlock, "protocolBlocks");
-		GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlocks");
+		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
+		GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");
 		
 		// WARP CORE
-		warpCore = new BlockReactor( 0, Material.rock);
+		warpCore = new BlockReactor(0, Material.rock);
 		
 		GameRegistry.registerBlock(warpCore, "warpCore");
 		GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");		
 		
 		// WARP RADAR
-		radarBlock = new BlockRadar( 0, Material.rock);
+		radarBlock = new BlockRadar(0, Material.rock);
 		
-		GameRegistry.registerBlock(radarBlock, "radarBlocks");
-		GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlocks");
+		GameRegistry.registerBlock(radarBlock, "radarBlock");
+		GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");
 		
 		// WARP ISOLATION
 		isolationBlock = new BlockWarpIsolation(0, Material.rock);
 		
-		GameRegistry.registerBlock(isolationBlock, "isolationBlocks");
+		GameRegistry.registerBlock(isolationBlock, "isolationBlock");
 		
 		// AIR GENERATOR
 		airgenBlock = new BlockAirGenerator(0,Material.rock);
@@ -230,15 +230,15 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");
 		
 		
-		// AIR Blocks
+		// AIR Block
 		airBlock = (new BlockAir());
 		
-		GameRegistry.registerBlock(airBlock, "airBlocks");
+		GameRegistry.registerBlock(airBlock, "airBlock");
 		
-		// GAS Blocks
+		// GAS Block
 		gasBlock = (new BlockGas());
 		
-		GameRegistry.registerBlock(gasBlock, "gasBlocks");
+		GameRegistry.registerBlock(gasBlock, "gasBlock");
 		
 		// LASER EMITTER
 		laserBlock = new BlockLaser(0, Material.rock);
@@ -328,7 +328,7 @@ public class WarpDrive implements LoadingCallback {
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			warpdriveTab.setBackgroundImageName("Itemss.png");
+			warpdriveTab.setBackgroundImageName("Items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 		
