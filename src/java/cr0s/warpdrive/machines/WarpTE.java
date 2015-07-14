@@ -1,7 +1,7 @@
 package cr0s.warpdrive.machines;
 
-import cr0s.warpdrive.data.Vector3;
 import net.minecraft.tileentity.TileEntity;
+import cr0s.warpdrive.data.Vector3;
 
 public abstract class WarpTE extends TileEntity
 {

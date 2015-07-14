@@ -3,10 +3,10 @@ package cr0s.warpdrive.data;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class CamRegistry {
     private LinkedList<CamRegistryItem> registry;

@@ -1,22 +1,11 @@
 package cr0s.warpdrive.machines;
 
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
 
 public class TileEntityMonitor extends WarpInterfacedTE {
 	private int frequency = -1;

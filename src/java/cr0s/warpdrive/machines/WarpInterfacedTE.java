@@ -3,23 +3,11 @@ package cr0s.warpdrive.machines;
 import java.util.HashMap;
 import java.util.Set;
 
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
-import li.cil.oc.api.Network;
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Context;
-import li.cil.oc.api.network.Environment;
-import li.cil.oc.api.network.Message;
-import li.cil.oc.api.network.Node;
-import li.cil.oc.api.network.Visibility;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IPeripheral;
-import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
-import cr0s.warpdrive.data.Vector3;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers"),

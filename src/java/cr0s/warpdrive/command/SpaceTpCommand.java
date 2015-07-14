@@ -1,13 +1,13 @@
 package cr0s.warpdrive.command;
 
-import cr0s.warpdrive.WarpDriveConfig;
-import cr0s.warpdrive.world.SpaceTeleporter;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
+import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.world.SpaceTeleporter;
 
 public class SpaceTpCommand extends CommandBase {
     @Override

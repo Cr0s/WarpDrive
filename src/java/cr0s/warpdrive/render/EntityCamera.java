@@ -1,28 +1,22 @@
 package cr0s.warpdrive.render;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.PacketDispatcher;
-import cr0s.warpdrive.PacketHandler;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.EnumOptions;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
+
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
+import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public final class EntityCamera extends EntityLivingBase
 {

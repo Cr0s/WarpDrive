@@ -1,13 +1,13 @@
 package cr0s.warpdrive.data;
 
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class JumpBlock {
     public int blockID;

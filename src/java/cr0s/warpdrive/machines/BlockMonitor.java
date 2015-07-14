@@ -1,5 +1,15 @@
 package cr0s.warpdrive.machines;
 
+import javax.swing.Icon;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -7,16 +17,6 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.CamRegistryItem;
 import cr0s.warpdrive.render.ClientCameraUtils;
 import cr0s.warpdrive.render.EntityCamera;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
-import net.minecraft.world.World;
 
 public class BlockMonitor extends BlockContainer {
     private Icon iconFront;

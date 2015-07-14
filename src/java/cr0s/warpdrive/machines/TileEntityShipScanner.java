@@ -1,21 +1,10 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Optional;
-import cr0s.warpdrive.*;
-import cr0s.warpdrive.data.JumpBlock;
-import cr0s.warpdrive.data.Vector3;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-import ic2.api.energy.tile.IEnergyTile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -23,10 +12,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.util.ForgeDirection;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.data.JumpBlock;
+import cr0s.warpdrive.data.Vector3;
 
 public class TileEntityShipScanner extends WarpEnergyTE {
 	private boolean isActive = false;

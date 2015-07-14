@@ -2,14 +2,14 @@ package cr0s.warpdrive.block;
 
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDriveConfig;
+import javax.swing.Icon;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Icon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class BlockGas extends Block {
     private Icon[] gasIcons;

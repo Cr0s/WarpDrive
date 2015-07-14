@@ -1,17 +1,14 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.warpdrive.WarpDrive;
-
 import java.util.Random;
+
+import javax.swing.Icon;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
-import net.minecraft.world.World;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.warpdrive.WarpDrive;
 
 public class BlockCloakingCoil extends Block {
     private Icon[] iconBuffer;

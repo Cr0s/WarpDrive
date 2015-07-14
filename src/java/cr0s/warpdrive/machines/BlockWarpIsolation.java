@@ -1,15 +1,14 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.warpdrive.WarpDrive;
-
 import java.util.Random;
+
+import javax.swing.Icon;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.util.Icon;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.warpdrive.WarpDrive;
 
 public class BlockWarpIsolation extends Block {
     private Icon[] iconBuffer;

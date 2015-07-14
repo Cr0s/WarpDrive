@@ -1,21 +1,20 @@
 package cr0s.warpdrive.machines;
 
+import java.util.Random;
+
+import javax.swing.Icon;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.CamRegistryItem;
-
-import java.util.Random;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Icon;
-import net.minecraft.world.World;
 
 public class BlockCamera extends BlockContainer {
     private Icon[] iconBuffer;

@@ -2,10 +2,9 @@ package cr0s.warpdrive.block;
 
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDrive;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import cr0s.warpdrive.WarpDrive;
 
 public class BlockIridium extends Block
 {

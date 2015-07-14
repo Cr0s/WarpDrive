@@ -1,9 +1,5 @@
 package cr0s.warpdrive.world;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -14,6 +10,10 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class HyperSpaceProvider extends WorldProvider
 {

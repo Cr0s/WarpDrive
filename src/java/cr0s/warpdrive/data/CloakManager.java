@@ -1,15 +1,7 @@
 package cr0s.warpdrive.data;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
-import cpw.mods.fml.common.network.FMLNetworkHandler;
-import cr0s.warpdrive.PacketHandler;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.data.CloakedArea;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLeashKnot;
 import net.minecraft.entity.EntityLivingBase;
@@ -19,7 +11,6 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityExpBottle;
-import net.minecraft.entity.item.EntityFallingSand;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
@@ -38,19 +29,11 @@ import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntityWitherSkull;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.Packet20NamedEntitySpawn;
-import net.minecraft.network.packet.Packet23VehicleSpawn;
-import net.minecraft.network.packet.Packet24MobSpawn;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.network.packet.Packet25EntityPainting;
-import net.minecraft.network.packet.Packet26EntityExpOrb;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
+import cr0s.warpdrive.PacketHandler;
 
 /**
  * Cloak manager stores cloaking devices covered areas

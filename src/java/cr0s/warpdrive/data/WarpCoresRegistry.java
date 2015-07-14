@@ -3,13 +3,12 @@ package cr0s.warpdrive.data;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import net.minecraft.util.AxisAlignedBB;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.MathHelper;
 
 /** Registry of active Warp Cores in world
  * @author Cr0s

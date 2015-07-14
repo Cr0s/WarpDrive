@@ -1,19 +1,15 @@
 package cr0s.warpdrive.world;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
-import cr0s.warpdrive.data.JumpBlock;
-
 import java.util.ArrayList;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.data.JumpBlock;
 /*
 2014-06-07 21:41:45 [Infos] [STDOUT] Generating star (class 0) at -579 257 1162
 2014-06-07 21:41:45 [Infos] [Minecraft-Client] [CHAT] /generate: generating star at -579, 257, 1162

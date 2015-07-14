@@ -1,13 +1,12 @@
 package cr0s.warpdrive.render;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.World;
+
 import org.lwjgl.input.Keyboard;
 
 import cr0s.warpdrive.WarpDrive;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.EnumOptions;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
 
 public class ClientCameraUtils {
     public static EntityPlayer entityPlayer;

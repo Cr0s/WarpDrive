@@ -10,8 +10,6 @@ import net.minecraft.world.World;
 
 import org.lwjgl.opengl.GL11;
 
-
-
 //import calclavia.lib.render.CalclaviaRenderHelper;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.relauncher.Side;

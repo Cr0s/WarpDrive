@@ -1,28 +1,13 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.FMLCommonHandler;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.packet.NetHandler;
-import net.minecraft.network.packet.Packet250CustomPayload;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -30,7 +15,11 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.ChunkPosition;
-import cr0s.warpdrive.*;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 public class TileEntityLaser extends WarpInterfacedTE {

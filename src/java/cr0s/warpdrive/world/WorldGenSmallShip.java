@@ -2,7 +2,6 @@ package cr0s.warpdrive.world;
 
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.block.Block;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.passive.EntityVillager;
@@ -11,6 +10,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class WorldGenSmallShip extends WorldGenerator
 {

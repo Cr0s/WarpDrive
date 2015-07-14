@@ -3,7 +3,6 @@ package cr0s.warpdrive.world;
 import java.util.List;
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDrive;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.world.ChunkPosition;
@@ -12,6 +11,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
+import cr0s.warpdrive.WarpDrive;
 
 public class HyperSpaceGenerator extends ChunkProviderGenerate implements IChunkProvider
 {

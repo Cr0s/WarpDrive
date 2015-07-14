@@ -1,13 +1,13 @@
 package cr0s.warpdrive.item;
 
+import javax.swing.Icon;
+
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
 
 public class ItemWarpAirCanister extends Item implements IAirCanister {
 	Icon icon;

@@ -1,11 +1,7 @@
 package cr0s.warpdriveCore;
 
-import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;

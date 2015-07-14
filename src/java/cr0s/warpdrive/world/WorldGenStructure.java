@@ -2,8 +2,8 @@ package cr0s.warpdrive.world;
 
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.block.Block;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class WorldGenStructure
 {

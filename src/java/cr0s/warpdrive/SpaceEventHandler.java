@@ -1,28 +1,23 @@
 package cr0s.warpdrive;
 
-import ic2.api.item.Items;
-
 import java.util.HashMap;
-import java.util.List;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.api.IBreathingHelmet;
-import cr0s.warpdrive.data.CloakedArea;
-import cr0s.warpdrive.world.SpaceTeleporter;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumGameType;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.event.ForgeSubscribe;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.api.IBreathingHelmet;
+import cr0s.warpdrive.world.SpaceTeleporter;
 
 /**
  * 
@@ -136,7 +131,7 @@ public class SpaceEventHandler {
 									player_airTank.put(player.username, air - 1);
 								}
 							}
-						} else if (WarpDriveConfig.SpaceHelmets.contains(helmetStack.itemID)) {
+						} else if (WarpDriveConfig.spaceHelmets.contains(helmetStack.itemID)) {
 							hasHelmet = true;
 							if (air == null) {// new player in space => grace period
 								player_airTank.put(player.username, AIR_TANK_TICKS);
@@ -237,7 +232,7 @@ public class SpaceEventHandler {
             if (check > 0)
             {
                 if ((player.getCurrentArmor(0) != null && player.getCurrentArmor(0).itemID == Items.getItem("quantumBoots").itemID) ||
-                        (player.getCurrentArmor(2) != null && WarpDriveConfig.Jetpacks.contains(player.getCurrentArmor(2).itemID)))
+                        (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2).itemID)))
                 {
                     event.setCanceled(true); // Don't damage player
                 }

@@ -1,11 +1,6 @@
 package cr0s.warpdrive;
 
-import java.util.ArrayList;
-
-import cr0s.warpdrive.data.CloakedArea;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraftforge.event.ForgeSubscribe;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 
 public class CloakChunkWatcher {

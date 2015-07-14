@@ -1,24 +1,16 @@
 package cr0s.warpdrive.data;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.FMLNetworkHandler;
-import cr0s.warpdrive.PacketHandler;
-import cr0s.warpdrive.WarpDrive;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import cr0s.warpdrive.PacketHandler;
 
 public class CloakedArea {
 	public int dimensionId = -666;

@@ -1,39 +1,24 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Optional;
-import dan200.computercraft.api.ComputerCraftAPI;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
-import cofh.api.transport.IItemConduit;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFluid;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
-import appeng.api.WorldCoord;
-import appeng.api.IAEItemStack;
-import appeng.api.Util;
-import appeng.api.events.GridTileLoadEvent;
-import appeng.api.events.GridTileUnloadEvent;
-import appeng.api.me.tiles.IGridMachine;
-import appeng.api.me.tiles.ITileCable;
-import appeng.api.me.util.IGridInterface;
-import appeng.api.me.util.IMEInventoryHandler;
-import cr0s.warpdrive.*;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMachine, ITileCable {
@@ -231,7 +216,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			return false;
 		}
 		// check whitelist
-		if (WarpDriveConfig.MinerOres.contains(blockID)) {
+		if (WarpDriveConfig.minerOres.contains(blockID)) {
 			return true;
 		}
 		// check default
@@ -497,7 +482,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 		z = zCoord;
 		blockID = worldObj.getBlockId(x, currentLayer, z);
 		if (canDig(blockID, x, currentLayer, z)) {
-			if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+			if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 				valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 		}
@@ -511,7 +496,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			for (; x <= xmax; x++) {
 				blockID = worldObj.getBlockId(x, currentLayer, z);
 				if (canDig(blockID, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -521,7 +506,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			for (; z <= zmax; z++) {
 				blockID = worldObj.getBlockId(x, currentLayer, z);
 				if (canDig(blockID, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -531,7 +516,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			for (; x >= xmin; x--) {
 				blockID = worldObj.getBlockId(x, currentLayer, z);
 				if (canDig(blockID, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -541,7 +526,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			for (; z > zmin; z--) {
 				blockID = worldObj.getBlockId(x, currentLayer, z);
 				if (canDig(blockID, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -551,7 +536,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridMach
 			for (; x < xCoord; x++) {
 				blockID = worldObj.getBlockId(x, currentLayer, z);
 				if (canDig(blockID, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.MinerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(blockID)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}

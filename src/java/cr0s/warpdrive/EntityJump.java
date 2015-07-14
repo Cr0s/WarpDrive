@@ -1,15 +1,5 @@
 package cr0s.warpdrive;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.data.JumpBlock;
-import cr0s.warpdrive.data.MovingEntity;
-import cr0s.warpdrive.data.TransitionPlane;
-import cr0s.warpdrive.data.Vector3;
-import cr0s.warpdrive.machines.TileEntityReactor;
-import cr0s.warpdrive.world.SpaceTeleporter;
-import dan200.computercraft.api.peripheral.IPeripheral;
-import ic2.api.network.NetworkHelper;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,12 +21,17 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.data.JumpBlock;
+import cr0s.warpdrive.data.MovingEntity;
+import cr0s.warpdrive.data.TransitionPlane;
+import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.machines.TileEntityReactor;
+import cr0s.warpdrive.world.SpaceTeleporter;
 
 public class EntityJump extends Entity
 {

@@ -17,9 +17,11 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.*;
+import cr0s.warpdrive.EntityJump;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Jumpgate;
 import cr0s.warpdrive.world.SpaceTeleporter;
 

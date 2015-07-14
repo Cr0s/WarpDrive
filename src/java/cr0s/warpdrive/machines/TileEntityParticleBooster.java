@@ -1,9 +1,9 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.ForgeDirection;
-import cr0s.warpdrive.*;
+import net.minecraftforge.common.util.ForgeDirection;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class TileEntityParticleBooster extends WarpEnergyTE {
 	private int ticks = 0;

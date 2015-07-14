@@ -1,15 +1,15 @@
 package cr0s.warpdrive.render;
 
-import org.lwjgl.opengl.GL11;
-
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.event.ForgeSubscribe;
+
+import org.lwjgl.opengl.GL11;
+
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class CameraOverlay
 {

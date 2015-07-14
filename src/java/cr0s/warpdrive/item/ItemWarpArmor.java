@@ -1,17 +1,17 @@
 package cr0s.warpdrive.item;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.api.IAirCanister;
-import cr0s.warpdrive.api.IBreathingHelmet;
-import net.minecraft.client.renderer.texture.IconRegister;
+import javax.swing.Icon;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Icon;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.api.IAirCanister;
+import cr0s.warpdrive.api.IBreathingHelmet;
 
 public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();

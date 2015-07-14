@@ -1,13 +1,10 @@
 package cr0s.warpdrive.item;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
-import net.minecraft.client.renderer.texture.IconRegister;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import ic2.api.reactor.IReactor;
-import ic2.api.reactor.IReactorComponent;
 
 public class ItemReactorLaserFocus extends Item implements IReactorComponent
 {

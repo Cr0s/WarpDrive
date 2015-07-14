@@ -1,21 +1,18 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Optional;
-
 import java.util.List;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraftforge.common.ForgeDirection;
-import cr0s.warpdrive.*;
+import net.minecraftforge.common.util.ForgeDirection;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityLift extends WarpEnergyTE {
     private static final int MODE_REDSTONE = -1;

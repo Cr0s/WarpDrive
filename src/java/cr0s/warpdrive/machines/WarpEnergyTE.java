@@ -2,23 +2,15 @@ package cr0s.warpdrive.machines;
 
 import java.util.HashMap;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
-import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileUnloadEvent;
-import ic2.api.energy.tile.IEnergySink;
-import ic2.api.energy.tile.IEnergySource;
-import cofh.api.energy.IEnergyHandler;
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Optional;
-import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.api.IBlockUpdateDetector;
-import cr0s.warpdrive.data.EnumUpgradeTypes;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ForgeDirection;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.api.IBlockUpdateDetector;
+import cr0s.warpdrive.data.EnumUpgradeTypes;
 
 public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
 	protected boolean addedToEnergyNet = false;

@@ -2,26 +2,29 @@ package cr0s.warpdrive.block;
 
 import java.util.Random;
 
-import cr0s.warpdrive.WarpDriveConfig;
+import javax.swing.Icon;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.texture.IconRegister;
+import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Icon;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public class BlockAir extends Block
 {
     private final boolean TRANSPARENT_AIR = true;
     private final boolean AIR_DEBUG = false;
     private final int AIR_BLOCK_TICKS = 40;
-    private Icon[] iconBuffer;
+    private IIcon[] iconBuffer;
 
-    public BlockAir(int par1) {
-        super(par1, Material.air);
+    public BlockAir() {
+        super(Material.air);
         setHardness(0.0F);
-        setUnlocalizedName("warpdrive.blocks.Air");
+        setUnlocalizedName("warpdrive.blocks.Air");this.isRe
     }
 
     @Override
@@ -30,7 +33,7 @@ public class BlockAir extends Block
     }
 
     @Override
-    public boolean isAirBlock(World var1, int var2, int var3, int var4) {
+    public boolean isAir(IBlockAccess var1, int var2, int var3, int var4) {
         return true;
     }
 
@@ -40,7 +43,7 @@ public class BlockAir extends Block
     }
 
     @Override
-    public boolean isBlockReplaceable(World var1, int var2, int var3, int var4) {
+    public boolean isReplaceable(IBlockAccess var1, int var2, int var3, int var4) {
         return true;
     }
 
@@ -60,9 +63,9 @@ public class BlockAir extends Block
     }
 
     @Override
-    public void registerIcons(IconRegister par1IconRegister) {
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
     	if (AIR_DEBUG) {
-	        iconBuffer = new Icon[16];
+	        iconBuffer = new IIcon[16];
 	        iconBuffer[ 0] = par1IconRegister.registerIcon("warpdrive:airBlock0");
 	        iconBuffer[ 1] = par1IconRegister.registerIcon("warpdrive:airBlock1");
 	        iconBuffer[ 2] = par1IconRegister.registerIcon("warpdrive:airBlock2");
@@ -85,7 +88,7 @@ public class BlockAir extends Block
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
     	if (AIR_DEBUG) {
             return iconBuffer[metadata];
     	} else {
@@ -99,8 +102,8 @@ public class BlockAir extends Block
     }
 
     @Override
-    public int idDropped(int var1, Random var2, int var3) {
-        return -1;
+    public Item getItemDropped(int var1, Random var2, int var3) {
+        return null;
     }
 
     /**
@@ -135,7 +138,7 @@ public class BlockAir extends Block
             spreadAirBlock(par1World, x, y, z, concentration);
         }
 
-        par1World.scheduleBlockUpdate(x, y, z, this.blockID, AIR_BLOCK_TICKS);
+        par1World.scheduleBlockUpdate(x, y, z, this, AIR_BLOCK_TICKS);
     }
 
     @Override
@@ -144,8 +147,8 @@ public class BlockAir extends Block
     		return side == 0;
     	}
     	
-    	int sideBlockID = world.getBlockId(x, y, z);
-        if (sideBlockID == this.blockID) {
+    	Block sideBlock = world.getBlock(x, y, z);
+        if (sideBlock.isAssociatedBlock(this)) { //TODO: Check if this works
             return false;
         }
         return world.isAirBlock(x, y, z);
@@ -157,9 +160,9 @@ public class BlockAir extends Block
         int sum_concentration = concentration;
 
         // Count air in adjacent blocks
-        int xp_blockId = worldObj.getBlockId(x + 1, y, z);
-        boolean xp_isAir = WarpDriveConfig.isAirBlock(worldObj, xp_blockId, x + 1, y, z);;
-        int xp_concentration = (xp_blockId != this.blockID) ? 0 : worldObj.getBlockMetadata(x + 1, y, z);
+        Block xp_block = worldObj.getBlock(x + 1, y, z);
+        boolean xp_isAir = WarpDriveConfig.isAirBlock(worldObj, xp_block, x + 1, y, z);;
+        int xp_concentration = (xp_block.isAssociatedBlock(this)) ? 0 : worldObj.getBlockMetadata(x + 1, y, z);
         if (xp_isAir) {
         	air_count++;
             if (xp_concentration > 0) {

@@ -1,21 +1,16 @@
 package cr0s.warpdrive.machines;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Optional;
-import dan200.computercraft.api.ComputerCraftAPI;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.lua.ILuaContext;
-
 import java.util.ArrayList;
 
-import li.cil.oc.api.network.Arguments;
-import li.cil.oc.api.network.Callback;
-import li.cil.oc.api.network.Context;
+import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
-import cr0s.warpdrive.*;
+import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
 
 /**
