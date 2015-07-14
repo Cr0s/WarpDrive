@@ -4,30 +4,32 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockIridium extends Block
 {
-    public BlockIridium(int par1)
+    public BlockIridium()
     {
-        super(par1, Material.rock);
+        super(Material.rock);
         setHardness(0.8F);
 		setResistance(150 * 4);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.blocks.IridiumBlock");
     }
 
     @Override
-    public void registerIcons(IconRegister par1IconRegister)
+    public void registerBlockIcons(IIconRegister par1IconRegister)
     {
         this.blockIcon = par1IconRegister.registerIcon("warpdrive:iridiumSide");
     }
 
     @Override
-    public int idDropped(int var1, Random var2, int var3)
+    public Item getItemDropped(int var1, Random var2, int var3)
     {
-        return this.blockID;
+        return Item.getItemFromBlock(this);
     }
 
     @Override
