@@ -155,8 +155,8 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 				JumpBlock jb = blocksToDeploy[currentDeployIndex];
 				
 				if (jb != null &&
-					jb.blockID != Block.bedrock.blockID &&
-					!WarpDriveConfig.scannerIgnoreBlocks.contains(jb.blockID) &&
+					jb.block != Block.bedrock.blockID &&
+					!WarpDriveConfig.scannerIgnoreBlocks.contains(jb.block) &&
 					worldObj.isAirBlock(targetX + jb.x, targetY + jb.y, targetZ + jb.z)) {
 					jb.deploy(worldObj, targetX, targetY, targetZ);
 					
@@ -499,18 +499,18 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
-					jb.blockID = (localBlocks[index]) & 0xFF;
+					jb.block = (localBlocks[index]) & 0xFF;
 					if (extraBlocks != null) {
-						jb.blockID |= ((extraBlocks[index]) & 0xFF) << 8;
+						jb.block |= ((extraBlocks[index]) & 0xFF) << 8;
 					}
 					jb.blockMeta = (localMetadata[index]) & 0xFF;
 					jb.blockNBT = tileEntities[index];
 					
-					if (jb.blockID != 0 && Block.blocksList[jb.blockID] != null) {
+					if (jb.block != 0 && Block.blocksList[jb.block] != null) {
 						if (tileEntities[index] == null) {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.blockID].getUnlocalizedName() + " (no tile entity)");
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.block].getUnlocalizedName() + " (no tile entity)");
 						} else {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.blockID].getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.block].getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
 						}
 						
 						blocksToDeploy[index] = jb;

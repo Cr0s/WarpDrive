@@ -134,7 +134,7 @@ public final class EntitySphereGen extends Entity
 				break;
 			notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
 			JumpBlock jb = blocks.get(currentIndex);
-			JumpBlock.mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.blockID, jb.blockMeta, notifyFlag);
+			JumpBlock.mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.block, jb.blockMeta, notifyFlag);
 			currentIndex++;
 		}
 
@@ -206,7 +206,7 @@ public final class EntitySphereGen extends Entity
 		if (worldObj.getBlockId(jb.x, jb.y, jb.z) == Block.leaves.blockID) {
 			if (worldObj.rand.nextInt(50) != 1)
 			{
-				jb.blockID = WarpDriveConfig.gasID;
+				jb.block = WarpDriveConfig.gasID;
 				jb.blockMeta = gasColor;
 			}
 			blocks.add(jb);

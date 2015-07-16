@@ -49,7 +49,7 @@ public class GravityManager
 
                     if (player.isSneaking())
                     {
-                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2).itemID))
+                        if (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))
                         {
                             return SPACE_VOID_GRAVITY_JETPACKSNEAK;
                         }

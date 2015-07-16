@@ -4,7 +4,8 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 
 public class CloakChunkWatcher {
-	@ForgeSubscribe
+	
+	//TODO: register as event reciever
 	public void chunkLoaded(ChunkWatchEvent event) {
 		ChunkCoordIntPair chunk = event.chunk;
 		
