@@ -236,7 +236,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(airBlock, "airBlock");
 		
 		// GAS Block
-		gasBlock = (new BlockGas());
+		gasBlock = new BlockGas();
 		
 		GameRegistry.registerBlock(gasBlock, "gasBlock");
 		
@@ -460,7 +460,7 @@ public class WarpDrive implements LoadingCallback {
 				'n', Items.gold_nugget));
 		
 		//Helmet
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItems), false, "iii", "iwi", "gcg",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg",
 				'i', Items.iron_ingot,
 				'w', Blocks.wool,
 				'g', Blocks.glass,

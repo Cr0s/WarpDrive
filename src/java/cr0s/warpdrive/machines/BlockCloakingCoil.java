@@ -2,36 +2,33 @@ package cr0s.warpdrive.machines;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.item.Item;
+import net.minecraft.util.IIcon;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockCloakingCoil extends Block {
-    private Icon[] iconBuffer;
+    private IIcon[] iconBuffer;
 
-    public BlockCloakingCoil(int id, int texture, Material material) {
-        super(id, material);
+    public BlockCloakingCoil(int texture, Material material) {
+        super(material);
         setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.machines.CloakingCoil");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[3];
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
+        iconBuffer = new IIcon[3];
         iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:cloakCoilSide");
         iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:cloakCoilSideActive");
         iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:cloakCoilTop");
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
         if (side == 0) {
             return iconBuffer[2];
         } else if (side == 1) {
@@ -58,7 +55,7 @@ public class BlockCloakingCoil extends Block {
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3) {
-        return this.blockID;
+    public Item getItemDropped(int par1, Random par2Random, int par3) {
+        return Item.getItemFromBlock(this);
     }
 }

@@ -2,22 +2,22 @@ package cr0s.warpdrive.block;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.item.Item;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDriveConfig;
 
 public class BlockGas extends Block {
-    private Icon[] gasIcons;
+    private IIcon[] gasIcons;
 
-    public BlockGas(int par1) {
-        super(par1, Material.air);
+    public BlockGas() {
+        super(Material.air);
         setHardness(0.0F);
-		setUnlocalizedName("warpdrive.blocks.Gas");
     }
 
     @Override
@@ -26,7 +26,7 @@ public class BlockGas extends Block {
     }
 
     @Override
-    public boolean isAirBlock(World var1, int var2, int var3, int var4) {
+    public boolean isAir(IBlockAccess var1, int var2, int var3, int var4) {
         return true;
     }
 
@@ -36,7 +36,7 @@ public class BlockGas extends Block {
     }
 
     @Override
-    public boolean isBlockReplaceable(World var1, int var2, int var3, int var4) {
+    public boolean isReplaceable(IBlockAccess var1, int var2, int var3, int var4) {
         return true;
     }
 
@@ -56,8 +56,8 @@ public class BlockGas extends Block {
     }
 
     @Override
-    public void registerIcons(IconRegister par1IconRegister) {
-        gasIcons = new Icon[12];
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
+        gasIcons = new IIcon[12];
         gasIcons[0] = par1IconRegister.registerIcon("warpdrive:gasBlockBlue");
         gasIcons[1] = par1IconRegister.registerIcon("warpdrive:gasBlockRed");
         gasIcons[2] = par1IconRegister.registerIcon("warpdrive:gasBlockGreen");
@@ -73,7 +73,7 @@ public class BlockGas extends Block {
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
         return gasIcons[metadata % gasIcons.length];	// Lem
     }
 
@@ -83,13 +83,10 @@ public class BlockGas extends Block {
     }
 
     @Override
-    public int idDropped(int var1, Random var2, int var3) {
-        return -1;
+    public Item getItemDropped(int var1, Random var2, int var3) {
+        return null;
     }
-
-    /**
-     * Returns the quantity of items to drop on block destruction.
-     */
+    
     @Override
     public int quantityDropped(Random par1Random) {
         return 0;
@@ -97,22 +94,13 @@ public class BlockGas extends Block {
 
     @Override
     public boolean shouldSideBeRendered(IBlockAccess world, int x, int y, int z, int side) {
-    	int sideBlockID = world.getBlockId(x, y, z);
-        if (sideBlockID == this.blockID) {
+    	Block sideBlock = world.getBlock(x, y, z);
+        if (sideBlock.isAssociatedBlock(this)) {
             return false;
         }
         return world.isAirBlock(x, y, z);
     }
-
-    @Override
-    public boolean func_82506_l()
-    {
-        return false;
-    }
-
-    /**
-     * Returns if this block is collidable. Args: x, y, z
-     */
+    
     @Override
     public boolean isCollidable() {
         return false;

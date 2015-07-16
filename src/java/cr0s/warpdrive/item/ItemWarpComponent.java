@@ -20,8 +20,8 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	private String[] potentialUnlocalized = new String[9];
 	private ItemStack[] cachedIS;
 	
-	public ItemWarpComponent(int par1) {
-		super(par1);
+	public ItemWarpComponent() {
+		super();
 		setHasSubtypes(true);
 		setUnlocalizedName("warpdrive.crafting.Malformed");
 		setCreativeTab(WarpDrive.warpdriveTab);

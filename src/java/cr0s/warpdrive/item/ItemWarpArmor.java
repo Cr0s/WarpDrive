@@ -2,11 +2,13 @@ package cr0s.warpdrive.item;
 
 import javax.swing.Icon;
 
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
@@ -17,10 +19,10 @@ public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();
 	private int slot;
 	
-	Icon ic;
+	IIcon ic;
 	
-	public ItemWarpArmor(int id,int slot) {
-		super(id, WarpDrive.armorMaterial, 0, slot);
+	public ItemWarpArmor(int slot) {
+		super(WarpDrive.armorMaterial, 0, slot);
 		this.slot = slot;
 		setUnlocalizedName("warpdrive.armor.Helmet");
 		setCreativeTab(WarpDrive.warpdriveTab);
@@ -33,16 +35,14 @@ public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister ir) {
+	public void registerIcons(IIconRegister ir) {
 		if (slot == 0) {
 			ic = ir.registerIcon("warpdrive:warpArmorHelmet");
 		}
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int damage) {
+	public IIcon getIconFromDamage(int damage) {
 		return ic;
 	}
 

@@ -2,34 +2,32 @@ package cr0s.warpdrive.machines;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockParticleBooster extends BlockContainer {
-    private Icon[] iconBuffer;
+    private IIcon[] iconBuffer;
 
-    public BlockParticleBooster(int id, int texture, Material material) {
-        super(id, material);
+    public BlockParticleBooster(int texture, Material material) {
+        super(material);
         setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.machines.ParticleBooster");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[16];
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
+        iconBuffer = new IIcon[16];
         iconBuffer[ 0] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide0");
         iconBuffer[ 1] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide1");
         iconBuffer[ 2] = par1IconRegister.registerIcon("warpdrive:particleBoosterSide2");
@@ -45,7 +43,7 @@ public class BlockParticleBooster extends BlockContainer {
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
         if (side == 0 || side == 1) {
             return iconBuffer[11];
         }
@@ -54,7 +52,7 @@ public class BlockParticleBooster extends BlockContainer {
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1, int i) {
         return new TileEntityParticleBooster();
     }
 
@@ -70,8 +68,8 @@ public class BlockParticleBooster extends BlockContainer {
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3) {
-        return this.blockID;
+    public Item getItemDropped(int par1, Random par2Random, int par3) {
+        return Item.getItemFromBlock(this);
     }
 
     /**
@@ -84,9 +82,9 @@ public class BlockParticleBooster extends BlockContainer {
 		}
 		
 		if (par5EntityPlayer.getHeldItem() == null) {
-			TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+			TileEntity te = par1World.getTileEntity(par2, par3, par4);
 			if (te != null && te instanceof WarpEnergyTE) {
-				par5EntityPlayer.addChatMessage(((WarpEnergyTE) te).getStatus());
+				par5EntityPlayer.addChatMessage(new ChatComponentText(((WarpEnergyTE) te).getStatus()));
 				return true;
 			}
 		}

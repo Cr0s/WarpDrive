@@ -2,36 +2,34 @@ package cr0s.warpdrive.machines;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockReactor extends BlockContainer {
-    private Icon[] iconBuffer;
+    private IIcon[] iconBuffer;
 
     private final int ICON_SIDE_INACTIVE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_HEATED = 4;
 
-    public BlockReactor(int id, int texture, Material material) {
-        super(id, material);
+    public BlockReactor(int texture, Material material) {
+        super(material);
         setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.machines.WarpCore");
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[5];
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
+        iconBuffer = new IIcon[5];
         iconBuffer[ICON_SIDE_INACTIVE] = par1IconRegister.registerIcon("warpdrive:coreSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:coreBottom");
         iconBuffer[ICON_TOP] = par1IconRegister.registerIcon("warpdrive:coreTop");
@@ -40,7 +38,7 @@ public class BlockReactor extends BlockContainer {
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
         if (side == 0) {
             return iconBuffer[ICON_BOTTOM];
         } else if (side == 1) {
@@ -59,7 +57,7 @@ public class BlockReactor extends BlockContainer {
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1, int i) {
         return new TileEntityReactor();
     }
 
@@ -75,8 +73,8 @@ public class BlockReactor extends BlockContainer {
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3) {
-        return this.blockID;
+    public Item getItemDropped(int par1, Random par2Random, int par3) {
+        return Item.getItemFromBlock(this);
     }
 
     /**
@@ -89,9 +87,9 @@ public class BlockReactor extends BlockContainer {
         }
 
         if (par5EntityPlayer.getHeldItem() == null) {
-        	TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+        	TileEntity te = par1World.getTileEntity(par2, par3, par4);
         	if (te != null && te instanceof TileEntityReactor) {
-                par5EntityPlayer.addChatMessage(((TileEntityReactor)te).getStatus());
+                par5EntityPlayer.addChatMessage(new ChatComponentText(((TileEntityReactor)te).getStatus()));
                 return true;
         	}
         }
@@ -100,8 +98,8 @@ public class BlockReactor extends BlockContainer {
     }
 
     @Override
-    public void breakBlock(World par1World, int par2, int par3, int par4, int par5, int par6) {
-        TileEntity te = par1World.getBlockTileEntity(par2, par3, par4);
+    public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
+        TileEntity te = par1World.getTileEntity(par2, par3, par4);
         if (te != null && te instanceof TileEntityReactor) {
             WarpDrive.warpCores.removeFromRegistry((TileEntityReactor)te);
         }

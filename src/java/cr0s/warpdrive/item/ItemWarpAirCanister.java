@@ -2,17 +2,19 @@ package cr0s.warpdrive.item;
 
 import javax.swing.Icon;
 
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.util.IIcon;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 
 public class ItemWarpAirCanister extends Item implements IAirCanister {
-	Icon icon;
-	public ItemWarpAirCanister(int id) {
-		super(id);
+	
+	private IIcon icon;
+	
+	public ItemWarpAirCanister() {
+		super();
 		setMaxDamage(20);
 		setCreativeTab(WarpDrive.warpdriveTab);
 		setMaxStackSize(1);
@@ -20,14 +22,12 @@ public class ItemWarpAirCanister extends Item implements IAirCanister {
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public void registerIcons(IconRegister ir) {
+	public void registerIcons(IIconRegister ir) {
 		icon = ir.registerIcon("warpdrive:componentAirCanisterFull");
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int damage) {
+	public IIcon getIconFromDamage(int damage) {
 		return icon;
 	}
 

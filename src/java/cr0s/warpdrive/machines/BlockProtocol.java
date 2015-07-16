@@ -2,13 +2,15 @@ package cr0s.warpdrive.machines;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
@@ -16,22 +18,21 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockProtocol extends BlockContainer {
-	private Icon[] iconBuffer;
+	private IIcon[] iconBuffer;
 
 	private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
 
-    public BlockProtocol(int id, int texture, Material material) {
-        super(id, material);
+    public BlockProtocol(int id, Material material) {
+        super(material);
         setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-		setUnlocalizedName("warpdrive.machines.WarpProtocol");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister) {
-        iconBuffer = new Icon[10];
+    public void registerBlockIcons(IIconRegister par1IconRegister) {
+        iconBuffer = new IIcon[10];
         // Solid textures
         iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:contSideInactive");
         iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:contBottom");
@@ -47,7 +48,7 @@ public class BlockProtocol extends BlockContainer {
     }
 
     @Override
-    public Icon getIcon(int side, int metadata) {
+    public IIcon getIcon(int side, int metadata) {
         if (side == 0) {
             return iconBuffer[ICON_BOTTOM];
         } else if (side == 1) {
@@ -68,7 +69,7 @@ public class BlockProtocol extends BlockContainer {
     }
 
     @Override
-    public TileEntity createNewTileEntity(World var1) {
+    public TileEntity createNewTileEntity(World var1, int i) {
         return new TileEntityProtocol();
     }
 
@@ -84,8 +85,8 @@ public class BlockProtocol extends BlockContainer {
      * Returns the ID of the items to drop on destruction.
      */
     @Override
-    public int idDropped(int par1, Random par2Random, int par3) {
-        return this.blockID;
+    public Item getItemDropped(int par1, Random par2Random, int par3) {
+        return Item.getItemFromBlock(this);
     }
     /**
      * Called upon block activation (right click on the block.)
@@ -97,10 +98,10 @@ public class BlockProtocol extends BlockContainer {
         }
 
         if (par5EntityPlayer.getHeldItem() == null) {
-        	TileEntityProtocol controller = (TileEntityProtocol)par1World.getBlockTileEntity(par2, par3, par4);
+        	TileEntityProtocol controller = (TileEntityProtocol)par1World.getTileEntity(par2, par3, par4);
         	if (controller != null) {
 	            controller.attachPlayer(par5EntityPlayer);
-	            par5EntityPlayer.addChatMessage(controller.getBlockType().getLocalizedName() + " Attached players: " + controller.getAttachedPlayersList());
+	            par5EntityPlayer.addChatMessage(new ChatComponentText(controller.getBlockType().getLocalizedName() + " Attached players: " + controller.getAttachedPlayersList()));
 	            return true;
         	}
         }
