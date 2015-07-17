@@ -172,9 +172,6 @@ public class WarpDrive implements LoadingCallback {
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 	        Minecraft mc = Minecraft.getMinecraft();
 
-	        // System.out.println("[WarpDrive] Registering sounds event handler...");
-			MinecraftForge.EVENT_BUS.register(new SoundHandler());
-
 			normalFOV = mc.gameSettings.fovSetting;
 		    normalSensitivity = mc.gameSettings.mouseSensitivity;
 		    WarpDrive.print("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
