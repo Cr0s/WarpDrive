@@ -9,30 +9,30 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 
 public abstract class WarpBlockContainer extends BlockContainer {
-	protected WarpBlockContainer(int par1) {
-		super(par1, Material.iron);
+	protected WarpBlockContainer() {
+		super(Material.iron);
 	}
 	
-	protected WarpBlockContainer(int par1, Material m) {
-		super(par1, m);
+	protected WarpBlockContainer(Material m) {
+		super(m);
 		setHardness(0.5F);
-		setStepSound(Block.soundMetalFootstep);
+		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
 	}
 	
 	@Override
 	public void onBlockAdded(World w, int x, int y, int z) {
 		super.onBlockAdded(w, x, y, z);
-		TileEntity te = w.getBlockTileEntity(x, y, z);
+		TileEntity te = w.getTileEntity(x, y, z);
 		if (te instanceof IBlockUpdateDetector) {
 			((IBlockUpdateDetector)te).updatedNeighbours();
 		}
 	}
 	
 	@Override
-	public void onNeighborBlockChange(World w, int x, int y, int z, int b) {
+	public void onNeighborBlockChange(World w, int x, int y, int z, Block b) {
 		super.onNeighborBlockChange(w, x, y, z, b);
-		TileEntity te = w.getBlockTileEntity(x, y, z);
+		TileEntity te = w.getTileEntity(x, y, z);
 		if (te instanceof IBlockUpdateDetector) {
 			((IBlockUpdateDetector)te).updatedNeighbours();
 		}

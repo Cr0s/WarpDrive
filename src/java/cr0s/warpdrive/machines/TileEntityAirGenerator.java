@@ -1,8 +1,10 @@
 package cr0s.warpdrive.machines;
 
+import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 
 public class TileEntityAirGenerator extends WarpEnergyTE {
@@ -56,11 +58,11 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
     }
     
     private void releaseAir(int xOffset, int yOffset, int zOffset) {
-    	int blockId = worldObj.getBlockId(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset);
-	    if (WarpDriveConfig.isAirBlock(worldObj, blockId, xCoord + xOffset, yCoord + yOffset, zCoord + zOffset)) {// can be air
-	    	int energy_cost = (blockId !=  WarpDriveConfig.airID) ? EU_PER_NEWAIRBLOCK : EU_PER_EXISTINGAIRBLOCK;
+    	Block block = worldObj.getBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset);
+	    if (block.isAir(worldObj, xOffset, yOffset, zOffset)) {// can be air
+	    	int energy_cost = (!block.isAssociatedBlock(WarpDrive.airBlock)) ? EU_PER_NEWAIRBLOCK : EU_PER_EXISTINGAIRBLOCK;
 	    	if (consumeEnergy(energy_cost,  true)) {// enough energy
-		        if (worldObj.setBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, WarpDriveConfig.airID, START_CONCENTRATION_VALUE, 2)) {// needs to renew air or was not maxed out
+		        if (worldObj.setBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, WarpDrive.airBlock, START_CONCENTRATION_VALUE, 2)) {// needs to renew air or was not maxed out
 		        	consumeEnergy(EU_PER_NEWAIRBLOCK, false);
 		        } else {
 		        	consumeEnergy(EU_PER_EXISTINGAIRBLOCK, false);
@@ -68,7 +70,7 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
 	    	}
 	    	else
 	    	{// low energy => remove air block
-	    		if (blockId == WarpDriveConfig.airID){
+	    		if (block.isAssociatedBlock(WarpDrive.airBlock)){
 	    			int metadata = worldObj.getBlockMetadata(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset);
 	    			if (metadata > 4) {
 	    				worldObj.setBlockMetadataWithNotify(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, metadata - 4, 2);

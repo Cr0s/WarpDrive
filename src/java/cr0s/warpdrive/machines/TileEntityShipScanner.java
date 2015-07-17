@@ -1,11 +1,16 @@
 package cr0s.warpdrive.machines;
 
+import ic2.api.energy.tile.IEnergyTile;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,6 +25,8 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.Vector3;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityShipScanner extends WarpEnergyTE {
 	private boolean isActive = false;
@@ -155,7 +162,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 				JumpBlock jb = blocksToDeploy[currentDeployIndex];
 				
 				if (jb != null &&
-					jb.block != Block.bedrock.blockID &&
+					!jb.block.isAssociatedBlock(Blocks.bedrock) &&
 					!WarpDriveConfig.scannerIgnoreBlocks.contains(jb.block) &&
 					worldObj.isAirBlock(targetX + jb.x, targetY + jb.y, targetZ + jb.z)) {
 					jb.deploy(worldObj, targetX, targetY, targetZ);
@@ -188,8 +195,8 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 		// Search for warp cores above
 		for (int newY = yCoord + 1; newY <= 255; newY++) {
-			if (worldObj.getBlockId(xCoord, newY, zCoord) == WarpDriveConfig.coreID) { // found warp core above
-				result = (TileEntityReactor) worldObj.getBlockTileEntity(
+			if (worldObj.getBlock(xCoord, newY, zCoord).isAssociatedBlock(WarpDrive.warpCore)) { // found warp core above
+				result = (TileEntityReactor) worldObj.getTileEntity(
 						xCoord, newY, zCoord);
 
 				if (result != null) {
@@ -222,7 +229,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	}
 	
 	private boolean saveShipToSchematic(String fileName, StringBuilder reason) {
-		NBTTagCompound schematic = new NBTTagCompound("Schematic");
+		NBTTagCompound schematic = new NBTTagCompound();
 
 		short width  = (short) (core.maxX - core.minX + 1);
 		short length = (short) (core.maxZ - core.minZ + 1);
@@ -256,21 +263,21 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				for (int z = 0; z < length; z++) {
-					int blockID = worldObj.getBlockId(core.minX + x, core.minY + y, core.minZ + z);
+					Block block = worldObj.getBlock(core.minX + x, core.minY + y, core.minZ + z);
 					
 					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || blockID == Block.bedrock.blockID /*|| WarpDriveConfig.scannerIgnoreBlocks.contains(blockID)/**/) {
-						blockID = 0;
+					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || block.isAssociatedBlock(Blocks.bedrock) || WarpDriveConfig.scannerIgnoreBlocks.contains(block)) {
+						block = 0;
 					}
 					
-					localBlocks[x + (y * length + z) * width] = (byte) blockID;
+					localBlocks[x + (y * length + z) * width] = (byte) block;
 					localMetadata[x + (y * length + z) * width] = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
-					if ((extraBlocks[x + (y * length + z) * width] = (byte) (blockID >> 8)) > 0) {
+					if ((extraBlocks[x + (y * length + z) * width] = (byte) (block >> 8)) > 0) {
 						extra = true;
 					}
 					
-					if (blockID != 0) {
-						TileEntity te = worldObj.getBlockTileEntity(core.minX + x, core.minY + y, core.minZ + z);
+					if (block != 0) {
+						TileEntity te = worldObj.getTileEntity(core.minX + x, core.minY + y, core.minZ + z);
 						if (te != null) {
 							try {
 								NBTTagCompound tileTag = new NBTTagCompound();

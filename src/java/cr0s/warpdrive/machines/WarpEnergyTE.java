@@ -1,12 +1,20 @@
 package cr0s.warpdrive.machines;
 
+import ic2.api.energy.event.EnergyTileLoadEvent;
+import ic2.api.energy.event.EnergyTileUnloadEvent;
+import ic2.api.energy.tile.IEnergySink;
+import ic2.api.energy.tile.IEnergySource;
+
 import java.util.HashMap;
 
 import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
+import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
@@ -199,12 +207,12 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     
     // IndustrialCraft IEnergySink interface
     @Override
-    public double demandedEnergyUnits() {
+    public double getDemandedEnergy() {
         return Math.max(0.0D, convertInternalToEU(getMaxEnergyStored() - energyStored_internal));
     }
     
     @Override
-    public double injectEnergyUnits(ForgeDirection from, double amount_EU) {
+    public double injectEnergy(ForgeDirection from, double amount_EU, double voltage) {
         int leftover_internal = 0;
         energyStored_internal += convertEUtoInternal(amount_EU);
         
@@ -217,13 +225,8 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     }
     
     @Override
-    public int getMaxSafeInput() {
-        return 0;
-    }
-    
-    @Override
     public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection from) {
-        return getMaxSafeInput() != 0 && canInputEnergy(from);
+        return canInputEnergy(from);
     }
     
     // IndustrialCraft IEnergySource interface
@@ -280,13 +283,13 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	}
 	
 	@Override
-	public boolean canInterface(ForgeDirection from) {
+	public boolean canConnectEnergy(ForgeDirection from) {
 		return (getMaxEnergyStored() != 0) && (canInputEnergy(from) || canOutputEnergy(from)); // FIXME deadlock risk
 	}
 	
 	@Override
 	public int getEnergyStored(ForgeDirection from) {
-		if (canInterface(from)) {
+		if (canConnectEnergy(from)) {
 			return convertInternalToRF(getEnergyStored());
 		}
 		return 0;
@@ -294,13 +297,13 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	
 	@Override
 	public int getMaxEnergyStored(ForgeDirection from) {
-		return canInterface(from) ? convertInternalToRF(getMaxEnergyStored()) : 0;
+		return canConnectEnergy(from) ? convertInternalToRF(getMaxEnergyStored()) : 0;
 	}
 	
 	
 	// WarpDrive overrides for Thermal Expansion FIXME: are we really supposed to do this?
 	private void outputEnergy(ForgeDirection from, IEnergyHandler ieh) {
-		if (ieh == null || worldObj.getBlockTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ) == null) {
+		if (ieh == null || worldObj.getTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ) == null) {
 			return;
 		}
 		int potentialEnergyOutput_internal = getPotentialEnergyOutput();
@@ -355,7 +358,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
         			upgradeTag.setInteger(type.toString(), upgrades.get(type));
         		}
         	}
-        	tag.setCompoundTag("upgrades", upgradeTag);
+        	tag.setTag("upgrades", upgradeTag);
         }
     }
     
@@ -368,11 +371,11 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	public void scanForEnergyHandlers() {
 		for(ForgeDirection from : ForgeDirection.VALID_DIRECTIONS) {
 			boolean iehFound = false;
-			if (canInterface(from)) {
-				TileEntity te = worldObj.getBlockTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ);
+			if (canConnectEnergy(from)) {
+				TileEntity te = worldObj.getTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ);
 				if (te != null && te instanceof IEnergyHandler) {
 					IEnergyHandler ieh = (IEnergyHandler)te;
-					if (ieh.canInterface(from.getOpposite())) {
+					if (ieh.canConnectEnergy(from.getOpposite())) {
 						iehFound = true;
 						TE_energyHandlers[from.ordinal()] = ieh;
 					}

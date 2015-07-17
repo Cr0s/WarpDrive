@@ -388,22 +388,22 @@ public class TileEntityProtocol extends WarpInterfacedTE {
     private TileEntityReactor findCoreBlock() {
     	TileEntity te;
 
-    	te = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+    	te = worldObj.getTileEntity(xCoord + 1, yCoord, zCoord);
         if (te != null && te instanceof TileEntityReactor) {
             return (TileEntityReactor)te;
         }
 
-        te = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+        te = worldObj.getTileEntity(xCoord - 1, yCoord, zCoord);
         if (te != null && te instanceof TileEntityReactor) {
             return (TileEntityReactor)te;
         }
 
-        te = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+        te = worldObj.getTileEntity(xCoord, yCoord, zCoord + 1);
         if (te != null && te instanceof TileEntityReactor) {
             return (TileEntityReactor)te;
         }
 
-        te = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+        te = worldObj.getTileEntity(xCoord, yCoord, zCoord - 1);
         if (te != null && te instanceof TileEntityReactor) {
             return (TileEntityReactor)te;
         }

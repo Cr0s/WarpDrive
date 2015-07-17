@@ -125,7 +125,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				newX = xCoord + (dx * shift);
 				newY = yCoord + (dy * shift);
 				newZ = zCoord + (dz * shift);
-				te = worldObj.getBlockTileEntity(newX, newY, newZ);
+				te = worldObj.getTileEntity(newX, newY, newZ);
 				if (te != null && te instanceof TileEntityParticleBooster) {
 					energyCollected += ((TileEntityParticleBooster)te).consumeAllEnergy();
 				} else {
@@ -240,7 +240,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				// Hit is a laser head
 				if (blockID == WarpDriveConfig.laserID || blockID == WarpDriveConfig.laserCamID) {
 					// Compare frequencies
-					TileEntityLaser tel = (TileEntityLaser)worldObj.getBlockTileEntity(hit.blockX, hit.blockY, hit.blockZ);
+					TileEntityLaser tel = (TileEntityLaser)worldObj.getTileEntity(hit.blockX, hit.blockY, hit.blockZ);
 
 					if (tel != null && tel.getBeamFrequency() == beamFrequency) {
 						tel.addBeamEnergy(energy);
@@ -353,7 +353,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	private TileEntityParticleBooster findFirstBooster() {
 		TileEntity result;
-		result = worldObj.getBlockTileEntity(xCoord + 1, yCoord, zCoord);
+		result = worldObj.getTileEntity(xCoord + 1, yCoord, zCoord);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = 1;
 			dy = 0;
@@ -361,7 +361,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			return (TileEntityParticleBooster) result;
 		}
 
-		result = worldObj.getBlockTileEntity(xCoord - 1, yCoord, zCoord);
+		result = worldObj.getTileEntity(xCoord - 1, yCoord, zCoord);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = -1;
 			dy = 0;
@@ -369,7 +369,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			return (TileEntityParticleBooster) result;
 		}
 
-		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord + 1);
+		result = worldObj.getTileEntity(xCoord, yCoord, zCoord + 1);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = 0;
 			dy = 0;
@@ -377,7 +377,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			return (TileEntityParticleBooster) result;
 		}
 
-		result = worldObj.getBlockTileEntity(xCoord, yCoord, zCoord - 1);
+		result = worldObj.getTileEntity(xCoord, yCoord, zCoord - 1);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = 0;
 			dy = 0;
@@ -385,7 +385,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			return (TileEntityParticleBooster) result;
 		}
 
-		result = worldObj.getBlockTileEntity(xCoord, yCoord + 1, zCoord);
+		result = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = 0;
 			dy = 1;
@@ -393,7 +393,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			return (TileEntityParticleBooster) result;
 		}
 
-		result = worldObj.getBlockTileEntity(xCoord, yCoord - 1, zCoord);
+		result = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
 		if (result != null && result instanceof TileEntityParticleBooster) {
 			dx = 0;
 			dy = -1;

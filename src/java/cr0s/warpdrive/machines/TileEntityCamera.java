@@ -1,12 +1,16 @@
 package cr0s.warpdrive.machines;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkPosition;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityCamera extends WarpInterfacedTE {
 	private int frequency = -1;	// beam frequency
@@ -99,7 +103,7 @@ public class TileEntityCamera extends WarpInterfacedTE {
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
     	String methodName = methodsArray[method];
     	if (methodName.equals("freq")) {
 			if (arguments.length == 1) {
