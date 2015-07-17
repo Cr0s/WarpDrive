@@ -8,6 +8,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 import org.lwjgl.opengl.GL11;
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 
@@ -70,7 +71,7 @@ public class CameraOverlay
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
-    @ForgeSubscribe
+    @SubscribeEvent
     public void onRender(RenderGameOverlayEvent.Pre event) {
         if (WarpDrive.instance.isOverlayEnabled) {
             if (event.type == ElementType.HELMET) {

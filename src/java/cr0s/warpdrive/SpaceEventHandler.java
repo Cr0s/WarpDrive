@@ -16,6 +16,7 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cr0s.warpdrive.api.IBreathingHelmet;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
@@ -39,7 +40,7 @@ public class SpaceEventHandler {
 		player_cloakTicks = new HashMap<String, Integer>();
 	}
 
-	@ForgeSubscribe
+	@SubscribeEvent
 	public void livingUpdate(LivingUpdateEvent event) {
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
@@ -218,7 +219,7 @@ public class SpaceEventHandler {
 		return false;
 	}
 	
-    @ForgeSubscribe
+    @SubscribeEvent
     public void livingFall(LivingFallEvent event)
     {
         EntityLivingBase entity = event.entityLiving;

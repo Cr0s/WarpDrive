@@ -1,5 +1,6 @@
 package cr0s.warpdrive.render;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityLivingBase;
@@ -47,9 +48,9 @@ public final class EntityCamera extends EntityLivingBase
     public EntityCamera(World world, ChunkPosition pos, EntityPlayer player) {
         super(world);
         this.setInvisible(true);
-        int x = pos.x;
-        int y = pos.y;
-        int z = pos.z;
+        int x = pos.chunkPosX;
+        int y = pos.chunkPosY;
+        int z = pos.chunkPosZ;
         this.xCoord = x;
         this.posX = x;
         this.yCoord = y;
@@ -83,7 +84,7 @@ public final class EntityCamera extends EntityLivingBase
         		return;
         	}
         	
-        	int blockID = worldObj.getBlockId(xCoord, yCoord, zCoord);
+        	Block block = worldObj.getBlock(xCoord, yCoord, zCoord);
             mc.renderViewEntity.rotationYaw = player.rotationYaw;
             //mc.renderViewEntity.rotationYawHead = player.rotationYawHead;
             mc.renderViewEntity.rotationPitch = player.rotationPitch;
@@ -121,7 +122,7 @@ public final class EntityCamera extends EntityLivingBase
                     fireWaitTicks = 0;
 
                     // Make a shoot with camera-laser
-                    if (blockID == WarpDriveConfig.laserCamID) {
+                    if (block.isAssociatedBlock(WarpDrive.laserCamBlock)) {
                     	PacketHandler.sendLaserTargetingPacket(xCoord, yCoord, zCoord, mc.renderViewEntity.rotationYaw, mc.renderViewEntity.rotationPitch);
                     }
             	}
@@ -134,13 +135,13 @@ public final class EntityCamera extends EntityLivingBase
                 dy = -1;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_UP)) {
                 dy = 2;
-            } else if (Keyboard.isKeyDown(gamesettings.keyBindLeft.keyCode)) {
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindLeft.getKeyCode())) {
                 dz = -1;
-            } else if (Keyboard.isKeyDown(gamesettings.keyBindRight.keyCode)) {
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindRight.getKeyCode())) {
                 dz = 1;
-            } else if (Keyboard.isKeyDown(gamesettings.keyBindForward.keyCode)) {
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindForward.getKeyCode())) {
                 dx = 1;
-            } else if (Keyboard.isKeyDown(gamesettings.keyBindBack.keyCode)) {
+            } else if (Keyboard.isKeyDown(gamesettings.keyBindBack.getKeyCode())) {
                 dx = -1;
             } else if (Keyboard.isKeyDown(Keyboard.KEY_C)) { // centering view
                 dx = 0;
@@ -165,6 +166,7 @@ public final class EntityCamera extends EntityLivingBase
     }
     
     public void zoom() {
+    	/*//TODO: Find 1.7 version of EnumOptions
         if (zoomNumber == 0) {
             mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -0.75F);
             mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.4F);
@@ -177,7 +179,7 @@ public final class EntityCamera extends EntityLivingBase
         } else if (zoomNumber == 3) {
             mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, WarpDrive.normalFOV);
             mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, WarpDrive.normalSensitivity);
-        }
+        }*/
         zoomNumber = (zoomNumber + 1) % 4;
     }
 
@@ -190,7 +192,7 @@ public final class EntityCamera extends EntityLivingBase
     protected void applyEntityAttributes()
     {
         super.applyEntityAttributes();
-        this.getAttributeMap().func_111150_b(SharedMonsterAttributes.attackDamage).setAttribute(1.0D);
+        this.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
     }
 
     @Override
@@ -215,11 +217,6 @@ public final class EntityCamera extends EntityLivingBase
     }
 
     @Override
-    public ItemStack getCurrentItemOrArmor(int i) {
-        return null;
-    }
-
-    @Override
     public void setCurrentItemOrArmor(int i, ItemStack itemstack) {
     }
 
@@ -227,4 +224,9 @@ public final class EntityCamera extends EntityLivingBase
     public ItemStack[] getLastActiveItems() {
         return null;
     }
+
+	@Override
+	public ItemStack getEquipmentInSlot(int i) {
+		return null;
+	}
 }
