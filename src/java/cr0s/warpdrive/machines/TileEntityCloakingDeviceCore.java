@@ -4,11 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.Packet;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -18,6 +22,9 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.CloakedArea;
 import cr0s.warpdrive.data.Vector3;
+import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	private final int MAX_ENERGY_VALUE = 500000000; // 500kk EU
@@ -146,7 +153,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public void searchCoilInDirectionAndSetState(byte dx, byte dy, byte dz, boolean enabled) {
 		int coilCount = 0;
 		for (int i = 0; i < WarpDriveConfig.CD_MAX_CLOAKING_FIELD_SIDE; i++) {
-			if (worldObj.getBlockId(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz) == WarpDriveConfig.cloakCoilID) {
+			if (worldObj.getBlock(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
 				coilCount++;
 				if (coilCount > 2) {
 					return;
@@ -168,7 +175,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		}
 		
 		for (int i = START_LENGTH + 1; i < WarpDriveConfig.CD_MAX_CLOAKING_FIELD_SIDE; i++) {
-			if (worldObj.getBlockId(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz) == WarpDriveConfig.cloakCoilID) {
+			if (worldObj.getBlock(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
 				sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).add(0.5), r, g, b, 110, 0, 100);
 			}
 		}
@@ -256,7 +263,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 			for (y = minY; y <= maxY; y++) {
 				for (x = minX; x <= maxX; x++) {
 					for(z = minZ; z <= maxZ; z++) {
-						if (worldObj.getBlockId(x, y, z) != 0) {
+						if (!worldObj.getBlock(x, y, z) .isAssociatedBlock(Blocks.air)) {
 							volume++;
 						} 
 					}
@@ -297,7 +304,9 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 				ex.printStackTrace();
 			}
 
-			Packet250CustomPayload packet = new Packet250CustomPayload();
+			//TODO: Needs to be re-done according to http://www.minecraftforge.net/forum/index.php/topic,20135.0.html
+			/*
+			PacketCustomPayload packet = new Packet250CustomPayload();
 			packet.channel = "WarpDriveBeam";
 			packet.data = bos.toByteArray();
 			packet.length = bos.size();
@@ -309,6 +318,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 					((EntityPlayerMP)e).playerNetServerHandler.sendPacketToPlayer(packet);
 				}
 			}
+			*/
 		}
 	}
 	
@@ -330,7 +340,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 
 	public int searchCoilInDirection(byte dx, byte dy, byte dz) {
 		for (int i = 3; i < WarpDriveConfig.CD_MAX_CLOAKING_FIELD_SIDE; i++) {
-			if (worldObj.getBlockId(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz) == WarpDriveConfig.cloakCoilID) {
+			if (worldObj.getBlock(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
 				return i;
 			}
 		}
@@ -347,7 +357,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		byte[] dz = { 0,  0,  0,  0, -1,  1 };
 		
 		for (int i = 0; i < 6; i++) {
-			if (worldObj.getBlockId(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]) != WarpDriveConfig.cloakCoilID) {
+			if (worldObj.getBlock(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
 				return false;
 			}
 		}
@@ -441,7 +451,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
     	String methodName = methodsArray[method];
     	if (methodName.equals("tier")) {
 			if (arguments.length == 1) {
@@ -473,14 +483,21 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public int getMaxEnergyStored() {
 		return MAX_ENERGY_VALUE;
 	}
-	
-	@Override
-	public int getMaxSafeInput() {
-		return Integer.MAX_VALUE;
-	}
     
     @Override
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
+
+	@Override
+	public int getSinkTier() {
+		// TODO Auto-generated method stub
+		return 3;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Auto-generated method stub
+		return 3;
+	}
 }

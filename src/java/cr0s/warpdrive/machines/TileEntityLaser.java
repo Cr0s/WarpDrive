@@ -2,7 +2,6 @@ package cr0s.warpdrive.machines;
 
 import java.util.List;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;

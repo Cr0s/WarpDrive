@@ -2,16 +2,22 @@ package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
+import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 /**
  * Protocol block tile entity
@@ -162,19 +168,19 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 
     public void attachPlayer(EntityPlayer entityPlayer) {
         for (int i = 0; i < players.size(); i++) {
-            String nick = players.get(i);
+            String name = players.get(i);
 
-            if (entityPlayer.username.equals(nick)) {
-            	entityPlayer.addChatMessage(getBlockType().getLocalizedName() + " Detached.");
+            if (entityPlayer.getDisplayName().equals(name)) {
+            	entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Detached."));
                 players.remove(i);
                 return;
             }
         }
 
         entityPlayer.attackEntityFrom(DamageSource.generic, 1);
-        players.add(entityPlayer.username);
+        players.add(entityPlayer.getDisplayName());
         updatePlayersString();
-        entityPlayer.addChatMessage(getBlockType().getLocalizedName() + " Successfully attached.");
+        entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Successfully attached."));
     }
 
     public void updatePlayersString() {
@@ -735,7 +741,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 
     @Override
 	@Optional.Method(modid = "ComputerCraft")
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		
 		if (methodName.equals("dim_positive")) {// dim_positive (front, right, up)

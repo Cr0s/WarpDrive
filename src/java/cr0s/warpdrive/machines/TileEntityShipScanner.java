@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import net.minecraft.block.Block;
@@ -267,16 +267,16 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 					
 					// Do not scan air, bedrock and specified forbidden blocks (like ore or Warp-Cores)
 					if (worldObj.isAirBlock(core.minX + x, core.minY + y, core.minZ + z) || block.isAssociatedBlock(Blocks.bedrock) || WarpDriveConfig.scannerIgnoreBlocks.contains(block)) {
-						block = 0;
+						block = Blocks.air;
 					}
 					
-					localBlocks[x + (y * length + z) * width] = (byte) block;
+					localBlocks[x + (y * length + z) * width] = (byte) block.getUnlocalizedName();
 					localMetadata[x + (y * length + z) * width] = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
 					if ((extraBlocks[x + (y * length + z) * width] = (byte) (block >> 8)) > 0) {
 						extra = true;
 					}
 					
-					if (block != 0) {
+					if (!block.isAssociatedBlock(Blocks.air)) {
 						TileEntity te = worldObj.getTileEntity(core.minX + x, core.minY + y, core.minZ + z);
 						if (te != null) {
 							try {
@@ -625,7 +625,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 	   	String methodName = methodsArray[method];
 		if (methodName.equals("scan")) {
 			return scan(arguments);
@@ -651,14 +651,20 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
 	}
-	
-	@Override
-	public int getMaxSafeInput() {
-		return Integer.MAX_VALUE;
-	}
-    
     @Override
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
+
+	@Override
+	public int getSinkTier() {
+		// TODO Arbitrarily chosen value
+		return 3;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Arbitrarily chosen value
+		return 3;
+	}
 }

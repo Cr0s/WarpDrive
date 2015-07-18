@@ -43,12 +43,19 @@ public class TileEntityParticleBooster extends WarpEnergyTE {
 	}
 
 	@Override
-	public int getMaxSafeInput() {
-		return Integer.MAX_VALUE;
+	public boolean canInputEnergy(ForgeDirection from) {
+		return true;
 	}
 
 	@Override
-	public boolean canInputEnergy(ForgeDirection from) {
-		return true;
+	public int getSinkTier() {
+		// TODO Auto-generated method stub
+		return 3;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Auto-generated method stub
+		return 3;
 	}
 }

@@ -3,7 +3,6 @@ package cr0s.warpdrive.machines;
 import java.util.ArrayList;
 import java.util.List;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;

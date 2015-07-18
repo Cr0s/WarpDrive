@@ -2,13 +2,18 @@ package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
+import dan200.computercraft.api.ComputerCraftAPI;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityRadar extends WarpEnergyTE {
 	private ArrayList<TileEntityReactor> results;
@@ -130,7 +135,7 @@ public class TileEntityRadar extends WarpEnergyTE {
 				TileEntityReactor res = results.get(index);
 				if (res != null)
 				{
-					int yAddition = (res.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
+					int yAddition = (res.getWorldObj().provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.getWorldObj().provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
 					return new Object[] { res.coreFrequency, res.xCoord, res.yCoord + yAddition, res.zCoord };
 				}
 			}
@@ -165,7 +170,7 @@ public class TileEntityRadar extends WarpEnergyTE {
 	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 	   	String methodName = methodsArray[method];
 		if (methodName.equals("scanRadius")) {// scanRadius (radius)
 			return scanRadius(arguments);
@@ -194,14 +199,20 @@ public class TileEntityRadar extends WarpEnergyTE {
 		return WarpDriveConfig.WR_MAX_ENERGY_VALUE;
 	}
 
-	// IEnergySink methods implementation
-	@Override
-	public int getMaxSafeInput() {
-		return Integer.MAX_VALUE;
-	}
-
     @Override
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
+
+	@Override
+	public int getSinkTier() {
+		// TODO Arbitrarily chosen value
+		return 3;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Arbitrarily chosen value
+		return 3;
+	}
 }

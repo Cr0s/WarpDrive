@@ -7,7 +7,7 @@ import ic2.api.energy.tile.IEnergySource;
 
 import java.util.HashMap;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.Arguments;
+import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import net.minecraft.nbt.NBTTagCompound;
