@@ -1,26 +1,26 @@
 package cr0s.warpdrive.item;
 
+import ic2.api.reactor.IReactor;
+import ic2.api.reactor.IReactorComponent;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 
 public class ItemReactorLaserFocus extends Item implements IReactorComponent
 {
 	private final static int maxHeat = 3000;
 	
-	public ItemReactorLaserFocus(int id)
+	public ItemReactorLaserFocus()
 	{
-		super(id);
+		super();
 		setMaxDamage(maxHeat);
 		setCreativeTab(WarpDrive.warpdriveTab);
 		setUnlocalizedName("warpdrive.items.ReactorLaserFocus");
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-    public void registerIcons(IconRegister par1IconRegister)
+    public void registerIcons(IIconRegister par1IconRegister)
     {
         this.itemIcon = par1IconRegister.registerIcon("warpdrive:reactorFocus");
     }

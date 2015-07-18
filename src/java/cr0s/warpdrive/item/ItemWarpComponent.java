@@ -4,10 +4,13 @@ import java.util.List;
 
 import javax.swing.Icon;
 
-import net.minecraft.block.Block;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
@@ -16,7 +19,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 
 public class ItemWarpComponent extends Item implements IAirCanister {	
-	private Icon[] potentialIcons;
+	private IIcon[] potentialIcons;
 	private String[] potentialUnlocalized = new String[9];
 	private ItemStack[] cachedIS;
 	
@@ -36,7 +39,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 		potentialUnlocalized[7] = "PowerCore";
 		potentialUnlocalized[8] = "AirCanisterEmpty";
 		
-		potentialIcons = new Icon[potentialUnlocalized.length];
+		potentialIcons = new IIcon[potentialUnlocalized.length];
 		cachedIS = new ItemStack[potentialUnlocalized.length];
 	}
 	
@@ -57,48 +60,48 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	public void registerRecipes() {
 		WarpDrive.debugPrint("Registering empty recipe");
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(0),false,"nrn","r r","nrn",
-				'r', Item.redstone,
-				'n', Item.goldNugget));
+				'r', Items.redstone,
+				'n', Items.gold_nugget));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(1),false,"g","e","c",
-				'g', Block.glass,
-				'e', Item.enderPearl,
+				'g', Blocks.glass,
+				'e', Items.ender_pearl,
 				'c', getIS(0)));
 			
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(2),false," g ","ede"," c ",
-				'g', Block.glass,
-				'e', Item.enderPearl,
-				'd', Item.diamond,
+				'g', Blocks.glass,
+				'e', Items.ender_pearl,
+				'd', Items.diamond,
 				'c', getIS(0)));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(3),false," g ","rtr"," c ",
-				'g', Block.glass,
+				'g', Blocks.glass,
 				'r', "dyeBlue",
-				't', Block.torchWood,
+				't', Blocks.torch,
 				'c', getIS(0)));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(4),false," l ","rcr"," l ",
 				'l', "dyeWhite",
-				'r', Item.coal,
+				'r', Items.coal,
 				'c', getIS(0)));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(5),false,"g  ","gwr","rwr",
-				'g', Item.goldNugget,
-				'r', Item.redstone,
+				'g', Items.gold_nugget,
+				'r', Items.redstone,
 				'w', "plankWood"));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(6),false,"gig","iri","gig",
-				'g', Item.goldNugget,
-				'r', Item.redstone,
-				'i', Item.ingotIron));
+				'g', Items.gold_nugget,
+				'r', Items.redstone,
+				'i', Items.iron_ingot));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(7),false,"glg","ldl","glg",
-				'g', Item.goldNugget,
+				'g', Items.gold_nugget,
 				'l', "dyeBlue",
-				'd', Item.diamond));
+				'd', Items.diamond));
 		
 		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(8),false,"gcg","g g","gcg",
-				'g', Block.glass,
+				'g', Blocks.glass,
 				'c', getIS(0)));
 	}
 	
@@ -115,7 +118,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	}
 
 	@Override
-	public void registerIcons(IconRegister par1IconRegister) {
+	public void registerIcons(IIconRegister par1IconRegister) {
 		for(int i = 0; i < potentialUnlocalized.length; i++) {
 			potentialIcons[i] = par1IconRegister.registerIcon("warpdrive:component" + potentialUnlocalized[i]);
 		}
@@ -131,8 +134,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
     }
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-	public Icon getIconFromDamage(int damage) {
+	public IIcon getIconFromDamage(int damage) {
 		if (damage >= 0 && damage < potentialUnlocalized.length) {
 			return potentialIcons[damage];
 		}
@@ -140,8 +142,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	}
 	
 	@Override
-	@SideOnly(Side.CLIENT)
-    public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List) {
+    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
 		for(int i = 0; i < potentialUnlocalized.length; i++) {
 			par3List.add(new ItemStack(par1, 1, i));
 		}
