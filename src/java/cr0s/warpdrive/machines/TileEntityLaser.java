@@ -2,10 +2,14 @@ package cr0s.warpdrive.machines;
 
 import java.util.List;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -20,6 +24,8 @@ import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityLaser extends WarpInterfacedTE {
 	private final int BEAM_FREQUENCY_SCANNING = 1420;
@@ -30,15 +36,15 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	private int beamFrequency = -1;
 	private int cameraFrequency = -1;
-	private float r, g, b;	  // beam color (corresponds to frequency)
+	private float r, g, b; // beam color (corresponds to frequency)
 
 	public boolean isEmitting = false;
 
 	private int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
-	
+
 	private MovingObjectPosition firstHit_position = null;
-	private int firstHit_blockID = -1;
+	private Block firstHit_block;
 	private int firstHit_blockMeta = 0;
 	private float firstHit_blockResistance = -2;
 
@@ -51,20 +57,20 @@ public class TileEntityLaser extends WarpInterfacedTE {
 	public TileEntityLaser() {
 		super();
 		peripheralName = "laser";
-		methodsArray = new String[] {
-			"emitBeam",			// 0
-			"pos",				// 1
-			"freq",				// 2
-			"getFirstHit",		// 3
-			"getBoosterDXDZ",	// 4
-			"camFreq"			// 5
+		methodsArray = new String[] { "emitBeam", // 0
+				"pos", // 1
+				"freq", // 2
+				"getFirstHit", // 3
+				"getBoosterDXDZ", // 4
+				"camFreq" // 5
 		};
 	}
-	
+
 	@Override
 	public void updateEntity() {
 		if (isWithCamera()) {
-			// Update frequency on clients (recovery mechanism, no need to go too fast)
+			// Update frequency on clients (recovery mechanism, no need to go
+			// too fast)
 			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 				packetSendTicks--;
 				if (packetSendTicks <= 0) {
@@ -80,31 +86,32 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			}
 		}
 
-		// Frequency is not set		
+		// Frequency is not set
 		if (beamFrequency <= 0 || beamFrequency > 65000) {
 			return;
 		}
 
 		delayTicks++;
 		if (isEmitting
-				&& ( (beamFrequency != BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS)
-				  || (beamFrequency == BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS) ) ) {
+				&& ((beamFrequency != BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || (beamFrequency == BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS))) {
 			delayTicks = 0;
 			isEmitting = false;
-			int beamEnergy = Math.min(this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER), WarpDriveConfig.LE_MAX_LASER_ENERGY); 
+			int beamEnergy = Math.min(
+					this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER),
+					WarpDriveConfig.LE_MAX_LASER_ENERGY);
 			emitBeam(beamEnergy);
 			energyFromOtherBeams = 0;
 			sendEvent("laserSend", new Object[] { beamFrequency, beamEnergy });
 		}
 	}
-	
+
 	public void initiateBeamEmission(float parYaw, float parPitch) {
 		yaw = parYaw;
 		pitch = parPitch;
 		delayTicks = 0;
 		isEmitting = true;
 	}
-	
+
 	public void addBeamEnergy(int amount) {
 		if (isEmitting) {
 			energyFromOtherBeams += amount;
@@ -126,7 +133,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				newZ = zCoord + (dz * shift);
 				te = worldObj.getTileEntity(newX, newY, newZ);
 				if (te != null && te instanceof TileEntityParticleBooster) {
-					energyCollected += ((TileEntityParticleBooster)te).consumeAllEnergy();
+					energyCollected += ((TileEntityParticleBooster) te).consumeAllEnergy();
 				} else {
 					break;
 				}
@@ -138,7 +145,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	// TODO refactor me
 	private void emitBeam(int parEnergy) {
-		int energy = parEnergy; 	// FIXME
+		int energy = parEnergy; // FIXME
 		// Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
 
@@ -151,7 +158,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
-		float pitchvertical   =  MathHelper.sin(-pitch * 0.017453292F);
+		float pitchvertical = MathHelper.sin(-pitch * 0.017453292F);
 		float directionx = yawx * pitchhorizontal;
 		float directionz = yawz * pitchhorizontal;
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
@@ -160,40 +167,46 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		WarpDrive.debugPrint(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
-		int distanceTravelled = 0; // distance traveled from beam sender to previous hit if there were any
-		
+		int distanceTravelled = 0; // distance traveled from beam sender to
+		// previous hit if there were any
+
 		// This is scanning beam, do not deal damage to blocks
 		if (beamFrequency == BEAM_FREQUENCY_SCANNING) {
-			firstHit_position = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), false, false);
+			firstHit_position = worldObj.rayTraceBlocks(beamVector.toVec3(), reachPoint.toVec3());
 
- 			if (firstHit_position != null) {
-				firstHit_blockID = worldObj.getBlockId(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
+			if (firstHit_position != null) {
+				firstHit_block = worldObj.getBlock(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
 				firstHit_blockMeta = worldObj.getBlockMetadata(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
 				firstHit_blockResistance = -2;
-				if (Block.blocksList[firstHit_blockID] != null) {
-					firstHit_blockResistance = Block.blocksList[firstHit_blockID].blockResistance;
+				if (firstHit_block != null) {
+					firstHit_blockResistance = firstHit_block.getExplosionResistance(null); // TODO:
+					// what
+					// entity
+					// should
+					// be
+					// used?
 				}
 				PacketHandler.sendBeamPacket(worldObj, beamVector, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
 			} else {
-				firstHit_blockID = -1;
+				firstHit_block = null;
 				firstHit_blockMeta = 0;
 				firstHit_blockResistance = -2;
 				PacketHandler.sendBeamPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
-  			}
- 			
+			}
+
 			return;
 		}
 
 		for (int passedBlocks = 0; passedBlocks < beamLengthBlocks; passedBlocks++) {
 			// Get next block hit
-			MovingObjectPosition hit = worldObj.rayTraceBlocks_do_do(beamVector.toVec3(), reachPoint.toVec3(), true, false);
+			MovingObjectPosition hit = worldObj.rayTraceBlocks(beamVector.toVec3(), reachPoint.toVec3());
 			// FIXME entity ray-tracing
 			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
 
 			WarpDrive.debugPrint("Entity hit is " + entityHit);
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
-				EntityLivingBase e = (EntityLivingBase)entityHit.entityHit;
+				EntityLivingBase e = (EntityLivingBase) entityHit.entityHit;
 				double distanceToEntity = entityHit.hitVec.distanceTo(beamVector.clone().toVec3());
 
 				if (hit == null || (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > distanceToEntity)) {
@@ -227,19 +240,21 @@ public class TileEntityLaser extends WarpInterfacedTE {
 					break;
 				}
 
-				int blockID = worldObj.getBlockId(hit.blockX, hit.blockY, hit.blockZ);
-				// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
-				float resistance = Block.blocksList[blockID].blockResistance;
+				Block block = worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
+				// int blockMeta = worldObj.getBlockMetadata(hit.blockX,
+				// hit.blockY, hit.blockZ);
+				float resistance = block.getExplosionResistance(null);
+				// TODO: choose entity
 
-				if (blockID == Block.bedrock.blockID) {
+				if (block.isAssociatedBlock(Blocks.bedrock)) {
 					endPoint = new Vector3(hit.hitVec);
 					break;
 				}
 
 				// Hit is a laser head
-				if (blockID == WarpDriveConfig.laserID || blockID == WarpDriveConfig.laserCamID) {
+				if (block.isAssociatedBlock(WarpDrive.laserBlock) || block.isAssociatedBlock(WarpDrive.laserCamBlock)) {
 					// Compare frequencies
-					TileEntityLaser tel = (TileEntityLaser)worldObj.getTileEntity(hit.blockX, hit.blockY, hit.blockZ);
+					TileEntityLaser tel = (TileEntityLaser) worldObj.getTileEntity(hit.blockX, hit.blockY, hit.blockZ);
 
 					if (tel != null && tel.getBeamFrequency() == beamFrequency) {
 						tel.addBeamEnergy(energy);
@@ -248,12 +263,13 @@ public class TileEntityLaser extends WarpInterfacedTE {
 					}
 				}
 
-				if (Block.blocksList[blockID].blockMaterial == Material.glass) {
-					worldObj.destroyBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextInt(20) == 0));
+				if (block.getMaterial() == Material.glass) {
+					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 					endPoint = new Vector3(hit.hitVec);
 				}
 
-				energy -=  WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE) + ( (distance - distanceTravelled) * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
+				energy -= WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE)
+						+ ((distance - distanceTravelled) * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
 				distanceTravelled = distance;
 				endPoint = new Vector3(hit.hitVec);
 
@@ -261,26 +277,30 @@ public class TileEntityLaser extends WarpInterfacedTE {
 					break;
 				}
 
-				if (resistance >= Block.obsidian.blockResistance) {
+				if (resistance >= Blocks.obsidian.getExplosionResistance(null)) {// TODO:
+					// choose
+					// entity
 					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, 4F * (2 + (energy / 500000)), true, true);
-					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Block.fire.blockID : 0);
+					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Blocks.fire : Blocks.air);
 				} else {
-					worldObj.destroyBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextInt(20) == 0));
+					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
 				}
 			}
 		}
 
-		PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D).translate(lookVector.scale(0.5D)), endPoint, r, g, b, 50, energy, beamLengthBlocks);
+		PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D).translate(lookVector.scale(0.5D)), endPoint, r, g, b, 50, energy,
+				beamLengthBlocks);
 	}
 
 	public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
 		MovingObjectPosition pickedEntity = null;
 		Vec3 playerPosition = beamVec.toVec3();
 		Vec3 playerLook = lookVec.toVec3();
-		Vec3 playerViewOffset = Vec3.createVectorHelper(playerPosition.xCoord + playerLook.xCoord * reachDistance, playerPosition.yCoord
-								+ playerLook.yCoord * reachDistance, playerPosition.zCoord + playerLook.zCoord * reachDistance);
+		Vec3 playerViewOffset = Vec3.createVectorHelper(playerPosition.xCoord + playerLook.xCoord * reachDistance, playerPosition.yCoord + playerLook.yCoord
+				* reachDistance, playerPosition.zCoord + playerLook.zCoord * reachDistance);
 		double playerBorder = 1.1 * reachDistance;
-		AxisAlignedBB boxToScan = WarpDrive.laserBlock.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder, playerBorder);
+		AxisAlignedBB boxToScan = WarpDrive.laserBlock.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder,
+				playerBorder);
 		List entitiesHit = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
 		double closestEntity = reachDistance;
 
@@ -321,13 +341,13 @@ public class TileEntityLaser extends WarpInterfacedTE {
 	}
 
 	public boolean isWithCamera() {
-		return (getBlockType().blockID == WarpDriveConfig.laserCamID);
+		return (getBlockType().isAssociatedBlock(WarpDrive.laserCamBlock));
 	}
 
 	public int getBeamFrequency() {
 		return beamFrequency;
 	}
-	
+
 	public void setBeamFrequency(int parBeamFrequency) {
 		if (beamFrequency != parBeamFrequency && (parBeamFrequency <= BEAM_FREQUENCY_MAX) && (parBeamFrequency > 0)) {
 			WarpDrive.debugPrint(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
@@ -344,9 +364,10 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		if (cameraFrequency != parCameraFrequency) {
 			WarpDrive.debugPrint(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
 			cameraFrequency = parCameraFrequency;
-	        // force update through main thread since CC runs on server as 'client'
-	        packetSendTicks = 0;
-	        registryUpdateTicks = 0;
+			// force update through main thread since CC runs on server as
+			// 'client'
+			packetSendTicks = 0;
+			registryUpdateTicks = 0;
 		}
 	}
 
@@ -444,7 +465,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 			b = 0.5F - 0.5F * (beamFrequency - 50000F) / 10000F;
 		} else if (beamFrequency <= BEAM_FREQUENCY_MAX) { // rainbow
 			int component = Math.round(4096F * (beamFrequency - 60000F) / (BEAM_FREQUENCY_MAX - 60000F));
-			r = 1.0F - 0.5F * (component      & 0xF);
+			r = 1.0F - 0.5F * (component & 0xF);
 			g = 0.5F + 0.5F * (component >> 4 & 0xF);
 			b = 0.5F + 0.5F * (component >> 8 & 0xF);
 		} else { // invalid frequency
@@ -467,18 +488,18 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		tag.setInteger("beamFrequency", beamFrequency);
 		tag.setInteger("cameraFrequency", cameraFrequency);
 	}
-	
+
 	@Override
 	public void invalidate() {
-        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 
-    @Override
-    public void onChunkUnload() {
-        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
-        super.onChunkUnload();
-    }
+	@Override
+	public void onChunkUnload() {
+		WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		super.onChunkUnload();
+	}
 
 	// OpenComputer callback methods
 	@Callback
@@ -501,13 +522,13 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 		return new Integer[] { beamFrequency };
 	}
-	
+
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	private Object[] getFirstHit(Context context, Arguments arguments) {
 		return getFirstHit();
 	}
-	
+
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	private Object[] getBoosterDXDZ(Context context, Arguments arguments) {
@@ -526,7 +547,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 		return null;
 	}
-	
+
 	private Object[] emitBeam(Object[] arguments) {
 		try {
 			float newYaw, newPitch;
@@ -535,12 +556,12 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				newPitch = toFloat(arguments[1]);
 				initiateBeamEmission(newYaw, newPitch);
 			} else if (arguments.length == 3) {
-				float deltaX = - toFloat(arguments[0]);
-				float deltaY = - toFloat(arguments[1]);
-				float deltaZ =   toFloat(arguments[2]);
+				float deltaX = -toFloat(arguments[0]);
+				float deltaY = -toFloat(arguments[1]);
+				float deltaZ = toFloat(arguments[2]);
 				double horizontalDistance = MathHelper.sqrt_double(deltaX * deltaX + deltaZ * deltaZ);
-				newYaw = (float)(Math.atan2(deltaX, deltaZ) * 180.0D / Math.PI);
-				newPitch = (float)(Math.atan2(deltaY, horizontalDistance) * 180.0D / Math.PI);
+				newYaw = (float) (Math.atan2(deltaX, deltaZ) * 180.0D / Math.PI);
+				newPitch = (float) (Math.atan2(deltaY, horizontalDistance) * 180.0D / Math.PI);
 				initiateBeamEmission(newYaw, newPitch);
 			}
 		} catch (Exception e) {
@@ -549,13 +570,14 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 		return new Object[] { true };
 	}
-	
+
 	private Object[] getFirstHit() {
 		if (firstHit_position != null) {
 			try {
-				Object[] info = { firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ, firstHit_blockID, firstHit_blockMeta, firstHit_blockResistance };
+				Object[] info = { firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ, firstHit_block, firstHit_blockMeta,
+						firstHit_blockResistance };
 				firstHit_position = null;
-				firstHit_blockID = -1;
+				firstHit_block = null;
 				firstHit_blockMeta = 0;
 				firstHit_blockResistance = -2;
 				return info;
@@ -571,23 +593,26 @@ public class TileEntityLaser extends WarpInterfacedTE {
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
-    	String methodName = methodsArray[method];
-    	if (methodName.equals("emitBeam")) { // emitBeam(yaw, pitch) or emitBeam(deltaX, deltaY, deltaZ)
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
+		String methodName = methodsArray[method];
+		if (methodName.equals("emitBeam")) { // emitBeam(yaw, pitch) or
+			// emitBeam(deltaX, deltaY,
+			// deltaZ)
 			return emitBeam(arguments);
-    	} else if (methodName.equals("pos")) {
+		} else if (methodName.equals("pos")) {
 			return new Integer[] { xCoord, yCoord, zCoord };
-    	} else if (methodName.equals("freq")) {
+		} else if (methodName.equals("freq")) {
 			if (arguments.length == 1) {
 				setBeamFrequency(toInt(arguments[0]));
 			}
 			return new Integer[] { beamFrequency };
-    	} else if (methodName.equals("getFirstHit")) {
-    		return getFirstHit();
-    	} else if (methodName.equals("getBoosterDXDZ")) {
-    		findFirstBooster();
-    		return new Integer[] { dx, dz };
-    	} else if (methodName.equals("camFreq")) { // camFreq (only for lasers with cam)
+		} else if (methodName.equals("getFirstHit")) {
+			return getFirstHit();
+		} else if (methodName.equals("getBoosterDXDZ")) {
+			findFirstBooster();
+			return new Integer[] { dx, dz };
+		} else if (methodName.equals("camFreq")) { // camFreq (only for lasers
+			// with cam)
 			if (isWithCamera()) {
 				if (arguments.length == 1) {
 					setCameraFrequency(toInt(arguments[0]));
@@ -598,15 +623,10 @@ public class TileEntityLaser extends WarpInterfacedTE {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public String toString() {
-        return String.format("%s/%d Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
-       		getClass().getSimpleName(),
-       		Integer.valueOf(hashCode()),
-       		beamFrequency,
-       		cameraFrequency,
-       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
-       		xCoord, yCoord, zCoord});
+		return String.format("%s/%d Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] { getClass().getSimpleName(), Integer.valueOf(hashCode()),
+				beamFrequency, cameraFrequency, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(), xCoord, yCoord, zCoord });
 	}
 }

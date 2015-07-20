@@ -3,31 +3,29 @@ package cr0s.warpdrive.world;
 import java.util.Random;
 
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import cr0s.warpdrive.WarpDriveConfig;
 
-public class WorldGenStructure
-{
-	public static int getStoneBlock(boolean corrupted, Random rand)
-	{
+public class WorldGenStructure {
+	public static Block getStoneBlock(boolean corrupted, Random rand) {
 		if (corrupted && (rand.nextInt(15) == 1))
-			return 0;
-		
+			return Blocks.air;
+
 		if (WarpDriveConfig.isICLoaded) {
-			return WarpDriveConfig.getIC2Item("reinforcedStone").itemID;
+			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("reinforcedStone").getItem());
 		} else {
-			return Block.stone.blockID;
+			return Blocks.stone;
 		}
 	}
 
-	public static int getGlassBlock(boolean corrupted, Random rand)
-	{
+	public static Block getGlassBlock(boolean corrupted, Random rand) {
 		if (corrupted && (rand.nextInt(30) == 1))
-			return 0;
-		
+			return Blocks.air;
+
 		if (WarpDriveConfig.isICLoaded) {
-			return WarpDriveConfig.getIC2Item("reinforcedGlass").itemID;
+			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("reinforcedGlass").getItem());
 		} else {
-			return Block.glass.blockID;
+			return Blocks.glass;
 		}
 	}
 }
