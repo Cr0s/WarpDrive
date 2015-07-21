@@ -10,7 +10,9 @@ import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
 
-/** Registry of active Warp Cores in world
+/**
+ * Registry of active Warp Cores in world
+ * 
  * @author Cr0s
  */
 public class WarpCoresRegistry {
@@ -69,7 +71,7 @@ public class WarpCoresRegistry {
 			double dZ = core.zCoord - z;
 			double distance2 = dX * dX + dY * dY + dZ * dZ;
 
-			if (distance2 <= radius2 && ! core.isHidden()) {
+			if (distance2 <= radius2 && !core.isHidden()) {
 				res.add(core);
 			}
 		}
@@ -82,8 +84,8 @@ public class WarpCoresRegistry {
 		removeDeadCores();
 
 		for (TileEntityReactor core : registry) {
-			WarpDrive.print("- Frequency '" + core.coreFrequency + "' @ '" + core.worldObj.provider.getDimensionName() + "' " + core.xCoord + ", " + core.yCoord + ", " + core.zCoord
-					+ " with " + core.isolationBlocksCount + " isolation blocks");
+			WarpDrive.print("- Frequency '" + core.coreFrequency + "' @ '" + core.getWorldObj().provider.getDimensionName() + "' " + core.xCoord + ", "
+					+ core.yCoord + ", " + core.zCoord + " with " + core.isolationBlocksCount + " isolation blocks");
 		}
 	}
 
@@ -91,13 +93,13 @@ public class WarpCoresRegistry {
 		StringBuilder reason = new StringBuilder();
 		AxisAlignedBB aabb1, aabb2;
 		removeDeadCores();
-		
+
 		core.validateShipSpatialParameters(reason);
 		aabb1 = AxisAlignedBB.getBoundingBox(core.minX, core.minY, core.minZ, core.maxX, core.maxY, core.maxZ);
 
 		for (TileEntityReactor c : registry) {
 			// Skip cores in other worlds
-			if (c.worldObj != core.worldObj) {
+			if (c.getWorldObj() != core.getWorldObj()) {
 				continue;
 			}
 
@@ -135,8 +137,11 @@ public class WarpCoresRegistry {
 		TileEntityReactor c;
 		for (int i = registry.size() - 1; i >= 0; i--) {
 			c = registry.get(i);
-			if (c == null || c.worldObj == null || c.worldObj.getBlockId(c.xCoord, c.yCoord, c.zCoord) != WarpDriveConfig.coreID || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord) != c || c.worldObj.getBlockTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
-				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null)? c.xCoord : "?") + ", " + ((c != null)? c.yCoord : "?") + ", " + ((c != null)? c.zCoord : "?"));
+			if (c == null || c.getWorldObj() == null || c.getWorldObj().getBlock(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.warpCore
+					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord) != c
+					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
+				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null) ? c.xCoord : "?") + ", " + ((c != null) ? c.yCoord : "?") + ", "
+						+ ((c != null) ? c.zCoord : "?"));
 				registry.remove(i);
 			}
 		}
@@ -145,39 +150,27 @@ public class WarpCoresRegistry {
 	}
 
 	// TODO: fix it to normal work in client
-	/*public boolean isEntityInsideAnyWarpField(Entity e) {
-		AxisAlignedBB aabb1, aabb2;
-
-		double x = e.posX;
-		double y = e.posY;
-		double z = e.posZ;
-
-		for (TileEntityReactor c : registry) {
-			// Skip offline or disassembled warp cores
-			if (c.controller == null || !c.prepareToJump()) {
-				System.out.println("Skipping " + c);
-				if (c.controller == null) {
-					System.out.println("Controller is null!");
-					continue;
-				}
-
-				if (c.controller.getMode() == 0) {
-					System.out.println("Mode is zero!");
-					continue;
-				}
-
-				if (!c.prepareToJump()) {
-					System.out.println("prepareToJump() returns false!");
-					continue;
-				}
-				continue;
-			}
-
-			if (c.minX <= x && c.maxX >= x && c.minY <= y && c.maxY >= y && c.minZ <= z && c.maxZ >= z) {
-				return true;
-			}
-		}
-
-		return false;
-	}*/
+	/*
+	 * public boolean isEntityInsideAnyWarpField(Entity e) { AxisAlignedBB
+	 * aabb1, aabb2;
+	 * 
+	 * double x = e.posX; double y = e.posY; double z = e.posZ;
+	 * 
+	 * for (TileEntityReactor c : registry) { // Skip offline or disassembled
+	 * warp cores if (c.controller == null || !c.prepareToJump()) {
+	 * System.out.println("Skipping " + c); if (c.controller == null) {
+	 * System.out.println("Controller is null!"); continue; }
+	 * 
+	 * if (c.controller.getMode() == 0) { System.out.println("Mode is zero!");
+	 * continue; }
+	 * 
+	 * if (!c.prepareToJump()) {
+	 * System.out.println("prepareToJump() returns false!"); continue; }
+	 * continue; }
+	 * 
+	 * if (c.minX <= x && c.maxX >= x && c.minY <= y && c.maxY >= y && c.minZ <=
+	 * z && c.maxZ >= z) { return true; } }
+	 * 
+	 * return false; }
+	 */
 }
