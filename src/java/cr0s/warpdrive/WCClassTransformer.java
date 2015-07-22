@@ -1,4 +1,4 @@
-package cr0s.warpdriveCore;
+package cr0s.warpdrive;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -117,7 +117,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
 						if (nodeAt.cst.equals(Double.valueOf(0.039999999105930328D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity", "(L" + nodemap.get("entityItemClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity", "(L"
+									+ nodemap.get("entityItemClass") + ";)D");
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							injectionCount++;
@@ -125,7 +126,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
 						if (nodeAt.cst.equals(Double.valueOf(0.98000001907348633D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity2", "(L" + nodemap.get("entityItemClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity2", "(L"
+									+ nodemap.get("entityItemClass") + ";)D");
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							injectionCount++;
@@ -170,7 +172,8 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 
 						if (nodeAt.cst.equals(Double.valueOf(0.080000000000000002D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getGravityForEntity", "(L" + nodemap.get("entityLivingBaseClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getGravityForEntity", "(L"
+									+ nodemap.get("entityLivingBaseClass") + ";)D");
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							injectionCount++;

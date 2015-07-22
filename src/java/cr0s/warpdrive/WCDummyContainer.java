@@ -1,4 +1,4 @@
-package cr0s.warpdriveCore;
+package cr0s.warpdrive;
 
 import java.util.Arrays;
 
