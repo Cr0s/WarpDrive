@@ -173,7 +173,7 @@ public class BlockAir extends Block
         }
         int xn_blockId = world.getBlockId(x - 1, y, z);
         boolean xn_isAir = WarpDriveConfig.isAirBlock(world, xn_blockId, x - 1, y, z);
-        int xn_concentration = (xn_blockId != this.blockID) ? 0 : world.getBlockMetadata(x - 1, y, z);
+        int xn_concentration = (xn_blockId != this) ? 0 : world.getBlockMetadata(x - 1, y, z);
         if (xn_isAir) {
         	air_count++;
             if (xn_concentration > 0) {
@@ -184,7 +184,7 @@ public class BlockAir extends Block
         }
         int yp_blockId = world.getBlockId(x, y + 1, z);
         boolean yp_isAir = WarpDriveConfig.isAirBlock(world, yp_blockId, x, y + 1, z);
-        int yp_concentration = (yp_blockId != this.blockID) ? 0 : world.getBlockMetadata(x, y + 1, z);
+        int yp_concentration = (yp_blockId != this) ? 0 : world.getBlockMetadata(x, y + 1, z);
         if (yp_isAir) {
         	air_count++;
             if (yp_concentration > 0) {
@@ -195,7 +195,7 @@ public class BlockAir extends Block
         }
         int yn_blockId = world.getBlockId(x, y - 1, z);
         boolean yn_isAir = WarpDriveConfig.isAirBlock(world, yn_blockId, x, y - 1, z);
-        int yn_concentration = (yn_blockId != this.blockID) ? 0 : world.getBlockMetadata(x, y - 1, z);
+        int yn_concentration = (yn_blockId != this) ? 0 : world.getBlockMetadata(x, y - 1, z);
         if (yn_isAir) {
         	air_count++;
             if (yn_concentration > 0) {
@@ -206,7 +206,7 @@ public class BlockAir extends Block
         }
         int zp_blockId = world.getBlockId(x, y, z + 1);
         boolean zp_isAir = WarpDriveConfig.isAirBlock(world, zp_blockId, x, y, z + 1);
-        int zp_concentration = (zp_blockId != this.blockID) ? 0 : world.getBlockMetadata(x, y, z + 1);
+        int zp_concentration = (zp_blockId != this) ? 0 : world.getBlockMetadata(x, y, z + 1);
         if (zp_isAir) {
         	air_count++;
             if (zp_concentration > 0) {
@@ -217,7 +217,7 @@ public class BlockAir extends Block
         }
         int zn_blockId = world.getBlockId(x, y, z - 1);
         boolean zn_isAir = WarpDriveConfig.isAirBlock(world, zn_blockId, x, y, z - 1);
-        int zn_concentration = (zn_blockId != this.blockID) ? 0 : world.getBlockMetadata(x, y, z - 1);
+        int zn_concentration = (zn_blockId != this) ? 0 : world.getBlockMetadata(x, y, z - 1);
         if (zn_isAir) {
         	air_count++;
             if (zn_concentration > 0) {
@@ -263,62 +263,62 @@ public class BlockAir extends Block
         
         // Check and setup air to adjacent blocks
         if (xp_isAir) {
-        	if (xp_blockId == this.blockID) {
+        	if (xp_blockId == this) {
         		if (xp_concentration != mid_concentration && xp_concentration != 15) {
         			world.setBlockMetadataWithNotify(x + 1, y, z, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x + 1, y, z, this.blockID, mid_concentration, 2);
+        		world.setBlock(x + 1, y, z, this, mid_concentration, 2);
         	}
         }
 
         if (xn_isAir) {
-        	if (xn_blockId == this.blockID) {
+        	if (xn_blockId == this) {
         		if (xn_concentration != mid_concentration && xn_concentration != 15) {
         			world.setBlockMetadataWithNotify(x - 1, y, z, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x - 1, y, z, this.blockID, mid_concentration, 2);
+        		world.setBlock(x - 1, y, z, this, mid_concentration, 2);
         	}
         }
 
         if (yp_isAir) {
-        	if (yp_blockId == this.blockID) {
+        	if (yp_blockId == this) {
         		if (yp_concentration != mid_concentration && yp_concentration != 15) {
         			world.setBlockMetadataWithNotify(x, y + 1, z, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x, y + 1, z, this.blockID, mid_concentration, 2);
+        		world.setBlock(x, y + 1, z, this, mid_concentration, 2);
         	}
         }
 
         if (yn_isAir) {
-        	if (yn_blockId == this.blockID) {
+        	if (yn_blockId == this) {
         		if (yn_concentration != mid_concentration && yn_concentration != 15) {
         			world.setBlockMetadataWithNotify(x, y - 1, z, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x, y - 1, z, this.blockID, mid_concentration, 2);
+        		world.setBlock(x, y - 1, z, this, mid_concentration, 2);
         	}
         }
 
         if (zp_isAir) {
-        	if (zp_blockId == this.blockID) {
+        	if (zp_blockId == this) {
         		if (zp_concentration != mid_concentration && zp_concentration != 15) {
         			world.setBlockMetadataWithNotify(x, y, z + 1, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x, y, z + 1, this.blockID, mid_concentration, 2);
+        		world.setBlock(x, y, z + 1, this, mid_concentration, 2);
         	}
         }
 
         if (zn_isAir) {
-        	if (zn_blockId == this.blockID) {
+        	if (zn_blockId == this) {
         		if (zn_concentration != mid_concentration && zn_concentration != 15) {
         			world.setBlockMetadataWithNotify(x, y, z - 1, mid_concentration, 2);
         		}
         	} else {
-        		world.setBlock(x, y, z - 1, this.blockID, mid_concentration, 2);
+        		world.setBlock(x, y, z - 1, this, mid_concentration, 2);
         	}
         }
     }
