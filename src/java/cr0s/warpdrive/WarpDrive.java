@@ -1,30 +1,5 @@
-package cr0s.warpdrive;
+package cr0s.WarpDrive;
 
-import java.util.List;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemArmor.ArmorMaterial;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.common.ForgeChunkManager.Type;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.common.util.EnumHelper;
-import net.minecraftforge.oredict.ShapedOreRecipe;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -34,60 +9,51 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
+import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import cr0s.warpdrive.block.BlockAir;
-import cr0s.warpdrive.block.BlockGas;
-import cr0s.warpdrive.block.BlockIridium;
-import cr0s.warpdrive.command.GenerateCommand;
-import cr0s.warpdrive.command.InvisibleCommand;
-import cr0s.warpdrive.command.JumpgateCommand;
-import cr0s.warpdrive.command.SpaceTpCommand;
-import cr0s.warpdrive.data.CamRegistry;
-import cr0s.warpdrive.data.CloakManager;
-import cr0s.warpdrive.data.JumpgatesRegistry;
-import cr0s.warpdrive.data.WarpCoresRegistry;
-import cr0s.warpdrive.item.ItemWarpAirCanister;
-import cr0s.warpdrive.item.ItemWarpArmor;
-import cr0s.warpdrive.item.ItemWarpComponent;
-import cr0s.warpdrive.machines.BlockAirGenerator;
-import cr0s.warpdrive.machines.BlockCamera;
-import cr0s.warpdrive.machines.BlockCloakingCoil;
-import cr0s.warpdrive.machines.BlockCloakingDeviceCore;
-import cr0s.warpdrive.machines.BlockLaser;
-import cr0s.warpdrive.machines.BlockLaserCam;
-import cr0s.warpdrive.machines.BlockLift;
-import cr0s.warpdrive.machines.BlockMiningLaser;
-import cr0s.warpdrive.machines.BlockMonitor;
-import cr0s.warpdrive.machines.BlockParticleBooster;
-import cr0s.warpdrive.machines.BlockProtocol;
-import cr0s.warpdrive.machines.BlockRadar;
-import cr0s.warpdrive.machines.BlockReactor;
-import cr0s.warpdrive.machines.BlockShipScanner;
-import cr0s.warpdrive.machines.BlockWarpIsolation;
-import cr0s.warpdrive.machines.TileEntityAirGenerator;
-import cr0s.warpdrive.machines.TileEntityCamera;
-import cr0s.warpdrive.machines.TileEntityCloakingDeviceCore;
-import cr0s.warpdrive.machines.TileEntityLaser;
-import cr0s.warpdrive.machines.TileEntityLift;
-import cr0s.warpdrive.machines.TileEntityMiningLaser;
-import cr0s.warpdrive.machines.TileEntityMonitor;
-import cr0s.warpdrive.machines.TileEntityParticleBooster;
-import cr0s.warpdrive.machines.TileEntityProtocol;
-import cr0s.warpdrive.machines.TileEntityRadar;
-import cr0s.warpdrive.machines.TileEntityReactor;
-import cr0s.warpdrive.machines.TileEntityShipScanner;
-import cr0s.warpdrive.machines.WarpChunkTE;
-import cr0s.warpdrive.render.CameraOverlay;
-import cr0s.warpdrive.world.BiomeSpace;
-import cr0s.warpdrive.world.HyperSpaceProvider;
-import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
-import cr0s.warpdrive.world.SpaceProvider;
-import cr0s.warpdrive.world.SpaceWorldGenerator;
+import cr0s.WarpDrive.block.*;
+import cr0s.WarpDrive.command.*;
+import cr0s.WarpDrive.data.*;
+import cr0s.WarpDrive.item.*;
+import cr0s.WarpDrive.machines.*;
+import cr0s.WarpDrive.render.*;
+import cr0s.WarpDrive.world.*;
 import dan200.computercraft.api.ComputerCraftAPI;
 
-@Mod(modid = "warpdrive", name = "WarpDrive", version = "2.0.0",
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.item.EnumArmorMaterial;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.packet.Packet250CustomPayload;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.Configuration;
+import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.common.EnumHelper;
+import net.minecraftforge.common.ForgeChunkManager;
+import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
+import net.minecraftforge.common.ForgeChunkManager.Ticket;
+import net.minecraftforge.common.ForgeChunkManager.Type;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.oredict.ShapedOreRecipe;
+import net.minecraftforge.oredict.ShapelessOreRecipe;
+
+@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.2.7.0",
 	dependencies = "required-after:IC2;"
 			+ " required-after:CoFHCore;"
 			+ " after:ComputerCraft;" 
@@ -102,6 +68,11 @@ import dan200.computercraft.api.ComputerCraftAPI;
 			+ " after:GraviSuite;" 
 			+ " after:UndergroundBiomes;" 
 			+ " after:NetherOres")
+@NetworkMod(clientSideRequired = true, serverSideRequired = true, channels = {
+		"WarpDriveBeam", 
+		"WarpDriveFreq", 
+		"WarpDriveLaserT",
+		"WarpDriveCloaks" }, packetHandler = PacketHandler.class)
 /**
  * @author Cr0s
  */
@@ -117,19 +88,28 @@ public class WarpDrive implements LoadingCallback {
 	public static Block monitorBlock;
 	public static Block boosterBlock;
 	public static Block miningLaserBlock;
+	public static Block laserTreeFarmBlock;
 	public static Block liftBlock;
 	public static Block scannerBlock;
 	public static Block cloakBlock;
 	public static Block cloakCoilBlock;
-	
+	public static Block transporterBlock;
+	public static Block reactorMonitorBlock;
+	public static Block powerReactorBlock;
+	public static Block powerLaserBlock;
+	public static Block powerStoreBlock;
 	public static Block airBlock;
 	public static Block gasBlock;
-
 	public static Block iridiumBlock;
+	public static Block transportBeaconBlock;
+	public static Block chunkLoaderBlock;
+	public static BlockDecorative decorativeBlock;
 	
+	public static Item reactorLaserFocusItem;
 	public static ItemWarpComponent componentItem;
+	public static ItemWarpUpgrade upgradeItem;
 	
-	public static ArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[]{1, 3, 2, 1}, 15);
+	public static EnumArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[]{1, 3, 2, 1}, 15);
 	public static ItemWarpArmor helmetItem;
 	public static ItemWarpAirCanister airCanisterItem;
 	
@@ -147,7 +127,7 @@ public class WarpDrive implements LoadingCallback {
 	
 	@Instance("WarpDrive")
 	public static WarpDrive instance;
-	@SidedProxy(clientSide = "cr0s.warpdrive.client.ClientProxy", serverSide = "cr0s.warpdrive.CommonProxy")
+	@SidedProxy(clientSide = "cr0s.WarpDrive.client.ClientProxy", serverSide = "cr0s.WarpDrive.CommonProxy")
 	public static CommonProxy proxy;
 
 	public static WarpCoresRegistry warpCores;
@@ -172,6 +152,9 @@ public class WarpDrive implements LoadingCallback {
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 	        Minecraft mc = Minecraft.getMinecraft();
 
+	        // System.out.println("[WarpDrive] Registering sounds event handler...");
+			MinecraftForge.EVENT_BUS.register(new SoundHandler());
+
 			normalFOV = mc.gameSettings.fovSetting;
 		    normalSensitivity = mc.gameSettings.mouseSensitivity;
 		    WarpDrive.print("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
@@ -181,10 +164,11 @@ public class WarpDrive implements LoadingCallback {
 	@SideOnly(Side.CLIENT)
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
+// FIXME		FMLInterModComms.sendMessage("Waila", "register", "cr0s.WarpDrive.client.WailaHandler.callbackRegister");
 	}
 
 	public static void print(String out) {
-		System.out.println("WarpDrive " + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + ": " + out);
+		System.out.println((FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client ":"Server ") + out);
 	}
 	
 	public static void debugPrint(String out) {
@@ -198,126 +182,178 @@ public class WarpDrive implements LoadingCallback {
 		WarpDriveConfig.load();
 
 		// CORE CONTROLLER
-		protocolBlock = new BlockProtocol(0, Material.rock);
+		protocolBlock = new BlockProtocol(WarpDriveConfig.controllerID,0, Material.rock);
 		
 		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
 		GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");
 		
 		// WARP CORE
-		warpCore = new BlockReactor(0, Material.rock);
+		warpCore = new BlockReactor(WarpDriveConfig.coreID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(warpCore, "warpCore");
 		GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");		
 		
 		// WARP RADAR
-		radarBlock = new BlockRadar(0, Material.rock);
+		radarBlock = new BlockRadar(WarpDriveConfig.radarID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(radarBlock, "radarBlock");
 		GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");
 		
 		// WARP ISOLATION
-		isolationBlock = new BlockWarpIsolation(0, Material.rock);
+		isolationBlock = new BlockWarpIsolation( WarpDriveConfig.isolationID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(isolationBlock, "isolationBlock");
 		
 		// AIR GENERATOR
-		airgenBlock = new BlockAirGenerator(0,Material.rock);
+		airgenBlock = new BlockAirGenerator(WarpDriveConfig.airgenID, 0,Material.rock);
 		
 		GameRegistry.registerBlock(airgenBlock, "airgenBlock");
 		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");
 		
 		
-		// AIR Block
-		airBlock = (new BlockAir());
+		// AIR BLOCK
+		airBlock = (new BlockAir(WarpDriveConfig.airID));
 		
 		GameRegistry.registerBlock(airBlock, "airBlock");
 		
-		// GAS Block
-		gasBlock = new BlockGas();
+		// GAS BLOCK
+		gasBlock = (new BlockGas(WarpDriveConfig.gasID));
 		
 		GameRegistry.registerBlock(gasBlock, "gasBlock");
 		
 		// LASER EMITTER
-		laserBlock = new BlockLaser(0, Material.rock);
+		laserBlock = new BlockLaser(WarpDriveConfig.laserID, 0,Material.rock);
 			
 		GameRegistry.registerBlock(laserBlock, "laserBlock");
 		GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");
 		
 		// LASER EMITTER WITH CAMERA
-		laserCamBlock = new BlockLaserCam(0, Material.rock);
+		laserCamBlock = new BlockLaserCam(WarpDriveConfig.laserCamID, 0, Material.rock);
 			
 		GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");
 		
 		// CAMERA
-		cameraBlock = new BlockCamera(0,Material.rock);
+		cameraBlock = new BlockCamera(WarpDriveConfig.camID, 0,Material.rock);
 		
 		GameRegistry.registerBlock(cameraBlock, "cameraBlock");
 		GameRegistry.registerTileEntity(TileEntityCamera.class, "cameraBlock");
 		
 		// MONITOR
-		monitorBlock = new BlockMonitor();
+		monitorBlock = new BlockMonitor(WarpDriveConfig.monitorID);
 		
 		GameRegistry.registerBlock(monitorBlock, "monitorBlock");
 		GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");
 		
 		
 		// MINING LASER
-		miningLaserBlock = new BlockMiningLaser(0, Material.rock);
+		miningLaserBlock = new BlockMiningLaser(WarpDriveConfig.miningLaserID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");
 		
+		// LASER TREE FARM
+		laserTreeFarmBlock = new BlockLaserTreeFarm(WarpDriveConfig.laserTreeFarmID, 0, Material.rock);
+		
+		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
+		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class,"laserTreeFarmBlock");
+		
 		// PARTICLE BOOSTER
-		boosterBlock = new BlockParticleBooster(0, Material.rock);
+		boosterBlock = new BlockParticleBooster(WarpDriveConfig.particleBoosterID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
 		GameRegistry.registerTileEntity(TileEntityParticleBooster.class, "boosterBlock");
 		
 		// LASER LIFT
-		liftBlock = new BlockLift(0, Material.rock);
+		liftBlock = new BlockLift(WarpDriveConfig.liftID, 0, Material.rock);
 		
-		GameRegistry.registerBlock(liftBlock, "liftBlocks");
+		GameRegistry.registerBlock(liftBlock, "liftBlock");
 		GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");
 		
-		// IRIDIUM Blocks
-		iridiumBlock = new BlockIridium();
+		// IRIDIUM BLOCK
+		iridiumBlock = new BlockIridium(WarpDriveConfig.iridiumBlockID);
 		
 		GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");
 		
         // SHIP SCANNER
-        scannerBlock = new BlockShipScanner(0, Material.rock);
+        scannerBlock = new BlockShipScanner(WarpDriveConfig.shipScannerID, 0, Material.rock);
         
-        GameRegistry.registerBlock(scannerBlock, "scannerBlocks");
+        GameRegistry.registerBlock(scannerBlock, "scannerBlock");
         GameRegistry.registerTileEntity(TileEntityShipScanner.class, "scannerBlock");		
 
         // CLOAKING DEVICE CORE
-        cloakBlock = new BlockCloakingDeviceCore(0, Material.rock);
+        cloakBlock = new BlockCloakingDeviceCore(WarpDriveConfig.cloakCoreID, 0, Material.rock);
         
         GameRegistry.registerBlock(cloakBlock, "cloakBlock");
         GameRegistry.registerTileEntity(TileEntityCloakingDeviceCore.class, "cloakBlock");        
         
         // CLOAKING DEVICE COIL
-		cloakCoilBlock = new BlockCloakingCoil(0, Material.rock);
+		cloakCoilBlock = new BlockCloakingCoil(WarpDriveConfig.cloakCoilID, 0, Material.rock);
 		
 		GameRegistry.registerBlock(cloakCoilBlock, "cloakCoilBlock");    
 		
-		// COMPONENT ItemsS
-		componentItem = new ItemWarpComponent();
+		// TRANSPORTER
+		transporterBlock = new BlockTransporter(WarpDriveConfig.transporterID,Material.rock);
+		
+		GameRegistry.registerBlock(transporterBlock, "transporter");
+		GameRegistry.registerTileEntity(TileEntityTransporter.class,"transporter");
+		
+		// REACTOR MONITOR
+		reactorMonitorBlock = new BlockLaserReactorMonitor(WarpDriveConfig.reactorMonitorID, Material.rock);
+		
+		GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
+		GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class,"reactorMonitor");
+		
+		// TRANSPORT BEACON
+		transportBeaconBlock = new BlockTransportBeacon(WarpDriveConfig.transportBeaconID);
+		
+		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");
+	        
+		// POWER REACTOR, LASER, STORE
+		powerReactorBlock = new BlockPowerReactor(WarpDriveConfig.powerReactorID);
+		GameRegistry.registerBlock(powerReactorBlock,"powerReactor");
+		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, "powerReactor");
+		
+		powerLaserBlock   = new BlockPowerLaser(WarpDriveConfig.powerLaserID);
+		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
+		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, "powerLaser");
+		
+		powerStoreBlock = new BlockPowerStore(WarpDriveConfig.powerStoreID);
+		GameRegistry.registerBlock(powerStoreBlock,"powerStore");
+		GameRegistry.registerTileEntity(TileEntityPowerStore.class, "powerStore");
+		
+		// CHUNK LOADER
+		chunkLoaderBlock = new BlockChunkLoader(WarpDriveConfig.chunkLoaderID);
+		GameRegistry.registerBlock(chunkLoaderBlock, "chunkLoader");
+		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, "chunkLoader");
+		
+		// DECORATIVE
+		decorativeBlock = new BlockDecorative(WarpDriveConfig.decorativeID);
+		GameRegistry.registerBlock(decorativeBlock, ItemBlockDecorative.class, "decorative");
+		
+		// REACTOR LASER FOCUS
+		reactorLaserFocusItem = new ItemReactorLaserFocus(WarpDriveConfig.reactorLaserFocusID);
+		GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
+		
+		// COMPONENT ITEMS
+		componentItem = new ItemWarpComponent(WarpDriveConfig.componentID);
 		GameRegistry.registerItem(componentItem, "component");		
 		
-		helmetItem = new ItemWarpArmor(0);
+		helmetItem = new ItemWarpArmor(WarpDriveConfig.helmetID, 0);
 		GameRegistry.registerItem(helmetItem, "helmet");
 		
-		airCanisterItem = new ItemWarpAirCanister();
+		airCanisterItem = new ItemWarpAirCanister(WarpDriveConfig.airCanisterID);
 		GameRegistry.registerItem(airCanisterItem, "airCanisterFull");
+		
+		upgradeItem = new ItemWarpUpgrade(WarpDriveConfig.upgradeID);
+		GameRegistry.registerItem(upgradeItem, "upgrade");
 		
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
 		
 		spaceWorldGenerator = new SpaceWorldGenerator();
-		GameRegistry.registerWorldGenerator(spaceWorldGenerator, 0);
+		GameRegistry.registerWorldGenerator(spaceWorldGenerator);
 		hyperSpaceWorldGenerator = new HyperSpaceWorldGenerator();
-		GameRegistry.registerWorldGenerator(hyperSpaceWorldGenerator, 0);
+		GameRegistry.registerWorldGenerator(hyperSpaceWorldGenerator);
 		
 		registerSpaceDimension();
 		registerHyperSpaceDimension();
@@ -325,7 +361,7 @@ public class WarpDrive implements LoadingCallback {
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
 		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			warpdriveTab.setBackgroundImageName("Items.png");
+			warpdriveTab.setBackgroundImageName("items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 		
@@ -359,76 +395,93 @@ public class WarpDrive implements LoadingCallback {
 	
 	private static void initVanillaRecipes() {
 		componentItem.registerRecipes();
+		decorativeBlock.initRecipes();
+		upgradeItem.initRecipes();
 		
 		//WarpCore
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(warpCore), false, "ipi", "ici", "idi",
-				'i', Items.iron_ingot,
+				'i', Item.ingotIron,
 				'p', componentItem.getIS(6),
 				'c', componentItem.getIS(2),
-				'd', Items.diamond));
+				'd', Item.diamond));
 		
 		//Controller
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(protocolBlock), false, "ici", "idi", "iii",
-				'i', Items.iron_ingot,
+				'i', Item.ingotIron,
 				'c', componentItem.getIS(5),
-				'd', Items.diamond));
+				'd', Item.diamond));
 		
 		//Radar
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(radarBlock), false, "ggg", "pdc", "iii",
-				'i', Items.iron_ingot,
+				'i', Item.ingotIron,
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6),
-				'g', Blocks.glass,
-				'd', Items.diamond));
+				'g', Block.glass,
+				'd', Item.diamond));
 		
-		//Isolation Blocks
+		//Isolation Block
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(isolationBlock), false, "igi", "geg", "igi",
-				'i', Items.iron_ingot,
-				'g', Blocks.glass,
-				'e', Items.ender_pearl));
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'e', Item.enderPearl));
 		
 		//Air generator
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(airgenBlock), false, "ibi", "i i", "ipi",
-				'i', Items.iron_ingot,
-				'b', Blocks.iron_bars,
+				'i', Item.ingotIron,
+				'b', Block.fenceIron,
 				'p', componentItem.getIS(6)));
 		
 		//Laser
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserBlock), false, "ili", "iri", "ici",
-				'i', Items.iron_ingot,
-				'r', Items.redstone,
+				'i', Item.ingotIron,
+				'r', Item.redstone,
 				'c', componentItem.getIS(5),
 				'l', componentItem.getIS(3),
 				'p', componentItem.getIS(6)));
 		
 		//Mining laser
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(miningLaserBlock), false, "ici", "iti", "ili",
-				'i', Items.iron_ingot,
-				'r', Items.redstone,
+				'i', Item.ingotIron,
+				'r', Item.redstone,
+				't', componentItem.getIS(1),
+				'c', componentItem.getIS(5),
+				'l', componentItem.getIS(3)));
+		
+		//Tree farm laser
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock), false, "ili", "sts", "ici",
+				'i', Item.ingotIron,
+				's', "treeSapling",
 				't', componentItem.getIS(1),
 				'c', componentItem.getIS(5),
 				'l', componentItem.getIS(3)));
 		
 		//Laser Lift
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(liftBlock), false, "ipi", "rtr", "ili",
-				'i', Items.iron_ingot,
-				'r', Items.redstone,
+				'i', Item.ingotIron,
+				'r', Item.redstone,
 				't', componentItem.getIS(1),
 				'l', componentItem.getIS(3),
 				'p', componentItem.getIS(6)));
 		
+		//Transporter
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, "iii", "ptc", "iii",
+				'i', Item.ingotIron,
+				't', componentItem.getIS(1),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
+		
 		//Particle Booster
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(boosterBlock), false, "ipi", "rgr", "iii",
-				'i', Items.iron_ingot,
-				'r', Items.redstone,
-				'g', Blocks.glass,
+				'i', Item.ingotIron,
+				'r', Item.redstone,
+				'g', Block.glass,
 				'p', componentItem.getIS(6)));
 		
 		//Camera
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cameraBlock), false, "ngn", "i i", "ici",
-				'i', Items.iron_ingot,
-				'n', Items.gold_nugget,
-				'g', Blocks.glass,
+				'i', Item.ingotIron,
+				'n', Item.goldNugget,
+				'g', Block.glass,
 				'c', componentItem.getIS(5)));
 		
 		//LaserCamera
@@ -436,43 +489,82 @@ public class WarpDrive implements LoadingCallback {
 		
 		//Monitor
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(monitorBlock), false, "ggg", "iti", "ici",
-				'i', Items.iron_ingot,
-				't', Blocks.torch,
-				'g', Blocks.glass,
+				'i', Item.ingotIron,
+				't', Block.torchWood,
+				'g', Block.glass,
 				'c', componentItem.getIS(5)));
 		
 		//Cloaking device
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakBlock), false, "ipi", "lrl", "ici",
-				'i', Items.iron_ingot,
-				'r', Items.redstone,
+				'i', Item.ingotIron,
+				'r', Item.redstone,
 				'l', componentItem.getIS(3),
 				'c', componentItem.getIS(5),
 				'p', componentItem.getIS(6)));
 		
 		//Cloaking coil
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakCoilBlock), false, "ini", "rdr", "ini",
-				'i', Items.iron_ingot,
-				'd', Items.diamond,
-				'r', Items.redstone,
-				'n', Items.gold_nugget));
+				'i', Item.ingotIron,
+				'd', Item.diamond,
+				'r', Item.redstone,
+				'n', Item.goldNugget));
+		
+		//Power Laser
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii", "ilg", "ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'c', componentItem.getIS(5),
+				'l', componentItem.getIS(3)));
+		
+		//Power Reactor
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi", "gog", "ici",
+				'i', Item.ingotIron,
+				'g', Block.glass,
+				'o', componentItem.getIS(4),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
+		
+		//Power Store
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerStoreBlock), false, "ipi", "isi", "ici",
+				'i', Item.ingotIron,
+				's', componentItem.getIS(7),
+				'c', componentItem.getIS(5),
+				'p', componentItem.getIS(6)));
+		
+		//Transport Beacon
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transportBeaconBlock), false, " e ", "ldl", " s ",
+				'e', Item.enderPearl,
+				'l', "dyeBlue",
+				'd', Item.diamond,
+				's', Item.stick));
+		
+		//Chunk Loader
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(chunkLoaderBlock), false, "ipi", "ici", "ifi",
+				'i', Item.ingotIron,
+				'p', componentItem.getIS(6),
+				'c', componentItem.getIS(0),
+				'f', componentItem.getIS(5)));
 		
 		//Helmet
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg",
-				'i', Items.iron_ingot,
-				'w', Blocks.wool,
-				'g', Blocks.glass,
+				'i', Item.ingotIron,
+				'w', Block.cloth,
+				'g', Block.glass,
 				'c', componentItem.getIS(8)));
 	}
 	
 	private static void initAETERecipes() {
 		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
+		ItemStack resonantEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellResonant", 1);
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
 		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
+		ItemStack quantumEntangledSingularity = WarpDriveConfig.getAEMaterial("matQuantumEntangledSingularity");
 		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEBlock("blkQuartzLamp");
 		vibrantQuartzGlass.setItemDamage(4);
 		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
 		antimatter.setItemDamage(0);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
+		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack, 1, 1);
 
 		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
 		// middle = fluix crystal, advancedMachine, fluix crystal
@@ -492,14 +584,37 @@ public class WarpDrive implements LoadingCallback {
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
 			'o', floppy,
 			'f', fluixCrystal);
+		
+		// top = Iridium plate, Resonant Energycell, Iridium plate
+		// middle = Singularity, 125 milligram antimatter, Singularity
+		// bottom = Iridium plate, Ultimate lappack, Iridium plate
+		GameRegistry.addRecipe(new ItemStack(powerReactorBlock), "iri", "sas", "ili",
+			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+			's', quantumEntangledSingularity,
+			'a', antimatter,
+			'l', ultimateLappack,
+			'r', resonantEnergycell);
+		
+		// top = Advanced circuit, Advanced alloy, Advanced alloy
+		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass
+		// bottom = Advanced circuit, Certus quartz tank, Advanced alloy
+		ItemStack isMiningLaserBlock = new ItemStack(miningLaserBlock.blockID, 1, 0);
+		ItemStack isCertusQuartzTank = new ItemStack(WarpDriveConfig.AEExtra_certusQuartzTank.blockID, 1, 0);
+
+		GameRegistry.addRecipe(new ItemStack(powerLaserBlock), "caa", "czg", "cta",
+			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
+			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
+			'z', isMiningLaserBlock,
+			't', isCertusQuartzTank,
+			'g', vibrantQuartzGlass);
 	}
 	
 	private static void initIC2Recipes() {
 		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
-			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
-			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
-			'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
-		
+				'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
+				'm', WarpDriveConfig.getIC2Item("advancedMachine"),
+				'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
+			
 		GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
 			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
@@ -513,10 +628,10 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.addRecipe(new ItemStack(isolationBlock), "iii", "idi", "iii",
 			'i', WarpDriveConfig.getIC2Item("iridiumPlate"),
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
-			'd', Blocks.diamond_block);
+			'd', Block.blockDiamond);
 		
 		GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
-			'l', Blocks.leaves,
+			'l', Block.leaves,
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"));
 		
@@ -558,18 +673,42 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.addRecipe(new ItemStack(cameraBlock), "cgc", "gmg", "cgc",
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
-			'g', Blocks.glass);
+			'g', Block.glass);
 		
 		GameRegistry.addRecipe(new ItemStack(monitorBlock), "gcg", "gmg", "ggg", 
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'c', WarpDriveConfig.getIC2Item("advancedCircuit"),
-			'g', Blocks.glass);
+			'g', Block.glass);
 		
 		GameRegistry.addRecipe(new ItemStack(scannerBlock), "sgs", "mma", "amm",
 			'm', WarpDriveConfig.getIC2Item("advancedMachine"),
 			'a', WarpDriveConfig.getIC2Item("advancedAlloy"),
 			's', WarpDriveConfig.getIC2Item("advancedCircuit"),
-			'g', Blocks.glass);	
+			'g', Block.glass);	
+	
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock),false,new Object[] {
+			"cwc", "wmw", "cwc",
+			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
+			'w', "logWood",
+			'm', miningLaserBlock }));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] {
+			"ece", "imi", "iei",
+			'e', Item.enderPearl,
+			'c', WarpDriveConfig.getIC2Item("electronicCircuit"),
+			'i', WarpDriveConfig.getIC2Item("plateiron"),
+			'm', WarpDriveConfig.getIC2Item("machine") }));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem),false,new Object[] {
+			" p ", "pdp", " p ",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond"}));
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] {
+			"pdp", "dmd", "pdp",
+			'p', WarpDriveConfig.getIC2Item("plateiron"),
+			'd', "gemDiamond",
+			'm', WarpDriveConfig.getIC2Item("mfeUnit")}));
 		
 		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi", 
 			'i', iridiumBlock,
@@ -605,10 +744,11 @@ public class WarpDrive implements LoadingCallback {
 		event.registerServerCommand(new SpaceTpCommand());
 		event.registerServerCommand(new InvisibleCommand());
 		event.registerServerCommand(new JumpgateCommand());
+		event.registerServerCommand(new DebugCommand());
 	}
 	
 	public Ticket registerChunkLoadTE(WarpChunkTE te, boolean refreshLoading) {
-		World worldObj = te.getWorldObj();
+		World worldObj = te.worldObj;
 		if (ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0)
 		{
 			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
@@ -657,7 +797,7 @@ public class WarpDrive implements LoadingCallback {
 					WorldServer ws = DimensionManager.getWorld(w);
 					if(ws != null)
 					{
-						TileEntity te = ws.getTileEntity(x, y, z);
+						TileEntity te = ws.getBlockTileEntity(x, y, z);
 						if(te != null && te instanceof WarpChunkTE)
 						{
 							if(((WarpChunkTE)te).shouldChunkLoad())
