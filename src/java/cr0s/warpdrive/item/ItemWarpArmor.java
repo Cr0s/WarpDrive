@@ -1,7 +1,5 @@
 package cr0s.warpdrive.item;
 
-import javax.swing.Icon;
-
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -9,8 +7,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 import cr0s.warpdrive.api.IBreathingHelmet;
@@ -18,29 +14,28 @@ import cr0s.warpdrive.api.IBreathingHelmet;
 public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();
 	private int slot;
-	
+
 	IIcon ic;
-	
-	public ItemWarpArmor(int slot) {
-		super(WarpDrive.armorMaterial, 0, slot);
+
+	public ItemWarpArmor(ArmorMaterial mat, int slot) {
+		super(mat, 0, slot);
 		this.slot = slot;
 		setUnlocalizedName("warpdrive.armor.Helmet");
 		setCreativeTab(WarpDrive.warpdriveTab);
 	}
-	
+
 	@Override
-	@SideOnly(Side.CLIENT)
 	public String getArmorTexture(ItemStack is, Entity en, int parSlot, String type) {
 		return "warpdrive:textures/armor/warpArmor_1.png";
 	}
-	
+
 	@Override
 	public void registerIcons(IIconRegister ir) {
 		if (slot == 0) {
 			ic = ir.registerIcon("warpdrive:warpArmorHelmet");
 		}
 	}
-	
+
 	@Override
 	public IIcon getIconFromDamage(int damage) {
 		return ic;
@@ -57,16 +52,18 @@ public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 		if (player instanceof EntityPlayerMP) {
 			EntityPlayerMP pl = (EntityPlayerMP) player;
 			ItemStack[] plInv = pl.inventory.mainInventory;
-			for(int i = 0; i < plInv.length; i++) {
+			for (int i = 0; i < plInv.length; i++) {
 				ItemStack is = plInv[i];
 				if (is != null && is.getItem() instanceof IAirCanister) {
-					IAirCanister airCanister = (IAirCanister)is.getItem();
+					IAirCanister airCanister = (IAirCanister) is.getItem();
 					if (airCanister.containsAir(is)) {
 						if (is.stackSize > 1) {// unstack
 							is.stackSize--;
 							ItemStack toAdd = is.copy();
 							toAdd.stackSize = 1;
-							toAdd.setItemDamage(is.getItemDamage() + 1);	// bypass unbreaking enchantment
+							toAdd.setItemDamage(is.getItemDamage() + 1); // bypass
+							// unbreaking
+							// enchantment
 							if (is.getItemDamage() >= is.getMaxDamage()) {
 								toAdd = airCanister.emptyDrop(is);
 							}
@@ -75,7 +72,9 @@ public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 								pl.worldObj.spawnEntityInWorld(ie);
 							}
 						} else {
-							is.setItemDamage(is.getItemDamage() + 1);	// bypass unbreaking enchantment
+							is.setItemDamage(is.getItemDamage() + 1); // bypass
+							// unbreaking
+							// enchantment
 							if (is.getItemDamage() >= is.getMaxDamage()) {
 								plInv[i] = airCanister.emptyDrop(is);
 							}
@@ -87,11 +86,9 @@ public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
 		}
 		return false;
 	}
-	
-	
+
 	@Override
-	public int ticksPerCanDamage()
-	{
+	public int ticksPerCanDamage() {
 		return 40;
 	}
 }
