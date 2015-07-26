@@ -43,7 +43,7 @@ public class SpaceTpCommand extends CommandBase {
 				// get an online player by name
 				List<EntityPlayer> onlinePlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
 				for (EntityPlayer onlinePlayer : onlinePlayers) {
-					if (onlinePlayer.getDisplayName().equalsIgnoreCase(astring[0]) && onlinePlayer instanceof EntityPlayerMP) {
+					if (onlinePlayer.getCommandSenderName().equalsIgnoreCase(astring[0]) && onlinePlayer instanceof EntityPlayerMP) {
 						player = (EntityPlayerMP) onlinePlayer;
 					}
 				}
@@ -56,7 +56,7 @@ public class SpaceTpCommand extends CommandBase {
 		}
 
 		WorldServer targetWorld = server.worldServerForDimension(targetDim);
-		WarpDrive.logger.info("/space: teleporting player " + player.getDisplayName() + " to " + targetDim + ":" + targetWorld.getWorldInfo().getWorldName());
+		WarpDrive.logger.info("/space: teleporting player " + player.getCommandSenderName() + " to " + targetDim + ":" + targetWorld.getWorldInfo().getWorldName());
 		SpaceTeleporter teleporter = new SpaceTeleporter(targetWorld, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 		server.getConfigurationManager().transferPlayerToDimension(player, targetDim, teleporter);
 	}

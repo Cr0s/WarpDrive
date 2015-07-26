@@ -72,7 +72,7 @@ public class CloakedArea {
 			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
 			for (Entity e : list) {
 				if (e instanceof EntityPlayer) {
-					addPlayer(((EntityPlayer) e).getDisplayName());
+					addPlayer(((EntityPlayer) e).getCommandSenderName());
 				}
 			}
 		} catch (Exception e) {
@@ -114,19 +114,19 @@ public class CloakedArea {
 
 	public void updatePlayer(EntityPlayer player) {
 		if (isEntityWithinArea(player)) {
-			if (!isPlayerListedInArea(player.getDisplayName())) {
+			if (!isPlayerListedInArea(player.getCommandSenderName())) {
 				// WarpDrive.debugPrint("" + this + " Player " + player.username
 				// + " has entered");
-				addPlayer(player.getDisplayName());
+				addPlayer(player.getCommandSenderName());
 				revealChunksToPlayer(player);
 				revealEntityToPlayer(player);
 				PacketHandler.sendCloakPacket(player, aabb, tier, false);
 			}
 		} else {
-			if (isPlayerListedInArea(player.getDisplayName())) {
+			if (isPlayerListedInArea(player.getCommandSenderName())) {
 				// WarpDrive.debugPrint("" + this + " Player " + player.username
 				// + " has left");
-				removePlayer(player.getDisplayName());
+				removePlayer(player.getCommandSenderName());
 				MinecraftServer
 						.getServer()
 						.getConfigurationManager()

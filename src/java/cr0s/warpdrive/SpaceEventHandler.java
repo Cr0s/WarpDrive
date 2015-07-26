@@ -112,7 +112,8 @@ public class SpaceEventHandler {
 				// Damage entity if in vacuum without protection
 				if (entity instanceof EntityPlayerMP) {
 					EntityPlayerMP player = (EntityPlayerMP) entity;
-					air = player_airTank.get(player.getDisplayName());
+					String playerName = player.getCommandSenderName();
+					air = player_airTank.get(playerName);
 
 					boolean hasHelmet = false;
 					ItemStack helmetStack = player.getCurrentArmor(3);
@@ -125,44 +126,44 @@ public class SpaceEventHandler {
 								hasHelmet = true;
 								if (air == null) {// new player in space =>
 									// grace period
-									player_airTank.put(player.getDisplayName(), airTicks);
+									player_airTank.put(playerName, airTicks);
 								} else if (air <= 1) {
 									if (breathHelmet.removeAir(player)) {
-										player_airTank.put(player.getDisplayName(), airTicks);
+										player_airTank.put(playerName, airTicks);
 									} else {
-										player_airTank.put(player.getDisplayName(), AIR_DROWN_TICKS);
+										player_airTank.put(playerName, AIR_DROWN_TICKS);
 										player.attackEntityFrom(DamageSource.drown, 2.0F);
 									}
 								} else {
-									player_airTank.put(player.getDisplayName(), air - 1);
+									player_airTank.put(playerName, air - 1);
 								}
 							}
 						} else if (WarpDriveConfig.spaceHelmets.contains(helmetStack)) {
 							hasHelmet = true;
 							if (air == null) {// new player in space => grace
 								// period
-								player_airTank.put(player.getDisplayName(), AIR_TANK_TICKS);
+								player_airTank.put(playerName, AIR_TANK_TICKS);
 							} else if (air <= 1) {
 								if (consumeO2(player.inventory.mainInventory, player)) {
-									player_airTank.put(player.getDisplayName(), AIR_TANK_TICKS);
+									player_airTank.put(playerName, AIR_TANK_TICKS);
 								} else {
-									player_airTank.put(player.getDisplayName(), AIR_DROWN_TICKS);
+									player_airTank.put(playerName, AIR_DROWN_TICKS);
 									entity.attackEntityFrom(DamageSource.drown, 2.0F);
 								}
 							} else {
-								player_airTank.put(player.getDisplayName(), air - 1);
+								player_airTank.put(playerName, air - 1);
 							}
 						}
 					}
 
 					if (!hasHelmet) {
 						if (air == null) {// new player in space => grace period
-							player_airTank.put(player.getDisplayName(), AIR_TANK_TICKS);
+							player_airTank.put(playerName, AIR_TANK_TICKS);
 						} else if (air <= 1) {
-							player_airTank.put(player.getDisplayName(), AIR_DROWN_TICKS);
+							player_airTank.put(playerName, AIR_DROWN_TICKS);
 							entity.attackEntityFrom(DamageSource.drown, 2.0F);
 						} else {
-							player_airTank.put(player.getDisplayName(), air - 1);
+							player_airTank.put(playerName, air - 1);
 						}
 					}
 
@@ -184,19 +185,19 @@ public class SpaceEventHandler {
 	private void updatePlayerCloakState(EntityLivingBase entity) {
 		try {
 			EntityPlayerMP player = (EntityPlayerMP) entity;
-			Integer cloakTicks = player_cloakTicks.get(player.getDisplayName());
+			Integer cloakTicks = player_cloakTicks.get(player.getCommandSenderName());
 
 			if (cloakTicks == null) {
-				player_cloakTicks.put(player.getDisplayName(), 0);
+				player_cloakTicks.put(player.getCommandSenderName(), 0);
 				return;
 			}
 
 			if (cloakTicks >= CLOAK_CHECK_TIMEOUT_TICKS) {
-				player_cloakTicks.put(player.getDisplayName(), 0);
+				player_cloakTicks.put(player.getCommandSenderName(), 0);
 
 				WarpDrive.cloaks.updatePlayer(player);
 			} else {
-				player_cloakTicks.put(player.getDisplayName(), cloakTicks + 1);
+				player_cloakTicks.put(player.getCommandSenderName(), cloakTicks + 1);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

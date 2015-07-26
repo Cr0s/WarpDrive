@@ -30,7 +30,7 @@ public class InvisibleCommand extends CommandBase {
 			// get an online player by name
 			List<EntityPlayer> onlinePlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
 			for (EntityPlayer onlinePlayer : onlinePlayers) {
-				if (onlinePlayer.getDisplayName().equalsIgnoreCase(astring[0])) {
+				if (onlinePlayer.getCommandSenderName().equalsIgnoreCase(astring[0])) {
 					player = onlinePlayer;
 				}
 			}
