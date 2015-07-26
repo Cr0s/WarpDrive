@@ -20,11 +20,11 @@ public class ClientCameraUtils {
         Minecraft mc = Minecraft.getMinecraft();
 
         if (parPlayerEntity == null) {
-        	WarpDrive.print("[WarpDrive] setupViewpoint with null player => denied");
+        	WarpDrive.logger.severe("setupViewpoint with null player => denied");
             return;
         }
         if (entityCamera == null) {
-        	WarpDrive.print("[WarpDrive] setupViewpoint with null camera => denied");
+        	WarpDrive.logger.severe("setupViewpoint with null camera => denied");
             return;
         }
 
@@ -54,19 +54,15 @@ public class ClientCameraUtils {
     		entityPlayer = null;
             WarpDrive.debugPrint("Resetting viewpoint");
     	} else {
-    		WarpDrive.print("[WarpDrive] reseting viewpoint with invalid player entity ?!?");
+    		WarpDrive.logger.severe("reseting viewpoint with invalid player entity ?!?");
     	}
         
     	Keyboard.enableRepeatEvents(false);
 
         WarpDrive.instance.isOverlayEnabled = false;
         mc.gameSettings.thirdPersonView = 0;
-        // TODO: Cannot find 1.7 equivalent
-        /*
-        mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, WarpDrive.normalFOV);
-        mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, WarpDrive.normalSensitivity);
-        */
-
+        mc.gameSettings.fovSetting = WarpDrive.normalFOV;
+        mc.gameSettings.mouseSensitivity = WarpDrive.normalSensitivity;
 
         entityPlayer = null;
         dimensionId = -666;
@@ -77,11 +73,11 @@ public class ClientCameraUtils {
     		return false;
     	}
     	if (!worldObj.getBlock(check1_x, check1_y, check1_z).isAssociatedBlock(check1_blockId)) {
-    		WarpDrive.print("[WarpDrive] checking viewpoint, found invalid block1 at (" + check1_x + ", " + check1_y + ", " + check1_z + ")");
+    		WarpDrive.logger.severe("checking viewpoint, found invalid block1 at (" + check1_x + ", " + check1_y + ", " + check1_z + ")");
     		return false;
     	}
     	if (!worldObj.getBlock(check2_x, check2_y, check2_z).isAssociatedBlock(check2_blockId)) {
-    		WarpDrive.print("[WarpDrive] checking viewpoint, found invalid block2 at (" + check2_x + ", " + check2_y + ", " + check2_z + ")");
+    		WarpDrive.logger.severe("checking viewpoint, found invalid block2 at (" + check2_x + ", " + check2_y + ", " + check2_z + ")");
     		return false;
     	}
     	return true;
