@@ -17,7 +17,6 @@ import org.lwjgl.input.Mouse;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
 
 public final class EntityCamera extends EntityLivingBase
 {

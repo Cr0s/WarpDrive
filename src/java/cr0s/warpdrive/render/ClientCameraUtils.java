@@ -8,7 +8,6 @@ import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.machines.BlockMonitor;
 
 public class ClientCameraUtils {
     public static EntityPlayer entityPlayer;

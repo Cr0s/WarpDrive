@@ -2,8 +2,6 @@ package cr0s.warpdrive.machines;
 
 import java.util.Random;
 
-import javax.swing.Icon;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;

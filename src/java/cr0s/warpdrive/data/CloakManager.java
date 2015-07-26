@@ -9,10 +9,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
-import com.sun.media.jfxmedia.logging.Logger;
-
 import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
 import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
 
 /**
  * Cloak manager stores cloaking devices covered areas
@@ -71,12 +70,7 @@ public class CloakManager {
 		for (int i = 0; i < this.cloaks.size(); i++) {
 			if (this.cloaks.get(i).coreX == x && this.cloaks.get(i).coreY == y && this.cloaks.get(i).coreZ == z
 					&& this.cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
-				this.cloaks.get(i).sendCloakPacketToPlayersEx(true); // send
-				// info
-				// about
-				// collapsing
-				// cloaking
-				// field
+				this.cloaks.get(i).sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
 				index = i;
 				break;
 			}
@@ -102,7 +96,7 @@ public class CloakManager {
 
 	public static Packet getPacketForThisEntity(Entity e) {
 		if (e.isDead) {
-			Logger.logMsg(Logger.WARNING, "Fetching addPacket for removed entity");
+			WarpDrive.debugPrint("Fetching addPacket for removed entity");
 		}
 
 		Packet pkt = FMLNetworkHandler.getEntitySpawningPacket(e);
