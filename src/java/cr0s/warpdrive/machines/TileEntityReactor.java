@@ -17,6 +17,7 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -299,6 +300,8 @@ public class TileEntityReactor extends WarpEnergyTE {
 				warmupTime = 0;
 			}
 			break;
+		default:
+			break;
 		}
 	}
 
@@ -306,7 +309,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX + 0.99D, this.maxY + 0.99D, this.maxZ + 0.99D);
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
-		WarpDrive.print("" + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client" : "Server") + this + " messageToAllPlayersOnShip: " + msg);
+		WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
 		for (Object o : list) {
 			if (o == null || !(o instanceof EntityPlayer)) {
 				continue;
@@ -377,7 +380,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 		for (int i = 0; i < controller.players.size(); i++) {
 			String nick = controller.players.get(i);
-			EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(nick);
+			EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().func_152612_a(nick);
 
 			if (player != null
 					&& !testBB(aabb, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ))) {
@@ -391,7 +394,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 		for (int i = 0; i < controller.players.size(); i++) {
 			String nick = controller.players.get(i);
-			EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(nick);
+			EntityPlayerMP player = MinecraftServer.getServer().getConfigurationManager().func_152612_a(nick);
 
 			if (player != null && nick.equals(nickname)
 					&& !testBB(aabb, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ))) {
@@ -512,7 +515,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 				continue;
 			}
 
-			String playerName = ((EntityPlayer) o).username;
+			String playerName = ((EntityPlayer) o).getDisplayName();
 			for (String unlimiteName : WarpDriveConfig.WC_UNLIMITED_PLAYERNAMES) {
 				isUnlimited = isUnlimited || unlimiteName.equals(playerName);
 			}
@@ -559,7 +562,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 		if (isBeaconFound) {
 			// Consume energy
 			if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
-				WarpDrive.print(this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
+				WarpDrive.logger.info(this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 				EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 				jump.maxX = maxX;
 				jump.minX = minX;
@@ -574,7 +577,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 				messageToAllPlayersOnShip("Insufficient energy level");
 			}
 		} else {
-			WarpDrive.print(this + " Beacon '" + freq + "' is unknown.");
+			WarpDrive.logger.info(this + " Beacon '" + freq + "' is unknown.");
 		}
 	}
 
@@ -584,7 +587,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 		int countBlocksInside = 0;
 		int countBlocksTotal = 0;
 
-		if (aabb.isVecInside(worldObj.getWorldVec3Pool().getVecFromPool(maxX - minX, maxY - minY, maxZ - minZ))) {
+		if (aabb.isVecInside(Vec3.createVectorHelper(maxX - minX, maxY - minY, maxZ - minZ))) {
 			return true;
 		}
 
@@ -609,7 +612,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 			percent = Math.round((((countBlocksInside * 1.0F) / shipVolume) * 100.0F) * 10.0F) / 10.0F;
 		}
 		if (shipVolume != countBlocksTotal) {
-			WarpDrive.print(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
+			WarpDrive.logger.info(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
 		}
 		WarpDrive.debugPrint("Ship has " + countBlocksInside + " / " + shipVolume + " blocks (" + percent + "%) in jumpgate '" + jg.name + "'");
 		// At least 80% of ship must be inside jumpgate
@@ -708,12 +711,12 @@ public class TileEntityReactor extends WarpEnergyTE {
 				return;
 			}
 
-			WarpDrive.print("[GATE] Place found over " + (10 - numTries) + " tries.");
+			WarpDrive.logger.info("[GATE] Place found over " + (10 - numTries) + " tries.");
 		}
 
 		// Consume energy
 		if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
-			WarpDrive.print(this + " Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
+			WarpDrive.logger.info(this + " Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 			EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 			jump.maxX = maxX;
 			jump.minX = minX;
@@ -742,21 +745,21 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 		String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
 		if (currentMode == ReactorMode.GATE_JUMP) {
-			WarpDrive.print(this + " Performing gate jump of " + shipInfo);
+			WarpDrive.logger.info(this + " Performing gate jump of " + shipInfo);
 			doGateJump();
 			return;
 		} else if (currentMode == ReactorMode.BEACON_JUMP) {
-			WarpDrive.print(this + " Performing beacon jump of " + shipInfo);
+			WarpDrive.logger.info(this + " Performing beacon jump of " + shipInfo);
 			doBeaconJump();
 			return;
 		} else if (currentMode == ReactorMode.HYPERSPACE) {
-			WarpDrive.print(this + " Performing hyperspace jump of " + shipInfo);
+			WarpDrive.logger.info(this + " Performing hyperspace jump of " + shipInfo);
 
 			// Check ship size for hyper-space jump
 			if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
 				Jumpgate nearestGate = null;
 				if (WarpDrive.jumpgates == null) {
-					WarpDrive.print(this + " WarpDrive.instance.jumpGates is NULL!");
+					WarpDrive.logger.warning(this + " WarpDrive.instance.jumpGates is NULL!");
 				} else {
 					nearestGate = WarpDrive.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 				}
@@ -770,11 +773,11 @@ public class TileEntityReactor extends WarpEnergyTE {
 				}
 			}
 		} else if (currentMode == ReactorMode.BASIC_JUMP) {
-			WarpDrive.print(this + " Performing basic jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
+			WarpDrive.logger.info(this + " Performing basic jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
 		} else if (currentMode == ReactorMode.LONG_JUMP) {
-			WarpDrive.print(this + " Performing long jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
+			WarpDrive.logger.info(this + " Performing long jump of " + shipInfo + " toward direction " + direction + " over " + distance + " blocks.");
 		} else {
-			WarpDrive.print(this + " Performing some jump #" + currentMode + " of " + shipInfo);
+			WarpDrive.logger.info(this + " Performing some jump #" + currentMode + " of " + shipInfo);
 		}
 
 		if (currentMode == ReactorMode.BASIC_JUMP || currentMode == ReactorMode.LONG_JUMP || currentMode == ReactorMode.HYPERSPACE) {
@@ -871,7 +874,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 			player = (EntityPlayerMP) MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
 
 			if (checkPlayerInventory(chest, player)) {
-				WarpDrive.print(this + " Summoning " + player.getDisplayName());
+				WarpDrive.logger.info(this + " Summoning " + player.getDisplayName());
 				summonPlayer(player, xCoord, yCoord + 2, zCoord);
 			}
 		}
@@ -901,7 +904,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 		}
 
 		if (keyLength < MIN_KEY_LENGTH) {
-			WarpDrive.print("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
+			WarpDrive.logger.info("[ChestCode] Key is too short: " + keyLength + " < " + MIN_KEY_LENGTH);
 			return false;
 		}
 
@@ -928,8 +931,8 @@ public class TileEntityReactor extends WarpEnergyTE {
 		return getBlockType().getLocalizedName()
 				+ String.format(" '%s' energy level is %.0f/%.0f EU.", coreFrequency, convertInternalToEU(getEnergyStored()),
 						convertInternalToEU(getMaxEnergyStored()))
-				+ ((cooldownTime > 0) ? ("\n" + (cooldownTime / 20) + " s left of cooldown.")
-						: ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
+						+ ((cooldownTime > 0) ? ("\n" + (cooldownTime / 20) + " s left of cooldown.")
+								: ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
 	}
 
 	public static int calculateRequiredEnergy(ReactorMode currentMode, int shipVolume, int jumpDistance) {
@@ -951,6 +954,8 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 		case GATE_JUMP:
 			return 2 * shipVolume;
+		default:
+			break;
 		}
 
 		return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
