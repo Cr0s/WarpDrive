@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
+import appeng.api.AEApi;
 import cpw.mods.fml.common.IWorldGenerator;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
@@ -77,8 +78,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			}
 		} else if (WarpDriveConfig.isAppliedEnergisticsLoaded && random.nextInt(1600) == 1) {// Quartz
 			// asteroid
-			generateAsteroidOfBlock(world, x, y, z, 3, 2, Block.getBlockFromItem(WarpDriveConfig.getAEBlock("blkQuartzOre").getItem()), WarpDriveConfig
-					.getAEBlock("blkQuartzOre").getItemDamage());
+			generateAsteroidOfBlock(world, x, y, z, 3, 2, AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get(), 0);
 			if (random.nextBoolean()) {
 				generateGasCloudOfColor(world, x, y, z, 4, 7, random.nextInt(12));
 			}
@@ -89,7 +89,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int coreRadius = 5 + world.rand.nextInt(12);
 		int moonRadius = coreRadius + 5 + world.rand.nextInt(26);
 		int y2 = Math.max(moonRadius + 6, Math.min(y, Y_LIMIT_HARD_MAX - moonRadius - 6));
-		WarpDrive.print("Generating moon at " + x + " " + y2 + " " + z);
+		WarpDrive.logger.info("Generating moon at " + x + " " + y2 + " " + z);
 
 		Block block = WarpDriveConfig.getDefaultSurfaceBlock(world.rand, world.rand.nextInt(10) > 8, true);
 
@@ -155,7 +155,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	public void generateStar(World world, int x, int y, int z, Integer type) {
 		Integer starClass = type == -1 ? world.rand.nextInt(3) : type;
 		Integer y2 = y;
-		WarpDrive.print("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
+		WarpDrive.logger.info("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
 
 		switch (starClass) {
 		case 0: // red dwarf
@@ -198,7 +198,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int x2 = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int y2 = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		WarpDrive.print("Generating small ship at " + x2 + "," + y2 + "," + z2);
+		WarpDrive.logger.info("Generating small ship at " + x2 + "," + y2 + "," + z2);
 		new WorldGenSmallShip(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
 	}
 
@@ -206,7 +206,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int x2 = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int y2 = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
-		WarpDrive.print("Generating small ship at " + x2 + "," + y2 + "," + z2);
+		WarpDrive.logger.info("Generating small ship at " + x2 + "," + y2 + "," + z2);
 		new WorldGenStation(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
 	}
 
@@ -215,15 +215,15 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			Block t = Blocks.air;
 			if (world.rand.nextInt(25) == 1) {
 				while (t.isAssociatedBlock(Blocks.air)) {
-					t = WarpDriveConfig.getRandomNetherBlock(world.rand, Blocks.air, 0);
+					t = WarpDriveConfig.getRandomNetherBlock(world.rand, Blocks.air);
 				}
 			} else if (world.rand.nextInt(35) == 1) {
 				while (t.isAssociatedBlock(Blocks.air)) {
-					t = WarpDriveConfig.getRandomEndBlock(world.rand, Blocks.air, 0);
+					t = WarpDriveConfig.getRandomEndBlock(world.rand, Blocks.air);
 				}
 			} else {
 				while (t.isAssociatedBlock(Blocks.air)) {
-					t = WarpDriveConfig.getRandomOverworldBlock(world.rand, Blocks.air, 0);
+					t = WarpDriveConfig.getRandomOverworldBlock(world.rand, Blocks.air);
 				}
 			}
 			generateAsteroidOfBlock(world, x, y, z, Math.min(3, asteroidSizeMax), Math.min(2, centerRadiusMax), t, 0);
@@ -288,7 +288,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int numOfClouds = Math.round(numOfBigAsteroids * 1.0F / (10.0F + world.rand.nextInt(10)));
 		int maxHeight = 70 + world.rand.nextInt(50);
 		int y2 = Math.min(Y_LIMIT_HARD_MAX - maxHeight, Math.max(y1, maxHeight));
-		WarpDrive.print("Generating asteroid field at " + x + "," + y2 + "," + z + " qty " + numOfBigAsteroids + ", " + numOfSmallAsteroids + ", "
+		WarpDrive.logger.info("Generating asteroid field at " + x + "," + y2 + "," + z + " qty " + numOfBigAsteroids + ", " + numOfSmallAsteroids + ", "
 				+ numOfClouds + " over " + maxDistance + ", " + maxHeight + " surfacePerAsteroid " + String.format("%.1f", surfacePerAsteroid));
 
 		// Setting up of big asteroids
@@ -495,25 +495,25 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 					// Place blocks
 					if (!corrupted || world.rand.nextInt(5) != 1) {
 						if (ice == null)
-							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, meta2, false);
+							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, false);
 						world.setBlock(xCoord + x, yCoord + y, zCoord + z, block, 0, 2);
 						world.setBlock(xCoord - x, yCoord + y, zCoord + z, block, 0, 2);
 					}
 					if (!corrupted || world.rand.nextInt(5) != 1) {
 						if (ice == null)
-							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, meta2, false);
+							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, false);
 						world.setBlock(xCoord + x, yCoord - y, zCoord + z, block, 0, 2);
 						world.setBlock(xCoord + x, yCoord + y, zCoord - z, block, 0, 2);
 					}
 					if (!corrupted || world.rand.nextInt(5) != 1) {
 						if (ice == null)
-							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, meta2, false);
+							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, false);
 						world.setBlock(xCoord - x, yCoord - y, zCoord + z, block, 0, 2);
 						world.setBlock(xCoord + x, yCoord - y, zCoord - z, block, 0, 2);
 					}
 					if (!corrupted || world.rand.nextInt(5) != 1) {
 						if (ice == null)
-							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, meta2, false);
+							block = WarpDriveConfig.getRandomSurfaceBlock(world.rand, t, false);
 						world.setBlock(xCoord - x, yCoord + y, zCoord - z, block, 0, 2);
 						world.setBlock(xCoord - x, yCoord - y, zCoord - z, block, 0, 2);
 					}
