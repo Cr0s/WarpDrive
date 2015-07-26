@@ -63,9 +63,6 @@ public class WarpDriveConfig {
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
 	public static Item GS_ultimateLappack;
-	public static int UB_igneousStone, UB_igneousCobblestone, UB_metamorphicStone, UB_metamorphicCobblestone, UB_sedimentaryStone;
-	public static int NetherOres_count;
-	public static int[] NetherOres_block;
 	public static ArrayList<Block> forceFieldBlocks;
 
 	public static ArrayList<Block> minerOres, minerLogs, minerLeaves, scannerIgnoreBlocks;
@@ -576,7 +573,7 @@ public class WarpDriveConfig {
 	}
 
 	private static void loadForgeMultipart() {
-		try {
+		try {//TODO: Update to 1.7
 			Class forgeMultipart_helper = Class.forName("codechicken.multipart.MultipartHelper");
 			forgeMultipart_helper_createTileFromNBT = forgeMultipart_helper.getDeclaredMethod("createTileFromNBT", World.class, NBTTagCompound.class);
 			forgeMultipart_helper_sendDescPacket = forgeMultipart_helper.getDeclaredMethod("sendDescPacket", World.class, TileEntity.class);

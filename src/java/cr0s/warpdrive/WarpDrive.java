@@ -107,6 +107,7 @@ import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
 import cr0s.warpdrive.world.SpaceProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
 import dan200.computercraft.api.ComputerCraftAPI;
+import extracells.api.ECApi;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:IC2;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
 		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " required-after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
@@ -531,7 +532,7 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
 		antimatter.setItemDamage(0);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
-		ItemStack ultimateLappack = WarpDriveConfig.GS_ultimateLappack.copy();
+		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack);
 
 		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
 		// middle = fluix crystal, advancedMachine, fluix crystal
@@ -555,7 +556,7 @@ public class WarpDrive implements LoadingCallback {
 		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass
 		// bottom = Advanced circuit, Certus quartz tank, Advanced alloy
 		ItemStack isMiningLaserBlock = new ItemStack(miningLaserBlock, 1, 0);
-		ItemStack isCertusQuartzTank = new ItemStack(WarpDriveConfig.AEExtra_certusQuartzTank, 1, 0);
+		ItemStack isCertusQuartzTank = new ItemStack(ECApi.instance().blocks().certusTank().block(), 1, 0);
 
 		GameRegistry.addRecipe(new ItemStack(powerLaserBlock), "caa", "czg", "cta", 'c', WarpDriveConfig.getIC2Item("advancedCircuit"), 'a',
 				WarpDriveConfig.getIC2Item("advancedAlloy"), 'z', isMiningLaserBlock, 't', isCertusQuartzTank, 'g', vibrantQuartzGlass);
