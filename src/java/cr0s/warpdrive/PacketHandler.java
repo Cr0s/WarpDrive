@@ -8,10 +8,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -74,23 +76,17 @@ public class PacketHandler implements IMessageHandler {
 
 				// Now hide the blocks within area
 				World worldObj = player.worldObj;
-				int cloakBlockID = (tier == 1) ? WarpDriveConfig.gasID : 0;
+				Block cloakBlockID = (tier == 1) ? WarpDrive.gasBlock : Blocks.air;
 				int cloakBlockMetadata = (tier == 1) ? 5 : 0;
 				int minYmap = Math.max(0, minY);
 				int maxYmap = Math.min(255, maxY);
 				for (int y = minYmap; y <= maxYmap; y++) {
 					for (int x = minX; x <= maxX; x++) {
 						for (int z = minZ; z <= maxZ; z++) {
-							int blockID = worldObj.getBlockId(x, y, z);
-							if (blockID != 0) {
-								boolean isSafe = true;
-								if (blockID == WarpDriveConfig.CC_peripheral) {
-									int blockMetadata = worldObj.getBlockMetadata(x, y, z);
-									isSafe = (blockMetadata != 2 && blockMetadata != 4);
-								}
-								if (isSafe) {
-									worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
-								}
+							Block block = worldObj.getBlock(x, y, z);
+							if (block.isAssociatedBlock(Blocks.air)) {
+								// 1.6.4 was skipping CC peripherals with metadata 2 and 4 here...
+								worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
 							}
 						}
 					}
@@ -102,7 +98,7 @@ public class PacketHandler implements IMessageHandler {
 				List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
 				for (Entity e : list) {
 					worldObj.removeEntity(e);
-					((WorldClient) worldObj).removeEntityFromWorld(e.entityId);
+					((WorldClient) worldObj).removeEntityFromWorld(e.getEntityId());
 				}
 			} else { // reveal the area
 				player.worldObj.markBlockRangeForRenderUpdate(minX - 1, Math.max(0, minY - 1), minZ - 1, maxX + 1, Math.min(255, maxY + 1), maxZ + 1);
@@ -140,7 +136,7 @@ public class PacketHandler implements IMessageHandler {
 			float yaw = inputStream.readFloat();
 			float pitch = inputStream.readFloat();
 			WarpDrive.debugPrint("Received target packet: (" + x + "; " + y + "; " + z + ") yaw: " + yaw + " pitch: " + pitch);
-			TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
+			TileEntity te = player.worldObj.getTileEntity(x, y, z);
 			if (te != null && te instanceof TileEntityLaser) {
 				TileEntityLaser laser = (TileEntityLaser) te;
 				laser.initiateBeamEmission(yaw, pitch);
@@ -158,9 +154,10 @@ public class PacketHandler implements IMessageHandler {
 			int y = inputStream.readInt();
 			int z = inputStream.readInt();
 			int frequency = inputStream.readInt();
-			// WarpDrive.debugPrint("Received frequency packet: (" + x + ", " +
-			// y + ", " + z + ") frequency '" + frequency + "'");
-			TileEntity te = player.worldObj.getBlockTileEntity(x, y, z);
+			if (WarpDriveConfig.G_DEBUGMODE) {
+				WarpDrive.debugPrint("Received frequency packet: (" + x + ", " + y + ", " + z + ") frequency '" + frequency + "'");
+			}
+			TileEntity te = player.worldObj.getTileEntity(x, y, z);
 			if (te != null) {
 				if (te instanceof TileEntityMonitor) {
 					((TileEntityMonitor) te).setFrequency(frequency);
@@ -169,10 +166,10 @@ public class PacketHandler implements IMessageHandler {
 				} else if (te instanceof TileEntityLaser) {
 					((TileEntityLaser) te).setCameraFrequency(frequency);
 				} else {
-					WarpDrive.print("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
+					WarpDrive.logger.warning("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
 				}
 			} else {
-				WarpDrive.print("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
+				WarpDrive.logger.warning("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
