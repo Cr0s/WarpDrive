@@ -27,8 +27,3 @@ Installation
 1. Download fresh build: http://kubach.tk/1.6.4/WarpDrive.zip
 2. Download fresh Core build: http://kubach.tk/1.6.4/WarpDriveCore.jar
 3. Install last version of IC2, Applied Energistics and Computer Craft
-
-Contact Us
-=============
-* Visit our IRC channel on EsperNet: irc://chaos.esper.net/WarpDrive
-* Or PM me: http://www.minecraftforum.net/user/1133830-anon1644/
