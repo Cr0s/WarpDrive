@@ -165,20 +165,19 @@ public final class EntityCamera extends EntityLivingBase
     }
     
     public void zoom() {
-    	/*//TODO: Find 1.7 version of EnumOptions
         if (zoomNumber == 0) {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -0.75F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.4F);
+            mc.gameSettings.fovSetting = -0.75F;
+            mc.gameSettings.mouseSensitivity = 0.4F;
         } else if (zoomNumber == 1) {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.25F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.3F);
+            mc.gameSettings.fovSetting = -1.25F;
+            mc.gameSettings.mouseSensitivity = 0.3F;
         } else if (zoomNumber == 2) {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, -1.6F);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, 0.15F);
+            mc.gameSettings.fovSetting = -1.6F;
+            mc.gameSettings.mouseSensitivity = 0.15F;
         } else if (zoomNumber == 3) {
-            mc.gameSettings.setOptionFloatValue(EnumOptions.FOV, WarpDrive.normalFOV);
-            mc.gameSettings.setOptionFloatValue(EnumOptions.SENSITIVITY, WarpDrive.normalSensitivity);
-        }*/
+            mc.gameSettings.fovSetting = WarpDrive.normalFOV;
+            mc.gameSettings.mouseSensitivity = WarpDrive.normalSensitivity;
+        }
         zoomNumber = (zoomNumber + 1) % 4;
     }
 
