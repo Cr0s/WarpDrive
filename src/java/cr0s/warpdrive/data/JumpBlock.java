@@ -101,8 +101,8 @@ public class JumpBlock {
 						WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
 					}
 				} else {
-					WarpDrive.print(" moveBlockSimple failed to create new tile entity at " + x + ", " + y + ", " + z + " blockId " + block + ":" + blockMeta);
-					WarpDrive.print("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
+					WarpDrive.logger.info(" moveBlockSimple failed to create new tile entity at " + x + ", " + y + ", " + z + " blockId " + block + ":" + blockMeta);
+					WarpDrive.logger.info("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
 				}
 			}
 		} catch (Exception exception) {
@@ -113,7 +113,7 @@ public class JumpBlock {
 			} catch (Exception dropMe) {
 				coordinates = " (unknown coordinates)";
 			}
-			WarpDrive.print("moveBlockSimple exception at " + coordinates);
+			WarpDrive.logger.info("moveBlockSimple exception at " + coordinates);
 			return false;
 		}
 		
