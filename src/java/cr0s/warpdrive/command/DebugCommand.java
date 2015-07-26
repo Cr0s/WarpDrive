@@ -1,7 +1,7 @@
-package cr0s.WarpDrive.command;
+package cr0s.warpdrive.command;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.WarpDriveConfig;
+import cr0s.warpdrive.WarpDriveConfig;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
