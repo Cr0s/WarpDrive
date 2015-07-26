@@ -1,14 +1,16 @@
 package cr0s.warpdrive.command;
 
+import java.util.List;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldServer;
 
-import com.sun.media.jfxmedia.logging.Logger;
-
+import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
@@ -37,22 +39,25 @@ public class SpaceTpCommand extends CommandBase {
 				targetDim = WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
 			} else if ("overworld".equals(astring[0])) {
 				targetDim = 0;
-			} else { // TODO: Fix
-				// player =
-				// MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
+			} else {
+				// get an online player by name
+				List<EntityPlayer> onlinePlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+				for (EntityPlayer onlinePlayer : onlinePlayers) {
+					if (onlinePlayer.getDisplayName().equalsIgnoreCase(astring[0]) && onlinePlayer instanceof EntityPlayerMP) {
+						player = (EntityPlayerMP) onlinePlayer;
+					}
+				}
 			}
 		}
 
 		if (player == null) {
-			Logger.logMsg(Logger.INFO, "/space: undefined player");
+			WarpDrive.logger.info("/space: undefined player");
 			return;
 		}
 
 		WorldServer targetWorld = server.worldServerForDimension(targetDim);
-		Logger.logMsg(Logger.INFO, "/space: teleporting player " + player.getDisplayName() + " to " + targetDim + ":"
-				+ targetWorld.getWorldInfo().getWorldName());
-		SpaceTeleporter teleporter = new SpaceTeleporter(targetWorld, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY),
-				MathHelper.floor_double(player.posZ));
+		WarpDrive.logger.info("/space: teleporting player " + player.getDisplayName() + " to " + targetDim + ":" + targetWorld.getWorldInfo().getWorldName());
+		SpaceTeleporter teleporter = new SpaceTeleporter(targetWorld, 0, MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ));
 		server.getConfigurationManager().transferPlayerToDimension(player, targetDim, teleporter);
 	}
 

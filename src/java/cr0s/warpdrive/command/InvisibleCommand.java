@@ -1,10 +1,13 @@
 package cr0s.warpdrive.command;
 
+import java.util.List;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 
-import com.sun.media.jfxmedia.logging.Logger;
+import cr0s.warpdrive.WarpDrive;
 
 public class InvisibleCommand extends CommandBase {
 	@Override
@@ -19,13 +22,18 @@ public class InvisibleCommand extends CommandBase {
 
 	@Override
 	public void processCommand(ICommandSender icommandsender, String[] astring) {
-		EntityPlayerMP player = (EntityPlayerMP) icommandsender;
+		EntityPlayer player = (EntityPlayer) icommandsender;
 
 		if (astring.length >= 1) {
-			Logger.logMsg(Logger.INFO, "/invisible: setting invisible to " + astring[0]);
-			// player =
-			// MinecraftServer.getServer().getConfigurationManager().getPlayerForUsername(astring[0]);
-			// TODO: Fix
+			WarpDrive.logger.info("/invisible: setting invisible to " + astring[0]);
+			
+			// get an online player by name
+			List<EntityPlayer> onlinePlayers = MinecraftServer.getServer().getConfigurationManager().playerEntityList;
+			for (EntityPlayer onlinePlayer : onlinePlayers) {
+				if (onlinePlayer.getDisplayName().equalsIgnoreCase(astring[0])) {
+					player = onlinePlayer;
+				}
+			}
 		}
 
 		if (player == null) {
