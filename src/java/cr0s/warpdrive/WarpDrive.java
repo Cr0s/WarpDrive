@@ -27,6 +27,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+import appeng.api.AEApi;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -106,6 +107,7 @@ import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
 import cr0s.warpdrive.world.SpaceProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
 import dan200.computercraft.api.ComputerCraftAPI;
+import extracells.api.ECApi;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:IC2;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
 		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " required-after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
@@ -523,14 +525,14 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
 		ItemStack resonantEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellResonant", 1);
 		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
-		ItemStack fluixCrystal = WarpDriveConfig.getAEMaterial("matFluxCrystal");
-		ItemStack quantumEntangledSingularity = WarpDriveConfig.getAEMaterial("matQuantumEntangledSingularity");
-		ItemStack vibrantQuartzGlass = WarpDriveConfig.getAEBlock("blkQuartzLamp");
+		ItemStack fluixCrystal = AEApi.instance().definitions().materials().fluixCrystal().maybeStack(1).get();
+		ItemStack quantumEntangledSingularity = AEApi.instance().definitions().materials().qESingularity().maybeStack(1).get();
+		ItemStack vibrantQuartzGlass = new ItemStack(AEApi.instance().definitions().blocks().quartzVibrantGlass().maybeBlock().get(), 1);
 		vibrantQuartzGlass.setItemDamage(4);
 		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
 		antimatter.setItemDamage(0);
 		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
-		ItemStack ultimateLappack = WarpDriveConfig.GS_ultimateLappack.copy();
+		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack);
 
 		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
 		// middle = fluix crystal, advancedMachine, fluix crystal
@@ -554,7 +556,7 @@ public class WarpDrive implements LoadingCallback {
 		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass
 		// bottom = Advanced circuit, Certus quartz tank, Advanced alloy
 		ItemStack isMiningLaserBlock = new ItemStack(miningLaserBlock, 1, 0);
-		ItemStack isCertusQuartzTank = new ItemStack(WarpDriveConfig.AEExtra_certusQuartzTank, 1, 0);
+		ItemStack isCertusQuartzTank = new ItemStack(ECApi.instance().blocks().certusTank().block(), 1, 0);
 
 		GameRegistry.addRecipe(new ItemStack(powerLaserBlock), "caa", "czg", "cta", 'c', WarpDriveConfig.getIC2Item("advancedCircuit"), 'a',
 				WarpDriveConfig.getIC2Item("advancedAlloy"), 'z', isMiningLaserBlock, 't', isCertusQuartzTank, 'g', vibrantQuartzGlass);
