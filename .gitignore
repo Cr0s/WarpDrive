@@ -6,8 +6,9 @@
 .gradle/
 .settings/
 build/
-eclipse/
+eclipse/*
 
+!eclipse/mods/
 
 *.iml
 *.iws
