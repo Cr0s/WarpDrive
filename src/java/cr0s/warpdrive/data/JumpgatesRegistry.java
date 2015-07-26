@@ -19,7 +19,7 @@ public final class JumpgatesRegistry {
     //@SideOnly(Side.CLIENT)
     public JumpgatesRegistry() {
         db = new File("gates.txt");
-        WarpDrive.print("Gates.txt file: " + db);
+        WarpDrive.logger.info("Opening gates file '" + db + "'");
         
         if (db != null && !db.exists()) {
         	try {
@@ -48,7 +48,7 @@ public final class JumpgatesRegistry {
     }
 
     public void loadGates() throws IOException {
-    	WarpDrive.print("[JUMP GATES] Loading jump gates from gates.txt...");
+    	WarpDrive.logger.info("Loading jump gates from gates.txt...");
         BufferedReader bufferedreader;
         bufferedreader = new BufferedReader(new FileReader(db));
         String s1;
@@ -58,7 +58,7 @@ public final class JumpgatesRegistry {
         }
 
         bufferedreader.close();
-        WarpDrive.print("[JUMP GATES] Loaded " + gates.size() + " jump gates.");
+        WarpDrive.logger.info("Loaded " + gates.size() + " jump gates.");
     }
 
     public void addGate(Jumpgate jg) {

@@ -80,11 +80,11 @@ public class WarpCoresRegistry {
 	}
 
 	public void printRegistry() {
-		WarpDrive.print("WarpCores registry:");
+		WarpDrive.logger.info("WarpCores registry:");
 		removeDeadCores();
 
 		for (TileEntityReactor core : registry) {
-			WarpDrive.print("- Frequency '" + core.coreFrequency + "' @ '" + core.getWorldObj().provider.getDimensionName() + "' " + core.xCoord + ", "
+			WarpDrive.logger.info("- Frequency '" + core.coreFrequency + "' @ '" + core.getWorldObj().provider.getDimensionName() + "' " + core.xCoord + ", "
 					+ core.yCoord + ", " + core.zCoord + " with " + core.isolationBlocksCount + " isolation blocks");
 		}
 	}
