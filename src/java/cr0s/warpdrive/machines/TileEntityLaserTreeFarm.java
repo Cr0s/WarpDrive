@@ -1,12 +1,12 @@
-package cr0s.WarpDrive.machines;
+package cr0s.warpdrive.machines;
 
 import java.util.LinkedList;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import cr0s.WarpDrive.data.Vector3;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
+import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.lua.ILuaContext;
 
@@ -143,11 +143,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	}
 	
 	private static boolean isLog(int blockID) {
-		return WarpDriveConfig.MinerLogs.contains(blockID);
+		return WarpDriveConfig.minerLogs.contains(blockID);
 	}
 	
 	private static boolean isLeaf(int blockID) {
-		return WarpDriveConfig.MinerLeaves.contains(blockID);
+		return WarpDriveConfig.minerLeaves.contains(blockID);
 	}
 	
 	private static void addTree(LinkedList<Vector3> list, Vector3 newTree) {

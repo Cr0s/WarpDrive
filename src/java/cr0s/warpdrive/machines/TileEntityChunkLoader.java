@@ -1,14 +1,14 @@
-package cr0s.WarpDrive.machines;
+package cr0s.warpdrive.machines;
 
 import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
-import cr0s.WarpDrive.data.EnumUpgradeTypes;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
-import cr0s.WarpDrive.api.IUpgradable;
+import cr0s.warpdrive.data.EnumUpgradeTypes;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.api.IUpgradable;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 

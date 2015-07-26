@@ -159,7 +159,7 @@ public class CloakManager {
 		 * EntityEnderCrystal) { return new Packet23VehicleSpawn(e, 51); } else
 		 * if (e instanceof EntityFallingSand) { EntityFallingSand
 		 * entityfallingsand = (EntityFallingSand) e; return new
-		 * Packet23VehicleSpawn(e, 70, entityfallingsand.blockID |
+		 * Packet23VehicleSpawn(e, 70, entityfallingsand |
 		 * entityfallingsand.metadata << 16); } else if (e instanceof
 		 * EntityPainting) { return new Packet25EntityPainting((EntityPainting)
 		 * e); } else if (e instanceof EntityItemFrame) { EntityItemFrame

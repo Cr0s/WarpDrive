@@ -1,7 +1,7 @@
-package cr0s.WarpDrive.machines;
+package cr0s.warpdrive.machines;
 
 import cpw.mods.fml.common.Optional;
-import cr0s.WarpDrive.WarpDriveConfig;
+import cr0s.warpdrive.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import net.minecraftforge.common.ForgeDirection;

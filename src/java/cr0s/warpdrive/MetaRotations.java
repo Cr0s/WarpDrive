@@ -60,7 +60,7 @@ public class MetaRotations {
 								Block b = blockid[i$1];
 
 								if (b != null && b.getUnlocalizedName().toLowerCase().equals("tile.".concat(i$.toLowerCase()))) {
-									ids[arr$] = b.blockID;
+									ids[arr$] = b;
 								}
 							}
 						}

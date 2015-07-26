@@ -1,4 +1,4 @@
-package cr0s.WarpDrive.machines;
+package cr0s.warpdrive.machines;
 
 import ic2.api.reactor.IReactor;
 import ic2.api.reactor.IReactorChamber;
@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.WarpDrive.data.Vector3;
-import cr0s.WarpDrive.PacketHandler;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
-import cr0s.WarpDrive.item.ItemReactorLaserFocus;
+import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.item.ItemReactorLaserFocus;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;

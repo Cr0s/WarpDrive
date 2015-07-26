@@ -1,4 +1,4 @@
-package cr0s.WarpDrive.machines;
+package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +21,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import cr0s.WarpDrive.data.Vector3;
-import cr0s.WarpDrive.PacketHandler;
-import cr0s.WarpDrive.WarpDrive;
-import cr0s.WarpDrive.WarpDriveConfig;
+import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.WarpDriveConfig;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridMachine, ITileCable
 {
@@ -197,7 +197,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 			return false;
 		}
 		// check blacklist
-		if (blockID == Block.bedrock.blockID) {
+		if (blockID == Block.bedrock) {
 			return false;
 		}
 		if (WarpDriveConfig.forceFieldBlocks.contains(blockID)) {
@@ -239,7 +239,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 	{
 		int blockID = worldObj.getBlockId(valuable.intX(), valuable.intY(), valuable.intZ());
 		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
-		if (blockID != Block.waterMoving.blockID && blockID != Block.waterStill.blockID && blockID != Block.lavaMoving.blockID && blockID != Block.lavaStill.blockID)
+		if (blockID != Block.waterMoving && blockID != Block.waterStill && blockID != Block.lavaMoving && blockID != Block.lavaStill)
 		{
 			boolean didPlace = true;
 			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), blockID, blockMeta);
@@ -253,7 +253,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 			mineBlock(valuable,blockID,blockMeta);
 			return didPlace;
 		}
-		else if (blockID == Block.waterMoving.blockID || blockID == Block.waterStill.blockID)
+		else if (blockID == Block.waterMoving || blockID == Block.waterStill)
 		// Evaporate water
 			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
