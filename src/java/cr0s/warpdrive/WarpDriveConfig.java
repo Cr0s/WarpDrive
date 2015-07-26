@@ -1,11 +1,13 @@
 package cr0s.warpdrive;
 
+import gravisuite.GraviSuite;
 import ic2.api.item.IC2Items;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
 
+import mods.immibis.ars.ARSMod;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -15,8 +17,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
+import powercrystals.netherores.NetherOresCore;
 import advsolar.api.ASPItemAPI;
-import appeng.api.definitions.IBlocks;
+import appeng.api.AEApi;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.data.TransitionPlane;
 import dan200.computercraft.ComputerCraft;
@@ -37,7 +40,6 @@ public class WarpDriveConfig {
 	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isICLoaded = false;
 	public static boolean isCCLoaded = false;
-	public static boolean isUndergroundBiomesLoaded = false;
 	public static boolean isNetherOresLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
@@ -60,20 +62,15 @@ public class WarpDriveConfig {
 	public static ItemStack ASP;
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
-	public static ItemStack GS_ultimateLappack;
+	public static Item GS_ultimateLappack;
 	public static int UB_igneousStone, UB_igneousCobblestone, UB_metamorphicStone, UB_metamorphicCobblestone, UB_sedimentaryStone;
 	public static int NetherOres_count;
 	public static int[] NetherOres_block;
-	public static ArrayList<Integer> forceFieldBlocks;
+	public static ArrayList<Block> forceFieldBlocks;
 
 	public static ArrayList<Block> minerOres, minerLogs, minerLeaves, scannerIgnoreBlocks;
 	public static ArrayList<Item> spaceHelmets, jetpacks;
-	private static IBlocks AEBlocks;
-	private static Class<?> AEMaterials;
-	private static Class<?> AEItems;
 	public static ArrayList<Block> commonWorldGenOres;
-	public static Item AEExtra_fluidDrive;
-	public static Block AEExtra_certusQuartzTank;
 
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
@@ -233,39 +230,6 @@ public class WarpDriveConfig {
 		return IC2Items.getItem(id);
 	}
 
-	public static ItemStack getAEBlock(String id) {
-		try {
-			Object ret = AEBlocks.getField(id).get(null);
-			if (ret instanceof ItemStack)
-				return (ItemStack) ret;
-		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Call getAEBlock failed for " + id);
-		}
-		return null;
-	}
-
-	public static ItemStack getAEMaterial(String id) {
-		try {
-			Object ret = AEMaterials.getField(id).get(null);
-			if (ret instanceof ItemStack)
-				return (ItemStack) ret;
-		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Call getAEMaterial failed for " + id);
-		}
-		return null;
-	}
-
-	public static ItemStack getAEItem(String id) {
-		try {
-			Object ret = AEItems.getField(id).get(null);
-			if (ret instanceof ItemStack)
-				return (ItemStack) ret;
-		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Call getAEItem failed for " + id);
-		}
-		return null;
-	}
-
 	public static void preInit(Configuration configIn) {
 		config = configIn;
 	}
@@ -316,11 +280,11 @@ public class WarpDriveConfig {
 			int[] plane = config.get("TransitionPlane", name, defaultPlane,
 					"dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, SpaceCenterX, SpaceCenterZ").getIntList();
 			if (plane.length != 7) {
-				WarpDrive.print("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
+				WarpDrive.logger.warning("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
 				plane = defaultPlane.clone();
 			}
 			TransitionPlane newPlane = new TransitionPlane(plane[0], plane[1], plane[2], plane[3], plane[4], plane[5], plane[6]);
-			WarpDrive.print("Adding '" + name + "' as " + newPlane.toString());
+			WarpDrive.logger.warning("Adding '" + name + "' as " + newPlane.toString());
 			G_TRANSITIONPLANES[index] = newPlane;
 		}
 		// FIXME: check transition planes aren't overlapping
@@ -473,7 +437,7 @@ public class WarpDriveConfig {
 		commonWorldGenOres.add(Blocks.lapis_ore);
 		commonWorldGenOres.add(Blocks.redstone_ore);
 
-		forceFieldBlocks = new ArrayList<Integer>();
+		forceFieldBlocks = new ArrayList<Block>();
 
 		spaceHelmets = new ArrayList<Item>();
 		jetpacks = new ArrayList<Item>();
@@ -523,10 +487,6 @@ public class WarpDriveConfig {
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded)
 			loadGraviSuite();
-
-		isUndergroundBiomesLoaded = Loader.isModLoaded("UndergroundBiomes");
-		if (isUndergroundBiomesLoaded)
-			loadUndergroundBiomes();
 
 		isNetherOresLoaded = Loader.isModLoaded("NetherOres");
 		if (isNetherOresLoaded)
@@ -669,19 +629,16 @@ public class WarpDriveConfig {
 			CCT_Upgraded = ComputerCraft.Blocks.turtleExpanded;
 			CCT_Advanced = ComputerCraft.Blocks.turtleAdvanced;
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading ComputerCraft classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading ComputerCraft classes");
 			e.printStackTrace();
 		}
 	}
 
 	private static void loadAppliedEnergistics() {
 		try {
-			AEBlocks = appeng.api.definitions.IDefinitions.blocks();
-			AEMaterials = Class.forName("appeng.api.Materials");
-			AEItems = Class.forName("appeng.api.Items");
-			minerOres.add(((ItemStack) AEBlocks.getField("blkQuartzOre").get(null)));
+			minerOres.add(AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get());
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading AppliedEnergistics classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading AppliedEnergistics classes");
 			e.printStackTrace();
 			isAppliedEnergisticsLoaded = false;
 		}
@@ -689,14 +646,9 @@ public class WarpDriveConfig {
 
 	private static void loadAEExtra() {
 		try {
-			Class<?> z = Class.forName("extracells.ItemEnum");
-			Object z1 = z.getEnumConstants()[6];
-			AEExtra_fluidDrive = (Item) z1.getClass().getDeclaredMethod("getItemInstance").invoke(z1);
-			z = Class.forName("extracells.BlockEnum");
-			z1 = z.getEnumConstants()[9];
-			AEExtra_certusQuartzTank = (Block) z1.getClass().getDeclaredMethod("getBlockInstance").invoke(z1);
+			//Should be references as ECApi.instanc()
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading AEExtra classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading AEExtra classes");
 			e.printStackTrace();
 			isAEExtraLoaded = false;
 		}
@@ -708,7 +660,7 @@ public class WarpDriveConfig {
 			spaceHelmets.add(ASPItemAPI.get("hybridSolarHelmet").getItem());
 			spaceHelmets.add(ASPItemAPI.get("ultimateSolarHelmet").getItem());
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading ASP classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading ASP classes");
 			e.printStackTrace();
 			isAdvSolPanelLoaded = false;
 		}
@@ -716,26 +668,32 @@ public class WarpDriveConfig {
 
 	private static void loadAtomicScience() {
 		try {
+			/* TODO: Does not exist for 1.7
 			Class<?> z = Class.forName("resonantinduction.atomic.Atomic");
-			commonWorldGenOres.add(new int[] { ((Block) z.getField("blockUraniumOre").get(null)), 0 });
+			commonWorldGenOres.add(((Block) z.getField("blockUraniumOre").get(null)), 0 });
 			AS_Turbine = ((Block) z.getField("blockElectricTurbine").get(null));
 			AS_deuteriumCell = ((Item) z.getField("itemDeuteriumCell").get(null));
+			 */
+			isAtomicScienceLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading AS classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading AS classes");
 			isAtomicScienceLoaded = false;
 		}
 	}
 
 	private static void loadICBM() {
 		try {
+			/* TODO: Does not exist yet for 1.7 (im working on it)
 			Class<?> z = Class.forName("icbm.core.ICBMCore");
-			commonWorldGenOres.add(new int[] { ((Block) z.getField("blockSulfurOre").get(null)), 0 });
+			commonWorldGenOres.add(((Block) z.getField("blockSulfurOre").get(null)), 0 });
 			z = Class.forName("icbm.explosion.ICBMExplosion");
 			ICBM_Machine = ((Block) z.getField("blockMachine").get(null));
 			ICBM_Missile = ((Item) z.getField("itemMissile").get(null));
 			ICBM_Explosive = ((Block) z.getField("blockExplosive").get(null));
+			 */
+			isICBMLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading ICBM classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
@@ -743,70 +701,38 @@ public class WarpDriveConfig {
 
 	private static void loadMFFS() {
 		try {
+			/* TODO: Does not exist for 1.7 yet
 			Class<?> z = Class.forName("mffs.ModularForceFieldSystem");
 			int blockId = ((Block) z.getField("blockForceField").get(null));
 			forceFieldBlocks.add(blockId);
+			 */
+			isMFFSLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading MFFS classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading MFFS classes");
 			e.printStackTrace();
-			isICBMLoaded = false;
+			isMFFSLoaded = false;
 		}
 	}
 
 	private static void loadGraviSuite() {
 		try {
-			Class<?> z = Class.forName("gravisuite.GraviSuite");
-			if (z.getField("ultimateSolarHelmet").get(null) != null)
-				spaceHelmets.add(((Item) z.getField("ultimateSolarHelmet").get(null)));
-			jetpacks.add(z.getField("advJetpackID").getInt(null) + 256);
-			jetpacks.add(z.getField("graviChestPlateID").getInt(null) + 256);
-			GS_ultimateLappack = z.getField("ultimateLappackID").getInt(null) + 256;
+
+			spaceHelmets.add(GraviSuite.ultimateSolarHelmet);
+			jetpacks.add(GraviSuite.advJetpack);
+			jetpacks.add(GraviSuite.graviChestPlate);
+			GS_ultimateLappack = GraviSuite.ultimateLappack;
 		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading GS classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
 	}
 
-	private static void loadUndergroundBiomes() {
-		try {
-			Class<?> z = Class.forName("exterminatorJeff.undergroundBiomes.common.UndergroundBiomes");
-			UB_igneousStone = ((Block) z.getField("igneousStone").get(null));
-			UB_igneousCobblestone = ((Block) z.getField("igneousCobblestone").get(null));
-			UB_metamorphicStone = ((Block) z.getField("metamorphicStone").get(null));
-			UB_metamorphicCobblestone = ((Block) z.getField("metamorphicCobblestone").get(null));
-			UB_sedimentaryStone = ((Block) z.getField("sedimentaryStone").get(null));
-			WarpDrive.debugPrint("WarpDriveConfig found UndergroundBiomes blocks " + UB_igneousStone + ", " + UB_igneousCobblestone + ", "
-					+ UB_metamorphicStone + ", " + UB_metamorphicCobblestone + ", " + UB_sedimentaryStone);
-		} catch (Exception e) {
-			WarpDrive.debugPrint("WarpDriveConfig Error loading UndergroundBiomes classes");
-			e.printStackTrace();
-			isUndergroundBiomesLoaded = false;
-		}
-	}
-
 	private static void loadNetherOres() {
 		try {
-			NetherOres_count = 21; // FIXME: extract it properly
-			/*
-			 * Class<?> z = Class.forName("powercrystals.netherores.ores.Ores");
-			 * NO_netherOresCount = z.getField("values").get(null).length;
-			 * WarpDrive.debugPrint("WarpDriveConfig found NetherOres count " +
-			 * NO_netherOresCount);
-			 *
-			 * z = Class.forName("powercrystals.netherores.NetherOresCore"); for
-			 * (int i = 0; i < (NO_netherOresCount + 15) / 16; i++) {
-			 * NO_netherOresBlock[i] =
-			 * ((Block[])z.getDeclaredField("blockNetherOres").get(null))[i];
-			 * WarpDrive.debugPrint("WarpDriveConfig found NetherOres blockId "
-			 * + NO_netherOresBlock[i]); }
-			 */
-			NetherOres_block = new int[(NetherOres_count + 15) / 16];
-			NetherOres_block[0] = 1440;
-			NetherOres_block[1] = 1442;
-			WarpDrive.debugPrint("WarpDriveConfig found " + NetherOres_count + " NetherOres");
+			//Nothing needs to be done
 		} catch (Exception e) {
-			WarpDrive.print("WarpDriveConfig Error loading NetherOres classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading NetherOres classes");
 			e.printStackTrace();
 			isNetherOresLoaded = false;
 		}
@@ -818,7 +744,7 @@ public class WarpDriveConfig {
 			// Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
 			// TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
 		} catch (Exception e) {
-			WarpDrive.print("WarpDriveConfig Error loading ThermalExpansion classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading ThermalExpansion classes");
 			e.printStackTrace();
 			isThermalExpansionLoaded = false;
 		}
@@ -826,179 +752,77 @@ public class WarpDriveConfig {
 
 	private static void loadAdvancedRepulsionSystems() {
 		try {
-			Class<?> z = Class.forName("mods.immibis.ars.ARSMod");
-			int fieldBlockId = ((Block) z.getField("MFFSFieldblock").get(null));
-			forceFieldBlocks.add(fieldBlockId);
+
+			forceFieldBlocks.add(ARSMod.MFFSFieldblock);
 		} catch (Exception e) {
-			WarpDrive.print("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
+			WarpDrive.logger.warning("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
 			e.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}
 	}
 
-	public static int[] getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
+	public static Block getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
 		if (isMoon) {
-			if (isGregLoaded && (random.nextInt(100) == 1)) {
-				if (random.nextBoolean()) {
-					return new int[] { GT_Granite, (corrupted && random.nextBoolean()) ? 1 : 0 };
-				} else {
-					return new int[] { GT_Granite, (corrupted && random.nextBoolean()) ? 9 : 8 };
-				}
-			} else if (random.nextInt(5) == 1) {
-				return new int[] { Block.netherrack, 0 };
+			if (random.nextInt(5) == 1) {
+				return Blocks.netherrack;
 			} else if (random.nextInt(15) == 1) {
-				return new int[] { Block.whiteStone, 0 };
+				return Blocks.end_stone;
 			}
 		} else {
-			if (isGregLoaded && (random.nextInt(25) == 1)) {
-				if (random.nextBoolean()) {
-					return new int[] { GT_Granite, (corrupted && random.nextBoolean()) ? 1 : 0 };
-				} else {
-					return new int[] { GT_Granite, (corrupted && random.nextBoolean()) ? 9 : 8 };
-				}
-			} else if (random.nextInt(6) == 1) {
-				return new int[] { Block.netherrack, 0 };
+			if (random.nextInt(6) == 1) {
+				return Blocks.netherrack;
 			} else if (random.nextInt(50) == 1) {
-				return new int[] { Block.whiteStone, 0 };
+				return Blocks.end_stone;
 			}
 		}
 		if (corrupted && random.nextBoolean()) {
-			if (isUndergroundBiomesLoaded) {
-				int rnd = random.nextInt(8 + 8 + 2);
-				if (rnd < 8) {
-					return new int[] { UB_igneousCobblestone, rnd };
-				} else if (rnd < (8 + 8)) {
-					return new int[] { UB_metamorphicCobblestone, rnd - 8 };
-				}
-			}
-			return new int[] { Block.cobblestone, 0 };
+			return Blocks.cobblestone;
 		}
-		if (isUndergroundBiomesLoaded) {
-			int rnd = random.nextInt(8 + 8 + 8 + 3);
-			if (rnd < 8) {
-				return new int[] { UB_igneousStone, rnd };
-			} else if (rnd < (8 + 8)) {
-				return new int[] { UB_metamorphicStone, rnd - 8 };
-			} else if (rnd < (8 + 8 + 8)) {
-				if (rnd == 8 + 8 + 8) {
-					return new int[] { 205, 0 }; // emasher Limestone
-				} else {
-					return new int[] { UB_sedimentaryStone, rnd - 8 - 8 };
-				}
-			}
-		}
-		return new int[] { Block.stone, 0 };
+		return Blocks.stone;
 	}
 
-	public static int[] getRandomSurfaceBlock(Random random, int blockID, int blockMeta, boolean bedrock) {
+	public static Block getRandomSurfaceBlock(Random random, Block def, boolean bedrock) {
 		if (bedrock && (random.nextInt(1000) == 1)) {
-			return new int[] { Block.bedrock, 0 };
-		} else if (blockID == GT_Granite) {
-			if ((blockMeta == 0) || (blockMeta == 1)) {
-				int[] t;
-				t = getRandomOverworldBlock(random, blockID, blockMeta);
-				if (t[0] == blockID)
-					t = getRandomOverworldBlock(random, blockID, blockMeta);
-				if (t[0] == blockID)
-					t = getRandomEndBlock(random, blockID, blockMeta);
-				return t;
-			} else if ((blockMeta == 8) || (blockMeta == 9)) {
-				int[] t;
-				t = getRandomOverworldBlock(random, blockID, blockMeta);
-				if (t[0] == blockID)
-					t = getRandomEndBlock(random, blockID, blockMeta);
-				if (t[0] == blockID)
-					t = getRandomOverworldBlock(random, blockID, blockMeta);
-				return t;
-			}
-		} else if (blockID == Block.whiteStone) {
-			return getRandomEndBlock(random, blockID, blockMeta);
-		} else if (blockID == Block.netherrack) {
-			return getRandomNetherBlock(random, blockID, blockMeta);
+			return Blocks.bedrock;
+		} else if (def.isAssociatedBlock(Blocks.end_stone)) {
+			return getRandomEndBlock(random, def);
+		} else if (def.isAssociatedBlock(Blocks.netherrack)) {
+			return getRandomNetherBlock(random, def);
 		}
-		return getRandomOverworldBlock(random, blockID, blockMeta);
+		return getRandomOverworldBlock(random, def);
 	}
 
-	public static int[] getRandomOverworldBlock(Random random, int blockID, int blockMeta) {
+	public static Block getRandomOverworldBlock(Random random, Block def) {
 		if (random.nextInt(25) == 5) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
-			return Metallurgy_overworldOresBlock[random.nextInt(Metallurgy_overworldOresBlock.length)];
 		} else if (isAppliedEnergisticsLoaded && random.nextInt(750) == 1) {
-			return new int[] { getAEBlock("blkQuartzOre"), getAEBlock("blkQuartzOre").getItemDamage() };
+			return AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get();
 		} else if (random.nextInt(250) == 1) {
-			return new int[] { Block.oreDiamond, 0 };
+			return Blocks.diamond_ore;
 		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
-			return new int[] { iridiumBlockID, 0 };
-		} else if (!isMagicalCropsLoaded && (random.nextInt(100) == 56)) {
-			return new int[] { 3108, 0 }; // Essence ore
-		} else if (isGregLoaded) {
-			if (random.nextInt(50) == 1)
-				return new int[] { GT_Ores, 5 }; // Bauxite S /*
-			// Stone/Iron/Diamod pick |
-			// +S = Silktouch
-			// recommended */
-			else if (random.nextInt(50) == 1)
-				return new int[] { GT_Ores, 1 }; // Galena S
-			else if (random.nextInt(100) == 1)
-				return new int[] { GT_Ores, 8 }; // Sphalerite S+S
-			else if (random.nextInt(250) == 1)
-				return new int[] { GT_Ores, 13 }; // Tetrahedrite I
-			else if (random.nextInt(250) == 1)
-				return new int[] { GT_Ores, 14 }; // Cassiterite I
-			else if (random.nextInt(250) == 1)
-				return new int[] { GT_Ores, 15 }; // Nickel I
-			else if (random.nextInt(500) == 1)
-				return new int[] { GT_Ores, 3 }; // Ruby I+S
-			else if (random.nextInt(500) == 1)
-				return new int[] { GT_Ores, 4 }; // Sapphire I+S
-			else if (random.nextInt(2000) == 1)
-				return new int[] { GT_Ores, 2 }; // Iridium D+S
+			return WarpDrive.iridiumBlock;
 		}
-		return new int[] { blockID, blockMeta };
+		return def;
 	}
 
-	public static int[] getRandomNetherBlock(Random random, int blockID, int blockMeta) {
+	public static Block getRandomNetherBlock(Random random, Block def) {
 		if (isICLoaded && (!isNetherOresLoaded) && (random.nextInt(10000) == 42)) {
-			return new int[] { iridiumBlockID, 0 };
+			return WarpDrive.iridiumBlock;
 		} else if (isNetherOresLoaded && (random.nextInt(25) == 1)) {
-			int rnd = random.nextInt(NetherOres_count);
-			return new int[] { NetherOres_block[rnd / 16], rnd % 16 };
-		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
-			return Metallurgy_netherOresBlock[random.nextInt(Metallurgy_netherOresBlock.length)];
+			return NetherOresCore.blockNetherOres[random.nextInt(NetherOresCore.blockNetherOres.length)];
 		} else if (random.nextInt(25) == 1) {
-			return new int[] { Block.oreNetherQuartz, 0 };
-		} else if (!isMagicalCropsLoaded && (random.nextInt(100) == 56)) {
-			return new int[] { 3109, 0 }; // Nether essence ore
-		} else if (isGregLoaded) {
-			if (random.nextInt(100) == 1)
-				return new int[] { GT_Ores, 6 }; // Pyrite S+S
-			else if (random.nextInt(100) == 1)
-				return new int[] { GT_Ores, 8 }; // Sphalerite S+S
-			else if (random.nextInt(500) == 1)
-				return new int[] { GT_Ores, 7 }; // Cinnabar I+S
+			return Blocks.quartz_ore;
 		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		return new int[] { blockID, blockMeta };
+		return def;
 	}
 
-	public static int[] getRandomEndBlock(Random random, int blockID, int blockMeta) {
+	public static Block getRandomEndBlock(Random random, Block def) {
 		if (isICLoaded && random.nextInt(10000) == 42) {
-			return new int[] { iridiumBlockID, 0 };
-		} else if (isGregLoaded) {
-			if (random.nextInt(250) == 1)
-				return new int[] { GT_Ores, 9 }; // Tungstate I
-			else if (random.nextInt(500) == 1)
-				return new int[] { GT_Ores, 12 }; // Sodalite I+S
-			else if (random.nextInt(500) == 1)
-				return new int[] { GT_Ores, 10 }; // Cooperite=Sheldonite D
-			else if (random.nextInt(1000) == 1)
-				return new int[] { GT_Ores, 11 }; // Olivine D+S
-		} else if (isMetallurgyLoaded && (random.nextInt(25) == 1)) {
-			return Metallurgy_endOresBlock[random.nextInt(Metallurgy_endOresBlock.length)];
+			return WarpDrive.iridiumBlock;
 		} else if (random.nextInt(200) == 13) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
 		}
-		return new int[] { blockID, blockMeta };
+		return def;
 	}
 }
