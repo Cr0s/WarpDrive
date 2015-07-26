@@ -6,8 +6,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 
-import com.sun.media.jfxmedia.logging.Logger;
-
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
@@ -55,35 +53,35 @@ public class GenerateCommand extends CommandBase {
 
 			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 				if (struct.equals("moon")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating moon at " + x + ", " + (y - 16) + ", " + z);
+					WarpDrive.logger.info("/generate: generating moon at " + x + ", " + (y - 16) + ", " + z);
 					WarpDrive.instance.spaceWorldGenerator.generateMoon(player.worldObj, x, y - 16, z);
 				} else if (struct.equals("ship")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating NPC ship at " + x + ", " + y + ", " + z);
+					WarpDrive.logger.info("/generate: generating NPC ship at " + x + ", " + y + ", " + z);
 					new WorldGenSmallShip(false).generate(player.worldObj, player.worldObj.rand, x, y, z);
 				} else if (struct.equals("station")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating station at " + x + ", " + y + ", " + z);
+					WarpDrive.logger.info("/generate: generating station at " + x + ", " + y + ", " + z);
 					new WorldGenStation(false).generate(player.worldObj, player.worldObj.rand, x, y, z);
 				} else if (struct.equals("asteroid")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating asteroid at " + x + ", " + (y - 10) + ", " + z);
+					WarpDrive.logger.info("/generate: generating asteroid at " + x + ", " + (y - 10) + ", " + z);
 					WarpDrive.instance.spaceWorldGenerator.generateRandomAsteroid(player.worldObj, x, y - 10, z, 6, 11);
 				} else if (struct.equals("astfield")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating asteroid field at " + x + ", " + y + ", " + z);
+					WarpDrive.logger.info("/generate: generating asteroid field at " + x + ", " + y + ", " + z);
 					WarpDrive.instance.spaceWorldGenerator.generateAsteroidField(player.worldObj, x, y, z);
 				} else if (struct.equals("gascloud")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating gas cloud at " + x + ", " + y + ", " + z);
+					WarpDrive.logger.info("/generate: generating gas cloud at " + x + ", " + y + ", " + z);
 					WarpDrive.instance.spaceWorldGenerator.generateGasCloudOfColor(player.worldObj, x, y, z, 15, 20, player.worldObj.rand.nextInt(12));
 				} else if (struct.equals("star")) {
-					Logger.logMsg(Logger.INFO, "/generate: generating star at " + x + ", " + y + ", " + z);
+					WarpDrive.logger.info("/generate: generating star at " + x + ", " + y + ", " + z);
 					Integer type = (params.length > 1) ? Integer.parseInt(params[1]) : -1; // Lem
 					WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z, type); // Lem
 				} else if (struct.equals("jumpgate")) {
 					if (params.length == 2) {
-						Logger.logMsg(Logger.INFO, "/generate: creating jumpgate at " + x + ", " + y + ", " + z);
+						WarpDrive.logger.info("/generate: creating jumpgate at " + x + ", " + y + ", " + z);
 
 						if (WarpDrive.jumpgates.addGate(params[1], x, y, z)) {
 							JumpgateGenerator.generate(player.worldObj, x, Math.min(y, 255 - JumpgateGenerator.GATE_SIZE_HALF - 1), z);
 						} else {
-							Logger.logMsg(Logger.INFO, "/generate: jumpgate '" + params[1] + "' already exists.");
+							WarpDrive.logger.info("/generate: jumpgate '" + params[1] + "' already exists.");
 						}
 					}
 				} else {
