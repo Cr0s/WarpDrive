@@ -5,10 +5,10 @@ import java.util.Map;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
-import cr0s.warpdrive.data.EnumUpgradeTypes;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.api.IUpgradable;
+import cr0s.warpdrive.data.EnumUpgradeTypes;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -16,13 +16,13 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 {
 	private boolean canLoad = false;
 	private boolean shouldLoad = false;
-	
+
 	private boolean inited = false;
 	private ChunkCoordIntPair myChunk;
-	
+
 	int negDX, posDX, negDZ, posDZ;
 	int area = 1;
-	
+
 	public TileEntityChunkLoader() {
 		super();
 		negDX = 0;
@@ -31,38 +31,38 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		posDZ = 0;
 		peripheralName = "warpdriveChunkloader";
 		methodsArray = new String[] {
-			"getEnergyLevel",
-			"radius",
-			"bounds",
-			"active",
-			"upgrades",
-			"help"
+				"getEnergyLevel",
+				"radius",
+				"bounds",
+				"active",
+				"upgrades",
+				"help"
 		};
 	}
-	
+
 	@Override
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.CL_MAX_ENERGY;
 	}
-	
+
 	@Override
 	public boolean shouldChunkLoad()
 	{
 		return shouldLoad && canLoad;
 	}
-	
+
 	@Override
 	public void updateEntity()
 	{
 		super.updateEntity();
-		
+
 		if(!inited)
 		{
 			inited = true;
 			myChunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord).getChunkCoordIntPair();
 			changedDistance();
 		}
-		
+
 		if(shouldLoad)
 		{
 			canLoad = consumeEnergy(area * WarpDriveConfig.CL_RF_PER_CHUNKTICK, false);
@@ -72,12 +72,12 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 			canLoad = consumeEnergy(area * WarpDriveConfig.CL_RF_PER_CHUNKTICK, true);
 		}
 	}
-	
+
 	private int clampDistance(int dis)
 	{
 		return clamp(dis,0,WarpDriveConfig.CL_MAX_DISTANCE);
 	}
-	
+
 	private void changedDistance()
 	{
 		if(worldObj == null) {
@@ -100,7 +100,7 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		area = (posDX - negDX + 1) * (posDZ - negDZ + 1);
 		refreshLoading(true);
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound nbt)
 	{
@@ -109,10 +109,10 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		negDZ  = nbt.getInteger("negDZ");
 		posDX  = nbt.getInteger("posDX");
 		posDZ  = nbt.getInteger("posDZ");
-		
+
 		changedDistance();
 	}
-	
+
 	@Override
 	public void writeToNBT(NBTTagCompound nbt)
 	{
@@ -122,7 +122,7 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		nbt.setInteger("posDX", posDX);
 		nbt.setInteger("posDZ", posDZ);
 	}
-	
+
 	// OpenComputer callback methods
 	// FIXME: implement OpenComputers...
 
@@ -147,9 +147,9 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String meth = methodsArray[method];
-		
+
 		if(meth.equals("getEnergyLevel")) {
 			return getEnergyLevel();
 		} else if(meth.equals("radius"))
@@ -192,10 +192,10 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		{
 			return new Object[] {helpStr(arguments) };
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public boolean takeUpgrade(EnumUpgradeTypes upgradeType, boolean simulate)
 	{
@@ -204,14 +204,14 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 			max = 2;
 		else if(upgradeType == EnumUpgradeTypes.Power)
 			max = 2;
-		
+
 		if(max == 0)
 			return false;
-		
+
 		if(upgrades.containsKey(upgradeType))
 			if(upgrades.get(upgradeType) >= max)
 				return false;
-		
+
 		if(!simulate)
 		{
 			int c = 0;
@@ -221,11 +221,23 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 		}
 		return true;
 	}
-	
+
 	@Override
 	public Map<EnumUpgradeTypes, Integer> getInstalledUpgrades()
 	{
 		return upgrades;
+	}
+
+	@Override
+	public int getSinkTier() {
+		// TODO Auto-generated method stub
+		return 2;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Auto-generated method stub
+		return 2;
 	}
 
 }

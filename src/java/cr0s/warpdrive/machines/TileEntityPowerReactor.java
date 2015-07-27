@@ -38,21 +38,21 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 	private int tickCount = 0;
 
 	private double[] instabilityValues = { 0.0D, 0.0D, 0.0D, 0.0D }; // no
-																		// instability
-																		// = 0,
-																		// explosion
-																		// = 100
+	// instability
+	// = 0,
+	// explosion
+	// = 100
 	private float lasersReceived = 0;
 	private int lastGenerationRate = 0;
 	private int releasedThisTick = 0; // amount of energy released during
-										// current tick update
+	// current tick update
 	private int releasedThisCycle = 0; // amount of energy released during
-										// current cycle
+	// current cycle
 	private int releasedLastCycle = 0;
 
 	private boolean hold = true; // hold updates and power output until reactor
-									// is controlled (i.e. don't explode on
-									// chunk-loading while computer is booting)
+	// is controlled (i.e. don't explode on
+	// chunk-loading while computer is booting)
 	private boolean active = false;
 	private static final int MODE_DONT_RELEASE = 0;
 	private static final int MODE_MANUAL_RELEASE = 1;
@@ -69,12 +69,12 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		super();
 		peripheralName = "warpdriveReactor";
 		methodsArray = new String[] { "active", "energy", // returns energy, max
-															// energy, energy
-															// rate
+				// energy, energy
+				// rate
 				"instability", // returns ins0,1,2,3
 				"release", // releases all energy
 				"releaseRate", // releases energy when more than arg0 is
-								// produced
+				// produced
 				"releaseAbove", // releases any energy above arg0 amount
 				"help" // returns help on arg0 function
 		};
@@ -88,8 +88,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		int side = from.ordinal() - 2;
 		if (containedEnergy > WarpDriveConfig.PR_TICK_TIME * PR_MIN_GENERATION * 100) {
 			double amountToIncrease = WarpDriveConfig.PR_TICK_TIME
-					* Math.max(PR_MIN_INSTABILITY,
-							PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.PR_MAX_ENERGY, 0.1));
+					* Math.max(PR_MIN_INSTABILITY, PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.PR_MAX_ENERGY, 0.1));
 			// WarpDrive.debugPrint("InsInc" + amountToIncrease);
 			instabilityValues[side] += amountToIncrease * (isNatural ? 1.0D : 0.25D);
 		} else {
@@ -127,11 +126,11 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 			// increaseInstability(false);
 		}
 		double normalisedAmount = Math.min(1.0D, Math.max(0.0D, amount / PR_MAX_LASER_ENERGY)); // 0.0
-																								// to
-																								// 1.0
+		// to
+		// 1.0
 		double baseLaserEffect = 0.5D + 0.5D * Math.cos(Math.PI - (1.0D + Math.log10(0.1D + 0.9D * normalisedAmount)) * Math.PI); // 0.0
-																																	// to
-																																	// 1.0
+		// to
+		// 1.0
 		double randomVariation = 0.8D + 0.4D * worldObj.rand.nextDouble(); // ~1.0
 		double amountToRemove = PR_MAX_LASER_EFFECT * baseLaserEffect * randomVariation * nospamFactor;
 
@@ -158,14 +157,14 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		}
 
 		if (active) {// producing, instability increase output, you want to take
-						// the risk
+			// the risk
 			int amountToGenerate = (int) Math.ceil(WarpDriveConfig.PR_TICK_TIME * (0.5D + stabilityOffset)
 					* (PR_MIN_GENERATION + PR_MAX_GENERATION * Math.pow(containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY, 0.6D)));
 			containedEnergy = Math.min(containedEnergy + amountToGenerate, WarpDriveConfig.PR_MAX_ENERGY);
 			lastGenerationRate = amountToGenerate / WarpDriveConfig.PR_TICK_TIME;
 			// WarpDrive.debugPrint("Generated " + amountToGenerate);
 		} else {// decaying over 20s without producing power, you better have
-				// power for those lasers
+			// power for those lasers
 			int amountToDecay = (int) (WarpDriveConfig.PR_TICK_TIME * (1.0D - stabilityOffset) * (PR_MIN_GENERATION + containedEnergy * 0.01D));
 			containedEnergy = Math.max(0, containedEnergy - amountToDecay);
 			lastGenerationRate = 0;
@@ -237,8 +236,8 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		worldObj.setBlockToAir(xCoord, yCoord, zCoord);
 		// set a few TnT augmented around reactor
 		for (int i = 0; i < 3; i++) {
-			worldObj.newExplosion((Entity) null, xCoord + worldObj.rand.nextInt(3) - 0.5D, yCoord + worldObj.rand.nextInt(3) - 0.5D,
-					zCoord + worldObj.rand.nextInt(3) - 0.5D, 4.0F + worldObj.rand.nextInt(3), true, true);
+			worldObj.newExplosion((Entity) null, xCoord + worldObj.rand.nextInt(3) - 0.5D, yCoord + worldObj.rand.nextInt(3) - 0.5D, zCoord + worldObj.rand.nextInt(3) - 0.5D,
+					4.0F + worldObj.rand.nextInt(3), true, true);
 		}
 	}
 
@@ -266,10 +265,9 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		exploding &= (worldObj.rand.nextInt(4) == 2);
 
 		if (exploding) {
-			WarpDrive.print(this
-					+ String.format(" Explosion trigerred, Instability is [%.2f, %.2f, %.2f, %.2f], Energy stored is %d, Laser received is %.2f, %s",
-							new Object[] { instabilityValues[0], instabilityValues[1], instabilityValues[2], instabilityValues[3], this.containedEnergy,
-									this.lasersReceived, this.active ? "ACTIVE" : "INACTIVE" }));
+			WarpDrive.logger.info(this
+					+ String.format(" Explosion trigerred, Instability is [%.2f, %.2f, %.2f, %.2f], Energy stored is %d, Laser received is %.2f, %s", new Object[] { instabilityValues[0],
+							instabilityValues[1], instabilityValues[2], instabilityValues[3], this.containedEnergy, this.lasersReceived, this.active ? "ACTIVE" : "INACTIVE" }));
 			active = false;
 		}
 		return exploding;
@@ -308,7 +306,7 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 		int[] zo = { 2, -2, 0, 0 };
 
 		for (int i = 0; i < 4; i++) {
-			te = worldObj.getBlockTileEntity(xCoord + xo[i], yCoord, zCoord + zo[i]);
+			te = worldObj.getTileEntity(xCoord + xo[i], yCoord, zCoord + zo[i]);
 			if (te instanceof TileEntityPowerLaser) {
 				((TileEntityPowerLaser) te).scanForReactor();
 			}
@@ -418,36 +416,40 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 	}
 
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		// computer is alive => start updating reactor
 		hold = false;
 
 		String methodName = methodsArray[method];
 
-		if (methodName.equals("active")) {
-			return active(arguments);
+		try {
+			if (methodName.equals("active")) {
+				return active(arguments);
 
-		} else if (methodName.equals("energy")) {
-			return new Object[] { containedEnergy, WarpDriveConfig.PR_MAX_ENERGY, releasedLastCycle / WarpDriveConfig.PR_TICK_TIME };
+			} else if (methodName.equals("energy")) {
+				return new Object[] { containedEnergy, WarpDriveConfig.PR_MAX_ENERGY, releasedLastCycle / WarpDriveConfig.PR_TICK_TIME };
 
-		} else if (methodName.equals("instability")) {
-			Object[] retVal = new Object[4];
-			for (int i = 0; i < 4; i++) {
-				retVal[i] = instabilityValues[i];
+			} else if (methodName.equals("instability")) {
+				Object[] retVal = new Object[4];
+				for (int i = 0; i < 4; i++) {
+					retVal[i] = instabilityValues[i];
+				}
+				return retVal;
+
+			} else if (methodName.equals("release")) {
+				return release(arguments);
+
+			} else if (methodName.equals("releaseRate")) {
+				return releaseRate(arguments);
+
+			} else if (methodName.equals("releaseAbove")) {
+				return releaseAbove(arguments);
+
+			} else if (methodName.equals("help")) {
+				return new Object[] { helpStr(arguments) };
 			}
-			return retVal;
-
-		} else if (methodName.equals("release")) {
-			return release(arguments);
-
-		} else if (methodName.equals("releaseRate")) {
-			return releaseRate(arguments);
-
-		} else if (methodName.equals("releaseAbove")) {
-			return releaseAbove(arguments);
-
-		} else if (methodName.equals("help")) {
-			return new Object[] { helpStr(arguments) };
+		} catch (Exception e) {
+			return new String[] { e.getMessage() };
 		}
 
 		return null;
@@ -543,8 +545,19 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 
 	@Override
 	public String toString() {
-		return String.format("%s \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] { getClass().getSimpleName(),
-				this.connectedComputers == null ? "~NULL~" : this.connectedComputers, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
-				Double.valueOf(xCoord), Double.valueOf(yCoord), Double.valueOf(zCoord) });
+		return String.format("%s \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] { getClass().getSimpleName(), this.connectedComputers == null ? "~NULL~" : this.connectedComputers,
+				worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(), Double.valueOf(xCoord), Double.valueOf(yCoord), Double.valueOf(zCoord) });
+	}
+
+	@Override
+	public int getSinkTier() {
+		// TODO Auto-generated method stub
+		return 3;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Auto-generated method stub
+		return 3;
 	}
 }
