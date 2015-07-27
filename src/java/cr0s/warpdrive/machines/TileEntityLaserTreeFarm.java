@@ -2,55 +2,56 @@ package cr0s.warpdrive.machines;
 
 import java.util.LinkedList;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
-import dan200.computercraft.api.peripheral.IComputerAccess;
+import cr0s.warpdrive.data.Vector3;
 import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	Boolean active = false;
-	
+
 	private int mode = 0;
 	private boolean doLeaves = false;
 	private boolean silkTouchLeaves = false;
 	private boolean treeTap = false;
-	
+
 	private final int defSize = 8;
 	private final int scanWait = 40;
 	private final int mineWait = 4;
 	private int delayMul = 4;
-	
+
 	private int totalHarvested=0;
-	
+
 	private int scan = 0;
 	private int xSize = defSize;
 	private int zSize = defSize;
-	
+
 	LinkedList<Vector3> logs;
 	private int logIndex = 0;
-	
+
 	public TileEntityLaserTreeFarm() {
 		super();
 		peripheralName = "treefarmLaser";
 		methodsArray = new String[] {
-			"start",
-			"stop",
-			"area",
-			"leaves",
-			"silkTouch",
-			"silkTouchLeaves",
-			"treetap",
-			"state"
+				"start",
+				"stop",
+				"area",
+				"leaves",
+				"silkTouch",
+				"silkTouchLeaves",
+				"treetap",
+				"state"
 		};
 	}
-	
+
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-		
+
 		if (active) {
 			scan++;
 			if (mode == 0) {
@@ -64,22 +65,22 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 			} else {
 				if (scan >= mineWait * delayMul) {
 					scan = 0;
-					
+
 					if (logIndex >= logs.size()) {
 						mode = 0;
 						return;
 					}
 					Vector3 pos = logs.get(logIndex);
-					int blockID = worldObj.getBlockId(pos.intX(), pos.intY(), pos.intZ());
-					
+					Block block = worldObj.getBlock(pos.intX(), pos.intY(), pos.intZ());
+
 					if (mode == 1) {
-						int cost = calculateBlockCost(blockID);
+						int cost = calculateBlockCost(block);
 						if (consumeEnergyFromBooster(cost, true)) {
-							if (isLog(blockID) || (doLeaves && isLeaf(blockID))) {
+							if (isLog(block) || (doLeaves && isLeaf(block))) {
 								delayMul = 1;
 								if (isRoomForHarvest()) {
 									if (consumeEnergyFromBooster(cost, false)) {
-										if (isLog(blockID)) {
+										if (isLog(block)) {
 											delayMul = 4;
 											totalHarvested++;
 										}
@@ -94,10 +95,10 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 							logIndex++;
 						}
 					} else if(mode == 2) {
-						int cost = calculateBlockCost(blockID);
+						int cost = calculateBlockCost(block);
 						if (consumeEnergyFromBooster(cost, true)) {
 							if (isRoomForHarvest()) {
-								if (blockID == WarpDriveConfig.IC2_RubberWood) {
+								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_RubberWood.getItem()))) {
 									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
 									if (metadata >= 2 && metadata <= 5) {
 										WarpDrive.debugPrint("wetspot found");
@@ -115,7 +116,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 									} else {
 										delayMul = 1;
 									}
-								} else if(isLog(blockID)) {
+								} else if (isLog(block)) {
 									if (consumeEnergyFromBooster(cost, false)) {
 										delayMul = 4;
 										totalHarvested++;
@@ -123,7 +124,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 									} else {
 										return;
 									}
-								} else if(isLeaf(blockID)) {
+								} else if (isLeaf(block)) {
 									if (consumeEnergyFromBooster(cost, true)) {
 										delayMul = 1;
 										harvestBlock(pos);
@@ -141,20 +142,20 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 			}
 		}
 	}
-	
-	private static boolean isLog(int blockID) {
-		return WarpDriveConfig.minerLogs.contains(blockID);
+
+	private static boolean isLog(Block block) {
+		return WarpDriveConfig.minerLogs.contains(block);
 	}
-	
-	private static boolean isLeaf(int blockID) {
-		return WarpDriveConfig.minerLeaves.contains(blockID);
+
+	private static boolean isLeaf(Block block) {
+		return WarpDriveConfig.minerLeaves.contains(block);
 	}
-	
+
 	private static void addTree(LinkedList<Vector3> list, Vector3 newTree) {
 		WarpDrive.debugPrint("Adding tree position:" + newTree.x + "," + newTree.y + "," + newTree.z);
 		list.add(newTree);
 	}
-	
+
 	private LinkedList<Vector3> scanTrees() {
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
@@ -167,13 +168,13 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		z2 = zCoord - zSize / 2;
 		zmin = Math.min(z1, z2);
 		zmax = Math.max(z1, z2);
-		
+
 		LinkedList<Vector3> logPositions = new LinkedList<Vector3>();
-		
+
 		for(int x = xmin; x <= xmax; x++) {
 			for(int z = zmin; z <= zmax; z++) {
-				int blockID = worldObj.getBlockId(x, yCoord, z);
-				if (isLog(blockID)) {
+				Block block = worldObj.getBlock(x, yCoord, z);
+				if (isLog(block)) {
 					Vector3 pos = new Vector3(x, yCoord, z);
 					logPositions.add(pos);
 					scanNearby(logPositions, x, yCoord, z, 0);
@@ -182,14 +183,14 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		}
 		return logPositions;
 	}
-	
+
 	private void scanNearby(LinkedList<Vector3> current, int x, int y, int z, int d) {
 		int[] deltas = {0, -1, 1};
 		for(int dx : deltas) {
 			for(int dy = 1; dy >= 0; dy--) {
 				for(int dz : deltas) {
-					int blockID = worldObj.getBlockId(x+dx, y+dy, z+dz);
-					if (isLog(blockID) || (doLeaves && isLeaf(blockID))) {
+					Block block = worldObj.getBlock(x + dx, y + dy, z + dz);
+					if (isLog(block) || (doLeaves && isLeaf(block))) {
 						Vector3 pos = new Vector3(x + dx, y + dy, z + dz);
 						if (!current.contains(pos)) {
 							addTree(current, pos);
@@ -198,11 +199,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 							}
 						}
 					}
-				}	
+				}
 			}
 		}
 	}
-	
+
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
@@ -213,20 +214,20 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		tag.setBoolean("treetap", treeTap);
 		tag.setBoolean("silkTouchLeaves", silkTouchLeaves);
 	}
-	
+
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		xSize = tag.getInteger("xSize");
 		zSize = tag.getInteger("zSize");
 		defineMiningArea(xSize,zSize);
-		
+
 		doLeaves = tag.getBoolean("doLeaves");
 		active   = tag.getBoolean("active");
 		treeTap  = tag.getBoolean("treetap");
 		silkTouchLeaves = tag.getBoolean("silkTouchLeaves");
 	}
-	
+
 	@Override
 	public boolean shouldChunkLoad() {
 		return active;
@@ -237,7 +238,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 	// ComputerCraft IPeripheral methods implementation
 	@Override
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		if (methodName.equals("start")) {
 			if (!active) {
@@ -269,7 +270,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 					doLeaves = toBool(arguments[0]);
 				}
 			} catch(Exception e) {
-				
+
 			}
 			return new Boolean[] { doLeaves };
 		} else if (methodName.equals("silkTouch")) {
@@ -306,13 +307,13 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 	//ABSTRACT LASER IMPLEMENTATION
 	@Override
-	protected boolean silkTouch(int blockID) {
-		if (isLeaf(blockID)) {
+	protected boolean silkTouch(Block block) {
+		if (isLeaf(block)) {
 			return silkTouchLeaves;
 		}
 		return silkTouch();
 	}
-	
+
 	@Override
 	protected boolean canSilkTouch() {
 		return true;
@@ -346,5 +347,17 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	protected float getColorB() {
 		return 0.4f;
+	}
+
+	@Override
+	public int getSinkTier() {
+		// TODO Auto-generated method stub
+		return 2;
+	}
+
+	@Override
+	public int getSourceTier() {
+		// TODO Auto-generated method stub
+		return 2;
 	}
 }
