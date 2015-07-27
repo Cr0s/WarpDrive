@@ -152,7 +152,7 @@ public final class EntitySphereGen extends Entity {
 		radius += 0.5D; // Radius from center of block
 		double radiusSq = radius * radius; // Optimization to avoid square roots
 		double radius1Sq = (radius - 1.0D) * (radius - 1.0D); // for hollow
-																// sphere
+		// sphere
 		int ceilRadius = (int) Math.ceil(radius);
 
 		// Pass the cube and check points for sphere equation x^2 + y^2 + z^2 =
@@ -165,7 +165,7 @@ public final class EntitySphereGen extends Entity {
 				for (int z = 0; z <= ceilRadius; z++) {
 					double z2 = (z + 0.5D) * (z + 0.5D);
 					double dSq = x2 + y2 + z2; // Distance from current position
-												// to center
+					// to center
 
 					// Skip too far blocks
 					if (dSq > radiusSq)
@@ -177,29 +177,29 @@ public final class EntitySphereGen extends Entity {
 						continue;
 
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					// Add blocks to memory
 					addBlock(new JumpBlock(block, defaultMeta, xCoord + x, yCoord + y, zCoord + z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord - x, yCoord + y, zCoord + z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord + x, yCoord - y, zCoord + z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord + x, yCoord + y, zCoord - z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord - x, yCoord - y, zCoord + z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord + x, yCoord - y, zCoord - z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord - x, yCoord + y, zCoord - z));
 					if (generateOres)
-						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, defaultMeta, true);
+						block = WarpDriveConfig.getRandomSurfaceBlock(worldObj.rand, defaultBlock, true);
 					addBlock(new JumpBlock(block, defaultMeta, xCoord - x, yCoord - y, zCoord - z));
 				}
 			}

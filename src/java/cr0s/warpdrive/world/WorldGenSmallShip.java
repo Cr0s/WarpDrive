@@ -11,6 +11,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import appeng.api.AEApi;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 
@@ -218,7 +219,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 7, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 7, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP), solarType, 0);
+		world.setBlock(i + 7, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP.getItem()), solarType, 0);
 		world.setBlock(i + 7, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 7, k + 5, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -251,7 +252,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 8, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 8, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP), solarType, 0);
+		world.setBlock(i + 8, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP.getItem()), solarType, 0);
 		world.setBlock(i + 8, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -286,7 +287,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 9, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 9, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP), solarType, 0);
+		world.setBlock(i + 9, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP.getItem()), solarType, 0);
 		// Placing air generator
 		world.setBlock(i + 9, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
 		world.setBlock(i + 9, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -326,7 +327,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 10, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 10, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP), solarType, 0);
+		world.setBlock(i + 10, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP.getItem()), solarType, 0);
 		// Placing air generator
 		world.setBlock(i + 10, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
 		world.setBlock(i + 10, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -382,7 +383,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 11, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 11, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP), solarType, 0);
+		world.setBlock(i + 11, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.ASP.getItem()), solarType, 0);
 		world.setBlock(i + 11, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -630,26 +631,24 @@ public class WorldGenSmallShip extends WorldGenerator {
 				isDone = true;
 				break;// skipped
 
-			// AE Quarz
+				// AE Quarz
 			case 9:
 				if (WarpDriveConfig.isAppliedEnergisticsLoaded) {
-					res = WarpDriveConfig.getAEMaterial("matQuartz").copy();
-					res.stackSize = 2 + rand.nextInt(22);
+					res = AEApi.instance().definitions().materials().fluixCrystal().maybeStack(2 + rand.nextInt(22)).get();
 					isDone = true;
 				}
 
 				break;
 
-			// AE improved processor
+				// AE improved processor
 			case 10:
 				if (WarpDriveConfig.isAppliedEnergisticsLoaded) {
-					res = WarpDriveConfig.getAEMaterial("matProcessorAdvanced").copy();
-					res.stackSize = 1 + rand.nextInt(3);
+					res = AEApi.instance().definitions().materials().advCard().maybeStack(res.stackSize = 1 + rand.nextInt(3)).get();
 					isDone = true;
 				}
 				break;
 
-			// Rocket launcher platform Tier3
+				// Rocket launcher platform Tier3
 			case 11:
 				if (WarpDriveConfig.isICBMLoaded) {
 					// TODO: No 1.7 ICBM yet
@@ -659,7 +658,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 				}
 				break;
 
-			// Missles from conventional to hypersonic
+				// Missles from conventional to hypersonic
 			case 12:
 				if (WarpDriveConfig.isICBMLoaded) {
 					// TODO: No 1.7 ICBM yet
@@ -669,10 +668,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 				}
 				break;
 
-			// Advanced solar panels
+				// Advanced solar panels
 			case 13:
 				if (WarpDriveConfig.isAdvSolPanelLoaded) {
-					res = new ItemStack(WarpDriveConfig.ASP, rand.nextInt(3), solarType).copy();
+					res = new ItemStack(WarpDriveConfig.ASP.getItem(), rand.nextInt(3), solarType).copy();
 					isDone = true;
 				}
 				break;
