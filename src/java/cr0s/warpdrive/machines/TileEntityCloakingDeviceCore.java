@@ -326,7 +326,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		this.tier = tag.getByte("tier");
-//		this.frequency = tag.getInteger("frequency");
 		this.isEnabled = tag.getBoolean("enabled");
 	}
 
@@ -334,7 +333,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setByte("tier", tier);
-//		tag.setInteger("frequency", frequency);
 		tag.setBoolean("enabled", isEnabled);
 	}
 
