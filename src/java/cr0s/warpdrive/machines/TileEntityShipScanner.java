@@ -346,7 +346,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	}
 
 	private void writeNBTToFile(String fileName, NBTTagCompound nbttagcompound) {
-		WarpDrive.print(this + " Filename: " + fileName);
+		WarpDrive.logger.info(this + " Filename: " + fileName);
 
 		try {
 			File file = new File(fileName);

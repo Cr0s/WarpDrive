@@ -52,11 +52,13 @@ public class TileEntityReactor extends WarpEnergyTE {
 	private ReactorMode currentMode = ReactorMode.IDLE;
 
 	public enum ReactorMode {
-		IDLE(0), BASIC_JUMP(1), // 0-128
-		LONG_JUMP(2), // 0-12800
-		TELEPORT(3), BEACON_JUMP(4), // Jump ship by beacon
-		HYPERSPACE(5), // Jump to/from Hyperspace
-		GATE_JUMP(6); // Jump via jumpgate
+		IDLE(0),
+		BASIC_JUMP(1),		// 0-128
+		LONG_JUMP(2),		// 0-12800
+		TELEPORT(3),
+		BEACON_JUMP(4),		// Jump ship by beacon
+		HYPERSPACE(5),		// Jump to/from Hyperspace
+		GATE_JUMP(6);		// Jump via jumpgate
 
 		private final int code;
 
@@ -123,11 +125,11 @@ public class TileEntityReactor extends WarpEnergyTE {
 		if (registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
 			registryUpdateTicks = 0;
 			WarpDrive.warpCores.updateInRegistry(this);
-			// WarpDrive.warpCores.printRegistry();
-			// WarpDrive.debugPrint("" + this + " controller is " + controller +
-			// ", warmupTime " + warmupTime + ", currentMode " + currentMode +
-			// ", jumpFlag " + (controller == null ? "NA" :
-			// controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
+			if (WarpDriveConfig.G_DEBUGMODE) {
+				WarpDrive.warpCores.printRegistry();
+				WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
+						+ (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
+			}
 
 			TileEntity c = findControllerBlock();
 			if (c == null) {
@@ -252,16 +254,16 @@ public class TileEntityReactor extends WarpEnergyTE {
 						messageToAllPlayersOnShip(reason.toString());
 						return;
 					}
-					// WarpDrive.debugPrint(this +
-					// " Giving warp sickness targetWarmup " + targetWarmup +
-					// " distance " + controller.getDistance());
+					if (WarpDriveConfig.G_DEBUGMODE) {
+						WarpDrive.debugPrint(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
+					}
 					makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
 				}
 
 				if (!soundPlayed && (soundThreshold > warmupTime)) {
-					// WarpDrive.debugPrint(this + " Playing sound effect '" +
-					// soundFile + "' soundThreshold " + soundThreshold +
-					// " warmupTime " + warmupTime);
+					if (WarpDriveConfig.G_DEBUGMODE) {
+						WarpDrive.debugPrint(this + " Playing sound effect '" + soundFile + "' soundThreshold " + soundThreshold + " warmupTime " + warmupTime);
+					}
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, soundFile, 4F, 1F);
 					soundPlayed = true;
 				}
@@ -356,9 +358,9 @@ public class TileEntityReactor extends WarpEnergyTE {
 		} else {
 			isolationRate = 0.0D;
 		}
-		// WarpDrive.debugPrint(this + " Isolation updated to " +
-		// isolationBlocksCount + " (" + String.format("%.1f", isolationRate *
-		// 100) + "%)");
+		if (WarpDriveConfig.G_DEBUGMODE) {
+			WarpDrive.debugPrint(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
+		}
 	}
 
 	private void makePlayersOnShipDrunk(int tickDuration) {
@@ -410,10 +412,12 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 			if (player.dimension != worldObj.provider.dimensionId) {
 				player.mcServer.getConfigurationManager().transferPlayerToDimension(
-						player,
-						this.worldObj.provider.dimensionId,
-						new SpaceTeleporter(DimensionManager.getWorld(this.worldObj.provider.dimensionId), 0, MathHelper.floor_double(player.posX), MathHelper
-								.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
+					player,
+					worldObj.provider.dimensionId,
+					new SpaceTeleporter(
+						DimensionManager.getWorld(worldObj.provider.dimensionId),
+						0,
+						MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
 			}
 		}
 	}
@@ -686,8 +690,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 		// If gate is blocked by obstacle
 		if (!isFreePlaceForShip(gateX, gateY, gateZ)) {
-			// Randomize destination coordinates and check for collision with
-			// obstacles around jumpgate
+			// Randomize destination coordinates and check for collision with obstacles around jumpgate
 			// Try to find good place for ship
 			int numTries = 10; // num tries to check for collision
 			boolean placeFound = false;
@@ -826,7 +829,6 @@ public class TileEntityReactor extends WarpEnergyTE {
 				int x = MathHelper.floor_double(entity.posX);
 				int z = MathHelper.floor_double(entity.posZ);
 				// int y = MathHelper.floor_double(entity.posY);
-				final int WOOL_BLOCK_ID = 35;
 				int newY;
 
 				for (newY = 254; newY > 0; newY--) {
