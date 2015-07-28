@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
 
+import mffs.Content;
 import mods.immibis.ars.ARSMod;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -698,11 +699,7 @@ public class WarpDriveConfig {
 
 	private static void loadMFFS() {
 		try {
-			/* TODO: Does not exist for 1.7 yet
-			Class<?> z = Class.forName("mffs.ModularForceFieldSystem");
-			int blockId = ((Block) z.getField("blockForceField").get(null));
-			forceFieldBlocks.add(blockId);
-			 */
+			forceFieldBlocks.add(Content.forceField());
 			isMFFSLoaded = false;
 		} catch (Exception e) {
 			WarpDrive.logger.warning("WarpDriveConfig Error loading MFFS classes");
