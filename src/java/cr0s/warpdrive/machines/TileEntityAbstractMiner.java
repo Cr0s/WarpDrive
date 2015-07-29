@@ -14,17 +14,12 @@ import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.IFluidBlock;
-import appeng.api.networking.IGrid;
-import appeng.api.networking.IGridNode;
-import appeng.api.storage.IMEInventoryHandler;
-import appeng.api.storage.data.IAEItemStack;
-import appeng.api.util.WorldCoord;
 import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
-public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser implements IGridNode, ITileCable
+public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 {
 	//FOR STORAGE
 	private boolean silkTouch = false;
@@ -32,10 +27,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 
 	private TileEntityParticleBooster booster = null;
 	private Vector3 minerVector;
-
-	Boolean powerStatus = false;
-	private IGrid grid;
-	private boolean isMEReady = false;
 
 	abstract boolean	canSilkTouch();
 	abstract int		minFortune();
@@ -110,7 +101,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return silkTouch;
 	}
 
-	protected boolean silkTouch(int blockID)
+	protected boolean silkTouch(Block block)
 	{
 		return silkTouch();
 	}
@@ -176,9 +167,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 
 	protected boolean isRoomForHarvest()
 	{
-		if(isMEReady && grid != null)
-			return true;
-
 		IInventory inv = findChest();
 		if(inv != null)
 		{
@@ -190,6 +178,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean canDig(Block block, int x, int y, int z) {// not used
 		// ignore air & fluids
 		if (block == null || (worldObj.isAirBlock(x, y, z) || (block instanceof IFluidBlock))) {
@@ -261,26 +250,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 
 	protected int dumpToInv(ItemStack item)
 	{
-		if (grid != null)
-			return putInGrid(item);
-		else
-			return putInChest(findChest(), item);
-	}
-
-	private int putInGrid(ItemStack itemStackSource)
-	{
-		int transferred = 0;
-		if(isMEReady && grid != null)
-		{
-			IMEInventoryHandler cellArray = grid.getCellArray();
-			if (cellArray != null)
-			{
-				IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
-				if (ret != null)
-					transferred = (int) ret.getStackSize();
-			}
-		}
-		return transferred;
+		return putInChest(findChest(), item);
 	}
 
 	private static int putInChest(IInventory inventory, ItemStack itemStackSource)
@@ -454,86 +424,4 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser im
 		tag.setBoolean("silkTouch", silkTouch);
 		tag.setInteger("fortuneLevel", fortuneLevel);
 	}
-
-	//AE INTERFACE
-	@Override
-	public void setNetworkReady( boolean isReady )
-	{
-		isMEReady = isReady;
-	}
-
-	@Override
-	public boolean isMachineActive()
-	{
-		return isMEReady;
-	}
-
-	@Override
-	public float getPowerDrainPerTick()
-	{
-		return 1;
-	}
-
-	@Override
-	public void validate()
-	{
-		super.validate();
-		MinecraftForge.EVENT_BUS.post(new GridTileLoadEvent(this, worldObj, getLocation()));
-	}
-
-	@Override
-	public void invalidate()
-	{
-		super.invalidate();
-		MinecraftForge.EVENT_BUS.post(new GridTileUnloadEvent(this, worldObj, getLocation()));
-	}
-
-	@Override
-	public WorldCoord getLocation()
-	{
-		return new WorldCoord(xCoord, yCoord, zCoord);
-	}
-
-	@Override
-	public boolean isValid()
-	{
-		return true;
-	}
-
-	@Override
-	public void setPowerStatus(boolean hasPower)
-	{
-		powerStatus = hasPower;
-	}
-
-	@Override
-	public boolean isPowered()
-	{
-		return powerStatus;
-	}
-
-	@Override
-	public IGridInterface getGrid()
-	{
-		return grid;
-	}
-
-	@Override
-	public void setGrid(IGridInterface gi)
-	{
-		grid = gi;
-	}
-
-	@Override
-	public boolean coveredConnections()
-	{
-		return true;
-	}
-
-	@Override
-	public World getWorld()
-	{
-		return worldObj;
-	}
-
 }
