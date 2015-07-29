@@ -145,8 +145,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	// TODO refactor me
 	private void emitBeam(int parEnergy) {
-		int energy = parEnergy; // FIXME
-		// Beam power calculations
+		int energy = parEnergy; // FIXME Beam power calculations
 		int beamLengthBlocks = energy / WarpDriveConfig.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
 
 		if (energy == 0 || beamLengthBlocks < 1 || beamFrequency > 65000 || beamFrequency <= 0) {
@@ -179,12 +178,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				firstHit_blockMeta = worldObj.getBlockMetadata(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
 				firstHit_blockResistance = -2;
 				if (firstHit_block != null) {
-					firstHit_blockResistance = firstHit_block.getExplosionResistance(null); // TODO:
-					// what
-					// entity
-					// should
-					// be
-					// used?
+					firstHit_blockResistance = firstHit_block.getExplosionResistance(null); // TODO: what entity should be used?
 				}
 				PacketHandler.sendBeamPacket(worldObj, beamVector, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
 			} else {
@@ -241,8 +235,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 				}
 
 				Block block = worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
-				// int blockMeta = worldObj.getBlockMetadata(hit.blockX,
-				// hit.blockY, hit.blockZ);
+				// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
 				float resistance = block.getExplosionResistance(null);
 				// TODO: choose entity
 
@@ -277,9 +270,7 @@ public class TileEntityLaser extends WarpInterfacedTE {
 					break;
 				}
 
-				if (resistance >= Blocks.obsidian.getExplosionResistance(null)) {// TODO:
-					// choose
-					// entity
+				if (resistance >= Blocks.obsidian.getExplosionResistance(null)) {// TODO: choose entity
 					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, 4F * (2 + (energy / 500000)), true, true);
 					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Blocks.fire : Blocks.air);
 				} else {
