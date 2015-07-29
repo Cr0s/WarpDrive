@@ -1,7 +1,5 @@
 package cr0s.warpdrive.machines;
 
-import gravisuite.redpower.WorldCoord;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,14 +14,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
-import appeng.api.networking.IGridCache;
-import appeng.api.networking.IGridNode;
-import appeng.api.storage.IMEInventoryHandler;
-import appeng.api.storage.data.IAEItemStack;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.PacketHandler;
@@ -34,10 +25,8 @@ import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
-public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode, ITileCable {
-	private Boolean powerStatus = false;
-	private IGridCache grid;
-
+public class TileEntityMiningLaser extends WarpInterfacedTE {
+	// particle booster relative position
 	private int dx, dz, dy;
 
 	private boolean isMining() {
@@ -46,7 +35,6 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 
 	private boolean isQuarry = false;
 	private boolean enableSilktouch = false;
-	private boolean AENetworkReady = false;
 
 	private int delayTicksWarmup = 0;
 	private int delayTicksScan = 0;
@@ -234,13 +222,11 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 		if (WarpDriveConfig.minerOres.contains(block)) {
 			return true;
 		}
-		// check default //TODO: i dont think resistence is appropriate for
-		// mining.
+		// check default //TODO: i don't think resistance is appropriate for mining.
 		if (block.getExplosionResistance(null) <= Blocks.obsidian.getExplosionResistance(null)) {
 			return true;
 		}
-		// WarpDrive.debugPrint("" + this + " Rejecting " + blockID + " at (" +
-		// x + ", " + y + ", " + z + ")");
+		// WarpDrive.debugPrint("" + this + " Rejecting " + blockID + " at (" + x + ", " + y + ", " + z + ")");
 		return false;
 	}
 
@@ -258,12 +244,9 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 				int qtyLeft = 0;
 				ItemStack stackLeft = null;
 				for (ItemStack stack : stacks) {
-					qtyLeft = putInGrid(stack);
-					/*
-					 * if (qtyLeft > 0) { // FIXME: untested stackLeft =
-					 * copyWithSize(stack, qtyLeft); qtyLeft =
-					 * putInPipe(stackLeft); }/*
-					 */
+					// put in AE network
+					// TODO: reimplement AE support
+					
 					if (qtyLeft > 0) {
 						stackLeft = copyWithSize(stack, qtyLeft);
 						qtyLeft = putInChest(findChest(), stackLeft);
@@ -341,56 +324,8 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 					isBlock.add(new ItemStack(block, 1, blockMeta));
 					return isBlock;
 				} else {
-					if (grid != null && AENetworkReady) {
-						IMEInventoryHandler cellArray = grid.getCellArray();
-						if (cellArray != null) {
-							int consume = isQuarry ? 15 : 1000;
-
-							IAEItemStack entryToAEIS1 = null;
-							long contained1 = 0;
-							if (WarpDriveConfig.AEExtra_fluidDrive != null) {
-								entryToAEIS1 = Util.createItemStack(new ItemStack(WarpDriveConfig.AEExtra_fluidDrive, consume, FluidRegistry
-										.getFluidID("deuterium")));
-								contained1 = cellArray.countOfItemType(entryToAEIS1);
-							}
-							IAEItemStack entryToAEIS2 = null;
-							long contained2 = 0;
-							if (WarpDriveConfig.IC2_fluidCell != null) {
-								entryToAEIS2 = Util
-										.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, consume, FluidRegistry.getFluidID("deuterium")));
-								contained2 = cellArray.countOfItemType(entryToAEIS2);
-							}
-							IAEItemStack entryToAEIS3 = null;
-							long contained3 = 0;
-							if (WarpDriveConfig.AS_deuteriumCell != 0) {
-								entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell, consume, FluidRegistry
-										.getFluidID("deuterium")));
-								contained3 = cellArray.countOfItemType(entryToAEIS3);
-							}
-
-							if (contained1 + contained2 + contained3 >= consume) {
-								if (contained1 > 0) {
-									cellArray.extractItems(entryToAEIS1);
-								}
-								if (contained2 > 0 && contained1 < consume) {
-									entryToAEIS2 = Util.createItemStack(new ItemStack(WarpDriveConfig.IC2_fluidCell, (int) (consume - contained2),
-											FluidRegistry.getFluidID("deuterium")));
-									cellArray.extractItems(entryToAEIS2);
-								}
-								if (contained3 > 0 && contained1 + contained2 < consume) {
-									entryToAEIS3 = Util.createItemStack(new ItemStack(WarpDriveConfig.AS_deuteriumCell,
-											(int) (consume - contained1 - contained2), FluidRegistry.getFluidID("deuterium")));
-									cellArray.extractItems(entryToAEIS3);
-								}
-
-								ArrayList<ItemStack> isBlock = new ArrayList<ItemStack>();
-								isBlock.add(new ItemStack(block, 1, blockMeta));
-								return isBlock;
-							}
-						}
-					} else {
-						// Missing AE connection
-					}
+					// TODO: implement fluid support through AE or tanks
+					WarpDrive.logger.severe("Fluids aren't supported yet, ML_DEUTERIUM_MUL_SILKTOUCH should be 0");
 				}
 			}
 		}
@@ -401,37 +336,6 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			e.printStackTrace();
 			return null;
 		}
-	}
-
-	private int putInGrid(ItemStack itemStackSource) {
-		int qtyLeft = itemStackSource.stackSize;
-		if (grid != null && AENetworkReady) {
-			IMEInventoryHandler cellArray = grid.getCellArray();
-			if (cellArray != null) {
-				IAEItemStack ret = cellArray.addItems(Util.createItemStack(itemStackSource));
-				if (ret != null) {
-					qtyLeft = (int) ret.getStackSize();
-				} else {
-					qtyLeft = 0;
-				}
-			}
-		}
-		return qtyLeft;
-	}
-
-	private int putInPipe(ItemStack itemStackSource) {
-		ItemStack itemStackLeft = itemStackSource.copy();
-		for (ForgeDirection direction : ForgeDirection.VALID_DIRECTIONS) {
-			TileEntity te = worldObj.getTileEntity(xCoord + direction.offsetX, yCoord + direction.offsetY, zCoord + direction.offsetZ);
-			if (te != null && te instanceof IItemConduit) {
-				WarpDrive.debugPrint("dumping to pipe");
-				itemStackLeft = ((IItemConduit) te).insertItem(direction.getOpposite(), itemStackLeft);
-				if (itemStackLeft == null) {
-					return 0;
-				}
-			}
-		}
-		return itemStackLeft.stackSize;
 	}
 
 	private int putInChest(IInventory inventory, ItemStack itemStackSource) {
@@ -507,15 +411,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 		z = zCoord;
 		block = worldObj.getBlock(x, currentLayer, z);
 		if (canDig(block, x, currentLayer, z)) {
-			if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-				// collects
-				// all
-				// blocks
-				// or
-				// only
-				// collect
-				// valuables
-				// blocks
+			if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 				valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 		}
@@ -529,15 +425,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			for (; x <= xmax; x++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-						// collects
-						// all
-						// blocks
-						// or
-						// only
-						// collect
-						// valuables
-						// blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -547,15 +435,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			for (; z <= zmax; z++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-						// collects
-						// all
-						// blocks
-						// or
-						// only
-						// collect
-						// valuables
-						// blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -565,15 +445,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			for (; x >= xmin; x--) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-						// collects
-						// all
-						// blocks
-						// or
-						// only
-						// collect
-						// valuables
-						// blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -583,15 +455,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			for (; z > zmin; z--) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-						// collects
-						// all
-						// blocks
-						// or
-						// only
-						// collect
-						// valuables
-						// blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
@@ -601,23 +465,14 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 			for (; x < xCoord; x++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry
-						// collects
-						// all
-						// blocks
-						// or
-						// only
-						// collect
-						// valuables
-						// blocks
+					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new Vector3(x, currentLayer, z));
 					}
 				}
 			}
 		}
 
-		// System.out.println("" + this + " Found " + valuablesInLayer.size() +
-		// " valuables");
+		// System.out.println("" + this + " Found " + valuablesInLayer.size() + " valuables");
 	}
 
 	private int getEnergyLevel() {
@@ -813,7 +668,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) throws Exception {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		if (methodName.equals("mine")) {
 			return mine(arguments);
@@ -871,75 +726,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE implements IGridNode
 		}
 		return state;
 	}
-
-	// Applied Energistics
-	@Override
-	public float getPowerDrainPerTick() {
-		return 1;
-	}
-
-	@Override
-	public void validate() {
-		super.validate();
-		MinecraftForge.EVENT_BUS.post(new GridTileLoadEvent(this, worldObj, getLocation()));
-	}
-
-	@Override
-	public void invalidate() {
-		super.invalidate();
-		MinecraftForge.EVENT_BUS.post(new GridTileUnloadEvent(this, worldObj, getLocation()));
-	}
-
-	@Override
-	public WorldCoord getLocation() {
-		return new WorldCoord(xCoord, yCoord, zCoord);
-	}
-
-	@Override
-	public boolean isValid() {
-		return true;
-	}
-
-	@Override
-	public void setPowerStatus(boolean hasPower) {
-		powerStatus = hasPower;
-	}
-
-	@Override
-	public boolean isPowered() {
-		return powerStatus;
-	}
-
-	@Override
-	public IGridInterface getGrid() {
-		return grid;
-	}
-
-	@Override
-	public void setGrid(IGridInterface parGrid) {
-		grid = parGrid;
-	}
-
-	@Override
-	public World getWorld() {
-		return worldObj;
-	}
-
-	@Override
-	public boolean coveredConnections() {
-		return true;
-	}
-
-	@Override
-	public void setNetworkReady(boolean isReady) {
-		AENetworkReady = isReady;
-	}
-
-	@Override
-	public boolean isMachineActive() {
-		return isMining();
-	}
-
+	
 	@Override
 	public String toString() {
 		return String.format("%s @ \'%s\' %d, %d, %d",
