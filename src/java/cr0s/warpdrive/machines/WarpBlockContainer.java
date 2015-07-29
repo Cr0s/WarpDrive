@@ -29,28 +29,38 @@ public abstract class WarpBlockContainer extends BlockContainer {
 		}
 	}
 
-	/*
-	 * FIXME untested
-	 *
-	 * @Override public boolean onBlockActivated(World world, int x, int y, int
-	 * z, EntityPlayer player, int par6, float par7, float par8, float par9) {
-	 * if (FMLCommonHandler.instance().getEffectiveSide().isClient()) { return
-	 * false; }
-	 *
-	 * boolean hasResponse = false; TileEntity te = world.getBlockTileEntity(x,
-	 * y, z); if(te != null && te instanceof IUpgradable) { IUpgradable
-	 * upgradable = (IUpgradable)te; ItemStack is =
-	 * player.inventory.getCurrentItem(); if(is != null) { Item i =
-	 * is.getItem(); if(i instanceof ItemWarpUpgrade) {
-	 * if(upgradable.takeUpgrade
-	 * (EnumUpgradeTypes.values()[is.getItemDamage()],false)) {
-	 * if(!player.capabilities.isCreativeMode)
-	 * player.inventory.decrStackSize(player.inventory.currentItem, 1);
-	 * player.addChatMessage("Upgrade accepted"); } else {
-	 * player.addChatMessage("Upgrade declined"); } hasResponse = true; } } }
-	 *
-	 * return hasResponse; } /*
-	 */
+	
+	// FIXME untested
+	 /*
+	@Override
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer player, int par6, float par7, float par8, float par9) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return false;
+		}
+
+		boolean hasResponse = false;
+		TileEntity te = world.getBlockTileEntity(x, y, z);
+		if (te != null && te instanceof IUpgradable) {
+			IUpgradable upgradable = (IUpgradable) te;
+			ItemStack is = player.inventory.getCurrentItem();
+			if (is != null) {
+				Item i = is.getItem();
+				if (i instanceof ItemWarpUpgrade) {
+					if (upgradable.takeUpgrade(EnumUpgradeTypes.values()[is.getItemDamage()], false)) {
+						if (!player.capabilities.isCreativeMode)
+							player.inventory.decrStackSize(player.inventory.currentItem, 1);
+						player.addChatMessage("Upgrade accepted");
+					} else {
+						player.addChatMessage("Upgrade declined");
+					}
+					hasResponse = true;
+				}
+			}
+		}
+
+		return hasResponse;
+	}
+	/**/
 
 	@Override
 	public void onNeighborBlockChange(World w, int x, int y, int z, Block b) {
