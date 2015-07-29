@@ -2,7 +2,7 @@ package cr0s.warpdrive.machines;
 
 
 
-public abstract class TileEntityAbstractLaser extends WarpChunkTE
+public abstract class TileEntityAbstractLaser extends WarpEnergyTE
 {
 
 }

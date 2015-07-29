@@ -220,17 +220,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		super.readFromNBT(tag);
 		xSize = tag.getInteger("xSize");
 		zSize = tag.getInteger("zSize");
-		defineMiningArea(xSize,zSize);
 
 		doLeaves = tag.getBoolean("doLeaves");
 		active   = tag.getBoolean("active");
 		treeTap  = tag.getBoolean("treetap");
 		silkTouchLeaves = tag.getBoolean("silkTouchLeaves");
-	}
-
-	@Override
-	public boolean shouldChunkLoad() {
-		return active;
 	}
 
 	// OpenComputer callback methods
@@ -262,7 +256,6 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				xSize = defSize;
 				zSize = defSize;
 			}
-			defineMiningArea(xSize,zSize);
 			return new Integer[] { xSize , zSize };
 		} else if (methodName.equals("leaves")) {
 			try {

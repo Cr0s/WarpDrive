@@ -10,9 +10,6 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fluids.IFluidBlock;
 import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
@@ -344,58 +341,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		return null;
 	}
 
-	protected void defineMiningArea(int xSize,int zSize)
-	{
-		int xmax, zmax, x1, x2, z1, z2;
-		int xmin, zmin;
-		x1 = xCoord + xSize / 2;
-		x2 = xCoord - xSize / 2;
-
-		if (x1 < x2)
-		{
-			xmin = x1;
-			xmax = x2;
-		}
-		else
-		{
-			xmin = x2;
-			xmax = x1;
-		}
-
-		z1 = zCoord + zSize / 2;
-		z2 = zCoord - zSize / 2;
-
-		if (z1 < z2)
-		{
-			zmin = z1;
-			zmax = z2;
-		}
-		else
-		{
-			zmin = z2;
-			zmax = z1;
-		}
-
-		defineMiningArea(xmin,zmin,xmax,zmax);
-	}
-
-	protected void defineMiningArea(int minX, int minZ, int maxX, int maxZ)
-	{
-		if(worldObj == null)
-			return;
-		ChunkCoordIntPair a = worldObj.getChunkFromBlockCoords(minX, minZ).getChunkCoordIntPair();
-		ChunkCoordIntPair b = worldObj.getChunkFromBlockCoords(maxX, maxZ).getChunkCoordIntPair();
-		if(minChunk != null && a.equals(minChunk))
-			if(maxChunk != null && b.equals(maxChunk))
-				return;
-		if(minChunk != null && b.equals(minChunk))
-			if(maxChunk != null && a.equals(maxChunk))
-				return;
-		minChunk = a;
-		maxChunk = b;
-		refreshLoading(true);
-	}
-
 	private static ItemStack copyWithSize(ItemStack itemStack, int newSize)
 	{
 		ItemStack ret = itemStack.copy();
@@ -403,7 +348,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		return ret;
 	}
 
-	//NBT DATA
+	// NBT DATA
 	@Override
 	public void readFromNBT(NBTTagCompound tag)
 	{
