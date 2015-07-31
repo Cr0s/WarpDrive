@@ -27,7 +27,6 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
-import appeng.api.AEApi;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -107,7 +106,6 @@ import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
 import cr0s.warpdrive.world.SpaceProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
 import dan200.computercraft.api.ComputerCraftAPI;
-import extracells.api.ECApi;
 
 @Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:IC2;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
 		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " required-after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
@@ -415,10 +413,6 @@ public class WarpDrive implements LoadingCallback {
 		if (WarpDriveConfig.isICLoaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
 			initIC2Recipes();
 		}
-		if (WarpDriveConfig.isAppliedEnergisticsLoaded && WarpDriveConfig.isThermalExpansionLoaded && WarpDriveConfig.isAtomicScienceLoaded
-				&& WarpDriveConfig.G_ENABLE_TDK_RECIPES) {
-			initAETERecipes();
-		}
 		if (WarpDriveConfig.G_ENABLE_VANILLA_RECIPES) {
 			initVanillaRecipes();
 		}
@@ -519,47 +513,6 @@ public class WarpDrive implements LoadingCallback {
 		// Helmet
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg", 'i', Items.iron_ingot, 'w', Blocks.wool, 'g',
 				Blocks.glass, 'c', componentItem.getIS(8)));
-	}
-
-	private static void initAETERecipes() {
-		ItemStack redstoneEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellReinforced", 1);
-		ItemStack resonantEnergycell = GameRegistry.findItemStack("ThermalExpansion", "cellResonant", 1);
-		ItemStack bucketEnder = GameRegistry.findItemStack("ThermalExpansion", "bucketEnder", 1);
-		ItemStack fluixCrystal = AEApi.instance().definitions().materials().fluixCrystal().maybeStack(1).get();
-		ItemStack quantumEntangledSingularity = AEApi.instance().definitions().materials().qESingularity().maybeStack(1).get();
-		ItemStack vibrantQuartzGlass = new ItemStack(AEApi.instance().definitions().blocks().quartzVibrantGlass().maybeBlock().get(), 1);
-		vibrantQuartzGlass.setItemDamage(4);
-		ItemStack antimatter = GameRegistry.findItemStack("ResonantInduction|Atomic", "antimatter", 1);
-		antimatter.setItemDamage(0);
-		ItemStack floppy = GameRegistry.findItemStack("ComputerCraft", "disk", 1);
-		ItemStack ultimateLappack = new ItemStack(WarpDriveConfig.GS_ultimateLappack);
-
-		// top = advancedCircuit, redstoneEnergycell, advancedCircuit
-		// middle = fluix crystal, advancedMachine, fluix crystal
-		// bottom = advancedCircuit, bucket Resonant ender, advancedCircuit
-		GameRegistry.addRecipe(new ItemStack(warpCore), "crc", "fmf", "cec", 'm', WarpDriveConfig.getIC2Item("advancedMachine"), 'c',
-				WarpDriveConfig.getIC2Item("advancedCircuit"), 'r', redstoneEnergycell, 'e', bucketEnder, 'f', fluixCrystal);
-
-		// top = advancedCircuit, floppy, advancedCircuit
-		// middle = advancedCircuit, advancedMachine, advancedCircuit
-		// bottom = advancedCircuit, fluix crystal, advancedCircuit
-		GameRegistry.addRecipe(new ItemStack(protocolBlock), "coc", "cmc", "cfc", 'm', WarpDriveConfig.getIC2Item("advancedMachine"), 'c',
-				WarpDriveConfig.getIC2Item("advancedCircuit"), 'o', floppy, 'f', fluixCrystal);
-
-		// top = Iridium plate, Resonant Energycell, Iridium plate
-		// middle = Singularity, 125 milligram antimatter, Singularity
-		// bottom = Iridium plate, Ultimate lappack, Iridium plate
-		GameRegistry.addRecipe(new ItemStack(powerReactorBlock), "iri", "sas", "ili", 'i', WarpDriveConfig.getIC2Item("iridiumPlate"), 's',
-				quantumEntangledSingularity, 'a', antimatter, 'l', ultimateLappack, 'r', resonantEnergycell);
-
-		// top = Advanced circuit, Advanced alloy, Advanced alloy
-		// middle = Advanced circuit, Warp drive laser, Vibrant quartz glass
-		// bottom = Advanced circuit, Certus quartz tank, Advanced alloy
-		ItemStack isMiningLaserBlock = new ItemStack(miningLaserBlock, 1, 0);
-		ItemStack isCertusQuartzTank = new ItemStack(ECApi.instance().blocks().certusTank().block(), 1, 0);
-
-		GameRegistry.addRecipe(new ItemStack(powerLaserBlock), "caa", "czg", "cta", 'c', WarpDriveConfig.getIC2Item("advancedCircuit"), 'a',
-				WarpDriveConfig.getIC2Item("advancedAlloy"), 'z', isMiningLaserBlock, 't', isCertusQuartzTank, 'g', vibrantQuartzGlass);
 	}
 
 	private static void initIC2Recipes() {

@@ -20,7 +20,6 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import powercrystals.netherores.NetherOresCore;
 import advsolar.api.ASPItemAPI;
-import appeng.api.AEApi;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.data.TransitionPlane;
 import dan200.computercraft.ComputerCraft;
@@ -32,10 +31,8 @@ public class WarpDriveConfig {
 	 * The variables which store whether or not individual mods are loaded
 	 */
 	public static boolean isForgeMultipartLoaded = false;
-	public static boolean isAppliedEnergisticsLoaded = false;
 	public static boolean isAdvSolPanelLoaded = false;
 	public static boolean isAtomicScienceLoaded = false;
-	public static boolean isAEExtraLoaded = false;
 	public static boolean isICBMLoaded = false;
 	public static boolean isMFFSLoaded = false;
 	public static boolean isGraviSuiteLoaded = false;
@@ -458,14 +455,6 @@ public class WarpDriveConfig {
 		if (isCCLoaded)
 			loadCC();
 
-		isAppliedEnergisticsLoaded = Loader.isModLoaded("AppliedEnergistics");
-		if (isAppliedEnergisticsLoaded)
-			loadAppliedEnergistics();
-
-		isAEExtraLoaded = Loader.isModLoaded("extracells");
-		if (isAEExtraLoaded)
-			loadAEExtra();
-
 		isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvSolPanelLoaded)
 			loadASP();
@@ -632,26 +621,6 @@ public class WarpDriveConfig {
 		}
 	}
 
-	private static void loadAppliedEnergistics() {
-		try {
-			minerOres.add(AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get());
-		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading AppliedEnergistics classes");
-			e.printStackTrace();
-			isAppliedEnergisticsLoaded = false;
-		}
-	}
-
-	private static void loadAEExtra() {
-		try {
-			//Should be references as ECApi.instanc()
-		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading AEExtra classes");
-			e.printStackTrace();
-			isAEExtraLoaded = false;
-		}
-	}
-
 	private static void loadASP() {
 		try {
 			spaceHelmets.add(ASPItemAPI.get("advancedSolarHelmet").getItem());
@@ -789,8 +758,6 @@ public class WarpDriveConfig {
 	public static Block getRandomOverworldBlock(Random random, Block def) {
 		if (random.nextInt(25) == 5) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		} else if (isAppliedEnergisticsLoaded && random.nextInt(750) == 1) {
-			return AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get();
 		} else if (random.nextInt(250) == 1) {
 			return Blocks.diamond_ore;
 		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {

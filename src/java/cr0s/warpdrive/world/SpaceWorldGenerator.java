@@ -6,7 +6,6 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
-import appeng.api.AEApi;
 import cpw.mods.fml.common.IWorldGenerator;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
@@ -75,12 +74,6 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			world.setBlock(x, y, z, Blocks.diamond_block, 0, 2);
 			if (random.nextBoolean()) {
 				generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
-			}
-		} else if (WarpDriveConfig.isAppliedEnergisticsLoaded && random.nextInt(1600) == 1) {// Quartz
-			// asteroid
-			generateAsteroidOfBlock(world, x, y, z, 3, 2, AEApi.instance().definitions().blocks().quartzOre().maybeBlock().get(), 0);
-			if (random.nextBoolean()) {
-				generateGasCloudOfColor(world, x, y, z, 4, 7, random.nextInt(12));
 			}
 		}
 	}

@@ -11,7 +11,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
-import appeng.api.AEApi;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 
@@ -631,23 +630,8 @@ public class WorldGenSmallShip extends WorldGenerator {
 				isDone = true;
 				break;// skipped
 
-				// AE Quarz
 			case 9:
-				if (WarpDriveConfig.isAppliedEnergisticsLoaded) {
-					res = AEApi.instance().definitions().materials().fluixCrystal().maybeStack(2 + rand.nextInt(22)).get();
-					isDone = true;
-				}
-
-				break;
-
-				// AE improved processor
 			case 10:
-				if (WarpDriveConfig.isAppliedEnergisticsLoaded) {
-					res = AEApi.instance().definitions().materials().advCard().maybeStack(res.stackSize = 1 + rand.nextInt(3)).get();
-					isDone = true;
-				}
-				break;
-
 				// Rocket launcher platform Tier3
 			case 11:
 				if (WarpDriveConfig.isICBMLoaded) {
