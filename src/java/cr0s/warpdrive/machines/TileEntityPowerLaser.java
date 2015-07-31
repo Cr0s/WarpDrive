@@ -23,11 +23,6 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 
 	String[] methodArray = { "energy", "hasReactor", "side", "sendLaser", "help" };
 
-	@Override
-	public boolean shouldChunkLoad() {
-		return false;
-	}
-
 	public TileEntityPowerReactor scanForReactor() {
 		reactor = null;
 		TileEntity te;

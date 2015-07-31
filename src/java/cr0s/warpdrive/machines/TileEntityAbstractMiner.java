@@ -175,7 +175,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		return false;
 	}
 
-	@SuppressWarnings("unused")
 	private boolean canDig(Block block, int x, int y, int z) {// not used
 		// ignore air & fluids
 		if (block == null || (worldObj.isAirBlock(x, y, z) || (block instanceof IFluidBlock))) {

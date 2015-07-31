@@ -125,11 +125,6 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	}
 
 	@Override
-	public boolean shouldChunkLoad() {
-		return false;
-	}
-
-	@Override
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.RM_MAX_ENERGY;
 	}
