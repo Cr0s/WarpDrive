@@ -13,9 +13,10 @@ import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTBase;
+import net.minecraft.nbt.NBTTagByteArray;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -250,10 +251,8 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 			return false;
 		}
 
-		byte localBlocks[] = new byte[size];
+		NBTTagList localBlocks = new NBTTagList();
 		byte localMetadata[] = new byte[size];
-		byte extraBlocks[] = new byte[size];
-		byte extraBlocksNibble[] = new byte[(int) Math.ceil(size / 2.0)];
 		boolean extra = false;
 
 		NBTTagList tileEntitiesList = new NBTTagList();
@@ -270,11 +269,9 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 						block = Blocks.air;
 					}
 
-					localBlocks[x + (y * length + z) * width] = (byte) block.getUnlocalizedName();
+					//Old coord calc [x + (y * length + z) * width]
+					localBlocks.appendTag(new NBTTagString(block.getUnlocalizedName()));
 					localMetadata[x + (y * length + z) * width] = (byte) worldObj.getBlockMetadata(core.minX + x, core.minY + y, core.minZ + z);
-					if ((extraBlocks[x + (y * length + z) * width] = (byte) (block >> 8)) > 0) {
-						extra = true;
-					}
 
 					if (!block.isAssociatedBlock(Blocks.air)) {
 						TileEntity te = worldObj.getTileEntity(core.minX + x, core.minY + y, core.minZ + z);
@@ -322,20 +319,9 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 			}
 		}
 
-		for (int i = 0; i < extraBlocksNibble.length; i++) {
-			if (i * 2 + 1 < extraBlocks.length) {
-				extraBlocksNibble[i] = (byte) ((extraBlocks[i * 2 + 0] << 4) | extraBlocks[i * 2 + 1]);
-			} else {
-				extraBlocksNibble[i] = (byte) (extraBlocks[i * 2 + 0] << 4);
-			}
-		}
-
 		schematic.setString("Materials", "Alpha");
-		schematic.setByteArray("Blocks", localBlocks);
+		schematic.setTag("Blocks", localBlocks);
 		schematic.setByteArray("Data", localMetadata);
-
-		if (extra)
-			schematic.setByteArray("AddBlocks", extraBlocksNibble);
 
 		schematic.setTag("Entities", new NBTTagList()); // don't save entities
 		schematic.setTag("TileEntities", tileEntitiesList);
@@ -466,25 +452,12 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 		currentDeployIndex = 0;
 
 		// Read blocks and TileEntities from NBT to internal storage array
-		byte localBlocks[] = schematic.getByteArray("Blocks");
+		NBTTagList localBlocks = (NBTTagList) schematic.getTag("Blocks");
 		byte localMetadata[] = schematic.getByteArray("Data");
-
-		byte extraBlocks[] = null;
-		byte extraBlocksNibble[] = null;
-		if (schematic.hasKey("AddBlocks")) {
-			extraBlocksNibble = schematic.getByteArray("AddBlocks");
-			extraBlocks = new byte[extraBlocksNibble.length * 2];
-			for (int i = 0; i < extraBlocksNibble.length; i++) {
-				extraBlocks[i * 2 + 0] = (byte) ((extraBlocksNibble[i] >> 4) & 0xF);
-				extraBlocks[i * 2 + 1] = (byte) (extraBlocksNibble[i] & 0xF);
-			}
-		} else if (schematic.hasKey("Add")) {
-			extraBlocks = schematic.getByteArray("Add");
-		}
 
 		// Load Tile Entities
 		NBTTagCompound[] tileEntities = new NBTTagCompound[blocksToDeployCount];
-		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", 0); //TODO: 0 is not corect
+		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", new NBTTagByteArray(new byte[0]).getId()); //TODO: 0 is not corect
 
 		for (int i = 0; i < tileEntitiesList.tagCount(); i++) {
 			NBTTagCompound teTag = tileEntitiesList.getCompoundTagAt(i);
@@ -505,18 +478,15 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 					jb.x = x;
 					jb.y = y;
 					jb.z = z;
-					jb.block = (localBlocks[index]) & 0xFF;
-					if (extraBlocks != null) {
-						jb.block |= ((extraBlocks[index]) & 0xFF) << 8;
-					}
+					jb.block = Block.getBlockFromName(localBlocks.getStringTagAt(index));
 					jb.blockMeta = (localMetadata[index]) & 0xFF;
 					jb.blockNBT = tileEntities[index];
 
-					if (jb.block != 0 && Block.blocksList[jb.block] != null) {
+					if (jb.block != null) {
 						if (tileEntities[index] == null) {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.block.getUnlocalizedName() + " (no tile entity)");
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " (no tile entity)");
 						} else {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + Block.blocksList[jb.block].getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
+							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
 						}
 
 						blocksToDeploy[index] = jb;
