@@ -187,19 +187,12 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 		// Search for warp cores above
 		for (int newY = yCoord + 1; newY <= 255; newY++) {
 			if (worldObj.getBlock(xCoord, newY, zCoord).isAssociatedBlock(WarpDrive.warpCore)) { // found
-				// warp
-				// core
-				// above
+				// warp core above
 				result = (TileEntityReactor) worldObj.getTileEntity(xCoord, newY, zCoord);
 
 				if (result != null) {
 					if (!result.validateShipSpatialParameters(reason)) { // If
-						// we
-						// can't
-						// refresh
-						// ship's
-						// spatial
-						// parameters
+						// we can't refresh ship's spatial parameters
 						result = null;
 					}
 				}
