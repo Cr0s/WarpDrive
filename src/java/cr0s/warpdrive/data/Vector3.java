@@ -184,6 +184,13 @@ public class Vector3 implements Cloneable {
 		return var2 * var2 + var4 * var4 + var6 * var6;
 	}
 
+	public double distanceTo_square(Entity entity) {
+		double var2 = entity.posX - this.x;
+		double var4 = entity.posY - this.y;
+		double var6 = entity.posZ - this.z;
+		return var2 * var2 + var4 * var4 + var6 * var6;
+	}
+
 	/**
 	 * Multiplies the vector by negative one.
 	 */
