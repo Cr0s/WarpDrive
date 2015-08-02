@@ -20,8 +20,4 @@ public class CommonProxy
     public void registerRenderers()
     {
     }
-
-    public void renderBeam(World world, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
-    {
-    }
 }
