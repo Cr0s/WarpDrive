@@ -1,27 +1,19 @@
 package cr0s.warpdrive.machines;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.util.List;
-
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.Packet;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.relauncher.Side;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.CloakedArea;
 import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -176,7 +168,11 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		
 		for (int i = START_LENGTH + 1; i < WarpDriveConfig.CD_MAX_CLOAKING_FIELD_SIDE; i++) {
 			if (worldObj.getBlock(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
-				sendLaserPacket(new Vector3(this).add(0.5), new Vector3(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).add(0.5), r, g, b, 110, 0, 100);
+				PacketHandler.sendBeamPacketToPlayersInArea(worldObj,
+						new Vector3(this).translate(0.5),
+						new Vector3(xCoord + i * dx, yCoord + i * dy, zCoord + i * dz).translate(0.5),
+						r, g, b, 110, 0,
+						AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
 			}
 		}
 	}	
@@ -228,7 +224,11 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 						g = 0f;
 				}
 				
-				sendLaserPacket(new Vector3(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]).add(0.5), new Vector3(xCoord + START_LENGTH * dx[j], yCoord + START_LENGTH * dy[j], zCoord + START_LENGTH * dz[j]).add(0.5), r, g, b, 110, 0, 100);
+				PacketHandler.sendBeamPacketToPlayersInArea(worldObj,
+					new Vector3(xCoord + START_LENGTH * dx[i], yCoord + START_LENGTH * dy[i], zCoord + START_LENGTH * dz[i]).translate(0.5),
+					new Vector3(xCoord + START_LENGTH * dx[j], yCoord + START_LENGTH * dy[j], zCoord + START_LENGTH * dz[j]).translate(0.5),
+					r, g, b, 110, 0,
+					AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
 			}
 		}
 	}
@@ -274,52 +274,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		
 		//System.out.println("" + this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
 		return consumeEnergy(energyToConsume, false);
-	}
-	
-	public void sendLaserPacket(Vector3 source, Vector3 dest, float r, float g, float b, int age, int energy, int radius) {
-		Side side = FMLCommonHandler.instance().getEffectiveSide();
-
-		if (side == Side.SERVER) {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(8);
-			DataOutputStream outputStream = new DataOutputStream(bos);
-
-			try {
-				// Write source vector
-				outputStream.writeDouble(source.x);
-				outputStream.writeDouble(source.y);
-				outputStream.writeDouble(source.z);
-				// Write target vector
-				outputStream.writeDouble(dest.x);
-				outputStream.writeDouble(dest.y);
-				outputStream.writeDouble(dest.z);
-				// Write r, g, b of laser
-				outputStream.writeFloat(r);
-				outputStream.writeFloat(g);
-				outputStream.writeFloat(b);
-				// Write age
-				outputStream.writeByte(age);
-				// Write energy value
-				outputStream.writeInt(energy);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-
-			//TODO: Needs to be re-done according to http://www.minecraftforge.net/forum/index.php/topic,20135.0.html
-			/*
-			PacketCustomPayload packet = new Packet250CustomPayload();
-			packet.channel = "WarpDriveBeam";
-			packet.data = bos.toByteArray();
-			packet.length = bos.size();
-			
-			// Send packet to all players within cloaked area
-			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ));
-			for (Entity e : list) {
-				if (e != null && e instanceof EntityPlayer) {
-					((EntityPlayerMP)e).playerNetServerHandler.sendPacketToPlayer(packet);
-				}
-			}
-			*/
-		}
 	}
 	
 	@Override

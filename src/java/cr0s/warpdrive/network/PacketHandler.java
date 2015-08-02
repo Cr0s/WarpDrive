@@ -2,11 +2,13 @@ package cr0s.warpdrive.network;
 
 import java.util.List;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -27,9 +29,11 @@ public class PacketHandler {
 		simpleNetworkManager.registerMessage(TargetingMessage.class , TargetingMessage.class , 2, Side.SERVER);
 		simpleNetworkManager.registerMessage(CloakMessage.class     , CloakMessage.class     , 3, Side.CLIENT);
     }
-    
-	// Beam effect sent client side
+	
+	// Beam effect sent to client side
 	public static void sendBeamPacket(World worldObj, Vector3 source, Vector3 target, float red, float green, float blue, int age, int energy, int radius) {
+		assert(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER);
+		
 		BeamEffectMessage beamMessage = new BeamEffectMessage(source, target, red, green, blue, age, energy);
 		
 		// small beam are sent relative to beam center
@@ -56,6 +60,19 @@ public class PacketHandler {
 						worldObj.provider.dimensionId, source.x, source.y, source.z, radius));
 				simpleNetworkManager.sendToAllAround(beamMessage, new TargetPoint(
 						worldObj.provider.dimensionId, target.x, target.y, target.z, radius));
+			}
+		}
+	}
+	
+	public static void sendBeamPacketToPlayersInArea(World worldObj, Vector3 source, Vector3 target, float red, float green, float blue, int age, int energy, AxisAlignedBB aabb) {
+		assert(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER);
+		
+		BeamEffectMessage beamMessage = new BeamEffectMessage(source, target, red, green, blue, age, energy);
+		// Send packet to all players within cloaked area
+		List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, aabb);
+		for (Entity entity : list) {
+			if (entity != null && entity instanceof EntityPlayerMP) {
+				PacketHandler.simpleNetworkManager.sendTo(beamMessage, (EntityPlayerMP) entity);
 			}
 		}
 	}
