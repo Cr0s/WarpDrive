@@ -12,10 +12,10 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.item.ItemReactorLaserFocus;
+import cr0s.warpdrive.network.PacketHandler;
 
 public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	private final int workRate = 10;

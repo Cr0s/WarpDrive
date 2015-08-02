@@ -8,10 +8,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-
 import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
-import cr0s.warpdrive.PacketHandler;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.network.PacketHandler;
 
 /**
  * Cloak manager stores cloaking devices covered areas

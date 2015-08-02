@@ -11,7 +11,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
-import cr0s.warpdrive.PacketHandler;
+import cr0s.warpdrive.network.PacketHandler;
 
 public class CloakedArea {
 	public int dimensionId = -666;
