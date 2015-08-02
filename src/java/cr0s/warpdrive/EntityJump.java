@@ -361,6 +361,8 @@ public class EntityJump extends Entity {
 			}
 			if (!planeValid) {
 				LocalProfiler.stop();
+				assert(closestTransitionPlane != null);
+				@SuppressWarnings("null")
 				String msg = "Ship is outside border, unable to reach space!\nClosest transition plane is ~" + closestPlaneDistance + " m away ("
 						+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
 						+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
