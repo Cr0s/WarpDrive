@@ -227,16 +227,6 @@ public class Vector3 implements Cloneable {
 		return translate;
 	}
 
-	@Deprecated
-	public Vector3 add(Vector3 amount) {
-		return translate(amount);
-	}
-
-	@Deprecated
-	public Vector3 add(double amount) {
-		return translate(amount);
-	}
-
 	public Vector3 subtract(Vector3 amount) {
 		return this.translate(amount.clone().invert());
 	}
