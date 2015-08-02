@@ -1,8 +1,6 @@
 package cr0s.warpdrive;
 
-import net.minecraft.world.World;
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.render.EntityCamera;
 import cr0s.warpdrive.world.EntitySphereGen;
 import cr0s.warpdrive.world.EntityStarCore;
