@@ -18,7 +18,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
-import powercrystals.netherores.NetherOresCore;
 import advsolar.api.ASPItemAPI;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.data.TransitionPlane;
@@ -476,8 +475,6 @@ public class WarpDriveConfig {
 			loadGraviSuite();
 
 		isNetherOresLoaded = Loader.isModLoaded("NetherOres");
-		if (isNetherOresLoaded)
-			loadNetherOres();
 
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
 		if (isThermalExpansionLoaded)
@@ -691,16 +688,6 @@ public class WarpDriveConfig {
 		}
 	}
 
-	private static void loadNetherOres() {
-		try {
-			//Nothing needs to be done
-		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading NetherOres classes");
-			e.printStackTrace();
-			isNetherOresLoaded = false;
-		}
-	}
-
 	private static void loadThermalExpansion() {
 		try {
 			// TEEnergyCell =
@@ -767,10 +754,8 @@ public class WarpDriveConfig {
 	}
 
 	public static Block getRandomNetherBlock(Random random, Block def) {
-		if (isICLoaded && (!isNetherOresLoaded) && (random.nextInt(10000) == 42)) {
+		if (isICLoaded && (random.nextInt(10000) == 42)) {
 			return WarpDrive.iridiumBlock;
-		} else if (isNetherOresLoaded && (random.nextInt(25) == 1)) {
-			return NetherOresCore.blockNetherOres[random.nextInt(NetherOresCore.blockNetherOres.length)];
 		} else if (random.nextInt(25) == 1) {
 			return Blocks.quartz_ore;
 		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
