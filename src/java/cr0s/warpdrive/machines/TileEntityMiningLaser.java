@@ -222,7 +222,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 		if (WarpDriveConfig.minerOres.contains(block)) {
 			return true;
 		}
-		// check default //TODO: i don't think resistance is appropriate for mining.
+		// check default (explosion resistance is used to test for force fields and reinforced blocks, basically preventing mining a base or ship) 
 		if (block.getExplosionResistance(null) <= Blocks.obsidian.getExplosionResistance(null)) {
 			return true;
 		}
@@ -244,9 +244,6 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 				int qtyLeft = 0;
 				ItemStack stackLeft = null;
 				for (ItemStack stack : stacks) {
-					// put in AE network
-					// TODO: reimplement AE support
-					
 					if (qtyLeft > 0) {
 						stackLeft = copyWithSize(stack, qtyLeft);
 						qtyLeft = putInChest(findChest(), stackLeft);
@@ -268,9 +265,8 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 					stop();
 				}
 			}
-			// standard harvest block effect //TODO: Update
-			// worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(),
-			// valuable.intY(), valuable.intZ(), block + (blockMeta << 12));
+			// standard harvest block effect
+			worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), Block.getIdFromBlock(block) + (blockMeta << 12));
 		}
 		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
 	}
