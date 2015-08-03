@@ -20,6 +20,11 @@ import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.data.EnumUpgradeTypes;
 
+@Optional.InterfaceList({
+	@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = "CoFHCore"),
+	@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "IC2API"),
+	@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "IC2API")
+})
 public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
@@ -207,11 +212,13 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     
     // IndustrialCraft IEnergySink interface
     @Override
+	@Optional.Method(modid = "IC2")
     public double getDemandedEnergy() {
         return Math.max(0.0D, convertInternalToEU(getMaxEnergyStored() - energyStored_internal));
     }
     
     @Override
+	@Optional.Method(modid = "IC2")
     public double injectEnergy(ForgeDirection from, double amount_EU, double voltage) {
         int leftover_internal = 0;
         energyStored_internal += convertEUtoInternal(amount_EU);
@@ -225,22 +232,26 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     }
     
     @Override
+	@Optional.Method(modid = "IC2")
     public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection from) {
         return canInputEnergy(from);
     }
     
     // IndustrialCraft IEnergySource interface
 	@Override
+	@Optional.Method(modid = "IC2")
 	public double getOfferedEnergy() {
 		return convertInternalToEU(getPotentialEnergyOutput());
 	}
 	
 	@Override
+	@Optional.Method(modid = "IC2")
 	public void drawEnergy(double amount_EU) {
 		energyOutputDone(convertEUtoInternal(amount_EU));
 	}
 	
 	@Override
+	@Optional.Method(modid = "IC2")
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection to) {
 		return canOutputEnergy(to);
 	}
@@ -248,6 +259,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     
     // ThermalExpansion IEnergyHandler interface
 	@Override
+	@Optional.Method(modid = "CoFHCore")
 	public int receiveEnergy(ForgeDirection from, int maxReceive_RF, boolean simulate) {
 		if (!canInputEnergy(from)) {
 			return 0;
@@ -268,6 +280,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	}
 	
 	@Override
+	@Optional.Method(modid = "CoFHCore")
 	public int extractEnergy(ForgeDirection from, int maxExtract_RF, boolean simulate) {
 		if (!canOutputEnergy(from)) {
 			return 0;
@@ -283,11 +296,13 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	}
 	
 	@Override
+	@Optional.Method(modid = "CoFHCore")
 	public boolean canConnectEnergy(ForgeDirection from) {
 		return (getMaxEnergyStored() != 0) && (canInputEnergy(from) || canOutputEnergy(from)); // FIXME deadlock risk
 	}
 	
 	@Override
+	@Optional.Method(modid = "CoFHCore")
 	public int getEnergyStored(ForgeDirection from) {
 		if (canConnectEnergy(from)) {
 			return convertInternalToRF(getEnergyStored());
@@ -296,12 +311,14 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	}
 	
 	@Override
+	@Optional.Method(modid = "CoFHCore")
 	public int getMaxEnergyStored(ForgeDirection from) {
 		return canConnectEnergy(from) ? convertInternalToRF(getMaxEnergyStored()) : 0;
 	}
 	
 	
 	// WarpDrive overrides for Thermal Expansion FIXME: are we really supposed to do this?
+	@Optional.Method(modid = "CoFHCore")
 	private void outputEnergy(ForgeDirection from, IEnergyHandler ieh) {
 		if (ieh == null || worldObj.getTileEntity(xCoord + from.offsetX, yCoord + from.offsetY, zCoord + from.offsetZ) == null) {
 			return;
@@ -317,6 +334,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 		}
 	}
 	
+	@Optional.Method(modid = "CoFHCore")
 	private void outputEnergy() {
 		for(ForgeDirection from: ForgeDirection.VALID_DIRECTIONS) {
 			if (TE_energyHandlers[from.ordinal()] != null) {
@@ -368,6 +386,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 		scanForEnergyHandlers();
 	}
 	
+	@Optional.Method(modid = "CoFHCore")
 	public void scanForEnergyHandlers() {
 		for(ForgeDirection from : ForgeDirection.VALID_DIRECTIONS) {
 			boolean iehFound = false;
