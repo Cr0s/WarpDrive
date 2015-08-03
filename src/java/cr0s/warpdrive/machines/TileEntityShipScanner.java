@@ -623,13 +623,11 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 	@Override
 	public int getSinkTier() {
-		// TODO Arbitrarily chosen value
 		return 3;
 	}
 
 	@Override
 	public int getSourceTier() {
-		// TODO Arbitrarily chosen value
 		return 3;
 	}
 }
