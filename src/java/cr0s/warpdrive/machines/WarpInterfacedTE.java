@@ -102,6 +102,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	}
 	
 	// Dirty cheap conversion methods
+	@Optional.Method(modid = "OpenComputers")
 	protected Object[] argumentsOCtoCC(Arguments args) {
 		Object[] arguments = new Object[args.count()];
 		int index = 0;
