@@ -123,7 +123,7 @@ public class JumpBlock {
 	}
 
 	// This code is a straight copy from Vanilla net.minecraft.world.World.setBlock to remove lighting computations
-	public boolean setBlockNoLight(World w, int x, int y, int z, Block block, int blockMeta, int par6) {
+	public static boolean setBlockNoLight(World w, int x, int y, int z, Block block, int blockMeta, int par6) {
 		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {
 			if (y < 0) {
 				return false;

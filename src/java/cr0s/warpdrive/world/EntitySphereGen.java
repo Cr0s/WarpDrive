@@ -140,7 +140,7 @@ public final class EntitySphereGen extends Entity {
 				break;
 			notifyFlag = (currentIndex % 1000 == 0 ? 2 : 0);
 			JumpBlock jb = blocks.get(currentIndex);
-			JumpBlock.mySetBlock(worldObj, jb.x, jb.y, jb.z, jb.block, jb.blockMeta, notifyFlag);
+			JumpBlock.setBlockNoLight(worldObj, jb.x, jb.y, jb.z, jb.block, jb.blockMeta, notifyFlag);
 			currentIndex++;
 		}
 
