@@ -107,13 +107,16 @@ import cr0s.warpdrive.world.SpaceProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
 import dan200.computercraft.api.ComputerCraftAPI;
 
-@Mod(modid = "WarpDrive", name = "WarpDrive", version = "1.3.0.0", dependencies = "required-after:IC2;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
+@Mod(modid = WarpDrive.MODID, name = "WarpDrive", version = WarpDrive.VERSION, dependencies = "required-after:IC2API;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
 		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
 		+ " after:AtomicScience;" + " after:ICBM|Explosion;" + " after:MFFS;" + " after:GraviSuite;" + " after:UndergroundBiomes;" + " after:NetherOres")
 /**
  * @author Cr0s
  */
 public class WarpDrive implements LoadingCallback {
+	public static final String MODID = "WarpDrive";
+	public static final String VERSION = "1.3.0.0";
+	
 	public static Block warpCore;
 	public static Block protocolBlock;
 	public static Block radarBlock;
@@ -162,7 +165,7 @@ public class WarpDrive implements LoadingCallback {
 
 	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
 
-	@Instance("WarpDrive")
+	@Instance(WarpDrive.MODID)
 	public static WarpDrive instance;
 	@SidedProxy(clientSide = "cr0s.warpdrive.client.ClientProxy", serverSide = "cr0s.warpdrive.CommonProxy")
 	public static CommonProxy proxy;
@@ -196,7 +199,7 @@ public class WarpDrive implements LoadingCallback {
 			logger.info("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
 		}
 
-		logger = Logger.getLogger("WarpDrive", (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client " : "Server "));
+		logger = Logger.getLogger(WarpDrive.MODID, (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client " : "Server "));
 	}
 
 	@EventHandler

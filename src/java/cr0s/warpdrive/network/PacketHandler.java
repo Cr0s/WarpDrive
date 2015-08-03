@@ -21,7 +21,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
-    public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel("WarpDrive");
+    public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(WarpDrive.MODID);
 
     public static void init() {
 		simpleNetworkManager.registerMessage(BeamEffectMessage.class, BeamEffectMessage.class, 0, Side.CLIENT);
