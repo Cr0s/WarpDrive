@@ -1,14 +1,11 @@
 package cr0s.warpdrive;
 
-import gravisuite.GraviSuite;
 import ic2.api.item.IC2Items;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
 
-import mffs.Content;
-import mods.immibis.ars.ARSMod;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -18,7 +15,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
-import advsolar.api.ASPItemAPI;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.data.TransitionPlane;
 import dan200.computercraft.ComputerCraft;
@@ -620,9 +616,9 @@ public class WarpDriveConfig {
 
 	private static void loadASP() {
 		try {
-			spaceHelmets.add(ASPItemAPI.get("advancedSolarHelmet").getItem());
-			spaceHelmets.add(ASPItemAPI.get("hybridSolarHelmet").getItem());
-			spaceHelmets.add(ASPItemAPI.get("ultimateSolarHelmet").getItem());
+			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:advanced_solar_helmet"));
+			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:hybrid_solar_helmet"));
+			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:ultimate_solar_helmet"));
 		} catch (Exception e) {
 			WarpDrive.logger.warning("WarpDriveConfig Error loading ASP classes");
 			e.printStackTrace();
@@ -665,7 +661,7 @@ public class WarpDriveConfig {
 
 	private static void loadMFFS() {
 		try {
-			forceFieldBlocks.add(Content.forceField());
+			forceFieldBlocks.add(Block.getBlockFromName("MFFS:FIXME_field"));	// FIXME
 			isMFFSLoaded = false;
 		} catch (Exception e) {
 			WarpDrive.logger.warning("WarpDriveConfig Error loading MFFS classes");
@@ -677,10 +673,10 @@ public class WarpDriveConfig {
 	private static void loadGraviSuite() {
 		try {
 
-			spaceHelmets.add(GraviSuite.ultimateSolarHelmet);
-			jetpacks.add(GraviSuite.advJetpack);
-			jetpacks.add(GraviSuite.graviChestPlate);
-			GS_ultimateLappack = GraviSuite.ultimateLappack;
+			spaceHelmets.add((Item) Item.itemRegistry.getObject("GraviSuite.ultimateSolarHelmet")); // FIXME
+			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.advJetpack")); // FIXME
+			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.graviChestPlate")); // FIXME
+			GS_ultimateLappack = (Item) Item.itemRegistry.getObject("GraviSuite.ultimateLappack"); // FIXME
 		} catch (Exception e) {
 			WarpDrive.logger.warning("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
@@ -703,7 +699,7 @@ public class WarpDriveConfig {
 	private static void loadAdvancedRepulsionSystems() {
 		try {
 
-			forceFieldBlocks.add(ARSMod.MFFSFieldblock);
+			forceFieldBlocks.add(Block.getBlockFromName("AdvancedRepulsionSystems:field"));
 		} catch (Exception e) {
 			WarpDrive.logger.warning("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
 			e.printStackTrace();
