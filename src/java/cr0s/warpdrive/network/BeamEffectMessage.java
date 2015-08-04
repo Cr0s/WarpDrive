@@ -1,5 +1,6 @@
 package cr0s.warpdrive.network;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 import io.netty.buffer.ByteBuf;
 import cpw.mods.fml.client.FMLClientHandler;
@@ -91,7 +92,7 @@ public class BeamEffectMessage implements IMessage, IMessageHandler<BeamEffectMe
 	@Override
 	public IMessage onMessage(BeamEffectMessage beamEffectMessage, MessageContext context) {
 		// skip in case player just logged in
-		if (context.getServerHandler().playerEntity.worldObj == null) {
+		if (Minecraft.getMinecraft().theWorld == null) {
 			WarpDrive.logger.error("WorldObj is null, ignoring beam packet");
 			return null;
 		}
@@ -102,7 +103,7 @@ public class BeamEffectMessage implements IMessage, IMessageHandler<BeamEffectMe
 				+ " age " + beamEffectMessage.age +" energy " + beamEffectMessage.energy);
 		}
 		
-        beamEffectMessage.handle(context.getServerHandler().playerEntity.worldObj);
+        beamEffectMessage.handle(Minecraft.getMinecraft().theWorld);
         
 		return null;	// no response
 	}

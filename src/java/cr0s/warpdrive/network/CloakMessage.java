@@ -3,9 +3,10 @@ package cr0s.warpdrive.network;
 import java.util.List;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -69,7 +70,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 		buffer.writeByte(tier);
 	}
 	
-	private void handle(EntityPlayerMP player) {
+	private void handle(EntityClientPlayerMP player) {
 		// Hide the area
 		if (!decloak) {
 			WarpDrive.debugPrint("Received cloak packet: Removing blocks...");
@@ -132,7 +133,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 	@Override
 	public IMessage onMessage(CloakMessage cloakMessage, MessageContext context) {
 		// skip in case player just logged in
-		if (context.getServerHandler().playerEntity.worldObj == null) {
+		if (Minecraft.getMinecraft().theWorld == null) {
 			WarpDrive.logger.error("WorldObj is null, ignoring cloak packet");
 			return null;
 		}
@@ -143,7 +144,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 				+ ") -> (" + cloakMessage.maxX + "; " + cloakMessage.maxY + "; " + cloakMessage.maxZ + ")");
 		}
 		
-		EntityPlayerMP player = context.getServerHandler().playerEntity;
+		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
 		if ( cloakMessage.minX <= player.posX && (cloakMessage.maxX + 1) > player.posX
 		  && cloakMessage.minY <= player.posY && (cloakMessage.maxY + 1) > player.posY
 		  && cloakMessage.minZ <= player.posZ && (cloakMessage.maxZ + 1) > player.posZ) {

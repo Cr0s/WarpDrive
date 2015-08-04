@@ -1,5 +1,6 @@
 package cr0s.warpdrive.network;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import io.netty.buffer.ByteBuf;
@@ -74,7 +75,7 @@ public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMess
 	@Override
 	public IMessage onMessage(FrequencyMessage frequencyMessage, MessageContext context) {
 		// skip in case player just logged in
-		if (context.getServerHandler().playerEntity.worldObj == null) {
+		if (Minecraft.getMinecraft().theWorld == null) {
 			WarpDrive.logger.error("WorldObj is null, ignoring frequency packet");
 			return null;
 		}
@@ -83,7 +84,7 @@ public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMess
 			WarpDrive.debugPrint("Received frequency packet: (" + frequencyMessage.x + ", " + frequencyMessage.y + ", " + frequencyMessage.z + ") frequency '" + frequencyMessage.frequency + "'");
 		}
 		
-		handle(context.getServerHandler().playerEntity.worldObj);
+		handle(Minecraft.getMinecraft().theWorld);
 		
 		return null;	// no response
 	}

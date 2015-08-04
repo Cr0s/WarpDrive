@@ -100,6 +100,7 @@ import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.machines.TileEntityShipScanner;
 import cr0s.warpdrive.machines.TileEntityTransporter;
 import cr0s.warpdrive.machines.WarpChunkTE;
+import cr0s.warpdrive.network.PacketHandler;
 import cr0s.warpdrive.render.CameraOverlay;
 import cr0s.warpdrive.world.BiomeSpace;
 import cr0s.warpdrive.world.HyperSpaceProvider;
@@ -206,6 +207,8 @@ public class WarpDrive implements LoadingCallback {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		// FIXME FMLInterModComms.sendMessage("Waila", "register", "cr0s.warpdrive.client.WailaHandler.callbackRegister");
+		
+		PacketHandler.init();
 	}
 
 	public static void debugPrint(String out) {
