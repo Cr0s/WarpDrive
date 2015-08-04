@@ -17,12 +17,12 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "2.0.0"
+version = "1.3.0"
 group= "cr0s.warpdrive" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "warpdrive"
 
 minecraft {
-    version = "1.7.10-10.13.4.1490-1.7.10"
+    version = "1.7.10-10.13.4.1492-1.7.10"
     runDir = "eclipse"
 }
 
