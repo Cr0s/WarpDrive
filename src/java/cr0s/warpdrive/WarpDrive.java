@@ -3,7 +3,6 @@ package cr0s.warpdrive;
 import java.util.List;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
