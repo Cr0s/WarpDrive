@@ -1,7 +1,5 @@
 package cr0s.warpdrive;
 
-import ic2.api.item.IC2Items;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
@@ -17,7 +15,7 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.data.TransitionPlane;
-import dan200.computercraft.ComputerCraft;
+// FIXME import dan200.computercraft.ComputerCraft;
 
 public class WarpDriveConfig {
 	private static Configuration config;
@@ -194,9 +192,9 @@ public class WarpDriveConfig {
 	// Transporter
 	public static int TR_MAX_ENERGY = 1000000;
 	public static boolean TR_RELATIVE_COORDS = true;
-	public static double TR_EU_PER_METRE = 100;
+	public static double TR_EU_PER_METRE = 100.0;
 	// public static double TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
-	public static double TR_MAX_BOOST_MUL = 4;
+	public static double TR_MAX_BOOST_MUL = 4.0;
 
 	// Power reactor
 	public static int PR_MAX_ENERGY = 100000000;
@@ -217,7 +215,7 @@ public class WarpDriveConfig {
 	public static int CL_RF_PER_CHUNKTICK = 320;
 
 	public static ItemStack getIC2Item(String id) {
-		return IC2Items.getItem(id);
+		return new ItemStack((Item) Item.itemRegistry.getObject("IC2:" + id));
 	}
 
 	public static void preInit(Configuration configIn) {
@@ -270,11 +268,11 @@ public class WarpDriveConfig {
 			int[] plane = config.get("TransitionPlane", name, defaultPlane,
 					"dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, SpaceCenterX, SpaceCenterZ").getIntList();
 			if (plane.length != 7) {
-				WarpDrive.logger.warning("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
+				WarpDrive.logger.warn("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
 				plane = defaultPlane.clone();
 			}
 			TransitionPlane newPlane = new TransitionPlane(plane[0], plane[1], plane[2], plane[3], plane[4], plane[5], plane[6]);
-			WarpDrive.logger.warning("Adding '" + name + "' as " + newPlane.toString());
+			WarpDrive.logger.info("Adding '" + name + "' as " + newPlane.toString());
 			G_TRANSITIONPLANES[index] = newPlane;
 		}
 		// FIXME: check transition planes aren't overlapping
@@ -401,8 +399,8 @@ public class WarpDriveConfig {
 		// Transporter
 		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
-		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100);
-		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getInt();
+		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100.0);
+		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getDouble(4.0);
 
 		// Power reactor
 		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
@@ -500,13 +498,13 @@ public class WarpDriveConfig {
 		scannerIgnoreBlocks.add(WarpDrive.iridiumBlock);
 
 		if (isICLoaded) {
-			scannerIgnoreBlocks.add(Block.getBlockFromItem(IC2Items.getItem("mfsUnit").getItem()));
-			scannerIgnoreBlocks.add(Block.getBlockFromItem(IC2Items.getItem("mfeUnit").getItem()));
-			scannerIgnoreBlocks.add(Block.getBlockFromItem(IC2Items.getItem("cesuUnit").getItem()));
-			scannerIgnoreBlocks.add(Block.getBlockFromItem(IC2Items.getItem("batBox").getItem()));
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:mfsUnit"));
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:mfeUnit"));
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:cesuUnit"));
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:batBox"));
 		}
 		if (isICBMLoaded) {
-			// scannerIgnoreBlocks.add(ICBM_Explosive); TODO: NO icbm yet
+			scannerIgnoreBlocks.add(Block.getBlockFromName("ICBM:explosive"));
 		}
 		if (isCCLoaded) {
 			scannerIgnoreBlocks.add(CC_Computer);
@@ -570,46 +568,47 @@ public class WarpDriveConfig {
 	}
 
 	private static void loadIC2() {
-		ASP = IC2Items.getItem("solarPanel");
-		spaceHelmets.add(IC2Items.getItem("hazmatHelmet").getItem());
-		spaceHelmets.add(IC2Items.getItem("quantumHelmet").getItem());
-		jetpacks.add(IC2Items.getItem("jetpack").getItem());
-		jetpacks.add(IC2Items.getItem("electricJetpack").getItem());
-		IC2_Air = IC2Items.getItem("airCell");
-		IC2_Empty = IC2Items.getItem("cell");
-		ItemStack rubberWood = IC2Items.getItem("rubberWood");
-		IC2_Resin = IC2Items.getItem("resin");
+		ASP = getIC2Item("solarPanel");
+		spaceHelmets.add(getIC2Item("hazmatHelmet").getItem());
+		spaceHelmets.add(getIC2Item("quantumHelmet").getItem());
+		jetpacks.add(getIC2Item("jetpack").getItem());
+		jetpacks.add(getIC2Item("electricJetpack").getItem());
+		IC2_Air = getIC2Item("airCell");
+		IC2_Empty = getIC2Item("cell");
+		ItemStack rubberWood = getIC2Item("rubberWood");
+		IC2_Resin = getIC2Item("resin");
 		if (rubberWood != null) {
 			IC2_RubberWood = rubberWood;
 		}
-		ItemStack ore = IC2Items.getItem("uraniumOre");
+		ItemStack ore = getIC2Item("uraniumOre");
 		if (ore != null)
 			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = IC2Items.getItem("copperOre");
+		ore = getIC2Item("copperOre");
 		if (ore != null)
 			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = IC2Items.getItem("tinOre");
+		ore = getIC2Item("tinOre");
 		if (ore != null)
 			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = IC2Items.getItem("leadOre");
+		ore = getIC2Item("leadOre");
 		if (ore != null)
 			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
 
-		minerOres.add(Block.getBlockFromItem(IC2Items.getItem("rubberWood").getItem()));
-		IC2_fluidCell = IC2Items.getItem("FluidCell").getItem();
+		minerOres.add(Block.getBlockFromItem(getIC2Item("rubberWood").getItem()));
+		IC2_fluidCell = getIC2Item("FluidCell").getItem();
 	}
 
 	private static void loadCC() {
 		try {
-
+/*
 			CC_Computer = ComputerCraft.Blocks.computer;
 			CC_peripheral = ComputerCraft.Blocks.peripheral;
 			CC_Floppy = ComputerCraft.Items.disk;
 			CCT_Turtle = ComputerCraft.Blocks.turtle;
 			CCT_Upgraded = ComputerCraft.Blocks.turtleExpanded;
 			CCT_Advanced = ComputerCraft.Blocks.turtleAdvanced;
+			/* FIXME */
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading ComputerCraft classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading ComputerCraft classes");
 			e.printStackTrace();
 		}
 	}
@@ -620,7 +619,7 @@ public class WarpDriveConfig {
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:hybrid_solar_helmet"));
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:ultimate_solar_helmet"));
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading ASP classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading ASP classes");
 			e.printStackTrace();
 			isAdvSolPanelLoaded = false;
 		}
@@ -636,14 +635,14 @@ public class WarpDriveConfig {
 			 */
 			isAtomicScienceLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading AS classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading AS classes");
 			isAtomicScienceLoaded = false;
 		}
 	}
 
 	private static void loadICBM() {
 		try {
-			/* TODO: Does not exist yet for 1.7 (im working on it)
+			/* TODO: Does not exist yet for 1.7
 			Class<?> z = Class.forName("icbm.core.ICBMCore");
 			commonWorldGenOres.add(((Block) z.getField("blockSulfurOre").get(null)), 0 });
 			z = Class.forName("icbm.explosion.ICBMExplosion");
@@ -653,7 +652,7 @@ public class WarpDriveConfig {
 			 */
 			isICBMLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading ICBM classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading ICBM classes");
 			e.printStackTrace();
 			isICBMLoaded = false;
 		}
@@ -664,7 +663,7 @@ public class WarpDriveConfig {
 			forceFieldBlocks.add(Block.getBlockFromName("MFFS:FIXME_field"));	// FIXME
 			isMFFSLoaded = false;
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading MFFS classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading MFFS classes");
 			e.printStackTrace();
 			isMFFSLoaded = false;
 		}
@@ -678,7 +677,7 @@ public class WarpDriveConfig {
 			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.graviChestPlate")); // FIXME
 			GS_ultimateLappack = (Item) Item.itemRegistry.getObject("GraviSuite.ultimateLappack"); // FIXME
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading GS classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading GS classes");
 			e.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
@@ -690,7 +689,7 @@ public class WarpDriveConfig {
 			// Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
 			// TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading ThermalExpansion classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading ThermalExpansion classes");
 			e.printStackTrace();
 			isThermalExpansionLoaded = false;
 		}
@@ -701,7 +700,7 @@ public class WarpDriveConfig {
 
 			forceFieldBlocks.add(Block.getBlockFromName("AdvancedRepulsionSystems:field"));
 		} catch (Exception e) {
-			WarpDrive.logger.warning("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
 			e.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}

@@ -1,7 +1,5 @@
 package cr0s.warpdrive;
 
-import ic2.api.item.IC2Items;
-
 import java.util.HashMap;
 
 import net.minecraft.block.Block;
@@ -237,8 +235,8 @@ public class SpaceEventHandler {
 			int check = MathHelper.ceiling_float_int(distance - 3.0F);
 
 			if (check > 0) {
-				if ((player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == IC2Items.getItem("quantumBoots"))
-						|| (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
+				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getIC2Item("quantumBoots")) // FIXME cache the value
+				  || (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
 					event.setCanceled(true); // Don't damage player
 				}
 			}
