@@ -133,7 +133,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 	public IMessage onMessage(CloakMessage cloakMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (context.getServerHandler().playerEntity.worldObj == null) {
-			WarpDrive.logger.severe("WorldObj is null, ignoring cloak packet");
+			WarpDrive.logger.error("WorldObj is null, ignoring cloak packet");
 			return null;
 		}
 		

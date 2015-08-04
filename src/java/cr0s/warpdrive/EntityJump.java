@@ -156,7 +156,7 @@ public class EntityJump extends Entity {
 		}
 
 		if (!on) {
-			WarpDrive.logger.fine(this + " Removing from onUpdate...");
+			WarpDrive.debugPrint(this + " Removing from onUpdate...");
 			worldObj.removeEntity(this);
 			return;
 		}
@@ -752,7 +752,7 @@ public class EntityJump extends Entity {
 						+ " blowPoints with massCorrection of " + String.format("%.2f", massCorrection) + " => strength "
 						+ String.format("%.2f", collisionStrength));
 			} else {
-				WarpDrive.logger.severe("WarpDrive error: unable to compute collision points, ignoring...");
+				WarpDrive.logger.error("WarpDrive error: unable to compute collision points, ignoring...");
 			}
 		}
 

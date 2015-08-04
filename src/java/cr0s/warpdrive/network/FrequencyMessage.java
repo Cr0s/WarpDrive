@@ -64,10 +64,10 @@ public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMess
 			} else if (te instanceof TileEntityLaser) {
 				((TileEntityLaser) te).setCameraFrequency(frequency);
 			} else {
-				WarpDrive.logger.warning("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
+				WarpDrive.logger.warn("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
 			}
 		} else {
-			WarpDrive.logger.warning("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
+			WarpDrive.logger.warn("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
 		}
  	}
 	
@@ -75,7 +75,7 @@ public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMess
 	public IMessage onMessage(FrequencyMessage frequencyMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (context.getServerHandler().playerEntity.worldObj == null) {
-			WarpDrive.logger.severe("WorldObj is null, ignoring frequency packet");
+			WarpDrive.logger.error("WorldObj is null, ignoring frequency packet");
 			return null;
 		}
 		

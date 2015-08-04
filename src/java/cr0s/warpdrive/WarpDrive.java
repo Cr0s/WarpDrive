@@ -1,7 +1,9 @@
 package cr0s.warpdrive;
 
 import java.util.List;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -190,27 +192,26 @@ public class WarpDrive implements LoadingCallback {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		WarpDriveConfig.preInit(new Configuration(event.getSuggestedConfigurationFile()));
-
+		
+		logger = event.getModLog();
+		
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 			Minecraft mc = Minecraft.getMinecraft();
 
 			normalFOV = mc.gameSettings.fovSetting;
 			normalSensitivity = mc.gameSettings.mouseSensitivity;
-			logger.info("[WarpDrive] FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
+			logger.info("FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
 		}
-
-		logger = Logger.getLogger(WarpDrive.MODID, (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client " : "Server "));
 	}
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		// FIXME FMLInterModComms.sendMessage("Waila", "register",
-		// "cr0s.warpdrive.client.WailaHandler.callbackRegister");
+		// FIXME FMLInterModComms.sendMessage("Waila", "register", "cr0s.warpdrive.client.WailaHandler.callbackRegister");
 	}
 
 	public static void debugPrint(String out) {
 		if (WarpDriveConfig.G_DEBUGMODE) {
-			logger.info(out);
+			logger.debug(out);
 		}
 	}
 

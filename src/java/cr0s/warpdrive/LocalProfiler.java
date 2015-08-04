@@ -35,6 +35,6 @@ public class LocalProfiler {
 
 		long self = (dt - stackElement.internal) / 1000; // in microseconds
 		long total = dt / 1000;
-		WarpDrive.logger.fine("Profiling '" + stackElement.name + "': " + (self / 1000.0F) + " ms, total: " + (total / 1000.0F) + " ms");
+		WarpDrive.logger.info("Profiling '" + stackElement.name + "': " + (self / 1000.0F) + " ms, total: " + (total / 1000.0F) + " ms");
 	}
 }

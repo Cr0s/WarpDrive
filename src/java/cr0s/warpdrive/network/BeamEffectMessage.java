@@ -92,7 +92,7 @@ public class BeamEffectMessage implements IMessage, IMessageHandler<BeamEffectMe
 	public IMessage onMessage(BeamEffectMessage beamEffectMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (context.getServerHandler().playerEntity.worldObj == null) {
-			WarpDrive.logger.severe("WorldObj is null, ignoring beam packet");
+			WarpDrive.logger.error("WorldObj is null, ignoring beam packet");
 			return null;
 		}
 		

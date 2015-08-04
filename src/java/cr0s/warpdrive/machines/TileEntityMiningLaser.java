@@ -321,7 +321,7 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 					return isBlock;
 				} else {
 					// TODO: implement fluid support through AE or tanks
-					WarpDrive.logger.severe("Fluids aren't supported yet, ML_DEUTERIUM_MUL_SILKTOUCH should be 0");
+					WarpDrive.logger.error("Fluids aren't supported yet, ML_DEUTERIUM_MUL_SILKTOUCH should be 0");
 				}
 			}
 		}

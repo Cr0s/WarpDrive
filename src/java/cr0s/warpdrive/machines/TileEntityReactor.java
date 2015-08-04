@@ -762,7 +762,7 @@ public class TileEntityReactor extends WarpEnergyTE {
 			if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
 				Jumpgate nearestGate = null;
 				if (WarpDrive.jumpgates == null) {
-					WarpDrive.logger.warning(this + " WarpDrive.instance.jumpGates is NULL!");
+					WarpDrive.logger.warn(this + " WarpDrive.instance.jumpGates is NULL!");
 				} else {
 					nearestGate = WarpDrive.jumpgates.findNearestGate(xCoord, yCoord, zCoord);
 				}
