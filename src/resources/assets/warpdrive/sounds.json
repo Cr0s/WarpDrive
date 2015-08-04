@@ -6,5 +6,5 @@
   "midlaser": {"category": "master","sounds": [{"name": "midlaser","stream": false}]},
   "lowlaser": {"category": "master","sounds": [{"name": "lowlaser","stream": false}]},
   "cloak": {"category": "master","sounds": [{"name": "cloak","stream": false}]},
-  "decloak": {"category": "master","sounds": [{"name": "decloak","stream": false}]},
+  "decloak": {"category": "master","sounds": [{"name": "decloak","stream": false}]}
 }
