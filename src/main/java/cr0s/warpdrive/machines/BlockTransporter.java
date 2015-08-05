@@ -12,6 +12,7 @@ public class BlockTransporter extends WarpBlockContainer {
 
 	public BlockTransporter(Material par2Material) {
 		super(par2Material);
+		setBlockName("warpdrive.machines.Transporter");
 	}
 
 	@Override

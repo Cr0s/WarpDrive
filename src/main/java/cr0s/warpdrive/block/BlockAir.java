@@ -24,6 +24,7 @@ public class BlockAir extends Block
 	public BlockAir() {
 		super(Material.air);
 		setHardness(0.0F);
+		setBlockName("warpdrive.blocks.Air");
 	}
 
 	@Override

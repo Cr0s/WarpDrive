@@ -12,6 +12,7 @@ public class BlockPowerStore extends WarpBlockContainer {
 	private IIcon iconBuffer;
 
 	public BlockPowerStore() {
+		setBlockName("warpdrive.power.Store");
 	}
 
 	@Override

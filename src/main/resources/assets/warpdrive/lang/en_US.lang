@@ -22,6 +22,7 @@ tile.warpdrive.blocks.Air.name=Air Block
 tile.warpdrive.blocks.Gas.name=Gas Block
 tile.warpdrive.blocks.WarpIsolation.name=Warp-field Isolation Block
 tile.warpdrive.blocks.IridiumBlock.name=Iridium Block
+tile.warpdrive.blocks.TransportBeacon.name=Transport Beacon
 
 tile.warpdrive.decorative.Plain.name=Plain Block
 tile.warpdrive.decorative.Energized.name=Energized Block

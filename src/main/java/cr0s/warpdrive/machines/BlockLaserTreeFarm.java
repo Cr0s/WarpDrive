@@ -20,6 +20,7 @@ public class BlockLaserTreeFarm extends BlockContainer {
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
+		this.setBlockName("warpdrive.machines.LaserTreeFarm");
 	}
 
 	@Override

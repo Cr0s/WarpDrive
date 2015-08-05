@@ -11,6 +11,7 @@ public class BlockPowerReactor extends WarpBlockContainer {
 
 	public BlockPowerReactor() {
 		super();
+		setBlockName("warpdrive.power.Reactor");
 	}
 
 	@Override

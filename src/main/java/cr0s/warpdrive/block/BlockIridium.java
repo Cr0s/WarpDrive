@@ -10,30 +10,31 @@ import cr0s.warpdrive.WarpDrive;
 
 public class BlockIridium extends Block
 {
-    public BlockIridium()
-    {
-        super(Material.rock);
-        setHardness(0.8F);
+	public BlockIridium()
+	{
+		super(Material.rock);
+		setHardness(0.8F);
 		setResistance(150 * 4);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
-    }
+		setBlockName("warpdrive.blocks.IridiumBlock");
+	}
 
-    @Override
-    public void registerBlockIcons(IIconRegister par1IconRegister)
-    {
-        this.blockIcon = par1IconRegister.registerIcon("warpdrive:iridiumSide");
-    }
+	@Override
+	public void registerBlockIcons(IIconRegister par1IconRegister)
+	{
+		this.blockIcon = par1IconRegister.registerIcon("warpdrive:iridiumSide");
+	}
 
-    @Override
-    public Item getItemDropped(int var1, Random var2, int var3)
-    {
-        return Item.getItemFromBlock(this);
-    }
+	@Override
+	public Item getItemDropped(int var1, Random var2, int var3)
+	{
+		return Item.getItemFromBlock(this);
+	}
 
-    @Override
-    public int quantityDropped(Random par1Random)
-    {
-        return 1;
-    }
+	@Override
+	public int quantityDropped(Random par1Random)
+	{
+		return 1;
+	}
 }

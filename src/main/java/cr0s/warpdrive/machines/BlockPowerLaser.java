@@ -10,6 +10,7 @@ public class BlockPowerLaser extends WarpBlockContainer {
 
 	public BlockPowerLaser() {
 		setResistance(100.0F);
+		setBlockName("warpdrive.power.Laser");
 	}
 
 	@Override

@@ -27,6 +27,7 @@ public class BlockDecorative extends Block {
 		setHardness(0.5f);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.warpdriveTab);
+		setBlockName("warpdrive.decorative.Plain");
 	}
 
 	public boolean isValidDamage(int damage) {
