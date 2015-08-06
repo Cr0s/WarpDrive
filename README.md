@@ -17,4 +17,4 @@ See mcmod.info for credits
 Installation
 ============
 1. Download WarpDrive.jar from Downloads and put it in your mods folder
-3. You need to have RoFHCore and IC2 installed to run. You also need either ComputerCraft or OpenComputers
+3. You need to have CoFHCore and IC2 installed to run. You also need either ComputerCraft or OpenComputers
