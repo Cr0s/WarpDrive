@@ -14,21 +14,7 @@ See mcmod.info for credits
 
 
 
-
-Warp Drive for 1.6
-=====================
-
-Minecraft forum:
-   http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
-   
-Mod Showcase:
-   https://www.youtube.com/watch?v=9pUSZPEMc1g
-   
-Wiki:
-   http://wiki.kubach.tk/
-
 Installation
 ============
-1. Download fresh build: http://kubach.tk/1.6.4/WarpDrive.zip
-2. Download fresh Core build: http://kubach.tk/1.6.4/WarpDriveCore.jar
-3. Install last version of IC2, Applied Energistics and Computer Craft
+1. Download WarpDrive.jar from Downloads and put it in your mods folder
+3. You need to have RoFHCore and IC2 installed to run. You also need either ComputerCraft or OpenComputers
