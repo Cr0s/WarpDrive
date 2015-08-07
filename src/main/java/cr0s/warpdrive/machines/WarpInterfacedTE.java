@@ -25,7 +25,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	WarpInterfacedTE() {
 		super();
 		if (Loader.isModLoaded("OpenComputers")) {
-			OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+			OC_constructor();
 		}
 	}
 	
@@ -169,6 +169,11 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	}
 	
 	// OpenComputers methods
+	@Optional.Method(modid = "OpenComputers")
+	public void OC_constructor() {
+		OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+	}
+	
 	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public Node node() {
