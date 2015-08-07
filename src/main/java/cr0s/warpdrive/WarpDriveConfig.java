@@ -50,7 +50,7 @@ public class WarpDriveConfig {
 
 	public static Item CC_Floppy;
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
-	public static ItemStack ASP;
+	public static ItemStack IC2_solarPanel;
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
 	public static Item GS_ultimateLappack;
@@ -568,7 +568,7 @@ public class WarpDriveConfig {
 	}
 
 	private static void loadIC2() {
-		ASP = getIC2Item("solarPanel");
+		IC2_solarPanel = getIC2Item("solarPanel");
 		spaceHelmets.add(getIC2Item("hazmatHelmet").getItem());
 		spaceHelmets.add(getIC2Item("quantumHelmet").getItem());
 		jetpacks.add(getIC2Item("jetpack").getItem());
