@@ -1,11 +1,12 @@
 package cr0s.warpdrive.machines;
 
+import java.util.HashMap;
+
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
-
-import java.util.HashMap;
+import cofh.api.energy.IEnergyHandler;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -14,9 +15,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.ForgeDirection;
-import cofh.api.energy.IEnergyHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.WarpDriveConfig;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.data.EnumUpgradeTypes;
 
@@ -32,9 +33,17 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	private static final double RF_PER_INTERNAL = 1800.0D / 437.5D;
 	
 	private int scanTickCount = -1;
-	private IEnergyHandler[] TE_energyHandlers = new IEnergyHandler[ForgeDirection.VALID_DIRECTIONS.length];
+	
+	private Object[] cofhEnergyHandlers;
+	
 	protected HashMap<EnumUpgradeTypes,Integer> upgrades = new HashMap<EnumUpgradeTypes,Integer>();
  	
+	public WarpEnergyTE() {
+		if (WarpDriveConfig.isThermalExpansionLoaded) {
+			this.RF_initialiseAPI();
+		}
+	}
+	
 	public Object[] getUpgrades()
 	{
 		Object[] retVal = new Object[EnumUpgradeTypes.values().length];
@@ -175,25 +184,25 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
         }
         
         // IndustrialCraft2
-        if (!addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
+        if (WarpDriveConfig.isICLoaded) {
+        	IC2_addToEnergyNet();
         }
         
         // Thermal Expansion
-		scanTickCount++;
-		if(scanTickCount >= 20) {
-			scanTickCount = 0;
-			scanForEnergyHandlers();
-		}
-		outputEnergy();
+        if (WarpDriveConfig.isThermalExpansionLoaded) {
+			scanTickCount++;
+			if(scanTickCount >= 20) {
+				scanTickCount = 0;
+				scanForEnergyHandlers();
+			}
+			outputEnergy();
+        }
     }
 
     @Override
     public void onChunkUnload() {
-        if (addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
+        if (WarpDriveConfig.isICLoaded) {
+        	IC2_removeFromEnergyNet();
         }
         
         super.onChunkUnload();
@@ -201,9 +210,8 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 
     @Override
     public void invalidate() {
-        if (addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
+        if (WarpDriveConfig.isICLoaded) {
+        	IC2_removeFromEnergyNet();
         }
         
         super.invalidate();
@@ -255,6 +263,23 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection to) {
 		return canOutputEnergy(to);
 	}
+	
+	@Optional.Method(modid = "IC2")
+	private void IC2_addToEnergyNet() {
+        if (!addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+            addedToEnergyNet = true;
+        }
+	}
+	
+	@Optional.Method(modid = "IC2")
+	private void IC2_removeFromEnergyNet() {
+        if (addedToEnergyNet) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            addedToEnergyNet = false;
+        }
+	}
+
 	
     
     // ThermalExpansion IEnergyHandler interface
@@ -337,10 +362,15 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	@Optional.Method(modid = "CoFHCore")
 	private void outputEnergy() {
 		for(ForgeDirection from: ForgeDirection.VALID_DIRECTIONS) {
-			if (TE_energyHandlers[from.ordinal()] != null) {
-				outputEnergy(from, TE_energyHandlers[from.ordinal()]);
+			if (cofhEnergyHandlers[from.ordinal()] != null) {
+				outputEnergy(from, (IEnergyHandler) cofhEnergyHandlers[from.ordinal()]);
 			}
 		}
+	}
+	
+	@Optional.Method(modid = "CoFHCore")
+	private void RF_initialiseAPI() {
+		cofhEnergyHandlers = new IEnergyHandler[ForgeDirection.VALID_DIRECTIONS.length];
 	}
 	
 	
@@ -383,11 +413,13 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     // WarpDrive overrides
 	@Override
 	public void updatedNeighbours() {
-		scanForEnergyHandlers();
+		if (WarpDriveConfig.isThermalExpansionLoaded) {
+			scanForEnergyHandlers();
+		}
 	}
 	
 	@Optional.Method(modid = "CoFHCore")
-	public void scanForEnergyHandlers() {
+	private void scanForEnergyHandlers() {
 		for(ForgeDirection from : ForgeDirection.VALID_DIRECTIONS) {
 			boolean iehFound = false;
 			if (canConnectEnergy(from)) {
@@ -396,12 +428,12 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 					IEnergyHandler ieh = (IEnergyHandler)te;
 					if (ieh.canConnectEnergy(from.getOpposite())) {
 						iehFound = true;
-						TE_energyHandlers[from.ordinal()] = ieh;
+						cofhEnergyHandlers[from.ordinal()] = ieh;
 					}
 				}
 			}
 			if (!iehFound) {
-				TE_energyHandlers[from.ordinal()] = null;
+				cofhEnergyHandlers[from.ordinal()] = null;
 			}
 		}
 	}
