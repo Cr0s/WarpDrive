@@ -12,7 +12,7 @@ import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class WorldGenSmallShip extends WorldGenerator {
 	private boolean corrupted;

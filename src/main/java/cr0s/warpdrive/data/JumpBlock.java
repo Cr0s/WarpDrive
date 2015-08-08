@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class JumpBlock {
 	public Block block;

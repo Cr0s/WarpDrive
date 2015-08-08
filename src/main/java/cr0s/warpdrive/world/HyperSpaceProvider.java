@@ -13,7 +13,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class HyperSpaceProvider extends WorldProvider {
 	public int exitXCoord;

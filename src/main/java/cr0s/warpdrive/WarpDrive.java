@@ -49,6 +49,7 @@ import cr0s.warpdrive.command.GenerateCommand;
 import cr0s.warpdrive.command.InvisibleCommand;
 import cr0s.warpdrive.command.JumpgateCommand;
 import cr0s.warpdrive.command.SpaceTpCommand;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CamRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;

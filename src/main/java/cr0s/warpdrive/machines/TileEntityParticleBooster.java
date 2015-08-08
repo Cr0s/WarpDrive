@@ -3,7 +3,7 @@ package cr0s.warpdrive.machines;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class TileEntityParticleBooster extends WarpEnergyTE {
 	private int ticks = 0;

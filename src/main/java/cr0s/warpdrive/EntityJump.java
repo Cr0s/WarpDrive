@@ -30,6 +30,7 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.MovingEntity;
 import cr0s.warpdrive.data.TransitionPlane;

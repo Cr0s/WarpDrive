@@ -18,6 +18,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cr0s.warpdrive.api.IBreathingHelmet;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
 /**

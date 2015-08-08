@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import net.minecraft.util.AxisAlignedBB;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.WarpDriveConfig;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
 
