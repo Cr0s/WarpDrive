@@ -108,9 +108,8 @@ import cr0s.warpdrive.world.HyperSpaceProvider;
 import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
 import cr0s.warpdrive.world.SpaceProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
-import dan200.computercraft.api.ComputerCraftAPI;
 
-@Mod(modid = WarpDrive.MODID, name = "WarpDrive", version = WarpDrive.VERSION, dependencies = "required-after:IC2API;" + " required-after:CoFHCore;" + " after:ComputerCraft;"
+@Mod(modid = WarpDrive.MODID, name = "WarpDrive", version = WarpDrive.VERSION, dependencies = "after:IC2API;" + " after:CoFHCore;" + " after:ComputerCraft;"
 		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
 		+ " after:AtomicScience;" + " after:ICBM|Explosion;" + " after:MFFS;" + " after:GraviSuite;" + " after:UndergroundBiomes;" + " after:NetherOres")
 /**
@@ -337,10 +336,12 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityTransporter.class, "transporter");
 
 		// REACTOR MONITOR
-		reactorMonitorBlock = new BlockLaserReactorMonitor(Material.rock);
-
-		GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
-		GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class, "reactorMonitor");
+		if (WarpDriveConfig.isICLoaded) {
+			reactorMonitorBlock = new BlockLaserReactorMonitor(Material.rock);
+			
+			GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
+			GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class, "reactorMonitor");
+		}
 
 		// TRANSPORT BEACON
 		transportBeaconBlock = new BlockTransportBeacon();
@@ -370,8 +371,10 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(decorativeBlock, ItemBlockDecorative.class, "decorative");
 
 		// REACTOR LASER FOCUS
-		reactorLaserFocusItem = new ItemReactorLaserFocus();
-		GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
+		if (WarpDriveConfig.isICLoaded) {
+			reactorLaserFocusItem = new ItemReactorLaserFocus();
+			GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
+		}
 
 		// COMPONENT ITEMS
 		componentItem = new ItemWarpComponent();
@@ -406,7 +409,7 @@ public class WarpDrive implements LoadingCallback {
 
 		if (WarpDriveConfig.isCCLoaded) {
 			peripheralHandler = new WarpDrivePeripheralHandler();
-			ComputerCraftAPI.registerPeripheralProvider(peripheralHandler);
+			peripheralHandler.register();
 		}
 	}
 
