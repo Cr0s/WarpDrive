@@ -1,7 +1,5 @@
 package cr0s.warpdrive.machines;
 
-import ic2.api.energy.tile.IEnergyTile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -285,15 +283,13 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 								}
 
 								// Remove energy from energy storages
-								if (te instanceof IEnergyTile) {
-									// IC2
-									if (tileTag.hasKey("energy")) {
-										tileTag.setInteger("energy", 0);
-									}
-									// Gregtech
-									if (tileTag.hasKey("mStoredEnergy")) {
-										tileTag.setInteger("mStoredEnergy", 0);
-									}
+								// IC2
+								if (tileTag.hasKey("energy")) {
+									tileTag.setInteger("energy", 0);
+								}
+								// Gregtech
+								if (tileTag.hasKey("mStoredEnergy")) {
+									tileTag.setInteger("mStoredEnergy", 0);
 								}
 
 								// Transform TE's coordinates from local axis to
