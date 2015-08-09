@@ -8,6 +8,13 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 public class TileEntityParticleBooster extends WarpEnergyTE {
 	private int ticks = 0;
 
+	public TileEntityParticleBooster() {
+		peripheralName = "warpdriveParticleBooster";
+		methodsArray = new String[] {
+			"getEnergyLevel"
+		};
+	}
+	
 	@Override
 	public void updateEntity() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
