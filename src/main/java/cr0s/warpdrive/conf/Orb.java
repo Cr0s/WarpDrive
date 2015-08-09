@@ -1,13 +1,17 @@
 package cr0s.warpdrive.conf;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.world.World;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import cr0s.warpdrive.WarpDrive;
 
 public abstract class Orb extends DeployableStructure implements XmlRepresentable {
 
@@ -22,7 +26,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 	}
 
 	@Override
-	public void saveToXmlElement(Element e) {
+	public void saveToXmlElement(Element e, Document d) {
 		// TODO Auto-generated method stub
 
 	}
@@ -37,15 +41,22 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 		private int radiusInner, radiusOuter;
 
-		private HashMap<Integer, String> compositionBlocks;
+		private HashMap<String, Integer> compositionBlocks;
+
+		private Block[] blockWeights;
+
+		private String name;
+
+		private int totalWeight;
 
 		public OrbShell() {
-			compositionBlocks = new HashMap<Integer, String>();
+			compositionBlocks = new HashMap<String, Integer>();
+			totalWeight = 1;
+			blockWeights = new Block[0];
 		}
 
-		public Block getNextBlock() {
-			return null;
-
+		public Block getNextBlock(Random r) {
+			return blockWeights[r.nextInt(totalWeight)];
 		}
 
 		public int getRadiusInner() {
@@ -53,6 +64,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 		}
 
 		public void setRadiusInner(int radiusInner) {
+
 			this.radiusInner = radiusInner;
 		}
 
@@ -65,26 +77,78 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 		}
 
 		@Override
-		public void loadFromXmlElement(Element e) {
+		public void loadFromXmlElement(Element e) throws InvalidXmlException {
 
-			radiusInner = Integer.parseInt(e.getAttribute("radiusInner"));
-			radiusOuter = Integer.parseInt(e.getAttribute("radiusOuter"));
+			WarpDrive.logger.info("Loading shell " + e.getAttribute("name"));
+			name = e.getAttribute("name");
 
-			if (radiusInner < 1 || radiusInner > radiusOuter)
-				throw new IllegalArgumentException("Orb creation arguments are incorrect!");
+			totalWeight = 0;
 
-			NodeList compBlocks = e.getElementsByTagName("CompositionBlock");
-			for (int i = 0; i < compBlocks.getLength(); i++) {
-				Element tmp = (Element) compBlocks.item(i);
-				compositionBlocks.put(Integer.parseInt(tmp.getAttribute("weight")), tmp.getAttribute("block"));
+			try {
+				radiusInner = Integer.parseInt(e.getAttribute("radiusInner"));
+				radiusOuter = Integer.parseInt(e.getAttribute("radiusOuter"));
+
+				if (radiusInner < 1 || radiusInner > radiusOuter)
+					throw new InvalidXmlException("Orb creation arguments are incorrect!");
+
+				NodeList compBlocks = e.getElementsByTagName("CompositionBlock");
+				for (int i = 0; i < compBlocks.getLength(); i++) {
+					Element tmp = (Element) compBlocks.item(i);
+
+					if (!tmp.hasAttribute("weight"))
+						throw new InvalidXmlException("Shell is missing weight at place " + i + "!");
+
+					if (!tmp.hasAttribute("block"))
+						throw new InvalidXmlException("Shell is missing block at place " + i + "!");
+
+					int tmpWeight = Integer.parseInt(tmp.getAttribute("weight"));
+
+					if (tmpWeight < 1)
+						throw new InvalidXmlException("Weight is less than 1 at place " + i + "!");
+
+					String tmpBlock = tmp.getAttribute("block");
+
+					if (Block.getBlockFromName(tmpBlock) == null)
+						throw new InvalidXmlException("Shell has unknown block at place " + i + "!");
+
+					totalWeight += tmpWeight;
+
+					compositionBlocks.put(tmpBlock, tmpWeight);
+				}
+
+				int index = 0;
+				blockWeights = new Block[totalWeight];
+
+				for (Entry<String, Integer> compBlock : compositionBlocks.entrySet()) {
+
+					Block bl = Block.getBlockFromName(compBlock.getKey());
+
+					for (int i = 0; i < compBlock.getValue(); i++) {
+						blockWeights[index++] = bl;
+					}
+
+				}
+
+			} catch (NumberFormatException ex) {
+				throw new InvalidXmlException("Invalid integer in shell " + name + "!");
 			}
 
 		}
 
 		@Override
-		public void saveToXmlElement(Element e) {
+		public void saveToXmlElement(Element e, Document d) {
+			WarpDrive.logger.info("Saving shell " + e.getAttribute("name"));
+
+			e.setAttribute("name", name);
 			e.setAttribute("radiusInner", "" + radiusInner);
 			e.setAttribute("radiusOuter", "" + radiusOuter);
+
+			for (Entry<String, Integer> compBlock : compositionBlocks.entrySet()) {
+				Element child = d.createElement("CompositionBlock");
+				child.setAttribute("weight", compBlock.getValue() + "");
+				child.setAttribute("block", compBlock.getKey());
+				e.appendChild(child);
+			}
 
 		}
 
