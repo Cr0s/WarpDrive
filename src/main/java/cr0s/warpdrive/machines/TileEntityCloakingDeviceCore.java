@@ -54,7 +54,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 
 	public TileEntityCloakingDeviceCore() {
 		super();
-		peripheralName = "cloakingdevicecore";
+		peripheralName = "warpdriveCloakingCore";
 		methodsArray = new String[] {
 			"tier",				// set field tier to 1 or 2, return field tier
 			"isAssemblyValid",	// returns true or false
@@ -370,12 +370,12 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	public void attach(IComputerAccess computer) {
 		super.attach(computer);
 		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/cloakingdevicecore", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
+			computer.mount("/cloakingcore", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore"));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/common/updater"));
 			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/uncloak", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore/uncloak"));
-				computer.mount("/cloak1", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore/cloak1"));
-				computer.mount("/cloak2", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/cloakingdevicecore/cloak2"));
+				computer.mount("/uncloak", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/uncloak"));
+				computer.mount("/cloak1", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/cloak1"));
+				computer.mount("/cloak2", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/cloak2"));
 			}
 		}
 	}
