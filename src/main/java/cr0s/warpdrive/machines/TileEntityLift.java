@@ -203,13 +203,13 @@ public class TileEntityLift extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mode(Context context, Arguments arguments) {
+	public Object[] mode(Context context, Arguments arguments) {
 		return mode(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] active(Context context, Arguments arguments) {
+	public Object[] active(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			computerEnabled = arguments.checkBoolean(0);
 		}

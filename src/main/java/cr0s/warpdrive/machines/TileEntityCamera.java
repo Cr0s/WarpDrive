@@ -93,7 +93,7 @@ public class TileEntityCamera extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] freq(Context context, Arguments arguments) {
+	public Object[] freq(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			setFrequency(arguments.checkInteger(0));
 		}

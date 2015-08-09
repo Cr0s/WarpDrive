@@ -5,6 +5,7 @@ import java.util.Set;
 
 import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
@@ -175,6 +176,12 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	}
 	
 	// OpenComputers methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	public Object[] interfaced(Context context, Arguments arguments) {
+		return new String[] { "This is a WarpDrive interfaced tile entity." };
+	}
+
 	@Optional.Method(modid = "OpenComputers")
 	public void OC_constructor() {
 		OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();

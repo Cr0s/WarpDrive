@@ -174,7 +174,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getEnergyLevel(Context context, Arguments arguments) {
+	public Object[] getEnergyLevel(Context context, Arguments arguments) {
 		return getEnergyLevel();
 	}
     

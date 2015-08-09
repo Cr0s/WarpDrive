@@ -506,19 +506,19 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] scan(Context context, Arguments arguments) {
+	public Object[] scan(Context context, Arguments arguments) {
 		return scan(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] filename(Context context, Arguments arguments) {
+	public Object[] filename(Context context, Arguments arguments) {
 		return filename(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] deploy(Context context, Arguments arguments) {
+	public Object[] deploy(Context context, Arguments arguments) {
 		return deploy(argumentsOCtoCC(arguments));
 	}
 

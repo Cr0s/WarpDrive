@@ -68,13 +68,13 @@ public class TileEntityRadar extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] scanRadius(Context context, Arguments arguments) {
+	public Object[] scanRadius(Context context, Arguments arguments) {
 		return scanRadius(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getResultsCount(Context context, Arguments arguments) {
+	public Object[] getResultsCount(Context context, Arguments arguments) {
 		if (results != null) {
 			return new Integer[] { results.size() };
 		}
@@ -83,13 +83,13 @@ public class TileEntityRadar extends WarpEnergyTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getResult(Context context, Arguments arguments) {
+	public Object[] getResult(Context context, Arguments arguments) {
 		return getResult(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] pos(Context context, Arguments arguments) {
+	public Object[] pos(Context context, Arguments arguments) {
 		return new Integer[] { xCoord, yCoord, zCoord };
 	}
 	

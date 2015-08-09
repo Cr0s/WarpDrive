@@ -563,38 +563,38 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mine(Context context, Arguments arguments) {
+	public Object[] mine(Context context, Arguments arguments) {
 		return mine(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] stop(Context context, Arguments arguments) {
+	public Object[] stop(Context context, Arguments arguments) {
 		stop();
 		return null;
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isMining(Context context, Arguments arguments) {
+	public Object[] isMining(Context context, Arguments arguments) {
 		return new Boolean[] { isMining() };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] quarry(Context context, Arguments arguments) {
+	public Object[] quarry(Context context, Arguments arguments) {
 		return quarry(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] state(Context context, Arguments arguments) {
+	public Object[] state(Context context, Arguments arguments) {
 		return state(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] offset(Context context, Arguments arguments) {
+	public Object[] offset(Context context, Arguments arguments) {
 		return offset(argumentsOCtoCC(arguments));
 	}
 

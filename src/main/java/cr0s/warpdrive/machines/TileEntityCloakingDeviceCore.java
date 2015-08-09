@@ -69,7 +69,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		// Reset sound timer
 		soundTicks++;
 		if (soundTicks >= 40) {
@@ -338,7 +338,7 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] tier(Context context, Arguments arguments) {
+	public Object[] tier(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			if (arguments.checkInteger(0) == 2) {
 				tier = 2;
@@ -351,13 +351,13 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isAssemblyValid(Context context, Arguments arguments) {
+	public Object[] isAssemblyValid(Context context, Arguments arguments) {
 		return new Object[] { (boolean)validateAssembly() };
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] enable(Context context, Arguments arguments) {
+	public Object[] enable(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			isEnabled = arguments.checkBoolean(0);
 		}

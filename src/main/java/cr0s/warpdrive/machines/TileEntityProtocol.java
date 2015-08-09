@@ -419,56 +419,56 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] dim_positive(Context context, Arguments arguments) {
+	public Object[] dim_positive(Context context, Arguments arguments) {
 		return dim_positive(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] dim_negative(Context context, Arguments arguments) {
+	public Object[] dim_negative(Context context, Arguments arguments) {
 		return dim_negative(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mode(Context context, Arguments arguments) {
+	public Object[] mode(Context context, Arguments arguments) {
 		return mode(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] distance(Context context, Arguments arguments) {
+	public Object[] distance(Context context, Arguments arguments) {
 		return distance(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] direction(Context context, Arguments arguments) {
+	public Object[] direction(Context context, Arguments arguments) {
 		return direction(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getAttachedPlayers(Context context, Arguments arguments) {
+	public Object[] getAttachedPlayers(Context context, Arguments arguments) {
 		return getAttachedPlayers(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] summon(Context context, Arguments arguments) {
+	public Object[] summon(Context context, Arguments arguments) {
 		return summon(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] summon_all(Context context, Arguments arguments) {
+	public Object[] summon_all(Context context, Arguments arguments) {
 		setSummonAllFlag(true);
 		return null;
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] pos(Context context, Arguments arguments) {
+	public Object[] pos(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -478,7 +478,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getEnergyLevel(Context context, Arguments arguments) {
+	public Object[] getEnergyLevel(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -488,7 +488,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getEnergyRequired(Context context, Arguments arguments) {
+	public Object[] getEnergyRequired(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -498,26 +498,26 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] jump(Context context, Arguments arguments) {
+	public Object[] jump(Context context, Arguments arguments) {
 		doJump();
 		return null;
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getShipSize(Context context, Arguments arguments) {
+	public Object[] getShipSize(Context context, Arguments arguments) {
 		return getShipSize(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] beaconFrequency(Context context, Arguments arguments) {
+	public Object[] beaconFrequency(Context context, Arguments arguments) {
 		return beaconFrequency(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getOrientation(Context context, Arguments arguments) {
+	public Object[] getOrientation(Context context, Arguments arguments) {
 		if (core != null) {
 			return new Object[] { core.dx, 0, core.dz };
 		}
@@ -526,31 +526,31 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] coreFrequency(Context context, Arguments arguments) {
+	public Object[] coreFrequency(Context context, Arguments arguments) {
 		return coreFrequency(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isInSpace(Context context, Arguments arguments) {
+	public Object[] isInSpace(Context context, Arguments arguments) {
 		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isInHyperspace(Context context, Arguments arguments) {
+	public Object[] isInHyperspace(Context context, Arguments arguments) {
 		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] targetJumpgate(Context context, Arguments arguments) {
+	public Object[] targetJumpgate(Context context, Arguments arguments) {
 		return targetJumpgate(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isAttached(Context context, Arguments arguments) {
+	public Object[] isAttached(Context context, Arguments arguments) {
 		if (core != null) {
 			return new Object[] { (boolean) (core.controller != null) };
 		}
