@@ -8,7 +8,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -75,10 +74,10 @@ public class BlockMonitor extends BlockContainer {
 			int frequency = ((TileEntityMonitor)te).getFrequency();
 			CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, frequency);
 			if (cam == null) {
-				par5EntityPlayer.addChatMessage(new ChatComponentText(getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!"));
+				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!");
 				return false;
 			} else {
-				par5EntityPlayer.addChatMessage(new ChatComponentText(getLocalizedName() + " Frequency '" + frequency + "' is valid. Viewing camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
+				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is valid. Viewing camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
 				// Spawn camera entity
 				EntityCamera e = new EntityCamera(par1World, cam.position, par5EntityPlayer);
 				par1World.spawnEntityInWorld(e);

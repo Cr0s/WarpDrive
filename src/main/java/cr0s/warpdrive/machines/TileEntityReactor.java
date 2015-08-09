@@ -15,7 +15,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
@@ -312,12 +311,12 @@ public class TileEntityReactor extends WarpEnergyTE {
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
 		WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
-		for (Object o : list) {
-			if (o == null || !(o instanceof EntityPlayer)) {
+		for (Object object : list) {
+			if (object == null || !(object instanceof EntityPlayer)) {
 				continue;
 			}
-
-			((EntityPlayer) o).addChatMessage(new ChatComponentText("[" + (coreFrequency.length() > 0 ? coreFrequency : "WarpCore") + "] " + msg));
+			
+			WarpDrive.addChatMessage((EntityPlayer) object, "[" + (coreFrequency.length() > 0 ? coreFrequency : "WarpCore") + "] " + msg);
 		}
 	}
 

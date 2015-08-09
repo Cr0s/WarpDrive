@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemArmor.ArmorMaterial;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
@@ -213,7 +215,7 @@ public class WarpDrive implements LoadingCallback {
 
 	public static void debugPrint(String out) {
 		if (WarpDriveConfig.G_DEBUGMODE) {
-			logger.debug(out);
+			logger.info(out);
 		}
 	}
 
@@ -665,6 +667,13 @@ public class WarpDrive implements LoadingCallback {
 			}
 
 			ForgeChunkManager.releaseTicket(ticket);
+		}
+	}
+	
+	public static void addChatMessage(final EntityPlayer player, final String message) {
+		String[] lines = message.split("\n");
+		for (String line : lines) {
+			player.addChatMessage(new ChatComponentText(line));
 		}
 	}
 }

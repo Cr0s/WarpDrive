@@ -1,8 +1,5 @@
 package cr0s.warpdrive.machines;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 import cpw.mods.fml.common.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -13,7 +10,6 @@ import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
 public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IBlockUpdateDetector {
 	Vector3 myVec;

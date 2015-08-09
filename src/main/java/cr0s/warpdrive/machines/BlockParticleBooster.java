@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -85,7 +84,7 @@ public class BlockParticleBooster extends BlockContainer {
 		if (par5EntityPlayer.getHeldItem() == null) {
 			TileEntity te = par1World.getTileEntity(par2, par3, par4);
 			if (te != null && te instanceof WarpEnergyTE) {
-				par5EntityPlayer.addChatMessage(new ChatComponentText(((WarpEnergyTE) te).getStatus()));
+				WarpDrive.addChatMessage(par5EntityPlayer, ((WarpEnergyTE) te).getStatus());
 				return true;
 			}
 		}

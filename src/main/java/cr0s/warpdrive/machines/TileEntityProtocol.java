@@ -8,7 +8,6 @@ import li.cil.oc.api.machine.Context;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
@@ -171,7 +170,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
             String name = players.get(i);
 
             if (entityPlayer.getDisplayName().equals(name)) {
-            	entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Detached."));
+            	WarpDrive.addChatMessage(entityPlayer, getBlockType().getLocalizedName() + " Detached.");
                 players.remove(i);
                 return;
             }
@@ -180,7 +179,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
         entityPlayer.attackEntityFrom(DamageSource.generic, 1);
         players.add(entityPlayer.getDisplayName());
         updatePlayersString();
-        entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Successfully attached."));
+        WarpDrive.addChatMessage(entityPlayer, getBlockType().getLocalizedName() + " Successfully attached.");
     }
 
     public void updatePlayersString() {
