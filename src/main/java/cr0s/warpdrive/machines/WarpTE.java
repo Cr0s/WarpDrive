@@ -1,6 +1,8 @@
 package cr0s.warpdrive.machines;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import cr0s.warpdrive.data.Vector3;
 
 public abstract class WarpTE extends TileEntity
