@@ -40,6 +40,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	protected HashMap<EnumUpgradeTypes,Integer> upgrades = new HashMap<EnumUpgradeTypes,Integer>();
  	
 	public WarpEnergyTE() {
+		super();
 		if (WarpDriveConfig.isThermalExpansionLoaded) {
 			this.RF_initialiseAPI();
 		}
@@ -180,6 +181,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	// Minecraft overrides
     @Override
     public void updateEntity() {
+		super.updateEntity();
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
