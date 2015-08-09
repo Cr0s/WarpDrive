@@ -7,7 +7,6 @@ import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergySink;
 import ic2.api.energy.tile.IEnergySource;
 import cofh.api.energy.IEnergyHandler;
-
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -31,6 +30,8 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 	protected int energyStored_internal = 0;
 	private static final double EU_PER_INTERNAL = 1.0D;
 	private static final double RF_PER_INTERNAL = 1800.0D / 437.5D;
+	protected int IC2_sinkTier = 3;
+	protected int IC2_sourceTier = 3;
 	
 	private int scanTickCount = -1;
 	
@@ -278,6 +279,18 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
             MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
             addedToEnergyNet = false;
         }
+	}
+
+	@Override
+	@Optional.Method(modid = "IC2")
+	public int getSinkTier() {
+		return IC2_sinkTier;
+	}
+
+	@Override
+	@Optional.Method(modid = "IC2")
+	public int getSourceTier() {
+		return IC2_sourceTier;
 	}
 
 	

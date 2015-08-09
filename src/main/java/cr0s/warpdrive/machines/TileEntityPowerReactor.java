@@ -535,16 +535,4 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 			worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
 			Double.valueOf(xCoord), Double.valueOf(yCoord), Double.valueOf(zCoord) });
 	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
 }

@@ -36,6 +36,8 @@ public class TileEntityLift extends WarpEnergyTE {
 
 	public TileEntityLift() {
 		super();
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
 		peripheralName = "warpdriveLaserLift";
 		methodsArray = new String[] { "getEnergyLevel", "mode", "active",
 				"help" };
@@ -271,17 +273,5 @@ public class TileEntityLift extends WarpEnergyTE {
 			return new Object[] { helpStr(arguments) };
 		}
 		return null;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Arbitrarily chosen value
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Arbitrarily chosen value
-		return 2;
 	}
 }

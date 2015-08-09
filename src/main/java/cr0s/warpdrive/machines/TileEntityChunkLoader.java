@@ -25,6 +25,8 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 
 	public TileEntityChunkLoader() {
 		super();
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
 		negDX = 0;
 		negDZ = 0;
 		posDX = 0;
@@ -227,17 +229,4 @@ public class TileEntityChunkLoader extends WarpChunkTE implements IUpgradable
 	{
 		return upgrades;
 	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
 }

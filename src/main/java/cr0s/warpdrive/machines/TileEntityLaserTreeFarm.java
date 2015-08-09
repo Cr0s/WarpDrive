@@ -35,6 +35,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 	public TileEntityLaserTreeFarm() {
 		super();
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
 		peripheralName = "treefarmLaser";
 		methodsArray = new String[] {
 				"start",
@@ -340,17 +342,5 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	protected float getColorB() {
 		return 0.4f;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 2;
 	}
 }

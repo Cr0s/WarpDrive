@@ -203,16 +203,4 @@ public class TileEntityRadar extends WarpEnergyTE {
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
-
-	@Override
-	public int getSinkTier() {
-		// TODO Arbitrarily chosen value
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Arbitrarily chosen value
-		return 3;
-	}
 }

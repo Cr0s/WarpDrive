@@ -1090,16 +1090,4 @@ public class TileEntityReactor extends WarpEnergyTE {
 				new Object[] { getClass().getSimpleName(), coreFrequency, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
 						Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord) });
 	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
 }

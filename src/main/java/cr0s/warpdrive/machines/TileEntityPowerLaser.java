@@ -192,17 +192,4 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IBl
 		}
 		return null;
 	}
-
-	// IC2 methods
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
 }

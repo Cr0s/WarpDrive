@@ -616,14 +616,4 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
 	}
-
-	@Override
-	public int getSinkTier() {
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		return 3;
-	}
 }
