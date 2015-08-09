@@ -5,6 +5,7 @@ import java.util.Set;
 
 import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
@@ -17,19 +18,15 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 
+// OpenComputer API: https://github.com/MightyPirates/OpenComputers/tree/master-MC1.7.10/src/main/java/li/cil/oc/api
+
 @Optional.InterfaceList({
 	@Optional.Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers"),
 	@Optional.Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft")
 })
 public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, Environment {
-	WarpInterfacedTE() {
-		super();
-		if (Loader.isModLoaded("OpenComputers")) {
-			OC_constructor();
-		}
-	}
-	
 	// Common computer properties
+	private boolean interfacedFirstTick = true;
 	protected String peripheralName = null;
 	protected String[] methodsArray = {};
 	
@@ -44,6 +41,15 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	@Override
  	public void updateEntity() {
 		super.updateEntity();
+		if (interfacedFirstTick) {
+			// deferred constructor so the derived class can finish it's initialization first
+			if (Loader.isModLoaded("OpenComputers")) {
+				OC_constructor();
+			}
+			interfacedFirstTick = false;
+			return;
+		}
+		
 		if (Loader.isModLoaded("OpenComputers")) {
 			if (!OC_addedToNetwork) {
 				OC_addedToNetwork = true;
@@ -172,6 +178,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	@Optional.Method(modid = "OpenComputers")
 	public void OC_constructor() {
 		OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
+		// ManagedEnvironment fileSystem = FileSystem.asManagedEnvironment(FileSystem.fromClass(getClass(), WarpDrive.MODID, "lua"), "my_files");
 	}
 	
 	@Override
@@ -183,13 +190,25 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onConnect(Node node) {
-		// nothing special
+		if (node.host() instanceof Context) {
+			// Attach our file system to new computers we get connected to.
+			// Note that this is also called for all already present computers
+			// when we're added to an already existing network, so we don't
+			// have to loop through the existing nodes manually.
+			// node.connect(fileSystem);
+		}
 	}
 	
 	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onDisconnect(Node node) {
-		// nothing special
+		if (node.host() instanceof Context) {
+			// Disconnecting from a single computer
+			// node.disconnect(fileSystem);
+		} else if (node == OC_node) {
+			// Disconnecting from the network
+			// fileSystem.node.remove();
+		}
 	}
 	
 	@Override
