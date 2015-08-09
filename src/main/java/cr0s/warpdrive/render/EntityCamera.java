@@ -4,7 +4,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.GameSettings;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -18,8 +17,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.network.PacketHandler;
 
-public final class EntityCamera extends EntityLivingBase
-{
+public final class EntityCamera extends EntityLivingBase {
     public int xCoord;
     public int yCoord;
     public int zCoord;
@@ -36,13 +34,12 @@ public final class EntityCamera extends EntityLivingBase
     private int fireWaitTicks = 0;
     private boolean isActive = true;
     private int bootUpTicks = 20;
+    
+	private boolean isCentered = true;
 
     public EntityCamera(World world) {
         super(world);
-		// TODO Auto-generated constructor stub
 	}
-    
-	private boolean isCentered = true;
 
     public EntityCamera(World world, ChunkPosition pos, EntityPlayer player) {
         super(world);
@@ -187,23 +184,16 @@ public final class EntityCamera extends EntityLivingBase
     }
 
     @Override
-    protected void applyEntityAttributes()
-    {
-        super.applyEntityAttributes();
-        this.getAttributeMap().getAttributeInstance(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
-    }
-
-    @Override
-    public void readEntityFromNBT(NBTTagCompound nbttagcompound)
-    {
+    public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
+    	// nothing to save, skip ancestor call
         xCoord = nbttagcompound.getInteger("x");
         yCoord = nbttagcompound.getInteger("y");
         zCoord = nbttagcompound.getInteger("z");
     }
 
     @Override
-    public void writeEntityToNBT(NBTTagCompound nbttagcompound)
-    {
+    public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
+    	// nothing to save, skip ancestor call
         nbttagcompound.setInteger("x", xCoord);
         nbttagcompound.setInteger("y", yCoord);
         nbttagcompound.setInteger("z", zCoord);
