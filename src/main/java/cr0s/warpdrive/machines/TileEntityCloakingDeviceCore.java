@@ -1,5 +1,7 @@
 package cr0s.warpdrive.machines;
 
+import java.util.Arrays;
+
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -14,7 +16,6 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CloakedArea;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -61,11 +62,13 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 			"getEnergyLevel", 
 			"enable"			// set field enable state (true or false), return true if enabled
 		};
+		CC_scripts = Arrays.asList("cloak1", "cloak2", "uncloak");
 	}
 	
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
@@ -365,21 +368,6 @@ public class TileEntityCloakingDeviceCore extends WarpEnergyTE {
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public void attach(IComputerAccess computer) {
-		super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/cloakingcore", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/uncloak", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/uncloak"));
-				computer.mount("/cloak1", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/cloak1"));
-				computer.mount("/cloak2", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua/warpdriveCloakingCore/cloak2"));
-			}
-		}
-	}
-	
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {

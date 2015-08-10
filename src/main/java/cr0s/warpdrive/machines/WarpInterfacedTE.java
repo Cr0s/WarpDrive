@@ -1,20 +1,26 @@
 package cr0s.warpdrive.machines;
 
+import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
+import li.cil.oc.api.FileSystem;
 import li.cil.oc.api.Network;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.ManagedEnvironment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
 import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
+import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
+import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
@@ -31,6 +37,12 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	protected String peripheralName = null;
 	protected String[] methodsArray = {};
 	
+	// pre-loaded scripts support
+	private volatile ManagedEnvironment OC_fileSystem = null;
+	private volatile boolean CC_hasResource = false;
+	private volatile boolean OC_hasResource = false;
+	protected volatile List<String> CC_scripts = null;
+	
 	// OpenComputer specific properties
 	protected Node		OC_node = null;
 	protected boolean	OC_addedToNetwork = false;
@@ -38,11 +50,29 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	// ComputerCraft specific properties
 	protected HashMap<Integer, IComputerAccess> connectedComputers = new HashMap<Integer, IComputerAccess>();
 	
+	private boolean assetExist(final String resourcePath) {
+		URL url = getClass().getResource(resourcePath);
+		return (url != null);
+	}
+	
 	// TileEntity overrides, notably for OpenComputer
 	@Override
  	public void updateEntity() {
 		super.updateEntity();
+		
 		if (interfacedFirstTick) {
+			WarpDrive.logger.info("interfacedFirstTick " + peripheralName);
+			String CC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.ComputerCraft/" + peripheralName;
+			String OC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.OpenComputers/" + peripheralName;
+			if (WarpDriveConfig.isCCLoaded) {
+				CC_hasResource = assetExist(CC_path);
+				WarpDrive.logger.info("CC_hasResource " + CC_hasResource);
+			}
+			if (Loader.isModLoaded("OpenComputers")) {
+				OC_hasResource = assetExist(OC_path);
+				WarpDrive.logger.info("OC_hasResource " + OC_hasResource);
+			}
+			
 			// deferred constructor so the derived class can finish it's initialization first
 			if (Loader.isModLoaded("OpenComputers")) {
 				OC_constructor();
@@ -58,7 +88,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 			}
 		}
 	}
-	
+
 	@Override
 	public void invalidate() {
 		if (Loader.isModLoaded("OpenComputers")) {
@@ -145,6 +175,15 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	public void attach(IComputerAccess computer) {
 		int id = computer.getID();
 		connectedComputers.put(id, computer);
+		if (CC_hasResource && WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
+			computer.mount("/" + peripheralName, ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/" + peripheralName));
+	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/common/updater"));
+			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
+				for(String script : CC_scripts) {
+					computer.mount("/" + script, ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/" + peripheralName + "/" + script));
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -179,13 +218,15 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	public Object[] interfaced(Context context, Arguments arguments) {
-		return new String[] { "This is a WarpDrive interfaced tile entity." };
+		return new String[] { "This is a WarpDrive computer interfaced tile entity." };
 	}
-
+	
 	@Optional.Method(modid = "OpenComputers")
-	public void OC_constructor() {
+	private void OC_constructor() {
 		OC_node = Network.newNode(this, Visibility.Network).withComponent(peripheralName).create();
-		// ManagedEnvironment fileSystem = FileSystem.asManagedEnvironment(FileSystem.fromClass(getClass(), WarpDrive.MODID, "lua"), "my_files");
+		if (OC_hasResource && WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
+			OC_fileSystem = FileSystem.asManagedEnvironment(FileSystem.fromClass(getClass(), WarpDrive.MODID.toLowerCase(), "lua.OpenComputers/" + peripheralName), peripheralName);
+		}
 	}
 	
 	@Override
@@ -202,19 +243,23 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 			// Note that this is also called for all already present computers
 			// when we're added to an already existing network, so we don't
 			// have to loop through the existing nodes manually.
-			// node.connect(fileSystem);
+			if (OC_fileSystem != null) {
+				node.connect(OC_fileSystem.node());
+			}
 		}
 	}
 	
 	@Override
 	@Optional.Method(modid = "OpenComputers")
 	public void onDisconnect(Node node) {
-		if (node.host() instanceof Context) {
-			// Disconnecting from a single computer
-			// node.disconnect(fileSystem);
-		} else if (node == OC_node) {
-			// Disconnecting from the network
-			// fileSystem.node.remove();
+		if (OC_fileSystem != null) {
+			if (node.host() instanceof Context) {
+				// Disconnecting from a single computer
+				node.disconnect(OC_fileSystem.node());
+			} else if (node == OC_node) {
+				// Disconnecting from the network
+				OC_fileSystem.node().remove();
+			}
 		}
 	}
 	
