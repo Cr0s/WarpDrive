@@ -39,7 +39,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 		cachedIS = new ItemStack[potentialUnlocalized.length];
 	}
 	
-	public ItemStack getIS(int damage) {
+	public ItemStack getItemStack(int damage) {
 		if (damage >=0 && damage < potentialUnlocalized.length) {
 			if (cachedIS[damage] == null) {
 				cachedIS[damage] = new ItemStack(WarpDrive.componentItem,1,damage);
@@ -55,50 +55,50 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	
 	public void registerRecipes() {
 		WarpDrive.debugPrint("Registering empty recipe");
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(0),false,"nrn","r r","nrn",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(0),false,"nrn","r r","nrn",
 				'r', Items.redstone,
 				'n', Items.gold_nugget));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(1),false,"g","e","c",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(1),false,"g","e","c",
 				'g', Blocks.glass,
 				'e', Items.ender_pearl,
-				'c', getIS(0)));
+				'c', getItemStack(0)));
 			
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(2),false," g ","ede"," c ",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(2),false," g ","ede"," c ",
 				'g', Blocks.glass,
 				'e', Items.ender_pearl,
 				'd', Items.diamond,
-				'c', getIS(0)));
+				'c', getItemStack(0)));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(3),false," g ","rtr"," c ",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(3),false," g ","rtr"," c ",
 				'g', Blocks.glass,
 				'r', "dyeBlue",
 				't', Blocks.torch,
-				'c', getIS(0)));
+				'c', getItemStack(0)));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(4),false," l ","rcr"," l ",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(4),false," l ","rcr"," l ",
 				'l', "dyeWhite",
 				'r', Items.coal,
-				'c', getIS(0)));
+				'c', getItemStack(0)));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(5),false,"g  ","gwr","rwr",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(5),false,"g  ","gwr","rwr",
 				'g', Items.gold_nugget,
 				'r', Items.redstone,
 				'w', "plankWood"));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(6),false,"gig","iri","gig",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(6),false,"gig","iri","gig",
 				'g', Items.gold_nugget,
 				'r', Items.redstone,
 				'i', Items.iron_ingot));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(7),false,"glg","ldl","glg",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(7),false,"glg","ldl","glg",
 				'g', Items.gold_nugget,
 				'l', "dyeBlue",
 				'd', Items.diamond));
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(8),false,"gcg","g g","gcg",
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(8),false,"gcg","g g","gcg",
 				'g', Blocks.glass,
-				'c', getIS(0)));
+				'c', getItemStack(0)));
 	}
 	
 	public boolean doesMatch(ItemStack is, String unlocalised) {

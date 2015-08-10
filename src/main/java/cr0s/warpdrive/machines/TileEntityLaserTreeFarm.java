@@ -100,7 +100,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						int cost = calculateBlockCost(block);
 						if (consumeEnergyFromBooster(cost, true)) {
 							if (isRoomForHarvest()) {
-								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_RubberWood.getItem()))) {
+								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_rubberWood.getItem()))) {
 									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
 									if (metadata >= 2 && metadata <= 5) {
 										WarpDrive.debugPrint("wetspot found");

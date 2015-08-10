@@ -25,13 +25,13 @@ public class WarpDriveConfig {
 	 * The variables which store whether or not individual mods are loaded
 	 */
 	public static boolean isForgeMultipartLoaded = false;
-	public static boolean isAdvSolPanelLoaded = false;
+	public static boolean isAdvancedSolarPanelLoaded = false;
 	public static boolean isAtomicScienceLoaded = false;
 	public static boolean isICBMLoaded = false;
 	public static boolean isMFFSLoaded = false;
 	public static boolean isGraviSuiteLoaded = false;
-	public static boolean isICLoaded = false;
-	public static boolean isCCLoaded = false;
+	public static boolean isIndustrialCraft2loaded = false;
+	public static boolean isComputerCraftLoaded = false;
 	public static boolean isNetherOresLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
@@ -42,9 +42,9 @@ public class WarpDriveConfig {
 	public static Method forgeMultipart_helper_sendDescPacket = null;
 	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
 
-	public static ItemStack IC2_Air;
-	public static ItemStack IC2_Empty;
-	public static ItemStack IC2_RubberWood;
+	public static ItemStack IC2_air;
+	public static ItemStack IC2_empty;
+	public static ItemStack IC2_rubberWood;
 	public static ItemStack IC2_Resin;
 	public static Item IC2_fluidCell;
 	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Upgraded, CCT_Advanced;
@@ -441,39 +441,47 @@ public class WarpDriveConfig {
 			loadForgeMultipart();
 		}
 
-		isICLoaded = Loader.isModLoaded("IC2");
-		if (isICLoaded)
+		isIndustrialCraft2loaded = Loader.isModLoaded("IC2");
+		if (isIndustrialCraft2loaded) {
 			loadIC2();
+		}
 
-		isCCLoaded = Loader.isModLoaded("ComputerCraft");
-		if (isCCLoaded)
+		isComputerCraftLoaded = Loader.isModLoaded("ComputerCraft");
+		if (isComputerCraftLoaded) {
 			loadCC();
+		}
 
-		isAdvSolPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
-		if (isAdvSolPanelLoaded)
+		isAdvancedSolarPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
+		if (isAdvancedSolarPanelLoaded) {
 			loadASP();
+		}
 
 		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
-		if (isAtomicScienceLoaded)
+		if (isAtomicScienceLoaded) {
 			loadAtomicScience();
+		}
 
 		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
-		if (isICBMLoaded)
+		if (isICBMLoaded) {
 			loadICBM();
+		}
 
 		isMFFSLoaded = Loader.isModLoaded("MFFS");
-		if (isMFFSLoaded)
+		if (isMFFSLoaded) {
 			loadMFFS();
+		}
 
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
-		if (isGraviSuiteLoaded)
+		if (isGraviSuiteLoaded) {
 			loadGraviSuite();
+		}
 
 		isNetherOresLoaded = Loader.isModLoaded("NetherOres");
 
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
-		if (isThermalExpansionLoaded)
+		if (isThermalExpansionLoaded) {
 			loadThermalExpansion();
+		}
 
 		isAdvancedRepulsionSystemsLoaded = Loader.isModLoaded("AdvancedRepulsionSystems");
 		if (isAdvancedRepulsionSystemsLoaded) {
@@ -498,16 +506,17 @@ public class WarpDriveConfig {
 		scannerIgnoreBlocks.add(WarpDrive.protocolBlock);
 		scannerIgnoreBlocks.add(WarpDrive.iridiumBlock);
 
-		if (isICLoaded) {
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:mfsUnit"));
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:mfeUnit"));
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:cesuUnit"));
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:batBox"));
+		if (isIndustrialCraft2loaded) {
+			// Metadata: 0 Batbox, 1 MFE, 2 MFSU, 3 LV transformer, 4 MV transformer, 5 HV transformer, 6 EV transformer, 7 CESU
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockElectric"));
+			
+			// Metadata: 0 Batbox, 1 CESU, 2 MFE, 3 MFSU
+			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockChargepad"));
 		}
 		if (isICBMLoaded) {
 			scannerIgnoreBlocks.add(Block.getBlockFromName("ICBM:explosive"));
 		}
-		if (isCCLoaded) {
+		if (isComputerCraftLoaded) {
 			scannerIgnoreBlocks.add(CC_Computer);
 			scannerIgnoreBlocks.add(CCT_Turtle);
 			scannerIgnoreBlocks.add(CCT_Upgraded);
@@ -569,33 +578,46 @@ public class WarpDriveConfig {
 	}
 
 	private static void loadIC2() {
-		IC2_solarPanel = getIC2Item("solarPanel");
-		spaceHelmets.add(getIC2Item("hazmatHelmet").getItem());
-		spaceHelmets.add(getIC2Item("quantumHelmet").getItem());
-		jetpacks.add(getIC2Item("jetpack").getItem());
-		jetpacks.add(getIC2Item("electricJetpack").getItem());
-		IC2_Air = getIC2Item("airCell");
-		IC2_Empty = getIC2Item("cell");
-		ItemStack rubberWood = getIC2Item("rubberWood");
-		IC2_Resin = getIC2Item("resin");
-		if (rubberWood != null) {
-			IC2_RubberWood = rubberWood;
+		try {
+			IC2_solarPanel = getIC2Item("blockGenerator");
+			IC2_solarPanel.setItemDamage(3);
+			
+			spaceHelmets.add(getIC2Item("itemArmorHazmatHelmet").getItem());
+			spaceHelmets.add(getIC2Item("itemSolarHelmet").getItem());
+			spaceHelmets.add(getIC2Item("itemArmorNanoHelmet").getItem());
+			spaceHelmets.add(getIC2Item("itemArmorQuantumHelmet").getItem());
+			
+			jetpacks.add(getIC2Item("itemArmorJetpack").getItem());
+			jetpacks.add(getIC2Item("itemArmorJetpackElectric").getItem());
+			
+			IC2_empty = getIC2Item("itemCellEmpty");
+			IC2_air = getIC2Item("itemCellEmpty");
+			IC2_air.setItemDamage(5);
+			
+			ItemStack rubberWood = getIC2Item("blockRubWood");
+			IC2_Resin = getIC2Item("itemHarz");
+			if (rubberWood != null) {
+				IC2_rubberWood = rubberWood;
+				minerOres.add(Block.getBlockFromItem(getIC2Item("rubberWood").getItem()));
+			}
+			ItemStack ore = getIC2Item("blockOreUran");
+			if (ore != null)
+				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
+			ore = getIC2Item("blockOreCopper");
+			if (ore != null)
+				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
+			ore = getIC2Item("blockOreTin");
+			if (ore != null)
+				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
+			ore = getIC2Item("blockOreLead");
+			if (ore != null)
+				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
+			
+			IC2_fluidCell = getIC2Item("itemFluidCell").getItem();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("WarpDriveConfig Error loading IndustrialCraft2 classes");
+			exception.printStackTrace();
 		}
-		ItemStack ore = getIC2Item("uraniumOre");
-		if (ore != null)
-			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = getIC2Item("copperOre");
-		if (ore != null)
-			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = getIC2Item("tinOre");
-		if (ore != null)
-			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-		ore = getIC2Item("leadOre");
-		if (ore != null)
-			commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-
-		minerOres.add(Block.getBlockFromItem(getIC2Item("rubberWood").getItem()));
-		IC2_fluidCell = getIC2Item("FluidCell").getItem();
 	}
 
 	private static void loadCC() {
@@ -622,7 +644,7 @@ public class WarpDriveConfig {
 		} catch (Exception e) {
 			WarpDrive.logger.error("WarpDriveConfig Error loading ASP classes");
 			e.printStackTrace();
-			isAdvSolPanelLoaded = false;
+			isAdvancedSolarPanelLoaded = false;
 		}
 	}
 
@@ -750,7 +772,7 @@ public class WarpDriveConfig {
 	}
 
 	public static Block getRandomNetherBlock(Random random, Block def) {
-		if (isICLoaded && (random.nextInt(10000) == 42)) {
+		if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
 			return WarpDrive.iridiumBlock;
 		} else if (random.nextInt(25) == 1) {
 			return Blocks.quartz_ore;
@@ -760,7 +782,7 @@ public class WarpDriveConfig {
 	}
 
 	public static Block getRandomEndBlock(Random random, Block def) {
-		if (isICLoaded && random.nextInt(10000) == 42) {
+		if (isIndustrialCraft2loaded && random.nextInt(10000) == 42) {
 			return WarpDrive.iridiumBlock;
 		} else if (random.nextInt(200) == 13) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));

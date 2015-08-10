@@ -61,7 +61,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 		super.updateEntity();
 		
 		if (interfacedFirstTick) {
-			if (WarpDriveConfig.isCCLoaded) {
+			if (WarpDriveConfig.isComputerCraftLoaded) {
 				String CC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.ComputerCraft/" + peripheralName;
 				CC_hasResource = assetExist(CC_path);
 			}
@@ -202,7 +202,7 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 	// Computer abstraction methods
 	protected void sendEvent(String eventName, Object[] arguments) {
 		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
-		if (WarpDriveConfig.isCCLoaded) {
+		if (WarpDriveConfig.isComputerCraftLoaded) {
 			Set<Integer> keys = connectedComputers.keySet();
 			for(Integer key:keys) {
 				IComputerAccess comp = connectedComputers.get(key);

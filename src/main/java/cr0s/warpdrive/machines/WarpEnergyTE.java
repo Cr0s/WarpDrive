@@ -188,7 +188,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
         }
         
         // IndustrialCraft2
-        if (WarpDriveConfig.isICLoaded) {
+        if (WarpDriveConfig.isIndustrialCraft2loaded) {
         	IC2_addToEnergyNet();
         }
         
@@ -205,7 +205,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 
     @Override
     public void onChunkUnload() {
-        if (WarpDriveConfig.isICLoaded) {
+        if (WarpDriveConfig.isIndustrialCraft2loaded) {
         	IC2_removeFromEnergyNet();
         }
         
@@ -214,7 +214,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
 
     @Override
     public void invalidate() {
-        if (WarpDriveConfig.isICLoaded) {
+        if (WarpDriveConfig.isIndustrialCraft2loaded) {
         	IC2_removeFromEnergyNet();
         }
         

@@ -11,8 +11,8 @@ public class WorldGenStructure {
 		if (corrupted && (rand.nextInt(15) == 1))
 			return Blocks.air;
 
-		if (WarpDriveConfig.isICLoaded) {
-			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("reinforcedStone").getItem());
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("blockAlloy").getItem());
 		} else {
 			return Blocks.stone;
 		}
@@ -22,8 +22,8 @@ public class WorldGenStructure {
 		if (corrupted && (rand.nextInt(30) == 1))
 			return Blocks.air;
 
-		if (WarpDriveConfig.isICLoaded) {
-			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("reinforcedGlass").getItem());
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("blockAlloyGlass").getItem());
 		} else {
 			return Blocks.glass;
 		}

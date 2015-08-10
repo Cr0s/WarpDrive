@@ -79,16 +79,16 @@ public class ItemWarpUpgrade extends Item {
 	}
 
 	public void initRecipes() {
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Energy.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getIS(0), 'e',
-				WarpDrive.componentItem.getIS(7), 'r', Items.redstone));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Energy.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
+				WarpDrive.componentItem.getItemStack(7), 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Power.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getIS(0), 'e',
-				WarpDrive.componentItem.getIS(6), 'r', Items.redstone));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Power.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
+				WarpDrive.componentItem.getItemStack(6), 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Speed.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getIS(0), 'e',
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Speed.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
 				Items.sugar, 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Range.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getIS(0), 'e',
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Range.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
 				WarpDrive.transportBeaconBlock, 'r', Items.redstone));
 
 	}
