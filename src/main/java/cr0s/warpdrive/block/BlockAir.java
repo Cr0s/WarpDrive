@@ -22,7 +22,7 @@ public class BlockAir extends Block
 	private IIcon[] iconBuffer;
 
 	public BlockAir() {
-		super(Material.air);
+		super(Material.fire);
 		setHardness(0.0F);
 		setBlockName("warpdrive.blocks.Air");
 	}
