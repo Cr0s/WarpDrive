@@ -61,16 +61,13 @@ public abstract class WarpInterfacedTE extends WarpTE implements IPeripheral, En
 		super.updateEntity();
 		
 		if (interfacedFirstTick) {
-			WarpDrive.logger.info("interfacedFirstTick " + peripheralName);
-			String CC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.ComputerCraft/" + peripheralName;
-			String OC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.OpenComputers/" + peripheralName;
 			if (WarpDriveConfig.isCCLoaded) {
+				String CC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.ComputerCraft/" + peripheralName;
 				CC_hasResource = assetExist(CC_path);
-				WarpDrive.logger.info("CC_hasResource " + CC_hasResource);
 			}
 			if (Loader.isModLoaded("OpenComputers")) {
+				String OC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.OpenComputers/" + peripheralName;
 				OC_hasResource = assetExist(OC_path);
-				WarpDrive.logger.info("OC_hasResource " + OC_hasResource);
 			}
 			
 			// deferred constructor so the derived class can finish it's initialization first
