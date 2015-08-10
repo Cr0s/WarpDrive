@@ -1,0 +1,15 @@
+language: java
+jdk:
+- oraclejdk7
+- openjdk7
+- oraclejdk8
+before_install:
+- chmod +x gradlew
+deploy:
+  provider: releases
+  api_key:
+    secure: pCpK6+FtSCcn0Td7vgeQBIA+/toUPNTuROQ0qJM0TRJf6v04qATwhl4CHo4c41cC5dVRmSj9fbT5olUZHucR6mgIKU27hjbjuhELffOB+vKWz+R786DP4VesKQalsBYycbGJEHG8bSYnjE3K7fCpjUrRsNsgY6uQMMEpaQkuUFyoyfG8AWOR1NRcRJTDyyEfnEwrfJ6cPiJUKVoUTC39cmKqy+283rkti6O+WPP6Jzp8xaqv4lbUjGU5qvtp7h7NLHHli95L/VQR3u3Jbc7V8Tq9TFnvJ7ytNB+wL7T+LX9420Jonji6263B6sO99AGvzatShigFzpRjummWtarMzwGDGFwD53EAFwJms6lgxUkWW5Rpd59x68fDr/BFJvrSZE9vpDuemEbVspTQlmHJOzLzaLnJMDveEMzqsrJL3xAYD6mTscfAm86zcWpXs+aAZrhlCSR3S6zPTQaTPXusJKgnXaS5NnfSgIs5cN0e64aavOgdhS8ZVFaq88n/GokBsu7hzZ7gq5tweBMDQo6zij5S81bY+ekYFAe4slyTNZGAt+Rw+Oecdnso+EbWGUiyo2s8DIvXXPF70Jj0PUZlo/Fjmjs11Rypkk92aSwxLsmUedsH08B5NYJRFN/Rc4Gq6lerU4j83B7rtgZf0GuOu+WBULZSVabCEsGZE+DVTqQ=
+  file: build/libs/warpdrive-1.3.2.jar
+  skip_cleanup: true
+  on:
+    tags: true
