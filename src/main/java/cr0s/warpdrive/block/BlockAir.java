@@ -162,7 +162,7 @@ public class BlockAir extends Block
 		// Count air in adjacent blocks
 		Block xp_block = world.getBlock(x + 1, y, z);
 		boolean xp_isAir = world.isAirBlock(x + 1, y, z);;
-		int xp_concentration = (xp_block.isAssociatedBlock(this)) ? 0 : world.getBlockMetadata(x + 1, y, z);
+		int xp_concentration = (xp_block != this) ? 0 : world.getBlockMetadata(x + 1, y, z);
 		if (xp_isAir) {
 			air_count++;
 			if (xp_concentration > 0) {
@@ -244,9 +244,9 @@ public class BlockAir extends Block
 		}
 		if (concentration != new_concentration) {
 			if (concentration == 15) {
-				if (!xp_block.isAssociatedBlock(WarpDrive.airgenBlock) && !xn_block.isAssociatedBlock(WarpDrive.airgenBlock)
-						&& !yp_block.isAssociatedBlock(WarpDrive.airgenBlock) && !yn_block.isAssociatedBlock(WarpDrive.airgenBlock)
-						&& !zp_block.isAssociatedBlock(WarpDrive.airgenBlock) && !zn_block.isAssociatedBlock(WarpDrive.airgenBlock)) {
+				if ( xp_block != WarpDrive.airgenBlock && xn_block != WarpDrive.airgenBlock
+				  && yp_block != WarpDrive.airgenBlock && yn_block != WarpDrive.airgenBlock
+				  && zp_block != WarpDrive.airgenBlock && zn_block != WarpDrive.airgenBlock) {
 					//        			WarpDrive.debugPrint("AirGenerator not found, removing air block at " + x + ", " + y + ", " + z);
 					world.setBlockMetadataWithNotify(x, y, z, 1, 2);
 				} else {
