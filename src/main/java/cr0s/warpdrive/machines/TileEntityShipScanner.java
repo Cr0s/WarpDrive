@@ -50,16 +50,16 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 	public TileEntityShipScanner() {
 		super();
-		peripheralName = "shipscanner";
+		peripheralName = "warpdriveShipScanner";
 		methodsArray = new String[] { "scan", "fileName", "getEnergyLevel", "deploy", "state" };
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
-
-		super.updateEntity();
 
 		if (++warpCoreSearchTicks > 20) {
 			core = searchWarpCore();
@@ -244,7 +244,6 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 		NBTTagList localBlocks = new NBTTagList();
 		byte localMetadata[] = new byte[size];
-		boolean extra = false;
 
 		NBTTagList tileEntitiesList = new NBTTagList();
 
@@ -446,7 +445,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 		// Load Tile Entities
 		NBTTagCompound[] tileEntities = new NBTTagCompound[blocksToDeployCount];
-		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", new NBTTagByteArray(new byte[0]).getId()); //TODO: 0 is not corect
+		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", new NBTTagByteArray(new byte[0]).getId()); //TODO: 0 is not correct
 
 		for (int i = 0; i < tileEntitiesList.tagCount(); i++) {
 			NBTTagCompound teTag = tileEntitiesList.getCompoundTagAt(i);

@@ -23,7 +23,7 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IBl
 
 	public TileEntityPowerLaser() {
 		methodsArray = new String[] { "energy", "hasReactor", "side", "sendLaser", "help" };
-		peripheralName = "warpdriveReactorLaser";
+		peripheralName = "warpdrivePowerLaser";
 	}
 
 	public TileEntityPowerReactor scanForReactor() {
@@ -94,6 +94,8 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IBl
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (doOnce == false) {
 			scanForReactor();
 			scanForBooster();

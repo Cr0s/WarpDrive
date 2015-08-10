@@ -37,7 +37,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		super();
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
-		peripheralName = "treefarmLaser";
+		peripheralName = "warpdriveLaserTreefarm";
 		methodsArray = new String[] {
 				"start",
 				"stop",

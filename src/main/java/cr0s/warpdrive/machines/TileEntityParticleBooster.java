@@ -17,10 +17,11 @@ public class TileEntityParticleBooster extends WarpEnergyTE {
 	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		ticks++;
 		if (ticks > 20) {

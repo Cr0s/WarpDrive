@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -11,7 +12,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -23,7 +23,7 @@ public class TileEntityRadar extends WarpEnergyTE {
 	
 	public TileEntityRadar() {
 		super();
-		peripheralName = "radar";
+		peripheralName = "warpdriveRadar";
 		methodsArray = new String[] {
 				"scanRadius",
 				"getResultsCount",
@@ -31,15 +31,17 @@ public class TileEntityRadar extends WarpEnergyTE {
 				"getEnergyLevel",
 				"pos"
 			};
+		CC_scripts = Arrays.asList("scan", "ping");
 	}
 	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
-
+		
 		try {
 			if (getBlockMetadata() == 2) {
 				cooldownTime++;
@@ -148,14 +150,6 @@ public class TileEntityRadar extends WarpEnergyTE {
 	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
 		super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/radar", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/scan", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/scan"));
-				computer.mount("/ping", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/ping"));
-			}
-		}
 		if (getBlockMetadata() == 0) {
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 		}

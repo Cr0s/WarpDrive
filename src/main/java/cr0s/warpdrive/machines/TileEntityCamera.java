@@ -23,7 +23,7 @@ public class TileEntityCamera extends WarpInterfacedTE {
 
 	public TileEntityCamera() {
 		super();
-		peripheralName = "camera";
+		peripheralName = "warpdriveCamera";
 		methodsArray = new String[] {
 			"freq"
 		};
@@ -31,6 +31,8 @@ public class TileEntityCamera extends WarpInterfacedTE {
 	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		// Update frequency on clients (recovery mechanism, no need to go too fast)
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			packetSendTicks--;

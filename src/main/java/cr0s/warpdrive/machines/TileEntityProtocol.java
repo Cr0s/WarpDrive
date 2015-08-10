@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -14,7 +15,6 @@ import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -53,7 +53,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 
     public TileEntityProtocol() {
     	super();
-		peripheralName = "warpcore";
+		peripheralName = "warpdriveShipController";
     	methodsArray = new String[] {
             "dim_positive",
             "dim_negative",
@@ -76,10 +76,13 @@ public class TileEntityProtocol extends WarpInterfacedTE {
             "isAttached",
             "getEnergyRequired"
         };
+		CC_scripts = Arrays.asList("startup");
 	}
     
     @Override
     public void updateEntity() {
+		super.updateEntity();
+		
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
@@ -725,19 +728,6 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-    @Override
-	@Optional.Method(modid = "ComputerCraft")
-    public void attach(IComputerAccess computer)  {
-    	super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
-			}
-		}
-    }
-
     @Override
 	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {

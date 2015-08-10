@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import li.cil.oc.api.machine.Arguments;
@@ -21,7 +22,6 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -54,15 +54,19 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 
 	public TileEntityMiningLaser() {
 		super();
-		peripheralName = "mininglaser";
+		peripheralName = "warpdriveMiningLaser";
 		methodsArray = new String[] { "mine", "stop", "isMining", "quarry", "state", "offset" };
+		CC_scripts = Arrays.asList("mine", "stop");
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
+		
 		if (currentState == STATE_IDLE) {
 			delayTicksWarmup = 0;
 			delayTicksScan = 0;
@@ -649,19 +653,6 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public void attach(IComputerAccess computer) {
-		super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/mininglaser", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/mine", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser/mine"));
-				computer.mount("/stop", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser/stop"));
-			}
-		}
-	}
-
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {

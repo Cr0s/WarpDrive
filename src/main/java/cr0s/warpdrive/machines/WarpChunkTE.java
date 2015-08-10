@@ -24,6 +24,8 @@ public abstract class WarpChunkTE extends WarpEnergyTE
 	// OVERRIDES
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (shouldChunkLoad() != areChunksLoaded) {
 			refreshLoading();
 		}

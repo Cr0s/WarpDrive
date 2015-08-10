@@ -56,18 +56,21 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	public TileEntityLaser() {
 		super();
-		peripheralName = "laser";
-		methodsArray = new String[] { "emitBeam", // 0
-				"pos", // 1
-				"freq", // 2
-				"getFirstHit", // 3
-				"getBoosterDXDZ", // 4
-				"camFreq" // 5
+		peripheralName = "warpdriveLaser";
+		methodsArray = new String[] {
+			"emitBeam", // 0
+			"pos", // 1
+			"freq", // 2
+			"getFirstHit", // 3
+			"getBoosterDXDZ", // 4
+			"camFreq" // 5
 		};
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (isWithCamera()) {
 			// Update frequency on clients (recovery mechanism, no need to go
 			// too fast)

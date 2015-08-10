@@ -9,7 +9,7 @@ end
 sides = peripheral.getNames()
 mininglasers = {}
 for key,side in pairs(sides) do
-  if peripheral.getType(side) == "radar" then
+  if peripheral.getType(side) == "warpdriveRadar" then
     print("Wrapping " .. side)
     radar = peripheral.wrap(side)
   end

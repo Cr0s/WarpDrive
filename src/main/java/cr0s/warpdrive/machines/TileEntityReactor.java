@@ -86,12 +86,19 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 	private boolean soundPlayed = false;
 
+	public TileEntityReactor() {
+		super();
+		peripheralName = "warpdriveShipCore";
+		// methodsArray = Arrays.asList("", "");;
+	}
+	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		// Always cooldown
 		if (cooldownTime > 0) {

@@ -1,5 +1,7 @@
 package cr0s.warpdrive.machines;
 
+import java.util.Arrays;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -8,7 +10,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.conf.WarpDriveConfig;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -56,14 +57,17 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 
 	public TileEntityPowerReactor() {
 		super();
-		peripheralName = "warpdriveReactor";
-		methodsArray = new String[] { "active", "energy", // returns energy, max energy, energy rate
-			"instability", // returns ins0,1,2,3
-			"release", // releases all energy
-			"releaseRate", // releases energy when more than arg0 is produced
-			"releaseAbove", // releases any energy above arg0 amount
-			"help" // returns help on arg0 function
+		peripheralName = "warpdrivePowerReactor";
+		methodsArray = new String[] {
+			"active",
+			"energy",		// returns energy, max energy, energy rate
+			"instability",	// returns ins0,1,2,3
+			"release",		// releases all energy
+			"releaseRate",	// releases energy when more than arg0 is produced
+			"releaseAbove",	// releases any energy above arg0 amount
+			"help"			// returns help on arg0 function
 		};
+		CC_scripts = Arrays.asList("startup");
 	}
 
 	private void increaseInstability(ForgeDirection from, boolean isNatural) {
@@ -160,10 +164,11 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		if (WarpDriveConfig.G_DEBUGMODE) {
 			WarpDrive.debugPrint("tickCount " + tickCount + " releasedThisTick " + releasedThisTick + " lasersReceived " + lasersReceived
@@ -384,20 +389,6 @@ public class TileEntityPowerReactor extends WarpEnergyTE implements IBlockUpdate
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-	@Override
-	public void attach(IComputerAccess computer) {
-		super.attach(computer);
-		int id = computer.getID();
-		connectedComputers.put(id, computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/power", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power"));
-			computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/power/startup"));
-			}
-		}
-	}
-
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		// computer is alive => start updating reactor

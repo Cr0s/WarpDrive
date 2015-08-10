@@ -85,10 +85,11 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		ticks++;
 		if (ticks > workRate)  {

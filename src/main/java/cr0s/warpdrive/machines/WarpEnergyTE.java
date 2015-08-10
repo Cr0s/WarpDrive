@@ -182,6 +182,7 @@ public abstract class WarpEnergyTE extends WarpInterfacedTE implements IEnergyHa
     @Override
     public void updateEntity() {
 		super.updateEntity();
+		
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }

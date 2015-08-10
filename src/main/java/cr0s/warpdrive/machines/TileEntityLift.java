@@ -38,17 +38,21 @@ public class TileEntityLift extends WarpEnergyTE {
 		super();
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
-		peripheralName = "warpdriveLaserLift";
-		methodsArray = new String[] { "getEnergyLevel", "mode", "active",
+		peripheralName = "warpdriveLift";
+		methodsArray = new String[] {
+				"getEnergyLevel",
+				"mode",
+				"active",
 				"help" };
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		tickCount++;
 		if (tickCount >= WarpDriveConfig.LL_TICK_RATE) {

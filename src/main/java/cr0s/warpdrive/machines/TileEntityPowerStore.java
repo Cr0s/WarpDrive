@@ -51,14 +51,4 @@ public class TileEntityPowerStore extends WarpEnergyTE {
 		}
 		return null;
 	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-		// nothing to see here
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-		// nothing to see here
-	}
 }

@@ -1837,22 +1837,22 @@ for key,side in pairs(sides) do
 		lmonitor = peripheral.wrap(side)
 		table.insert(monitors, lmonitor)
 		lmonitor.setTextScale(monitor_textScale)
-	elseif peripheral.getType(side) == "warpcore" then
+	elseif peripheral.getType(side) == "warpdriveShipController" then
 		WriteLn("Wrapping " .. side)
 		warpcore = peripheral.wrap(side)
-	elseif peripheral.getType(side) == "warpdriveReactor" then
+	elseif peripheral.getType(side) == "warpdrivePowerReactor" then
 		WriteLn("Wrapping " .. side)
 		reactor =  peripheral.wrap(side)
-	elseif peripheral.getType(side) == "warpdriveReactorLaser" then
+	elseif peripheral.getType(side) == "warpdrivePowerLaser" then
 		WriteLn("Wrapping " .. side)
 		table.insert(reactorlasers, peripheral.wrap(side))
-	elseif peripheral.getType(side) == "mininglaser" then
+	elseif peripheral.getType(side) == "warpdriveMiningLaser" then
 		WriteLn("Wrapping " .. side)
 		table.insert(mininglasers, peripheral.wrap(side))
-	elseif peripheral.getType(side) == "cloakingdevicecore" then
+	elseif peripheral.getType(side) == "warpdriveCloakingCore" then
 		WriteLn("Wrapping " .. side)
 		table.insert(cloakingcores, peripheral.wrap(side))
-	elseif peripheral.getType(side) == "radar" then
+	elseif peripheral.getType(side) == "warpdriveRadar" then
 		WriteLn("Wrapping " .. side)
 		radar = peripheral.wrap(side);
 	end
