@@ -1,7 +1,7 @@
 /**
  *
  */
-package cr0s.warpdrive.conf;
+package cr0s.warpdrive.conf.structures;
 
 import net.minecraft.world.gen.feature.WorldGenerator;
 
