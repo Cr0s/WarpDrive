@@ -5,9 +5,9 @@ import java.util.Random;
 import net.minecraft.world.World;
 import cr0s.warpdrive.world.EntityStarCore;
 
-public class Sun extends Orb {
+public class Star extends Orb {
 	
-	public Sun(int diameter) {
+	public Star(int diameter) {
 		super(diameter);
 		// TODO Auto-generated constructor stub
 	}
