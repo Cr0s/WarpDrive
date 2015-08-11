@@ -13,3 +13,4 @@ deploy:
   on:
     repo: LemADEC/WarpDrive
     branch: MC1.7
+    tags: true 
