@@ -132,14 +132,14 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 					int offset = (yCoord - currentLayer) % (2 * r);
 					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.ML_SCAN_DELAY_TICKS));
 					double y = currentLayer + 1.0D;
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 					delayTicksMine = 0;
 					currentState = STATE_MINING;
@@ -246,12 +246,8 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 			if (stacks != null) {
 				boolean overflow = false;
 				int qtyLeft = 0;
-				ItemStack stackLeft = null;
 				for (ItemStack stack : stacks) {
-					if (qtyLeft > 0) {
-						stackLeft = copyWithSize(stack, qtyLeft);
-						qtyLeft = putInChest(findChest(), stackLeft);
-					}
+					qtyLeft = putInChest(findChest(), stack);
 					if (qtyLeft > 0) {
 						WarpDrive.debugPrint("" + this + " Overflow detected");
 						overflow = true;
