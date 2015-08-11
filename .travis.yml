@@ -6,7 +6,7 @@ jdk:
 before_install:
 - chmod +x gradlew
 before_deploy:
-  - export RELEASE_FILE=$(ls build/lib/*.jar)
+  - export RELEASE_FILE=$(ls build/libs/*.jar)
   - echo "deploying ${RELEASE_PKG_FILE} to GitHub releases"
 deploy:
   provider: releases
