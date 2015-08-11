@@ -10,14 +10,16 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class BlockGas extends Block {
-	private IIcon[] gasIcons;
+	private IIcon[] iconBuffer;
 
 	public BlockGas() {
-		super(Material.air);
+		super(Material.fire);
 		setHardness(0.0F);
+		setCreativeTab(WarpDrive.warpdriveTab);
 		setBlockName("warpdrive.blocks.Gas");
 	}
 
@@ -58,24 +60,24 @@ public class BlockGas extends Block {
 
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
-		gasIcons = new IIcon[12];
-		gasIcons[0] = par1IconRegister.registerIcon("warpdrive:gasBlockBlue");
-		gasIcons[1] = par1IconRegister.registerIcon("warpdrive:gasBlockRed");
-		gasIcons[2] = par1IconRegister.registerIcon("warpdrive:gasBlockGreen");
-		gasIcons[3] = par1IconRegister.registerIcon("warpdrive:gasBlockYellow");
-		gasIcons[4] = par1IconRegister.registerIcon("warpdrive:gasBlockDark");
-		gasIcons[5] = par1IconRegister.registerIcon("warpdrive:gasBlockDarkness");
-		gasIcons[6] = par1IconRegister.registerIcon("warpdrive:gasBlockWhite");
-		gasIcons[7] = par1IconRegister.registerIcon("warpdrive:gasBlockMilk");
-		gasIcons[8] = par1IconRegister.registerIcon("warpdrive:gasBlockOrange");
-		gasIcons[9] = par1IconRegister.registerIcon("warpdrive:gasBlockSyren");
-		gasIcons[10] = par1IconRegister.registerIcon("warpdrive:gasBlockGray");
-		gasIcons[11] = par1IconRegister.registerIcon("warpdrive:gasBlockViolet");
+		iconBuffer = new IIcon[12];
+		iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:gasBlockBlue");
+		iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:gasBlockRed");
+		iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:gasBlockGreen");
+		iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:gasBlockYellow");
+		iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:gasBlockDark");
+		iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:gasBlockDarkness");
+		iconBuffer[6] = par1IconRegister.registerIcon("warpdrive:gasBlockWhite");
+		iconBuffer[7] = par1IconRegister.registerIcon("warpdrive:gasBlockMilk");
+		iconBuffer[8] = par1IconRegister.registerIcon("warpdrive:gasBlockOrange");
+		iconBuffer[9] = par1IconRegister.registerIcon("warpdrive:gasBlockSyren");
+		iconBuffer[10] = par1IconRegister.registerIcon("warpdrive:gasBlockGray");
+		iconBuffer[11] = par1IconRegister.registerIcon("warpdrive:gasBlockViolet");
 	}
 
 	@Override
 	public IIcon getIcon(int side, int metadata) {
-		return gasIcons[metadata % gasIcons.length];	// Lem
+		return iconBuffer[metadata % iconBuffer.length];
 	}
 
 	@Override

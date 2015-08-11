@@ -35,7 +35,9 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 	public TileEntityLaserTreeFarm() {
 		super();
-		peripheralName = "treefarmLaser";
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
+		peripheralName = "warpdriveLaserTreefarm";
 		methodsArray = new String[] {
 				"start",
 				"stop",
@@ -98,7 +100,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						int cost = calculateBlockCost(block);
 						if (consumeEnergyFromBooster(cost, true)) {
 							if (isRoomForHarvest()) {
-								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_RubberWood.getItem()))) {
+								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_rubberWood.getItem()))) {
 									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
 									if (metadata >= 2 && metadata <= 5) {
 										WarpDrive.debugPrint("wetspot found");
@@ -340,17 +342,5 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	protected float getColorB() {
 		return 0.4f;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 2;
 	}
 }

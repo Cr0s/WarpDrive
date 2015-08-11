@@ -6,7 +6,7 @@ end
 sides = peripheral.getNames()
 mininglasers = {}
 for key,side in pairs(sides) do
-  if peripheral.getType(side) == "mininglaser" then
+  if peripheral.getType(side) == "warpdriveMiningLaser" then
     print("Wrapping " .. side)
     table.insert(mininglasers, peripheral.wrap(side))
   end

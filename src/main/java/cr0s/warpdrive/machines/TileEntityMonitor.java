@@ -19,7 +19,7 @@ public class TileEntityMonitor extends WarpInterfacedTE {
 
 	public TileEntityMonitor() {
 		super();
-		peripheralName = "monitor";
+		peripheralName = "warpdriveMonitor";
 		methodsArray = new String[] {
 			"freq"
 		};
@@ -27,6 +27,8 @@ public class TileEntityMonitor extends WarpInterfacedTE {
 	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			packetSendTicks--;
 			if (packetSendTicks <= 0) {
@@ -65,7 +67,7 @@ public class TileEntityMonitor extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] freq(Context context, Arguments arguments) {
+	public Object[] freq(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			setFrequency(arguments.checkInteger(0));
 		}

@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -71,11 +70,11 @@ public class BlockCloakingDeviceCore extends BlockContainer {
 
 		TileEntityCloakingDeviceCore te = (TileEntityCloakingDeviceCore)par1World.getTileEntity(par2, par3, par4);
 		if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-			par5EntityPlayer.addChatMessage(new ChatComponentText(te.getStatus() + "\n"
-					//        			+ " Valid? " + te.isValid + " Cloaking? " + te.isCloaking + " Enabled? " + te.isEnabled + "\n"
+			WarpDrive.addChatMessage(par5EntityPlayer, te.getStatus()
+					// + " isInvalid? " + te.isInvalid() + " Valid? " + te.isValid + " Cloaking? " + te.isCloaking + " Enabled? " + te.isEnabled
 					+ ((!te.isValid) ? "Invalid assembly!" :
 						((!te.isEnabled) ? "Cloak is disabled" :
-							((te.isCloaking) ? "A tier " + te.tier + " cloak is currently covering " + te.volume + " blocks!" : "Cloak needs more power!")))));
+							((te.isCloaking) ? "A tier " + te.tier + " cloak is currently covering " + te.volume + " blocks!" : "Cloak needs more power!"))));
 			return true;
 		}
 

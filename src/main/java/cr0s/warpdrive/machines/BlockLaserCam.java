@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -79,9 +78,9 @@ public class BlockLaserCam extends BlockContainer {
 
 			CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, cameraFrequency);
 			WarpDrive.debugPrint("cam detected as " + cam);
-			par5EntityPlayer.addChatMessage(new ChatComponentText(getLocalizedName()
+			WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName()
 					+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.")
-					+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ)));
+					+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
 			return true;
 		}
 

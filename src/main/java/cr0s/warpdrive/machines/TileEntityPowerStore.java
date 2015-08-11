@@ -9,6 +9,8 @@ public class TileEntityPowerStore extends WarpEnergyTE {
 
 	public TileEntityPowerStore() {
 		super();
+		IC2_sinkTier = 0;
+		IC2_sourceTier = 0;
 		peripheralName = "warpdrivePowerStore";
 		methodsArray = new String[] {
 				"getEnergyLevel"
@@ -48,27 +50,5 @@ public class TileEntityPowerStore extends WarpEnergyTE {
 			return getEnergyLevel();
 		}
 		return null;
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-		// nothing to see here
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-		// nothing to see here
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 }

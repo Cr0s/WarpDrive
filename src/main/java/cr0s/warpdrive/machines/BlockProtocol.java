@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -102,7 +101,7 @@ public class BlockProtocol extends BlockContainer {
 			TileEntityProtocol controller = (TileEntityProtocol)par1World.getTileEntity(par2, par3, par4);
 			if (controller != null) {
 				controller.attachPlayer(par5EntityPlayer);
-				par5EntityPlayer.addChatMessage(new ChatComponentText(controller.getBlockType().getLocalizedName() + " Attached players: " + controller.getAttachedPlayersList()));
+				WarpDrive.addChatMessage(par5EntityPlayer, controller.getBlockType().getLocalizedName() + " Attached players: " + controller.getAttachedPlayersList());
 				return true;
 			}
 		}

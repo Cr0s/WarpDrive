@@ -81,20 +81,20 @@ public class PacketHandler {
 	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
 		FrequencyMessage frequencyMessage = new FrequencyMessage(xCoord, yCoord, zCoord, frequency);
 		simpleNetworkManager.sendToAllAround(frequencyMessage, new TargetPoint(dimensionId, xCoord, yCoord, zCoord, 100));
-		WarpDrive.debugPrint("Packet 'frequency' sent (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
+		WarpDrive.debugPrint("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
 	}
 	
 	// LaserCamera shooting at target (client -> server)
 	public static void sendLaserTargetingPacket(int x, int y, int z, float yaw, float pitch) {
 		TargetingMessage targetingMessage = new TargetingMessage(x, y, z, yaw, pitch);
 		simpleNetworkManager.sendToServer(targetingMessage);
-		WarpDrive.debugPrint("Packet 'targeting' sent (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
+		WarpDrive.debugPrint("Sent targeting packet (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
 	}
 	
 	// Sending cloaking area definition (server -> client)
 	public static void sendCloakPacket(EntityPlayer player, AxisAlignedBB aabb, int tier, boolean decloak) {
 		CloakMessage cloakMessage = new CloakMessage(aabb, tier, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
-		WarpDrive.debugPrint("Packet 'cloak' sent (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+		WarpDrive.debugPrint("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
 	}
 }

@@ -36,17 +36,23 @@ public class TileEntityLift extends WarpEnergyTE {
 
 	public TileEntityLift() {
 		super();
-		peripheralName = "warpdriveLaserLift";
-		methodsArray = new String[] { "getEnergyLevel", "mode", "active",
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
+		peripheralName = "warpdriveLift";
+		methodsArray = new String[] {
+				"getEnergyLevel",
+				"mode",
+				"active",
 				"help" };
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		tickCount++;
 		if (tickCount >= WarpDriveConfig.LL_TICK_RATE) {
@@ -201,13 +207,13 @@ public class TileEntityLift extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mode(Context context, Arguments arguments) {
+	public Object[] mode(Context context, Arguments arguments) {
 		return mode(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] active(Context context, Arguments arguments) {
+	public Object[] active(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			computerEnabled = arguments.checkBoolean(0);
 		}
@@ -271,17 +277,5 @@ public class TileEntityLift extends WarpEnergyTE {
 			return new Object[] { helpStr(arguments) };
 		}
 		return null;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Arbitrarily chosen value
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Arbitrarily chosen value
-		return 2;
 	}
 }

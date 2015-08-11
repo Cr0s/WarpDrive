@@ -1,0 +1,21 @@
+language: java
+jdk:
+- oraclejdk7
+- openjdk7
+- oraclejdk8
+before_install:
+- chmod +x gradlew
+before_deploy:
+  - export RELEASE_FILE=$(ls build/libs/*.jar)
+  - echo "deploying ${RELEASE_PKG_FILE} to GitHub releases"
+deploy:
+  provider: releases
+  api_key:
+    secure: IzGBMb7m6y5DgoeNtlcRU4vnfnpULwrLEqbYnrK65mXh8LFR5QXRPcS5qhMctwbl4ZCXxe8BMSUegFo3grRPDQ8m1CJDt6Jh6+GydhQbuf5NtUOFMTrH5s2Ob5q23xXhxJGrQEFCm+a0L9YPDAV234UTOdUZZ6KAow5+E8hVx3PZGFWgFMUmSa/uX0Aqh++FfRMDcWtRtp9r6sth23JCgcO4Ryxohd67OYvFbvhoHBLDG5SpD0iRweY/uLVA/DIZuazdb+grqGocjCpzrh8a/bbUxUF4CbJOiInY2/9EuSgIIC267K5P76UKEAutMtC2/vx/EdHNapTRGjgXCU8FOBkepFZ6Rc97mPxFDvCK0xBIRcftO4f1fs27SS/MkQBaEVqd8wZxuDDcHcX3H2+84VM+9isGBmNdxgz+r5RDnDKcfATg3c2saN4X6Lz/CP4kVjiGb02rwZlS2e8BZIFWi/ahdEJY/IdzfnbfS5S+7hxddbtIOWnNsZ2JLTN0MzJYCCD6IXTloUBmljokQgB1vRY4Xzm7iDeF/yew2Jiuo1JoQI9RVlbBOXY+XobCz93yjeFvhOHIm/1y5wZff5bFO9LAshEwCriD1wjcnpac4qvy/RpRzUKnvUZyGoWdNBq8egrY3EZT7rV0DRFeiXLG6j1BB65LjvlK0wWhadn6Kps=
+  file_glob: true
+  file: "${RELEASE_FILE}"
+  on:
+    repo: LemADEC/WarpDrive
+    branch: MC1.7
+    tags: true 
+    jdk: oraclejdk7

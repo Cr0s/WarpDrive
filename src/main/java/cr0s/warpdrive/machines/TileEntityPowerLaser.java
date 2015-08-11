@@ -1,5 +1,6 @@
 package cr0s.warpdrive.machines;
 
+import cpw.mods.fml.common.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -9,9 +10,8 @@ import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
 
-public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPeripheral, IBlockUpdateDetector {
+public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IBlockUpdateDetector {
 	Vector3 myVec;
 	Vector3 reactorVec;
 	ForgeDirection side = ForgeDirection.UNKNOWN;
@@ -21,7 +21,10 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 	boolean useLaser = false;
 	boolean doOnce = false;
 
-	String[] methodArray = { "energy", "hasReactor", "side", "sendLaser", "help" };
+	public TileEntityPowerLaser() {
+		methodsArray = new String[] { "energy", "hasReactor", "side", "sendLaser", "help" };
+		peripheralName = "warpdrivePowerLaser";
+	}
 
 	public TileEntityPowerReactor scanForReactor() {
 		reactor = null;
@@ -91,6 +94,8 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (doOnce == false) {
 			scanForReactor();
 			scanForBooster();
@@ -144,16 +149,6 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		super.readFromNBT(nbt);
 	}
 
-	@Override
-	public String getType() {
-		return "warpdriveReactorLaser";
-	}
-
-	@Override
-	public String[] getMethodNames() {
-		return methodArray;
-	}
-
 	private static String helpStr(Object[] args) {
 		if (args.length > 0) {
 			String arg = args[0].toString().toLowerCase();
@@ -170,9 +165,11 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 		return WarpDrive.defHelpStr;
 	}
 
+	// ComputerCraft methods
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodArray[method];
+		String methodName = methodsArray[method];
 		if (methodName.equals("energy")) {
 			scanForBooster();
 			if (booster == null) {
@@ -192,30 +189,5 @@ public class TileEntityPowerLaser extends TileEntityAbstractLaser implements IPe
 			return new Object[] { side.ordinal() - 2 };
 		}
 		return null;
-	}
-
-	@Override
-	public void attach(IComputerAccess computer) {
-	}
-
-	@Override
-	public void detach(IComputerAccess computer) {
-	}
-
-	@Override
-	public boolean equals(IPeripheral other) {
-		return other == this;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
 	}
 }

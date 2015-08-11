@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -90,7 +89,7 @@ public class BlockReactor extends BlockContainer {
 		if (par5EntityPlayer.getHeldItem() == null) {
 			TileEntity te = par1World.getTileEntity(par2, par3, par4);
 			if (te != null && te instanceof TileEntityReactor) {
-				par5EntityPlayer.addChatMessage(new ChatComponentText(((TileEntityReactor)te).getStatus()));
+				WarpDrive.addChatMessage(par5EntityPlayer, ((TileEntityReactor)te).getStatus());
 				return true;
 			}
 		}

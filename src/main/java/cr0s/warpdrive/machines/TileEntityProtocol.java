@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -8,14 +9,12 @@ import li.cil.oc.api.machine.Context;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.machines.TileEntityReactor.ReactorMode;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -54,7 +53,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 
     public TileEntityProtocol() {
     	super();
-		peripheralName = "warpcore";
+		peripheralName = "warpdriveShipController";
     	methodsArray = new String[] {
             "dim_positive",
             "dim_negative",
@@ -77,10 +76,13 @@ public class TileEntityProtocol extends WarpInterfacedTE {
             "isAttached",
             "getEnergyRequired"
         };
+		CC_scripts = Arrays.asList("startup");
 	}
     
     @Override
     public void updateEntity() {
+		super.updateEntity();
+		
         if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
             return;
         }
@@ -171,7 +173,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
             String name = players.get(i);
 
             if (entityPlayer.getDisplayName().equals(name)) {
-            	entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Detached."));
+            	WarpDrive.addChatMessage(entityPlayer, getBlockType().getLocalizedName() + " Detached.");
                 players.remove(i);
                 return;
             }
@@ -180,7 +182,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
         entityPlayer.attackEntityFrom(DamageSource.generic, 1);
         players.add(entityPlayer.getDisplayName());
         updatePlayersString();
-        entityPlayer.addChatMessage(new ChatComponentText(getBlockType().getLocalizedName() + " Successfully attached."));
+        WarpDrive.addChatMessage(entityPlayer, getBlockType().getLocalizedName() + " Successfully attached.");
     }
 
     public void updatePlayersString() {
@@ -420,56 +422,56 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] dim_positive(Context context, Arguments arguments) {
+	public Object[] dim_positive(Context context, Arguments arguments) {
 		return dim_positive(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] dim_negative(Context context, Arguments arguments) {
+	public Object[] dim_negative(Context context, Arguments arguments) {
 		return dim_negative(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mode(Context context, Arguments arguments) {
+	public Object[] mode(Context context, Arguments arguments) {
 		return mode(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] distance(Context context, Arguments arguments) {
+	public Object[] distance(Context context, Arguments arguments) {
 		return distance(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] direction(Context context, Arguments arguments) {
+	public Object[] direction(Context context, Arguments arguments) {
 		return direction(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getAttachedPlayers(Context context, Arguments arguments) {
+	public Object[] getAttachedPlayers(Context context, Arguments arguments) {
 		return getAttachedPlayers(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] summon(Context context, Arguments arguments) {
+	public Object[] summon(Context context, Arguments arguments) {
 		return summon(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] summon_all(Context context, Arguments arguments) {
+	public Object[] summon_all(Context context, Arguments arguments) {
 		setSummonAllFlag(true);
 		return null;
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] pos(Context context, Arguments arguments) {
+	public Object[] pos(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -479,7 +481,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getEnergyLevel(Context context, Arguments arguments) {
+	public Object[] getEnergyLevel(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -489,7 +491,7 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getEnergyRequired(Context context, Arguments arguments) {
+	public Object[] getEnergyRequired(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -499,26 +501,26 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] jump(Context context, Arguments arguments) {
+	public Object[] jump(Context context, Arguments arguments) {
 		doJump();
 		return null;
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getShipSize(Context context, Arguments arguments) {
+	public Object[] getShipSize(Context context, Arguments arguments) {
 		return getShipSize(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] beaconFrequency(Context context, Arguments arguments) {
+	public Object[] beaconFrequency(Context context, Arguments arguments) {
 		return beaconFrequency(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getOrientation(Context context, Arguments arguments) {
+	public Object[] getOrientation(Context context, Arguments arguments) {
 		if (core != null) {
 			return new Object[] { core.dx, 0, core.dz };
 		}
@@ -527,31 +529,31 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] coreFrequency(Context context, Arguments arguments) {
+	public Object[] coreFrequency(Context context, Arguments arguments) {
 		return coreFrequency(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isInSpace(Context context, Arguments arguments) {
+	public Object[] isInSpace(Context context, Arguments arguments) {
 		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isInHyperspace(Context context, Arguments arguments) {
+	public Object[] isInHyperspace(Context context, Arguments arguments) {
 		return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID };
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] targetJumpgate(Context context, Arguments arguments) {
+	public Object[] targetJumpgate(Context context, Arguments arguments) {
 		return targetJumpgate(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isAttached(Context context, Arguments arguments) {
+	public Object[] isAttached(Context context, Arguments arguments) {
 		if (core != null) {
 			return new Object[] { (boolean) (core.controller != null) };
 		}
@@ -726,19 +728,6 @@ public class TileEntityProtocol extends WarpInterfacedTE {
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-    @Override
-	@Optional.Method(modid = "ComputerCraft")
-    public void attach(IComputerAccess computer)  {
-    	super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-	        computer.mount("/warpcontroller", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-		        computer.mount("/startup", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/warpcontroller/startup"));
-			}
-		}
-    }
-
     @Override
 	@Optional.Method(modid = "ComputerCraft")
     public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {

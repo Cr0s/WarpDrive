@@ -9,7 +9,6 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -89,7 +88,7 @@ public class BlockMiningLaser extends BlockContainer {
 		TileEntityMiningLaser miningLaser = (TileEntityMiningLaser)par1World.getTileEntity(par2, par3, par4);
 
 		if (miningLaser != null && (par5EntityPlayer.getHeldItem() == null)) {
-			par5EntityPlayer.addChatMessage(new ChatComponentText(miningLaser.getStatus()));
+			WarpDrive.addChatMessage(par5EntityPlayer, miningLaser.getStatus());
 			return true;
 		}
 

@@ -11,7 +11,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -95,7 +94,7 @@ public class BlockAirGenerator extends BlockContainer
 		if (te != null) {
 			ItemStack heldItemStack = player.getHeldItem();
 			if (heldItemStack == null) {
-				player.addChatMessage(new ChatComponentText(te.getStatus()));
+				WarpDrive.addChatMessage(player, te.getStatus());
 				return true;
 			} else {
 				Item heldItem = heldItemStack.getItem();

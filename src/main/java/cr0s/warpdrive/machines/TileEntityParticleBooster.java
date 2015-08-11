@@ -8,12 +8,20 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 public class TileEntityParticleBooster extends WarpEnergyTE {
 	private int ticks = 0;
 
+	public TileEntityParticleBooster() {
+		peripheralName = "warpdriveParticleBooster";
+		methodsArray = new String[] {
+			"getEnergyLevel"
+		};
+	}
+	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		ticks++;
 		if (ticks > 20) {
@@ -45,17 +53,5 @@ public class TileEntityParticleBooster extends WarpEnergyTE {
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
 	}
 }

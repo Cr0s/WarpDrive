@@ -3,7 +3,6 @@ package cr0s.warpdrive.command;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
@@ -42,7 +41,7 @@ public class GenerateCommand extends CommandBase {
 
 			// Reject command, if player is not in space
 			if (player.dimension != WarpDriveConfig.G_SPACE_DIMENSION_ID && (!"ship".equals(struct))) {
-				player.addChatMessage(new ChatComponentText("* generate: this structure is only allowed in space!"));
+				WarpDrive.addChatMessage(player, "* generate: this structure is only allowed in space!");
 				return;
 			}
 
@@ -84,11 +83,11 @@ public class GenerateCommand extends CommandBase {
 						}
 					}
 				} else {
-					player.addChatMessage(new ChatComponentText(getCommandUsage(icommandsender)));
+					WarpDrive.addChatMessage(player, getCommandUsage(icommandsender));
 				}
 			}
 		} else {
-			player.addChatMessage(new ChatComponentText(getCommandUsage(icommandsender)));
+			WarpDrive.addChatMessage(player, getCommandUsage(icommandsender));
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -11,7 +12,6 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -23,7 +23,7 @@ public class TileEntityRadar extends WarpEnergyTE {
 	
 	public TileEntityRadar() {
 		super();
-		peripheralName = "radar";
+		peripheralName = "warpdriveRadar";
 		methodsArray = new String[] {
 				"scanRadius",
 				"getResultsCount",
@@ -31,15 +31,17 @@ public class TileEntityRadar extends WarpEnergyTE {
 				"getEnergyLevel",
 				"pos"
 			};
+		CC_scripts = Arrays.asList("scan", "ping");
 	}
 	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
-
+		
 		try {
 			if (getBlockMetadata() == 2) {
 				cooldownTime++;
@@ -68,13 +70,13 @@ public class TileEntityRadar extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] scanRadius(Context context, Arguments arguments) {
+	public Object[] scanRadius(Context context, Arguments arguments) {
 		return scanRadius(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getResultsCount(Context context, Arguments arguments) {
+	public Object[] getResultsCount(Context context, Arguments arguments) {
 		if (results != null) {
 			return new Integer[] { results.size() };
 		}
@@ -83,13 +85,13 @@ public class TileEntityRadar extends WarpEnergyTE {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getResult(Context context, Arguments arguments) {
+	public Object[] getResult(Context context, Arguments arguments) {
 		return getResult(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] pos(Context context, Arguments arguments) {
+	public Object[] pos(Context context, Arguments arguments) {
 		return new Integer[] { xCoord, yCoord, zCoord };
 	}
 	
@@ -148,14 +150,6 @@ public class TileEntityRadar extends WarpEnergyTE {
 	@Optional.Method(modid = "ComputerCraft")
 	public void attach(IComputerAccess computer) {
 		super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/radar", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar"));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/common/updater"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/scan", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/scan"));
-				computer.mount("/ping", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/radar/ping"));
-			}
-		}
 		if (getBlockMetadata() == 0) {
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 		}
@@ -203,16 +197,4 @@ public class TileEntityRadar extends WarpEnergyTE {
     public boolean canInputEnergy(ForgeDirection from) {
     	return true;
     }
-
-	@Override
-	public int getSinkTier() {
-		// TODO Arbitrarily chosen value
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Arbitrarily chosen value
-		return 3;
-	}
 }

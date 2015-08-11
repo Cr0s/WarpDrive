@@ -5,7 +5,6 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -82,7 +81,7 @@ public class DebugCommand extends CommandBase
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				player.addChatMessage(new ChatComponentText(getCommandUsage(icommandsender)));
+				WarpDrive.addChatMessage(player, getCommandUsage(icommandsender));
 				return;
 			}
 
@@ -150,7 +149,7 @@ public class DebugCommand extends CommandBase
 		}
 		else
 		{
-			player.addChatMessage(new ChatComponentText(getCommandUsage(icommandsender)));
+			WarpDrive.addChatMessage(player, getCommandUsage(icommandsender));
 		}
 	}
 

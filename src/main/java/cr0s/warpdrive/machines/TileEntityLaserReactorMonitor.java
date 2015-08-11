@@ -21,6 +21,12 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	private final int workRate = 10;
 	private int ticks = 0;
 
+	public TileEntityLaserReactorMonitor() {
+		super();
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
+	}
+	
 	private Set<Object> findReactors() {//returns either IReactor or IReactorChamber tile entity
 		int[] xD = {-2, 2, 0, 0, 0, 0};
 		int[] yD = { 0, 0,-2, 2, 0, 0};
@@ -79,10 +85,11 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		ticks++;
 		if (ticks > workRate)  {
@@ -132,17 +139,5 @@ public class TileEntityLaserReactorMonitor extends TileEntityAbstractLaser {
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 2;
 	}
 }

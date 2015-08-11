@@ -1,6 +1,7 @@
 package cr0s.warpdrive.machines;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import li.cil.oc.api.machine.Arguments;
@@ -21,7 +22,6 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
-import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
@@ -54,15 +54,19 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 
 	public TileEntityMiningLaser() {
 		super();
-		peripheralName = "mininglaser";
+		peripheralName = "warpdriveMiningLaser";
 		methodsArray = new String[] { "mine", "stop", "isMining", "quarry", "state", "offset" };
+		CC_scripts = Arrays.asList("mine", "stop");
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
+		
 		if (currentState == STATE_IDLE) {
 			delayTicksWarmup = 0;
 			delayTicksScan = 0;
@@ -128,14 +132,14 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 					int offset = (yCoord - currentLayer) % (2 * r);
 					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.ML_SCAN_DELAY_TICKS));
 					double y = currentLayer + 1.0D;
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D), 0.0F, 0.0F, 1.0F, age,
-							0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
+					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D),
+							0.0F, 0.0F, 1.0F, age, 0, 50);
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 					delayTicksMine = 0;
 					currentState = STATE_MINING;
@@ -242,12 +246,8 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 			if (stacks != null) {
 				boolean overflow = false;
 				int qtyLeft = 0;
-				ItemStack stackLeft = null;
 				for (ItemStack stack : stacks) {
-					if (qtyLeft > 0) {
-						stackLeft = copyWithSize(stack, qtyLeft);
-						qtyLeft = putInChest(findChest(), stackLeft);
-					}
+					qtyLeft = putInChest(findChest(), stack);
 					if (qtyLeft > 0) {
 						WarpDrive.debugPrint("" + this + " Overflow detected");
 						overflow = true;
@@ -563,38 +563,38 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] mine(Context context, Arguments arguments) {
+	public Object[] mine(Context context, Arguments arguments) {
 		return mine(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] stop(Context context, Arguments arguments) {
+	public Object[] stop(Context context, Arguments arguments) {
 		stop();
 		return null;
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] isMining(Context context, Arguments arguments) {
+	public Object[] isMining(Context context, Arguments arguments) {
 		return new Boolean[] { isMining() };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] quarry(Context context, Arguments arguments) {
+	public Object[] quarry(Context context, Arguments arguments) {
 		return quarry(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] state(Context context, Arguments arguments) {
+	public Object[] state(Context context, Arguments arguments) {
 		return state(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] offset(Context context, Arguments arguments) {
+	public Object[] offset(Context context, Arguments arguments) {
 		return offset(argumentsOCtoCC(arguments));
 	}
 
@@ -649,19 +649,6 @@ public class TileEntityMiningLaser extends WarpInterfacedTE {
 	}
 
 	// ComputerCraft IPeripheral methods implementation
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public void attach(IComputerAccess computer) {
-		super.attach(computer);
-		if (WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
-			computer.mount("/mininglaser", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser"));
-			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
-				computer.mount("/mine", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser/mine"));
-				computer.mount("/stop", ComputerCraftAPI.createResourceMount(WarpDrive.class, "warpdrive", "lua/mininglaser/stop"));
-			}
-		}
-	}
-
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {

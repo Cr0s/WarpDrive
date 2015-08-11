@@ -16,12 +16,19 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
 	private final int AIR_GENERATION_TICKS = 40;
 	private final int START_CONCENTRATION_VALUE = 15;
 
+	public TileEntityAirGenerator() {
+		super();
+		peripheralName = "warpdriveAirGenerator";
+		// methodsArray = Arrays.asList("", "");;
+	}
+	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		if (this.isInvalid()) {
 			return;
@@ -115,17 +122,5 @@ public class TileEntityAirGenerator extends WarpEnergyTE {
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
 	}
 }

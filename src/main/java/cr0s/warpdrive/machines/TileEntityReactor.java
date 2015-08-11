@@ -15,7 +15,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
@@ -87,12 +86,19 @@ public class TileEntityReactor extends WarpEnergyTE {
 
 	private boolean soundPlayed = false;
 
+	public TileEntityReactor() {
+		super();
+		peripheralName = "warpdriveShipCore";
+		// methodsArray = Arrays.asList("", "");;
+	}
+	
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		super.updateEntity();
 
 		// Always cooldown
 		if (cooldownTime > 0) {
@@ -312,12 +318,12 @@ public class TileEntityReactor extends WarpEnergyTE {
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 
 		WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
-		for (Object o : list) {
-			if (o == null || !(o instanceof EntityPlayer)) {
+		for (Object object : list) {
+			if (object == null || !(object instanceof EntityPlayer)) {
 				continue;
 			}
-
-			((EntityPlayer) o).addChatMessage(new ChatComponentText("[" + (coreFrequency.length() > 0 ? coreFrequency : "WarpCore") + "] " + msg));
+			
+			WarpDrive.addChatMessage((EntityPlayer) object, "[" + (coreFrequency.length() > 0 ? coreFrequency : "WarpCore") + "] " + msg);
 		}
 	}
 
@@ -1089,17 +1095,5 @@ public class TileEntityReactor extends WarpEnergyTE {
 				"%s \'%s\' @ \'%s\' %d, %d, %d",
 				new Object[] { getClass().getSimpleName(), coreFrequency, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
 						Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord) });
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 3;
 	}
 }

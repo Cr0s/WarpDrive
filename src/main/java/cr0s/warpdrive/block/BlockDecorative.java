@@ -79,9 +79,9 @@ public class BlockDecorative extends Block {
 	}
 
 	public void initRecipes() {
-		GameRegistry.addRecipe(new ShapedOreRecipe(getISNoCache(0, 8), false, "sss", "scs", "sss", 's', Blocks.stone, 'c', WarpDrive.componentItem.getIS(0)));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getISNoCache(0, 8), false, "sss", "scs", "sss", 's', Blocks.stone, 'c', WarpDrive.componentItem.getItemStack(0)));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getISNoCache(2, 8), false, "sss", "scs", "sss", 's', getIS(0), 'c', WarpDrive.componentItem.getIS(5)));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getISNoCache(2, 8), false, "sss", "scs", "sss", 's', getIS(0), 'c', WarpDrive.componentItem.getItemStack(5)));
 	}
 
 }

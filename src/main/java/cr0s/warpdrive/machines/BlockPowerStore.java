@@ -3,10 +3,10 @@ package cr0s.warpdrive.machines;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.WarpDrive;
 
 public class BlockPowerStore extends WarpBlockContainer {
 	private IIcon iconBuffer;
@@ -41,7 +41,7 @@ public class BlockPowerStore extends WarpBlockContainer {
 
 		WarpEnergyTE te = (WarpEnergyTE) par1World.getTileEntity(par2, par3, par4);
 		if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-			par5EntityPlayer.addChatMessage(new ChatComponentText(te.getStatus()));
+			WarpDrive.addChatMessage(par5EntityPlayer, te.getStatus());
 			return true;
 		}
 

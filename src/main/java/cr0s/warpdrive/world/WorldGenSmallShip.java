@@ -21,7 +21,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 	public WorldGenSmallShip(boolean corrupted) {
 		this.corrupted = corrupted;
 		
-		if (WarpDriveConfig.isICLoaded) {
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
 			IC2_solarType = WarpDriveConfig.IC2_solarPanel.getItemDamage();
 		} else {
 			WarpDriveConfig.IC2_solarPanel = new ItemStack(Blocks.air);	// FIXME: have proper generation for non-IC2
@@ -32,28 +32,28 @@ public class WorldGenSmallShip extends WorldGenerator {
 	@Override
 	public boolean generate(World world, Random rand, int centerX, int centerY, int centerZ) {
 		ItemStack cableType = new ItemStack(Blocks.air);
-		if (WarpDriveConfig.isICLoaded) {
-			if (WarpDriveConfig.isAdvSolPanelLoaded) {
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			if (WarpDriveConfig.isAdvancedSolarPanelLoaded) {
 				IC2_solarType = rand.nextInt(2);
 			}
 	
-			cableType = WarpDriveConfig.getIC2Item("copperCableBlock").copy();
+			cableType = WarpDriveConfig.getIC2Item("blockCable").copy();
 	
 			switch (rand.nextInt(4)) {
 			case 0:
-				cableType = WarpDriveConfig.getIC2Item("glassFiberCableBlock").copy();
+				cableType.setItemDamage(0);
 				break;
 	
 			case 1:
-				cableType = WarpDriveConfig.getIC2Item("glassFiberCableBlock").copy();
+				cableType.setItemDamage(3);
 				break;
 	
 			case 2:
-				cableType = WarpDriveConfig.getIC2Item("insulatedGoldCableBlock").copy();
+				cableType.setItemDamage(6);
 				break;
 	
 			case 3:
-				cableType = WarpDriveConfig.getIC2Item("doubleInsulatedIronCableBlock").copy();
+				cableType.setItemDamage(9);
 				break;
 			}
 		}
@@ -227,8 +227,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 7, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 7, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 7, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 7, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+			world.setBlock(i + 7, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		}
 		world.setBlock(i + 7, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 7, j + 7, k + 5, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -260,8 +262,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 8, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 8, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 8, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 8, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+			world.setBlock(i + 8, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		}
 		world.setBlock(i + 8, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 8, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -295,8 +299,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 9, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 9, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 9, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 9, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+			world.setBlock(i + 9, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		}
 		// Placing air generator
 		world.setBlock(i + 9, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
 		world.setBlock(i + 9, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -335,8 +341,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 10, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 10, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 10, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 10, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);	
+			world.setBlock(i + 10, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		}
 		// Placing air generator
 		world.setBlock(i + 10, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
 		world.setBlock(i + 10, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -380,7 +388,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 11, j + 4, k + 6, WorldGenStructure.getGlassBlock(corrupted, rand));
 
 		// Place computer
-		if (rand.nextBoolean()) {
+		if (rand.nextBoolean() && WarpDriveConfig.isComputerCraftLoaded) {
 			world.setBlock(i + 11, j + 4, k + 7, WarpDriveConfig.CC_Computer, 12, 3);
 		}
 
@@ -391,8 +399,10 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 11, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 11, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 11, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 11, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+			world.setBlock(i + 11, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
+		}
 		world.setBlock(i + 11, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 11, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -432,16 +442,22 @@ public class WorldGenSmallShip extends WorldGenerator {
 		world.setBlock(i + 12, j + 3, k + 12, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 4, k + 2, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 4, k + 6, WorldGenStructure.getGlassBlock(corrupted, rand));
-		world.setBlock(i + 12, j + 4, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 12, j + 4, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		}
 		world.setBlock(i + 12, j + 4, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 4, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 5, k + 2, WorldGenStructure.getGlassBlock(corrupted, rand));
-		world.setBlock(i + 12, j + 5, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 12, j + 5, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		}
 		world.setBlock(i + 12, j + 5, k + 12, WorldGenStructure.getGlassBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 6, k + 3, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 6, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
-		world.setBlock(i + 12, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
-		world.setBlock(i + 12, j + 6, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			world.setBlock(i + 12, j + 6, k + 6, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+			world.setBlock(i + 12, j + 6, k + 7, Block.getBlockFromItem(cableType.getItem()), cableType.getItemDamage(), 0);
+		}
 		world.setBlock(i + 12, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 12, j + 7, k + 5, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -605,14 +621,15 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 		while (!isDone) {
 			switch (rand.nextInt(14)) {
-			case 0:
-				res = WarpDriveConfig.getIC2Item("massFabricator").copy();
+			case 0:// Mass fabricator
+				res = WarpDriveConfig.getIC2Item("blockMachine").copy();
+				res.setItemDamage(14);
 				res.stackSize = 1; // + rand.nextInt(2);
 				isDone = true;
 				break;
 
 			case 1:
-				res = WarpDriveConfig.getIC2Item("nuke").copy();
+				res = WarpDriveConfig.getIC2Item("blockNuke").copy();
 				res.stackSize = 1 + rand.nextInt(2);
 				isDone = true;
 				break;
@@ -624,14 +641,16 @@ public class WorldGenSmallShip extends WorldGenerator {
 				isDone = true;
 				break;// skipped
 
-			case 6:
-				res = WarpDriveConfig.getIC2Item("glassFiberCableItem").copy();
+			case 6:// Glass fiber cable item
+				res = WarpDriveConfig.getIC2Item("itemCable").copy();
+				res.setItemDamage(9);
 				res.stackSize = 2 + rand.nextInt(12);
 				isDone = true;
 				break;
 
-			case 7:
-				res = WarpDriveConfig.getIC2Item("matter").copy();
+			case 7:// UU matter cell
+				res = WarpDriveConfig.getIC2Item("itemCellEmpty").copy();
+				res.setItemDamage(3);
 				res.stackSize = 2 + rand.nextInt(14);
 				isDone = true;
 				break;
@@ -664,7 +683,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 				// Advanced solar panels
 			case 13:
-				if (WarpDriveConfig.isAdvSolPanelLoaded) {
+				if (WarpDriveConfig.isAdvancedSolarPanelLoaded) {
 					res = new ItemStack(WarpDriveConfig.IC2_solarPanel.getItem(), rand.nextInt(3), IC2_solarType).copy();
 					isDone = true;
 				}

@@ -56,18 +56,21 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	public TileEntityLaser() {
 		super();
-		peripheralName = "laser";
-		methodsArray = new String[] { "emitBeam", // 0
-				"pos", // 1
-				"freq", // 2
-				"getFirstHit", // 3
-				"getBoosterDXDZ", // 4
-				"camFreq" // 5
+		peripheralName = "warpdriveLaser";
+		methodsArray = new String[] {
+			"emitBeam", // 0
+			"pos", // 1
+			"freq", // 2
+			"getFirstHit", // 3
+			"getBoosterDXDZ", // 4
+			"camFreq" // 5
 		};
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (isWithCamera()) {
 			// Update frequency on clients (recovery mechanism, no need to go
 			// too fast)
@@ -495,19 +498,19 @@ public class TileEntityLaser extends WarpInterfacedTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] emitBeam(Context context, Arguments arguments) {
+	public Object[] emitBeam(Context context, Arguments arguments) {
 		return emitBeam(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] pos(Context context, Arguments arguments) {
+	public Object[] pos(Context context, Arguments arguments) {
 		return new Integer[] { xCoord, yCoord, zCoord };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] freq(Context context, Arguments arguments) {
+	public Object[] freq(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			setBeamFrequency(arguments.checkInteger(0));
 		}
@@ -516,20 +519,20 @@ public class TileEntityLaser extends WarpInterfacedTE {
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getFirstHit(Context context, Arguments arguments) {
+	public Object[] getFirstHit(Context context, Arguments arguments) {
 		return getFirstHit();
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] getBoosterDXDZ(Context context, Arguments arguments) {
+	public Object[] getBoosterDXDZ(Context context, Arguments arguments) {
 		findFirstBooster();
 		return new Integer[] { dx, dz };
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] CamFreq(Context context, Arguments arguments) {
+	public Object[] CamFreq(Context context, Arguments arguments) {
 		if (isWithCamera()) {
 			if (arguments.count() == 1) {
 				setCameraFrequency(arguments.checkInteger(0));

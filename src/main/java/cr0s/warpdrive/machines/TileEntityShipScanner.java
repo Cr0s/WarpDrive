@@ -1,7 +1,5 @@
 package cr0s.warpdrive.machines;
 
-import ic2.api.energy.tile.IEnergyTile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,16 +50,16 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 	public TileEntityShipScanner() {
 		super();
-		peripheralName = "shipscanner";
+		peripheralName = "warpdriveShipScanner";
 		methodsArray = new String[] { "scan", "fileName", "getEnergyLevel", "deploy", "state" };
 	}
 
 	@Override
 	public void updateEntity() {
+		super.updateEntity();
+
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient())
 			return;
-
-		super.updateEntity();
 
 		if (++warpCoreSearchTicks > 20) {
 			core = searchWarpCore();
@@ -246,7 +244,6 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 		NBTTagList localBlocks = new NBTTagList();
 		byte localMetadata[] = new byte[size];
-		boolean extra = false;
 
 		NBTTagList tileEntitiesList = new NBTTagList();
 
@@ -285,15 +282,13 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 								}
 
 								// Remove energy from energy storages
-								if (te instanceof IEnergyTile) {
-									// IC2
-									if (tileTag.hasKey("energy")) {
-										tileTag.setInteger("energy", 0);
-									}
-									// Gregtech
-									if (tileTag.hasKey("mStoredEnergy")) {
-										tileTag.setInteger("mStoredEnergy", 0);
-									}
+								// IC2
+								if (tileTag.hasKey("energy")) {
+									tileTag.setInteger("energy", 0);
+								}
+								// Gregtech
+								if (tileTag.hasKey("mStoredEnergy")) {
+									tileTag.setInteger("mStoredEnergy", 0);
 								}
 
 								// Transform TE's coordinates from local axis to
@@ -450,7 +445,7 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 
 		// Load Tile Entities
 		NBTTagCompound[] tileEntities = new NBTTagCompound[blocksToDeployCount];
-		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", new NBTTagByteArray(new byte[0]).getId()); //TODO: 0 is not corect
+		NBTTagList tileEntitiesList = schematic.getTagList("TileEntities", new NBTTagByteArray(new byte[0]).getId()); //TODO: 0 is not correct
 
 		for (int i = 0; i < tileEntitiesList.tagCount(); i++) {
 			NBTTagCompound teTag = tileEntitiesList.getCompoundTagAt(i);
@@ -510,19 +505,19 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] scan(Context context, Arguments arguments) {
+	public Object[] scan(Context context, Arguments arguments) {
 		return scan(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] filename(Context context, Arguments arguments) {
+	public Object[] filename(Context context, Arguments arguments) {
 		return filename(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	private Object[] deploy(Context context, Arguments arguments) {
+	public Object[] deploy(Context context, Arguments arguments) {
 		return deploy(argumentsOCtoCC(arguments));
 	}
 
@@ -619,15 +614,5 @@ public class TileEntityShipScanner extends WarpEnergyTE {
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
-	}
-
-	@Override
-	public int getSinkTier() {
-		return 3;
-	}
-
-	@Override
-	public int getSourceTier() {
-		return 3;
 	}
 }

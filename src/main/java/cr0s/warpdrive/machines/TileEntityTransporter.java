@@ -40,7 +40,9 @@ public class TileEntityTransporter extends WarpEnergyTE implements IUpgradable {
 
 	public TileEntityTransporter() {
 		super();
-		peripheralName = "transporter";
+		IC2_sinkTier = 2;
+		IC2_sourceTier = 2;
+		peripheralName = "warpdriveTransporter";
 		methodsArray = new String[] { "source", "dest", "lock", "release", "lockStrength", "energize", "getEnergyLevel", "powerBoost", "energyCost",
 				"upgrades", "help" };
 	}
@@ -453,17 +455,5 @@ public class TileEntityTransporter extends WarpEnergyTE implements IUpgradable {
 	@Override
 	public Map<EnumUpgradeTypes, Integer> getInstalledUpgrades() {
 		return upgrades;
-	}
-
-	@Override
-	public int getSinkTier() {
-		// TODO Auto-generated method stub
-		return 2;
-	}
-
-	@Override
-	public int getSourceTier() {
-		// TODO Auto-generated method stub
-		return 2;
 	}
 }

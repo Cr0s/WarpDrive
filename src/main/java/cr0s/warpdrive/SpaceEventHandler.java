@@ -205,15 +205,15 @@ public class SpaceEventHandler {
 
 	private static boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
 		for (int j = 0; j < inventory.length; ++j) {
-			if (inventory[j] != null && inventory[j] == WarpDriveConfig.IC2_Air) {
+			if (inventory[j] != null && inventory[j] == WarpDriveConfig.IC2_air) {
 				inventory[j].stackSize--;
 				if (inventory[j].stackSize <= 0) {
 					inventory[j] = null;
 				}
 
-				if (WarpDriveConfig.IC2_Empty != null) {
+				if (WarpDriveConfig.IC2_empty != null) {
 					// WarpDrive.debugPrint("giveEmptyCell");
-					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_Empty.getItem(), 1, 0);
+					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_empty.getItem(), 1, 0);
 					if (!entityPlayer.inventory.addItemStackToInventory(emptyCell)) {
 						World world = entityPlayer.worldObj;
 						EntityItem itemEnt = new EntityItem(world, entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ, emptyCell);
@@ -236,7 +236,7 @@ public class SpaceEventHandler {
 			int check = MathHelper.ceiling_float_int(distance - 3.0F);
 
 			if (check > 0) {
-				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getIC2Item("quantumBoots")) // FIXME cache the value
+				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getIC2Item("itemArmorQuantumBoots")) // FIXME cache the value
 				  || (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
 					event.setCanceled(true); // Don't damage player
 				}
