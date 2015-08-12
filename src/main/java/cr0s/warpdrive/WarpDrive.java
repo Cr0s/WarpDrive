@@ -227,19 +227,19 @@ public class WarpDrive implements LoadingCallback {
 		protocolBlock = new BlockProtocol(0, Material.rock);
 
 		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
-		GameRegistry.registerTileEntity(TileEntityProtocol.class, "protocolBlock");
+		GameRegistry.registerTileEntity(TileEntityProtocol.class, MODID + ":protocolBlock");
 
 		// WARP CORE
 		warpCore = new BlockReactor(0, Material.rock);
 
 		GameRegistry.registerBlock(warpCore, "warpCore");
-		GameRegistry.registerTileEntity(TileEntityReactor.class, "warpCore");
+		GameRegistry.registerTileEntity(TileEntityReactor.class, MODID + ":warpCore");
 
 		// WARP RADAR
 		radarBlock = new BlockRadar(0, Material.rock);
 
 		GameRegistry.registerBlock(radarBlock, "radarBlock");
-		GameRegistry.registerTileEntity(TileEntityRadar.class, "radarBlock");
+		GameRegistry.registerTileEntity(TileEntityRadar.class, MODID + ":radarBlock");
 
 		// WARP ISOLATION
 		isolationBlock = new BlockWarpIsolation(0, Material.rock);
@@ -250,7 +250,7 @@ public class WarpDrive implements LoadingCallback {
 		airgenBlock = new BlockAirGenerator(0, Material.rock);
 
 		GameRegistry.registerBlock(airgenBlock, "airgenBlock");
-		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, "airgenBlock");
+		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, MODID + ":airgenBlock");
 
 		// AIR BLOCK
 		airBlock = new BlockAir();
@@ -266,7 +266,7 @@ public class WarpDrive implements LoadingCallback {
 		laserBlock = new BlockLaser(0, Material.rock);
 
 		GameRegistry.registerBlock(laserBlock, "laserBlock");
-		GameRegistry.registerTileEntity(TileEntityLaser.class, "laserBlock");
+		GameRegistry.registerTileEntity(TileEntityLaser.class, MODID + ":laserBlock");
 
 		// LASER EMITTER WITH CAMERA
 		laserCamBlock = new BlockLaserCam(0, Material.rock);
@@ -277,37 +277,37 @@ public class WarpDrive implements LoadingCallback {
 		cameraBlock = new BlockCamera(0, Material.rock);
 
 		GameRegistry.registerBlock(cameraBlock, "cameraBlock");
-		GameRegistry.registerTileEntity(TileEntityCamera.class, "cameraBlock");
+		GameRegistry.registerTileEntity(TileEntityCamera.class, MODID + ":cameraBlock");
 
 		// MONITOR
 		monitorBlock = new BlockMonitor();
 
 		GameRegistry.registerBlock(monitorBlock, "monitorBlock");
-		GameRegistry.registerTileEntity(TileEntityMonitor.class, "monitorBlock");
+		GameRegistry.registerTileEntity(TileEntityMonitor.class, MODID + ":monitorBlock");
 
 		// MINING LASER
 		miningLaserBlock = new BlockMiningLaser(0, Material.rock);
 
 		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
-		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, "miningLaserBlock");
+		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, MODID + ":miningLaserBlock");
 
 		// LASER TREE FARM
 		laserTreeFarmBlock = new BlockLaserTreeFarm(0, Material.rock);
 
 		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
-		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, "laserTreeFarmBlock");
+		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, MODID + ":laserTreeFarmBlock");
 
 		// PARTICLE BOOSTER
 		boosterBlock = new BlockParticleBooster(0, Material.rock);
 
 		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
-		GameRegistry.registerTileEntity(TileEntityParticleBooster.class, "boosterBlock");
+		GameRegistry.registerTileEntity(TileEntityParticleBooster.class, MODID + ":boosterBlock");
 
 		// LASER LIFT
 		liftBlock = new BlockLift(0, Material.rock);
 
 		GameRegistry.registerBlock(liftBlock, "liftBlock");
-		GameRegistry.registerTileEntity(TileEntityLift.class, "liftBlock");
+		GameRegistry.registerTileEntity(TileEntityLift.class, MODID + ":liftBlock");
 
 		// IRIDIUM BLOCK
 		iridiumBlock = new BlockIridium();
@@ -318,13 +318,13 @@ public class WarpDrive implements LoadingCallback {
 		scannerBlock = new BlockShipScanner(0, Material.rock);
 
 		GameRegistry.registerBlock(scannerBlock, "scannerBlock");
-		GameRegistry.registerTileEntity(TileEntityShipScanner.class, "scannerBlock");
+		GameRegistry.registerTileEntity(TileEntityShipScanner.class, MODID + ":scannerBlock");
 
 		// CLOAKING DEVICE CORE
 		cloakBlock = new BlockCloakingDeviceCore(0, Material.rock);
 
 		GameRegistry.registerBlock(cloakBlock, "cloakBlock");
-		GameRegistry.registerTileEntity(TileEntityCloakingDeviceCore.class, "cloakBlock");
+		GameRegistry.registerTileEntity(TileEntityCloakingDeviceCore.class, MODID + ":cloakBlock");
 
 		// CLOAKING DEVICE COIL
 		cloakCoilBlock = new BlockCloakingCoil(0, Material.rock);
@@ -342,7 +342,7 @@ public class WarpDrive implements LoadingCallback {
 			reactorMonitorBlock = new BlockLaserReactorMonitor(Material.rock);
 			
 			GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
-			GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class, "reactorMonitor");
+			GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class, MODID + ":reactorMonitor");
 		}
 
 		// TRANSPORT BEACON
@@ -353,20 +353,20 @@ public class WarpDrive implements LoadingCallback {
 		// POWER REACTOR, LASER, STORE
 		powerReactorBlock = new BlockPowerReactor();
 		GameRegistry.registerBlock(powerReactorBlock, "powerReactor");
-		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, "powerReactor");
+		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, MODID + ":powerReactor");
 
 		powerLaserBlock = new BlockPowerLaser();
 		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
-		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, "powerLaser");
+		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, MODID + ":powerLaser");
 
 		powerStoreBlock = new BlockPowerStore();
 		GameRegistry.registerBlock(powerStoreBlock, "powerStore");
-		GameRegistry.registerTileEntity(TileEntityPowerStore.class, "powerStore");
+		GameRegistry.registerTileEntity(TileEntityPowerStore.class, MODID + ":powerStore");
 
 		// CHUNK LOADER
 		chunkLoaderBlock = new BlockChunkLoader();
 		GameRegistry.registerBlock(chunkLoaderBlock, "chunkLoader");
-		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, "chunkLoader");
+		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, MODID + ":chunkLoader");
 
 		// DECORATIVE
 		decorativeBlock = new BlockDecorative();
