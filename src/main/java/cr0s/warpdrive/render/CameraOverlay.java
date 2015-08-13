@@ -36,10 +36,10 @@ public class CameraOverlay
         try {
 	        String text;
 	        if (WarpDrive.instance.overlayType == 0) {
-	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/camOverlay.png"));
+	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/detection/cameraOverlay.png"));
 	            text = "Left click to zoom / Right click to exit";
 	        } else {
-	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/lasercamOverlay.png"));
+	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/weapon/laserCameraOverlay.png"));
 	            text = "Left click to zoom / Right click to exit / Space to fire";
 	        }
 	

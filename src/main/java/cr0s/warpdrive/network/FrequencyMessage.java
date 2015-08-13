@@ -8,11 +8,11 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.block.TileEntityLaser;
+import cr0s.warpdrive.block.detection.TileEntityCamera;
+import cr0s.warpdrive.block.detection.TileEntityMonitor;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
-import cr0s.warpdrive.machines.TileEntityCamera;
-import cr0s.warpdrive.machines.TileEntityLaser;
-import cr0s.warpdrive.machines.TileEntityMonitor;
 
 
 public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMessage, IMessage> {

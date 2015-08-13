@@ -40,12 +40,54 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cr0s.warpdrive.block.BlockAir;
-import cr0s.warpdrive.block.BlockDecorative;
-import cr0s.warpdrive.block.BlockGas;
-import cr0s.warpdrive.block.BlockIridium;
-import cr0s.warpdrive.block.BlockTransportBeacon;
-import cr0s.warpdrive.block.ItemBlockDecorative;
+import cr0s.warpdrive.block.BlockAirGenerator;
+import cr0s.warpdrive.block.BlockChunkLoader;
+import cr0s.warpdrive.block.BlockLaser;
+import cr0s.warpdrive.block.BlockLaserMedium;
+import cr0s.warpdrive.block.TileEntityAbstractChunkLoading;
+import cr0s.warpdrive.block.TileEntityAirGenerator;
+import cr0s.warpdrive.block.TileEntityChunkLoader;
+import cr0s.warpdrive.block.TileEntityLaser;
+import cr0s.warpdrive.block.TileEntityLaserMedium;
+import cr0s.warpdrive.block.building.BlockShipScanner;
+import cr0s.warpdrive.block.building.TileEntityShipScanner;
+import cr0s.warpdrive.block.collection.BlockLaserTreeFarm;
+import cr0s.warpdrive.block.collection.BlockMiningLaser;
+import cr0s.warpdrive.block.collection.TileEntityLaserTreeFarm;
+import cr0s.warpdrive.block.collection.TileEntityMiningLaser;
+import cr0s.warpdrive.block.detection.BlockCamera;
+import cr0s.warpdrive.block.detection.BlockCloakingCoil;
+import cr0s.warpdrive.block.detection.BlockCloakingCore;
+import cr0s.warpdrive.block.detection.BlockMonitor;
+import cr0s.warpdrive.block.detection.BlockRadar;
+import cr0s.warpdrive.block.detection.BlockWarpIsolation;
+import cr0s.warpdrive.block.detection.TileEntityCamera;
+import cr0s.warpdrive.block.detection.TileEntityCloakingCore;
+import cr0s.warpdrive.block.detection.TileEntityMonitor;
+import cr0s.warpdrive.block.detection.TileEntityRadar;
+import cr0s.warpdrive.block.energy.BlockEnanReactorCore;
+import cr0s.warpdrive.block.energy.BlockEnanReactorLaser;
+import cr0s.warpdrive.block.energy.BlockEnergyBank;
+import cr0s.warpdrive.block.energy.BlockIC2reactorLaserMonitor;
+import cr0s.warpdrive.block.energy.TileEntityEnanReactorCore;
+import cr0s.warpdrive.block.energy.TileEntityEnanReactorLaser;
+import cr0s.warpdrive.block.energy.TileEntityEnergyBank;
+import cr0s.warpdrive.block.energy.TileEntityIC2reactorLaserMonitor;
+import cr0s.warpdrive.block.movement.BlockLift;
+import cr0s.warpdrive.block.movement.BlockShipController;
+import cr0s.warpdrive.block.movement.BlockShipCore;
+import cr0s.warpdrive.block.movement.BlockTransporter;
+import cr0s.warpdrive.block.movement.TileEntityLift;
+import cr0s.warpdrive.block.movement.TileEntityShipController;
+import cr0s.warpdrive.block.movement.TileEntityShipCore;
+import cr0s.warpdrive.block.movement.TileEntityTransporter;
+import cr0s.warpdrive.block.passive.BlockAir;
+import cr0s.warpdrive.block.passive.BlockDecorative;
+import cr0s.warpdrive.block.passive.BlockGas;
+import cr0s.warpdrive.block.passive.BlockIridium;
+import cr0s.warpdrive.block.passive.BlockTransportBeacon;
+import cr0s.warpdrive.block.passive.ItemBlockDecorative;
+import cr0s.warpdrive.block.weapon.BlockLaserCamera;
 import cr0s.warpdrive.command.DebugCommand;
 import cr0s.warpdrive.command.GenerateCommand;
 import cr0s.warpdrive.command.InvisibleCommand;
@@ -56,53 +98,11 @@ import cr0s.warpdrive.data.CamRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;
 import cr0s.warpdrive.data.WarpCoresRegistry;
-import cr0s.warpdrive.item.ItemReactorLaserFocus;
+import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.item.ItemWarpAirCanister;
 import cr0s.warpdrive.item.ItemWarpArmor;
 import cr0s.warpdrive.item.ItemWarpComponent;
 import cr0s.warpdrive.item.ItemWarpUpgrade;
-import cr0s.warpdrive.machines.BlockAirGenerator;
-import cr0s.warpdrive.machines.BlockCamera;
-import cr0s.warpdrive.machines.BlockChunkLoader;
-import cr0s.warpdrive.machines.BlockCloakingCoil;
-import cr0s.warpdrive.machines.BlockCloakingDeviceCore;
-import cr0s.warpdrive.machines.BlockLaser;
-import cr0s.warpdrive.machines.BlockLaserCam;
-import cr0s.warpdrive.machines.BlockLaserReactorMonitor;
-import cr0s.warpdrive.machines.BlockLaserTreeFarm;
-import cr0s.warpdrive.machines.BlockLift;
-import cr0s.warpdrive.machines.BlockMiningLaser;
-import cr0s.warpdrive.machines.BlockMonitor;
-import cr0s.warpdrive.machines.BlockParticleBooster;
-import cr0s.warpdrive.machines.BlockPowerLaser;
-import cr0s.warpdrive.machines.BlockPowerReactor;
-import cr0s.warpdrive.machines.BlockPowerStore;
-import cr0s.warpdrive.machines.BlockProtocol;
-import cr0s.warpdrive.machines.BlockRadar;
-import cr0s.warpdrive.machines.BlockReactor;
-import cr0s.warpdrive.machines.BlockShipScanner;
-import cr0s.warpdrive.machines.BlockTransporter;
-import cr0s.warpdrive.machines.BlockWarpIsolation;
-import cr0s.warpdrive.machines.TileEntityAirGenerator;
-import cr0s.warpdrive.machines.TileEntityCamera;
-import cr0s.warpdrive.machines.TileEntityChunkLoader;
-import cr0s.warpdrive.machines.TileEntityCloakingDeviceCore;
-import cr0s.warpdrive.machines.TileEntityLaser;
-import cr0s.warpdrive.machines.TileEntityLaserReactorMonitor;
-import cr0s.warpdrive.machines.TileEntityLaserTreeFarm;
-import cr0s.warpdrive.machines.TileEntityLift;
-import cr0s.warpdrive.machines.TileEntityMiningLaser;
-import cr0s.warpdrive.machines.TileEntityMonitor;
-import cr0s.warpdrive.machines.TileEntityParticleBooster;
-import cr0s.warpdrive.machines.TileEntityPowerLaser;
-import cr0s.warpdrive.machines.TileEntityPowerReactor;
-import cr0s.warpdrive.machines.TileEntityPowerStore;
-import cr0s.warpdrive.machines.TileEntityProtocol;
-import cr0s.warpdrive.machines.TileEntityRadar;
-import cr0s.warpdrive.machines.TileEntityReactor;
-import cr0s.warpdrive.machines.TileEntityShipScanner;
-import cr0s.warpdrive.machines.TileEntityTransporter;
-import cr0s.warpdrive.machines.WarpChunkTE;
 import cr0s.warpdrive.network.PacketHandler;
 import cr0s.warpdrive.render.CameraOverlay;
 import cr0s.warpdrive.world.BiomeSpace;
@@ -121,7 +121,7 @@ public class WarpDrive implements LoadingCallback {
 	public static final String MODID = "WarpDrive";
 	public static final String VERSION = "@version@";
 	
-	public static Block warpCore;
+	public static Block shipCore;
 	public static Block protocolBlock;
 	public static Block radarBlock;
 	public static Block isolationBlock;
@@ -224,16 +224,16 @@ public class WarpDrive implements LoadingCallback {
 		WarpDriveConfig.load();
 
 		// CORE CONTROLLER
-		protocolBlock = new BlockProtocol(0, Material.rock);
+		protocolBlock = new BlockShipController(0, Material.rock);
 
 		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
-		GameRegistry.registerTileEntity(TileEntityProtocol.class, MODID + ":protocolBlock");
+		GameRegistry.registerTileEntity(TileEntityShipController.class, MODID + ":protocolBlock");
 
 		// WARP CORE
-		warpCore = new BlockReactor(0, Material.rock);
+		shipCore = new BlockShipCore(0, Material.rock);
 
-		GameRegistry.registerBlock(warpCore, "warpCore");
-		GameRegistry.registerTileEntity(TileEntityReactor.class, MODID + ":warpCore");
+		GameRegistry.registerBlock(shipCore, "warpCore");
+		GameRegistry.registerTileEntity(TileEntityShipCore.class, MODID + ":warpCore");
 
 		// WARP RADAR
 		radarBlock = new BlockRadar(0, Material.rock);
@@ -269,7 +269,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityLaser.class, MODID + ":laserBlock");
 
 		// LASER EMITTER WITH CAMERA
-		laserCamBlock = new BlockLaserCam(0, Material.rock);
+		laserCamBlock = new BlockLaserCamera(0, Material.rock);
 
 		GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");
 
@@ -298,10 +298,10 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, MODID + ":laserTreeFarmBlock");
 
 		// PARTICLE BOOSTER
-		boosterBlock = new BlockParticleBooster(0, Material.rock);
+		boosterBlock = new BlockLaserMedium(0, Material.rock);
 
 		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
-		GameRegistry.registerTileEntity(TileEntityParticleBooster.class, MODID + ":boosterBlock");
+		GameRegistry.registerTileEntity(TileEntityLaserMedium.class, MODID + ":boosterBlock");
 
 		// LASER LIFT
 		liftBlock = new BlockLift(0, Material.rock);
@@ -321,10 +321,10 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityShipScanner.class, MODID + ":scannerBlock");
 
 		// CLOAKING DEVICE CORE
-		cloakBlock = new BlockCloakingDeviceCore(0, Material.rock);
+		cloakBlock = new BlockCloakingCore(0, Material.rock);
 
 		GameRegistry.registerBlock(cloakBlock, "cloakBlock");
-		GameRegistry.registerTileEntity(TileEntityCloakingDeviceCore.class, MODID + ":cloakBlock");
+		GameRegistry.registerTileEntity(TileEntityCloakingCore.class, MODID + ":cloakBlock");
 
 		// CLOAKING DEVICE COIL
 		cloakCoilBlock = new BlockCloakingCoil(0, Material.rock);
@@ -339,10 +339,10 @@ public class WarpDrive implements LoadingCallback {
 
 		// REACTOR MONITOR
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			reactorMonitorBlock = new BlockLaserReactorMonitor(Material.rock);
+			reactorMonitorBlock = new BlockIC2reactorLaserMonitor(Material.rock);
 			
 			GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
-			GameRegistry.registerTileEntity(TileEntityLaserReactorMonitor.class, MODID + ":reactorMonitor");
+			GameRegistry.registerTileEntity(TileEntityIC2reactorLaserMonitor.class, MODID + ":reactorMonitor");
 		}
 
 		// TRANSPORT BEACON
@@ -351,17 +351,17 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");
 
 		// POWER REACTOR, LASER, STORE
-		powerReactorBlock = new BlockPowerReactor();
+		powerReactorBlock = new BlockEnanReactorCore();
 		GameRegistry.registerBlock(powerReactorBlock, "powerReactor");
-		GameRegistry.registerTileEntity(TileEntityPowerReactor.class, MODID + ":powerReactor");
+		GameRegistry.registerTileEntity(TileEntityEnanReactorCore.class, MODID + ":powerReactor");
 
-		powerLaserBlock = new BlockPowerLaser();
+		powerLaserBlock = new BlockEnanReactorLaser();
 		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
-		GameRegistry.registerTileEntity(TileEntityPowerLaser.class, MODID + ":powerLaser");
+		GameRegistry.registerTileEntity(TileEntityEnanReactorLaser.class, MODID + ":powerLaser");
 
-		powerStoreBlock = new BlockPowerStore();
+		powerStoreBlock = new BlockEnergyBank();
 		GameRegistry.registerBlock(powerStoreBlock, "powerStore");
-		GameRegistry.registerTileEntity(TileEntityPowerStore.class, MODID + ":powerStore");
+		GameRegistry.registerTileEntity(TileEntityEnergyBank.class, MODID + ":powerStore");
 
 		// CHUNK LOADER
 		chunkLoaderBlock = new BlockChunkLoader();
@@ -374,7 +374,7 @@ public class WarpDrive implements LoadingCallback {
 
 		// REACTOR LASER FOCUS
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			reactorLaserFocusItem = new ItemReactorLaserFocus();
+			reactorLaserFocusItem = new ItemIC2reactorLaserFocus();
 			GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
 		}
 
@@ -440,7 +440,7 @@ public class WarpDrive implements LoadingCallback {
 		upgradeItem.initRecipes();
 
 		// WarpCore
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(warpCore), false, "ipi", "ici", "idi",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(shipCore), false, "ipi", "ici", "idi",
 				'i', Items.iron_ingot,
 				'p', componentItem.getItemStack(6),
 				'c', componentItem.getItemStack(2),
@@ -609,7 +609,7 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack mfe = WarpDriveConfig.getIC2Item("blockElectric").copy();
 		mfe.setItemDamage(1);
 		
-		GameRegistry.addRecipe(new ItemStack(warpCore), "ici", "cmc", "ici",
+		GameRegistry.addRecipe(new ItemStack(shipCore), "ici", "cmc", "ici",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"));
@@ -739,7 +739,7 @@ public class WarpDrive implements LoadingCallback {
 		event.registerServerCommand(new DebugCommand());
 	}
 
-	public Ticket registerChunkLoadTE(WarpChunkTE te, boolean refreshLoading) {
+	public Ticket registerChunkLoadTE(TileEntityAbstractChunkLoading te, boolean refreshLoading) {
 		World worldObj = te.getWorldObj();
 		if (ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0) {
 			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
@@ -757,11 +757,11 @@ public class WarpDrive implements LoadingCallback {
 		return null;
 	}
 
-	public Ticket registerChunkLoadTE(WarpChunkTE te) {
+	public Ticket registerChunkLoadTE(TileEntityAbstractChunkLoading te) {
 		return registerChunkLoadTE(te, true);
 	}
 
-	public Ticket getTicket(WarpChunkTE te) {
+	public Ticket getTicket(TileEntityAbstractChunkLoading te) {
 		return registerChunkLoadTE(te, false);
 	}
 
@@ -778,11 +778,11 @@ public class WarpDrive implements LoadingCallback {
 					WorldServer ws = DimensionManager.getWorld(w);
 					if (ws != null) {
 						TileEntity te = ws.getTileEntity(x, y, z);
-						if (te != null && te instanceof WarpChunkTE) {
-							if (((WarpChunkTE) te).shouldChunkLoad()) {
+						if (te != null && te instanceof TileEntityAbstractChunkLoading) {
+							if (((TileEntityAbstractChunkLoading) te).shouldChunkLoad()) {
 								WarpDrive.debugPrint("[TicketCallback] Regiving Ticket!");
-								((WarpChunkTE) te).giveTicket(ticket);
-								((WarpChunkTE) te).refreshLoading(true);
+								((TileEntityAbstractChunkLoading) te).giveTicket(ticket);
+								((TileEntityAbstractChunkLoading) te).refreshLoading(true);
 								return;
 							}
 						}

@@ -502,7 +502,7 @@ public class WarpDriveConfig {
 
 		// Ignore WarpDrive blocks (which potentially will be duplicated by
 		// cheaters using ship scan/deploy)
-		scannerIgnoreBlocks.add(WarpDrive.warpCore);
+		scannerIgnoreBlocks.add(WarpDrive.shipCore);
 		scannerIgnoreBlocks.add(WarpDrive.protocolBlock);
 		scannerIgnoreBlocks.add(WarpDrive.iridiumBlock);
 

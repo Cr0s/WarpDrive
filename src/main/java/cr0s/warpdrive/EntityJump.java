@@ -29,12 +29,12 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.MovingEntity;
 import cr0s.warpdrive.data.TransitionPlane;
 import cr0s.warpdrive.data.Vector3;
-import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
 public class EntityJump extends Entity {
@@ -71,7 +71,7 @@ public class EntityJump extends Entity {
 
 	public boolean on = false;
 	private JumpBlock ship[];
-	private TileEntityReactor reactor;
+	private TileEntityShipCore reactor;
 
 	private final static int STATE_IDLE = 0;
 	private final static int STATE_JUMPING = 1;
@@ -97,7 +97,7 @@ public class EntityJump extends Entity {
 				+ " " + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client" : "Server"));
 	}
 
-	public EntityJump(World world, int x, int y, int z, int _dx, int _dz, TileEntityReactor _reactor, boolean _isHyperspaceJump, int _distance, int _direction,
+	public EntityJump(World world, int x, int y, int z, int _dx, int _dz, TileEntityShipCore _reactor, boolean _isHyperspaceJump, int _distance, int _direction,
 			boolean _isCoordJump, int _destX, int _destY, int _destZ) {
 		super(world);
 		this.posX = x + 0.5D;
@@ -576,8 +576,8 @@ public class EntityJump extends Entity {
 						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
-				} else if (te instanceof TileEntityReactor) {
-					WarpDrive.warpCores.removeFromRegistry((TileEntityReactor) te);
+				} else if (te instanceof TileEntityShipCore) {
+					WarpDrive.warpCores.removeFromRegistry((TileEntityShipCore) te);
 				}
 
 				teSuperclass = teClass.getSuperclass();

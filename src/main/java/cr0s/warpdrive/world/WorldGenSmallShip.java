@@ -435,7 +435,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 		// Place warp-core
 		if (rand.nextBoolean()) {
-			world.setBlock(i + 12, j + 3, k + 7, WarpDrive.warpCore);
+			world.setBlock(i + 12, j + 3, k + 7, WarpDrive.shipCore);
 		}
 
 		world.setBlock(i + 12, j + 3, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));
