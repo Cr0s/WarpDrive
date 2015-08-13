@@ -12,18 +12,18 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 
-public class TargetingMessage implements IMessage, IMessageHandler<TargetingMessage, IMessage> {
+public class MessageTargeting implements IMessage, IMessageHandler<MessageTargeting, IMessage> {
 	private int x;
 	private int y;
 	private int z;
 	private float yaw;
 	private float pitch;
 	
-	public TargetingMessage() {
+	public MessageTargeting() {
 		// required on receiving side
 	}
 	
-	public TargetingMessage(final Vector3 target, final float yaw, final float pitch) {
+	public MessageTargeting(final Vector3 target, final float yaw, final float pitch) {
 		this.x = target.intX();
 		this.y = target.intY();
 		this.z = target.intZ();
@@ -31,7 +31,7 @@ public class TargetingMessage implements IMessage, IMessageHandler<TargetingMess
 		this.pitch = pitch;
 	}
 	
-	public TargetingMessage(final int x, final int y, final int z, final float yaw, final float pitch) {
+	public MessageTargeting(final int x, final int y, final int z, final float yaw, final float pitch) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -66,7 +66,7 @@ public class TargetingMessage implements IMessage, IMessageHandler<TargetingMess
 	}
 	
 	@Override
-	public IMessage onMessage(TargetingMessage targetingMessage, MessageContext context) {
+	public IMessage onMessage(MessageTargeting targetingMessage, MessageContext context) {
 		if (WarpDriveConfig.G_DEBUGMODE) {
 			WarpDrive.debugPrint("Received target packet: (" + targetingMessage.x + "; " + targetingMessage.y + "; " + targetingMessage.z
 				+ ") yaw: " + targetingMessage.yaw + " pitch: " + targetingMessage.pitch);

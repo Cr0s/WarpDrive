@@ -15,7 +15,7 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
  *   /wdebug <dimension> <coordinates> <blockId> <Metadata> <actions>
  */
 
-public class DebugCommand extends CommandBase
+public class CommandDebug extends CommandBase
 {
 	@Override
 	public String getCommandName()

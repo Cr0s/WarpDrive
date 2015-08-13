@@ -17,7 +17,7 @@ import cr0s.warpdrive.world.WorldGenStation;
  *   moon, ship, asteroid, astfield, gascloud, star
  */
 
-public class GenerateCommand extends CommandBase {
+public class CommandGenerate extends CommandBase {
 	@Override
 	public String getCommandName() {
 		return "generate";

@@ -13,7 +13,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
-public class SpaceTpCommand extends CommandBase {
+public class CommandSpace extends CommandBase {
 	@Override
 	public int getRequiredPermissionLevel() {
 		return 2;

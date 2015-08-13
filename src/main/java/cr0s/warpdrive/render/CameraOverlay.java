@@ -12,8 +12,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
-public class CameraOverlay
-{
+public class CameraOverlay {
     private Minecraft mc;
     private int frameCount = 0;
     private static int ANIMATION_FRAMES = 200;

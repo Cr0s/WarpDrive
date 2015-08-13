@@ -9,7 +9,7 @@ import net.minecraft.server.MinecraftServer;
 
 import cr0s.warpdrive.WarpDrive;
 
-public class InvisibleCommand extends CommandBase {
+public class CommandInvisible extends CommandBase {
 	@Override
 	public int getRequiredPermissionLevel() {
 		return 4;

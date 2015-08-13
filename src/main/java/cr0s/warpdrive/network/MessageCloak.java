@@ -18,10 +18,10 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
-import cr0s.warpdrive.render.FXBeam;
+import cr0s.warpdrive.render.EntityFXBeam;
 
 
-public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMessage> {
+public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMessage> {
 	private int minX;
 	private int minY;
 	private int minZ;
@@ -31,11 +31,11 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 	private int tier;
 	private boolean decloak;
 	
-	public CloakMessage() {
+	public MessageCloak() {
 		// required on receiving side
 	}
 	
-	public CloakMessage(final AxisAlignedBB aabb, final int tier, final boolean decloak) {
+	public MessageCloak(final AxisAlignedBB aabb, final int tier, final boolean decloak) {
 		this.minX = (int)aabb.minX;
 		this.minY = (int)aabb.minY;
 		this.minZ = (int)aabb.minZ;
@@ -115,7 +115,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 			double radiusZ = (maxZ - minZ) / 2.0D + 5.0D;
 			
 			for (int i = 0; i < numLasers; i++) {
-				FMLClientHandler.instance().getClient().effectRenderer.addEffect(new FXBeam(player.worldObj,
+				FMLClientHandler.instance().getClient().effectRenderer.addEffect(new EntityFXBeam(player.worldObj,
 					new Vector3(
 						centerX + radiusX * player.worldObj.rand.nextGaussian(),
 						centerY + radiusY * player.worldObj.rand.nextGaussian(),
@@ -131,7 +131,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 	}
 	
 	@Override
-	public IMessage onMessage(CloakMessage cloakMessage, MessageContext context) {
+	public IMessage onMessage(MessageCloak cloakMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
 			WarpDrive.logger.error("WorldObj is null, ignoring cloak packet");

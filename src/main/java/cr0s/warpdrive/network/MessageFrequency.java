@@ -15,24 +15,24 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 
-public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMessage, IMessage> {
+public class MessageFrequency implements IMessage, IMessageHandler<MessageFrequency, IMessage> {
 	private int x;
 	private int y;
 	private int z;
 	private int frequency;
 	
-	public FrequencyMessage() {
+	public MessageFrequency() {
 		// required on receiving side
 	}
 	
-	public FrequencyMessage(final Vector3 target, final int frequency) {
+	public MessageFrequency(final Vector3 target, final int frequency) {
 		this.x = target.intX();
 		this.y = target.intY();
 		this.z = target.intZ();
 		this.frequency = frequency;
 	}
 	
-	public FrequencyMessage(final int x, final int y, final int z, final int frequency) {
+	public MessageFrequency(final int x, final int y, final int z, final int frequency) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -73,7 +73,7 @@ public class FrequencyMessage implements IMessage, IMessageHandler<FrequencyMess
  	}
 	
 	@Override
-	public IMessage onMessage(FrequencyMessage frequencyMessage, MessageContext context) {
+	public IMessage onMessage(MessageFrequency frequencyMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {
 			WarpDrive.logger.error("WorldObj is null, ignoring frequency packet");

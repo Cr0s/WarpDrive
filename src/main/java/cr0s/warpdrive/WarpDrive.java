@@ -88,11 +88,11 @@ import cr0s.warpdrive.block.passive.BlockIridium;
 import cr0s.warpdrive.block.passive.BlockTransportBeacon;
 import cr0s.warpdrive.block.passive.ItemBlockDecorative;
 import cr0s.warpdrive.block.weapon.BlockLaserCamera;
-import cr0s.warpdrive.command.DebugCommand;
-import cr0s.warpdrive.command.GenerateCommand;
-import cr0s.warpdrive.command.InvisibleCommand;
-import cr0s.warpdrive.command.JumpgateCommand;
-import cr0s.warpdrive.command.SpaceTpCommand;
+import cr0s.warpdrive.command.CommandDebug;
+import cr0s.warpdrive.command.CommandGenerate;
+import cr0s.warpdrive.command.CommandInvisible;
+import cr0s.warpdrive.command.CommandJumpgates;
+import cr0s.warpdrive.command.CommandSpace;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CamerasRegistry;
 import cr0s.warpdrive.data.CloakManager;
@@ -733,11 +733,11 @@ public class WarpDrive implements LoadingCallback {
 		cloaks = new CloakManager();
 		MinecraftForge.EVENT_BUS.register(new CloakChunkWatcher());
 
-		event.registerServerCommand(new GenerateCommand());
-		event.registerServerCommand(new SpaceTpCommand());
-		event.registerServerCommand(new InvisibleCommand());
-		event.registerServerCommand(new JumpgateCommand());
-		event.registerServerCommand(new DebugCommand());
+		event.registerServerCommand(new CommandGenerate());
+		event.registerServerCommand(new CommandSpace());
+		event.registerServerCommand(new CommandInvisible());
+		event.registerServerCommand(new CommandJumpgates());
+		event.registerServerCommand(new CommandDebug());
 	}
 
 	public Ticket registerChunkLoadTE(TileEntityAbstractChunkLoading te, boolean refreshLoading) {

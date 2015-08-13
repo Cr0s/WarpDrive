@@ -17,7 +17,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.data.Vector3;
 
 @SideOnly(Side.CLIENT)
-public class FXBeam extends EntityFX
+public class EntityFXBeam extends EntityFX
 {
     private static ResourceLocation TEXTURE = null;
 
@@ -40,7 +40,7 @@ public class FXBeam extends EntityFX
 
     boolean a = false;
 
-    public FXBeam(World par1World, Vector3 position, float yaw, float pitch, float red, float green, float blue, int age, int energy)
+    public EntityFXBeam(World par1World, Vector3 position, float yaw, float pitch, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
         a = true;
@@ -79,7 +79,7 @@ public class FXBeam extends EntityFX
         }
     }
 
-    public FXBeam(World par1World, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
+    public EntityFXBeam(World par1World, Vector3 position, Vector3 target, float red, float green, float blue, int age, int energy)
     {
         super(par1World, position.x, position.y, position.z, 0.0D, 0.0D, 0.0D);
         this.setRGB(red, green, blue);

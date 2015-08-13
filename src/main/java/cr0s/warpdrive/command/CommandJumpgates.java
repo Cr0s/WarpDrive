@@ -5,7 +5,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import cr0s.warpdrive.WarpDrive;
 
-public class JumpgateCommand extends CommandBase {
+public class CommandJumpgates extends CommandBase {
 	@Override
 	public int getRequiredPermissionLevel() {
 		return 4;
