@@ -121,7 +121,7 @@ public final class EntityCamera extends EntityLivingBase {
 					fireWaitTicks = 0;
 					
 					// Make a shoot with camera-laser
-					if (block.isAssociatedBlock(WarpDrive.laserCamBlock)) {
+					if (block.isAssociatedBlock(WarpDrive.blockLaserCamera)) {
 						PacketHandler.sendLaserTargetingPacket(xCoord, yCoord, zCoord, mc.renderViewEntity.rotationYaw, mc.renderViewEntity.rotationPitch);
 					}
 				}

@@ -490,7 +490,7 @@ public class WarpDriveConfig {
 
 		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
 		//
-		minerOres.add(WarpDrive.iridiumBlock);
+		minerOres.add(WarpDrive.blockIridium);
 		minerOres.add(Blocks.coal_ore);
 		minerOres.add(Blocks.quartz_ore);
 		minerOres.add(Blocks.obsidian);
@@ -502,9 +502,9 @@ public class WarpDriveConfig {
 
 		// Ignore WarpDrive blocks (which potentially will be duplicated by
 		// cheaters using ship scan/deploy)
-		scannerIgnoreBlocks.add(WarpDrive.shipCore);
-		scannerIgnoreBlocks.add(WarpDrive.protocolBlock);
-		scannerIgnoreBlocks.add(WarpDrive.iridiumBlock);
+		scannerIgnoreBlocks.add(WarpDrive.blockShipCore);
+		scannerIgnoreBlocks.add(WarpDrive.blockShipController);
+		scannerIgnoreBlocks.add(WarpDrive.blockIridium);
 
 		if (isIndustrialCraft2loaded) {
 			// Metadata: 0 Batbox, 1 MFE, 2 MFSU, 3 LV transformer, 4 MV transformer, 5 HV transformer, 6 EV transformer, 7 CESU
@@ -766,14 +766,14 @@ public class WarpDriveConfig {
 		} else if (random.nextInt(250) == 1) {
 			return Blocks.diamond_ore;
 		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
-			return WarpDrive.iridiumBlock;
+			return WarpDrive.blockIridium;
 		}
 		return def;
 	}
 
 	public static Block getRandomNetherBlock(Random random, Block def) {
 		if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
-			return WarpDrive.iridiumBlock;
+			return WarpDrive.blockIridium;
 		} else if (random.nextInt(25) == 1) {
 			return Blocks.quartz_ore;
 		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
@@ -783,7 +783,7 @@ public class WarpDriveConfig {
 
 	public static Block getRandomEndBlock(Random random, Block def) {
 		if (isIndustrialCraft2loaded && random.nextInt(10000) == 42) {
-			return WarpDrive.iridiumBlock;
+			return WarpDrive.blockIridium;
 		} else if (random.nextInt(200) == 13) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
 		}

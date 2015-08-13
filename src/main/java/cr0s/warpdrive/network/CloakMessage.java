@@ -76,7 +76,7 @@ public class CloakMessage implements IMessage, IMessageHandler<CloakMessage, IMe
 			WarpDrive.debugPrint("Received cloak packet: Removing blocks...");
 			// Hide the blocks within area
 			World worldObj = player.worldObj;
-			Block cloakBlockID = (tier == 1) ? WarpDrive.gasBlock : Blocks.air;
+			Block cloakBlockID = (tier == 1) ? WarpDrive.blockGas : Blocks.air;
 			int cloakBlockMetadata = (tier == 1) ? 5 : 0;
 			int minYmap = Math.max(0, minY);
 			int maxYmap = Math.min(255, maxY);

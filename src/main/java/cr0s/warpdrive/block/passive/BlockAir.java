@@ -244,9 +244,9 @@ public class BlockAir extends Block
 		}
 		if (concentration != new_concentration) {
 			if (concentration == 15) {
-				if ( xp_block != WarpDrive.airgenBlock && xn_block != WarpDrive.airgenBlock
-				  && yp_block != WarpDrive.airgenBlock && yn_block != WarpDrive.airgenBlock
-				  && zp_block != WarpDrive.airgenBlock && zn_block != WarpDrive.airgenBlock) {
+				if ( xp_block != WarpDrive.blockAirGenerator && xn_block != WarpDrive.blockAirGenerator
+				  && yp_block != WarpDrive.blockAirGenerator && yn_block != WarpDrive.blockAirGenerator
+				  && zp_block != WarpDrive.blockAirGenerator && zn_block != WarpDrive.blockAirGenerator) {
 					//        			WarpDrive.debugPrint("AirGenerator not found, removing air block at " + x + ", " + y + ", " + z);
 					world.setBlockMetadataWithNotify(x, y, z, 1, 2);
 				} else {

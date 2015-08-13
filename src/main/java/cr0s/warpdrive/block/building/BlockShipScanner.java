@@ -22,7 +22,7 @@ public class BlockShipScanner extends BlockContainer {
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.building.ShipScanner");
 	}
 

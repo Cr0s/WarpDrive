@@ -258,7 +258,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 				}
 
 				for (int z = zL; z <= zU; z++) {
-					if (!worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.transportBeaconBlock)) {
+					if (!worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockTransportBeacon)) {
 						continue;
 					}
 					double dist = 1 + Math.abs(x - xV) + Math.abs(y - yV) + Math.abs(z - zV);

@@ -26,7 +26,7 @@ public class BlockDecorative extends Block {
 		super(Material.iron);
 		setHardness(0.5f);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.passive.Plain");
 	}
 
@@ -71,7 +71,7 @@ public class BlockDecorative extends Block {
 		if (!isValidDamage(damage))
 			return null;
 
-		return new ItemStack(WarpDrive.decorativeBlock, amount, damage);
+		return new ItemStack(WarpDrive.blockDecorative, amount, damage);
 	}
 
 	public ItemStack getItemStackNoCache(int damage) {
@@ -79,9 +79,9 @@ public class BlockDecorative extends Block {
 	}
 
 	public void initRecipes() {
-		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStackNoCache(0, 8), false, "sss", "scs", "sss", 's', Blocks.stone, 'c', WarpDrive.componentItem.getItemStack(0)));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStackNoCache(0, 8), false, "sss", "scs", "sss", 's', Blocks.stone, 'c', WarpDrive.itemComponent.getItemStack(0)));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStackNoCache(2, 8), false, "sss", "scs", "sss", 's', getItemStack(0), 'c', WarpDrive.componentItem.getItemStack(5)));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStackNoCache(2, 8), false, "sss", "scs", "sss", 's', getItemStack(0), 'c', WarpDrive.itemComponent.getItemStack(5)));
 	}
 
 }

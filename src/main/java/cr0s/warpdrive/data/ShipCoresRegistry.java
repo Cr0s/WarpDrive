@@ -15,10 +15,10 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
  * 
  * @author Cr0s
  */
-public class WarpCoresRegistry {
+public class ShipCoresRegistry {
 	private LinkedList<TileEntityShipCore> registry;
 
-	public WarpCoresRegistry() {
+	public ShipCoresRegistry() {
 		registry = new LinkedList<TileEntityShipCore>();
 	}
 
@@ -137,7 +137,7 @@ public class WarpCoresRegistry {
 		TileEntityShipCore c;
 		for (int i = registry.size() - 1; i >= 0; i--) {
 			c = registry.get(i);
-			if (c == null || c.getWorldObj() == null || c.getWorldObj().getBlock(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.shipCore
+			if (c == null || c.getWorldObj() == null || c.getWorldObj().getBlock(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.blockShipCore
 					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord) != c
 					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
 				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null) ? c.xCoord : "?") + ", " + ((c != null) ? c.yCoord : "?") + ", "

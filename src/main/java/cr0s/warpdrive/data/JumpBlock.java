@@ -48,7 +48,7 @@ public class JumpBlock {
 			setBlockNoLight(targetWorld, newX, newY, newZ, block, blockMeta, 2);
 
 			// Re-schedule air blocks update
-			if (block == WarpDrive.airBlock) {
+			if (block == WarpDrive.blockAir) {
 				targetWorld.markBlockForUpdate(newX, newY, newZ);
 				targetWorld.scheduleBlockUpdate(newX, newY, newZ, block, 40 + targetWorld.rand.nextInt(20));
 			}

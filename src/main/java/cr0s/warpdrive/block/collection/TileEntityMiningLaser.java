@@ -200,7 +200,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 
 	private void updateMetadata(int metadata) {
 		Block block = worldObj.getBlock(xCoord, yCoord, zCoord);
-		if (block.isAssociatedBlock(WarpDrive.miningLaserBlock) && getBlockMetadata() != metadata) {
+		if (block.isAssociatedBlock(WarpDrive.blockMiningLaser) && getBlockMetadata() != metadata) {
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 2);
 		}
 	}

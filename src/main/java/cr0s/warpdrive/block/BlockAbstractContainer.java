@@ -17,7 +17,7 @@ public abstract class BlockAbstractContainer extends BlockContainer {
 		super(m);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 	}
 
 	@Override

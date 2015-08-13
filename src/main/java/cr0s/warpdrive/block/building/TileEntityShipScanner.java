@@ -186,7 +186,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 
 		// Search for warp cores above
 		for (int newY = yCoord + 1; newY <= 255; newY++) {
-			if (worldObj.getBlock(xCoord, newY, zCoord).isAssociatedBlock(WarpDrive.shipCore)) { // found
+			if (worldObj.getBlock(xCoord, newY, zCoord).isAssociatedBlock(WarpDrive.blockShipCore)) { // found
 				// warp core above
 				result = (TileEntityShipCore) worldObj.getTileEntity(xCoord, newY, zCoord);
 

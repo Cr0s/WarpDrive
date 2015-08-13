@@ -19,7 +19,7 @@ public class BlockGas extends Block {
 	public BlockGas() {
 		super(Material.fire);
 		setHardness(0.0F);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.passive.Gas");
 	}
 

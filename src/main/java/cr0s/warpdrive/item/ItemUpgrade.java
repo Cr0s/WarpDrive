@@ -14,14 +14,14 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.EnumUpgradeTypes;
 
-public class ItemWarpUpgrade extends Item {
+public class ItemUpgrade extends Item {
 	private ItemStack[] isCache = new ItemStack[EnumUpgradeTypes.values().length];
 	private IIcon[] iconBuffer = new IIcon[EnumUpgradeTypes.values().length];
 
-	public ItemWarpUpgrade() {
+	public ItemUpgrade() {
 		setHasSubtypes(true);
 		setUnlocalizedName("warpdrive.upgrade.Malformed");
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 	}
 
 	private boolean isValidDamage(int damage) {
@@ -41,7 +41,7 @@ public class ItemWarpUpgrade extends Item {
 		if (!isValidDamage(damage))
 			return null;
 
-		return new ItemStack(WarpDrive.upgradeItem, 1, damage);
+		return new ItemStack(WarpDrive.itemUpgrade, 1, damage);
 	}
 
 	@Override
@@ -79,17 +79,17 @@ public class ItemWarpUpgrade extends Item {
 	}
 
 	public void initRecipes() {
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Energy.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
-				WarpDrive.componentItem.getItemStack(7), 'r', Items.redstone));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Energy.ordinal()), false, "c", "e", "r", 'c', WarpDrive.itemComponent.getItemStack(0), 'e',
+				WarpDrive.itemComponent.getItemStack(7), 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Power.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
-				WarpDrive.componentItem.getItemStack(6), 'r', Items.redstone));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Power.ordinal()), false, "c", "e", "r", 'c', WarpDrive.itemComponent.getItemStack(0), 'e',
+				WarpDrive.itemComponent.getItemStack(6), 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Speed.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Speed.ordinal()), false, "c", "e", "r", 'c', WarpDrive.itemComponent.getItemStack(0), 'e',
 				Items.sugar, 'r', Items.redstone));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Range.ordinal()), false, "c", "e", "r", 'c', WarpDrive.componentItem.getItemStack(0), 'e',
-				WarpDrive.transportBeaconBlock, 'r', Items.redstone));
+		GameRegistry.addRecipe(new ShapedOreRecipe(getIS(EnumUpgradeTypes.Range.ordinal()), false, "c", "e", "r", 'c', WarpDrive.itemComponent.getItemStack(0), 'e',
+				WarpDrive.blockTransportBeacon, 'r', Items.redstone));
 
 	}
 

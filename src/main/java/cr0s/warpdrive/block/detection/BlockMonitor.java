@@ -12,7 +12,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.data.CamRegistryItem;
+import cr0s.warpdrive.data.CameraRegistryItem;
 import cr0s.warpdrive.render.ClientCameraUtils;
 import cr0s.warpdrive.render.EntityCamera;
 
@@ -24,7 +24,7 @@ public class BlockMonitor extends BlockContainer {
 		super(Material.iron);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.detection.Monitor");
 	}
 
@@ -72,7 +72,7 @@ public class BlockMonitor extends BlockContainer {
 
 		if (te != null && te instanceof TileEntityMonitor && (par5EntityPlayer.getHeldItem() == null)) {
 			int frequency = ((TileEntityMonitor)te).getFrequency();
-			CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, frequency);
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCamByFrequency(par1World, frequency);
 			if (cam == null) {
 				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!");
 				return false;

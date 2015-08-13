@@ -131,9 +131,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		registryUpdateTicks++;
 		if (registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
 			registryUpdateTicks = 0;
-			WarpDrive.warpCores.updateInRegistry(this);
+			WarpDrive.shipCores.updateInRegistry(this);
 			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.warpCores.printRegistry();
+				WarpDrive.shipCores.printRegistry();
 				WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
 						+ (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
 			}
@@ -290,7 +290,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					return;
 				}
 
-				if (WarpDrive.warpCores.isWarpCoreIntersectsWithOthers(this)) {
+				if (WarpDrive.shipCores.isWarpCoreIntersectsWithOthers(this)) {
 					controller.setJumpFlag(false);
 					messageToAllPlayersOnShip("Warp field intersects with other ship's field. Cannot jump.");
 					return;
@@ -349,7 +349,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		for (int y = ymin; y <= ymax; y++) {
 			for (int x = xmin; x <= xmax; x++) {
 				for (int z = zmin; z <= zmax; z++) {
-					if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.isolationBlock)) {
+					if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockWarpIsolation)) {
 						newCount++;
 					}
 				}
@@ -607,7 +607,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				for (int y = minY; y <= maxY; y++) {
 					Block block = worldObj.getBlock(x, y, z);
 
-					if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.airBlock))) {
+					if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
 						continue;
 					}
 					if (aabb.minX <= x && aabb.maxX >= x && aabb.minY <= y && aabb.maxY >= y && aabb.minZ <= z && aabb.maxZ >= z) {
@@ -979,7 +979,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					for (int y = minY; y <= maxY; y++) {
 						Block block = worldObj.getBlock(x, y, z);
 
-						if (worldObj.isAirBlock(x, y, z) && (block != WarpDrive.airBlock)) {
+						if (worldObj.isAirBlock(x, y, z) && (block != WarpDrive.blockAir)) {
 							continue;
 						}
 
@@ -1061,7 +1061,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		coreFrequency = tag.getString("corefrequency");
 		isolationBlocksCount = tag.getInteger("isolation");
 		cooldownTime = tag.getInteger("cooldownTime");
-		WarpDrive.warpCores.updateInRegistry(this);
+		WarpDrive.shipCores.updateInRegistry(this);
 	}
 
 	@Override
@@ -1074,19 +1074,19 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 
 	@Override
 	public void onChunkUnload() {
-		WarpDrive.warpCores.removeFromRegistry(this);
+		WarpDrive.shipCores.removeFromRegistry(this);
 		super.onChunkUnload();
 	}
 
 	@Override
 	public void validate() {
 		super.validate();
-		WarpDrive.warpCores.updateInRegistry(this);
+		WarpDrive.shipCores.updateInRegistry(this);
 	}
 
 	@Override
 	public void invalidate() {
-		WarpDrive.warpCores.removeFromRegistry(this);
+		WarpDrive.shipCores.removeFromRegistry(this);
 		super.invalidate();
 	}
 

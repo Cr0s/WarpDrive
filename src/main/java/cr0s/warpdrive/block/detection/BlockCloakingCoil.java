@@ -16,7 +16,7 @@ public class BlockCloakingCoil extends Block {
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.detection.CloakingCoil");
 	}
 

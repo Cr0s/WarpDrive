@@ -577,7 +577,7 @@ public class EntityJump extends Entity {
 						e.printStackTrace();
 					}
 				} else if (te instanceof TileEntityShipCore) {
-					WarpDrive.warpCores.removeFromRegistry((TileEntityShipCore) te);
+					WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) te);
 				}
 
 				teSuperclass = teClass.getSuperclass();
@@ -641,7 +641,7 @@ public class EntityJump extends Entity {
 								Block block = worldObj.getBlock(x, y, z);
 
 							// Skip air blocks
-								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.airBlock))) {
+								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
 									continue;
 								}
 
@@ -825,7 +825,7 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.airBlock)) {// whitelist
+					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 						continue;
 					}
 
@@ -1076,8 +1076,8 @@ public class EntityJump extends Entity {
 
 					if ( !worldObj.isAirBlock(x, y, z)
 					  && !worldObj.isAirBlock(newX, newY, newZ)
-					  && !block.isAssociatedBlock(WarpDrive.airBlock)
-					  && !block.isAssociatedBlock(WarpDrive.gasBlock)
+					  && !block.isAssociatedBlock(WarpDrive.blockAir)
+					  && !block.isAssociatedBlock(WarpDrive.blockGas)
 					  && !block.isAssociatedBlock(Blocks.leaves)) {
 						result.add(x, y, z,
 							newX + 0.5D + movementVector[0] * 0.1D,

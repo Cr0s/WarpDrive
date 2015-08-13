@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
-import cr0s.warpdrive.data.CamRegistryItem;
+import cr0s.warpdrive.data.CameraRegistryItem;
 
 public class BlockLaserCamera extends BlockContainer {
 	private IIcon[] iconBuffer;
@@ -25,7 +25,7 @@ public class BlockLaserCamera extends BlockContainer {
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.weapon.LaserCamera");
 	}
 
@@ -77,7 +77,7 @@ public class BlockLaserCamera extends BlockContainer {
 			int beamFrequency = ((TileEntityLaser)te).getBeamFrequency();
 			int cameraFrequency = ((TileEntityLaser)te).getCameraFrequency();
 
-			CamRegistryItem cam = WarpDrive.instance.cams.getCamByFrequency(par1World, cameraFrequency);
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCamByFrequency(par1World, cameraFrequency);
 			WarpDrive.debugPrint("cam detected as " + cam);
 			WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName()
 					+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.")

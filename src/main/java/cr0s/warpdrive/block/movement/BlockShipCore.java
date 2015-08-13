@@ -23,7 +23,7 @@ public class BlockShipCore extends BlockContainer {
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.movement.ShipCore");
 	}
 
@@ -101,7 +101,7 @@ public class BlockShipCore extends BlockContainer {
 	public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
 		TileEntity te = par1World.getTileEntity(par2, par3, par4);
 		if (te != null && te instanceof TileEntityShipCore) {
-			WarpDrive.warpCores.removeFromRegistry((TileEntityShipCore)te);
+			WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore)te);
 		}
 
 		super.breakBlock(par1World, par2, par3, par4, par5, par6);

@@ -7,16 +7,16 @@ import net.minecraft.util.IIcon;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 
-public class ItemWarpAirCanister extends Item implements IAirCanister {
+public class ItemAirCanisterFull extends Item implements IAirCanister {
 	
 	private IIcon icon;
 	
-	public ItemWarpAirCanister() {
+	public ItemAirCanisterFull() {
 		super();
 		setMaxDamage(20);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setMaxStackSize(1);
-		setUnlocalizedName("warpdrive.items.AirCanisterFull");
+		setUnlocalizedName("warpdrive.armor.AirCanisterFull");
 	}
 	
 	@Override
@@ -31,17 +31,17 @@ public class ItemWarpAirCanister extends Item implements IAirCanister {
 
 	@Override
 	public ItemStack emptyDrop(ItemStack is) {
- 		return WarpDrive.componentItem.getISNoCache(1, 8);
+ 		return WarpDrive.itemComponent.getISNoCache(1, 8);
  	}
  
 	@Override
 	public ItemStack fullDrop(ItemStack can) {
-		return new ItemStack(WarpDrive.airCanisterItem,1);
+		return new ItemStack(WarpDrive.itemAirCanisterFull,1);
 	}
 	
 	@Override
 	public boolean canContainAir(ItemStack can) {
-		if (can != null && can.getItem() instanceof ItemWarpAirCanister) {
+		if (can != null && can.getItem() instanceof ItemAirCanisterFull) {
 			return can.getItemDamage() > 0;
 		}
 		return false;

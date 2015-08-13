@@ -37,9 +37,7 @@ public class TileEntityAirGenerator extends TileEntityAbstractEnergy {
 		// Air generator works only in spaces
 		if (worldObj.provider.dimensionId != WarpDriveConfig.G_SPACE_DIMENSION_ID && worldObj.provider.dimensionId != WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			if (getBlockMetadata() != 0) {
-				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set
-																					// disabled
-																					// texture
+				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
 			}
 			return;
 		}
@@ -48,15 +46,11 @@ public class TileEntityAirGenerator extends TileEntityAbstractEnergy {
 		if (cooldownTicks > AIR_GENERATION_TICKS) {
 			if (consumeEnergy(EU_PER_NEWAIRBLOCK, true)) {
 				if (getBlockMetadata() != 1) {
-					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2); // set
-																						// enabled
-																						// texture
+					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 2); // set enabled texture
 				}
 			} else {
 				if (getBlockMetadata() != 0) {
-					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set
-																						// disabled
-																						// texture
+					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 2); // set disabled texture
 				}
 			}
 			releaseAir(1, 0, 0);
@@ -73,23 +67,16 @@ public class TileEntityAirGenerator extends TileEntityAbstractEnergy {
 	private void releaseAir(int xOffset, int yOffset, int zOffset) {
 		Block block = worldObj.getBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset);
 		if (block.isAir(worldObj, xOffset, yOffset, zOffset)) {// can be air
-			int energy_cost = (!block.isAssociatedBlock(WarpDrive.airBlock)) ? EU_PER_NEWAIRBLOCK : EU_PER_EXISTINGAIRBLOCK;
+			int energy_cost = (!block.isAssociatedBlock(WarpDrive.blockAir)) ? EU_PER_NEWAIRBLOCK : EU_PER_EXISTINGAIRBLOCK;
 			if (consumeEnergy(energy_cost, true)) {// enough energy
-				if (worldObj.setBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, WarpDrive.airBlock, START_CONCENTRATION_VALUE, 2)) {// needs
-																																				// to
-																																				// renew
-																																				// air
-																																				// or
-																																				// was
-																																				// not
-																																				// maxed
-																																				// out
+				if (worldObj.setBlock(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, WarpDrive.blockAir, START_CONCENTRATION_VALUE, 2)) {
+					// (needs to renew air or was not maxed out)
 					consumeEnergy(EU_PER_NEWAIRBLOCK, false);
 				} else {
 					consumeEnergy(EU_PER_EXISTINGAIRBLOCK, false);
 				}
 			} else {// low energy => remove air block
-				if (block.isAssociatedBlock(WarpDrive.airBlock)) {
+				if (block.isAssociatedBlock(WarpDrive.blockAir)) {
 					int metadata = worldObj.getBlockMetadata(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset);
 					if (metadata > 4) {
 						worldObj.setBlockMetadataWithNotify(xCoord + xOffset, yCoord + yOffset, zCoord + zOffset, metadata - 4, 2);

@@ -14,16 +14,16 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 
-public class ItemWarpComponent extends Item implements IAirCanister {	
+public class ItemComponent extends Item implements IAirCanister {	
 	private IIcon[] potentialIcons;
 	private String[] potentialUnlocalized = new String[9];
 	private ItemStack[] cachedIS;
 	
-	public ItemWarpComponent() {
+	public ItemComponent() {
 		super();
 		setHasSubtypes(true);
 		setUnlocalizedName("warpdrive.crafting.Malformed");
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		
 		potentialUnlocalized[0] = "EmptyCore";
 		potentialUnlocalized[1] = "TeleCore";
@@ -42,7 +42,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	public ItemStack getItemStack(int damage) {
 		if (damage >=0 && damage < potentialUnlocalized.length) {
 			if (cachedIS[damage] == null) {
-				cachedIS[damage] = new ItemStack(WarpDrive.componentItem,1,damage);
+				cachedIS[damage] = new ItemStack(WarpDrive.itemComponent,1,damage);
 			}
 			return cachedIS[damage];
 		}
@@ -50,7 +50,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	}
 	
 	public ItemStack getISNoCache(int amount,int damage) {
-		return new ItemStack(WarpDrive.componentItem, amount, damage);
+		return new ItemStack(WarpDrive.itemComponent, amount, damage);
 	}
 	
 	public void registerRecipes() {
@@ -105,7 +105,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 		if (is == null) {
 			return false;
 		}
-		if (!(is.getItem() instanceof ItemWarpComponent)) {
+		if (!(is.getItem() instanceof ItemComponent)) {
 				return false;
 		}
 		String data = potentialUnlocalized[is.getItemDamage()];
@@ -148,7 +148,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	@Override
 	public ItemStack fullDrop(ItemStack is) {
 		if (doesMatch(is, "AirCanisterEmpty")) {
-			return WarpDrive.airCanisterItem.fullDrop(is);
+			return WarpDrive.itemAirCanisterFull.fullDrop(is);
 		}
 		return null;
 	}	
@@ -156,7 +156,7 @@ public class ItemWarpComponent extends Item implements IAirCanister {
 	@Override
 	public ItemStack emptyDrop(ItemStack is) {
 		if (doesMatch(is, "AirCanisterEmpty")) {
-			return WarpDrive.airCanisterItem.emptyDrop(is);
+			return WarpDrive.itemAirCanisterFull.emptyDrop(is);
 		}
 		return null;
 	}

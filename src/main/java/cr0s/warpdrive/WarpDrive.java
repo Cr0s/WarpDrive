@@ -94,15 +94,15 @@ import cr0s.warpdrive.command.InvisibleCommand;
 import cr0s.warpdrive.command.JumpgateCommand;
 import cr0s.warpdrive.command.SpaceTpCommand;
 import cr0s.warpdrive.conf.WarpDriveConfig;
-import cr0s.warpdrive.data.CamRegistry;
+import cr0s.warpdrive.data.CamerasRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;
-import cr0s.warpdrive.data.WarpCoresRegistry;
+import cr0s.warpdrive.data.ShipCoresRegistry;
 import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
-import cr0s.warpdrive.item.ItemWarpAirCanister;
-import cr0s.warpdrive.item.ItemWarpArmor;
-import cr0s.warpdrive.item.ItemWarpComponent;
-import cr0s.warpdrive.item.ItemWarpUpgrade;
+import cr0s.warpdrive.item.ItemAirCanisterFull;
+import cr0s.warpdrive.item.ItemHelmet;
+import cr0s.warpdrive.item.ItemComponent;
+import cr0s.warpdrive.item.ItemUpgrade;
 import cr0s.warpdrive.network.PacketHandler;
 import cr0s.warpdrive.render.CameraOverlay;
 import cr0s.warpdrive.world.BiomeSpace;
@@ -121,41 +121,41 @@ public class WarpDrive implements LoadingCallback {
 	public static final String MODID = "WarpDrive";
 	public static final String VERSION = "@version@";
 	
-	public static Block shipCore;
-	public static Block protocolBlock;
-	public static Block radarBlock;
-	public static Block isolationBlock;
-	public static Block airgenBlock;
-	public static Block laserBlock;
-	public static Block laserCamBlock;
-	public static Block cameraBlock;
-	public static Block monitorBlock;
-	public static Block boosterBlock;
-	public static Block miningLaserBlock;
-	public static Block laserTreeFarmBlock;
-	public static Block liftBlock;
-	public static Block scannerBlock;
-	public static Block cloakBlock;
-	public static Block cloakCoilBlock;
-	public static Block transporterBlock;
-	public static Block reactorMonitorBlock;
-	public static Block powerReactorBlock;
-	public static Block powerLaserBlock;
-	public static Block powerStoreBlock;
-	public static Block airBlock;
-	public static Block gasBlock;
-	public static Block iridiumBlock;
-	public static Block transportBeaconBlock;
-	public static Block chunkLoaderBlock;
-	public static BlockDecorative decorativeBlock;
+	public static Block blockShipCore;
+	public static Block blockShipController;
+	public static Block blockRadar;
+	public static Block blockWarpIsolation;
+	public static Block blockAirGenerator;
+	public static Block blockLaser;
+	public static Block blockLaserCamera;
+	public static Block blockCamera;
+	public static Block blockMonitor;
+	public static Block blockLaserMedium;
+	public static Block blockMiningLaser;
+	public static Block blockLaserTreeFarm;
+	public static Block blockLift;
+	public static Block blockShipScanner;
+	public static Block blockCloakingCore;
+	public static Block blockCloakingCoil;
+	public static Block blockTransporter;
+	public static Block blockIC2reactorLaserMonitor;
+	public static Block blockEnanReactorCore;
+	public static Block blockEnanReactorLaser;
+	public static Block blockEnergyBank;
+	public static Block blockAir;
+	public static Block blockGas;
+	public static Block blockIridium;
+	public static Block blockTransportBeacon;
+	public static Block blockChunkLoader;
+	public static BlockDecorative blockDecorative;
 
-	public static Item reactorLaserFocusItem;
-	public static ItemWarpComponent componentItem;
-	public static ItemWarpUpgrade upgradeItem;
+	public static Item itemIC2reactorLaserFocus;
+	public static ItemComponent itemComponent;
+	public static ItemUpgrade itemUpgrade;
 
 	public static ArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[] { 1, 3, 2, 1 }, 15);
-	public static ItemWarpArmor helmetItem;
-	public static ItemWarpAirCanister airCanisterItem;
+	public static ItemHelmet itemHelmet;
+	public static ItemAirCanisterFull itemAirCanisterFull;
 
 	public static BiomeGenBase spaceBiome;
 	public SpaceWorldGenerator spaceWorldGenerator;
@@ -167,18 +167,18 @@ public class WarpDrive implements LoadingCallback {
 	public static float normalFOV = 70.0F;
 	public static float normalSensitivity = 1.0F;
 
-	public static CreativeTabs warpdriveTab = new WarpDriveCreativeTab("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
+	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
 
 	@Instance(WarpDrive.MODID)
 	public static WarpDrive instance;
 	@SidedProxy(clientSide = "cr0s.warpdrive.client.ClientProxy", serverSide = "cr0s.warpdrive.CommonProxy")
 	public static CommonProxy proxy;
 
-	public static WarpCoresRegistry warpCores;
+	public static ShipCoresRegistry shipCores;
 	public static JumpgatesRegistry jumpgates;
 	public static CloakManager cloaks;
 
-	public static CamRegistry cams;
+	public static CamerasRegistry cameras;
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
 	public String debugMessage = "";
@@ -224,173 +224,174 @@ public class WarpDrive implements LoadingCallback {
 		WarpDriveConfig.load();
 
 		// CORE CONTROLLER
-		protocolBlock = new BlockShipController(0, Material.rock);
+		blockShipController = new BlockShipController(0, Material.rock);
 
-		GameRegistry.registerBlock(protocolBlock, "protocolBlock");
-		GameRegistry.registerTileEntity(TileEntityShipController.class, MODID + ":protocolBlock");
+		GameRegistry.registerBlock(blockShipController, "blockShipController");
+		GameRegistry.registerTileEntity(TileEntityShipController.class, MODID + ":blockShipController");
 
 		// WARP CORE
-		shipCore = new BlockShipCore(0, Material.rock);
+		blockShipCore = new BlockShipCore(0, Material.rock);
 
-		GameRegistry.registerBlock(shipCore, "warpCore");
-		GameRegistry.registerTileEntity(TileEntityShipCore.class, MODID + ":warpCore");
+		GameRegistry.registerBlock(blockShipCore, "blockShipCore");
+		GameRegistry.registerTileEntity(TileEntityShipCore.class, MODID + ":blockShipCore");
 
 		// WARP RADAR
-		radarBlock = new BlockRadar(0, Material.rock);
+		blockRadar = new BlockRadar(0, Material.rock);
 
-		GameRegistry.registerBlock(radarBlock, "radarBlock");
-		GameRegistry.registerTileEntity(TileEntityRadar.class, MODID + ":radarBlock");
+		GameRegistry.registerBlock(blockRadar, "blockRadar");
+		GameRegistry.registerTileEntity(TileEntityRadar.class, MODID + ":blockRadar");
 
 		// WARP ISOLATION
-		isolationBlock = new BlockWarpIsolation(0, Material.rock);
+		blockWarpIsolation = new BlockWarpIsolation(0, Material.rock);
 
-		GameRegistry.registerBlock(isolationBlock, "isolationBlock");
+		GameRegistry.registerBlock(blockWarpIsolation, "blockWarpIsolation");
 
 		// AIR GENERATOR
-		airgenBlock = new BlockAirGenerator(0, Material.rock);
+		blockAirGenerator = new BlockAirGenerator(0, Material.rock);
 
-		GameRegistry.registerBlock(airgenBlock, "airgenBlock");
-		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, MODID + ":airgenBlock");
+		GameRegistry.registerBlock(blockAirGenerator, "blockAirGenerator");
+		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, MODID + ":blockAirGenerator");
 
 		// AIR BLOCK
-		airBlock = new BlockAir();
+		blockAir = new BlockAir();
 
-		GameRegistry.registerBlock(airBlock, "airBlock");
+		GameRegistry.registerBlock(blockAir, "blockAir");
 
 		// GAS BLOCK
-		gasBlock = new BlockGas();
+		blockGas = new BlockGas();
 
-		GameRegistry.registerBlock(gasBlock, "gasBlock");
+		GameRegistry.registerBlock(blockGas, "blockGas");
 
 		// LASER EMITTER
-		laserBlock = new BlockLaser(0, Material.rock);
+		blockLaser = new BlockLaser(0, Material.rock);
 
-		GameRegistry.registerBlock(laserBlock, "laserBlock");
-		GameRegistry.registerTileEntity(TileEntityLaser.class, MODID + ":laserBlock");
+		GameRegistry.registerBlock(blockLaser, "blockLaser");
+		GameRegistry.registerTileEntity(TileEntityLaser.class, MODID + ":blockLaser");
 
 		// LASER EMITTER WITH CAMERA
-		laserCamBlock = new BlockLaserCamera(0, Material.rock);
+		blockLaserCamera = new BlockLaserCamera(0, Material.rock);
 
-		GameRegistry.registerBlock(laserCamBlock, "laserCamBlock");
+		GameRegistry.registerBlock(blockLaserCamera, "blockLaserCamera");
 
 		// CAMERA
-		cameraBlock = new BlockCamera(0, Material.rock);
+		blockCamera = new BlockCamera(0, Material.rock);
 
-		GameRegistry.registerBlock(cameraBlock, "cameraBlock");
-		GameRegistry.registerTileEntity(TileEntityCamera.class, MODID + ":cameraBlock");
+		GameRegistry.registerBlock(blockCamera, "blockCamera");
+		GameRegistry.registerTileEntity(TileEntityCamera.class, MODID + ":blockCamera");
 
 		// MONITOR
-		monitorBlock = new BlockMonitor();
+		blockMonitor = new BlockMonitor();
 
-		GameRegistry.registerBlock(monitorBlock, "monitorBlock");
-		GameRegistry.registerTileEntity(TileEntityMonitor.class, MODID + ":monitorBlock");
+		GameRegistry.registerBlock(blockMonitor, "blockMonitor");
+		GameRegistry.registerTileEntity(TileEntityMonitor.class, MODID + ":blockMonitor");
 
 		// MINING LASER
-		miningLaserBlock = new BlockMiningLaser(0, Material.rock);
+		blockMiningLaser = new BlockMiningLaser(0, Material.rock);
 
-		GameRegistry.registerBlock(miningLaserBlock, "miningLaserBlock");
-		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, MODID + ":miningLaserBlock");
+		GameRegistry.registerBlock(blockMiningLaser, "blockMiningLaser");
+		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, MODID + ":blockMiningLaser");
 
 		// LASER TREE FARM
-		laserTreeFarmBlock = new BlockLaserTreeFarm(0, Material.rock);
+		blockLaserTreeFarm = new BlockLaserTreeFarm(0, Material.rock);
 
-		GameRegistry.registerBlock(laserTreeFarmBlock, "laserTreeFarmBlock");
-		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, MODID + ":laserTreeFarmBlock");
+		GameRegistry.registerBlock(blockLaserTreeFarm, "blockLaserTreeFarm");
+		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, MODID + ":blockLaserTreeFarm");
 
-		// PARTICLE BOOSTER
-		boosterBlock = new BlockLaserMedium(0, Material.rock);
+		// LASER MEDIUM
+		blockLaserMedium = new BlockLaserMedium(0, Material.rock);
 
-		GameRegistry.registerBlock(boosterBlock, "boosterBlock");
-		GameRegistry.registerTileEntity(TileEntityLaserMedium.class, MODID + ":boosterBlock");
+		GameRegistry.registerBlock(blockLaserMedium, "blockLaserMedium");
+		GameRegistry.registerTileEntity(TileEntityLaserMedium.class, MODID + ":blockLaserMedium");
 
-		// LASER LIFT
-		liftBlock = new BlockLift(0, Material.rock);
+		// LIFT
+		blockLift = new BlockLift(0, Material.rock);
 
-		GameRegistry.registerBlock(liftBlock, "liftBlock");
-		GameRegistry.registerTileEntity(TileEntityLift.class, MODID + ":liftBlock");
+		GameRegistry.registerBlock(blockLift, "blockLift");
+		GameRegistry.registerTileEntity(TileEntityLift.class, MODID + ":blockLift");
 
 		// IRIDIUM BLOCK
-		iridiumBlock = new BlockIridium();
+		blockIridium = new BlockIridium();
 
-		GameRegistry.registerBlock(iridiumBlock, "iridiumBlock");
+		GameRegistry.registerBlock(blockIridium, "blockIridium");
 
 		// SHIP SCANNER
-		scannerBlock = new BlockShipScanner(0, Material.rock);
+		blockShipScanner = new BlockShipScanner(0, Material.rock);
 
-		GameRegistry.registerBlock(scannerBlock, "scannerBlock");
-		GameRegistry.registerTileEntity(TileEntityShipScanner.class, MODID + ":scannerBlock");
+		GameRegistry.registerBlock(blockShipScanner, "blockShipScanner");
+		GameRegistry.registerTileEntity(TileEntityShipScanner.class, MODID + ":blockShipScanner");
 
 		// CLOAKING DEVICE CORE
-		cloakBlock = new BlockCloakingCore(0, Material.rock);
+		blockCloakingCore = new BlockCloakingCore(0, Material.rock);
 
-		GameRegistry.registerBlock(cloakBlock, "cloakBlock");
-		GameRegistry.registerTileEntity(TileEntityCloakingCore.class, MODID + ":cloakBlock");
+		GameRegistry.registerBlock(blockCloakingCore, "blockCloakingCore");
+		GameRegistry.registerTileEntity(TileEntityCloakingCore.class, MODID + ":blockCloakingCore");
 
 		// CLOAKING DEVICE COIL
-		cloakCoilBlock = new BlockCloakingCoil(0, Material.rock);
+		blockCloakingCoil = new BlockCloakingCoil(0, Material.rock);
 
-		GameRegistry.registerBlock(cloakCoilBlock, "cloakCoilBlock");
+		GameRegistry.registerBlock(blockCloakingCoil, "blockCloakingCoil");
 
 		// TRANSPORTER
-		transporterBlock = new BlockTransporter(Material.rock);
+		blockTransporter = new BlockTransporter(Material.rock);
 
-		GameRegistry.registerBlock(transporterBlock, "transporter");
-		GameRegistry.registerTileEntity(TileEntityTransporter.class, "transporter");
+		GameRegistry.registerBlock(blockTransporter, "blockTransporter");
+		GameRegistry.registerTileEntity(TileEntityTransporter.class, MODID + ":blockTransporter");
 
 		// REACTOR MONITOR
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			reactorMonitorBlock = new BlockIC2reactorLaserMonitor(Material.rock);
+			blockIC2reactorLaserMonitor = new BlockIC2reactorLaserMonitor(Material.rock);
 			
-			GameRegistry.registerBlock(reactorMonitorBlock, "reactorMonitor");
-			GameRegistry.registerTileEntity(TileEntityIC2reactorLaserMonitor.class, MODID + ":reactorMonitor");
+			GameRegistry.registerBlock(blockIC2reactorLaserMonitor, "blockIC2reactorLaserMonitor");
+			GameRegistry.registerTileEntity(TileEntityIC2reactorLaserMonitor.class, MODID + ":blockIC2reactorLaserMonitor");
 		}
 
 		// TRANSPORT BEACON
-		transportBeaconBlock = new BlockTransportBeacon();
+		blockTransportBeacon = new BlockTransportBeacon();
 
-		GameRegistry.registerBlock(transportBeaconBlock, "transportBeacon");
+		GameRegistry.registerBlock(blockTransportBeacon, "blockTransportBeacon");
 
 		// POWER REACTOR, LASER, STORE
-		powerReactorBlock = new BlockEnanReactorCore();
-		GameRegistry.registerBlock(powerReactorBlock, "powerReactor");
-		GameRegistry.registerTileEntity(TileEntityEnanReactorCore.class, MODID + ":powerReactor");
+		blockEnanReactorCore = new BlockEnanReactorCore();
+		GameRegistry.registerBlock(blockEnanReactorCore, "blockEnanReactorCore");
+		GameRegistry.registerTileEntity(TileEntityEnanReactorCore.class, MODID + ":blockEnanReactorCore");
 
-		powerLaserBlock = new BlockEnanReactorLaser();
-		GameRegistry.registerBlock(powerLaserBlock, "powerLaser");
-		GameRegistry.registerTileEntity(TileEntityEnanReactorLaser.class, MODID + ":powerLaser");
+		blockEnanReactorLaser = new BlockEnanReactorLaser();
+		GameRegistry.registerBlock(blockEnanReactorLaser, "blockEnanReactorLaser");
+		GameRegistry.registerTileEntity(TileEntityEnanReactorLaser.class, MODID + ":blockEnanReactorLaser");
 
-		powerStoreBlock = new BlockEnergyBank();
-		GameRegistry.registerBlock(powerStoreBlock, "powerStore");
-		GameRegistry.registerTileEntity(TileEntityEnergyBank.class, MODID + ":powerStore");
+		blockEnergyBank = new BlockEnergyBank();
+		GameRegistry.registerBlock(blockEnergyBank, "blockEnergyBank");
+		GameRegistry.registerTileEntity(TileEntityEnergyBank.class, MODID + ":blockEnergyBank");
 
 		// CHUNK LOADER
-		chunkLoaderBlock = new BlockChunkLoader();
-		GameRegistry.registerBlock(chunkLoaderBlock, "chunkLoader");
-		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, MODID + ":chunkLoader");
+		blockChunkLoader = new BlockChunkLoader();
+		GameRegistry.registerBlock(blockChunkLoader, "blockChunkLoader");
+		GameRegistry.registerTileEntity(TileEntityChunkLoader.class, MODID + ":blockChunkLoader");
 
 		// DECORATIVE
-		decorativeBlock = new BlockDecorative();
-		GameRegistry.registerBlock(decorativeBlock, ItemBlockDecorative.class, "decorative");
+		blockDecorative = new BlockDecorative();
+		GameRegistry.registerBlock(blockDecorative, ItemBlockDecorative.class, "blockDecorative");
 
 		// REACTOR LASER FOCUS
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			reactorLaserFocusItem = new ItemIC2reactorLaserFocus();
-			GameRegistry.registerItem(reactorLaserFocusItem, "reactorLaserFocus");
+			itemIC2reactorLaserFocus = new ItemIC2reactorLaserFocus();
+			GameRegistry.registerItem(itemIC2reactorLaserFocus, "itemIC2reactorLaserFocus");
 		}
 
 		// COMPONENT ITEMS
-		componentItem = new ItemWarpComponent();
-		GameRegistry.registerItem(componentItem, "component");
+		itemComponent = new ItemComponent();
+		GameRegistry.registerItem(itemComponent, "itemComponent");
 
-		helmetItem = new ItemWarpArmor(armorMaterial, 0);
-		GameRegistry.registerItem(helmetItem, "helmet");
+		itemHelmet = new ItemHelmet(armorMaterial, 0);
+		GameRegistry.registerItem(itemHelmet, "itemHelmet");
 
-		airCanisterItem = new ItemWarpAirCanister();
-		GameRegistry.registerItem(airCanisterItem, "airCanisterFull");
+		itemAirCanisterFull = new ItemAirCanisterFull();
+		GameRegistry.registerItem(itemAirCanisterFull, "itemAirCanisterFull");
 
-		upgradeItem = new ItemWarpUpgrade();
-		GameRegistry.registerItem(upgradeItem, "upgrade");
-
+		itemUpgrade = new ItemUpgrade();
+		GameRegistry.registerItem(itemUpgrade, "itemUpgrade");
+		
+		
 		proxy.registerEntities();
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, instance);
 
@@ -405,7 +406,7 @@ public class WarpDrive implements LoadingCallback {
 		MinecraftForge.EVENT_BUS.register(new SpaceEventHandler());
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-			warpdriveTab.setBackgroundImageName("items.png");
+			creativeTabWarpDrive.setBackgroundImageName("items.png");
 			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 
@@ -429,169 +430,169 @@ public class WarpDrive implements LoadingCallback {
 			initVanillaRecipes();
 		}
 
-		warpCores = new WarpCoresRegistry();
+		shipCores = new ShipCoresRegistry();
 		jumpgates = new JumpgatesRegistry();
-		cams = new CamRegistry();
+		cameras = new CamerasRegistry();
 	}
 
 	private static void initVanillaRecipes() {
-		componentItem.registerRecipes();
-		decorativeBlock.initRecipes();
-		upgradeItem.initRecipes();
+		itemComponent.registerRecipes();
+		blockDecorative.initRecipes();
+		itemUpgrade.initRecipes();
 
 		// WarpCore
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(shipCore), false, "ipi", "ici", "idi",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipCore), false, "ipi", "ici", "idi",
 				'i', Items.iron_ingot,
-				'p', componentItem.getItemStack(6),
-				'c', componentItem.getItemStack(2),
+				'p', itemComponent.getItemStack(6),
+				'c', itemComponent.getItemStack(2),
 				'd', Items.diamond));
 
 		// Controller
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(protocolBlock), false, "ici", "idi", "iii",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, "ici", "idi", "iii",
 				'i', Items.iron_ingot,
-				'c', componentItem.getItemStack(5),
+				'c', itemComponent.getItemStack(5),
 				'd', Items.diamond));
 
 		// Radar
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(radarBlock), false, "ggg", "pdc", "iii",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockRadar), false, "ggg", "pdc", "iii",
 				'i', Items.iron_ingot,
-				'c', componentItem.getItemStack(5),
-				'p', componentItem.getItemStack(6),
+				'c', itemComponent.getItemStack(5),
+				'p', itemComponent.getItemStack(6),
 				'g', Blocks.glass,
 				'd', Items.diamond));
 
 		// Isolation Block
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(isolationBlock), false, "igi", "geg", "igi",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockWarpIsolation), false, "igi", "geg", "igi",
 				'i', Items.iron_ingot,
 				'g', Blocks.glass,
 				'e', Items.ender_pearl));
 
 		// Air generator
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(airgenBlock), false, "ibi", "i i", "ipi",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockAirGenerator), false, "ibi", "i i", "ipi",
 				'i', Items.iron_ingot,
 				'b', Blocks.iron_bars,
-				'p', componentItem.getItemStack(6)));
+				'p', itemComponent.getItemStack(6)));
 
 		// Laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserBlock), false, "ili", "iri", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaser), false, "ili", "iri", "ici",
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
-				'c', componentItem.getItemStack(5),
-				'l', componentItem.getItemStack(3),
-				'p', componentItem.getItemStack(6)));
+				'c', itemComponent.getItemStack(5),
+				'l', itemComponent.getItemStack(3),
+				'p', itemComponent.getItemStack(6)));
 
 		// Mining laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(miningLaserBlock), false, "ici", "iti", "ili",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMiningLaser), false, "ici", "iti", "ili",
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
-				't', componentItem.getItemStack(1),
-				'c', componentItem.getItemStack(5),
-				'l', componentItem.getItemStack(3)));
+				't', itemComponent.getItemStack(1),
+				'c', itemComponent.getItemStack(5),
+				'l', itemComponent.getItemStack(3)));
 
 		// Tree farm laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock), false, "ili", "sts", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserTreeFarm), false, "ili", "sts", "ici",
 				'i', Items.iron_ingot,
 				's', "treeSapling",
-				't', componentItem.getItemStack(1), 
-				'c', componentItem.getItemStack(5),
-				'l', componentItem.getItemStack(3)));
+				't', itemComponent.getItemStack(1), 
+				'c', itemComponent.getItemStack(5),
+				'l', itemComponent.getItemStack(3)));
 
 		// Laser Lift
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(liftBlock), false, "ipi", "rtr", "ili",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLift), false, "ipi", "rtr", "ili",
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
-				't', componentItem.getItemStack(1),
-				'l', componentItem.getItemStack(3),
-				'p', componentItem.getItemStack(6)));
+				't', itemComponent.getItemStack(1),
+				'l', itemComponent.getItemStack(3),
+				'p', itemComponent.getItemStack(6)));
 
 		// Transporter
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, "iii", "ptc", "iii",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTransporter), false, "iii", "ptc", "iii",
 				'i', Items.iron_ingot,
-				't', componentItem.getItemStack(1),
-				'c', componentItem.getItemStack(5),
-				'p', componentItem.getItemStack(6)));
+				't', itemComponent.getItemStack(1),
+				'c', itemComponent.getItemStack(5),
+				'p', itemComponent.getItemStack(6)));
 
 		// Particle Booster
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(boosterBlock), false, "ipi", "rgr", "iii", 
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserMedium), false, "ipi", "rgr", "iii", 
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
 				'g', Blocks.glass,
-				'p', componentItem.getItemStack(6)));
+				'p', itemComponent.getItemStack(6)));
 
 		// Camera
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cameraBlock), false, "ngn", "i i", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCamera), false, "ngn", "i i", "ici",
 				'i', Items.iron_ingot,
 				'n', Items.gold_nugget,
 				'g', Blocks.glass,
-				'c', componentItem.getItemStack(5)));
+				'c', itemComponent.getItemStack(5)));
 
 		// LaserCamera
-		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(laserCamBlock), cameraBlock, laserBlock));
+		GameRegistry.addRecipe(new ShapelessOreRecipe(new ItemStack(blockLaserCamera), blockCamera, blockLaser));
 
 		// Monitor
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(monitorBlock), false, "ggg", "iti", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMonitor), false, "ggg", "iti", "ici",
 				'i', Items.iron_ingot,
 				't', Blocks.torch,
 				'g', Blocks.glass,
-				'c', componentItem.getItemStack(5)));
+				'c', itemComponent.getItemStack(5)));
 
 		// Cloaking device
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakBlock), false, "ipi", "lrl", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCore), false, "ipi", "lrl", "ici",
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
-				'l', componentItem.getItemStack(3),
-				'c', componentItem.getItemStack(5),
-				'p', componentItem.getItemStack(6)));
+				'l', itemComponent.getItemStack(3),
+				'c', itemComponent.getItemStack(5),
+				'p', itemComponent.getItemStack(6)));
 
 		// Cloaking coil
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakCoilBlock), false, "ini", "rdr", "ini",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCoil), false, "ini", "rdr", "ini",
 				'i', Items.iron_ingot,
 				'd', Items.diamond,
 				'r', Items.redstone,
 				'n', Items.gold_nugget));
 
 		// Power Laser
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerLaserBlock), false, "iii", "ilg", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockEnanReactorLaser), false, "iii", "ilg", "ici",
 				'i', Items.iron_ingot,
 				'g', Blocks.glass,
-				'c', componentItem.getItemStack(5),
-				'l', componentItem.getItemStack(3)));
+				'c', itemComponent.getItemStack(5),
+				'l', itemComponent.getItemStack(3)));
 
 		// Power Reactor
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerReactorBlock), false, "ipi", "gog", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockEnanReactorCore), false, "ipi", "gog", "ici",
 				'i', Items.iron_ingot,
 				'g', Blocks.glass,
-				'o', componentItem.getItemStack(4),
-				'c', componentItem.getItemStack(5),
-				'p', componentItem.getItemStack(6)));
+				'o', itemComponent.getItemStack(4),
+				'c', itemComponent.getItemStack(5),
+				'p', itemComponent.getItemStack(6)));
 
 		// Power Store
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(powerStoreBlock), false, "ipi", "isi", "ici",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockEnergyBank), false, "ipi", "isi", "ici",
 				'i', Items.iron_ingot,
-				's', componentItem.getItemStack(7),
-				'c', componentItem.getItemStack(5),
-				'p', componentItem.getItemStack(6)));
+				's', itemComponent.getItemStack(7),
+				'c', itemComponent.getItemStack(5),
+				'p', itemComponent.getItemStack(6)));
 
 		// Transport Beacon
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transportBeaconBlock), false, " e ", "ldl", " s ",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTransportBeacon), false, " e ", "ldl", " s ",
 				'e', Items.ender_pearl,
 				'l', "dyeBlue",
 				'd', Items.diamond,
 				's', Items.stick));
 
 		// Chunk Loader
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(chunkLoaderBlock), false, "ipi", "ici", "ifi",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockChunkLoader), false, "ipi", "ici", "ifi",
 				'i', Items.iron_ingot,
-				'p', componentItem .getItemStack(6),
-				'c', componentItem.getItemStack(0),
-				'f', componentItem.getItemStack(5)));
+				'p', itemComponent .getItemStack(6),
+				'c', itemComponent.getItemStack(0),
+				'f', itemComponent.getItemStack(5)));
 
 		// Helmet
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(helmetItem), false, "iii", "iwi", "gcg",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(itemHelmet), false, "iii", "iwi", "gcg",
 				'i', Items.iron_ingot,
 				'w', Blocks.wool,
 				'g', Blocks.glass,
-				'c', componentItem.getItemStack(8)));
+				'c', itemComponent.getItemStack(8)));
 	}
 
 	private static void initIC2Recipes() {
@@ -609,108 +610,108 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack mfe = WarpDriveConfig.getIC2Item("blockElectric").copy();
 		mfe.setItemDamage(1);
 		
-		GameRegistry.addRecipe(new ItemStack(shipCore), "ici", "cmc", "ici",
+		GameRegistry.addRecipe(new ItemStack(blockShipCore), "ici", "cmc", "ici",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"));
 
-		GameRegistry.addRecipe(new ItemStack(protocolBlock), "iic", "imi", "cii",
+		GameRegistry.addRecipe(new ItemStack(blockShipController), "iic", "imi", "cii",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"));
 
-		GameRegistry.addRecipe(new ItemStack(radarBlock), "ifi", "imi", "imi",
+		GameRegistry.addRecipe(new ItemStack(blockRadar), "ifi", "imi", "imi",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'f', WarpDriveConfig.getIC2Item("itemFreq"));
 
-		GameRegistry.addRecipe(new ItemStack(isolationBlock), "iii", "idi", "iii",
+		GameRegistry.addRecipe(new ItemStack(blockWarpIsolation), "iii", "idi", "iii",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'd', Blocks.diamond_block);
 
-		GameRegistry.addRecipe(new ItemStack(airgenBlock), "lcl", "lml", "lll",
+		GameRegistry.addRecipe(new ItemStack(blockAirGenerator), "lcl", "lml", "lll",
 				'l', Blocks.leaves,
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"));
 
-		GameRegistry.addRecipe(new ItemStack(laserBlock), "sss", "ama", "aaa",
+		GameRegistry.addRecipe(new ItemStack(blockLaser), "sss", "ama", "aaa",
 				'm', advancedMachine,
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"),
 				's', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"));
 
-		GameRegistry.addRecipe(new ItemStack(miningLaserBlock), "aaa", "ama", "ccc",
+		GameRegistry.addRecipe(new ItemStack(blockMiningLaser), "aaa", "ama", "ccc",
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"),
 				'm', miner);
 
-		GameRegistry.addRecipe(new ItemStack(boosterBlock), "afc", "ama", "cfa",
+		GameRegistry.addRecipe(new ItemStack(blockLaserMedium), "afc", "ama", "cfa",
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"),
 				'f', fiberGlassCable,
 				'm', mfe);
 
-		GameRegistry.addRecipe(new ItemStack(liftBlock), "aca", "ama", "a#a",
+		GameRegistry.addRecipe(new ItemStack(blockLift), "aca", "ama", "a#a",
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"),
 				'm', magnetizer);
 
-		GameRegistry.addRecipe(new ItemStack(iridiumBlock), "iii", "iii", "iii",
+		GameRegistry.addRecipe(new ItemStack(blockIridium), "iii", "iii", "iii",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"));
 
-		GameRegistry.addShapelessRecipe(new ItemStack(WarpDriveConfig.getIC2Item("itemPartIridium").getItem(), 9), new ItemStack(iridiumBlock));
+		GameRegistry.addShapelessRecipe(new ItemStack(WarpDriveConfig.getIC2Item("itemPartIridium").getItem(), 9), new ItemStack(blockIridium));
 
-		GameRegistry.addRecipe(new ItemStack(laserCamBlock), "imi", "cec", "#k#",
+		GameRegistry.addRecipe(new ItemStack(blockLaserCamera), "imi", "cec", "#k#",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
-				'e', laserBlock,
-				'k', cameraBlock);
+				'e', blockLaser,
+				'k', blockCamera);
 
-		GameRegistry.addRecipe(new ItemStack(cameraBlock), "cgc", "gmg", "cgc",
+		GameRegistry.addRecipe(new ItemStack(blockCamera), "cgc", "gmg", "cgc",
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'g', Blocks.glass);
 
-		GameRegistry.addRecipe(new ItemStack(monitorBlock), "gcg", "gmg", "ggg",
+		GameRegistry.addRecipe(new ItemStack(blockMonitor), "gcg", "gmg", "ggg",
 				'm', advancedMachine,
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'g', Blocks.glass);
 
-		GameRegistry.addRecipe(new ItemStack(scannerBlock), "sgs", "mma", "amm",
+		GameRegistry.addRecipe(new ItemStack(blockShipScanner), "sgs", "mma", "amm",
 				'm', advancedMachine,
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"),
 				's', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'g', Blocks.glass);
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock), false, new Object[] { "cwc", "wmw", "cwc",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserTreeFarm), false, new Object[] { "cwc", "wmw", "cwc",
 				'c', circuit,
 				'w', "logWood",
-				'm', miningLaserBlock }));
+				'm', blockMiningLaser }));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] { "ece", "imi", "iei",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTransporter), false, new Object[] { "ece", "imi", "iei",
 				'e', Items.ender_pearl,
 				'c', circuit,
 				'i', ironPlate,
 				'm', advancedMachine }));
 
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem), false, new Object[] { " p ", "pdp", " p ",
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(itemIC2reactorLaserFocus), false, new Object[] { " p ", "pdp", " p ",
 					'p', ironPlate,
 					'd', "gemDiamond" }));
 
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] { "pdp", "dmd", "pdp",
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockIC2reactorLaserMonitor), false, new Object[] { "pdp", "dmd", "pdp",
 					'p', ironPlate,
 					'd', "gemDiamond",
 					'm', mfe }));
 		}
 
-		GameRegistry.addRecipe(new ItemStack(cloakBlock), "imi", "mcm", "imi",
-				'i', iridiumBlock,
-				'c', cloakCoilBlock,
+		GameRegistry.addRecipe(new ItemStack(blockCloakingCore), "imi", "mcm", "imi",
+				'i', blockIridium,
+				'c', blockCloakingCoil,
 				'm', advancedMachine);
 
-		GameRegistry.addRecipe(new ItemStack(cloakCoilBlock), "iai", "aca", "iai",
+		GameRegistry.addRecipe(new ItemStack(blockCloakingCoil), "iai", "aca", "iai",
 				'i', WarpDriveConfig.getIC2Item("itemPartIridium"),
 				'c', WarpDriveConfig.getIC2Item("itemPartCircuitAdv"),
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"));

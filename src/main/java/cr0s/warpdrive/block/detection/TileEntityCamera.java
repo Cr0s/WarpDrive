@@ -46,7 +46,7 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 			if (registryUpdateTicks <= 0) {
 				registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
 				// WarpDrive.debugPrint("" + this + " Updating registry (" + frequency + ")");
-				WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
+				WarpDrive.instance.cameras.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 			}
 		}
 	}
@@ -68,14 +68,14 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 	@Override
 	public void invalidate() {
 		// WarpDrive.debugPrint("" + this + " invalidated");
-        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+        WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 	
     @Override
     public void onChunkUnload() {
 		// WarpDrive.debugPrint("" + this + " onChunkUnload");
-        WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+        WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
         super.onChunkUnload();
     }
     

@@ -29,7 +29,7 @@ public class BlockAirGenerator extends BlockContainer
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.machines.AirGenerator");
 	}
 

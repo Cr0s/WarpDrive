@@ -8,16 +8,16 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
 
-public class CamRegistry {
-	private LinkedList<CamRegistryItem> registry;
+public class CamerasRegistry {
+	private LinkedList<CameraRegistryItem> registry;
 
-	public CamRegistry() {
-		registry = new LinkedList<CamRegistryItem>();
+	public CamerasRegistry() {
+		registry = new LinkedList<CameraRegistryItem>();
 	}
 
-	public CamRegistryItem getCamByFrequency(World worldObj, int frequency) {
-		CamRegistryItem cam = null;
-		for (Iterator<CamRegistryItem> it = registry.iterator(); it.hasNext();) {
+	public CameraRegistryItem getCamByFrequency(World worldObj, int frequency) {
+		CameraRegistryItem cam = null;
+		for (Iterator<CameraRegistryItem> it = registry.iterator(); it.hasNext();) {
 			cam = it.next();
 			if (cam.frequency == frequency && cam.dimensionId == worldObj.provider.dimensionId) {
 				if (isCamAlive(worldObj, cam)) {
@@ -35,9 +35,9 @@ public class CamRegistry {
 		return null;
 	}
 
-	private CamRegistryItem getCamByPosition(World worldObj, ChunkPosition position) {
-		CamRegistryItem cam = null;
-		for (Iterator<CamRegistryItem> it = registry.iterator(); it.hasNext();) {
+	private CameraRegistryItem getCamByPosition(World worldObj, ChunkPosition position) {
+		CameraRegistryItem cam = null;
+		for (Iterator<CameraRegistryItem> it = registry.iterator(); it.hasNext();) {
 			cam = it.next();
 			if (cam.position.chunkPosX == position.chunkPosX && cam.position.chunkPosY == position.chunkPosY && cam.position.chunkPosZ == position.chunkPosZ
 					&& cam.dimensionId == worldObj.provider.dimensionId) {
@@ -48,7 +48,7 @@ public class CamRegistry {
 		return null;
 	}
 
-	private static boolean isCamAlive(World worldObj, CamRegistryItem cam) {
+	private static boolean isCamAlive(World worldObj, CameraRegistryItem cam) {
 		if (worldObj.provider.dimensionId != cam.dimensionId) {
 			WarpDrive.debugPrint("Inconsistent worldObj with camera " + worldObj.provider.dimensionId + " vs " + cam.dimensionId);
 			return false;
@@ -60,7 +60,7 @@ public class CamRegistry {
 			return false;
 		}
 		Block block = worldObj.getBlock(cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ);
-		if ((block != WarpDrive.cameraBlock) && (block != WarpDrive.laserCamBlock)) {
+		if ((block != WarpDrive.blockCamera) && (block != WarpDrive.blockLaserCamera)) {
 			WarpDrive.debugPrint("Reporting a 'dead' camera in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
 					+ ", " + cam.position.chunkPosZ);
 			return false;
@@ -72,8 +72,8 @@ public class CamRegistry {
 	private void removeDeadCams(World worldObj) {
 		// LocalProfiler.start("CamRegistry Removing dead cameras");
 
-		CamRegistryItem cam = null;
-		for (Iterator<CamRegistryItem> it = registry.iterator(); it.hasNext();) {
+		CameraRegistryItem cam = null;
+		for (Iterator<CameraRegistryItem> it = registry.iterator(); it.hasNext();) {
 			cam = it.next();
 			if (!isCamAlive(worldObj, cam)) {
 				WarpDrive.debugPrint("Removing 'dead' camera in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
@@ -86,7 +86,7 @@ public class CamRegistry {
 	}
 
 	public void removeFromRegistry(World worldObj, ChunkPosition position) {
-		CamRegistryItem cam = getCamByPosition(worldObj, position);
+		CameraRegistryItem cam = getCamByPosition(worldObj, position);
 		if (cam != null) {
 			WarpDrive.debugPrint("Removing camera by request in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
 					+ ", " + cam.position.chunkPosZ);
@@ -95,13 +95,13 @@ public class CamRegistry {
 	}
 
 	public void updateInRegistry(World worldObj, ChunkPosition position, int frequency, int type) {
-		CamRegistryItem cam = new CamRegistryItem(worldObj, position, frequency, type);
+		CameraRegistryItem cam = new CameraRegistryItem(worldObj, position, frequency, type);
 		// WarpDrive.debugPrint("updateInRegistry " + cam.position.x + ", " +
 		// cam.position.y + ", " + cam.position.z);
 		removeDeadCams(worldObj);
 
 		if (isCamAlive(worldObj, cam)) {
-			CamRegistryItem existingCam = getCamByPosition(worldObj, cam.position);
+			CameraRegistryItem existingCam = getCamByPosition(worldObj, cam.position);
 			if (existingCam == null) {
 				WarpDrive.debugPrint("Adding 'live' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
 						+ " with frequency '" + cam.frequency + "'");
@@ -119,7 +119,7 @@ public class CamRegistry {
 	public void printRegistry(World worldObj) {
 		WarpDrive.logger.info("Cameras registry for dimension " + worldObj.provider.dimensionId + ":");
 
-		for (CamRegistryItem cam : registry) {
+		for (CameraRegistryItem cam : registry) {
 			WarpDrive.logger.info("- " + cam.frequency + " (" + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ + ")");
 		}
 	}

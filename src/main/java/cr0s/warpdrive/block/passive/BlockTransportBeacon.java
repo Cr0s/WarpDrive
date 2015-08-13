@@ -14,7 +14,7 @@ public class BlockTransportBeacon extends Block {
 		super(Material.iron);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.passive.TransportBeacon");
 	}
 

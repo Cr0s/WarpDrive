@@ -23,7 +23,7 @@ public class BlockLift extends BlockContainer
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.movement.Lift");
 	}
 

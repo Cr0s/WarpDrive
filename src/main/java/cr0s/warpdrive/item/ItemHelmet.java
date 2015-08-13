@@ -11,17 +11,17 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 import cr0s.warpdrive.api.IBreathingHelmet;
 
-public class ItemWarpArmor extends ItemArmor implements IBreathingHelmet {
+public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();
 	private int slot;
 
 	IIcon ic;
 
-	public ItemWarpArmor(ArmorMaterial mat, int slot) {
+	public ItemHelmet(ArmorMaterial mat, int slot) {
 		super(mat, 0, slot);
 		this.slot = slot;
 		setUnlocalizedName("warpdrive.armor.Helmet");
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 	}
 
 	@Override

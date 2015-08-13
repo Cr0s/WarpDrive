@@ -16,7 +16,7 @@ public class BlockIridium extends Block
 		setHardness(0.8F);
 		setResistance(150 * 4);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.passive.IridiumBlock");
 	}
 

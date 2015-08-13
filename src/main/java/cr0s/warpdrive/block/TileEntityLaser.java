@@ -84,7 +84,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 				registryUpdateTicks--;
 				if (registryUpdateTicks <= 0) {
 					registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
-					WarpDrive.instance.cams.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
+					WarpDrive.instance.cameras.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
 				}
 			}
 		}
@@ -248,7 +248,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 				}
 
 				// Hit is a laser head
-				if (block.isAssociatedBlock(WarpDrive.laserBlock) || block.isAssociatedBlock(WarpDrive.laserCamBlock)) {
+				if (block.isAssociatedBlock(WarpDrive.blockLaser) || block.isAssociatedBlock(WarpDrive.blockLaserCamera)) {
 					// Compare frequencies
 					TileEntityLaser tel = (TileEntityLaser) worldObj.getTileEntity(hit.blockX, hit.blockY, hit.blockZ);
 
@@ -293,7 +293,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		Vec3 playerViewOffset = Vec3.createVectorHelper(playerPosition.xCoord + playerLook.xCoord * reachDistance, playerPosition.yCoord + playerLook.yCoord
 				* reachDistance, playerPosition.zCoord + playerLook.zCoord * reachDistance);
 		double playerBorder = 1.1 * reachDistance;
-		AxisAlignedBB boxToScan = WarpDrive.laserBlock.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder,
+		AxisAlignedBB boxToScan = WarpDrive.blockLaser.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder,
 				playerBorder);
 		List entitiesHit = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
 		double closestEntity = reachDistance;
@@ -335,7 +335,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	}
 
 	public boolean isWithCamera() {
-		return (getBlockType().isAssociatedBlock(WarpDrive.laserCamBlock));
+		return (getBlockType().isAssociatedBlock(WarpDrive.blockLaserCamera));
 	}
 
 	public int getBeamFrequency() {
@@ -485,13 +485,13 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 
 	@Override
 	public void invalidate() {
-		WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 
 	@Override
 	public void onChunkUnload() {
-		WarpDrive.instance.cams.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
+		WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.onChunkUnload();
 	}
 

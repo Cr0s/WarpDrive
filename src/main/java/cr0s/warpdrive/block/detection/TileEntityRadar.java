@@ -48,7 +48,7 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 			if (getBlockMetadata() == 2) {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
-					results = WarpDrive.warpCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
+					results = WarpDrive.shipCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
 					// WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results in " + scanRadius + " radius...");
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 					cooldownTime = 0;

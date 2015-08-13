@@ -192,7 +192,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		}
 		// check whitelist
 		// WarpDriveConfig.MinerOres.contains(blockID) then true ?
-		else if (block.isAssociatedBlock(WarpDrive.iridiumBlock)) {
+		else if (block.isAssociatedBlock(WarpDrive.blockIridium)) {
 			return true;
 		}
 		// check default

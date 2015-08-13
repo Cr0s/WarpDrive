@@ -165,7 +165,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		int x = xCoord + distance * dx[direction];
 		int y = yCoord + distance * dy[direction];
 		int z = zCoord + distance * dz[direction];
-		if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
+		if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockCloakingCoil)) {
 			worldObj.setBlockMetadataWithNotify(x, y, z, (enabled) ? 1 : 0, 2);
 		}
 	}
@@ -292,7 +292,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			int x = xCoord + innerCoilsDistance * dx[direction];
 			int y = yCoord + innerCoilsDistance * dy[direction];
 			int z = zCoord + innerCoilsDistance * dz[direction];
-			if (!worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
+			if (!worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockCloakingCoil)) {
 				return false;
 			}
 			
@@ -303,7 +303,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 				y += dy[direction];
 				z += dz[direction];
 				
-				if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
+				if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockCloakingCoil)) {
 					newCoilDistance = distance;
 					break;
 				}
@@ -315,7 +315,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 				int oldX = xCoord + outerCoilsDistance[direction] * dx[direction];
 				int oldY = yCoord + outerCoilsDistance[direction] * dy[direction];
 				int oldZ = zCoord + outerCoilsDistance[direction] * dz[direction];
-				if (worldObj.getBlock(oldX, oldY, oldZ).isAssociatedBlock(WarpDrive.cloakCoilBlock)) {
+				if (worldObj.getBlock(oldX, oldY, oldZ).isAssociatedBlock(WarpDrive.blockCloakingCoil)) {
 					worldObj.setBlockMetadataWithNotify(oldX, oldY, oldZ, 0, 2);
 				}
 			}

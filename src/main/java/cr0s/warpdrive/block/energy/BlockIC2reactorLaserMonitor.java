@@ -13,7 +13,7 @@ public class BlockIC2reactorLaserMonitor extends BlockContainer {
 		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.energy.IC2ReactorLaserMonitor");
 	}
 

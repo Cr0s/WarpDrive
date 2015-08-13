@@ -9,14 +9,15 @@ item.warpdrive.crafting.InterfacePower.name=Power Interface
 item.warpdrive.crafting.PowerCore.name=Energy Core
 item.warpdrive.crafting.AirCanisterEmpty.name=Empty Air Canister
 
+item.warpdrive.energy.IC2reactorLaserFocus.name=IC2 Reactor Laser Focus
+item.warpdrive.armor.AirCanisterFull.name=Air Canister
+item.warpdrive.armor.Helmet.name=Warp Helmet
+
 item.warpdrive.upgrade.Power.name=Power Upgrade
 item.warpdrive.upgrade.Speed.name=Speed Upgrade
 item.warpdrive.upgrade.Range.name=Range Upgrade
 item.warpdrive.upgrade.Energy.name=Energy Upgrade
 
-item.warpdrive.items.IC2reactorLaserFocus.name=IC2 Reactor Laser Focus
-item.warpdrive.items.AirCanisterFull.name=Air Canister
-item.warpdrive.armor.Helmet.name=Warp Helmet
 
 tile.warpdrive.passive.Air.name=Air Block
 tile.warpdrive.passive.Energized.name=Energized Block

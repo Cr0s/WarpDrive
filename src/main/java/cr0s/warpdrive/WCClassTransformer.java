@@ -81,6 +81,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 			System.out.println("========= NODEMAP IS NULL!!! ========");
 			return bytes;
 		}
+		System.out.println("Transforming " + name);
 
 		if (name.replace('.', '/').equals(nodemap.get("entityLivingBaseClass"))) {
 			bytes = transformEntityLivingBase(bytes);
