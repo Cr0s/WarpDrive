@@ -90,7 +90,9 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			isCloaking = WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord); 
 			if (!isEnabled) {// disabled
 				if (isCloaking) {// disabled, cloaking => stop cloaking
-					WarpDrive.debugPrint("" + this + " Disabled, cloak field going down...");
+					if (WarpDriveConfig.LOGGING_CLOAKING) {
+						WarpDrive.logger.info("" + this + " Disabled, cloak field going down...");
+					}
 					disableCloakingField();
 				} else {// disabled, no cloaking
 					// IDLE
@@ -113,14 +115,18 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 						if (area != null) {
 							area.sendCloakPacketToPlayersEx(false); // recloak field
 						} else {
-							WarpDrive.debugPrint("getCloakedArea1 returned null for " + worldObj + " " + xCoord + "," + yCoord + "," + zCoord);
+							if (WarpDriveConfig.LOGGING_CLOAKING) {
+								WarpDrive.logger.info("getCloakedArea1 returned null for " + worldObj + " " + xCoord + "," + yCoord + "," + zCoord);
+							}
 						}
 					} else {// enabled, not cloaking but not able to
 						// IDLE
 					}
 				} else {// enabled & cloaked
 					if (!isValid) {// enabled, cloaking but invalid
-						WarpDrive.debugPrint("" + this + " Coil(s) lost, cloak field is collapsing...");
+						if (WarpDriveConfig.LOGGING_CLOAKING) {
+							WarpDrive.logger.info("" + this + " Coil(s) lost, cloak field is collapsing...");
+						}
 						consumeAllEnergy();
 						disableCloakingField();				
 					} else {// enabled, cloaking and valid
@@ -131,11 +137,15 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 							if (area != null) {
 								area.sendCloakPacketToPlayersEx(false); // recloak field
 							} else {
-								WarpDrive.debugPrint("getCloakedArea2 returned null for " + worldObj + " " + xCoord + "," + yCoord + "," + zCoord);
+								if (WarpDriveConfig.LOGGING_CLOAKING) {
+									WarpDrive.logger.info("getCloakedArea2 returned null for " + worldObj + " " + xCoord + "," + yCoord + "," + zCoord);
+								}
 							}
 							setCoilsState(true);
 						} else {// loosing power
-							WarpDrive.debugPrint("" + this + " Low power, cloak field is collapsing...");
+							if (WarpDriveConfig.LOGGING_CLOAKING) {
+								WarpDrive.logger.info("" + this + " Low power, cloak field is collapsing...");
+							}
 							disableCloakingField();
 						}
 					}
@@ -323,7 +333,9 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			// check validity and save new coil position
 			if (newCoilDistance <= 0) {
 				outerCoilsDistance[direction] = 0;
-				WarpDrive.debugPrint("Invalid outercoil assembly at " + direction);
+				if (WarpDriveConfig.LOGGING_CLOAKING) {
+					WarpDrive.logger.info("Invalid outercoil assembly at " + direction);
+				}
 				return false;
 			}
 			outerCoilsDistance[direction] = newCoilDistance;

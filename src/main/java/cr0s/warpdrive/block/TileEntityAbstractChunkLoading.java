@@ -10,6 +10,7 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import com.google.common.collect.ImmutableSet;
 
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public abstract class TileEntityAbstractChunkLoading extends TileEntityAbstractEnergy
 {
@@ -63,7 +64,7 @@ public abstract class TileEntityAbstractChunkLoading extends TileEntityAbstractE
 						t = ticketList.get(tickNum);
 					}
 					
-					WarpDrive.debugPrint("Attempting to force chunk" + chunk);
+					WarpDrive.logger.info("Attempting to force chunk" + chunk);
 					ForgeChunkManager.forceChunk(t, chunk);
 					chunkInTicket++;
 				}
@@ -124,16 +125,15 @@ public abstract class TileEntityAbstractChunkLoading extends TileEntityAbstractE
 		int maxX = Math.max(chunkA.chunkXPos, chunkB.chunkXPos);
 		int minZ = Math.min(chunkA.chunkZPos, chunkB.chunkZPos);
 		int maxZ = Math.max(chunkA.chunkZPos, chunkB.chunkZPos);
-		WarpDrive.debugPrint("From " + minX + "," + minZ + " to " + maxX + "," + maxZ);
+		WarpDrive.logger.info("ChunkLoading from " + minX + "," + minZ + " to " + maxX + "," + maxZ);
 		
 		//REMOVE ODD SIZES
 		int deltaX = (maxX - minX + 1);
 		int deltaZ = (maxZ - minZ + 1);
-		WarpDrive.debugPrint("Allocating Block: " + deltaX + "," + deltaZ);
 		
 		maxX = minX + deltaX - 1;
 		maxZ = minZ + deltaZ - 1;
-		WarpDrive.debugPrint("From " + minX + "," + minZ + " to " + maxX + "," + maxZ);
+		WarpDrive.logger.info("Allocating " + deltaX + " x " + deltaZ + " blocks from " + minX + "," + minZ + " to " + maxX + "," + maxZ);
 		
 		int maxEnts = (deltaX) * (deltaZ);
 		ArrayList<ChunkCoordIntPair> chunkList = new ArrayList<ChunkCoordIntPair>(maxEnts);
@@ -170,32 +170,33 @@ public abstract class TileEntityAbstractChunkLoading extends TileEntityAbstractE
 		
 		return chunkList;
 	}
+	
 	@Override
-	public void writeToNBT(NBTTagCompound t)
+	public void writeToNBT(NBTTagCompound tag)
 	{
-		super.writeToNBT(t);
+		super.writeToNBT(tag);
 		if(minChunk == null)
 			minChunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord).getChunkCoordIntPair();
 		
 		if(maxChunk == null)
 			maxChunk = worldObj.getChunkFromBlockCoords(xCoord, zCoord).getChunkCoordIntPair();
-		t.setInteger("minChunkX", minChunk.chunkXPos);
-		t.setInteger("minChunkZ", minChunk.chunkZPos);
-		t.setInteger("maxChunkX", maxChunk.chunkXPos);
-		t.setInteger("maxChunkZ", maxChunk.chunkZPos);
+		tag.setInteger("minChunkX", minChunk.chunkXPos);
+		tag.setInteger("minChunkZ", minChunk.chunkZPos);
+		tag.setInteger("maxChunkX", maxChunk.chunkXPos);
+		tag.setInteger("maxChunkZ", maxChunk.chunkZPos);
 	}
 	
 	@Override
-	public void readFromNBT(NBTTagCompound t)
+	public void readFromNBT(NBTTagCompound tag)
 	{
-		super.readFromNBT(t);
-		if(t.hasKey("minChunkX"))
+		super.readFromNBT(tag);
+		if(tag.hasKey("minChunkX"))
 		{
-			int mx = t.getInteger("minChunkX");
-			int mz = t.getInteger("minChunkZ");
+			int mx = tag.getInteger("minChunkX");
+			int mz = tag.getInteger("minChunkZ");
 			minChunk = new ChunkCoordIntPair(mx,mz);
-			mx = t.getInteger("maxChunkX");
-			mz = t.getInteger("maxChunkZ");
+			mx = tag.getInteger("maxChunkX");
+			mz = tag.getInteger("maxChunkZ");
 			maxChunk = new ChunkCoordIntPair(mx,mz);
 		}
 	}

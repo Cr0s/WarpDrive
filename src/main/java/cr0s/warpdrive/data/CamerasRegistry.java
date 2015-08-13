@@ -7,6 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class CamerasRegistry {
 	private LinkedList<CameraRegistryItem> registry;
@@ -23,8 +24,10 @@ public class CamerasRegistry {
 				if (isCamAlive(worldObj, cam)) {
 					return cam;
 				} else {
-					WarpDrive.debugPrint("Removing 'dead' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
-							+ " (while searching)");
+					if (WarpDriveConfig.LOGGING_FREQUENCY) {
+						WarpDrive.logger.info("Removing 'dead' camera at "
+							+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ + " (while searching)");
+					}
 					it.remove();
 				}
 			}
@@ -50,19 +53,23 @@ public class CamerasRegistry {
 
 	private static boolean isCamAlive(World worldObj, CameraRegistryItem cam) {
 		if (worldObj.provider.dimensionId != cam.dimensionId) {
-			WarpDrive.debugPrint("Inconsistent worldObj with camera " + worldObj.provider.dimensionId + " vs " + cam.dimensionId);
+			WarpDrive.logger.error("Inconsistent worldObj with camera " + worldObj.provider.dimensionId + " vs " + cam.dimensionId);
 			return false;
 		}
 
 		if (!worldObj.getChunkFromBlockCoords(cam.position.chunkPosX, cam.position.chunkPosZ).isChunkLoaded) {
-			WarpDrive.debugPrint("Reporting an 'unloaded' camera in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", "
-					+ cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info("Reporting an 'unloaded' camera in dimension " + cam.dimensionId + " at "
+						+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			}
 			return false;
 		}
 		Block block = worldObj.getBlock(cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ);
 		if ((block != WarpDrive.blockCamera) && (block != WarpDrive.blockLaserCamera)) {
-			WarpDrive.debugPrint("Reporting a 'dead' camera in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
-					+ ", " + cam.position.chunkPosZ);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info("Reporting a 'dead' camera in dimension " + cam.dimensionId + " at "
+						+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			}
 			return false;
 		}
 
@@ -76,8 +83,10 @@ public class CamerasRegistry {
 		for (Iterator<CameraRegistryItem> it = registry.iterator(); it.hasNext();) {
 			cam = it.next();
 			if (!isCamAlive(worldObj, cam)) {
-				WarpDrive.debugPrint("Removing 'dead' camera in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
-						+ ", " + cam.position.chunkPosZ);
+				if (WarpDriveConfig.LOGGING_FREQUENCY) {
+					WarpDrive.logger.info("Removing 'dead' camera in dimension " + cam.dimensionId + " at "
+							+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+				}
 				it.remove();
 			}
 		}
@@ -88,8 +97,10 @@ public class CamerasRegistry {
 	public void removeFromRegistry(World worldObj, ChunkPosition position) {
 		CameraRegistryItem cam = getCamByPosition(worldObj, position);
 		if (cam != null) {
-			WarpDrive.debugPrint("Removing camera by request in dimension " + cam.dimensionId + " at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY
-					+ ", " + cam.position.chunkPosZ);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info("Removing camera by request in dimension " + cam.dimensionId + " at "
+						+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			}
 			registry.remove(cam);
 		}
 	}
@@ -103,16 +114,24 @@ public class CamerasRegistry {
 		if (isCamAlive(worldObj, cam)) {
 			CameraRegistryItem existingCam = getCamByPosition(worldObj, cam.position);
 			if (existingCam == null) {
-				WarpDrive.debugPrint("Adding 'live' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
-						+ " with frequency '" + cam.frequency + "'");
+				if (WarpDriveConfig.LOGGING_FREQUENCY) {
+					WarpDrive.logger.info("Adding 'live' camera at "
+							+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
+							+ " with frequency '" + cam.frequency + "'");
+				}
 				registry.add(cam);
 			} else if (existingCam.frequency != cam.frequency) {
-				WarpDrive.debugPrint("Updating 'live' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
-						+ " from frequency '" + existingCam.frequency + "' to frequency '" + cam.frequency + "'");
+				if (WarpDriveConfig.LOGGING_FREQUENCY) {
+					WarpDrive.logger.info("Updating 'live' camera at "
+							+ cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ
+							+ " from frequency '" + existingCam.frequency + "' to frequency '" + cam.frequency + "'");
+				}
 				existingCam.frequency = cam.frequency;
 			}
 		} else {
-			WarpDrive.debugPrint("Unable to update 'dead' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info("Unable to update 'dead' camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
+			}
 		}
 	}
 

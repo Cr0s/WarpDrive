@@ -73,12 +73,12 @@ public final class EntityCamera extends EntityLivingBase {
 	public void onEntityUpdate() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			if (player == null || player.isDead) {
-				WarpDrive.debugPrint("" + this + " Player is null or dead, closing camera...");
+				WarpDrive.logger.error(this + " Player is null or dead, closing camera...");
 				closeCamera();
 				return;
 			}
 			if (!ClientCameraUtils.isValidContext(worldObj)) {
-				WarpDrive.debugPrint("" + this + " Invalid context, closing camera...");
+				WarpDrive.logger.error(this + " Invalid context, closing camera...");
 				closeCamera();
 				return;
 			}

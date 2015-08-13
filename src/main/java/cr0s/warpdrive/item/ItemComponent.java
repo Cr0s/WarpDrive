@@ -54,7 +54,6 @@ public class ItemComponent extends Item implements IAirCanister {
 	}
 	
 	public void registerRecipes() {
-		WarpDrive.debugPrint("Registering empty recipe");
 		GameRegistry.addRecipe(new ShapedOreRecipe(getItemStack(0),false,"nrn","r r","nrn",
 				'r', Items.redstone,
 				'n', Items.gold_nugget));
@@ -109,7 +108,7 @@ public class ItemComponent extends Item implements IAirCanister {
 				return false;
 		}
 		String data = potentialUnlocalized[is.getItemDamage()];
-		WarpDrive.debugPrint(data);
+		// WarpDrive.logger.info(data);
 		return data.equals(unlocalised);
 	}
 

@@ -213,12 +213,6 @@ public class WarpDrive implements LoadingCallback {
 		PacketHandler.init();
 	}
 
-	public static void debugPrint(String out) {
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			logger.info(out);
-		}
-	}
-
 	@EventHandler
 	public void load(FMLInitializationEvent event) {
 		WarpDriveConfig.load();
@@ -750,10 +744,10 @@ public class WarpDrive implements LoadingCallback {
 					te.refreshLoading();
 				return t;
 			} else {
-				WarpDrive.debugPrint("Ticket not granted");
+				WarpDrive.logger.error("Ticket not granted");
 			}
 		} else {
-			WarpDrive.debugPrint("No tickets left!");
+			WarpDrive.logger.error("No tickets left!");
 		}
 		return null;
 	}
@@ -776,14 +770,14 @@ public class WarpDrive implements LoadingCallback {
 				int y = data.getInteger("ticketY");
 				int z = data.getInteger("ticketZ");
 				if (w != 0 || x != 0 || y != 0 || z != 0) {
-					WorldServer ws = DimensionManager.getWorld(w);
-					if (ws != null) {
-						TileEntity te = ws.getTileEntity(x, y, z);
-						if (te != null && te instanceof TileEntityAbstractChunkLoading) {
-							if (((TileEntityAbstractChunkLoading) te).shouldChunkLoad()) {
-								WarpDrive.debugPrint("[TicketCallback] Regiving Ticket!");
-								((TileEntityAbstractChunkLoading) te).giveTicket(ticket);
-								((TileEntityAbstractChunkLoading) te).refreshLoading(true);
+					WorldServer worldServer = DimensionManager.getWorld(w);
+					if (worldServer != null) {
+						TileEntity tileEntity = worldServer.getTileEntity(x, y, z);
+						if (tileEntity != null && tileEntity instanceof TileEntityAbstractChunkLoading) {
+							if (((TileEntityAbstractChunkLoading) tileEntity).shouldChunkLoad()) {
+								WarpDrive.logger.info("ChunkLoadingTicket is loading " + tileEntity);
+								((TileEntityAbstractChunkLoading) tileEntity).giveTicket(ticket);
+								((TileEntityAbstractChunkLoading) tileEntity).refreshLoading(true);
 								return;
 							}
 						}

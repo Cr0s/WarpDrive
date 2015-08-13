@@ -80,8 +80,8 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		if (containedEnergy > WarpDriveConfig.PR_TICK_TIME * PR_MIN_GENERATION * 100) {
 			double amountToIncrease = WarpDriveConfig.PR_TICK_TIME
 					* Math.max(PR_MIN_INSTABILITY, PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.PR_MAX_ENERGY, 0.1));
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("InsInc" + amountToIncrease);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("InsInc" + amountToIncrease);
 			}
 			instabilityValues[side] += amountToIncrease * (isNatural ? 1.0D : 0.25D);
 		} else {
@@ -125,9 +125,9 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 
 		int side = from.ordinal() - 2;
 
-		if (WarpDriveConfig.G_DEBUGMODE) {
+		if (WarpDriveConfig.LOGGING_ENERGY) {
 			if (side == 3) {
-				WarpDrive.debugPrint("Instability on " + from.toString()
+				WarpDrive.logger.info("Instability on " + from.toString()
 					+ " decreased by " + String.format("%.1f", amountToRemove) + "/" + String.format("%.1f", PR_MAX_LASER_EFFECT)
 					+ " after consuming " + amount + "/" + PR_MAX_LASER_ENERGY + " lasersReceived is " + String.format("%.1f", lasersReceived) + " hence nospamFactor is " + nospamFactor);
 			}
@@ -149,16 +149,16 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 					* (PR_MIN_GENERATION + PR_MAX_GENERATION * Math.pow(containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY, 0.6D)));
 			containedEnergy = Math.min(containedEnergy + amountToGenerate, WarpDriveConfig.PR_MAX_ENERGY);
 			lastGenerationRate = amountToGenerate / WarpDriveConfig.PR_TICK_TIME;
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("Generated " + amountToGenerate);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("Generated " + amountToGenerate);
 			}
 		} else {// decaying over 20s without producing power, you better have
 			// power for those lasers
 			int amountToDecay = (int) (WarpDriveConfig.PR_TICK_TIME * (1.0D - stabilityOffset) * (PR_MIN_GENERATION + containedEnergy * 0.01D));
 			containedEnergy = Math.max(0, containedEnergy - amountToDecay);
 			lastGenerationRate = 0;
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("Decayed " + amountToDecay);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("Decayed " + amountToDecay);
 			}
 		}
 	}
@@ -171,8 +171,8 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			return;
 		}
 
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("tickCount " + tickCount + " releasedThisTick " + releasedThisTick + " lasersReceived " + lasersReceived
+		if (WarpDriveConfig.LOGGING_ENERGY) {
+			WarpDrive.logger.info("tickCount " + tickCount + " releasedThisTick " + releasedThisTick + " lasersReceived " + lasersReceived
 				+ " releasedThisCycle " + releasedThisCycle + " containedEnergy " + containedEnergy);
 		}
 		releasedThisTick = 0;
@@ -209,7 +209,9 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		double normalizedEnergy = containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY;
 		int radius = (int) Math.round(PR_MAX_EXPLOSION_RADIUS * Math.pow(normalizedEnergy, 0.125));
 		double c = PR_MAX_EXPLOSION_REMOVAL_CHANCE * Math.pow(normalizedEnergy, 0.125);
-		WarpDrive.debugPrint(this + " Explosion radius is " + radius + ", Chance of removal is " + c);
+		if (WarpDriveConfig.LOGGING_ENERGY) {
+			WarpDrive.logger.info(this + " Explosion radius is " + radius + ", Chance of removal is " + c);
+		}
 		if (radius > 1) {
 			for (int x = xCoord - radius; x <= xCoord + radius; x++) {
 				for (int y = yCoord - radius; y <= yCoord + radius; y++) {
@@ -440,19 +442,19 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		int capacity = Math.max(0, 2 * lastGenerationRate - releasedThisTick);
 		if (releaseMode == MODE_MANUAL_RELEASE) {
 			result = Math.min(Math.max(0, containedEnergy), capacity);
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("PotentialOutput Manual " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("PotentialOutput Manual " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
 			}
 		} else if (releaseMode == MODE_RELEASE_ABOVE) {
 			result = Math.min(Math.max(0, containedEnergy - releaseAbove), capacity);
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("PotentialOutput Above " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("PotentialOutput Above " + result + " RF (" + convertRFtoInternal(result) + " internal) capacity " + capacity);
 			}
 		} else if (releaseMode == MODE_RELEASE_AT_RATE) {
 			int remainingRate = Math.max(0, releaseRate - releasedThisTick);
 			result = Math.min(Math.max(0, containedEnergy), Math.min(remainingRate, capacity));
-			if (WarpDriveConfig.G_DEBUGMODE) {
-				WarpDrive.debugPrint("PotentialOutput Rated " + result + " RF (" + convertRFtoInternal(result) + " internal) remainingRate " + remainingRate + " RF/t capacity " + capacity);
+			if (WarpDriveConfig.LOGGING_ENERGY) {
+				WarpDrive.logger.info("PotentialOutput Rated " + result + " RF (" + convertRFtoInternal(result) + " internal) remainingRate " + remainingRate + " RF/t capacity " + capacity);
 			}
 		}
 		return convertRFtoInternal(result);
@@ -475,8 +477,8 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		}
 		releasedThisTick += energyOutput_RF;
 		releasedThisCycle += energyOutput_RF;
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("OutputDone " + energyOutput_internal + " (" + energyOutput_RF + " RF)");
+		if (WarpDriveConfig.LOGGING_ENERGY) {
+			WarpDrive.logger.info("OutputDone " + energyOutput_internal + " (" + energyOutput_RF + " RF)");
 		}
 	}
 

@@ -18,6 +18,7 @@ import cr0s.warpdrive.network.MessageFrequency;
 import cr0s.warpdrive.network.MessageBeamEffect;
 import cr0s.warpdrive.network.MessageTargeting;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
@@ -81,20 +82,26 @@ public class PacketHandler {
 	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
 		MessageFrequency frequencyMessage = new MessageFrequency(xCoord, yCoord, zCoord, frequency);
 		simpleNetworkManager.sendToAllAround(frequencyMessage, new TargetPoint(dimensionId, xCoord, yCoord, zCoord, 100));
-		WarpDrive.debugPrint("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
+		}
 	}
 	
 	// LaserCamera shooting at target (client -> server)
 	public static void sendLaserTargetingPacket(int x, int y, int z, float yaw, float pitch) {
 		MessageTargeting targetingMessage = new MessageTargeting(x, y, z, yaw, pitch);
 		simpleNetworkManager.sendToServer(targetingMessage);
-		WarpDrive.debugPrint("Sent targeting packet (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
+		if (WarpDriveConfig.LOGGING_TARGETTING) {
+			WarpDrive.logger.info("Sent targeting packet (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
+		}
 	}
 	
 	// Sending cloaking area definition (server -> client)
 	public static void sendCloakPacket(EntityPlayer player, AxisAlignedBB aabb, int tier, boolean decloak) {
 		MessageCloak cloakMessage = new MessageCloak(aabb, tier, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
-		WarpDrive.debugPrint("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+		}
 	}
 }

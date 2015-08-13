@@ -251,7 +251,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				for (ItemStack stack : stacks) {
 					qtyLeft = putInChest(findChest(), stack);
 					if (qtyLeft > 0) {
-						WarpDrive.debugPrint("" + this + " Overflow detected");
+						if (WarpDriveConfig.LOGGING_COLLECTION) {
+							WarpDrive.logger.info(this + " Overflow detected");
+						}
 						overflow = true;
 						int transfer;
 						while (qtyLeft > 0) {

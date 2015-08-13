@@ -473,10 +473,13 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 					jb.blockNBT = tileEntities[index];
 
 					if (jb.block != null) {
-						if (tileEntities[index] == null) {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " (no tile entity)");
-						} else {
-							WarpDrive.debugPrint("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
+						
+						if (WarpDriveConfig.LOGGING_BUILDING) {
+							if (tileEntities[index] == null) {
+								WarpDrive.logger.info("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " (no tile entity)");
+							} else {
+								WarpDrive.logger.info("[ShipScanner] Adding block to deploy: " + jb.block.getUnlocalizedName() + " with tile entity " + tileEntities[index].getString("id"));
+							}
 						}
 
 						blocksToDeploy[index] = jb;

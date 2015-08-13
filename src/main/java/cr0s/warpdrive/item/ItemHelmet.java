@@ -10,6 +10,7 @@ import net.minecraft.util.IIcon;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 import cr0s.warpdrive.api.IBreathingHelmet;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();
@@ -48,7 +49,9 @@ public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 
 	@Override
 	public boolean removeAir(Entity player) {
-		WarpDrive.debugPrint("Checking breathing!");
+		if (WarpDriveConfig.G_LOGGING_BREATHING) {
+			WarpDrive.logger.info("Checking breathing!");
+		}
 		if (player instanceof EntityPlayerMP) {
 			EntityPlayerMP pl = (EntityPlayerMP) player;
 			ItemStack[] plInv = pl.inventory.mainInventory;
@@ -61,9 +64,7 @@ public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 							is.stackSize--;
 							ItemStack toAdd = is.copy();
 							toAdd.stackSize = 1;
-							toAdd.setItemDamage(is.getItemDamage() + 1); // bypass
-							// unbreaking
-							// enchantment
+							toAdd.setItemDamage(is.getItemDamage() + 1); // bypass unbreaking enchantment
 							if (is.getItemDamage() >= is.getMaxDamage()) {
 								toAdd = airCanister.emptyDrop(is);
 							}
@@ -72,9 +73,7 @@ public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 								pl.worldObj.spawnEntityInWorld(ie);
 							}
 						} else {
-							is.setItemDamage(is.getItemDamage() + 1); // bypass
-							// unbreaking
-							// enchantment
+							is.setItemDamage(is.getItemDamage() + 1); // bypass unbreaking enchantment
 							if (is.getItemDamage() >= is.getMaxDamage()) {
 								plInv[i] = airCanister.emptyDrop(is);
 							}

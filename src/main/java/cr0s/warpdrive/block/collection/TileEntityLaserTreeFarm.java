@@ -103,7 +103,9 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_rubberWood.getItem()))) {
 									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
 									if (metadata >= 2 && metadata <= 5) {
-										WarpDrive.debugPrint("wetspot found");
+										if (WarpDriveConfig.LOGGING_COLLECTION) {
+											WarpDrive.logger.info("wetspot found");
+										}
 										if (consumeEnergyFromBooster(cost, false)) {
 											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
 											resin.stackSize = (int) Math.round(Math.random() * 4);
@@ -154,7 +156,9 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	}
 
 	private static void addTree(LinkedList<Vector3> list, Vector3 newTree) {
-		WarpDrive.debugPrint("Adding tree position:" + newTree.x + "," + newTree.y + "," + newTree.z);
+		if (WarpDriveConfig.LOGGING_COLLECTION) {
+			WarpDrive.logger.info("Adding tree position:" + newTree.x + "," + newTree.y + "," + newTree.z);
+		}
 		list.add(newTree);
 	}
 

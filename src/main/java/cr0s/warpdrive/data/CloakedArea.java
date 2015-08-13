@@ -11,6 +11,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.network.PacketHandler;
 
 public class CloakedArea {
@@ -81,7 +83,10 @@ public class CloakedArea {
 	}
 
 	// Sending only if field changes: sets up or collapsing
-	public void sendCloakPacketToPlayersEx(boolean decloak) {
+	public void sendCloakPacketToPlayersEx(final boolean decloak) {
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			WarpDrive.logger.info("sendCloakPacketToPlayersEx " + decloak);
+		}
 		final int RADIUS = 250;
 
 		double midX = this.aabb.minX + (Math.abs(this.aabb.maxX - this.aabb.minX) / 2);

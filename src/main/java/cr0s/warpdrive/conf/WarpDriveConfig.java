@@ -72,14 +72,25 @@ public class WarpDriveConfig {
 	public static final int LUA_SCRIPTS_TEMPLATES = 1;
 	public static final int LUA_SCRIPTS_ALL = 2;
 	public static int G_LUA_SCRIPTS = LUA_SCRIPTS_ALL;
-	public static boolean G_DEBUGMODE = false;
 	public static String G_SCHEMALOCATION = "warpDrive_schematics";
 	public static int G_BLOCKS_PER_TICK = 3500;
 
 	public static boolean G_ENABLE_IC2_RECIPES = true;
 	public static boolean G_ENABLE_VANILLA_RECIPES = false;
 	public static boolean G_ENABLE_TDK_RECIPES = false;
-
+	
+	// logging
+	public static boolean LOGGING_JUMP = false;
+	public static boolean LOGGING_ENERGY = false;
+	public static boolean LOGGING_EFFECTS = false;
+	public static boolean LOGGING_CLOAKING = false;
+	public static boolean LOGGING_FREQUENCY = false;
+	public static boolean LOGGING_TARGETTING = false;
+	public static boolean LOGGING_WEAPON = false;
+	public static boolean LOGGING_BUILDING = false;
+	public static boolean LOGGING_COLLECTION = false;
+	public static boolean LOGGING_TRANSPORTER = false;
+	
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
 
@@ -102,6 +113,7 @@ public class WarpDriveConfig {
 	public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
 	public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
 	public static String[] WC_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
+	public static boolean WC_WARMUP_SICKNESS = true;
 
 	// Warp Radar
 	public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
@@ -232,19 +244,13 @@ public class WarpDriveConfig {
 		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS,
 				"World border applied to hyperspace & space, set to 0 to disable it").getInt();
 		G_LUA_SCRIPTS = config.get("General", "lua_scripts", G_LUA_SCRIPTS,
-				"LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)")
-				.getInt();
-		G_DEBUGMODE = config.get("General", "debug_mode", G_DEBUGMODE, "Detailled logs to help debug the mod, enable it before reporting a bug").getBoolean(
-				false);
+				"LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt();
 		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
 		G_BLOCKS_PER_TICK = config.get("General", "blocks_per_tick", G_BLOCKS_PER_TICK,
-				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings")
-				.getInt();
+				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt();
 
-		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s")
-				.getBoolean(true);
-		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(
-				false);
+		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
+		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
 		G_ENABLE_TDK_RECIPES = config
 				.get("General",
 						"enable_TDK_recipes",
@@ -252,17 +258,32 @@ public class WarpDriveConfig {
 						"Mixed recipes for TDK packs by Lem'ADEC (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion")
 						.getBoolean(false);
 
+		// Logging
+		LOGGING_JUMP = config.get("Logging", "enable_jump_debugLogs", LOGGING_JUMP, "Detailled jump logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_ENERGY = config.get("Logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		if (WarpDrive.VERSION.contains("-dev")) {// disabled in production, for obvious reasons :)
+			LOGGING_EFFECTS = config.get("Logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_CLOAKING = config.get("Logging", "enable_cloaking_logs", LOGGING_CLOAKING, "Detailled cloaking logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_FREQUENCY = config.get("Logging", "enable_frequency_logs", LOGGING_FREQUENCY, "Detailled frequency logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_TARGETTING = config.get("Logging", "enable_targetting_logs", LOGGING_TARGETTING, "Detailled targetting logs to help debug the mod, will spam your console!").getBoolean(false);
+		} else {
+			LOGGING_EFFECTS = false;
+			LOGGING_CLOAKING = false;
+			LOGGING_FREQUENCY = false;
+			LOGGING_TARGETTING = false;
+		}
+		LOGGING_WEAPON = config.get("Logging", "enable_weapon_logs", LOGGING_WEAPON, "Detailled weapon logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_BUILDING = config.get("Logging", "enable_building_logs", LOGGING_BUILDING, "Detailled building logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_COLLECTION = config.get("Logging", "enable_collection_logs", LOGGING_COLLECTION, "Detailled collection logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_TRANSPORTER = config.get("Logging", "enable_transporter_logs", LOGGING_TRANSPORTER, "Detailled transporter logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		
 		// TransitionPlane
 		config.addCustomCategoryComment("TransitionPlane",
-				"Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
-						+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
+				  "Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
+				+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
 		String[] transitionNames = { "overworld" };
 		transitionNames = config.get("TransitionPlane", "names", transitionNames, "this is the list of transition planes defined hereafter").getStringList();
-		int[] defaultPlane = { 0, 0, 0, 30000000, 30000000, 0, 0 }; // 30000000
-		// is
-		// Minecraft
-		// limit for
-		// SetBlock
+		int[] defaultPlane = { 0, 0, 0, 30000000, 30000000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
 		G_TRANSITIONPLANES = new TransitionPlane[transitionNames.length];
 		int index = 0;
 		for (String name : transitionNames) {
@@ -277,7 +298,7 @@ public class WarpDriveConfig {
 			G_TRANSITIONPLANES[index] = newPlane;
 		}
 		// FIXME: check transition planes aren't overlapping
-		// FIXME: check transition planes have valid dimension id
+		// FIXME: check transition planes have valid dimension id, and ignore them
 
 		// Warp Core
 		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
@@ -300,6 +321,7 @@ public class WarpDriveConfig {
 				.getInt();
 		WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump means more than 50 blocks")
 				.getInt();
+		WC_WARMUP_SICKNESS = config.get("WarpCore", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
 
 		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS,
 				"(measured in seconds)").getInt();
@@ -543,21 +565,21 @@ public class WarpDriveConfig {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
 				for (ItemStack i : item) {
 					minerOres.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.debugPrint("WD: Added ore ID: " + i);
+					WarpDrive.logger.info("Added ore ID: " + i);
 				}
 			}
 			if (lowerOreName.contains("log")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
 				for (ItemStack i : item) {
 					minerLogs.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.debugPrint("WD: Added log ID: " + i);
+					WarpDrive.logger.info("Added log ID: " + i);
 				}
 			}
 			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
 				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
 				for (ItemStack i : item) {
 					minerLeaves.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.debugPrint("WD: Added leaf ID: " + i);
+					WarpDrive.logger.info("Added leaf ID: " + i);
 				}
 			}
 		}
@@ -572,7 +594,7 @@ public class WarpDriveConfig {
 			forgeMultipart_tileMultipart_onChunkLoad = forgeMultipart_tileMultipart.getDeclaredMethod("onChunkLoad");
 		} catch (Exception e) {
 			isForgeMultipartLoaded = false;
-			WarpDrive.debugPrint("WarpDriveConfig Error loading ForgeMultipart classes");
+			WarpDrive.logger.error("WarpDriveConfig Error loading ForgeMultipart classes");
 			e.printStackTrace();
 		}
 	}

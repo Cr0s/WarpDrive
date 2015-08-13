@@ -184,7 +184,9 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		if (isLocked) {
 			int count = 0;
 			double ls = getLockStrength();
-			WarpDrive.debugPrint("LS:" + getLockStrength());
+			if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+				WarpDrive.logger.info(this + " lock strength " + getLockStrength());
+			}
 			ArrayList<Entity> entitiesToTransport = findEntities(sourceVec, ls);
 			Integer energyReq = energyCost();
 			if (energyReq == null) {
@@ -192,13 +194,17 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 			}
 			Vector3 modDest = destVec.clone().translate(centreOnMe);
 			for (Entity ent : entitiesToTransport) {
-				WarpDrive.debugPrint(this + " Handling entity " + ent.getEntityId());
 				if (consumeEnergy(energyReq, false)) {
-					WarpDrive.debugPrint("" + this + " Energy taken");
+					if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+						WarpDrive.logger.info(this + " Transporting entity " + ent.getEntityId());
+					}
 					inflictNegativeEffect(ent, ls);
 					transportEnt(ent, modDest);
 					count++;
 				} else {
+					if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+						WarpDrive.logger.info(this + " Insufficient energy to transport entity " + ent.getEntityId());
+					}
 					break;
 				}
 			}
@@ -227,7 +233,10 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	private void inflictNegativeEffect(Entity ent, double lockStrength) {
 		double value = Math.random() + lockStrength;
 
-		WarpDrive.debugPrint("TRANSPORTER INFLICTION: " + value);
+		if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+			WarpDrive.logger.info(this + " Inflicting negative effect " + value);
+		}
+		
 		if (value < 0.1) {
 			ent.attackEntityFrom(teleDam, 1000);
 		}
@@ -242,7 +251,9 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	}
 
 	private double beaconScan(int xV, int yV, int zV) {
-		WarpDrive.debugPrint("BeaconScan:" + xV + "," + yV + "," + zV);
+		if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+			WarpDrive.logger.info(this + "BeaconScan:" + xV + "," + yV + "," + zV);
+		}
 		double beacon = 0;
 		int beaconCount = 0;
 		int xL = xV - scanDist;
@@ -330,11 +341,12 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		if (source != null && dest != null) {
 			double basePower = min(calculatePower(source), calculatePower(dest), calculatePower(source, dest));
 			beaconEffect = beaconScan(source, dest);
-			WarpDrive.debugPrint("BEACON:" + beaconEffect);
 			baseLockStrength = basePower;
 			lockStrengthMul = 1;
 			isLocked = true;
-			WarpDrive.debugPrint(baseLockStrength + "," + getLockStrength());
+			if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+				WarpDrive.logger.info(this + " Beacon effect " + beaconEffect + " Lock strength " + baseLockStrength + "," + getLockStrength());
+			}
 			return getLockStrength();
 		} else {
 			unlock();
@@ -359,21 +371,23 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	private ArrayList<Entity> findEntities(Vector3 source, double lockStrength) {
 		AxisAlignedBB bb = getAABB();
-		WarpDrive.debugPrint("Transporter:" + bb.toString());
+		if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+			WarpDrive.logger.info(this + " Transporter:" + bb.toString());
+		}
 		List data = worldObj.getEntitiesWithinAABBExcludingEntity(null, bb);
 		ArrayList<Entity> output = new ArrayList<Entity>(data.size());
-		for (Object ent : data) {
-			if (lockStrength >= 1 || worldObj.rand.nextDouble() < lockStrength) {// If
-				// weak
-				// lock,
-				// don't
-				// transport
-				WarpDrive.debugPrint("" + this + " Entity '" + ent.toString() + "' found and added");
-				if (ent instanceof Entity) {
-					output.add((Entity) ent);
+		for (Object entity : data) {
+			if (lockStrength >= 1 || worldObj.rand.nextDouble() < lockStrength) {// If weak lock, don't transport
+				if (entity instanceof Entity) {
+					if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+						WarpDrive.logger.info(this + " Entity '" + entity.toString() + "' found and added");
+					}
+					output.add((Entity) entity);
 				}
 			} else {
-				WarpDrive.debugPrint("" + this + " Entity '" + ent.toString() + "' discarded");
+				if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+					WarpDrive.logger.info(this + " Entity '" + entity.toString() + "' discarded");
+				}
 			}
 		}
 		return output;
@@ -414,16 +428,18 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		}
 
 		@Override
-		public ChatComponentText func_151519_b(EntityLivingBase e) {
-			String mess = "";
-			if (e instanceof EntityPlayer || e instanceof EntityPlayerMP) {
-				mess = ((EntityPlayer) e).getDisplayName() + " was killed by a teleporter malfunction";
+		public ChatComponentText func_151519_b(EntityLivingBase entity) {
+			String message = "";
+			if (entity instanceof EntityPlayer || entity instanceof EntityPlayerMP) {
+				message = ((EntityPlayer) entity).getDisplayName() + " was killed by a teleporter malfunction";
 			} else {
-				mess = e.toString() + " was killed by a teleporter malfunction";
+				message = entity.toString() + " was killed by a teleporter malfunction";
 			}
 
-			WarpDrive.debugPrint(mess);
-			return new ChatComponentText(mess);
+			if (WarpDriveConfig.LOGGING_TRANSPORTER) {
+				WarpDrive.logger.info(message);
+			}
+			return new ChatComponentText(message);
 		}
 	}
 

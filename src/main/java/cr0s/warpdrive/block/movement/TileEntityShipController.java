@@ -106,7 +106,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
     	ShipCoreMode[] modes = ShipCoreMode.values();
     	if (mode >= 0 && mode <= modes.length) {
     		this.mode = modes[mode];
-            WarpDrive.debugPrint(this + " Mode set to " + this.mode + " (" + this.mode.getCode() + ")");
+    		if (WarpDriveConfig.LOGGING_JUMP) {
+    			WarpDrive.logger.info(this + " Mode set to " + this.mode + " (" + this.mode.getCode() + ")");
+    		}
     	}
     }
 
@@ -128,7 +130,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
             // Adding random ticks to warmup
             core.randomWarmupAddition = worldObj.rand.nextInt(WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
         } else {
-        	WarpDrive.debugPrint("" + this + " doJump without a core");
+        	WarpDrive.logger.error(this + " doJump without a core");
         }
 
         setJumpFlag(true);
@@ -234,7 +236,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
      * @param jumpFlag the jumpFlag to set
      */
     public void setJumpFlag(boolean jumpFlag) {
-    	WarpDrive.debugPrint("" + this + " setJumpFlag(" + jumpFlag + ")");
+    	if (WarpDriveConfig.LOGGING_JUMP) {
+    		WarpDrive.logger.info(this + " setJumpFlag(" + jumpFlag + ")");
+    	}
         this.jumpFlag = jumpFlag;
     }
 
@@ -330,7 +334,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 
     private void setDistance(int distance) {
         this.distance = Math.max(1, Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance));
-    	WarpDrive.debugPrint(this + " Jump distance set to " + distance);
+        if (WarpDriveConfig.LOGGING_JUMP) {
+        	WarpDrive.logger.info(this + " Jump distance set to " + distance);
+        }
     }
 
     public int getDistance() {
@@ -571,7 +577,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
 					return new Integer[] { getFront(), getRight(), getUp() };
 				}
-				WarpDrive.debugPrint("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+				}
 				setFront(argInt0);
 				setRight(argInt1);
 				setUp(argInt2);
@@ -593,7 +601,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 				if (argInt0 < 0 || argInt1 < 0 || argInt2 < 0) {
 					return new Integer[] { getBack(), getLeft(), getDown() };
 				}
-				WarpDrive.debugPrint("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+				}
 				setBack(argInt0);
 				setLeft(argInt1);
 				setDown(argInt2);
@@ -697,7 +707,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 			}
 			return new Object[] { core.shipVolume };
 		} catch (Exception e) {
-			if (WarpDriveConfig.G_DEBUGMODE) {
+			if (WarpDriveConfig.LOGGING_JUMP) {// disabled by default to avoid console spam as ship size is checked quite frequently
 				e.printStackTrace();
 			}
 			return null;

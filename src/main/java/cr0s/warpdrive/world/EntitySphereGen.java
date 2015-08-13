@@ -205,7 +205,7 @@ public final class EntitySphereGen extends Entity {
 			}
 		}
 		if (blocks != null) {
-			WarpDrive.debugPrint("[EntitySphereGen] Saved " + blocks.size() + " blocks (estimated to " + pregenSize + ")");
+			WarpDrive.logger.info("[EntitySphereGen] Saved " + blocks.size() + " blocks (estimated to " + pregenSize + ")");
 		}
 		// LocalProfiler.stop();
 	}

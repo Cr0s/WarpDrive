@@ -132,9 +132,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		if (registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
 			registryUpdateTicks = 0;
 			WarpDrive.shipCores.updateInRegistry(this);
-			if (WarpDriveConfig.G_DEBUGMODE) {
+			if (WarpDriveConfig.LOGGING_JUMP) {
 				WarpDrive.shipCores.printRegistry();
-				WarpDrive.debugPrint("" + this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
+				WarpDrive.logger.info(this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
 						+ (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
 			}
 
@@ -261,15 +261,17 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 						messageToAllPlayersOnShip(reason.toString());
 						return;
 					}
-					if (WarpDriveConfig.G_DEBUGMODE) {
-						WarpDrive.debugPrint(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
+					if (WarpDriveConfig.WC_WARMUP_SICKNESS) {
+						if (WarpDriveConfig.LOGGING_JUMP) {
+							WarpDrive.logger.info(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
+						}
+						makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
 					}
-					makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
 				}
 
 				if (!soundPlayed && (soundThreshold > warmupTime)) {
-					if (WarpDriveConfig.G_DEBUGMODE) {
-						WarpDrive.debugPrint(this + " Playing sound effect '" + soundFile + "' soundThreshold " + soundThreshold + " warmupTime " + warmupTime);
+					if (WarpDriveConfig.LOGGING_JUMP) {
+						WarpDrive.logger.info(this + " Playing sound effect '" + soundFile + "' soundThreshold " + soundThreshold + " warmupTime " + warmupTime);
 					}
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, soundFile, 4F, 1F);
 					soundPlayed = true;
@@ -365,8 +367,8 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		} else {
 			isolationRate = 0.0D;
 		}
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
 		}
 	}
 
@@ -592,9 +594,11 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 	}
 
-	private boolean isShipInJumpgate(Jumpgate jg, StringBuilder reason) {
-		AxisAlignedBB aabb = jg.getGateAABB();
-		WarpDrive.debugPrint("[TEWarpCore] Jumpgate " + jg.name + " AABB is " + aabb);
+	private boolean isShipInJumpgate(Jumpgate jumpgate, StringBuilder reason) {
+		AxisAlignedBB aabb = jumpgate.getGateAABB();
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Jumpgate " + jumpgate.name + " AABB is " + aabb);
+		}
 		int countBlocksInside = 0;
 		int countBlocksTotal = 0;
 
@@ -622,15 +626,19 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		if (shipVolume != 0) {
 			percent = Math.round((((countBlocksInside * 1.0F) / shipVolume) * 100.0F) * 10.0F) / 10.0F;
 		}
-		if (shipVolume != countBlocksTotal) {
-			WarpDrive.logger.info(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
+		
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			if (shipVolume != countBlocksTotal) {
+				WarpDrive.logger.info(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
+			}
+			WarpDrive.logger.info(this + "Ship has " + countBlocksInside + " / " + shipVolume + " blocks (" + percent + "%) in jumpgate '" + jumpgate.name + "'");
 		}
-		WarpDrive.debugPrint("Ship has " + countBlocksInside + " / " + shipVolume + " blocks (" + percent + "%) in jumpgate '" + jg.name + "'");
+		
 		// At least 80% of ship must be inside jumpgate
 		if (percent > 80F) {
 			return true;
 		} else if (percent <= 0.001) {
-			reason.append("Ship is not inside a jumpgate. Jump rejected. Nearest jumpgate is " + jg.toNiceString());
+			reason.append("Ship is not inside a jumpgate. Jump rejected. Nearest jumpgate is " + jumpgate.toNiceString());
 			return false;
 		} else {
 			reason.append("Ship is only " + percent + "% inside a jumpgate. Sorry, we'll loose too much crew as is, jump rejected.");
@@ -806,7 +814,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				}
 			}
 
-			WarpDrive.debugPrint("" + this + " Distance adjusted to " + distance + " blocks.");
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info(this + " Distance adjusted to " + distance + " blocks.");
+			}
 			EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, (currentMode == ShipCoreMode.HYPERSPACE), distance, direction,
 					false, 0, 0, 0);
 			jump.maxX = maxX;

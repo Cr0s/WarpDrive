@@ -57,7 +57,7 @@ public class CameraOverlay {
 	        float time = Math.abs(frameCount * 2.0F / ANIMATION_FRAMES - 1.0F);
 	        int color = (colorGradient(time, 0x40, 0xA0) << 16) + (colorGradient(time, 0x80, 0x00) << 8) + colorGradient(time, 0x80, 0xFF);
 	        mc.fontRenderer.drawString(text, (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2, 30, color, true);
-	        if (WarpDriveConfig.G_DEBUGMODE) {
+	        if (WarpDriveConfig.LOGGING_TARGETTING) {
 	        	mc.fontRenderer.drawString(WarpDrive.instance.debugMessage, (scaledWidth - mc.fontRenderer.getStringWidth(WarpDrive.instance.debugMessage)) / 2, 40, 0xFF008F, true);
 	        }
         } catch (Exception e) {

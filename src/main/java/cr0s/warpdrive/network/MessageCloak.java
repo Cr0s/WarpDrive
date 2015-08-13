@@ -73,7 +73,9 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 	private void handle(EntityClientPlayerMP player) {
 		// Hide the area
 		if (!decloak) {
-			WarpDrive.debugPrint("Received cloak packet: Removing blocks...");
+			if (WarpDriveConfig.LOGGING_CLOAKING) {
+				WarpDrive.logger.info("Received cloak packet: Removing blocks...");
+			}
 			// Hide the blocks within area
 			World worldObj = player.worldObj;
 			Block cloakBlockID = (tier == 1) ? WarpDrive.blockGas : Blocks.air;
@@ -92,7 +94,9 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 				}
 			}
 
-			WarpDrive.debugPrint("Received cloak packet: Removing entities...");
+			if (WarpDriveConfig.LOGGING_CLOAKING) {
+				WarpDrive.logger.info("Received cloak packet: Removing entities...");
+			}
 			// Hide any entities inside area
 			AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1);
 			List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
@@ -138,8 +142,8 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 			return null;
 		}
 		
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("Received cloak packet: " + ((cloakMessage.decloak) ? "DEcloaked" : "cloaked")
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			WarpDrive.logger.info("Received cloak packet: " + ((cloakMessage.decloak) ? "DEcloaked" : "cloaked")
 				+ "area: (" + cloakMessage.minX + "; " + cloakMessage.minY + "; " + cloakMessage.minZ
 				+ ") -> (" + cloakMessage.maxX + "; " + cloakMessage.maxY + "; " + cloakMessage.maxZ + ")");
 		}

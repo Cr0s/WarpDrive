@@ -80,8 +80,8 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 			return null;
 		}
 		
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("Received frequency packet: (" + frequencyMessage.x + ", " + frequencyMessage.y + ", " + frequencyMessage.z + ") frequency '" + frequencyMessage.frequency + "'");
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info("Received frequency packet: (" + frequencyMessage.x + ", " + frequencyMessage.y + ", " + frequencyMessage.z + ") frequency '" + frequencyMessage.frequency + "'");
 		}
 		
 		handle(Minecraft.getMinecraft().theWorld);

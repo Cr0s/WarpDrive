@@ -67,8 +67,8 @@ public class MessageTargeting implements IMessage, IMessageHandler<MessageTarget
 	
 	@Override
 	public IMessage onMessage(MessageTargeting targetingMessage, MessageContext context) {
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("Received target packet: (" + targetingMessage.x + "; " + targetingMessage.y + "; " + targetingMessage.z
+		if (WarpDriveConfig.LOGGING_TARGETTING) {
+			WarpDrive.logger.info("Received target packet: (" + targetingMessage.x + "; " + targetingMessage.y + "; " + targetingMessage.z
 				+ ") yaw: " + targetingMessage.yaw + " pitch: " + targetingMessage.pitch);
 		}
 		

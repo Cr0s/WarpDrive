@@ -97,8 +97,8 @@ public class MessageBeamEffect implements IMessage, IMessageHandler<MessageBeamE
 			return null;
 		}
 		
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("Received beam packet from " + beamEffectMessage.source + " to " + beamEffectMessage.target
+		if (WarpDriveConfig.LOGGING_EFFECTS) {
+			WarpDrive.logger.info("Received beam packet from " + beamEffectMessage.source + " to " + beamEffectMessage.target
 				+ " as RGB " + beamEffectMessage.red + " " + beamEffectMessage.green + " " + beamEffectMessage.blue
 				+ " age " + beamEffectMessage.age +" energy " + beamEffectMessage.energy);
 		}

@@ -118,9 +118,13 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	public void addBeamEnergy(int amount) {
 		if (isEmitting) {
 			energyFromOtherBeams += amount;
-			WarpDrive.debugPrint(this + " Added energy " + amount);
+			if (WarpDriveConfig.LOGGING_WEAPON) {
+				WarpDrive.logger.info(this + " Added energy " + amount);
+			}
 		} else {
-			WarpDrive.debugPrint(this + " Ignored energy " + amount);
+			if (WarpDriveConfig.LOGGING_WEAPON) {
+				WarpDrive.logger.info(this + " Ignored energy " + amount);
+			}
 		}
 	}
 
@@ -156,7 +160,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		}
 
 		Vector3 beamVector = new Vector3(this).translate(0.5D);
-		WarpDrive.debugPrint(this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
+		if (WarpDriveConfig.LOGGING_WEAPON) {
+			WarpDrive.logger.info(this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
+		}
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
@@ -166,7 +172,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
 		Vector3.translate(beamVector, lookVector);
 		Vector3 reachPoint = Vector3.translate(beamVector.clone(), Vector3.scale(lookVector.clone(), beamLengthBlocks));
-		WarpDrive.debugPrint(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
+		if (WarpDriveConfig.LOGGING_WEAPON) {
+			WarpDrive.logger.info(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
+		}
 		Vector3 endPoint = reachPoint.clone();
 		playSoundCorrespondsEnergy(energy);
 		int distanceTravelled = 0; // distance traveled from beam sender to
@@ -200,7 +208,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 			// FIXME entity ray-tracing
 			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
 
-			WarpDrive.debugPrint("Entity hit is " + entityHit);
+			if (WarpDriveConfig.LOGGING_WEAPON) {
+				WarpDrive.logger.info("Entity hit is " + entityHit);
+			}
 
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
 				EntityLivingBase e = (EntityLivingBase) entityHit.entityHit;
@@ -344,7 +354,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 
 	public void setBeamFrequency(int parBeamFrequency) {
 		if (beamFrequency != parBeamFrequency && (parBeamFrequency <= BEAM_FREQUENCY_MAX) && (parBeamFrequency > 0)) {
-			WarpDrive.debugPrint(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
+			}
 			beamFrequency = parBeamFrequency;
 		}
 		updateColor();
@@ -356,7 +368,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 
 	public void setCameraFrequency(int parCameraFrequency) {
 		if (cameraFrequency != parCameraFrequency) {
-			WarpDrive.debugPrint(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
+			}
 			cameraFrequency = parCameraFrequency;
 			// force update through main thread since CC runs on server as
 			// 'client'

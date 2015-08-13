@@ -132,7 +132,7 @@ public class ShipCoresRegistry {
 	}
 
 	private void removeDeadCores() {
-		LocalProfiler.start("WarpCoresRegistry Removing dead cores");
+		LocalProfiler.start("ShipCoresRegistry Removing dead cores");
 
 		TileEntityShipCore c;
 		for (int i = registry.size() - 1; i >= 0; i--) {
@@ -140,8 +140,12 @@ public class ShipCoresRegistry {
 			if (c == null || c.getWorldObj() == null || c.getWorldObj().getBlock(c.xCoord, c.yCoord, c.zCoord) != WarpDrive.blockShipCore
 					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord) != c
 					|| c.getWorldObj().getTileEntity(c.xCoord, c.yCoord, c.zCoord).isInvalid()) {
-				WarpDrive.debugPrint("Removing 'dead' core at " + ((c != null) ? c.xCoord : "?") + ", " + ((c != null) ? c.yCoord : "?") + ", "
-						+ ((c != null) ? c.zCoord : "?"));
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Removing 'dead' core at "
+							+ ((c != null) ? c.xCoord : "?") + ", "
+							+ ((c != null) ? c.yCoord : "?") + ", "
+							+ ((c != null) ? c.zCoord : "?"));
+				}
 				registry.remove(i);
 			}
 		}

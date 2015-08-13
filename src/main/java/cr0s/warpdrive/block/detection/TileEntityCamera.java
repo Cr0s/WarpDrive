@@ -9,6 +9,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractInterfaced;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -58,7 +59,9 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 	public void setFrequency(int parFrequency) {
 		if (frequency != parFrequency) {
 			frequency = parFrequency;
-			WarpDrive.debugPrint("" + this + " Camera frequency set to " + frequency);
+			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+				WarpDrive.logger.info(this + " Camera frequency set to " + frequency);
+			}
 	        // force update through main thread since CC runs on server as 'client'
 	        packetSendTicks = 0;
 	        registryUpdateTicks = 0;
