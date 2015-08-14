@@ -37,6 +37,7 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -967,6 +968,134 @@ public class WarpDrive implements LoadingCallback {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
 			player.addChatMessage(new ChatComponentText(line));
+		}
+	}
+	@Mod.EventHandler
+	public void remap(FMLMissingMappingsEvent event) {
+		for (FMLMissingMappingsEvent.MissingMapping mapping: event.get()) {
+			if (mapping.type == GameRegistry.Type.ITEM) {
+				if (mapping.name.equals("WarpDrive:airBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockAir));
+				} else if (mapping.name.equals("WarpDrive:airCanisterFull")) {
+					mapping.remap(itemAirCanisterFull);
+				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockAirGenerator));
+				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserMedium));
+				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCamera));
+				} else if (mapping.name.equals("WarpDrive:chunkLoader")) {
+					mapping.remap(Item.getItemFromBlock(blockChunkLoader));
+				} else if (mapping.name.equals("WarpDrive:cloakBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCloakingCore));
+				} else if (mapping.name.equals("WarpDrive:cloakCoilBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCloakingCoil));
+				} else if (mapping.name.equals("WarpDrive:component")) {
+					mapping.remap(itemComponent);
+				} else if (mapping.name.equals("WarpDrive:decorative")) {
+					mapping.remap(Item.getItemFromBlock(blockDecorative));
+				} else if (mapping.name.equals("WarpDrive:gasBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockGas));
+				} else if (mapping.name.equals("WarpDrive:helmet")) {
+					mapping.remap(itemHelmet);
+				} else if (mapping.name.equals("WarpDrive:iridiumBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockIridium));
+				} else if (mapping.name.equals("WarpDrive:isolationBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockWarpIsolation));
+				} else if (mapping.name.equals("WarpDrive:laserBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaser));
+				} else if (mapping.name.equals("WarpDrive:laserCamBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserCamera));
+				} else if (mapping.name.equals("WarpDrive:laserTreeFarmBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserTreeFarm));
+				} else if (mapping.name.equals("WarpDrive:liftBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLift));
+				} else if (mapping.name.equals("WarpDrive:miningLaserBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockMiningLaser));
+				} else if (mapping.name.equals("WarpDrive:monitorBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockMonitor));
+				} else if (mapping.name.equals("WarpDrive:powerLaser")) {
+					mapping.remap(Item.getItemFromBlock(blockEnanReactorLaser));
+				} else if (mapping.name.equals("WarpDrive:powerReactor")) {
+					mapping.remap(Item.getItemFromBlock(blockEnanReactorCore));
+				} else if (mapping.name.equals("WarpDrive:powerStore")) {
+					mapping.remap(Item.getItemFromBlock(blockEnergyBank));
+				} else if (mapping.name.equals("WarpDrive:protocolBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockShipController));
+				} else if (mapping.name.equals("WarpDrive:radarBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockRadar));
+				} else if (mapping.name.equals("WarpDrive:reactorLaserFocus")) {
+					mapping.remap(itemIC2reactorLaserFocus);
+				} else if (mapping.name.equals("WarpDrive:reactorMonitor")) {
+					mapping.remap(Item.getItemFromBlock(blockIC2reactorLaserMonitor));
+				} else if (mapping.name.equals("WarpDrive:scannerBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockShipScanner));
+				} else if (mapping.name.equals("WarpDrive:transportBeacon")) {
+					mapping.remap(Item.getItemFromBlock(blockTransportBeacon));
+				} else if (mapping.name.equals("WarpDrive:transporter")) {
+					mapping.remap(Item.getItemFromBlock(blockTransporter));
+				} else if (mapping.name.equals("WarpDrive:upgrade")) {
+					mapping.remap(itemUpgrade);
+				} else if (mapping.name.equals("WarpDrive:warpCore")) {
+					mapping.remap(Item.getItemFromBlock(blockShipCore));
+				}
+			} else if (mapping.type == GameRegistry.Type.BLOCK) {
+				if (mapping.name.equals("WarpDrive:airBlock")) {
+					mapping.remap(blockAir);
+				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
+					mapping.remap(blockAirGenerator);
+				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
+					mapping.remap(blockLaserMedium);
+				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
+					mapping.remap(blockCamera);
+				} else if (mapping.name.equals("WarpDrive:chunkLoader")) {
+					mapping.remap(blockChunkLoader);
+				} else if (mapping.name.equals("WarpDrive:cloakBlock")) {
+					mapping.remap(blockCloakingCore);
+				} else if (mapping.name.equals("WarpDrive:cloakCoilBlock")) {
+					mapping.remap(blockCloakingCoil);
+				} else if (mapping.name.equals("WarpDrive:decorative")) {
+					mapping.remap(blockDecorative);
+				} else if (mapping.name.equals("WarpDrive:gasBlock")) {
+					mapping.remap(blockGas);
+				} else if (mapping.name.equals("WarpDrive:iridiumBlock")) {
+					mapping.remap(blockIridium);
+				} else if (mapping.name.equals("WarpDrive:isolationBlock")) {
+					mapping.remap(blockWarpIsolation);
+				} else if (mapping.name.equals("WarpDrive:laserBlock")) {
+					mapping.remap(blockLaser);
+				} else if (mapping.name.equals("WarpDrive:laserCamBlock")) {
+					mapping.remap(blockLaserCamera);
+				} else if (mapping.name.equals("WarpDrive:laserTreeFarmBlock")) {
+					mapping.remap(blockLaserTreeFarm);
+				} else if (mapping.name.equals("WarpDrive:liftBlock")) {
+					mapping.remap(blockLift);
+				} else if (mapping.name.equals("WarpDrive:miningLaserBlock")) {
+					mapping.remap(blockMiningLaser);
+				} else if (mapping.name.equals("WarpDrive:monitorBlock")) {
+					mapping.remap(blockMonitor);
+				} else if (mapping.name.equals("WarpDrive:powerLaser")) {
+					mapping.remap(blockEnanReactorLaser);
+				} else if (mapping.name.equals("WarpDrive:powerReactor")) {
+					mapping.remap(blockEnanReactorCore);
+				} else if (mapping.name.equals("WarpDrive:powerStore")) {
+					mapping.remap(blockEnergyBank);
+				} else if (mapping.name.equals("WarpDrive:protocolBlock")) {
+					mapping.remap(blockShipController);
+				} else if (mapping.name.equals("WarpDrive:radarBlock")) {
+					mapping.remap(blockRadar);
+				} else if (mapping.name.equals("WarpDrive:reactorMonitor")) {
+					mapping.remap(blockIC2reactorLaserMonitor);
+				} else if (mapping.name.equals("WarpDrive:scannerBlock")) {
+					mapping.remap(blockShipScanner);
+				} else if (mapping.name.equals("WarpDrive:transportBeacon")) {
+					mapping.remap(blockTransportBeacon);
+				} else if (mapping.name.equals("WarpDrive:transporter")) {
+					mapping.remap(blockTransporter);
+				} else if (mapping.name.equals("WarpDrive:warpCore")) {
+					mapping.remap(blockShipCore);
+				}
+			}
 		}
 	}
 }
