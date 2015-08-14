@@ -13,40 +13,42 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 @IFMLLoadingPlugin.SortingIndex(value = 1001) // > 1000 to work with srg names
 public class FMLLoadingPlugin implements IFMLLoadingPlugin, IFMLCallHook {
 	public static File location;
-
+	private boolean debugLog = false;
+	
 	@Override
 	public String[] getASMTransformerClass() {
 		return new String[] { ClassTransformer.class.getName() };
 	}
-
+	
 	@Override
 	public String getModContainerClass() {
 		return MyDummyModContainer.class.getName();
 	}
-
+	
 	@Override
 	public String getSetupClass() {
 		return getClass().getName();
 	}
-
+	
 	@Override
 	public void injectData(Map<String, Object> data) {
 		location = (File) data.get("coremodLocation");
-		System.out.println("injectData:");
-		for (Entry<String, Object> entry : data.entrySet()) {
-			System.out.println(" - " + entry.getKey() + " = " + entry.getValue());
+		if (debugLog) {
+			System.out.println("injectData:");
+			for (Entry<String, Object> entry : data.entrySet()) {
+				System.out.println("- " + entry.getKey() + " = " + entry.getValue());
+			}
 		}
 	}
-
+	
 	@Override
 	public Void call() throws Exception {
-		System.out.println("call()");
+		if (debugLog) { System.out.println("call()"); }
 		return null;
 	}
-
+	
 	@Override
 	public String getAccessTransformerClass() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }
