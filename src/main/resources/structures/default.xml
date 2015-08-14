@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<structure type="star" name="red_giant" radius="40" maxScaling="3.0">
+	<shell name="core" radiusInner="1" radiusOuter="10" >
+		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+	</shell>
+	
+	<shell name="mantle" radiusInner="11" radiusOuter="30" >
+		<CompositionBlock weight="10" block="net.minecraft.blocks.sand" />
+		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+	</shell>
+
+	<shell name="surface" radiusInner="31" radiusOuter="40" >
+		<CompositionBlock weight="5" block="net.minecraft.blocks.glowstone" />
+		<CompositionBlock weight="10" block="net.minecraft.blocks.lava" />
+	</shell>
+
+</structure>
+
+<structure type="planetoid" name="theMoon" radius="20" maxScaling="2.0">
+	<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
+		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+	</shell>
+	
+	<shell name="mantle" radiusInner="6" radiusOuter="20" ores="common">
+		<CompositionBlock weight="10" block="net.minecraft.blocks.stone" />
+		<CompositionBlock weight="3" block="net.minecraft.blocks.clay" />
+	</shell>
+
+</structure>

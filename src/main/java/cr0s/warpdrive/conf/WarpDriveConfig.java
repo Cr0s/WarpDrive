@@ -44,7 +44,7 @@ public class WarpDriveConfig {
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
 	public static Method forgeMultipart_helper_sendDescPacket = null;
 	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
-
+	
 	public static ItemStack IC2_air;
 	public static ItemStack IC2_empty;
 	public static ItemStack IC2_rubberWood;
@@ -502,37 +502,32 @@ public class WarpDriveConfig {
 		if (isForgeMultipartLoaded) {
 			loadForgeMultipart();
 		}
-
+		
 		isIndustrialCraft2loaded = Loader.isModLoaded("IC2");
 		if (isIndustrialCraft2loaded) {
 			loadIC2();
 		}
-
+		
 		isComputerCraftLoaded = Loader.isModLoaded("ComputerCraft");
 		if (isComputerCraftLoaded) {
 			loadCC();
 		}
-
+		
 		isAdvancedSolarPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvancedSolarPanelLoaded) {
 			loadASP();
 		}
-
+		
 		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
 		if (isAtomicScienceLoaded) {
 			loadAtomicScience();
-		}
-
-		isICBMLoaded = Loader.isModLoaded("ICBM|Explosion");
-		if (isICBMLoaded) {
-			loadICBM();
 		}
 
 		isMFFSLoaded = Loader.isModLoaded("MFFS");
 		if (isMFFSLoaded) {
 			loadMFFS();
 		}
-
+		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded) {
 			loadGraviSuite();
@@ -573,7 +568,7 @@ public class WarpDriveConfig {
 		if (isIndustrialCraft2loaded) {
 			// Metadata: 0 Batbox, 1 MFE, 2 MFSU, 3 LV transformer, 4 MV transformer, 5 HV transformer, 6 EV transformer, 7 CESU
 			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockElectric"));
-			
+
 			// Metadata: 0 Batbox, 1 CESU, 2 MFE, 3 MFSU
 			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockChargepad"));
 		}
@@ -645,19 +640,19 @@ public class WarpDriveConfig {
 		try {
 			IC2_solarPanel = getIC2Item("blockGenerator");
 			IC2_solarPanel.setItemDamage(3);
-			
+
 			spaceHelmets.add(getIC2Item("itemArmorHazmatHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemSolarHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemArmorNanoHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemArmorQuantumHelmet").getItem());
-			
+
 			jetpacks.add(getIC2Item("itemArmorJetpack").getItem());
 			jetpacks.add(getIC2Item("itemArmorJetpackElectric").getItem());
-			
+
 			IC2_empty = getIC2Item("itemCellEmpty");
 			IC2_air = getIC2Item("itemCellEmpty");
 			IC2_air.setItemDamage(5);
-			
+
 			ItemStack rubberWood = getIC2Item("blockRubWood");
 			IC2_Resin = getIC2Item("itemHarz");
 			if (rubberWood != null) {
@@ -676,7 +671,7 @@ public class WarpDriveConfig {
 			ore = getIC2Item("blockOreLead");
 			if (ore != null)
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			
+
 			IC2_fluidCell = getIC2Item("itemFluidCell").getItem();
 		} catch (Exception exception) {
 			WarpDrive.logger.error("WarpDriveConfig Error loading IndustrialCraft2 classes");
@@ -686,7 +681,7 @@ public class WarpDriveConfig {
 
 	private static void loadCC() {
 		try {
-/*
+			/*
 			CC_Computer = ComputerCraft.Blocks.computer;
 			CC_peripheral = ComputerCraft.Blocks.peripheral;
 			CC_Floppy = ComputerCraft.Items.disk;
@@ -860,5 +855,9 @@ public class WarpDriveConfig {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
 		}
 		return def;
+	}
+
+	public static void loadWorldGen() {
+		
 	}
 }
