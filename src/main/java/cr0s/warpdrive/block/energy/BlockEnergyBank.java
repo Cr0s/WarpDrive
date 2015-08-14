@@ -29,7 +29,7 @@ public class BlockEnergyBank extends BlockAbstractContainer {
 
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
-		iconBuffer = par1IconRegister.registerIcon("warpdrive:energyBank");
+		iconBuffer = par1IconRegister.registerIcon("warpdrive:energy/energyBank");
 	}
 
 	/**
