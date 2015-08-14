@@ -14,6 +14,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.TransitionPlane;
 // FIXME import dan200.computercraft.ComputerCraft;
@@ -26,12 +27,14 @@ public class WarpDriveConfig {
 	 */
 	public static boolean isForgeMultipartLoaded = false;
 	public static boolean isAdvancedSolarPanelLoaded = false;
+	public static boolean isAE2Loaded = false;
 	public static boolean isAtomicScienceLoaded = false;
 	public static boolean isICBMLoaded = false;
 	public static boolean isMFFSLoaded = false;
 	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isIndustrialCraft2loaded = false;
 	public static boolean isComputerCraftLoaded = false;
+	public static boolean isOCLoaded = false;
 	public static boolean isNetherOresLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
@@ -76,6 +79,7 @@ public class WarpDriveConfig {
 	public static int G_BLOCKS_PER_TICK = 3500;
 
 	public static boolean G_ENABLE_IC2_RECIPES = true;
+	public static boolean G_ENABLE_HARD_IC2_RECIPES = false;
 	public static boolean G_ENABLE_VANILLA_RECIPES = false;
 	public static boolean G_ENABLE_TDK_RECIPES = false;
 	
@@ -233,7 +237,36 @@ public class WarpDriveConfig {
 	public static ItemStack getIC2Item(String id) {
 		return new ItemStack((Item) Item.itemRegistry.getObject("IC2:" + id));
 	}
-
+	
+	public static Block getModBlock(String mod, String id)
+	{
+		try
+		{
+			return GameRegistry.findBlock(mod, id);
+		}
+		catch (Exception e)
+		{
+			WarpDrive.logger.info("WarpDriveConfig Call getModBlock failed for " + mod + ":" + id);
+		}
+		return null;
+	}
+	
+	public static ItemStack getModItem(String mod, String id, int meta)
+	{
+		try
+		{
+			ItemStack item = new ItemStack((Item) Item.itemRegistry.getObject(mod+ ":" + id));
+			if (meta != -1)
+				item.setItemDamage(meta);
+			return item;
+		}
+		catch (Exception e)
+		{
+			WarpDrive.logger.info("WarpDriveConfig Call getModItem failed for " + mod + ":" + id + ":" + meta);
+		}
+		return null;
+	}
+	
 	public static void preInit(Configuration configIn) {
 		config = configIn;
 	}
@@ -253,6 +286,7 @@ public class WarpDriveConfig {
 				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt();
 
 		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
+		G_ENABLE_HARD_IC2_RECIPES = config.get("General", "enable_hard_ic2_recipes", G_ENABLE_HARD_IC2_RECIPES, "Harder recipes based on IC2 by YuRaNnNzZZ").getBoolean(false);
 		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
 		G_ENABLE_TDK_RECIPES = config
 				.get("General",
@@ -517,6 +551,8 @@ public class WarpDriveConfig {
 		}
 
 		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
+		isAE2Loaded = Loader.isModLoaded("appliedenergistics2");
+		isOCLoaded = Loader.isModLoaded("OpenComputers");
 		//
 		minerOres.add(WarpDrive.blockIridium);
 		minerOres.add(Blocks.coal_ore);
@@ -759,13 +795,21 @@ public class WarpDriveConfig {
 
 	public static Block getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
 		if (isMoon) {
-			if (random.nextInt(5) == 1) {
+			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
+				return getModBlock("IC2", "blockBasalt");
+			else if (isAE2Loaded && random.nextInt(10) == 1)
+				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
+			else if (random.nextInt(5) == 1) {
 				return Blocks.netherrack;
 			} else if (random.nextInt(15) == 1) {
 				return Blocks.end_stone;
 			}
 		} else {
-			if (random.nextInt(6) == 1) {
+			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
+				return getModBlock("IC2", "blockBasalt");
+			else if (isAE2Loaded && random.nextInt(10) == 1)
+				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
+			else if (random.nextInt(6) == 1) {
 				return Blocks.netherrack;
 			} else if (random.nextInt(50) == 1) {
 				return Blocks.end_stone;
@@ -793,7 +837,7 @@ public class WarpDriveConfig {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
 		} else if (random.nextInt(250) == 1) {
 			return Blocks.diamond_ore;
-		} else if (!isNetherOresLoaded && (random.nextInt(10000) == 42)) {
+		} else if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
 			return WarpDrive.blockIridium;
 		}
 		return def;

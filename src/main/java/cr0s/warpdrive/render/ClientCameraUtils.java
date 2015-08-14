@@ -2,6 +2,7 @@ package cr0s.warpdrive.render;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings.Options;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
@@ -40,11 +41,17 @@ public class ClientCameraUtils {
         check2_z = z2;
         check2_blockId = block2;
         
+        
+        WarpDrive.normalFOV = mc.gameSettings.fovSetting;
+        WarpDrive.normalSensitivity = mc.gameSettings.mouseSensitivity;
+        
         if (WarpDriveConfig.LOGGING_WEAPON) {
         	WarpDrive.logger.info("Setting viewpoint: " + entityCamera.toString());
         }
         mc.renderViewEntity = entityCamera;
         mc.gameSettings.thirdPersonView = 0;
+        mc.gameSettings.setOptionFloatValue(Options.FOV, WarpDrive.camFOV);
+        mc.gameSettings.setOptionFloatValue(Options.SENSITIVITY, WarpDrive.camSensitivity);
         WarpDrive.instance.isOverlayEnabled = true;
         
         Keyboard.enableRepeatEvents(true);
@@ -66,8 +73,8 @@ public class ClientCameraUtils {
 
         WarpDrive.instance.isOverlayEnabled = false;
         mc.gameSettings.thirdPersonView = 0;
-        mc.gameSettings.fovSetting = WarpDrive.normalFOV;
-        mc.gameSettings.mouseSensitivity = WarpDrive.normalSensitivity;
+        mc.gameSettings.setOptionFloatValue(Options.FOV, WarpDrive.normalFOV);
+        mc.gameSettings.setOptionFloatValue(Options.SENSITIVITY, WarpDrive.normalSensitivity);
 
         entityPlayer = null;
         dimensionId = -666;
