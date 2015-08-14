@@ -183,7 +183,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	}
 
 	private static void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) {
-		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.gasBlock, color, hollow, true, false);
+		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.blockGas, color, hollow, true, false);
 		world.spawnEntityInWorld(esg);
 	}
 

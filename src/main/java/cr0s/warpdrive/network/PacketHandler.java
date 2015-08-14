@@ -13,28 +13,29 @@ import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import cpw.mods.fml.relauncher.Side;
-import cr0s.warpdrive.network.CloakMessage;
-import cr0s.warpdrive.network.FrequencyMessage;
-import cr0s.warpdrive.network.BeamEffectMessage;
-import cr0s.warpdrive.network.TargetingMessage;
+import cr0s.warpdrive.network.MessageCloak;
+import cr0s.warpdrive.network.MessageFrequency;
+import cr0s.warpdrive.network.MessageBeamEffect;
+import cr0s.warpdrive.network.MessageTargeting;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
     public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(WarpDrive.MODID);
 
     public static void init() {
-		simpleNetworkManager.registerMessage(BeamEffectMessage.class, BeamEffectMessage.class, 0, Side.CLIENT);
-		simpleNetworkManager.registerMessage(FrequencyMessage.class , FrequencyMessage.class , 1, Side.CLIENT);
-		simpleNetworkManager.registerMessage(TargetingMessage.class , TargetingMessage.class , 2, Side.SERVER);
-		simpleNetworkManager.registerMessage(CloakMessage.class     , CloakMessage.class     , 3, Side.CLIENT);
+		simpleNetworkManager.registerMessage(MessageBeamEffect.class, MessageBeamEffect.class, 0, Side.CLIENT);
+		simpleNetworkManager.registerMessage(MessageFrequency.class , MessageFrequency.class , 1, Side.CLIENT);
+		simpleNetworkManager.registerMessage(MessageTargeting.class , MessageTargeting.class , 2, Side.SERVER);
+		simpleNetworkManager.registerMessage(MessageCloak.class     , MessageCloak.class     , 3, Side.CLIENT);
     }
 	
 	// Beam effect sent to client side
 	public static void sendBeamPacket(World worldObj, Vector3 source, Vector3 target, float red, float green, float blue, int age, int energy, int radius) {
 		assert(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER);
 		
-		BeamEffectMessage beamMessage = new BeamEffectMessage(source, target, red, green, blue, age, energy);
+		MessageBeamEffect beamMessage = new MessageBeamEffect(source, target, red, green, blue, age, energy);
 		
 		// small beam are sent relative to beam center
 		if (source.distanceTo_square(target) < 3600 /* 60 * 60 */) {
@@ -67,7 +68,7 @@ public class PacketHandler {
 	public static void sendBeamPacketToPlayersInArea(World worldObj, Vector3 source, Vector3 target, float red, float green, float blue, int age, int energy, AxisAlignedBB aabb) {
 		assert(FMLCommonHandler.instance().getEffectiveSide() == Side.SERVER);
 		
-		BeamEffectMessage beamMessage = new BeamEffectMessage(source, target, red, green, blue, age, energy);
+		MessageBeamEffect beamMessage = new MessageBeamEffect(source, target, red, green, blue, age, energy);
 		// Send packet to all players within cloaked area
 		List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, aabb);
 		for (Entity entity : list) {
@@ -79,22 +80,28 @@ public class PacketHandler {
 	
 	// Monitor/Laser/Camera updating its frequency to client side
 	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
-		FrequencyMessage frequencyMessage = new FrequencyMessage(xCoord, yCoord, zCoord, frequency);
+		MessageFrequency frequencyMessage = new MessageFrequency(xCoord, yCoord, zCoord, frequency);
 		simpleNetworkManager.sendToAllAround(frequencyMessage, new TargetPoint(dimensionId, xCoord, yCoord, zCoord, 100));
-		WarpDrive.debugPrint("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
+		}
 	}
 	
 	// LaserCamera shooting at target (client -> server)
 	public static void sendLaserTargetingPacket(int x, int y, int z, float yaw, float pitch) {
-		TargetingMessage targetingMessage = new TargetingMessage(x, y, z, yaw, pitch);
+		MessageTargeting targetingMessage = new MessageTargeting(x, y, z, yaw, pitch);
 		simpleNetworkManager.sendToServer(targetingMessage);
-		WarpDrive.debugPrint("Sent targeting packet (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
+		if (WarpDriveConfig.LOGGING_TARGETTING) {
+			WarpDrive.logger.info("Sent targeting packet (" + x + ", " + y + ", " + z + ") yaw " + yaw + " pitch " + pitch);
+		}
 	}
 	
 	// Sending cloaking area definition (server -> client)
 	public static void sendCloakPacket(EntityPlayer player, AxisAlignedBB aabb, int tier, boolean decloak) {
-		CloakMessage cloakMessage = new CloakMessage(aabb, tier, decloak);
+		MessageCloak cloakMessage = new MessageCloak(aabb, tier, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
-		WarpDrive.debugPrint("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+		}
 	}
 }

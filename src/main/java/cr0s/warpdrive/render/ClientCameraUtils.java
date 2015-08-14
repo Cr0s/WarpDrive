@@ -9,6 +9,7 @@ import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class ClientCameraUtils {
     public static EntityPlayer entityPlayer;
@@ -44,7 +45,9 @@ public class ClientCameraUtils {
         WarpDrive.normalFOV = mc.gameSettings.fovSetting;
         WarpDrive.normalSensitivity = mc.gameSettings.mouseSensitivity;
         
-        WarpDrive.debugPrint("Setting viewpoint: " + entityCamera.toString());
+        if (WarpDriveConfig.LOGGING_WEAPON) {
+        	WarpDrive.logger.info("Setting viewpoint: " + entityCamera.toString());
+        }
         mc.renderViewEntity = entityCamera;
         mc.gameSettings.thirdPersonView = 0;
         mc.gameSettings.setOptionFloatValue(Options.FOV, WarpDrive.camFOV);
@@ -59,7 +62,9 @@ public class ClientCameraUtils {
     	if (entityPlayer != null) {
     		mc.renderViewEntity = entityPlayer;
     		entityPlayer = null;
-            WarpDrive.debugPrint("Resetting viewpoint");
+    		if (WarpDriveConfig.LOGGING_WEAPON) {
+    			WarpDrive.logger.info("Resetting viewpoint");
+    		}
     	} else {
     		WarpDrive.logger.error("reseting viewpoint with invalid player entity ?!?");
     	}

@@ -10,6 +10,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.network.internal.FMLNetworkHandler;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.network.PacketHandler;
 
 /**
@@ -95,7 +96,9 @@ public class CloakManager {
 
 	public static Packet getPacketForThisEntity(Entity e) {
 		if (e.isDead) {
-			WarpDrive.debugPrint("Fetching addPacket for removed entity");
+			if (WarpDriveConfig.LOGGING_CLOAKING) {
+				WarpDrive.logger.info("Fetching addPacket for removed entity");
+			}
 		}
 
 		Packet pkt = FMLNetworkHandler.getEntitySpawningPacket(e);

@@ -29,12 +29,12 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.MovingEntity;
 import cr0s.warpdrive.data.TransitionPlane;
 import cr0s.warpdrive.data.Vector3;
-import cr0s.warpdrive.machines.TileEntityReactor;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
 public class EntityJump extends Entity {
@@ -71,7 +71,7 @@ public class EntityJump extends Entity {
 
 	public boolean on = false;
 	private JumpBlock ship[];
-	private TileEntityReactor reactor;
+	private TileEntityShipCore reactor;
 
 	private final static int STATE_IDLE = 0;
 	private final static int STATE_JUMPING = 1;
@@ -93,11 +93,12 @@ public class EntityJump extends Entity {
 	public EntityJump(World world) {
 		super(world);
 		targetWorld = worldObj;
-		WarpDrive.debugPrint("" + this + " Entity created (empty) in dimension " + worldObj.getProviderName() + " - " + worldObj.getWorldInfo().getWorldName()
-				+ " " + (FMLCommonHandler.instance().getEffectiveSide().isClient() ? "Client" : "Server"));
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Entity created (empty) in dimension " + worldObj.getProviderName() + " - " + worldObj.getWorldInfo().getWorldName());
+		}
 	}
 
-	public EntityJump(World world, int x, int y, int z, int _dx, int _dz, TileEntityReactor _reactor, boolean _isHyperspaceJump, int _distance, int _direction,
+	public EntityJump(World world, int x, int y, int z, int _dx, int _dz, TileEntityShipCore _reactor, boolean _isHyperspaceJump, int _distance, int _direction,
 			boolean _isCoordJump, int _destX, int _destY, int _destZ) {
 		super(world);
 		this.posX = x + 0.5D;
@@ -124,7 +125,9 @@ public class EntityJump extends Entity {
 		// set when preparing jump
 		targetWorld = null;
 
-		WarpDrive.debugPrint("" + this + " Entity created");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Entity created");
+		}
 	}
 
 	public void killEntity(String reason) {
@@ -134,10 +137,12 @@ public class EntityJump extends Entity {
 
 		on = false;
 
-		if (reason == null || reason.isEmpty()) {
-			WarpDrive.debugPrint("" + this + " Killing jump entity...");
-		} else {
-			WarpDrive.debugPrint("" + this + " Killing jump entity... (" + reason + ")");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			if (reason == null || reason.isEmpty()) {
+				WarpDrive.logger.info(this + " Killing jump entity...");
+			} else {
+				WarpDrive.logger.info(this + " Killing jump entity... (" + reason + ")");
+			}
 		}
 
 		unforceChunks();
@@ -156,7 +161,9 @@ public class EntityJump extends Entity {
 		}
 
 		if (!on) {
-			WarpDrive.debugPrint(this + " Removing from onUpdate...");
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info(this + " Removing from onUpdate...");
+			}
 			worldObj.removeEntity(this);
 			return;
 		}
@@ -170,7 +177,9 @@ public class EntityJump extends Entity {
 
 		ticks++;
 		if (state == STATE_IDLE) {
-			WarpDrive.debugPrint(this + " Preparing to jump...");
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info(this + " Preparing to jump...");
+			}
 			prepareToJump();
 			if (on) {
 				state = STATE_JUMPING;
@@ -202,7 +211,9 @@ public class EntityJump extends Entity {
 
 	private boolean forceChunks(StringBuilder reason) {
 		LocalProfiler.start("EntityJump.forceChunks");
-		WarpDrive.debugPrint("" + this + " Forcing chunks in " + worldObj.provider.getDimensionName() + " and " + targetWorld.provider.getDimensionName());
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Forcing chunks in " + worldObj.provider.getDimensionName() + " and " + targetWorld.provider.getDimensionName());
+		}
 		sourceWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, worldObj, Type.NORMAL); // Type.ENTITY);
 		if (sourceWorldTicket == null) {
 			reason.append("Chunkloading rejected in S:" + worldObj.getWorldInfo().getWorldName() + ". Aborting.");
@@ -251,7 +262,9 @@ public class EntityJump extends Entity {
 
 	private void unforceChunks() {
 		LocalProfiler.start("EntityJump.unforceChunks");
-		WarpDrive.debugPrint("" + this + " Unforcing chunks");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Unforcing chunks");
+		}
 
 		int x1, x2, z1, z2;
 		if (sourceWorldTicket != null) {
@@ -289,7 +302,7 @@ public class EntityJump extends Entity {
 		if (entitiesOnShip == null) {
 			reactor.messageToAllPlayersOnShip(msg);
 		} else {
-			WarpDrive.logger.info("" + this + " messageToAllPlayersOnShip: " + msg);
+			WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
 			for (MovingEntity me : entitiesOnShip) {
 				if (me.entity instanceof EntityPlayer) {
 					WarpDrive.addChatMessage((EntityPlayer) me.entity, "["
@@ -453,8 +466,8 @@ public class EntityJump extends Entity {
 			}
 		}
 
-		if (betweenWorlds) {
-			WarpDrive.debugPrint("" + this + " Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
+		if (betweenWorlds && WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
 		}
 
 		// Validate positions aren't overlapping
@@ -481,7 +494,9 @@ public class EntityJump extends Entity {
 		}
 		// lockWorlds();
 		saveEntities();
-		WarpDrive.debugPrint("" + this + " Saved " + entitiesOnShip.size() + " entities from ship");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Saved " + entitiesOnShip.size() + " entities from ship");
+		}
 
 		if (isHyperspaceJump && isInSpace) {
 			messageToAllPlayersOnShip("Entering HYPERSPACE...");
@@ -507,28 +522,36 @@ public class EntityJump extends Entity {
 		this.currentIndexInShip = 0;
 		msCounter = System.currentTimeMillis();
 		LocalProfiler.stop();
-		WarpDrive.debugPrint("Removing TE duplicates: tileEntities in target world before jump: " + targetWorld.loadedTileEntityList.size());
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world before jump: " + targetWorld.loadedTileEntityList.size());
+		}
 	}
 
 	/**
 	 * Finish jump: move entities, unlock worlds and delete self
 	 */
 	private void finishJump() {
-		WarpDrive.debugPrint("" + this + " Jump done in " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds and " + ticks + " ticks");
 		// FIXME TileEntity duplication workaround
-		WarpDrive.debugPrint("Removing TE duplicates: tileEntities in target world after jump, before cleanup: " + targetWorld.loadedTileEntityList.size());
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Jump done in " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds and " + ticks + " ticks");
+			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, before cleanup: " + targetWorld.loadedTileEntityList.size());
+		}
 		LocalProfiler.start("EntityJump.removeDuplicates()");
 
 		try {
 			targetWorld.loadedTileEntityList = this.removeDuplicates(targetWorld.loadedTileEntityList);
-		} catch (Exception e) {
-			WarpDrive.debugPrint("TE Duplicates removing exception: " + e.getMessage());
+		} catch (Exception exception) {
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info("TE Duplicates removing exception: " + exception.getMessage());
+			}
 		}
 		FixASTurbines();
 		doCollisionDamage(true);
 
 		LocalProfiler.stop();
-		WarpDrive.debugPrint("Removing TE duplicates: tileEntities in target world after jump, after cleanup: " + targetWorld.loadedTileEntityList.size());
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, after cleanup: " + targetWorld.loadedTileEntityList.size());
+		}
 		killEntity("Jump done");
 	}
 
@@ -539,8 +562,9 @@ public class EntityJump extends Entity {
 	private void removeShip() {
 		LocalProfiler.start("EntityJump.removeShip");
 		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
-		WarpDrive.debugPrint("" + this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / "
-				+ (ship.length - 1));
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
+		}
 		TileEntity te;
 		Class<?> teClass;
 		Class<?> teSuperclass;
@@ -550,7 +574,9 @@ public class EntityJump extends Entity {
 			}
 			JumpBlock jb = ship[ship.length - currentIndexInShip - 1];
 			if (jb == null) {
-				WarpDrive.debugPrint("" + this + " Removing ship part: unexpected null found at ship[" + currentIndexInShip + "]");
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info(this + " Removing ship part: unexpected null found at ship[" + currentIndexInShip + "]");
+				}
 				currentIndexInShip++;
 				continue;
 			}
@@ -576,8 +602,8 @@ public class EntityJump extends Entity {
 						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
-				} else if (te instanceof TileEntityReactor) {
-					WarpDrive.warpCores.removeFromRegistry((TileEntityReactor) te);
+				} else if (te instanceof TileEntityShipCore) {
+					WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) te);
 				}
 
 				teSuperclass = teClass.getSuperclass();
@@ -641,7 +667,7 @@ public class EntityJump extends Entity {
 								Block block = worldObj.getBlock(x, y, z);
 
 							// Skip air blocks
-								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.airBlock))) {
+								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
 									continue;
 								}
 
@@ -673,7 +699,9 @@ public class EntityJump extends Entity {
 			return;
 		}
 
-		WarpDrive.debugPrint("" + this + " Ship saved as " + ship.length + " blocks");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Ship saved as " + ship.length + " blocks");
+		}
 		LocalProfiler.stop();
 	}
 
@@ -683,8 +711,9 @@ public class EntityJump extends Entity {
 	private void moveShip() {
 		LocalProfiler.start("EntityJump.moveShip");
 		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
-		WarpDrive.debugPrint("" + this + " Moving ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / "
-				+ (ship.length - 1));
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Moving ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
+		}
 
 		for (int index = 0; index < blocksToMove; index++) {
 			if (currentIndexInShip >= ship.length) {
@@ -709,7 +738,9 @@ public class EntityJump extends Entity {
 	 * @return possible jump distance or -1
 	 */
 	private int getPossibleJumpDistance() {
-		WarpDrive.debugPrint("" + this + " Calculating possible jump distance...");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Calculating possible jump distance...");
+		}
 		int testDistance = this.distance;
 		int blowPoints = 0;
 		collisionDetected = false;
@@ -729,8 +760,8 @@ public class EntityJump extends Entity {
 			testDistance--;
 		}
 
-		if (distance != testDistance) {
-			WarpDrive.debugPrint("" + this + " Jump distance adjusted to " + testDistance + " after " + blowPoints + " collisions");
+		if (distance != testDistance && WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Jump distance adjusted to " + testDistance + " after " + blowPoints + " collisions");
 		}
 
 		// Register explosion(s) at collision point
@@ -748,9 +779,9 @@ public class EntityJump extends Entity {
 				collisionStrength = (4.0F + blowPoints - WarpDriveConfig.WC_COLLISION_TOLERANCE_BLOCKS) * massCorrection;
 				collisionAtSource = result.atSource;
 				collisionAtTarget = result.atTarget;
-				WarpDrive.debugPrint("" + this + " Reporting " + collisionAtTarget.size() + " collisions coordinates " + blowPoints
-						+ " blowPoints with massCorrection of " + String.format("%.2f", massCorrection) + " => strength "
-						+ String.format("%.2f", collisionStrength));
+				WarpDrive.logger.info(this + " Reporting " + collisionAtTarget.size() + " collisions coordinates " + blowPoints
+							+ " blowPoints with massCorrection of " + String.format("%.2f", massCorrection) + " => strength "
+							+ String.format("%.2f", collisionStrength));
 			} else {
 				WarpDrive.logger.error("WarpDrive error: unable to compute collision points, ignoring...");
 			}
@@ -761,7 +792,9 @@ public class EntityJump extends Entity {
 
 	private void doCollisionDamage(boolean atTarget) {
 		if (!collisionDetected) {
-			WarpDrive.debugPrint("" + this + " doCollisionDamage No collision detected...");
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info(this + " doCollisionDamage No collision detected...");
+			}
 			return;
 		}
 		ArrayList<Vector3> collisionPoints = atTarget ? collisionAtTarget : collisionAtSource;
@@ -795,15 +828,21 @@ public class EntityJump extends Entity {
 
 		// randomize if too many collision points
 		int nbExplosions = Math.min(5, collisionPoints.size());
-		WarpDrive.debugPrint("doCollisionDamage nbExplosions " + nbExplosions + "/" + collisionPoints.size());
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info("doCollisionDamage nbExplosions " + nbExplosions + "/" + collisionPoints.size());
+		}
 		for (int i = 0; i < nbExplosions; i++) {
 			// get location
 			Vector3 current;
 			if (nbExplosions < collisionPoints.size()) {
-				WarpDrive.debugPrint("doCollisionDamage random #" + i);
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("doCollisionDamage random #" + i);
+				}
 				current = collisionPoints.get(worldObj.rand.nextInt(collisionPoints.size()));
 			} else {
-				WarpDrive.debugPrint("doCollisionDamage get " + i);
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("doCollisionDamage get " + i);
+				}
 				current = collisionPoints.get(i);
 			}
 
@@ -811,7 +850,7 @@ public class EntityJump extends Entity {
 			float strength = Math.max(4.0F, collisionStrength / nbExplosions - 2.0F + 2.0F * worldObj.rand.nextFloat());
 
 			(atTarget ? targetWorld : worldObj).newExplosion((Entity) null, current.x, current.y, current.z, strength, atTarget, atTarget);
-			WarpDrive.debugPrint("doCollisionDamage explosion at " + current.x + ", " + current.y + ", " + current.z + " with strength " + strength);
+			WarpDrive.logger.info("Ship collision caused explosion at " + current.x + ", " + current.y + ", " + current.z + " with strength " + strength);
 		}
 	}
 
@@ -825,14 +864,14 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.airBlock)) {// whitelist
+					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 						continue;
 					}
 
 					shipVolume++;
 
-					if (WarpDriveConfig.G_DEBUGMODE) {
-						WarpDrive.debugPrint("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
+					if (WarpDriveConfig.LOGGING_JUMP) {
+						WarpDrive.logger.info("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
 					}
 
 					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
@@ -904,7 +943,9 @@ public class EntityJump extends Entity {
 	}
 
 	private boolean moveEntities(boolean restorePositions) {
-		WarpDrive.debugPrint("" + this + " Moving entities");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Moving entities");
+		}
 		LocalProfiler.start("EntityJump.moveEntities");
 
 		if (entitiesOnShip != null) {
@@ -1030,8 +1071,9 @@ public class EntityJump extends Entity {
 			atTarget.add(new Vector3(tx, ty, tz));
 			isCollision = isCollision || pisCollision;
 			reason = preason;
-			WarpDrive.debugPrint("CheckMovementResult " + sx + ", " + sy + ", " + sz + " -> " + tx + ", " + ty + ", " + tz + " " + isCollision + " '" + reason
-					+ "'");
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info("CheckMovementResult " + sx + ", " + sy + ", " + sz + " -> " + tx + ", " + ty + ", " + tz + " " + isCollision + " '" + reason + "'");
+			}
 		}
 	};
 
@@ -1076,8 +1118,8 @@ public class EntityJump extends Entity {
 
 					if ( !worldObj.isAirBlock(x, y, z)
 					  && !worldObj.isAirBlock(newX, newY, newZ)
-					  && !block.isAssociatedBlock(WarpDrive.airBlock)
-					  && !block.isAssociatedBlock(WarpDrive.gasBlock)
+					  && !block.isAssociatedBlock(WarpDrive.blockAir)
+					  && !block.isAssociatedBlock(WarpDrive.blockGas)
 					  && !block.isAssociatedBlock(Blocks.leaves)) {
 						result.add(x, y, z,
 							newX + 0.5D + movementVector[0] * 0.1D,
@@ -1104,7 +1146,9 @@ public class EntityJump extends Entity {
 			@Override
 			public int compare(TileEntity o1, TileEntity o2) {
 				if (o1.xCoord == o2.xCoord && o1.yCoord == o2.yCoord && o1.zCoord == o2.zCoord) {
-					WarpDrive.debugPrint("Removed duplicated TE: " + o1 + ", " + o2);
+					if (WarpDriveConfig.LOGGING_JUMP) {
+						WarpDrive.logger.info("Removed duplicated TE: " + o1 + ", " + o2);
+					}
 					return 0;
 				} else {
 					return 1;
@@ -1117,19 +1161,19 @@ public class EntityJump extends Entity {
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		WarpDrive.logger.info("" + this + " readEntityFromNBT()");
+		WarpDrive.logger.error(this + " readEntityFromNBT()");
 	}
 
 	@Override
 	protected void entityInit() {
-		if (WarpDriveConfig.G_DEBUGMODE) {
-			WarpDrive.debugPrint("" + this + " entityInit()");
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.warn(this + " entityInit()");
 		}
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound var1) {
-		WarpDrive.debugPrint("" + this + " writeEntityToNBT()");
+		WarpDrive.logger.error(this + " writeEntityToNBT()");
 	}
 
 	private void FixASTurbines() {

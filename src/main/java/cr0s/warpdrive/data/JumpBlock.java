@@ -48,7 +48,7 @@ public class JumpBlock {
 			setBlockNoLight(targetWorld, newX, newY, newZ, block, blockMeta, 2);
 
 			// Re-schedule air blocks update
-			if (block == WarpDrive.airBlock) {
+			if (block == WarpDrive.blockAir) {
 				targetWorld.markBlockForUpdate(newX, newY, newZ);
 				targetWorld.scheduleBlockUpdate(newX, newY, newZ, block, 40 + targetWorld.rand.nextInt(20));
 			}
@@ -61,7 +61,9 @@ public class JumpBlock {
 				oldnbt.setInteger("z", newZ);
 
 				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ")) { // Mekanism 6.0.4.44
-					WarpDrive.debugPrint("[JUMP] moveBlockSimple: TileEntity from Mekanism detected");
+					if (WarpDriveConfig.LOGGING_JUMP) {
+						WarpDrive.logger.info(this + " moveBlockSimple: TileEntity from Mekanism detected");
+					}
 					oldnbt.setInteger("mainX", oldnbt.getInteger("mainX") + offsetX);
 					oldnbt.setInteger("mainY", oldnbt.getInteger("mainY") + offsetY);
 					oldnbt.setInteger("mainZ", oldnbt.getInteger("mainZ") + offsetZ);

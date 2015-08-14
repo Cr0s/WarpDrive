@@ -12,8 +12,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
-public class CameraOverlay
-{
+public class CameraOverlay {
     private Minecraft mc;
     private int frameCount = 0;
     private static int ANIMATION_FRAMES = 200;
@@ -36,10 +35,10 @@ public class CameraOverlay
         try {
 	        String text;
 	        if (WarpDrive.instance.overlayType == 0) {
-	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/camOverlay.png"));
+	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/detection/cameraOverlay.png"));
 	            text = "Left click to zoom / Right click to exit";
 	        } else {
-	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/lasercamOverlay.png"));
+	            mc.getTextureManager().bindTexture(new ResourceLocation("warpdrive", "textures/blocks/weapon/laserCameraOverlay.png"));
 	            text = "Left click to zoom / Right click to exit / Space to fire";
 	        }
 	
@@ -58,7 +57,7 @@ public class CameraOverlay
 	        float time = Math.abs(frameCount * 2.0F / ANIMATION_FRAMES - 1.0F);
 	        int color = (colorGradient(time, 0x40, 0xA0) << 16) + (colorGradient(time, 0x80, 0x00) << 8) + colorGradient(time, 0x80, 0xFF);
 	        mc.fontRenderer.drawString(text, (scaledWidth - mc.fontRenderer.getStringWidth(text)) / 2, 30, color, true);
-	        if (WarpDriveConfig.G_DEBUGMODE) {
+	        if (WarpDriveConfig.LOGGING_TARGETTING) {
 	        	mc.fontRenderer.drawString(WarpDrive.instance.debugMessage, (scaledWidth - mc.fontRenderer.getStringWidth(WarpDrive.instance.debugMessage)) / 2, 40, 0xFF008F, true);
 	        }
         } catch (Exception e) {

@@ -304,7 +304,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 			world.setBlock(i + 9, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
 		}
 		// Placing air generator
-		world.setBlock(i + 9, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
+		world.setBlock(i + 9, j + 5, k + 7, WarpDrive.blockAirGenerator, 0, 0);
 		world.setBlock(i + 9, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 9, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -346,7 +346,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 			world.setBlock(i + 10, j + 6, k + 7, Block.getBlockFromItem(WarpDriveConfig.IC2_solarPanel.getItem()), IC2_solarType, 0);
 		}
 		// Placing air generator
-		world.setBlock(i + 10, j + 5, k + 7, WarpDrive.airgenBlock, 0, 0);
+		world.setBlock(i + 10, j + 5, k + 7, WarpDrive.blockAirGenerator, 0, 0);
 		world.setBlock(i + 10, j + 6, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 6, k + 11, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 10, j + 7, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -379,7 +379,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 		// Place warp-controller
 		if (rand.nextBoolean()) {
-			world.setBlock(i + 11, j + 3, k + 7, WarpDrive.protocolBlock);
+			world.setBlock(i + 11, j + 3, k + 7, WarpDrive.blockShipController);
 		}
 
 		world.setBlock(i + 11, j + 3, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));
@@ -435,7 +435,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 		// Place warp-core
 		if (rand.nextBoolean()) {
-			world.setBlock(i + 12, j + 3, k + 7, WarpDrive.warpCore);
+			world.setBlock(i + 12, j + 3, k + 7, WarpDrive.blockShipCore);
 		}
 
 		world.setBlock(i + 12, j + 3, k + 8, WorldGenStructure.getGlassBlock(corrupted, rand));
