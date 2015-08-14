@@ -204,14 +204,14 @@ public class WarpDrive implements LoadingCallback {
 		logger = event.getModLog();
 		
 		// Not needed as we register this at right click on the monitor.
-		/* if (FMLCommonHandler.instance().getSide().isClient()) {
-		 * 	Minecraft mc = Minecraft.getMinecraft();
-		 * 
-		 * 	normalFOV = mc.gameSettings.fovSetting;
-		 * 	normalSensitivity = mc.gameSettings.mouseSensitivity;
-		 * 	logger.info("FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
-		 * }
-		 */
+		if (FMLCommonHandler.instance().getSide().isClient()) {
+			Minecraft mc = Minecraft.getMinecraft();
+		
+			normalFOV = mc.gameSettings.fovSetting;
+			normalSensitivity = mc.gameSettings.mouseSensitivity;
+			logger.info("FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
+		}
+		
 	}
 
 	@EventHandler
