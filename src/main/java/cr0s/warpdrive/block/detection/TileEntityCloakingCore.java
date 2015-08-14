@@ -83,7 +83,9 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		
 		updateTicks--;
 		if (updateTicks <= 0) {
-			WarpDrive.logger.info("" + this + " Updating cloaking state...");
+			if (WarpDriveConfig.LOGGING_CLOAKING) {
+				WarpDrive.logger.info(this + " Updating cloaking state...");
+			}
 			updateTicks = ((tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			isValid = validateAssembly();
@@ -91,7 +93,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			if (!isEnabled) {// disabled
 				if (isCloaking) {// disabled, cloaking => stop cloaking
 					if (WarpDriveConfig.LOGGING_CLOAKING) {
-						WarpDrive.logger.info("" + this + " Disabled, cloak field going down...");
+						WarpDrive.logger.info(this + " Disabled, cloak field going down...");
 					}
 					disableCloakingField();
 				} else {// disabled, no cloaking
@@ -125,7 +127,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 				} else {// enabled & cloaked
 					if (!isValid) {// enabled, cloaking but invalid
 						if (WarpDriveConfig.LOGGING_CLOAKING) {
-							WarpDrive.logger.info("" + this + " Coil(s) lost, cloak field is collapsing...");
+							WarpDrive.logger.info(this + " Coil(s) lost, cloak field is collapsing...");
 						}
 						consumeAllEnergy();
 						disableCloakingField();				
@@ -144,7 +146,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 							setCoilsState(true);
 						} else {// loosing power
 							if (WarpDriveConfig.LOGGING_CLOAKING) {
-								WarpDrive.logger.info("" + this + " Low power, cloak field is collapsing...");
+								WarpDrive.logger.info(this + " Low power, cloak field is collapsing...");
 							}
 							disableCloakingField();
 						}
@@ -275,7 +277,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			energyToConsume = volume * WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER2;
 		}
 		
-		//System.out.println("" + this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
+		// WarpDrive.logger.info(this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
 		return consumeEnergy(energyToConsume, false);
 	}
 	

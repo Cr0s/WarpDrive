@@ -122,7 +122,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
         } else {
         	this.direction = dir;
         }
-        // WarpDrive.print("" + this + " Direction set to " + this.direction);
+        if (WarpDriveConfig.LOGGING_JUMP) {
+        	WarpDrive.logger.info(this + " Direction set to " + this.direction);
+        }
     }
 
     private void doJump() {

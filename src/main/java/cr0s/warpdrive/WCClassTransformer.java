@@ -189,7 +189,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 		ClassWriter writer = new ClassWriter(1);
 		node.accept(writer);
 		bytes = writer.toByteArray();
-		System.out.println("[WDCore] WarpDrive successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
+		System.out.println("Successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
 		return bytes;
 	}
 }

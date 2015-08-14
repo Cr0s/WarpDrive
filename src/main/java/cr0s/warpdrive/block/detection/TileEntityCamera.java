@@ -46,7 +46,9 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 			registryUpdateTicks--;
 			if (registryUpdateTicks <= 0) {
 				registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
-				// WarpDrive.debugPrint("" + this + " Updating registry (" + frequency + ")");
+				if (WarpDriveConfig.LOGGING_FREQUENCY) {
+					WarpDrive.logger.info(this + " Updating registry (" + frequency + ")");
+				}
 				WarpDrive.instance.cameras.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), frequency, 0);
 			}
 		}
@@ -70,14 +72,18 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 	
 	@Override
 	public void invalidate() {
-		// WarpDrive.debugPrint("" + this + " invalidated");
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info(this + " invalidated");
+		}
         WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
 		super.invalidate();
 	}
 	
     @Override
     public void onChunkUnload() {
-		// WarpDrive.debugPrint("" + this + " onChunkUnload");
+    	if (WarpDriveConfig.LOGGING_FREQUENCY) {
+    		WarpDrive.logger.info(this + " onChunkUnload");
+    	}
         WarpDrive.instance.cameras.removeFromRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord));
         super.onChunkUnload();
     }
@@ -86,14 +92,18 @@ public class TileEntityCamera extends TileEntityAbstractInterfaced {
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
-		// WarpDrive.debugPrint("" + this + " readFromNBT");
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info(this + " readFromNBT");
+		}
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
-		// WarpDrive.debugPrint("" + this + " writeToNBT");
+		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			WarpDrive.logger.info(this + " writeToNBT");
+		}
 	}
 
 	// OpenComputer callback methods

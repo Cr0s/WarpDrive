@@ -206,7 +206,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 	}
 
 	private void stop() {
-		// WarpDrive.debugPrint("" + this + " Stop requested");
+		if (WarpDriveConfig.LOGGING_COLLECTION) {
+			WarpDrive.logger.info(this + " Stop requested");
+		}
 		currentState = STATE_IDLE;
 		updateMetadata(BlockMiningLaser.ICON_IDLE);
 	}
@@ -232,7 +234,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		if (block.getExplosionResistance(null) <= Blocks.obsidian.getExplosionResistance(null)) {
 			return true;
 		}
-		// WarpDrive.debugPrint("" + this + " Rejecting " + blockID + " at (" + x + ", " + y + ", " + z + ")");
+		if (WarpDriveConfig.LOGGING_COLLECTION) {
+			WarpDrive.logger.info(this + " Rejecting " + block + " at (" + x + ", " + y + ", " + z + ")");
+		}
 		return false;
 	}
 
@@ -472,7 +476,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			}
 		}
 
-		// System.out.println("" + this + " Found " + valuablesInLayer.size() + " valuables");
+		if (WarpDriveConfig.LOGGING_COLLECTION) {
+			WarpDrive.logger.info(this + " Found " + valuablesInLayer.size() + " valuables");
+		}
 	}
 
 	private int getEnergyLevel() {

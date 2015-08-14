@@ -49,7 +49,9 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
 					results = WarpDrive.shipCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
-					// WarpDrive.debugPrint("" + this + " Scan found " + results.size() + " results in " + scanRadius + " radius...");
+					if (WarpDriveConfig.LOGGING_RADAR) {
+						WarpDrive.logger.info(this + " Scan found " + results.size() + " results in " + scanRadius + " radius...");
+					}
 					worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 1, 1 + 2);
 					cooldownTime = 0;
 				}

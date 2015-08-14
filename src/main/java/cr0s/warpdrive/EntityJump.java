@@ -302,7 +302,7 @@ public class EntityJump extends Entity {
 		if (entitiesOnShip == null) {
 			reactor.messageToAllPlayersOnShip(msg);
 		} else {
-			WarpDrive.logger.info("" + this + " messageToAllPlayersOnShip: " + msg);
+			WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
 			for (MovingEntity me : entitiesOnShip) {
 				if (me.entity instanceof EntityPlayer) {
 					WarpDrive.addChatMessage((EntityPlayer) me.entity, "["
@@ -1161,19 +1161,19 @@ public class EntityJump extends Entity {
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		WarpDrive.logger.error("" + this + " readEntityFromNBT()");
+		WarpDrive.logger.error(this + " readEntityFromNBT()");
 	}
 
 	@Override
 	protected void entityInit() {
 		if (WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.warn("" + this + " entityInit()");
+			WarpDrive.logger.warn(this + " entityInit()");
 		}
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound var1) {
-		WarpDrive.logger.error("" + this + " writeEntityToNBT()");
+		WarpDrive.logger.error(this + " writeEntityToNBT()");
 	}
 
 	private void FixASTurbines() {

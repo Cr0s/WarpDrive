@@ -201,7 +201,9 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	
 	// Computer abstraction methods
 	protected void sendEvent(String eventName, Object[] arguments) {
-		// WarpDrive.debugPrint("" + this + " Sending event '" + eventName + "'");
+		if (WarpDriveConfig.LOGGING_LUA) {
+			WarpDrive.logger.info(this + " Sending event '" + eventName + "'");
+		}
 		if (WarpDriveConfig.isComputerCraftLoaded) {
 			Set<Integer> keys = connectedComputers.keySet();
 			for(Integer key:keys) {
