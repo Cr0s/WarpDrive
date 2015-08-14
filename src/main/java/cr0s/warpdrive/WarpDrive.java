@@ -748,14 +748,14 @@ public class WarpDrive implements LoadingCallback {
 				't', WarpDriveConfig.getModItem("IC2", "blockMachine2", 0), // Teleporter
 				'm', itemHAMachine,
 				'u', mfsu);
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOCLoaded) {
 			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With OC Adapter
 					'a', advancedAlloy,
 					'm', itemHAMachine,
 					'c', "circuitAdvanced",
 					'h', crystalmemory,
 					'p', WarpDriveConfig.getModItem("OpenComputers", "adapter", -1)}));
-		} else if (Loader.isModLoaded("ComputerCraft")) {
+		} else if (WarpDriveConfig.isComputerCraftLoaded) {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With CC Modem
 				'a', advancedAlloy,
 				'm', itemHAMachine,

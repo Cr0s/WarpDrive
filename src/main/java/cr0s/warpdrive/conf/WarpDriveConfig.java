@@ -34,6 +34,7 @@ public class WarpDriveConfig {
 	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isIndustrialCraft2loaded = false;
 	public static boolean isComputerCraftLoaded = false;
+	public static boolean isOCLoaded = false;
 	public static boolean isNetherOresLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
@@ -551,6 +552,7 @@ public class WarpDriveConfig {
 
 		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
 		isAE2Loaded = Loader.isModLoaded("appliedenergistics2");
+		isOCLoaded = Loader.isModLoaded("OpenComputers");
 		//
 		minerOres.add(WarpDrive.blockIridium);
 		minerOres.add(Blocks.coal_ore);
