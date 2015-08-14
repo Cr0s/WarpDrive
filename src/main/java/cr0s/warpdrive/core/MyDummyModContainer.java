@@ -1,4 +1,4 @@
-package cr0s.warpdrive;
+package cr0s.warpdrive.core;
 
 import java.util.Arrays;
 
@@ -13,13 +13,14 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 
-public class WCDummyContainer extends DummyModContainer {
-	public WCDummyContainer() {
+public class MyDummyModContainer extends DummyModContainer {
+	public MyDummyModContainer() {
 		super(new ModMetadata());
 		ModMetadata meta = getMetadata();
 		meta.modId = "WarpDriveCore";
 		meta.name = "WarpDriveCore";
-		meta.version = "1.0.0.4";
+		meta.parent = "WarpDrive";
+		meta.version = "@version@";
 		meta.credits = "Cr0s";
 		meta.authorList = Arrays.asList("cr0s");
 		meta.description = "";

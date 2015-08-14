@@ -1,4 +1,4 @@
-package cr0s.warpdrive;
+package cr0s.warpdrive.core;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,12 +13,12 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTransformer {
+public class ClassTransformer implements net.minecraft.launchwrapper.IClassTransformer {
 	private HashMap<String, String> nodemap = new HashMap<String, String>();
 
 	private final String GRAVITY_MANAGER_CLASS = "cr0s/WarpDrive/GravityManager";
 
-	public WCClassTransformer() {
+	public ClassTransformer() {
 		nodemap.put("worldClass", "abw");
 		nodemap.put("playerMP", "jv");
 		nodemap.put("netLoginHandler", "jy");
@@ -81,11 +81,12 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 			System.out.println("========= NODEMAP IS NULL!!! ========");
 			return bytes;
 		}
-		System.out.println("Transforming " + name);
 
 		if (name.replace('.', '/').equals(nodemap.get("entityLivingBaseClass"))) {
+			System.out.println("Transforming " + name);
 			bytes = transformEntityLivingBase(bytes);
 		} else if (name.replace('.', '/').equals(nodemap.get("entityItemClass"))) {
+			System.out.println("Transforming " + name);
 			bytes = transformEntityItem(bytes);
 		}
 
@@ -143,7 +144,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 		ClassWriter writer = new ClassWriter(1);
 		node.accept(writer);
 		bytes = writer.toByteArray();
-		System.out.println("[WDCore] WarpDrive successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
+		System.out.println("Successfully injected EntityItem bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
 		return bytes;
 	}
 
@@ -189,7 +190,7 @@ public class WCClassTransformer implements net.minecraft.launchwrapper.IClassTra
 		ClassWriter writer = new ClassWriter(1);
 		node.accept(writer);
 		bytes = writer.toByteArray();
-		System.out.println("Successfully injected bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
+		System.out.println("Successfully injected EntityLivingBase bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
 		return bytes;
 	}
 }
