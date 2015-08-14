@@ -48,7 +48,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		}
 		int x = (chunkX * 16) + (5 - random.nextInt(10));
 		int z = (chunkZ * 16) + (5 - random.nextInt(10));
-		if (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS) {
+		if (WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS > 0 && (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)) {
 			return;
 		}
 		int y = Y_LIMIT_SOFT_MIN + random.nextInt(Y_LIMIT_SOFT_MAX - Y_LIMIT_SOFT_MIN);

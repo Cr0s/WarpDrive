@@ -1,9 +1,1 @@
-if not(fs.exists("san")) then
-  shell.run("pastebin","get wf2EBfvT san")
-end
-if not(fs.exists("mcwarp")) then
-  shell.run("san"," install mcwarp")
-else
-  shell.run("san"," update mcwarp")
-end
-os.reboot()
+shell.run("pastebin","run qe4nQP8F")
