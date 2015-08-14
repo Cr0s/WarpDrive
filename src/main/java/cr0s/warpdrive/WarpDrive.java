@@ -85,8 +85,8 @@ import cr0s.warpdrive.block.movement.TileEntityTransporter;
 import cr0s.warpdrive.block.passive.BlockAir;
 import cr0s.warpdrive.block.passive.BlockDecorative;
 import cr0s.warpdrive.block.passive.BlockGas;
+import cr0s.warpdrive.block.passive.BlockHiAdvMachine;
 import cr0s.warpdrive.block.passive.BlockIridium;
-import cr0s.warpdrive.block.BlockHiAdvMachine;
 import cr0s.warpdrive.block.passive.BlockTransportBeacon;
 import cr0s.warpdrive.block.passive.ItemBlockDecorative;
 import cr0s.warpdrive.block.weapon.BlockLaserCamera;
@@ -147,7 +147,7 @@ public class WarpDrive implements LoadingCallback {
 	public static Block blockAir;
 	public static Block blockGas;
 	public static Block blockIridium;
-	public static Block hiAdvMachineBlock;
+	public static Block blockHiAdvMachine;
 	public static Block blockTransportBeacon;
 	public static Block blockChunkLoader;
 	public static BlockDecorative blockDecorative;
@@ -315,9 +315,9 @@ public class WarpDrive implements LoadingCallback {
 
 		// HIGHLY ADVANCED MACHINE BLOCK
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-		hiAdvMachineBlock = new BlockHiAdvMachine();
+			blockHiAdvMachine = new BlockHiAdvMachine();
 
-		GameRegistry.registerBlock(hiAdvMachineBlock, "blockHAMachine");
+		GameRegistry.registerBlock(blockHiAdvMachine, "blockHAMachine");
 		}
 
 		// SHIP SCANNER
@@ -740,90 +740,90 @@ public class WarpDrive implements LoadingCallback {
 		ItemStack mfsu = WarpDriveConfig.getModItem("IC2", "blockElectric", 2).copy();
 		ItemStack energiumDust = WarpDriveConfig.getModItem("IC2", "itemDust2", 2).copy();
 		ItemStack crystalmemory = WarpDriveConfig.getModItem("IC2", "itemcrystalmemory", -1).copy();
-		ItemStack itemHAMachine = new ItemStack(hiAdvMachineBlock).copy();
+		ItemStack itemHAMachine = new ItemStack(blockHiAdvMachine).copy();
 		
-		GameRegistry.addRecipe(new ItemStack(warpCore),"uau", "tmt", "uau",
+		GameRegistry.addRecipe(new ItemStack(blockShipCore),"uau", "tmt", "uau",
 				'a', advancedAlloy,
 				't', WarpDriveConfig.getModItem("IC2", "blockMachine2", 0), // Teleporter
 				'm', itemHAMachine,
 				'u', mfsu);
 		if (Loader.isModLoaded("OpenComputers")) {
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(protocolBlock), false, new Object[] { "aha", "cmc", "apa", // With OC Adapter
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With OC Adapter
 					'a', advancedAlloy,
 					'm', itemHAMachine,
 					'c', "circuitAdvanced",
 					'h', crystalmemory,
 					'p', WarpDriveConfig.getModItem("OpenComputers", "adapter", -1)}));
 		} else if (Loader.isModLoaded("ComputerCraft")) {
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(protocolBlock), false, new Object[] { "aha", "cmc", "apa", // With CC Modem
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With CC Modem
 				'a', advancedAlloy,
 				'm', itemHAMachine,
 				'c', "circuitAdvanced",
 				'h', crystalmemory,
 				'p', WarpDriveConfig.getModItem("ComputerCraft", "CC-Cable", 1)}));
 		} else {
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(protocolBlock), false, new Object[] { "aha", "cmc", "aca",
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "aca",
 				'a', advancedAlloy,
 				'm', itemHAMachine,
 				'c', "circuitAdvanced",
 				'h', crystalmemory}));
 		}
 		
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(radarBlock), false, new Object[] { "afa", "cmc", "aca",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockRadar), false, new Object[] { "afa", "cmc", "aca",
 				'a', advancedAlloy,
 				'm', itemHAMachine,
 				'c', "circuitAdvanced",
 				'f', WarpDriveConfig.getModItem("IC2", "itemFreq", -1)}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(isolationBlock), false, new Object[] { "sls", "lml", "sls",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockWarpIsolation), false, new Object[] { "sls", "lml", "sls",
 				's', "plateDenseSteel",
 				'l', "plateDenseLead",
 				'm', itemHAMachine}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(airgenBlock), false, new Object[] { "lel", "vmv", "lcl",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockAirGenerator), false, new Object[] { "lel", "vmv", "lcl",
 				'l', Blocks.leaves, 
 				'm', WarpDriveConfig.getModItem("IC2", "blockMachine", 0),
 				'c', "circuitBasic",
 				'e', WarpDriveConfig.getModItem("IC2", "blockMachine", 5), // Compressor
 				'v', WarpDriveConfig.getModItem("IC2", "reactorVent", -1)}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserBlock), false, new Object[] { "aca", "cmc", "ala",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaser), false, new Object[] { "aca", "cmc", "ala",
 				'm', advancedMachine,
 				'a', advancedAlloy,
 				'c', "circuitAdvanced",
 				'l', WarpDriveConfig.getModItem("IC2", "itemToolMiningLaser", -1)}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(miningLaserBlock), false, new Object[] { "pcp", "pap", "plp",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMiningLaser), false, new Object[] { "pcp", "pap", "plp",
 				'c', "circuitAdvanced",
 				'p', advancedAlloy,
 				'a', WarpDriveConfig.getModItem("IC2", "blockMachine2", 11), // Advanced Miner
-				'l', laserBlock}));
+				'l', blockLaser}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(boosterBlock), false, new Object[] { "efe", "aca", "ama",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserMedium), false, new Object[] { "efe", "aca", "ama",
 				'c', "circuitAdvanced",
 				'a', advancedAlloy,
 				'f', fiberGlassCable,
 				'e', energiumDust,
 				'm', mfe}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(liftBlock), false, new Object[] { "aca", "ama", "aea",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLift), false, new Object[] { "aca", "ama", "aea",
 				'c', "circuitAdvanced",
 				'a', advancedAlloy,
 				'm', WarpDriveConfig.getModItem("IC2", "blockMachine", 9), // Magnetizer
 				'e', energiumDust}));
 
-		GameRegistry.addRecipe(new ItemStack(iridiumBlock), "iii", "iii", "iii",
+		GameRegistry.addRecipe(new ItemStack(blockIridium), "iii", "iii", "iii",
 				'i', iridiumAlloy);
 
-		GameRegistry.addShapelessRecipe(new ItemStack(iridiumAlloy.getItem(), 9), new ItemStack(iridiumBlock));
+		GameRegistry.addShapelessRecipe(new ItemStack(iridiumAlloy.getItem(), 9), new ItemStack(blockIridium));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserCamBlock), false, new Object[] { "ala", "sss", "aca",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserCamera), false, new Object[] { "ala", "sss", "aca",
 				'a', advancedAlloy,
 				's', "circuitAdvanced",
-				'l', laserBlock,
-				'c', cameraBlock}));
+				'l', blockLaser,
+				'c', blockCamera}));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cameraBlock), false, new Object[] { "aed", "cma", "aga",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCamera), false, new Object[] { "aed", "cma", "aga",
 				'a', advancedAlloy,
 				'e', WarpDriveConfig.getModItem("IC2", "itemRecipePart", 1), // Electric Motor
 				'd', "gemDiamond",
@@ -832,26 +832,26 @@ public class WarpDrive implements LoadingCallback {
 				'g', WarpDriveConfig.getModItem("IC2", "itemCable", 2)}));
 
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(monitorBlock), false, new Object[] { "ala", "aca", "aga",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMonitor), false, new Object[] { "ala", "aca", "aga",
 				'a', advancedAlloy,
 				'l', Blocks.redstone_lamp,
 				'c', "circuitAdvanced",
 				'g', "paneGlassColorless" }));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(scannerBlock), false, new Object[] { "ici", "isi", "mcm",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipScanner), false, new Object[] { "ici", "isi", "mcm",
 				'm', mfsu,
 				'i', iridiumAlloy,
 				'c', "circuitAdvanced",
 				's', WarpDriveConfig.getModItem("IC2", "blockMachine2", 7) })); // Scanner
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(laserTreeFarmBlock), false, new Object[] { "awa", "cmc", "asa",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserTreeFarm), false, new Object[] { "awa", "cmc", "asa",
 				'a', advancedAlloy,
 				'c', "circuitAdvanced",
 				'w', "logWood",
-				'm', miningLaserBlock,
+				'm', blockMiningLaser,
 				's', WarpDriveConfig.getModItem("IC2", "itemToolChainsaw", -1) }));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(transporterBlock), false, new Object[] { "aea", "ctc", "ama",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTransporter), false, new Object[] { "aea", "ctc", "ama",
 				'a', advancedAlloy,
 				'e', Items.ender_pearl,
 				'c', "circuitAdvanced",
@@ -859,28 +859,28 @@ public class WarpDrive implements LoadingCallback {
 				't', WarpDriveConfig.getModItem("IC2", "blockMachine2", 0) })); // Teleporter
 
 		//if (WarpDriveConfig.isIndustrialCraft2loaded) { // It is already loaded, if this set of recipes initialized.
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorLaserFocusItem), false, new Object[] { "a a", " d ", "a a",
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(itemIC2reactorLaserFocus), false, new Object[] { "a a", " d ", "a a",
 					'a', advancedAlloy,
 					'd', "gemDiamond" }));
 
-			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(reactorMonitorBlock), false, new Object[] { "pdp", "dmd", "pdp",
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockIC2reactorLaserMonitor), false, new Object[] { "pdp", "dmd", "pdp",
 					'p', advancedAlloy,
 					'd', "gemDiamond",
 					'm', mfe }));
 		//}
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakBlock), false, new Object[] { "ici", "cmc", "igi",
-				'i', iridiumBlock,
-				'c', cloakCoilBlock,
-				'm', hiAdvMachineBlock,
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCore), false, new Object[] { "ici", "cmc", "igi",
+				'i', blockIridium,
+				'c', blockCloakingCoil,
+				'm', blockHiAdvMachine,
 				'g', "circuitAdvanced" }));
 
-		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(cloakCoilBlock), false, new Object[] { "iai", "ccc", "iai",
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCoil), false, new Object[] { "iai", "ccc", "iai",
 				'i', iridiumAlloy,
 				'c', WarpDriveConfig.getModItem("IC2", "itemRecipePart", 0), // Coil
 				'a', advancedAlloy })); 
 
-		GameRegistry.addRecipe(new ItemStack(hiAdvMachineBlock), "iii", "imi", "iii",
+		GameRegistry.addRecipe(new ItemStack(blockHiAdvMachine), "iii", "imi", "iii",
 				'i', iridiumAlloy,
 				'm', advancedMachine);
 	}

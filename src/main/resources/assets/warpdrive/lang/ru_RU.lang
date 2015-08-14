@@ -1,52 +1,58 @@
 item.warpdrive.crafting.Malformed.name=Bad Item
-item.warpdrive.crafting.EmptyCore.name=Пустое ядро
+item.warpdrive.crafting.EmptyCore.name=Основа для ядра
 item.warpdrive.crafting.TeleCore.name=Ядро телепортации
 item.warpdrive.crafting.WarpCore.name=Ядро перемещения
-item.warpdrive.crafting.LaserCore.name=Ядро лазера
+item.warpdrive.crafting.LaserCore.name=Лазерное ядро
 item.warpdrive.crafting.ReactorCore.name=Ядро реактора
-item.warpdrive.crafting.InterfaceComputer.name=Компьютерный интерфейс
+item.warpdrive.crafting.InterfaceComputer.name=Сигнальный интерфейс
 item.warpdrive.crafting.InterfacePower.name=Интерфейс питания
 item.warpdrive.crafting.PowerCore.name=Энергетическое ядро
-item.warpdrive.crafting.AirCanisterEmpty.name=Пустой баллон воздуха
+item.warpdrive.crafting.AirCanisterEmpty.name=Пустой воздушный баллон
 
-item.warpdrive.upgrade.Power.name=Power Upgrade
-item.warpdrive.upgrade.Speed.name=Speed Upgrade
-item.warpdrive.upgrade.Range.name=Range Upgrade
-item.warpdrive.upgrade.Energy.name=Energy Upgrade
-
-item.warpdrive.items.ReactorLaserFocus.name=Reactor Laser Focus
-item.warpdrive.items.AirCanisterFull.name=Баллон воздуха
+item.warpdrive.energy.IC2reactorLaserFocus.name=IC2 Reactor Laser Focus
+item.warpdrive.armor.AirCanisterFull.name=Баллон воздуха
 item.warpdrive.armor.Helmet.name=Космический шлем
 
-tile.warpdrive.blocks.Air.name=Блок воздуха
-tile.warpdrive.blocks.Gas.name=Блок газа
-tile.warpdrive.blocks.WarpIsolation.name=Warp-field Isolation Block
-tile.warpdrive.blocks.IridiumBlock.name=Блок иридия
-tile.warpdrive.blocks.HiAdvMachineBlock.name=Высокотехнологичный корпус механизма
-tile.warpdrive.blocks.TransportBeacon.name=Transport Beacon
+item.warpdrive.upgrade.Power.name=Улучшение питания
+item.warpdrive.upgrade.Speed.name=Улучшение скорости
+item.warpdrive.upgrade.Range.name=Улучшение радиуса
+item.warpdrive.upgrade.Energy.name=Улучшение энергии
 
-tile.warpdrive.decorative.Plain.name=Plain Block
-tile.warpdrive.decorative.Energized.name=Energized Block
-tile.warpdrive.decorative.Network.name=Network Block
 
-tile.warpdrive.power.Reactor.name=Enantiomorphic Reactor
-tile.warpdrive.power.Laser.name=Aurbis Reactor Stabilisation Laser
-tile.warpdrive.power.Store.name=Anuic Energy Store
-tile.warpdrive.machines.WarpCore.name=Варп-ядро
-tile.warpdrive.machines.WarpProtocol.name=Варп-контроллер
-tile.warpdrive.machines.WarpRadar.name=Варп-радар
-tile.warpdrive.machines.Laser.name=Лазер
-tile.warpdrive.machines.LaserCamera.name=Лазер-камера
-tile.warpdrive.machines.LaserTreeFarm.name=Лазерная ферма дерева
-tile.warpdrive.machines.CloakingCoil.name=Cloaking Coil
-tile.warpdrive.machines.Camera.name=Камера видеонаблюдения
-tile.warpdrive.machines.CloakingDeviceCore.name=Cloaking Device Core
-tile.warpdrive.machines.ParticleBooster.name=Лазерный ускоритель частиц
-tile.warpdrive.machines.Monitor.name=Монитор видеонаблюдения
-tile.warpdrive.machines.MiningLaser.name=Лазерная буровая установка
-tile.warpdrive.machines.LaserLift.name=Лазерный лифт
-tile.warpdrive.machines.Transporter.name=Transporter
-tile.warpdrive.machines.Scanner.name=Сканер корабля
+tile.warpdrive.passive.Air.name=Воздух
+tile.warpdrive.passive.Energized.name=Energized Block
+tile.warpdrive.passive.Gas.name=Газ
+tile.warpdrive.passive.IridiumBlock.name=Блок иридия
+tile.warpdrive.passive.HiAdvMachineBlock.name=Высокотехнологичный корпус механизма
+tile.warpdrive.passive.Network.name=Сетевой блок
+tile.warpdrive.passive.Plain.name=Пустой блок
+tile.warpdrive.passive.TransportBeacon.name=Transport Beacon
+
 tile.warpdrive.machines.AirGenerator.name=Генератор воздуха
 tile.warpdrive.machines.ChunkLoader.name=Chunk Loader
-tile.warpdrive.machines.LaserReactorMonitor.name=Laser Reactor Monitor
+tile.warpdrive.machines.Laser.name=Лазер
+tile.warpdrive.machines.LaserMedium.name=Лазерный ускоритель частиц
+
+tile.warpdrive.building.ShipScanner.name=Сканер корабля
+
+tile.warpdrive.collection.LaserTreeFarm.name=Лазерная ферма деревьев
+tile.warpdrive.collection.MiningLaser.name=Лазерная буровая установка
+
+tile.warpdrive.detection.Camera.name=Камера видеонаблюдения
+tile.warpdrive.detection.CloakingCoil.name=Катушка маскировщика
+tile.warpdrive.detection.CloakingCore.name=Маскировщик
+tile.warpdrive.detection.Monitor.name=Монитор видеонаблюдения
+tile.warpdrive.detection.Radar.name=Варп-радар
+tile.warpdrive.detection.WarpIsolation.name=Блок изоляции варп-поля
+
+tile.warpdrive.energy.EnanReactorCore.name=Enantiomorphic Reactor
+tile.warpdrive.energy.EnanReactorLaser.name=Aurbis Reactor Stabilisation Laser
+tile.warpdrive.energy.EnergyBank.name=Anuic Energy Bank
+tile.warpdrive.energy.IC2ReactorLaserMonitor.name=IC2 Reactor Laser Monitor
+
+tile.warpdrive.movement.Lift.name=Лазерный лифт
+tile.warpdrive.movement.ShipController.name=Контроллер корабля
+tile.warpdrive.movement.ShipCore.name=Ядро корабля
+tile.warpdrive.movement.Transporter.name=Transporter
+
+tile.warpdrive.weapon.LaserCamera.name=Боевая камера видеонаблюдения

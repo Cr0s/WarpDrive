@@ -1,4 +1,4 @@
-package cr0s.warpdrive.block;
+package cr0s.warpdrive.block.passive;
 
 import java.util.Random;
 
@@ -15,14 +15,14 @@ public class BlockHiAdvMachine extends Block
 		super(Material.rock);
 		setHardness(3.0F);
 		setStepSound(Block.soundTypeMetal);
-		setCreativeTab(WarpDrive.warpdriveTab);
-		setBlockName("warpdrive.blocks.HiAdvMachineBlock");
+		setCreativeTab(WarpDrive.creativeTabWarpDrive);
+		setBlockName("warpdrive.passive.HiAdvMachineBlock");
 	}
 
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister)
 	{
-		this.blockIcon = par1IconRegister.registerIcon("warpdrive:hiAdvMachineSide");
+		this.blockIcon = par1IconRegister.registerIcon("warpdrive:passive/hiAdvMachineSide");
 	}
 
 	@Override
