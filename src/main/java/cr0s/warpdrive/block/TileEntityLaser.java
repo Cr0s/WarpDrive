@@ -72,8 +72,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		super.updateEntity();
 
 		if (isWithCamera()) {
-			// Update frequency on clients (recovery mechanism, no need to go
-			// too fast)
+			// Update frequency on clients (recovery mechanism, no need to go too fast)
 			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 				packetSendTicks--;
 				if (packetSendTicks <= 0) {

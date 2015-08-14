@@ -42,11 +42,11 @@ public class SpaceEventHandler {
 	}
 
 	@SubscribeEvent
-	public void livingUpdate(LivingUpdateEvent event) {
+	public void onLivingUpdate(LivingUpdateEvent event) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		EntityLivingBase entity = event.entityLiving;
 		int x = MathHelper.floor_double(entity.posX);
 		int y = MathHelper.floor_double(entity.posY);
@@ -79,8 +79,8 @@ public class SpaceEventHandler {
 		}
 
 		// If entity is in vacuum, check and start consuming air cells
-		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID
-				|| entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
+		if ( entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID
+		  || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			Block block1 = entity.worldObj.getBlock(x, y, z);
 			Block block2 = entity.worldObj.getBlock(x, y + 1, z);
 			boolean inVacuum = (!block1.isAssociatedBlock(WarpDrive.blockAir) && !block2.isAssociatedBlock(WarpDrive.blockAir));
