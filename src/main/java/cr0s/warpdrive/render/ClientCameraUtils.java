@@ -2,12 +2,14 @@ package cr0s.warpdrive.render;
 
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.GameSettings.Options;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 
 import org.lwjgl.input.Keyboard;
 
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class ClientCameraUtils {
     public static EntityPlayer entityPlayer;
@@ -39,9 +41,17 @@ public class ClientCameraUtils {
         check2_z = z2;
         check2_blockId = block2;
         
-        WarpDrive.debugPrint("Setting viewpoint: " + entityCamera.toString());
+        
+        WarpDrive.normalFOV = mc.gameSettings.fovSetting;
+        WarpDrive.normalSensitivity = mc.gameSettings.mouseSensitivity;
+        
+        if (WarpDriveConfig.LOGGING_WEAPON) {
+        	WarpDrive.logger.info("Setting viewpoint: " + entityCamera.toString());
+        }
         mc.renderViewEntity = entityCamera;
         mc.gameSettings.thirdPersonView = 0;
+        mc.gameSettings.setOptionFloatValue(Options.FOV, WarpDrive.camFOV);
+        mc.gameSettings.setOptionFloatValue(Options.SENSITIVITY, WarpDrive.camSensitivity);
         WarpDrive.instance.isOverlayEnabled = true;
         
         Keyboard.enableRepeatEvents(true);
@@ -52,7 +62,9 @@ public class ClientCameraUtils {
     	if (entityPlayer != null) {
     		mc.renderViewEntity = entityPlayer;
     		entityPlayer = null;
-            WarpDrive.debugPrint("Resetting viewpoint");
+    		if (WarpDriveConfig.LOGGING_WEAPON) {
+    			WarpDrive.logger.info("Resetting viewpoint");
+    		}
     	} else {
     		WarpDrive.logger.error("reseting viewpoint with invalid player entity ?!?");
     	}
@@ -61,8 +73,8 @@ public class ClientCameraUtils {
 
         WarpDrive.instance.isOverlayEnabled = false;
         mc.gameSettings.thirdPersonView = 0;
-        mc.gameSettings.fovSetting = WarpDrive.normalFOV;
-        mc.gameSettings.mouseSensitivity = WarpDrive.normalSensitivity;
+        mc.gameSettings.setOptionFloatValue(Options.FOV, WarpDrive.normalFOV);
+        mc.gameSettings.setOptionFloatValue(Options.SENSITIVITY, WarpDrive.normalSensitivity);
 
         entityPlayer = null;
         dimensionId = -666;

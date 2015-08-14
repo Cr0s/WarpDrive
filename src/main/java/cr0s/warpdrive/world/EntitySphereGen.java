@@ -183,7 +183,7 @@ public final class EntitySphereGen extends Entity {
 			}
 		}
 		if (blocks != null) {
-			WarpDrive.debugPrint("[EntitySphereGen] Saved " + blocks.size() + " blocks (estimated to " + pregenSize + ")");
+			WarpDrive.logger.info("[EntitySphereGen] Saved " + blocks.size() + " blocks (estimated to " + pregenSize + ")");
 		}
 		// LocalProfiler.stop();
 	}
@@ -194,7 +194,7 @@ public final class EntitySphereGen extends Entity {
 		// Replace water with random gas (ship in moon)
 		if (worldObj.getBlock(jb.x, jb.y, jb.z).isAssociatedBlock(Blocks.water)) {
 			if (worldObj.rand.nextInt(50) != 1) {
-				jb.block = WarpDrive.gasBlock;
+				jb.block = WarpDrive.blockGas;
 				jb.blockMeta = gasColor;
 			}
 			blocks.add(jb);

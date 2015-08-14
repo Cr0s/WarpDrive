@@ -67,8 +67,8 @@ public final class EntityStarCore extends Entity
         if (!isLogged)
         {
         	isLogged = true;
-        	WarpDrive.debugPrint(this + ": Capture range: " + MAX_RANGE
-	        		+ " X: " + xmin + " to " + xmax + " Y: " + ymin + " to " + ymax + " Z: " + zmin + " to " + zmax);
+        	WarpDrive.logger.info(this + " Capture range " + MAX_RANGE
+	        		+ " X " + xmin + " to " + xmax + " Y " + ymin + " to " + ymax + " Z " + zmin + " to " + zmax);
         }
         for (Object o : list)
         {

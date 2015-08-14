@@ -11,6 +11,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.network.PacketHandler;
 
 public class CloakedArea {
@@ -22,9 +24,6 @@ public class CloakedArea {
 
 	public boolean isPlayerListedInArea(String username) {
 		for (String playerInArea : playersInArea) {
-			// WarpDrive.debugPrint("" + this + " Checking player: " +
-			// p.username + "(" + p.entityId + ")" + " =? " + player.username +
-			// " (" + p.entityId + ")");
 			if (playerInArea.equals(username)) {
 				return true;
 			}
@@ -81,7 +80,10 @@ public class CloakedArea {
 	}
 
 	// Sending only if field changes: sets up or collapsing
-	public void sendCloakPacketToPlayersEx(boolean decloak) {
+	public void sendCloakPacketToPlayersEx(final boolean decloak) {
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			WarpDrive.logger.info("sendCloakPacketToPlayersEx " + decloak);
+		}
 		final int RADIUS = 250;
 
 		double midX = this.aabb.minX + (Math.abs(this.aabb.maxX - this.aabb.minX) / 2);
@@ -115,8 +117,9 @@ public class CloakedArea {
 	public void updatePlayer(EntityPlayer player) {
 		if (isEntityWithinArea(player)) {
 			if (!isPlayerListedInArea(player.getCommandSenderName())) {
-				// WarpDrive.debugPrint("" + this + " Player " + player.username
-				// + " has entered");
+				if (WarpDriveConfig.LOGGING_CLOAKING) {
+					WarpDrive.logger.info(this + " Player " + player.getCommandSenderName() + " has entered");
+				}
 				addPlayer(player.getCommandSenderName());
 				revealChunksToPlayer(player);
 				revealEntityToPlayer(player);
@@ -124,8 +127,9 @@ public class CloakedArea {
 			}
 		} else {
 			if (isPlayerListedInArea(player.getCommandSenderName())) {
-				// WarpDrive.debugPrint("" + this + " Player " + player.username
-				// + " has left");
+				if (WarpDriveConfig.LOGGING_CLOAKING) {
+					WarpDrive.logger.info(this + " Player " + player.getCommandSenderName() + " has left");
+				}
 				removePlayer(player.getCommandSenderName());
 				MinecraftServer
 						.getServer()
@@ -137,16 +141,17 @@ public class CloakedArea {
 		}
 	}
 
-	public void revealChunksToPlayer(EntityPlayer p) {
-		// WarpDrive.debugPrint("" + this +
-		// " Revealing cloaked blocks to player " + p.username);
+	public void revealChunksToPlayer(EntityPlayer player) {
+		if (WarpDriveConfig.LOGGING_CLOAKING) {
+			 WarpDrive.logger.info(this + " Revealing cloaked blocks to player " + player.getCommandSenderName());
+		}
 		int minY = (int) Math.max(0, aabb.minY);
 		int maxY = (int) Math.min(255, aabb.maxY);
 		for (int x = (int) aabb.minX; x <= (int) aabb.maxX; x++) {
 			for (int z = (int) aabb.minZ; z <= (int) aabb.maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
-					if (!p.worldObj.getBlock(x, y, z).isAssociatedBlock(Blocks.air)) {
-						p.worldObj.markBlockForUpdate(x, y, z);
+					if (!player.worldObj.getBlock(x, y, z).isAssociatedBlock(Blocks.air)) {
+						player.worldObj.markBlockForUpdate(x, y, z);
 					}
 				}
 			}
