@@ -31,11 +31,13 @@ import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLMissingMappingsEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -84,6 +86,7 @@ import cr0s.warpdrive.block.movement.TileEntityTransporter;
 import cr0s.warpdrive.block.passive.BlockAir;
 import cr0s.warpdrive.block.passive.BlockDecorative;
 import cr0s.warpdrive.block.passive.BlockGas;
+import cr0s.warpdrive.block.passive.BlockHiAdvMachine;
 import cr0s.warpdrive.block.passive.BlockIridium;
 import cr0s.warpdrive.block.passive.BlockTransportBeacon;
 import cr0s.warpdrive.block.passive.ItemBlockDecorative;
@@ -145,6 +148,7 @@ public class WarpDrive implements LoadingCallback {
 	public static Block blockAir;
 	public static Block blockGas;
 	public static Block blockIridium;
+	public static Block blockHiAdvMachine;
 	public static Block blockTransportBeacon;
 	public static Block blockChunkLoader;
 	public static BlockDecorative blockDecorative;
@@ -164,7 +168,9 @@ public class WarpDrive implements LoadingCallback {
 	public World hyperSpace;
 
 	// Client settings
+    public static float camFOV = 70.0F;
 	public static float normalFOV = 70.0F;
+    public static float camSensitivity = 0.5F;
 	public static float normalSensitivity = 1.0F;
 
 	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
@@ -197,19 +203,19 @@ public class WarpDrive implements LoadingCallback {
 		
 		logger = event.getModLog();
 		
+		// Not needed as we register this at right click on the monitor.
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 			Minecraft mc = Minecraft.getMinecraft();
-
+		
 			normalFOV = mc.gameSettings.fovSetting;
 			normalSensitivity = mc.gameSettings.mouseSensitivity;
 			logger.info("FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
 		}
+		
 	}
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		// FIXME FMLInterModComms.sendMessage("Waila", "register", "cr0s.warpdrive.client.WailaHandler.callbackRegister");
-		
 		PacketHandler.init();
 	}
 
@@ -307,6 +313,13 @@ public class WarpDrive implements LoadingCallback {
 		blockIridium = new BlockIridium();
 
 		GameRegistry.registerBlock(blockIridium, "blockIridium");
+
+		// HIGHLY ADVANCED MACHINE BLOCK
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			blockHiAdvMachine = new BlockHiAdvMachine();
+
+		GameRegistry.registerBlock(blockHiAdvMachine, "blockHAMachine");
+		}
 
 		// SHIP SCANNER
 		blockShipScanner = new BlockShipScanner(0, Material.rock);
@@ -419,6 +432,9 @@ public class WarpDrive implements LoadingCallback {
 
 		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
 			initIC2Recipes();
+		}
+		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_HARD_IC2_RECIPES) {
+			initHardIC2Recipes();
 		}
 		if (WarpDriveConfig.G_ENABLE_VANILLA_RECIPES) {
 			initVanillaRecipes();
@@ -711,6 +727,165 @@ public class WarpDrive implements LoadingCallback {
 				'a', WarpDriveConfig.getIC2Item("itemPartAlloy"));
 	}
 
+	private static void initHardIC2Recipes() {
+		ItemStack advancedAlloy = WarpDriveConfig.getModItem("IC2", "itemPartAlloy", -1).copy();
+		ItemStack iridiumAlloy = WarpDriveConfig.getModItem("IC2", "itemPartIridium", -1).copy();
+		ItemStack advancedMachine = WarpDriveConfig.getModItem("IC2", "blockMachine", 12).copy();
+		ItemStack miner = WarpDriveConfig.getModItem("IC2", "blockMachine", 7).copy();
+		ItemStack magnetizer = WarpDriveConfig.getModItem("IC2", "blockMachine", 9).copy();
+		ItemStack fiberGlassCable = WarpDriveConfig.getModItem("IC2", "itemCable", 9).copy();
+		ItemStack circuit = WarpDriveConfig.getModItem("IC2", "itemPartCircuit", -1).copy();
+		ItemStack advCircuit = WarpDriveConfig.getModItem("IC2", "itemPartCircuitAdv", -1).copy();
+		ItemStack ironPlate = WarpDriveConfig.getModItem("IC2", "itemPlates", 4).copy();
+		ItemStack mfe = WarpDriveConfig.getModItem("IC2", "blockElectric", 1).copy();
+		ItemStack mfsu = WarpDriveConfig.getModItem("IC2", "blockElectric", 2).copy();
+		ItemStack energiumDust = WarpDriveConfig.getModItem("IC2", "itemDust2", 2).copy();
+		ItemStack crystalmemory = WarpDriveConfig.getModItem("IC2", "itemcrystalmemory", -1).copy();
+		ItemStack itemHAMachine = new ItemStack(blockHiAdvMachine).copy();
+		
+		GameRegistry.addRecipe(new ItemStack(blockShipCore),"uau", "tmt", "uau",
+				'a', advancedAlloy,
+				't', WarpDriveConfig.getModItem("IC2", "blockMachine2", 0), // Teleporter
+				'm', itemHAMachine,
+				'u', mfsu);
+		if (WarpDriveConfig.isOCLoaded) {
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With OC Adapter
+					'a', advancedAlloy,
+					'm', itemHAMachine,
+					'c', "circuitAdvanced",
+					'h', crystalmemory,
+					'p', WarpDriveConfig.getModItem("OpenComputers", "adapter", -1)}));
+		} else if (WarpDriveConfig.isComputerCraftLoaded) {
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "apa", // With CC Modem
+				'a', advancedAlloy,
+				'm', itemHAMachine,
+				'c', "circuitAdvanced",
+				'h', crystalmemory,
+				'p', WarpDriveConfig.getModItem("ComputerCraft", "CC-Cable", 1)}));
+		} else {
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, new Object[] { "aha", "cmc", "aca",
+				'a', advancedAlloy,
+				'm', itemHAMachine,
+				'c', "circuitAdvanced",
+				'h', crystalmemory}));
+		}
+		
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockRadar), false, new Object[] { "afa", "cmc", "aca",
+				'a', advancedAlloy,
+				'm', itemHAMachine,
+				'c', "circuitAdvanced",
+				'f', WarpDriveConfig.getModItem("IC2", "itemFreq", -1)}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockWarpIsolation), false, new Object[] { "sls", "lml", "sls",
+				's', "plateDenseSteel",
+				'l', "plateDenseLead",
+				'm', itemHAMachine}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockAirGenerator), false, new Object[] { "lel", "vmv", "lcl",
+				'l', Blocks.leaves, 
+				'm', WarpDriveConfig.getModItem("IC2", "blockMachine", 0),
+				'c', "circuitBasic",
+				'e', WarpDriveConfig.getModItem("IC2", "blockMachine", 5), // Compressor
+				'v', WarpDriveConfig.getModItem("IC2", "reactorVent", -1)}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaser), false, new Object[] { "aca", "cmc", "ala",
+				'm', advancedMachine,
+				'a', advancedAlloy,
+				'c', "circuitAdvanced",
+				'l', WarpDriveConfig.getModItem("IC2", "itemToolMiningLaser", -1)}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMiningLaser), false, new Object[] { "pcp", "pap", "plp",
+				'c', "circuitAdvanced",
+				'p', advancedAlloy,
+				'a', WarpDriveConfig.getModItem("IC2", "blockMachine2", 11), // Advanced Miner
+				'l', blockLaser}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserMedium), false, new Object[] { "efe", "aca", "ama",
+				'c', "circuitAdvanced",
+				'a', advancedAlloy,
+				'f', fiberGlassCable,
+				'e', energiumDust,
+				'm', mfe}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLift), false, new Object[] { "aca", "ama", "aea",
+				'c', "circuitAdvanced",
+				'a', advancedAlloy,
+				'm', WarpDriveConfig.getModItem("IC2", "blockMachine", 9), // Magnetizer
+				'e', energiumDust}));
+
+		GameRegistry.addRecipe(new ItemStack(blockIridium), "iii", "iii", "iii",
+				'i', iridiumAlloy);
+
+		GameRegistry.addShapelessRecipe(new ItemStack(iridiumAlloy.getItem(), 9), new ItemStack(blockIridium));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserCamera), false, new Object[] { "ala", "sss", "aca",
+				'a', advancedAlloy,
+				's', "circuitAdvanced",
+				'l', blockLaser,
+				'c', blockCamera}));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCamera), false, new Object[] { "aed", "cma", "aga",
+				'a', advancedAlloy,
+				'e', WarpDriveConfig.getModItem("IC2", "itemRecipePart", 1), // Electric Motor
+				'd', "gemDiamond",
+				'c', crystalmemory,
+				'm', advancedMachine,
+				'g', WarpDriveConfig.getModItem("IC2", "itemCable", 2)}));
+
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockMonitor), false, new Object[] { "ala", "aca", "aga",
+				'a', advancedAlloy,
+				'l', Blocks.redstone_lamp,
+				'c', "circuitAdvanced",
+				'g', "paneGlassColorless" }));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipScanner), false, new Object[] { "ici", "isi", "mcm",
+				'm', mfsu,
+				'i', iridiumAlloy,
+				'c', "circuitAdvanced",
+				's', WarpDriveConfig.getModItem("IC2", "blockMachine2", 7) })); // Scanner
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLaserTreeFarm), false, new Object[] { "awa", "cmc", "asa",
+				'a', advancedAlloy,
+				'c', "circuitAdvanced",
+				'w', "logWood",
+				'm', blockMiningLaser,
+				's', WarpDriveConfig.getModItem("IC2", "itemToolChainsaw", -1) }));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTransporter), false, new Object[] { "aea", "ctc", "ama",
+				'a', advancedAlloy,
+				'e', Items.ender_pearl,
+				'c', "circuitAdvanced",
+				'm', advancedMachine,
+				't', WarpDriveConfig.getModItem("IC2", "blockMachine2", 0) })); // Teleporter
+
+		//if (WarpDriveConfig.isIndustrialCraft2loaded) { // It is already loaded, if this set of recipes initialized.
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(itemIC2reactorLaserFocus), false, new Object[] { "a a", " d ", "a a",
+					'a', advancedAlloy,
+					'd', "gemDiamond" }));
+
+			GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockIC2reactorLaserMonitor), false, new Object[] { "pdp", "dmd", "pdp",
+					'p', advancedAlloy,
+					'd', "gemDiamond",
+					'm', mfe }));
+		//}
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCore), false, new Object[] { "ici", "cmc", "igi",
+				'i', blockIridium,
+				'c', blockCloakingCoil,
+				'm', blockHiAdvMachine,
+				'g', "circuitAdvanced" }));
+
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockCloakingCoil), false, new Object[] { "iai", "ccc", "iai",
+				'i', iridiumAlloy,
+				'c', WarpDriveConfig.getModItem("IC2", "itemRecipePart", 0), // Coil
+				'a', advancedAlloy })); 
+
+		GameRegistry.addRecipe(new ItemStack(blockHiAdvMachine), "iii", "imi", "iii",
+				'i', iridiumAlloy,
+				'm', advancedMachine);
+	}
+
 	private static void registerSpaceDimension() {
 		spaceBiome = (new BiomeSpace(24)).setColor(0).setDisableRain().setBiomeName("Space");
 		DimensionManager.registerProviderType(WarpDriveConfig.G_SPACE_PROVIDER_ID, SpaceProvider.class, true);
@@ -793,6 +968,134 @@ public class WarpDrive implements LoadingCallback {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
 			player.addChatMessage(new ChatComponentText(line));
+		}
+	}
+	@Mod.EventHandler
+	public void remap(FMLMissingMappingsEvent event) {
+		for (FMLMissingMappingsEvent.MissingMapping mapping: event.get()) {
+			if (mapping.type == GameRegistry.Type.ITEM) {
+				if (mapping.name.equals("WarpDrive:airBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockAir));
+				} else if (mapping.name.equals("WarpDrive:airCanisterFull")) {
+					mapping.remap(itemAirCanisterFull);
+				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockAirGenerator));
+				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserMedium));
+				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCamera));
+				} else if (mapping.name.equals("WarpDrive:chunkLoader")) {
+					mapping.remap(Item.getItemFromBlock(blockChunkLoader));
+				} else if (mapping.name.equals("WarpDrive:cloakBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCloakingCore));
+				} else if (mapping.name.equals("WarpDrive:cloakCoilBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockCloakingCoil));
+				} else if (mapping.name.equals("WarpDrive:component")) {
+					mapping.remap(itemComponent);
+				} else if (mapping.name.equals("WarpDrive:decorative")) {
+					mapping.remap(Item.getItemFromBlock(blockDecorative));
+				} else if (mapping.name.equals("WarpDrive:gasBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockGas));
+				} else if (mapping.name.equals("WarpDrive:helmet")) {
+					mapping.remap(itemHelmet);
+				} else if (mapping.name.equals("WarpDrive:iridiumBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockIridium));
+				} else if (mapping.name.equals("WarpDrive:isolationBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockWarpIsolation));
+				} else if (mapping.name.equals("WarpDrive:laserBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaser));
+				} else if (mapping.name.equals("WarpDrive:laserCamBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserCamera));
+				} else if (mapping.name.equals("WarpDrive:laserTreeFarmBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLaserTreeFarm));
+				} else if (mapping.name.equals("WarpDrive:liftBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockLift));
+				} else if (mapping.name.equals("WarpDrive:miningLaserBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockMiningLaser));
+				} else if (mapping.name.equals("WarpDrive:monitorBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockMonitor));
+				} else if (mapping.name.equals("WarpDrive:powerLaser")) {
+					mapping.remap(Item.getItemFromBlock(blockEnanReactorLaser));
+				} else if (mapping.name.equals("WarpDrive:powerReactor")) {
+					mapping.remap(Item.getItemFromBlock(blockEnanReactorCore));
+				} else if (mapping.name.equals("WarpDrive:powerStore")) {
+					mapping.remap(Item.getItemFromBlock(blockEnergyBank));
+				} else if (mapping.name.equals("WarpDrive:protocolBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockShipController));
+				} else if (mapping.name.equals("WarpDrive:radarBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockRadar));
+				} else if (mapping.name.equals("WarpDrive:reactorLaserFocus")) {
+					mapping.remap(itemIC2reactorLaserFocus);
+				} else if (mapping.name.equals("WarpDrive:reactorMonitor")) {
+					mapping.remap(Item.getItemFromBlock(blockIC2reactorLaserMonitor));
+				} else if (mapping.name.equals("WarpDrive:scannerBlock")) {
+					mapping.remap(Item.getItemFromBlock(blockShipScanner));
+				} else if (mapping.name.equals("WarpDrive:transportBeacon")) {
+					mapping.remap(Item.getItemFromBlock(blockTransportBeacon));
+				} else if (mapping.name.equals("WarpDrive:transporter")) {
+					mapping.remap(Item.getItemFromBlock(blockTransporter));
+				} else if (mapping.name.equals("WarpDrive:upgrade")) {
+					mapping.remap(itemUpgrade);
+				} else if (mapping.name.equals("WarpDrive:warpCore")) {
+					mapping.remap(Item.getItemFromBlock(blockShipCore));
+				}
+			} else if (mapping.type == GameRegistry.Type.BLOCK) {
+				if (mapping.name.equals("WarpDrive:airBlock")) {
+					mapping.remap(blockAir);
+				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
+					mapping.remap(blockAirGenerator);
+				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
+					mapping.remap(blockLaserMedium);
+				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
+					mapping.remap(blockCamera);
+				} else if (mapping.name.equals("WarpDrive:chunkLoader")) {
+					mapping.remap(blockChunkLoader);
+				} else if (mapping.name.equals("WarpDrive:cloakBlock")) {
+					mapping.remap(blockCloakingCore);
+				} else if (mapping.name.equals("WarpDrive:cloakCoilBlock")) {
+					mapping.remap(blockCloakingCoil);
+				} else if (mapping.name.equals("WarpDrive:decorative")) {
+					mapping.remap(blockDecorative);
+				} else if (mapping.name.equals("WarpDrive:gasBlock")) {
+					mapping.remap(blockGas);
+				} else if (mapping.name.equals("WarpDrive:iridiumBlock")) {
+					mapping.remap(blockIridium);
+				} else if (mapping.name.equals("WarpDrive:isolationBlock")) {
+					mapping.remap(blockWarpIsolation);
+				} else if (mapping.name.equals("WarpDrive:laserBlock")) {
+					mapping.remap(blockLaser);
+				} else if (mapping.name.equals("WarpDrive:laserCamBlock")) {
+					mapping.remap(blockLaserCamera);
+				} else if (mapping.name.equals("WarpDrive:laserTreeFarmBlock")) {
+					mapping.remap(blockLaserTreeFarm);
+				} else if (mapping.name.equals("WarpDrive:liftBlock")) {
+					mapping.remap(blockLift);
+				} else if (mapping.name.equals("WarpDrive:miningLaserBlock")) {
+					mapping.remap(blockMiningLaser);
+				} else if (mapping.name.equals("WarpDrive:monitorBlock")) {
+					mapping.remap(blockMonitor);
+				} else if (mapping.name.equals("WarpDrive:powerLaser")) {
+					mapping.remap(blockEnanReactorLaser);
+				} else if (mapping.name.equals("WarpDrive:powerReactor")) {
+					mapping.remap(blockEnanReactorCore);
+				} else if (mapping.name.equals("WarpDrive:powerStore")) {
+					mapping.remap(blockEnergyBank);
+				} else if (mapping.name.equals("WarpDrive:protocolBlock")) {
+					mapping.remap(blockShipController);
+				} else if (mapping.name.equals("WarpDrive:radarBlock")) {
+					mapping.remap(blockRadar);
+				} else if (mapping.name.equals("WarpDrive:reactorMonitor")) {
+					mapping.remap(blockIC2reactorLaserMonitor);
+				} else if (mapping.name.equals("WarpDrive:scannerBlock")) {
+					mapping.remap(blockShipScanner);
+				} else if (mapping.name.equals("WarpDrive:transportBeacon")) {
+					mapping.remap(blockTransportBeacon);
+				} else if (mapping.name.equals("WarpDrive:transporter")) {
+					mapping.remap(blockTransporter);
+				} else if (mapping.name.equals("WarpDrive:warpCore")) {
+					mapping.remap(blockShipCore);
+				}
+			}
 		}
 	}
 }
