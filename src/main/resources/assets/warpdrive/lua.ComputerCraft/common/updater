@@ -1,1 +1,40 @@
-shell.run("pastebin","run qe4nQP8F")
+local sg = {}
+sg.filename = "san-get"
+sg.installed = false
+local mw = {}
+mw.filename = "mcwarp"
+mw.installed = false
+
+write("Checking for san-get... ")
+if not(fs.exists(sg.filename)) then
+	print("not installed.")
+elseif (fs.isDir(sg.filename)) then
+	print("it is directory?!?")
+	fs.delete(sg.filename) -- установка любой ценой
+else
+	print("installed.")
+	sg.installed = true
+end
+
+if not sg.installed then shell.run("pastebin","run", "qe4nQP8F") end
+
+write("Checking for mcwarp... ")
+if not(fs.exists(mw.filename)) then
+	print("not installed.")
+	shell.run("san-get", "install", "mcwarp")
+elseif (fs.isDir(mw.filename)) then
+	print("it is directory?!?")
+	fs.delete(mw.filename) -- установка любой ценой (2)
+else
+	print("installed.")
+	mw.installed = true
+end
+
+if mw.installed then
+	shell.run("san-get","update", "mcwarp")
+	print("Multicore Warper updated successfully.")
+else
+	shell.run("san-get", "install", "mcwarp")
+	print("Multicore Warper installed successfully.")
+	print("Run mcwarp to setup your ship.")
+end
