@@ -9,7 +9,7 @@ item.warpdrive.crafting.InterfacePower.name=Интерфейс питания
 item.warpdrive.crafting.PowerCore.name=Энергетическое ядро
 item.warpdrive.crafting.AirCanisterEmpty.name=Пустой воздушный баллон
 
-item.warpdrive.energy.IC2reactorLaserFocus.name=IC2 Reactor Laser Focus
+item.warpdrive.energy.IC2reactorLaserFocus.name=Фокусировщик лазера реактора IC2
 item.warpdrive.armor.AirCanisterFull.name=Баллон воздуха
 item.warpdrive.armor.Helmet.name=Космический шлем
 
@@ -20,16 +20,16 @@ item.warpdrive.upgrade.Energy.name=Улучшение энергии
 
 
 tile.warpdrive.passive.Air.name=Воздух
-tile.warpdrive.passive.Energized.name=Energized Block
+tile.warpdrive.passive.Energized.name=Блок под напряжением
 tile.warpdrive.passive.Gas.name=Газ
 tile.warpdrive.passive.IridiumBlock.name=Блок иридия
 tile.warpdrive.passive.HiAdvMachineBlock.name=Высокотехнологичный корпус механизма
 tile.warpdrive.passive.Network.name=Сетевой блок
-tile.warpdrive.passive.Plain.name=Пустой блок
-tile.warpdrive.passive.TransportBeacon.name=Transport Beacon
+tile.warpdrive.passive.Plain.name=Простой блок
+tile.warpdrive.passive.TransportBeacon.name=Маяк для транспортера
 
 tile.warpdrive.machines.AirGenerator.name=Генератор воздуха
-tile.warpdrive.machines.ChunkLoader.name=Chunk Loader
+tile.warpdrive.machines.ChunkLoader.name=Загрузчик чанков
 tile.warpdrive.machines.Laser.name=Лазер
 tile.warpdrive.machines.LaserMedium.name=Лазерный ускоритель частиц
 
@@ -45,14 +45,14 @@ tile.warpdrive.detection.Monitor.name=Монитор видеонаблюден�
 tile.warpdrive.detection.Radar.name=Варп-радар
 tile.warpdrive.detection.WarpIsolation.name=Блок изоляции варп-поля
 
-tile.warpdrive.energy.EnanReactorCore.name=Enantiomorphic Reactor
-tile.warpdrive.energy.EnanReactorLaser.name=Aurbis Reactor Stabilisation Laser
-tile.warpdrive.energy.EnergyBank.name=Anuic Energy Bank
-tile.warpdrive.energy.IC2ReactorLaserMonitor.name=IC2 Reactor Laser Monitor
+tile.warpdrive.energy.EnanReactorCore.name=Энантиоморфный реактор
+tile.warpdrive.energy.EnanReactorLaser.name=Лазер стабилизации реактора Аурбиса
+tile.warpdrive.energy.EnergyBank.name=Хранилище энергии Ану
+tile.warpdrive.energy.IC2ReactorLaserMonitor.name=Монитор лазера реактора IC2
 
 tile.warpdrive.movement.Lift.name=Лазерный лифт
 tile.warpdrive.movement.ShipController.name=Контроллер корабля
 tile.warpdrive.movement.ShipCore.name=Ядро корабля
-tile.warpdrive.movement.Transporter.name=Transporter
+tile.warpdrive.movement.Transporter.name=Транспортер
 
 tile.warpdrive.weapon.LaserCamera.name=Боевая камера видеонаблюдения
