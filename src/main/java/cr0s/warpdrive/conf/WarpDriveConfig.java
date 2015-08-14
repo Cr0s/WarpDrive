@@ -92,6 +92,7 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_TRANSPORTER = false;
 	public static boolean LOGGING_LUA = false;
 	public static boolean LOGGING_RADAR = false;
+	public static boolean LOGGING_BREATHING = false;
 	
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
@@ -279,7 +280,8 @@ public class WarpDriveConfig {
 		LOGGING_COLLECTION = config.get("Logging", "enable_collection_logs", LOGGING_COLLECTION, "Detailled collection logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_TRANSPORTER = config.get("Logging", "enable_transporter_logs", LOGGING_TRANSPORTER, "Detailled transporter logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_LUA = config.get("Logging", "enable_LUA_logs", LOGGING_LUA, "Detailled LUA logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_RADAR = config.get("Logging", "enable_LUA_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_RADAR = config.get("Logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_BREATHING = config.get("Logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 			
 		// TransitionPlane
 		config.addCustomCategoryComment("TransitionPlane",

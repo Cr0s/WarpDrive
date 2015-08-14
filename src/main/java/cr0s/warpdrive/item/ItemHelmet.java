@@ -49,7 +49,7 @@ public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 
 	@Override
 	public boolean removeAir(Entity player) {
-		if (WarpDriveConfig.G_LOGGING_BREATHING) {
+		if (WarpDriveConfig.LOGGING_BREATHING) {
 			WarpDrive.logger.info("Checking breathing!");
 		}
 		if (player instanceof EntityPlayerMP) {
