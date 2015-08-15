@@ -4,6 +4,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -21,7 +25,7 @@ import cr0s.warpdrive.data.TransitionPlane;
 
 public class WarpDriveConfig {
 	private static Configuration config;
-
+	
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
@@ -39,19 +43,19 @@ public class WarpDriveConfig {
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
 	public static boolean isMagicalCropsLoaded = false;
-
+	
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
 	public static Method forgeMultipart_helper_sendDescPacket = null;
 	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
-	
+
 	public static ItemStack IC2_air;
 	public static ItemStack IC2_empty;
 	public static ItemStack IC2_rubberWood;
 	public static ItemStack IC2_Resin;
 	public static Item IC2_fluidCell;
 	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Upgraded, CCT_Advanced;
-
+	
 	public static Item CC_Floppy;
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
 	public static ItemStack IC2_solarPanel;
@@ -59,11 +63,11 @@ public class WarpDriveConfig {
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
 	public static Item GS_ultimateLappack;
 	public static ArrayList<Block> forceFieldBlocks;
-
+	
 	public static ArrayList<Block> minerOres, minerLogs, minerLeaves, scannerIgnoreBlocks;
 	public static ArrayList<Item> spaceHelmets, jetpacks;
 	public static ArrayList<Block> commonWorldGenOres;
-
+	
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
 	public static int G_SPACE_PROVIDER_ID = 14;
@@ -77,12 +81,12 @@ public class WarpDriveConfig {
 	public static int G_LUA_SCRIPTS = LUA_SCRIPTS_ALL;
 	public static String G_SCHEMALOCATION = "warpDrive_schematics";
 	public static int G_BLOCKS_PER_TICK = 3500;
-
+	
 	public static boolean G_ENABLE_IC2_RECIPES = true;
 	public static boolean G_ENABLE_HARD_IC2_RECIPES = false;
 	public static boolean G_ENABLE_VANILLA_RECIPES = false;
 	public static boolean G_ENABLE_TDK_RECIPES = false;
-	
+
 	// logging
 	public static boolean LOGGING_JUMP = false;
 	public static boolean LOGGING_ENERGY = false;
@@ -97,10 +101,10 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_LUA = false;
 	public static boolean LOGGING_RADAR = false;
 	public static boolean LOGGING_BREATHING = false;
-	
+
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
-
+	
 	// Warp Drive Core
 	public static int WC_MAX_ENERGY_VALUE = 100000000;
 	public static int WC_ENERGY_PER_BLOCK_MODE1 = 10;
@@ -121,7 +125,7 @@ public class WarpDriveConfig {
 	public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
 	public static String[] WC_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
 	public static boolean WC_WARMUP_SICKNESS = true;
-
+	
 	// Warp Radar
 	public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
 	public static int WR_MAX_ISOLATION_RANGE = 2;
@@ -129,23 +133,23 @@ public class WarpDriveConfig {
 	public static int WR_MAX_ISOLATION_BLOCKS = 132;
 	public static double WR_MIN_ISOLATION_EFFECT = 0.12;
 	public static double WR_MAX_ISOLATION_EFFECT = 1.00;
-
+	
 	// Ship Scanner
 	public static int SS_MAX_ENERGY_VALUE = 500000000;
 	public static int SS_EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume
 	// (including air)
 	public static int SS_EU_PER_BLOCK_DEPLOY = 5000;
 	public static int SS_MAX_DEPLOY_RADIUS_BLOCKS = 50;
-
+	
 	// Particle Booster
 	public static int PB_MAX_ENERGY_VALUE = 100000;
-
+	
 	// Laser Emitter
 	public static int LE_MAX_BOOSTERS_NUMBER = 10;
 	public static int LE_MAX_LASER_ENERGY = 4000000;
 	public static int LE_EMIT_DELAY_TICKS = 20 * 3;
 	public static int LE_EMIT_SCAN_DELAY_TICKS = 10;
-
+	
 	public static double LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
 	public static int LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
 	public static int LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
@@ -154,7 +158,7 @@ public class WarpDriveConfig {
 	public static int LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
 	public static int LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
 	public static int LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
-
+	
 	// Mining Laser
 	// BuildCraft quarry values for reference
 	// - harvesting one block is 60 MJ/block = 600 RF/block = ~145 EU/block
@@ -191,53 +195,55 @@ public class WarpDriveConfig {
 	public static double ML_DEUTERIUM_MUL_SILKTOUCH = 1.0;
 	public static double ML_EU_MUL_FORTUNE = 2.5;
 	public static int ML_MAX_RADIUS = 5;
-
+	
 	// Tree farm
 	public static int TF_MAX_SIZE = 16;
-
+	
 	// Cloaking device core
 	public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
 	public static int CD_ENERGY_PER_BLOCK_TIER1 = 125;
 	public static int CD_ENERGY_PER_BLOCK_TIER2 = 500;
 	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 3;
 	public static int CD_COIL_CAPTURE_BLOCKS = 5;
-
+	
 	// Air generator
 	public static int AG_RF_PER_CANISTER = 20;
-
+	
 	// Reactor monitor
 	public static int RM_MAX_ENERGY = 1000000;
 	public static double RM_EU_PER_HEAT = 2;
-
+	
 	// Transporter
 	public static int TR_MAX_ENERGY = 1000000;
 	public static boolean TR_RELATIVE_COORDS = true;
 	public static double TR_EU_PER_METRE = 100.0;
 	// public static double TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
 	public static double TR_MAX_BOOST_MUL = 4.0;
-
+	
 	// Power reactor
 	public static int PR_MAX_ENERGY = 100000000;
 	public static int PR_TICK_TIME = 5;
 	public static int PR_MAX_LASERS = 6;
-
+	
 	// Power store
 	public static int PS_MAX_ENERGY = 1000000;
-
+	
 	// Laser Lift
 	public static int LL_MAX_ENERGY = 2400;
 	public static int LL_LIFT_ENERGY = 800;
 	public static int LL_TICK_RATE = 10;
-
+	
 	// Chunk Loader
 	public static int CL_MAX_ENERGY = 1000000;
 	public static int CL_MAX_DISTANCE = 2;
 	public static int CL_RF_PER_CHUNKTICK = 320;
-
+	
+	private static DocumentBuilder xmlDocumentBuilder;
+	
 	public static ItemStack getIC2Item(String id) {
 		return new ItemStack((Item) Item.itemRegistry.getObject("IC2:" + id));
 	}
-	
+
 	public static Block getModBlock(String mod, String id)
 	{
 		try
@@ -250,7 +256,7 @@ public class WarpDriveConfig {
 		}
 		return null;
 	}
-	
+
 	public static ItemStack getModItem(String mod, String id, int meta)
 	{
 		try
@@ -266,11 +272,11 @@ public class WarpDriveConfig {
 		}
 		return null;
 	}
-	
+
 	public static void preInit(Configuration configIn) {
 		config = configIn;
 	}
-
+	
 	public static void loadWarpDriveConfig() {
 		// General
 		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt();
@@ -284,7 +290,7 @@ public class WarpDriveConfig {
 		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
 		G_BLOCKS_PER_TICK = config.get("General", "blocks_per_tick", G_BLOCKS_PER_TICK,
 				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt();
-
+		
 		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
 		G_ENABLE_HARD_IC2_RECIPES = config.get("General", "enable_hard_ic2_recipes", G_ENABLE_HARD_IC2_RECIPES, "Harder recipes based on IC2 by YuRaNnNzZZ").getBoolean(false);
 		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
@@ -294,7 +300,7 @@ public class WarpDriveConfig {
 						G_ENABLE_TDK_RECIPES,
 						"Mixed recipes for TDK packs by Lem'ADEC (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion")
 						.getBoolean(false);
-
+		
 		// Logging
 		LOGGING_JUMP = config.get("Logging", "enable_jump_debugLogs", LOGGING_JUMP, "Detailled jump logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_ENERGY = config.get("Logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
@@ -316,11 +322,11 @@ public class WarpDriveConfig {
 		LOGGING_LUA = config.get("Logging", "enable_LUA_logs", LOGGING_LUA, "Detailled LUA logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_RADAR = config.get("Logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_BREATHING = config.get("Logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-			
+
 		// TransitionPlane
 		config.addCustomCategoryComment("TransitionPlane",
-				  "Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
-				+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
+				"Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
+						+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
 		String[] transitionNames = { "overworld" };
 		transitionNames = config.get("TransitionPlane", "names", transitionNames, "this is the list of transition planes defined hereafter").getStringList();
 		int[] defaultPlane = { 0, 0, 0, 30000000, 30000000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
@@ -339,7 +345,7 @@ public class WarpDriveConfig {
 		}
 		// FIXME: check transition planes aren't overlapping
 		// FIXME: check transition planes have valid dimension id, and ignore them
-
+		
 		// Warp Core
 		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
 		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", WC_ENERGY_PER_BLOCK_MODE1).getInt();
@@ -362,14 +368,14 @@ public class WarpDriveConfig {
 		WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump means more than 50 blocks")
 				.getInt();
 		WC_WARMUP_SICKNESS = config.get("WarpCore", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
-
+		
 		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS,
 				"(measured in seconds)").getInt();
 		WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS,
 				"(measured in seconds)").getInt();
 		WC_UNLIMITED_PLAYERNAMES = config.get("WarpCore", "unlimited_playernames", WC_UNLIMITED_PLAYERNAMES,
 				"List of player names which gives unlimited block counts to their ship").getStringList();
-
+		
 		// Warp Radar
 		WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", WR_MAX_ENERGY_VALUE).getInt();
 		WR_MAX_ISOLATION_RANGE = config.get("WarpRadar", "max_isolation_range", WR_MAX_ISOLATION_RANGE,
@@ -387,7 +393,7 @@ public class WarpDriveConfig {
 		WR_MAX_ISOLATION_EFFECT = config.get("WarpRadar", "max_isolation_effect", WR_MAX_ISOLATION_EFFECT,
 				"isolation effect achieved with max number of isolation blocks (0.01 to 1.00)").getDouble(1.00D);
 		WR_MAX_ISOLATION_EFFECT = Math.min(1.0D, Math.max(WR_MAX_ISOLATION_EFFECT, 0.01D));
-
+		
 		// Ship Scanner
 		SS_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", SS_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
 		SS_EU_PER_BLOCK_SCAN = config.get("ShipScanner", "energy_per_block_when_scanning", SS_EU_PER_BLOCK_SCAN,
@@ -402,16 +408,16 @@ public class WarpDriveConfig {
 		}
 		SS_MAX_DEPLOY_RADIUS_BLOCKS = config.get("ShipScanner", "max_deploy_radius_blocks", SS_MAX_DEPLOY_RADIUS_BLOCKS,
 				"Max distance from ship scanner to ship core, measured in blocks").getInt();
-
+		
 		// Particle Booster
 		PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", PB_MAX_ENERGY_VALUE).getInt();
-
+		
 		// Laser Emitter
 		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", LE_MAX_BOOSTERS_NUMBER).getInt();
 		LE_MAX_LASER_ENERGY = config.get("LaserEmitter", "max_laser_energy", LE_MAX_LASER_ENERGY).getInt();
 		LE_EMIT_DELAY_TICKS = config.get("LaserEmitter", "emit_delay_ticks", LE_EMIT_DELAY_TICKS).getInt();
 		LE_EMIT_SCAN_DELAY_TICKS = config.get("LaserEmitter", "emit_scan_delay_ticks", LE_EMIT_SCAN_DELAY_TICKS).getInt();
-
+		
 		// Laser Emitter tweaks
 		LE_COLLECT_ENERGY_MULTIPLIER = config.get("LaserEmitterTweaks", "collect_energy_multiplier", LE_COLLECT_ENERGY_MULTIPLIER).getDouble(0.6D);
 		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "beam_length_per_energy_divider", LE_BEAM_LENGTH_PER_ENERGY_DIVIDER).getInt();
@@ -425,7 +431,7 @@ public class WarpDriveConfig {
 				LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE).getInt();
 		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_distance",
 				LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE).getInt();
-
+		
 		// Mining Laser
 		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", ML_MAX_BOOSTERS_NUMBER).getInt();
 		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", ML_WARMUP_DELAY_TICKS).getInt();
@@ -440,10 +446,10 @@ public class WarpDriveConfig {
 		ML_DEUTERIUM_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_deuterium_mul", ML_DEUTERIUM_MUL_SILKTOUCH).getDouble(1.0);
 		ML_EU_MUL_FORTUNE = config.get("MiningLaser", "fortune_power_base", ML_EU_MUL_FORTUNE).getDouble(2.5);
 		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", ML_MAX_RADIUS).getInt();
-
+		
 		// Tree Farm
 		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", TF_MAX_SIZE).getInt();
-
+		
 		// Cloaking device core
 		CD_MAX_CLOAKING_FIELD_SIDE = config.get("CloakingDevice", "max_cloaking_field_side", CD_MAX_CLOAKING_FIELD_SIDE).getInt();
 		CD_ENERGY_PER_BLOCK_TIER1 = config.get("CloakingDevice", "energy_per_block_tier1", CD_ENERGY_PER_BLOCK_TIER1).getInt();
@@ -451,34 +457,34 @@ public class WarpDriveConfig {
 		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", CD_FIELD_REFRESH_INTERVAL_SECONDS).getInt();
 		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", CD_COIL_CAPTURE_BLOCKS, "Extra blocks covered after the outer coils")
 				.getInt();
-
+		
 		// Air generator
 		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
-
+		
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
 		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", RM_EU_PER_HEAT).getDouble(2);
-
+		
 		// Transporter
 		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();
 		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
 		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100.0);
 		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getDouble(4.0);
-
+		
 		// Power reactor
 		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
 		PR_TICK_TIME = config.get("Reactor", "ticks_per_update", PR_TICK_TIME).getInt();
 		PR_MAX_LASERS = config.get("Reactor", "max_lasers", PR_MAX_LASERS).getInt();
-
+		
 		// Power store
 		PS_MAX_ENERGY = config.get("PowerStore", "max_energy", PS_MAX_ENERGY).getInt();
-
+		
 		// Laser lift
 		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
 		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
 		LL_TICK_RATE = config.get("LaserLift", "tick_rate", LL_TICK_RATE).getInt();
 	}
-
+	
 	public static void load() {
 		commonWorldGenOres = new ArrayList<Block>();
 		commonWorldGenOres.add(Blocks.iron_ore);
@@ -487,9 +493,9 @@ public class WarpDriveConfig {
 		commonWorldGenOres.add(Blocks.emerald_ore);
 		commonWorldGenOres.add(Blocks.lapis_ore);
 		commonWorldGenOres.add(Blocks.redstone_ore);
-
+		
 		forceFieldBlocks = new ArrayList<Block>();
-
+		
 		spaceHelmets = new ArrayList<Item>();
 		jetpacks = new ArrayList<Item>();
 		minerOres = new ArrayList<Block>();
@@ -497,54 +503,54 @@ public class WarpDriveConfig {
 		minerLeaves = new ArrayList<Block>();
 		scannerIgnoreBlocks = new ArrayList<Block>();
 		config.load();
-
+		
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
 			loadForgeMultipart();
 		}
-		
+
 		isIndustrialCraft2loaded = Loader.isModLoaded("IC2");
 		if (isIndustrialCraft2loaded) {
 			loadIC2();
 		}
-		
+
 		isComputerCraftLoaded = Loader.isModLoaded("ComputerCraft");
 		if (isComputerCraftLoaded) {
 			loadCC();
 		}
-		
+
 		isAdvancedSolarPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
 		if (isAdvancedSolarPanelLoaded) {
 			loadASP();
 		}
-		
+
 		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
 		if (isAtomicScienceLoaded) {
 			loadAtomicScience();
 		}
-
+		
 		isMFFSLoaded = Loader.isModLoaded("MFFS");
 		if (isMFFSLoaded) {
 			loadMFFS();
 		}
-		
+
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded) {
 			loadGraviSuite();
 		}
-
+		
 		isNetherOresLoaded = Loader.isModLoaded("NetherOres");
-
+		
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
 		if (isThermalExpansionLoaded) {
 			loadThermalExpansion();
 		}
-
+		
 		isAdvancedRepulsionSystemsLoaded = Loader.isModLoaded("AdvancedRepulsionSystems");
 		if (isAdvancedRepulsionSystemsLoaded) {
 			loadAdvancedRepulsionSystems();
 		}
-
+		
 		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
 		isAE2Loaded = Loader.isModLoaded("appliedenergistics2");
 		isOCLoaded = Loader.isModLoaded("OpenComputers");
@@ -558,17 +564,17 @@ public class WarpDriveConfig {
 		minerOres.add(Blocks.torch);
 		minerOres.add(Blocks.glowstone);
 		minerOres.add(Blocks.redstone_block);
-
+		
 		// Ignore WarpDrive blocks (which potentially will be duplicated by
 		// cheaters using ship scan/deploy)
 		scannerIgnoreBlocks.add(WarpDrive.blockShipCore);
 		scannerIgnoreBlocks.add(WarpDrive.blockShipController);
 		scannerIgnoreBlocks.add(WarpDrive.blockIridium);
-
+		
 		if (isIndustrialCraft2loaded) {
 			// Metadata: 0 Batbox, 1 MFE, 2 MFSU, 3 LV transformer, 4 MV transformer, 5 HV transformer, 6 EV transformer, 7 CESU
 			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockElectric"));
-
+			
 			// Metadata: 0 Batbox, 1 CESU, 2 MFE, 3 MFSU
 			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockChargepad"));
 		}
@@ -585,15 +591,15 @@ public class WarpDriveConfig {
 		for (Block t : commonWorldGenOres) {
 			scannerIgnoreBlocks.add(t);
 		}
-
+		
 		loadWarpDriveConfig();
 		config.save();
 	}
-
+	
 	public static void postInit() {
 		LoadOreDict();
 	}
-
+	
 	private static void LoadOreDict() {
 		String[] oreNames = OreDictionary.getOreNames();
 		for (String oreName : oreNames) {
@@ -621,7 +627,7 @@ public class WarpDriveConfig {
 			}
 		}
 	}
-
+	
 	private static void loadForgeMultipart() {
 		try {//TODO: Update to 1.7
 			Class forgeMultipart_helper = Class.forName("codechicken.multipart.MultipartHelper");
@@ -635,24 +641,24 @@ public class WarpDriveConfig {
 			e.printStackTrace();
 		}
 	}
-
+	
 	private static void loadIC2() {
 		try {
 			IC2_solarPanel = getIC2Item("blockGenerator");
 			IC2_solarPanel.setItemDamage(3);
-
+			
 			spaceHelmets.add(getIC2Item("itemArmorHazmatHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemSolarHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemArmorNanoHelmet").getItem());
 			spaceHelmets.add(getIC2Item("itemArmorQuantumHelmet").getItem());
-
+			
 			jetpacks.add(getIC2Item("itemArmorJetpack").getItem());
 			jetpacks.add(getIC2Item("itemArmorJetpackElectric").getItem());
-
+			
 			IC2_empty = getIC2Item("itemCellEmpty");
 			IC2_air = getIC2Item("itemCellEmpty");
 			IC2_air.setItemDamage(5);
-
+			
 			ItemStack rubberWood = getIC2Item("blockRubWood");
 			IC2_Resin = getIC2Item("itemHarz");
 			if (rubberWood != null) {
@@ -671,14 +677,14 @@ public class WarpDriveConfig {
 			ore = getIC2Item("blockOreLead");
 			if (ore != null)
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-
+			
 			IC2_fluidCell = getIC2Item("itemFluidCell").getItem();
 		} catch (Exception exception) {
 			WarpDrive.logger.error("WarpDriveConfig Error loading IndustrialCraft2 classes");
 			exception.printStackTrace();
 		}
 	}
-
+	
 	private static void loadCC() {
 		try {
 			/*
@@ -694,7 +700,7 @@ public class WarpDriveConfig {
 			e.printStackTrace();
 		}
 	}
-
+	
 	private static void loadASP() {
 		try {
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:advanced_solar_helmet"));
@@ -706,7 +712,7 @@ public class WarpDriveConfig {
 			isAdvancedSolarPanelLoaded = false;
 		}
 	}
-
+	
 	private static void loadAtomicScience() {
 		try {
 			/* TODO: Does not exist for 1.7
@@ -721,7 +727,7 @@ public class WarpDriveConfig {
 			isAtomicScienceLoaded = false;
 		}
 	}
-
+	
 	private static void loadICBM() {
 		try {
 			/* TODO: Does not exist yet for 1.7
@@ -739,7 +745,7 @@ public class WarpDriveConfig {
 			isICBMLoaded = false;
 		}
 	}
-
+	
 	private static void loadMFFS() {
 		try {
 			forceFieldBlocks.add(Block.getBlockFromName("MFFS:FIXME_field"));	// FIXME
@@ -750,10 +756,10 @@ public class WarpDriveConfig {
 			isMFFSLoaded = false;
 		}
 	}
-
+	
 	private static void loadGraviSuite() {
 		try {
-
+			
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("GraviSuite.ultimateSolarHelmet")); // FIXME
 			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.advJetpack")); // FIXME
 			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.graviChestPlate")); // FIXME
@@ -764,7 +770,7 @@ public class WarpDriveConfig {
 			isGraviSuiteLoaded = false;
 		}
 	}
-
+	
 	private static void loadThermalExpansion() {
 		try {
 			// TEEnergyCell =
@@ -776,10 +782,10 @@ public class WarpDriveConfig {
 			isThermalExpansionLoaded = false;
 		}
 	}
-
+	
 	private static void loadAdvancedRepulsionSystems() {
 		try {
-
+			
 			forceFieldBlocks.add(Block.getBlockFromName("AdvancedRepulsionSystems:field"));
 		} catch (Exception e) {
 			WarpDrive.logger.error("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
@@ -787,7 +793,7 @@ public class WarpDriveConfig {
 			isAdvancedRepulsionSystemsLoaded = false;
 		}
 	}
-
+	
 	public static Block getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
 		if (isMoon) {
 			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
@@ -815,7 +821,7 @@ public class WarpDriveConfig {
 		}
 		return Blocks.stone;
 	}
-
+	
 	public static Block getRandomSurfaceBlock(Random random, Block def, boolean bedrock) {
 		if (bedrock && (random.nextInt(1000) == 1)) {
 			return Blocks.bedrock;
@@ -826,7 +832,7 @@ public class WarpDriveConfig {
 		}
 		return getRandomOverworldBlock(random, def);
 	}
-
+	
 	public static Block getRandomOverworldBlock(Random random, Block def) {
 		if (random.nextInt(25) == 5) {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
@@ -837,7 +843,7 @@ public class WarpDriveConfig {
 		}
 		return def;
 	}
-
+	
 	public static Block getRandomNetherBlock(Random random, Block def) {
 		if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
 			return WarpDrive.blockIridium;
@@ -847,7 +853,7 @@ public class WarpDriveConfig {
 			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
 		return def;
 	}
-
+	
 	public static Block getRandomEndBlock(Random random, Block def) {
 		if (isIndustrialCraft2loaded && random.nextInt(10000) == 42) {
 			return WarpDrive.blockIridium;
@@ -856,8 +862,24 @@ public class WarpDriveConfig {
 		}
 		return def;
 	}
-
+	
 	public static void loadWorldGen() {
-		
+
+	}
+	
+	public static DocumentBuilder getXmlDocumentBuilder() {
+		if (xmlDocumentBuilder == null) {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setIgnoringComments(false);
+			dbf.setValidating(true);
+			try {
+				xmlDocumentBuilder = dbf.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return xmlDocumentBuilder;
+
 	}
 }
