@@ -31,7 +31,6 @@ import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -168,9 +167,7 @@ public class WarpDrive implements LoadingCallback {
 	public World hyperSpace;
 
 	// Client settings
-    public static float camFOV = 70.0F;
 	public static float normalFOV = 70.0F;
-    public static float camSensitivity = 0.5F;
 	public static float normalSensitivity = 1.0F;
 
 	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
@@ -187,6 +184,7 @@ public class WarpDrive implements LoadingCallback {
 	public static CamerasRegistry cameras;
 	public boolean isOverlayEnabled = false;
 	public int overlayType = 0;
+	public static int zoomIndex = 0;
 	public String debugMessage = "";
 
 	public static WarpDrivePeripheralHandler peripheralHandler = null;
@@ -203,7 +201,9 @@ public class WarpDrive implements LoadingCallback {
 		
 		logger = event.getModLog();
 		
-		// Not needed as we register this at right click on the monitor.
+		// TODO: clarify best approach
+		// option 1: we register values when opening a monitor => balance issue with cascading monitors
+		// option 2: we record values at boot, and stick to them => starting bad, remains bad + changing config won't work until client gets restarted
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 			Minecraft mc = Minecraft.getMinecraft();
 		

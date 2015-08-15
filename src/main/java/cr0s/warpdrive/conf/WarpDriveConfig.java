@@ -205,7 +205,7 @@ public class WarpDriveConfig {
 	// Air generator
 	public static int AG_RF_PER_CANISTER = 20;
 
-	// Reactor monitor
+	// IC2 Reactor monitor
 	public static int RM_MAX_ENERGY = 1000000;
 	public static double RM_EU_PER_HEAT = 2;
 
@@ -216,7 +216,7 @@ public class WarpDriveConfig {
 	// public static double TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
 	public static double TR_MAX_BOOST_MUL = 4.0;
 
-	// Power reactor
+	// Enantiomorphic Power reactor
 	public static int PR_MAX_ENERGY = 100000000;
 	public static int PR_TICK_TIME = 5;
 	public static int PR_MAX_LASERS = 6;
