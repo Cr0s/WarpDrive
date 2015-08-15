@@ -37,7 +37,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 				IC2_solarType = rand.nextInt(2);
 			}
 	
-			cableType = WarpDriveConfig.getIC2Item("blockCable").copy();
+			cableType = WarpDriveConfig.getModItemStack("IC2", "blockCable", -1).copy();
 	
 			switch (rand.nextInt(4)) {
 			case 0:
@@ -622,14 +622,14 @@ public class WorldGenSmallShip extends WorldGenerator {
 		while (!isDone) {
 			switch (rand.nextInt(14)) {
 			case 0:// Mass fabricator
-				res = WarpDriveConfig.getIC2Item("blockMachine").copy();
+				res = WarpDriveConfig.getModItemStack("IC2", "blockMachine", -1).copy();
 				res.setItemDamage(14);
 				res.stackSize = 1; // + rand.nextInt(2);
 				isDone = true;
 				break;
 
 			case 1:
-				res = WarpDriveConfig.getIC2Item("blockNuke").copy();
+				res = WarpDriveConfig.getModItemStack("IC2", "blockNuke", -1).copy();
 				res.stackSize = 1 + rand.nextInt(2);
 				isDone = true;
 				break;
@@ -642,14 +642,14 @@ public class WorldGenSmallShip extends WorldGenerator {
 				break;// skipped
 
 			case 6:// Glass fiber cable item
-				res = WarpDriveConfig.getIC2Item("itemCable").copy();
+				res = WarpDriveConfig.getModItemStack("IC2", "itemCable", -1).copy();
 				res.setItemDamage(9);
 				res.stackSize = 2 + rand.nextInt(12);
 				isDone = true;
 				break;
 
 			case 7:// UU matter cell
-				res = WarpDriveConfig.getIC2Item("itemCellEmpty").copy();
+				res = WarpDriveConfig.getModItemStack("IC2", "itemCellEmpty", -1).copy();
 				res.setItemDamage(3);
 				res.stackSize = 2 + rand.nextInt(14);
 				isDone = true;

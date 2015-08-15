@@ -236,7 +236,7 @@ public class SpaceEventHandler {
 			int check = MathHelper.ceiling_float_int(distance - 3.0F);
 
 			if (check > 0) {
-				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getIC2Item("itemArmorQuantumBoots")) // FIXME cache the value
+				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getModItemStack("IC2", "itemArmorQuantumBoots", -1)) // FIXME cache the value
 				  || (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
 					event.setCanceled(true); // Don't damage player
 				}

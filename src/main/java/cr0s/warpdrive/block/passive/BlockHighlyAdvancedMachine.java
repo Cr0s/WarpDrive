@@ -8,32 +8,27 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import cr0s.warpdrive.WarpDrive;
 
-public class BlockHiAdvMachine extends Block
-{
-	public BlockHiAdvMachine()
-	{
+public class BlockHighlyAdvancedMachine extends Block {
+	public BlockHighlyAdvancedMachine() {
 		super(Material.rock);
 		setHardness(3.0F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
-		setBlockName("warpdrive.passive.HiAdvMachineBlock");
+		setBlockName("warpdrive.passive.HighlyAdvancedMachine");
 	}
-
+	
 	@Override
-	public void registerBlockIcons(IIconRegister par1IconRegister)
-	{
-		this.blockIcon = par1IconRegister.registerIcon("warpdrive:passive/hiAdvMachineSide");
+	public void registerBlockIcons(IIconRegister par1IconRegister) {
+		blockIcon = par1IconRegister.registerIcon("warpdrive:passive/highlyAdvancedMachineSide");
 	}
-
+	
 	@Override
-	public Item getItemDropped(int var1, Random var2, int var3)
-	{
+	public Item getItemDropped(int var1, Random var2, int var3) {
 		return Item.getItemFromBlock(this);
 	}
-
+	
 	@Override
-	public int quantityDropped(Random par1Random)
-	{
+	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
 }
