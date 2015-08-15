@@ -8,12 +8,12 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class TileEntityAirGenerator extends TileEntityAbstractEnergy {
-	private final int EU_PER_NEWAIRBLOCK = 12;
-	private final int EU_PER_EXISTINGAIRBLOCK = 4; // 1 solar = 1 EU/t
-	private final int MAX_ENERGY_VALUE = 8 * EU_PER_NEWAIRBLOCK;
+	private final int EU_PER_NEWAIRBLOCK = WarpDriveConfig.AG_EU_PER_NEWAIRBLOCK;
+	private final int EU_PER_EXISTINGAIRBLOCK = WarpDriveConfig.AG_EU_PER_EXISTINGAIRBLOCK;
+	private final int MAX_ENERGY_VALUE = WarpDriveConfig.AG_MAX_ENERGY;
 
 	private int cooldownTicks = 0;
-	private final int AIR_GENERATION_TICKS = 40;
+	private final int AIR_GENERATION_TICKS = WarpDriveConfig.AG_AIR_GENERATION_TICKS;
 	private final int START_CONCENTRATION_VALUE = 15;
 
 	public TileEntityAirGenerator() {

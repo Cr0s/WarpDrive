@@ -204,6 +204,10 @@ public class WarpDriveConfig {
 
 	// Air generator
 	public static int AG_RF_PER_CANISTER = 20;
+	public static int AG_EU_PER_NEWAIRBLOCK = 12;
+	public static int AG_EU_PER_EXISTINGAIRBLOCK = 4;
+	public static int AG_MAX_ENERGY = 4000;
+	public static int AG_AIR_GENERATION_TICKS = 40;
 
 	// IC2 Reactor monitor
 	public static int RM_MAX_ENERGY = 1000000;
@@ -444,6 +448,10 @@ public class WarpDriveConfig {
 
 		// Air generator
 		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
+		AG_EU_PER_NEWAIRBLOCK = config.get("Air Generator", "eu_per_new_air_block", AG_EU_PER_NEWAIRBLOCK).getInt();
+		AG_EU_PER_EXISTINGAIRBLOCK = config.get("Air Generator", "eu_per_existing_air_block", AG_EU_PER_EXISTINGAIRBLOCK).getInt();
+		AG_MAX_ENERGY = config.get("Air Generator", "max_energy", AG_MAX_ENERGY).getInt();
+		AG_AIR_GENERATION_TICKS = config.get("Air Generator", "air_generation_ticks", AG_AIR_GENERATION_TICKS).getInt();
 
 		// Reactor monitor
 		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
