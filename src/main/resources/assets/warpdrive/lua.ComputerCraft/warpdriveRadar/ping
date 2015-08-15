@@ -3,31 +3,43 @@ if not term.isColor() then
   exit()
 end
 
+function error(message)
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No radar detected")
+  term.setBackgroundColor(colors.black)
+  term.setTextColor(colors.white)
+  print()
+end
+
 sides = peripheral.getNames()
-mininglasers = {}
 for key,side in pairs(sides) do
   if peripheral.getType(side) == "warpdriveRadar" then
-    print("Wrapping " .. side)
+    print("Radar found on " .. side)
     radar = peripheral.wrap(side)
   end
+end
+if radar == nil then
+  error("No radar detected")
+  return
 end
 
 local argv = { ... }
 if #argv ~= 1 then
-  print("Usage: scan <radius>")
+  error("Usage: ping <scanRadius>")
   return
 end
 
 local radius = tonumber(argv[1])
 
 if radius < 1 or radius > 9999 then
-  print("Radius must be between 1 and 9999")
+  error("Radius must be between 1 and 9999")
   return
 end
 
 energy, energyMax = radar.getEnergyLevel()
 if energy < radius * radius then
-  print("Low energy level...")
+  error("Low energy level... (" + energy + "/" + radius * radius + ")")
   return
 end
 radar.scanRadius(radius)
@@ -42,13 +54,13 @@ repeat
   sleep(1)
   seconds = seconds + 1
 until (count ~= nil and count ~= -1) or seconds > 10
-print("took "..seconds.." seconds")
+print("took " .. seconds .. " seconds")
 
 if count ~= nil and count > 0 then
   for i=0, count-1 do
     freq, x, y, z = radar.getResult(i)
-    print("Ship '"..freq.."' @ ("..x.. " " .. y .. " " .. z .. ")")
+    print("Ship '" .. freq .. "' @ (" .. x .. " " .. y .. " " .. z .. ")")
   end
 else
-  print("Nothing is found =(")
+  print("Nothing was found =(")
 end

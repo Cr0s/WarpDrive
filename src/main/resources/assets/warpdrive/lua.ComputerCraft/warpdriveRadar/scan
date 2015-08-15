@@ -7,12 +7,17 @@ if not term.isColor() then
 end
 
 sides = peripheral.getNames()
-mininglasers = {}
 for key,side in pairs(sides) do
   if peripheral.getType(side) == "warpdriveRadar" then
-    print("Wrapping " .. side)
+    print("Radar found on " .. side)
     radar = peripheral.wrap(side)
   end
+end
+if radar == nil then
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No radar detected")
+  return
 end
 
 w, h = term.getSize()
@@ -22,7 +27,7 @@ term.clear()
 function colorScreen(color)
   for a = 2,w-1 do
     for b = 1,h do
-      paintutils.drawPixel(a,b,color)
+      paintutils.drawPixel(a, b, color)
     end
   end
 end
@@ -92,18 +97,17 @@ function scanAndDraw()
 end
 
 function redraw()
-   --shell.run("clear")
-   colorScreen(colors.green)
-   
-   paintutils.drawLine(1, 1, w, 1, colors.black)
-   
-   textOut(h, 1, "= Q-Radar v0.1 =", colors.white, colors.black)
-   
-   textOut(w - 3, 1, "[X]", colors.white, colors.red)
-   
-   paintutils.drawLine(1, h, w, h, colors.black);
-   local energy, energyMax = radar.getEnergyLevel()
-   textOut(4, h, "Energy: " .. energy .. " EU | Scan radius: " .. radius, colors.white, colors.black)
+  colorScreen(colors.green)
+  
+  paintutils.drawLine(1, 1, w, 1, colors.black)
+  
+  textOut(h, 1, "= Q-Radar v0.1 =", colors.white, colors.black)
+  
+  textOut(w - 3, 1, "[X]", colors.white, colors.red)
+  
+  paintutils.drawLine(1, h, w, h, colors.black);
+  local energy, energyMax = radar.getEnergyLevel()
+  textOut(4, h, "Energy: " .. energy .. " EU | Scan radius: " .. radius, colors.white, colors.black)
 end
 
 mrun = true
