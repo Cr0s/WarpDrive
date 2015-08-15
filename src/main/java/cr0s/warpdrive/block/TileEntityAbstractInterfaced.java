@@ -16,7 +16,6 @@ import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import li.cil.oc.api.network.Visibility;
 import net.minecraft.nbt.NBTTagCompound;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
@@ -65,20 +64,20 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 				String CC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.ComputerCraft/" + peripheralName;
 				CC_hasResource = assetExist(CC_path);
 			}
-			if (Loader.isModLoaded("OpenComputers")) {
+			if (WarpDriveConfig.isOpenComputersLoaded) {
 				String OC_path = "/assets/" + WarpDrive.MODID.toLowerCase() + "/lua.OpenComputers/" + peripheralName;
 				OC_hasResource = assetExist(OC_path);
 			}
 			
 			// deferred constructor so the derived class can finish it's initialization first
-			if (Loader.isModLoaded("OpenComputers")) {
+			if (WarpDriveConfig.isOpenComputersLoaded) {
 				OC_constructor();
 			}
 			interfacedFirstTick = false;
 			return;
 		}
 		
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOpenComputersLoaded) {
 			if (!OC_addedToNetwork) {
 				OC_addedToNetwork = true;
 				Network.joinOrCreateNetwork(this);
@@ -88,7 +87,7 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 
 	@Override
 	public void invalidate() {
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOpenComputersLoaded) {
 			if (OC_node != null) {
 				OC_node.remove();
 				OC_node = null;
@@ -99,7 +98,7 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	
 	@Override
 	public void onChunkUnload() {
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOpenComputersLoaded) {
 			if (OC_node != null) {
 				OC_node.remove();
 				OC_node = null;
@@ -111,7 +110,7 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOpenComputersLoaded) {
 			if (OC_node != null && OC_node.host() == this) {
 				OC_node.load(tag.getCompoundTag("oc:node"));
 			}
@@ -121,7 +120,7 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		if (Loader.isModLoaded("OpenComputers")) {
+		if (WarpDriveConfig.isOpenComputersLoaded) {
 			if (OC_node != null && OC_node.host() == this) {
 				final NBTTagCompound nodeNbt = new NBTTagCompound();
 				OC_node.save(nodeNbt);

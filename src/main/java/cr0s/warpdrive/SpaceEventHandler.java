@@ -42,11 +42,11 @@ public class SpaceEventHandler {
 	}
 
 	@SubscribeEvent
-	public void livingUpdate(LivingUpdateEvent event) {
+	public void onLivingUpdate(LivingUpdateEvent event) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		EntityLivingBase entity = event.entityLiving;
 		int x = MathHelper.floor_double(entity.posX);
 		int y = MathHelper.floor_double(entity.posY);
@@ -79,8 +79,8 @@ public class SpaceEventHandler {
 		}
 
 		// If entity is in vacuum, check and start consuming air cells
-		if (entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID
-				|| entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
+		if ( entity.worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID
+		  || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			Block block1 = entity.worldObj.getBlock(x, y, z);
 			Block block2 = entity.worldObj.getBlock(x, y + 1, z);
 			boolean inVacuum = (!block1.isAssociatedBlock(WarpDrive.blockAir) && !block2.isAssociatedBlock(WarpDrive.blockAir));
@@ -236,7 +236,7 @@ public class SpaceEventHandler {
 			int check = MathHelper.ceiling_float_int(distance - 3.0F);
 
 			if (check > 0) {
-				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getIC2Item("itemArmorQuantumBoots")) // FIXME cache the value
+				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getModItemStack("IC2", "itemArmorQuantumBoots", -1)) // FIXME cache the value
 				  || (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
 					event.setCanceled(true); // Don't damage player
 				}

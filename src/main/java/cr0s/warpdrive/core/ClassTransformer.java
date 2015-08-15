@@ -15,182 +15,166 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 public class ClassTransformer implements net.minecraft.launchwrapper.IClassTransformer {
 	private HashMap<String, String> nodemap = new HashMap<String, String>();
-
-	private final String GRAVITY_MANAGER_CLASS = "cr0s/WarpDrive/GravityManager";
-
+	
+	private final String GRAVITY_MANAGER_CLASS = "cr0s/warpdrive/GravityManager";
+	private boolean debugLog = false;
+	
 	public ClassTransformer() {
-		nodemap.put("worldClass", "abw");
-		nodemap.put("playerMP", "jv");
-		nodemap.put("netLoginHandler", "jy");
-		nodemap.put("confManagerClass", "hn");
-		nodemap.put("createPlayerMethod", "a");
-		nodemap.put("createPlayerDesc", "(Ljava/lang/String;)L" + nodemap.get("playerMP") + ";");
-		nodemap.put("respawnPlayerMethod", "a");
-		nodemap.put("respawnPlayerDesc", "(L" + nodemap.get("playerMP") + ";IZ)L" + nodemap.get("playerMP") + ";");
-		nodemap.put("itemInWorldManagerClass", "jw");
-		nodemap.put("attemptLoginMethodBukkit", "attemptLogin");
-		nodemap.put("attemptLoginDescBukkit", "(L" + nodemap.get("netLoginHandler") + ";Ljava/lang/String;Ljava/lang/String;)L" + nodemap.get("playerMP") + ";");
-		nodemap.put("playerControllerClass", "bdc");
-		nodemap.put("playerClient", "bdi");
-		nodemap.put("netClientHandler", "bcw");
-		nodemap.put("createClientPlayerMethod", "a");
-		nodemap.put("createClientPlayerDesc", "(L" + nodemap.get("worldClass") + ";)L" + nodemap.get("playerClient") + ";");
-		nodemap.put("entityLivingBaseClass", "of");
-		nodemap.put("moveEntityMethod", "e");
-		nodemap.put("moveEntityDesc", "(FF)V");
-		nodemap.put("entityItemClass", "ss");
-		nodemap.put("onUpdateMethod", "l_");
+		nodemap.put("entityLivingBaseClass", "sv");
+		nodemap.put("moveEntityWithHeadingMethod", "func_70612_e");
+		nodemap.put("moveEntityWithHeadingDesc", "(FF)V");
+		nodemap.put("entityItemClass", "xk");
+		nodemap.put("onUpdateMethod", "func_70071_h_");
 		nodemap.put("onUpdateDesc", "()V");
-		nodemap.put("entityRendererClass", "bfe");
-		nodemap.put("updateLightmapMethod", "h");
-		nodemap.put("updateLightmapDesc", "(F)V");
-		nodemap.put("player", "uf");
-		nodemap.put("containerPlayer", "vv");
-		nodemap.put("invPlayerClass", "ud");
-		nodemap.put("minecraft", "atv");
-		nodemap.put("session", "aus");
-		nodemap.put("guiPlayer", "axv");
-		nodemap.put("thePlayer", "h");
-		nodemap.put("displayGui", "a");
-		nodemap.put("guiScreen", "awe");
-		nodemap.put("displayGuiDesc", "(L" + nodemap.get("guiScreen") + ";)V");
-		nodemap.put("runTick", "k");
-		nodemap.put("runTickDesc", "()V");
-		nodemap.put("clickMiddleMouseButton", "W");
-		nodemap.put("clickMiddleMouseButtonDesc", "()V");
-		nodemap.put("itemRendererClass", "bfj");
-		nodemap.put("renderOverlaysMethod", "b");
-		nodemap.put("renderOverlaysDesc", "(F)V");
-		nodemap.put("updateFogColorMethod", "i");
-		nodemap.put("updateFogColorDesc", "(F)V");
-		nodemap.put("getFogColorMethod", "f");
-		nodemap.put("getSkyColorMethod", "a");
-		nodemap.put("vecClass", "atc");
-		nodemap.put("entityClass", "nn");
-		nodemap.put("getFogColorDesc", "(F)L" + nodemap.get("vecClass") + ";");
-		nodemap.put("getSkyColorDesc", "(L" + nodemap.get("entityClass") + ";F)L" + nodemap.get("vecClass") + ";");
-		nodemap.put("guiSleepClass", "avm");
-		nodemap.put("wakeEntityMethod", "g");
-		nodemap.put("wakeEntityDesc", "()V");
-		nodemap.put("orientCameraDesc", "(L" + nodemap.get("minecraft") + ";L" + nodemap.get("entityLivingBaseClass") + ";)V");
 	}
-
+	
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		if (nodemap == null) {
-			System.out.println("========= NODEMAP IS NULL!!! ========");
+			System.out.println("Nodemap is null, transformation cancelled");
 			return bytes;
 		}
-
-		if (name.replace('.', '/').equals(nodemap.get("entityLivingBaseClass"))) {
-			System.out.println("Transforming " + name);
-			bytes = transformEntityLivingBase(bytes);
-		} else if (name.replace('.', '/').equals(nodemap.get("entityItemClass"))) {
-			System.out.println("Transforming " + name);
-			bytes = transformEntityItem(bytes);
+		
+		String className = name.replace('/', '.');
+		
+		if (debugLog) { System.out.println("Checking " + name); }
+		if (className.equals(nodemap.get("entityLivingBaseClass")) || className.equals("net.minecraft.entity.EntityLivingBase")) {
+			bytes = transformEntityLivingBase(bytes, name.contains("."));
+		} else if (className.equals(nodemap.get("entityItemClass")) || className.equals("net.minecraft.entity.item.EntityItem")) {
+			bytes = transformEntityItem(bytes, name.contains("/"));
 		}
-
+		
 		return bytes;
 	}
-
-	private byte[] transformEntityItem(byte[] bytes) {
+	
+	private byte[] transformEntityItem(byte[] bytes, final boolean isDevelopment) {
 		ClassNode node = new ClassNode();
 		ClassReader reader = new ClassReader(bytes);
 		reader.accept(node, 0);
 		int operationCount = 2;
 		int injectionCount = 0;
 		Iterator methods = node.methods.iterator();
-
+		
 		do {
 			if (!methods.hasNext()) {
 				break;
 			}
-
+			
 			MethodNode methodnode = (MethodNode) methods.next();
-
-			if (methodnode.name.equals(nodemap.get("onUpdateMethod")) && methodnode.desc.equals(nodemap.get("onUpdateDesc"))) {
+			if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			
+			if ( (methodnode.name.equals(nodemap.get("onUpdateMethod")) || methodnode.name.equals("onUpdate"))
+			  && methodnode.desc.equals(nodemap.get("onUpdateDesc")) ) {
+				if (debugLog) { System.out.println("Method found!"); }
+				
 				int count = 0;
-
+				
 				while (count < methodnode.instructions.size()) {
 					AbstractInsnNode list = methodnode.instructions.get(count);
-
+					
 					if (list instanceof LdcInsnNode) {
 						LdcInsnNode nodeAt = (LdcInsnNode) list;
-
+						
 						if (nodeAt.cst.equals(Double.valueOf(0.039999999105930328D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity", "(L"
-									+ nodemap.get("entityItemClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getItemGravity",
+									"(L" + "net/minecraft/entity/item/EntityItem" + ";)D",
+									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { System.out.println("Injecting into " + node.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectionCount++;
 						}
-
+						
 						if (nodeAt.cst.equals(Double.valueOf(0.98000001907348633D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getItemGravity2", "(L"
-									+ nodemap.get("entityItemClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getItemGravity2",
+									"(L" + "net/minecraft/entity/item/EntityItem" + ";)D",
+									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { System.out.println("Injecting into " + node.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectionCount++;
 						}
 					}
-
+					
 					count++;
 				}
 			}
 		} while (true);
-
-		ClassWriter writer = new ClassWriter(1);
-		node.accept(writer);
-		bytes = writer.toByteArray();
-		System.out.println("Successfully injected EntityItem bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
+		
+		if (injectionCount != operationCount) {
+			System.out.println("Injection failed for " + node.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		} else {
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
+			node.accept(writer);
+			bytes = writer.toByteArray();
+			System.out.println("Injection successfull!");
+		}
 		return bytes;
 	}
-
-	private byte[] transformEntityLivingBase(byte[] bytes) {
+	
+	private byte[] transformEntityLivingBase(byte[] bytes, final boolean isDevelopment) {
 		ClassNode node = new ClassNode();
 		ClassReader reader = new ClassReader(bytes);
 		reader.accept(node, 0);
 		int operationCount = 1;
 		int injectionCount = 0;
 		Iterator methods = node.methods.iterator();
-
+		
 		do {
 			if (!methods.hasNext()) {
 				break;
 			}
-
+			
 			MethodNode methodnode = (MethodNode) methods.next();
-
-			if (methodnode.name.equals(nodemap.get("moveEntityMethod")) && methodnode.desc.equals(nodemap.get("moveEntityDesc"))) {
+			
+			if ( (methodnode.name.equals(nodemap.get("moveEntityWithHeadingMethod")) || methodnode.name.equals("moveEntityWithHeading"))
+			  && methodnode.desc.equals(nodemap.get("moveEntityWithHeadingDesc")) ) {
+				if (debugLog) { System.out.println("Method found!"); }
+				
 				int count = 0;
-
+				
 				while (count < methodnode.instructions.size()) {
 					AbstractInsnNode list = methodnode.instructions.get(count);
-
+					
 					if (list instanceof LdcInsnNode) {
 						LdcInsnNode nodeAt = (LdcInsnNode) list;
-
+						
 						if (nodeAt.cst.equals(Double.valueOf(0.080000000000000002D))) {
 							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
-							MethodInsnNode overwriteNode = new MethodInsnNode(Opcodes.INVOKESTATIC, GRAVITY_MANAGER_CLASS, "getGravityForEntity", "(L"
-									+ nodemap.get("entityLivingBaseClass") + ";)D");
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getGravityForEntity",
+									"(L" + "net/minecraft/entity/EntityLivingBase" + ";)D",
+									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { System.out.println("Injecting into " + node.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectionCount++;
 						}
 					}
-
+					
 					count++;
 				}
 			}
 		} while (true);
-
-		ClassWriter writer = new ClassWriter(1);
-		node.accept(writer);
-		bytes = writer.toByteArray();
-		System.out.println("Successfully injected EntityLivingBase bytecode into: " + node.name + " (" + injectionCount + " / " + operationCount + ")");
+		
+		if (injectionCount != operationCount) {
+			System.out.println("Injection failed for " + node.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		} else {
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
+			node.accept(writer);
+			bytes = writer.toByteArray();
+			System.out.println("Injection successfull!");
+		}
 		return bytes;
 	}
 }

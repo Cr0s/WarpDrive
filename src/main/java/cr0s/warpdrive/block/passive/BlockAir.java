@@ -66,24 +66,24 @@ public class BlockAir extends Block
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		if (AIR_DEBUG) {
 			iconBuffer = new IIcon[16];
-			iconBuffer[ 0] = par1IconRegister.registerIcon("warpdrive:airBlock0");
-			iconBuffer[ 1] = par1IconRegister.registerIcon("warpdrive:airBlock1");
-			iconBuffer[ 2] = par1IconRegister.registerIcon("warpdrive:airBlock2");
-			iconBuffer[ 3] = par1IconRegister.registerIcon("warpdrive:airBlock3");
-			iconBuffer[ 4] = par1IconRegister.registerIcon("warpdrive:airBlock4");
-			iconBuffer[ 5] = par1IconRegister.registerIcon("warpdrive:airBlock5");
-			iconBuffer[ 6] = par1IconRegister.registerIcon("warpdrive:airBlock6");
-			iconBuffer[ 7] = par1IconRegister.registerIcon("warpdrive:airBlock7");
-			iconBuffer[ 8] = par1IconRegister.registerIcon("warpdrive:airBlock8");
-			iconBuffer[ 9] = par1IconRegister.registerIcon("warpdrive:airBlock9");
-			iconBuffer[10] = par1IconRegister.registerIcon("warpdrive:airBlock10");
-			iconBuffer[11] = par1IconRegister.registerIcon("warpdrive:airBlock11");
-			iconBuffer[12] = par1IconRegister.registerIcon("warpdrive:airBlock12");
-			iconBuffer[13] = par1IconRegister.registerIcon("warpdrive:airBlock13");
-			iconBuffer[14] = par1IconRegister.registerIcon("warpdrive:airBlock14");
-			iconBuffer[15] = par1IconRegister.registerIcon("warpdrive:airBlock15");
+			iconBuffer[ 0] = par1IconRegister.registerIcon("warpdrive:passive/airBlock0");
+			iconBuffer[ 1] = par1IconRegister.registerIcon("warpdrive:passive/airBlock1");
+			iconBuffer[ 2] = par1IconRegister.registerIcon("warpdrive:passive/airBlock2");
+			iconBuffer[ 3] = par1IconRegister.registerIcon("warpdrive:passive/airBlock3");
+			iconBuffer[ 4] = par1IconRegister.registerIcon("warpdrive:passive/airBlock4");
+			iconBuffer[ 5] = par1IconRegister.registerIcon("warpdrive:passive/airBlock5");
+			iconBuffer[ 6] = par1IconRegister.registerIcon("warpdrive:passive/airBlock6");
+			iconBuffer[ 7] = par1IconRegister.registerIcon("warpdrive:passive/airBlock7");
+			iconBuffer[ 8] = par1IconRegister.registerIcon("warpdrive:passive/airBlock8");
+			iconBuffer[ 9] = par1IconRegister.registerIcon("warpdrive:passive/airBlock9");
+			iconBuffer[10] = par1IconRegister.registerIcon("warpdrive:passive/airBlock10");
+			iconBuffer[11] = par1IconRegister.registerIcon("warpdrive:passive/airBlock11");
+			iconBuffer[12] = par1IconRegister.registerIcon("warpdrive:passive/airBlock12");
+			iconBuffer[13] = par1IconRegister.registerIcon("warpdrive:passive/airBlock13");
+			iconBuffer[14] = par1IconRegister.registerIcon("warpdrive:passive/airBlock14");
+			iconBuffer[15] = par1IconRegister.registerIcon("warpdrive:passive/airBlock15");
 		} else {
-			blockIcon = par1IconRegister.registerIcon("warpdrive:airBlock");
+			blockIcon = par1IconRegister.registerIcon("warpdrive:passive/airBlock");
 		}
 	}
 

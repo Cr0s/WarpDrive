@@ -27,14 +27,14 @@ public class WarpDriveConfig {
 	 */
 	public static boolean isForgeMultipartLoaded = false;
 	public static boolean isAdvancedSolarPanelLoaded = false;
-	public static boolean isAE2Loaded = false;
+	public static boolean isAppliedEnergistics2Loaded = false;
 	public static boolean isAtomicScienceLoaded = false;
 	public static boolean isICBMLoaded = false;
 	public static boolean isMFFSLoaded = false;
 	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isIndustrialCraft2loaded = false;
 	public static boolean isComputerCraftLoaded = false;
-	public static boolean isOCLoaded = false;
+	public static boolean isOpenComputersLoaded = false;
 	public static boolean isNetherOresLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
@@ -205,7 +205,7 @@ public class WarpDriveConfig {
 	// Air generator
 	public static int AG_RF_PER_CANISTER = 20;
 
-	// Reactor monitor
+	// IC2 Reactor monitor
 	public static int RM_MAX_ENERGY = 1000000;
 	public static double RM_EU_PER_HEAT = 2;
 
@@ -216,7 +216,7 @@ public class WarpDriveConfig {
 	// public static double TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
 	public static double TR_MAX_BOOST_MUL = 4.0;
 
-	// Power reactor
+	// Enantiomorphic Power reactor
 	public static int PR_MAX_ENERGY = 100000000;
 	public static int PR_TICK_TIME = 5;
 	public static int PR_MAX_LASERS = 6;
@@ -233,36 +233,26 @@ public class WarpDriveConfig {
 	public static int CL_MAX_ENERGY = 1000000;
 	public static int CL_MAX_DISTANCE = 2;
 	public static int CL_RF_PER_CHUNKTICK = 320;
-
-	public static ItemStack getIC2Item(String id) {
-		return new ItemStack((Item) Item.itemRegistry.getObject("IC2:" + id));
-	}
 	
-	public static Block getModBlock(String mod, String id)
-	{
-		try
-		{
+	public static Block getModBlock(final String mod, final String id) {
+		try {
 			return GameRegistry.findBlock(mod, id);
-		}
-		catch (Exception e)
-		{
-			WarpDrive.logger.info("WarpDriveConfig Call getModBlock failed for " + mod + ":" + id);
+		} catch (Exception exception) {
+			WarpDrive.logger.info("Failed to get mod block for " + mod + ":" + id);
+			exception.printStackTrace();
 		}
 		return null;
 	}
 	
-	public static ItemStack getModItem(String mod, String id, int meta)
-	{
-		try
-		{
-			ItemStack item = new ItemStack((Item) Item.itemRegistry.getObject(mod+ ":" + id));
-			if (meta != -1)
+	public static ItemStack getModItemStack(final String mod, final String id, final int meta) {
+		try {
+			ItemStack item = new ItemStack((Item) Item.itemRegistry.getObject(mod + ":" + id));
+			if (meta != -1) {
 				item.setItemDamage(meta);
+			}
 			return item;
-		}
-		catch (Exception e)
-		{
-			WarpDrive.logger.info("WarpDriveConfig Call getModItem failed for " + mod + ":" + id + ":" + meta);
+		} catch (Exception exception) {
+			WarpDrive.logger.info("Failed to get mod item for " + mod + ":" + id + ":" + meta);
 		}
 		return null;
 	}
@@ -551,8 +541,9 @@ public class WarpDriveConfig {
 		}
 
 		isMagicalCropsLoaded = Loader.isModLoaded("MagicalCrops");
-		isAE2Loaded = Loader.isModLoaded("appliedenergistics2");
-		isOCLoaded = Loader.isModLoaded("OpenComputers");
+		isAppliedEnergistics2Loaded = Loader.isModLoaded("appliedenergistics2");
+		isOpenComputersLoaded = Loader.isModLoaded("OpenComputers");
+		
 		//
 		minerOres.add(WarpDrive.blockIridium);
 		minerOres.add(Blocks.coal_ore);
@@ -643,41 +634,43 @@ public class WarpDriveConfig {
 
 	private static void loadIC2() {
 		try {
-			IC2_solarPanel = getIC2Item("blockGenerator");
-			IC2_solarPanel.setItemDamage(3);
+			IC2_solarPanel = getModItemStack("IC2", "blockGenerator", 3);
 			
-			spaceHelmets.add(getIC2Item("itemArmorHazmatHelmet").getItem());
-			spaceHelmets.add(getIC2Item("itemSolarHelmet").getItem());
-			spaceHelmets.add(getIC2Item("itemArmorNanoHelmet").getItem());
-			spaceHelmets.add(getIC2Item("itemArmorQuantumHelmet").getItem());
+			spaceHelmets.add(getModItemStack("IC2", "itemArmorHazmatHelmet", -1).getItem());
+			spaceHelmets.add(getModItemStack("IC2", "itemSolarHelmet", -1).getItem());
+			spaceHelmets.add(getModItemStack("IC2", "itemArmorNanoHelmet", -1).getItem());
+			spaceHelmets.add(getModItemStack("IC2", "itemArmorQuantumHelmet", -1).getItem());
 			
-			jetpacks.add(getIC2Item("itemArmorJetpack").getItem());
-			jetpacks.add(getIC2Item("itemArmorJetpackElectric").getItem());
+			jetpacks.add(getModItemStack("IC2", "itemArmorJetpack", -1).getItem());
+			jetpacks.add(getModItemStack("IC2", "itemArmorJetpackElectric", -1).getItem());
 			
-			IC2_empty = getIC2Item("itemCellEmpty");
-			IC2_air = getIC2Item("itemCellEmpty");
-			IC2_air.setItemDamage(5);
+			IC2_empty = getModItemStack("IC2", "itemCellEmpty", -1);
+			IC2_air = getModItemStack("IC2", "itemCellEmpty", 5);
 			
-			ItemStack rubberWood = getIC2Item("blockRubWood");
-			IC2_Resin = getIC2Item("itemHarz");
+			ItemStack rubberWood = getModItemStack("IC2", "blockRubWood", -1);
+			IC2_Resin = getModItemStack("IC2", "itemHarz", -1);
 			if (rubberWood != null) {
 				IC2_rubberWood = rubberWood;
-				minerOres.add(Block.getBlockFromItem(getIC2Item("rubberWood").getItem()));
+				minerOres.add(Block.getBlockFromItem(getModItemStack("IC2", "rubberWood", -1).getItem()));
 			}
-			ItemStack ore = getIC2Item("blockOreUran");
-			if (ore != null)
+			ItemStack ore = getModItemStack("IC2", "blockOreUran", -1);
+			if (ore != null) {
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			ore = getIC2Item("blockOreCopper");
-			if (ore != null)
+			}
+			ore = getModItemStack("IC2", "blockOreCopper", -1);
+			if (ore != null) {
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			ore = getIC2Item("blockOreTin");
-			if (ore != null)
+			}
+			ore = getModItemStack("IC2", "blockOreTin", -1);
+			if (ore != null) {
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			ore = getIC2Item("blockOreLead");
-			if (ore != null)
+			}
+			ore = getModItemStack("IC2", "blockOreLead", -1);
+			if (ore != null) {
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
+			}
 			
-			IC2_fluidCell = getIC2Item("itemFluidCell").getItem();
+			IC2_fluidCell = getModItemStack("IC2", "itemFluidCell", -1).getItem();
 		} catch (Exception exception) {
 			WarpDrive.logger.error("WarpDriveConfig Error loading IndustrialCraft2 classes");
 			exception.printStackTrace();
@@ -797,7 +790,7 @@ public class WarpDriveConfig {
 		if (isMoon) {
 			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
 				return getModBlock("IC2", "blockBasalt");
-			else if (isAE2Loaded && random.nextInt(10) == 1)
+			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
 				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
 			else if (random.nextInt(5) == 1) {
 				return Blocks.netherrack;
@@ -807,7 +800,7 @@ public class WarpDriveConfig {
 		} else {
 			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
 				return getModBlock("IC2", "blockBasalt");
-			else if (isAE2Loaded && random.nextInt(10) == 1)
+			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
 				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
 			else if (random.nextInt(6) == 1) {
 				return Blocks.netherrack;

@@ -30,7 +30,6 @@ public final class EntityCamera extends EntityLivingBase {
 	private Minecraft mc = Minecraft.getMinecraft();
 	
 	private int dx = 0, dy = 0, dz = 0;
-	private int zoomNumber = 0;
 	
 	private int closeWaitTicks = 0;
 	private int zoomWaitTicks = 0;
@@ -95,7 +94,7 @@ public final class EntityCamera extends EntityLivingBase {
 				zoomWaitTicks++;
 				if (zoomWaitTicks >= 2) {
 					zoomWaitTicks = 0;
-					zoom();
+					ClientCameraUtils.zoom();
 				}
 			} else {
 				zoomWaitTicks = 0;
@@ -162,23 +161,6 @@ public final class EntityCamera extends EntityLivingBase {
 	public void onUpdate() {
 		super.onUpdate();
 		this.motionX = this.motionY = this.motionZ = 0.0D;
-	}
-	
-	public void zoom() {
-		if (zoomNumber == 0) {
-			mc.gameSettings.fovSetting = -0.75F;
-			mc.gameSettings.mouseSensitivity = 0.4F;
-		} else if (zoomNumber == 1) {
-			mc.gameSettings.fovSetting = -1.25F;
-			mc.gameSettings.mouseSensitivity = 0.3F;
-		} else if (zoomNumber == 2) {
-			mc.gameSettings.fovSetting = -1.6F;
-			mc.gameSettings.mouseSensitivity = 0.15F;
-		} else if (zoomNumber == 3) {
-			mc.gameSettings.fovSetting = WarpDrive.normalFOV;
-			mc.gameSettings.mouseSensitivity = WarpDrive.normalSensitivity;
-		}
-		zoomNumber = (zoomNumber + 1) % 4;
 	}
 	
 	@Override

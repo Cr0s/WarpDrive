@@ -12,7 +12,7 @@ public class WorldGenStructure {
 			return Blocks.air;
 
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("blockAlloy").getItem());
+			return Block.getBlockFromItem(WarpDriveConfig.getModItemStack("IC2", "blockAlloy", -1).getItem());
 		} else {
 			return Blocks.stone;
 		}
@@ -23,7 +23,7 @@ public class WorldGenStructure {
 			return Blocks.air;
 
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			return Block.getBlockFromItem(WarpDriveConfig.getIC2Item("blockAlloyGlass").getItem());
+			return Block.getBlockFromItem(WarpDriveConfig.getModItemStack("IC2", "blockAlloyGlass", -1).getItem());
 		} else {
 			return Blocks.glass;
 		}
