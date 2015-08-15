@@ -47,8 +47,9 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 
     boolean ready = false;                // Ready to operate (valid assembly)
 
-    private int ticks = 0;
-    private final int BLOCK_UPDATE_INTERVAL = 20 * 3; // 3 seconds
+    private final int updateInterval_ticks = 20 * WarpDriveConfig.WC_CONTROLLER_UPDATE_INTERVAL_SECONDS;
+    private int updateTicks = updateInterval_ticks;
+    private int bootTicks = 20;
 
     private TileEntityShipCore core = null;
 
@@ -88,7 +89,17 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
             return;
         }
 
-        if (++ticks >= BLOCK_UPDATE_INTERVAL) {
+        // accelerate update ticks during boot
+        if (bootTicks > 0) {
+            bootTicks--;
+            if (core == null) {
+            	updateTicks = 1;
+            }
+        }
+        updateTicks--;
+        if (updateTicks <= 0) {
+            updateTicks = updateInterval_ticks;
+            
             core = findCoreBlock();
             if (core != null) {
             	if (mode.getCode() != getBlockMetadata()) {
@@ -97,8 +108,6 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
             } else if (getBlockMetadata() != 0) {
                 worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, 0, 1 + 2);  // Inactive
             }
-
-            ticks = 0;
         }
     }
 
@@ -403,26 +412,26 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
     }
 
     private TileEntityShipCore findCoreBlock() {
-    	TileEntity te;
+    	TileEntity tileEntity;
 
-    	te = worldObj.getTileEntity(xCoord + 1, yCoord, zCoord);
-        if (te != null && te instanceof TileEntityShipCore) {
-            return (TileEntityShipCore)te;
+    	tileEntity = worldObj.getTileEntity(xCoord + 1, yCoord, zCoord);
+        if (tileEntity != null && tileEntity instanceof TileEntityShipCore) {
+            return (TileEntityShipCore)tileEntity;
         }
 
-        te = worldObj.getTileEntity(xCoord - 1, yCoord, zCoord);
-        if (te != null && te instanceof TileEntityShipCore) {
-            return (TileEntityShipCore)te;
+        tileEntity = worldObj.getTileEntity(xCoord - 1, yCoord, zCoord);
+        if (tileEntity != null && tileEntity instanceof TileEntityShipCore) {
+            return (TileEntityShipCore)tileEntity;
         }
 
-        te = worldObj.getTileEntity(xCoord, yCoord, zCoord + 1);
-        if (te != null && te instanceof TileEntityShipCore) {
-            return (TileEntityShipCore)te;
+        tileEntity = worldObj.getTileEntity(xCoord, yCoord, zCoord + 1);
+        if (tileEntity != null && tileEntity instanceof TileEntityShipCore) {
+            return (TileEntityShipCore)tileEntity;
         }
 
-        te = worldObj.getTileEntity(xCoord, yCoord, zCoord - 1);
-        if (te != null && te instanceof TileEntityShipCore) {
-            return (TileEntityShipCore)te;
+        tileEntity = worldObj.getTileEntity(xCoord, yCoord, zCoord - 1);
+        if (tileEntity != null && tileEntity instanceof TileEntityShipCore) {
+            return (TileEntityShipCore)tileEntity;
         }
 
         return null;
