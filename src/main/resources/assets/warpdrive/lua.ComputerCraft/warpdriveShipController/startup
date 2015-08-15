@@ -368,8 +368,6 @@ else
  }
 end
 
-SetColorDeflt()
-
 Side = { "bottom", "top", "back", "left", "right" }
 for i = 1,5 do
  if peripheral.getType(Side[i]) == "warpdriveShipController" then
@@ -381,10 +379,13 @@ for i = 1,5 do
 end
 
 if warp == nil then
- ShowWarning("No warpcore controller detected")
+ ShowWarning("No ship controller detected")
  os.pullEvent("key")
  os.reboot()
 end
+print("Ship controller detected...")
+
+SetColorDeflt()
 
 if SData.Shipname == "" then
  SetShipName()
@@ -403,11 +404,13 @@ repeat
  pos = warp.pos()
  sleep(0.3)
 until pos ~= nil
+print("Ship core detected...")
 X, Y, Z = warp.pos()
 repeat
  isAttached = warp.isAttached()
  sleep(0.3)
 until isAttached ~= false
+print("Ship core linked...")
 
 repeat
  Weight = warp.getShipSize()
@@ -427,7 +430,7 @@ while(mainloop) do
  ShowMenu("D - Dimensions, M - Toggle summon, N - Ship name")
  ShowMenu("S - Set Warp Data, J - Jump, G - Jump to JumpGate")
  ShowMenu("B - Jump to Beacon, H - Jump to Hyperspace")
- ShowMenu("C - Summon crew, X - Shutdown WarpCore and Exit")
+ ShowMenu("C - Summon crew, X - Shutdown Controller and Exit")
  SetColorDeflt()
  local event, keycode = os.pullEvent("key")
  if keycode == 31 then

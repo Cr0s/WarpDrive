@@ -119,6 +119,7 @@ public class WarpDriveConfig {
 	public static int WC_WARMUP_LONGJUMP_SECONDS = 30;
 	public static int WC_WARMUP_RANDOM_TICKS = 60;
 	public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+	public static int WC_CONTROLLER_UPDATE_INTERVAL_SECONDS = 2;
 	public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
 	public static String[] WC_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
 	public static boolean WC_WARMUP_SICKNESS = true;
@@ -360,6 +361,8 @@ public class WarpDriveConfig {
 		WC_WARMUP_SICKNESS = config.get("WarpCore", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
 
 		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS,
+				"(measured in seconds)").getInt();
+		WC_CONTROLLER_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "controller_update_interval", WC_CONTROLLER_UPDATE_INTERVAL_SECONDS,
 				"(measured in seconds)").getInt();
 		WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS,
 				"(measured in seconds)").getInt();

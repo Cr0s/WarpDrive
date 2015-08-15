@@ -76,7 +76,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	public int randomWarmupAddition = 0;
 
 	private int chestTeleportUpdateTicks = 0;
-	private int registryUpdateTicks = 15;
+    private final int registryUpdateInterval_ticks = 20 * WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS;
+	private int registryUpdateTicks = 0;
+    private int bootTicks = 20;
 	public String coreFrequency = "default";
 
 	public int isolationBlocksCount = 0;
@@ -128,24 +130,31 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 
 		// Update warp core in cores registry
-		registryUpdateTicks++;
-		if (registryUpdateTicks > WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS * 20) {
-			registryUpdateTicks = 0;
+	       // accelerate update ticks during boot
+        if (bootTicks > 0) {
+            bootTicks--;
+            if (controller == null) {
+            	registryUpdateTicks = 1;
+            }
+        }
+		registryUpdateTicks--;
+		if (registryUpdateTicks <= 0) {
+			registryUpdateTicks = registryUpdateInterval_ticks;
 			WarpDrive.shipCores.updateInRegistry(this);
 			if (WarpDriveConfig.LOGGING_JUMP) {
 				WarpDrive.shipCores.printRegistry();
 				WarpDrive.logger.info(this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
 						+ (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
 			}
-
-			TileEntity c = findControllerBlock();
-			if (c == null) {
+			
+			TileEntity controllerFound = findControllerBlock();
+			if (controllerFound == null) {
 				controller = null;
 				warmupTime = 0;
 				soundPlayed = false;
 				return;
 			}
-			controller = (TileEntityShipController) c;
+			controller = (TileEntityShipController) controllerFound;
 		}
 
 		isolationUpdateTicks++;
