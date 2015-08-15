@@ -17,13 +17,13 @@ public class CommandJumpgates extends CommandBase {
 	}
 
 	@Override
-	public String getCommandUsage(ICommandSender icommandsender) {
+	public String getCommandUsage(ICommandSender commandSender) {
 		return "Lists jumpgates";
 	}
 
 	@Override
-	public void processCommand(ICommandSender icommandsender, String[] astring) {
-		EntityPlayerMP player = (EntityPlayerMP) icommandsender;
-		WarpDrive.addChatMessage(player, WarpDrive.jumpgates.commaList());
+	public void processCommand(ICommandSender commandSender, String[] astring) {
+		EntityPlayerMP player = (EntityPlayerMP) commandSender;
+		WarpDrive.addChatMessage(player, "Jumpgates: " + WarpDrive.jumpgates.commaList());
 	}
 }

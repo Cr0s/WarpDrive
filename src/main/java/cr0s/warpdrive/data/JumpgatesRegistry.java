@@ -124,8 +124,12 @@ public final class JumpgatesRegistry {
     
     public String commaList() {
     	String result = "";
-    	for (Jumpgate jg : gates) {
-    		result += jg.toNiceString() + ",";
+    	if (gates.isEmpty()) {
+    		result += "<none> (check /generate to create one)";
+    	} else {
+	    	for (Jumpgate jg : gates) {
+	    		result += jg.toNiceString() + ",";
+	    	}
     	}
     	return result;
     }
