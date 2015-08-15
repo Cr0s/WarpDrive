@@ -271,8 +271,8 @@ end
 
 function SetDimensions()
  Clear()
- sleep(0.3)
  ShowTitle("<==== Set dimensions ====>")
+ sleep(0.3)
  term.write(" Front ("..GFront..") : ")
  GFront = tonumber(read())
  term.write(" Right ("..GRight..") : ")
@@ -401,21 +401,23 @@ GFront, GRight, GUp = warp.dim_positive()
 GBack, GLeft, GDown = warp.dim_negative()
 IsInHyper = warp.isInHyperspace()
 repeat
- pos = warp.pos()
  sleep(0.3)
+ pos = warp.pos()
 until pos ~= nil
 print("Ship core detected...")
 X, Y, Z = warp.pos()
+
 repeat
- isAttached = warp.isAttached()
  sleep(0.3)
-until isAttached ~= false
+ isAttached = warp.isAttached()
+until not isAttached
 print("Ship core linked...")
 
 repeat
- Weight = warp.getShipSize()
  sleep(0.3)
-until Weight ~= nil 
+ Weight = warp.getShipSize()
+until Weight ~= nil
+print("Ship weight updated...")
 
 CalcRealDistance()
 
