@@ -973,6 +973,8 @@ public class WarpDrive implements LoadingCallback {
 					mapping.remap(itemAirCanisterFull);
 				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
 					mapping.remap(Item.getItemFromBlock(blockAirGenerator));
+				} else if (mapping.name.equals("WarpDrive:blockHAMachine")) {
+					mapping.remap(Item.getItemFromBlock(blockHighlyAdvancedMachine));
 				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
 					mapping.remap(Item.getItemFromBlock(blockLaserMedium));
 				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
@@ -1037,6 +1039,8 @@ public class WarpDrive implements LoadingCallback {
 					mapping.remap(blockAir);
 				} else if (mapping.name.equals("WarpDrive:airgenBlock")) {
 					mapping.remap(blockAirGenerator);
+				} else if (mapping.name.equals("WarpDrive:blockHAMachine")) {
+					mapping.remap(blockHighlyAdvancedMachine);
 				} else if (mapping.name.equals("WarpDrive:boosterBlock")) {
 					mapping.remap(blockLaserMedium);
 				} else if (mapping.name.equals("WarpDrive:cameraBlock")) {
