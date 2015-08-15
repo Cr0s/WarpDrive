@@ -7,7 +7,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 
 import org.lwjgl.input.Keyboard;
@@ -21,9 +20,9 @@ public final class EntityCamera extends EntityLivingBase {
 	// entity coordinates (x, y, z) are dynamically changed by player
 	
 	// camera block coordinates are fixed
-	public int xCoord;
-	public int yCoord;
-	public int zCoord;
+	public int cameraX;
+	public int cameraY;
+	public int cameraZ;
 	
 	private EntityPlayer player;
 	
@@ -39,22 +38,16 @@ public final class EntityCamera extends EntityLivingBase {
 	
 	private boolean isCentered = true;
 	
-	public EntityCamera(World world) {
-		super(world);
-	}
-	
-	public EntityCamera(World world, ChunkPosition pos, EntityPlayer player) {
+	public EntityCamera(World world, final int x, final int y, final int z, EntityPlayer player) {
 		super(world);
 		setInvisible(true);
-		int x = pos.chunkPosX;
-		int y = pos.chunkPosY;
-		int z = pos.chunkPosZ;
-		xCoord = x;
+		// yOffset = 1.9F; // set viewpoint inside camera (requires a 3D model of the camera)
 		posX = x;
-		yCoord = y;
 		posY = y;
-		zCoord = z;
 		posZ = z;
+		cameraX = x;
+		cameraY = y;
+		cameraZ = z;
 		this.player = player;
 	}
 	
@@ -63,7 +56,7 @@ public final class EntityCamera extends EntityLivingBase {
 			return;
 		}
 		
-		ClientCameraUtils.resetViewpoint();
+		ClientCameraHandler.resetViewpoint();
 		worldObj.removeEntity(this);
 		isActive = false;
 	}
@@ -76,25 +69,25 @@ public final class EntityCamera extends EntityLivingBase {
 				closeCamera();
 				return;
 			}
-			if (!ClientCameraUtils.isValidContext(worldObj)) {
+			if (!ClientCameraHandler.isValidContext(worldObj)) {
 				WarpDrive.logger.error(this + " Invalid context, closing camera...");
 				closeCamera();
 				return;
 			}
 			
-			Block block = worldObj.getBlock(xCoord, yCoord, zCoord);
+			Block block = worldObj.getBlock(cameraX, cameraY, cameraZ);
 			mc.renderViewEntity.rotationYaw = player.rotationYaw;
-			//mc.renderViewEntity.rotationYawHead = player.rotationYawHead;
+			// mc.renderViewEntity.rotationYawHead = player.rotationYawHead;
 			mc.renderViewEntity.rotationPitch = player.rotationPitch;
 			
-			WarpDrive.instance.debugMessage = "Mouse " + Mouse.isButtonDown(0) + " " + Mouse.isButtonDown(1) + " " + Mouse.isButtonDown(2) + " " + Mouse.isButtonDown(3) + "\nBackspace "
+			ClientCameraHandler.overlayLoggingMessage = "Mouse " + Mouse.isButtonDown(0) + " " + Mouse.isButtonDown(1) + " " + Mouse.isButtonDown(2) + " " + Mouse.isButtonDown(3) + "\nBackspace "
 					+ Keyboard.isKeyDown(Keyboard.KEY_BACKSLASH) + " Space " + Keyboard.isKeyDown(Keyboard.KEY_SPACE) + " Shift " + "";
 			// Perform zoom
 			if (Mouse.isButtonDown(0)) {// FIXME merge: main is using right click with Mouse.isButtonDown(1), branch is using left click
 				zoomWaitTicks++;
 				if (zoomWaitTicks >= 2) {
 					zoomWaitTicks = 0;
-					ClientCameraUtils.zoom();
+					ClientCameraHandler.zoom();
 				}
 			} else {
 				zoomWaitTicks = 0;
@@ -121,7 +114,7 @@ public final class EntityCamera extends EntityLivingBase {
 					
 					// Make a shoot with camera-laser
 					if (block.isAssociatedBlock(WarpDrive.blockLaserCamera)) {
-						PacketHandler.sendLaserTargetingPacket(xCoord, yCoord, zCoord, mc.renderViewEntity.rotationYaw, mc.renderViewEntity.rotationPitch);
+						PacketHandler.sendLaserTargetingPacket(cameraX, cameraY, cameraZ, mc.renderViewEntity.rotationYaw, mc.renderViewEntity.rotationPitch);
 					}
 				}
 			} else {
@@ -150,9 +143,9 @@ public final class EntityCamera extends EntityLivingBase {
 			}
 			
 			if (isCentered) {
-				setPosition(xCoord + 0.5D, yCoord + 0.75D, zCoord + 0.5D);
+				setPosition(cameraX + 0.5D, cameraY + 0.75D, cameraZ + 0.5D);
 			} else {
-				setPosition(xCoord + dx, yCoord + dy, zCoord + dz);
+				setPosition(cameraX + dx, cameraY + dy, cameraZ + dz);
 			}
 		}
 	}
@@ -171,17 +164,17 @@ public final class EntityCamera extends EntityLivingBase {
 	@Override
 	public void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		// nothing to save, skip ancestor call
-		xCoord = nbttagcompound.getInteger("x");
-		yCoord = nbttagcompound.getInteger("y");
-		zCoord = nbttagcompound.getInteger("z");
+		cameraX = nbttagcompound.getInteger("x");
+		cameraY = nbttagcompound.getInteger("y");
+		cameraZ = nbttagcompound.getInteger("z");
 	}
 	
 	@Override
 	public void writeEntityToNBT(NBTTagCompound nbttagcompound) {
 		// nothing to save, skip ancestor call
-		nbttagcompound.setInteger("x", xCoord);
-		nbttagcompound.setInteger("y", yCoord);
-		nbttagcompound.setInteger("z", zCoord);
+		nbttagcompound.setInteger("x", cameraX);
+		nbttagcompound.setInteger("y", cameraY);
+		nbttagcompound.setInteger("z", cameraZ);
 	}
 	
 	@Override

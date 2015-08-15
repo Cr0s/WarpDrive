@@ -16,6 +16,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CameraRegistryItem;
+import cr0s.warpdrive.render.ClientCameraHandler;
 
 public class BlockLaserCamera extends BlockContainer {
 	private IIcon[] iconBuffer;
@@ -67,22 +68,22 @@ public class BlockLaserCamera extends BlockContainer {
 	 * Called upon block activation (right click on the block.)
 	 */
 	@Override
-	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer entityPlayer, int par6, float par7, float par8, float par9) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
 
 		// Get camera frequency
-		TileEntity te = par1World.getTileEntity(x, y, z);
-		if (!WarpDrive.instance.isOverlayEnabled && te != null && te instanceof TileEntityLaser && (par5EntityPlayer.getHeldItem() == null)) {
-			int beamFrequency = ((TileEntityLaser)te).getBeamFrequency();
-			int cameraFrequency = ((TileEntityLaser)te).getCameraFrequency();
+		TileEntity tileEntity = par1World.getTileEntity(x, y, z);
+		if (!ClientCameraHandler.isOverlayEnabled && tileEntity != null && tileEntity instanceof TileEntityLaser && (entityPlayer.getHeldItem() == null)) {
+			int beamFrequency = ((TileEntityLaser)tileEntity).getBeamFrequency();
+			int cameraFrequency = ((TileEntityLaser)tileEntity).getCameraFrequency();
 
-			CameraRegistryItem cam = WarpDrive.instance.cameras.getCamByFrequency(par1World, cameraFrequency);
-			if (WarpDriveConfig.LOGGING_WEAPON) {
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, cameraFrequency);
+			if (WarpDriveConfig.LOGGING_CAMERA) {
 				WarpDrive.logger.info("Camera detected as " + cam);
 			}
-			WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName()
+			WarpDrive.addChatMessage(entityPlayer, getLocalizedName()
 					+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.")
 					+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
 			return true;

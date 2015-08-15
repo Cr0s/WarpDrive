@@ -106,7 +106,8 @@ import cr0s.warpdrive.item.ItemHelmet;
 import cr0s.warpdrive.item.ItemComponent;
 import cr0s.warpdrive.item.ItemUpgrade;
 import cr0s.warpdrive.network.PacketHandler;
-import cr0s.warpdrive.render.CameraOverlay;
+import cr0s.warpdrive.render.ClientCameraHandler;
+import cr0s.warpdrive.render.RenderOverlayCamera;
 import cr0s.warpdrive.world.BiomeSpace;
 import cr0s.warpdrive.world.HyperSpaceProvider;
 import cr0s.warpdrive.world.HyperSpaceWorldGenerator;
@@ -167,9 +168,6 @@ public class WarpDrive implements LoadingCallback {
 	public World hyperSpace;
 
 	// Client settings
-	public static float normalFOV = 70.0F;
-	public static float normalSensitivity = 1.0F;
-
 	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
 
 	@Instance(WarpDrive.MODID)
@@ -182,10 +180,6 @@ public class WarpDrive implements LoadingCallback {
 	public static CloakManager cloaks;
 
 	public static CamerasRegistry cameras;
-	public boolean isOverlayEnabled = false;
-	public int overlayType = 0;
-	public static int zoomIndex = 0;
-	public String debugMessage = "";
 
 	public static WarpDrivePeripheralHandler peripheralHandler = null;
 
@@ -201,17 +195,11 @@ public class WarpDrive implements LoadingCallback {
 		
 		logger = event.getModLog();
 		
-		// TODO: clarify best approach
-		// option 1: we register values when opening a monitor => balance issue with cascading monitors
-		// option 2: we record values at boot, and stick to them => starting bad, remains bad + changing config won't work until client gets restarted
 		if (FMLCommonHandler.instance().getSide().isClient()) {
-			Minecraft mc = Minecraft.getMinecraft();
-		
-			normalFOV = mc.gameSettings.fovSetting;
-			normalSensitivity = mc.gameSettings.mouseSensitivity;
-			logger.info("FOV is " + normalFOV + " Sensitivity is " + normalSensitivity);
+			MinecraftForge.EVENT_BUS.register(new RenderOverlayCamera(Minecraft.getMinecraft()));
+			
+			FMLCommonHandler.instance().bus().register(new ClientCameraHandler());
 		}
-		
 	}
 
 	@EventHandler
@@ -414,7 +402,6 @@ public class WarpDrive implements LoadingCallback {
 
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			creativeTabWarpDrive.setBackgroundImageName("items.png");
-			MinecraftForge.EVENT_BUS.register(new CameraOverlay(Minecraft.getMinecraft()));
 		}
 
 		if (WarpDriveConfig.isComputerCraftLoaded) {

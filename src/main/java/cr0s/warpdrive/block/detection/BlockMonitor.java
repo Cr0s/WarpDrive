@@ -13,8 +13,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.data.CameraRegistryItem;
-import cr0s.warpdrive.render.ClientCameraUtils;
-import cr0s.warpdrive.render.EntityCamera;
+import cr0s.warpdrive.render.ClientCameraHandler;
 
 public class BlockMonitor extends BlockContainer {
 	private IIcon iconFront;
@@ -61,7 +60,7 @@ public class BlockMonitor extends BlockContainer {
 	 * Called upon block activation (right click on the block.)
 	 */
 	@Override
-	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer entityPlayer, int par6, float par7, float par8, float par9) {
 		// Monitor is only reacting client side
 		if (!FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
@@ -70,21 +69,18 @@ public class BlockMonitor extends BlockContainer {
 		// Get camera frequency
 		TileEntity te = par1World.getTileEntity(x, y, z);
 
-		if (te != null && te instanceof TileEntityMonitor && (par5EntityPlayer.getHeldItem() == null)) {
+		if (te != null && te instanceof TileEntityMonitor && (entityPlayer.getHeldItem() == null)) {
 			int frequency = ((TileEntityMonitor)te).getFrequency();
-			CameraRegistryItem cam = WarpDrive.instance.cameras.getCamByFrequency(par1World, frequency);
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, frequency);
 			if (cam == null) {
-				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is invalid or camera is too far!");
+				WarpDrive.addChatMessage(entityPlayer, getLocalizedName() + " frequency '" + frequency + "' is invalid or camera is too far!");
 				return false;
 			} else {
-				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is valid. Viewing camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ);
-				// Spawn camera entity
-				EntityCamera e = new EntityCamera(par1World, cam.position, par5EntityPlayer);
-				par1World.spawnEntityInWorld(e);
-				e.setPositionAndUpdate(cam.position.chunkPosX + 0.5D, cam.position.chunkPosY + 0.5D, cam.position.chunkPosZ + 0.5D);
-				//e.setPositionAndRotation(camPos.x, camPos.y, camPos.z, entityplayer.rotationYaw, entityplayer.rotationPitch);
-				WarpDrive.instance.overlayType = cam.type;
-				ClientCameraUtils.setupViewpoint(par5EntityPlayer, e, x, y, z, this, cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ, par1World.getBlock(cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ));
+				WarpDrive.addChatMessage(entityPlayer, "Viewing camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ + " on frequency " + frequency);
+				ClientCameraHandler.setupViewpoint(
+						cam.type, entityPlayer, entityPlayer.rotationYaw, entityPlayer.rotationPitch,
+						x, y, z, this,
+						cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ, par1World.getBlock(cam.position.chunkPosX, cam.position.chunkPosY, cam.position.chunkPosZ));
 			}
 		}
 

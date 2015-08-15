@@ -17,9 +17,9 @@ import cr0s.warpdrive.data.CameraRegistryItem;
 
 public class BlockCamera extends BlockContainer {
 	private IIcon[] iconBuffer;
-
+	
 	private final int ICON_SIDE = 0;
-
+	
 	public BlockCamera(int texture, Material material) {
 		super(material);
 		setHardness(0.5F);
@@ -27,55 +27,46 @@ public class BlockCamera extends BlockContainer {
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.detection.Camera");
 	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[1];
 		// Solid textures
 		iconBuffer[ICON_SIDE] = par1IconRegister.registerIcon("warpdrive:detection/cameraSide");
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		return iconBuffer[ICON_SIDE];
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World parWorld, int i) {
 		return new TileEntityCamera();
 	}
-
-	/**
-	 * Returns the quantity of items to drop on block destruction.
-	 */
+	
 	@Override
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
-	/**
-	 * Returns the ID of the items to drop on destruction.
-	 */
+	
 	@Override
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
 	}
-
-	/**
-	 * Called upon block activation (right click on the block.)
-	 */
+	
 	@Override
 	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
+		
 		// Get camera frequency
 		TileEntity te = par1World.getTileEntity(x, y, z);
 		if (te != null && te instanceof TileEntityCamera && (par5EntityPlayer.getHeldItem() == null)) {
 			int frequency = ((TileEntityCamera)te).getFrequency();
-
-			CameraRegistryItem cam = WarpDrive.instance.cameras.getCamByFrequency(par1World, frequency);
+			
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, frequency);
 			if (cam == null) {
 				WarpDrive.instance.cameras.printRegistry(par1World);
 				WarpDrive.addChatMessage(par5EntityPlayer, getLocalizedName() + " Frequency '" + frequency + "' is invalid!");
@@ -84,7 +75,7 @@ public class BlockCamera extends BlockContainer {
 			}
 			return true;
 		}
-
+		
 		return false;
 	}
 }

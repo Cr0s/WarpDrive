@@ -16,7 +16,7 @@ public class CamerasRegistry {
 		registry = new LinkedList<CameraRegistryItem>();
 	}
 
-	public CameraRegistryItem getCamByFrequency(World worldObj, int frequency) {
+	public CameraRegistryItem getCameraByFrequency(World worldObj, int frequency) {
 		CameraRegistryItem cam = null;
 		for (Iterator<CameraRegistryItem> it = registry.iterator(); it.hasNext();) {
 			cam = it.next();

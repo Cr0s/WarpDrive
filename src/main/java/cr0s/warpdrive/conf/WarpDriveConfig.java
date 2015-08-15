@@ -91,6 +91,7 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_FREQUENCY = false;
 	public static boolean LOGGING_TARGETTING = false;
 	public static boolean LOGGING_WEAPON = false;
+	public static boolean LOGGING_CAMERA = false;
 	public static boolean LOGGING_BUILDING = false;
 	public static boolean LOGGING_COLLECTION = false;
 	public static boolean LOGGING_TRANSPORTER = false;
@@ -304,6 +305,7 @@ public class WarpDriveConfig {
 			LOGGING_TARGETTING = false;
 		}
 		LOGGING_WEAPON = config.get("Logging", "enable_weapon_logs", LOGGING_WEAPON, "Detailled weapon logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_CAMERA = config.get("Logging", "enable_camera_logs", LOGGING_CAMERA, "Detailled camera logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_BUILDING = config.get("Logging", "enable_building_logs", LOGGING_BUILDING, "Detailled building logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_COLLECTION = config.get("Logging", "enable_collection_logs", LOGGING_COLLECTION, "Detailled collection logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_TRANSPORTER = config.get("Logging", "enable_transporter_logs", LOGGING_TRANSPORTER, "Detailled transporter logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
