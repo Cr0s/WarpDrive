@@ -14,7 +14,7 @@ import org.w3c.dom.NodeList;
 
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.InvalidXmlException;
-import cr0s.warpdrive.conf.OreManager.OreSpawnValue;
+import cr0s.warpdrive.conf.OreManager.OreSpawnCategory;
 import cr0s.warpdrive.conf.XmlRepresentable;
 
 public abstract class Orb extends DeployableStructure implements XmlRepresentable {
@@ -177,7 +177,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 					int weight = Integer.parseInt(cat.getAttribute("weight"));
 					String oreSpawnCategory = cat.getAttribute("category");
 
-					if (OreSpawnValue.getOreSpawnValue(oreSpawnCategory) == null)
+					if (OreSpawnCategory.getOreSpawnValue(oreSpawnCategory) == null)
 						throw new InvalidXmlException("Shell has an invalid ores category!");
 					
 					if (weight < 1)
@@ -206,7 +206,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 				}
 				
 				for(Entry<String, Integer> category : categoryTemp.entrySet()) {
-					OreSpawnValue value = OreSpawnValue.getOreSpawnValue(category.getKey());
+					OreSpawnCategory value = OreSpawnCategory.getOreSpawnValue(category.getKey());
 					for (Entry<Block, Integer> compBlock : value.getOres()) {
 						
 						int reduced = category.getValue() * compBlock.getValue() / value.getTotalWeight();
