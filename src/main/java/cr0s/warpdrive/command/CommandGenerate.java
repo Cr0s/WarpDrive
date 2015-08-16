@@ -52,7 +52,7 @@ public class CommandGenerate extends CommandBase {
 			if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 				if (struct.equals("moon")) {
 					WarpDrive.logger.info("/generate: generating moon at " + x + ", " + (y - 16) + ", " + z);
-					WarpDrive.instance.spaceWorldGenerator.generateMoon(player.worldObj, x, y - 16, z);
+					WarpDrive.instance.spaceWorldGenerator.generateMoon(player.worldObj, x, y - 16, z, null);
 				} else if (struct.equals("ship")) {
 					WarpDrive.logger.info("/generate: generating NPC ship at " + x + ", " + y + ", " + z);
 					new WorldGenSmallShip(false).generate(player.worldObj, player.worldObj.rand, x, y, z);
@@ -67,11 +67,12 @@ public class CommandGenerate extends CommandBase {
 					WarpDrive.instance.spaceWorldGenerator.generateAsteroidField(player.worldObj, x, y, z);
 				} else if (struct.equals("gascloud")) {
 					WarpDrive.logger.info("/generate: generating gas cloud at " + x + ", " + y + ", " + z);
-					WarpDrive.instance.spaceWorldGenerator.generateGasCloudOfColor(player.worldObj, x, y, z, 15, 20, player.worldObj.rand.nextInt(12));
+					String type = (params.length > 1) ? params[1] : null;
+					WarpDrive.instance.spaceWorldGenerator.generateGasCloudOfColor(player.worldObj, x, y, z, 15, 20, type);
 				} else if (struct.equals("star")) {
 					WarpDrive.logger.info("/generate: generating star at " + x + ", " + y + ", " + z);
-					Integer type = (params.length > 1) ? Integer.parseInt(params[1]) : -1; // Lem
-					WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z, type); // Lem
+					String type = (params.length > 1) ? params[1] : null;
+					WarpDrive.instance.spaceWorldGenerator.generateStar(player.worldObj, x, y, z, type);
 				} else if (struct.equals("jumpgate")) {
 					if (params.length == 2) {
 						WarpDrive.logger.info("/generate: creating jumpgate at " + x + ", " + y + ", " + z);

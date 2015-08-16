@@ -16,6 +16,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.InvalidXmlException;
 import cr0s.warpdrive.conf.OreManager.OreSpawnCategory;
 import cr0s.warpdrive.conf.XmlRepresentable;
+import cr0s.warpdrive.world.EntitySphereGen;
 
 public abstract class Orb extends DeployableStructure implements XmlRepresentable {
 	
@@ -54,8 +55,14 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 	}
 	
 	@Override
-	public boolean generate(World p_76484_1_, Random p_76484_2_, int p_76484_3_, int p_76484_4_, int p_76484_5_) {
-		// TODO Auto-generated method stub
+	public boolean generate(World world, Random p_76484_2_, int x, int y, int z) {
+		EntitySphereGen entitySphereGen = new EntitySphereGen(world, x, y, z, getHeight() / 2, this, true);
+		world.spawnEntityInWorld(entitySphereGen);
+		return false;
+	}
+	public boolean generate(World world, Random p_76484_2_, int x, int y, int z, final int radius) {
+		EntitySphereGen entitySphereGen = new EntitySphereGen(world, x, y, z, radius, this, true);
+		world.spawnEntityInWorld(entitySphereGen);
 		return false;
 	}
 	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,41 +23,34 @@ public class StructureManager {
 	private static ArrayList<Planetoid> moons = new ArrayList<Planetoid>();
 
 	public static void loadStructures(String structureConfDir) {
+		File dir = new File(structureConfDir);
 		
-		loadStructures(new File(structureConfDir));
-
-	}
-
-	public static void loadStructures(File dir) {
 		dir.mkdir();
 		
-		if (!dir.isDirectory())
-			throw new IllegalArgumentException("File path " + dir.getPath() + " must be a drectory!");
+		if (!dir.isDirectory()) {
+			throw new IllegalArgumentException("File path " + dir.getPath() + " must be a directory!");
+		}
 		
 		File[] files = dir.listFiles(new FilenameFilter() {
-
 			@Override
-			public boolean accept(File dir, String name) {
+			public boolean accept(File file_notUsed, String name) {
 				return name.startsWith("structure") && name.endsWith(".xml");
 			}
-			
 		});
 		
-		for (File f : files) {
-			
+		for (File file : files) {
 			try {
 				
-				WarpDrive.logger.info("Loading structure data file " + f.getPath());
+				WarpDrive.logger.info("Loading structure data file " + file.getPath());
 				
-				loadXmlStructureFile(f);
+				loadXmlStructureFile(file);
 				
-				WarpDrive.logger.info("Finished loading structure data file " + f.getPath());
+				WarpDrive.logger.info("Finished loading structure data file " + file.getPath());
 				
 			} catch (Exception e) {
-				WarpDrive.logger.error("Error loading file " + f.getPath() + ": " + e.getMessage());
+				WarpDrive.logger.error("Error loading file " + file.getPath() + ": " + e.getMessage());
 				e.printStackTrace();
 			}
-			
 		}
 	}
 	
@@ -68,8 +62,9 @@ public class StructureManager {
 			NodeList mods = ((Element) modReqList.item(i)).getElementsByTagName("mod");
 			for (int j = 0; j < mods.getLength(); j++) {
 				Element mod = (Element) mods.item(j);
-				if (!mod.hasAttribute("name"))
+				if (!mod.hasAttribute("name")) {
 					throw new InvalidXmlException("A mod requirement at " + i + ":" + j + " is missing the name attribute!");
+				}
 
 				String name = mod.getAttribute("name");
 				if (!Loader.isModLoaded(name)) {
@@ -97,18 +92,47 @@ public class StructureManager {
 				throw new InvalidXmlException("Structure radius is invalid!");
 			}
 
-			if(type.equalsIgnoreCase("star")) {
+			if (type.equalsIgnoreCase("star")) {
 				Star s = new Star(radius);
 				s.loadFromXmlElement(struct);
 				stars.add(s);
 			} else if(type.equalsIgnoreCase("moon")) {
 				Planetoid pl = new Planetoid(radius);
 				pl.loadFromXmlElement(struct);
-
 			}
-
 		}
-
 	}
 
+	public static DeployableStructure getStructure(Random random, final String name, final String type) {
+		if (name == null || name.length() == 0) {
+			if (type == null || type.length() == 0) {
+				return stars.get(random.nextInt(stars.size()));
+			} else if (type.equalsIgnoreCase("star")) {
+				return stars.get(random.nextInt(stars.size()));
+			} else if (type.equalsIgnoreCase("moon")) {
+				return moons.get(random.nextInt(moons.size()));
+			}
+		} else {
+			for (Star star : stars) {
+				// if (star.getName().equalsIgnoreCase(name)) { FIXME add a name property so we can refer to it
+					return star;
+				// }
+			}
+		}
+		
+		// not found or nothing defined => return null
+		return null;
+	}
+
+	public static DeployableStructure getStar(Random random, final String name) {
+		return getStructure(random, name, "star");
+	}
+
+	public static DeployableStructure getMoon(Random random, final String name) {
+		return getStructure(random, name, "moon");
+	}
+
+	public static DeployableStructure getGasCloud(Random random, final String name) {
+		return getStructure(random, name, "cloud");
+	}
 }
