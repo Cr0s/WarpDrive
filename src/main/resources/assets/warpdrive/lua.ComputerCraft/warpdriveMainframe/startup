@@ -261,6 +261,8 @@ function readInputNumber(currentValue)
 			end
 		elseif eventName == "char" then
 			-- drop it
+		elseif eventName == "key_up" then
+			-- drop it
 		elseif eventName == "terminate" then
 			inputAbort = true
 		elseif not common_event(eventName, params[2]) then
@@ -308,6 +310,8 @@ function readInputText(currentValue)
 			else
 				ShowWarning("Char #" .. string.byte(char) .. " is invalid")
 			end
+		elseif eventName == "key_up" then
+			-- drop it
 		elseif eventName == "terminate" then
 			inputAbort = true
 		elseif not common_event(eventName, params[2]) then
@@ -337,6 +341,9 @@ function readConfirmation()
 				return false
 			end
 		elseif eventName == "char" then
+			-- drop it
+		elseif eventName == "key_up" then
+			-- drop it
 		elseif eventName == "terminate" then
 			return false
 		elseif not common_event(eventName, params[2]) then
@@ -1840,10 +1847,10 @@ for key,side in pairs(sides) do
 	elseif peripheral.getType(side) == "warpdriveShipController" then
 		WriteLn("Wrapping " .. side)
 		warpcore = peripheral.wrap(side)
-	elseif peripheral.getType(side) == "warpdrivePowerReactor" then
+	elseif peripheral.getType(side) == "warpdriveEnanReactorCore" then
 		WriteLn("Wrapping " .. side)
 		reactor =  peripheral.wrap(side)
-	elseif peripheral.getType(side) == "warpdrivePowerLaser" then
+	elseif peripheral.getType(side) == "warpdriveEnanReactorLaser" then
 		WriteLn("Wrapping " .. side)
 		table.insert(reactorlasers, peripheral.wrap(side))
 	elseif peripheral.getType(side) == "warpdriveMiningLaser" then
@@ -1889,10 +1896,10 @@ function connections_page()
 
 	if reactor == nil then
 		SetColorDisabled()
-		WriteLn("No reactor detected")
+		WriteLn("No Enantiomorphic reactor detected")
 	else
 		SetColorSuccess()
-		WriteLn("Warpcore reactor detected")
+		WriteLn("Enantiomorphic reactor detected")
 	end
 
 	if #reactorlasers == 0 then
@@ -2004,6 +2011,8 @@ repeat
 		-- func(unpack(params))
 		-- abort, refresh = false, false
 	elseif eventName == "char" then
+		-- drop it
+	elseif eventName == "key_up" then
 		-- drop it
 	elseif eventName == "reactorPulse" then
 		reactor_pulse(params[2])
