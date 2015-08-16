@@ -1,5 +1,6 @@
 package cr0s.warpdrive.world;
 
+import java.awt.Color;
 import java.util.Random;
 
 import net.minecraft.block.Block;
@@ -10,6 +11,11 @@ import cpw.mods.fml.common.IWorldGenerator;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.conf.structures.GasCloud;
+import cr0s.warpdrive.conf.structures.Orb;
+import cr0s.warpdrive.conf.structures.Planetoid;
+import cr0s.warpdrive.conf.structures.Star;
+import cr0s.warpdrive.conf.structures.StructureManager;
 
 /**
  * @author Cr0s
@@ -54,7 +60,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int y = Y_LIMIT_SOFT_MIN + random.nextInt(Y_LIMIT_SOFT_MAX - Y_LIMIT_SOFT_MIN);
 		// Moon setup
 		if (random.nextInt(700) == 1)
-			generateMoon(world, x, y, z);
+			generateMoon(world, x, y, z, null);
 		// Simple asteroids
 		else if (random.nextInt(150) == 1) {
 			generateAsteroidOfBlock(world, x, y, z, 6, 11, null, 0);
@@ -62,7 +68,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		} else if (random.nextInt(400) == 1) {
 			generateRandomAsteroid(world, x, y, z, 6, 11);
 			if (random.nextBoolean()) {
-				generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
+				generateGasCloudOfColor(world, x, y, z, 6, 11, getRandomColor(random));
 			}
 		} else if (random.nextInt(200) == 1) {// Ice asteroid
 			generateAsteroidOfBlock(world, x, y, z, 6, 11, Blocks.ice, 0);
@@ -73,117 +79,31 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			// Diamond block core
 			world.setBlock(x, y, z, Blocks.diamond_block, 0, 2);
 			if (random.nextBoolean()) {
-				generateGasCloudOfColor(world, x, y, z, 6, 11, random.nextInt(12));
+				generateGasCloudOfColor(world, x, y, z, 6, 11, getRandomColor(random));
 			}
 		}
 	}
 
-	public static void generateMoon(World world, int x, int y, int z) {
-		int coreRadius = 5 + world.rand.nextInt(12);
-		int moonRadius = coreRadius + 5 + world.rand.nextInt(26);
-		int y2 = Math.max(moonRadius + 6, Math.min(y, Y_LIMIT_HARD_MAX - moonRadius - 6));
-		WarpDrive.logger.info("Generating moon at " + x + " " + y2 + " " + z);
+	public static void generateMoon(World world, int x, int y, int z, Planetoid m) {
+		
+		WarpDrive.logger.info("Generating moon at " + x + " " + y + " " + z);
 
-		Block block = WarpDriveConfig.getDefaultSurfaceBlock(world.rand, world.rand.nextInt(10) > 8, true);
-
-		// Generate moon's core
-		if (block.isAssociatedBlock(Blocks.netherrack)) {
-			generateSphereDirect(world, x, y2, z, coreRadius, false, Blocks.lava, 0, false); // Lava
-			// core
-			world.setBlock(x, y2, z, Blocks.bedrock, 0, 0);
-		} else if (!block.isAssociatedBlock(Blocks.end_stone)) {
-			if (world.rand.nextInt(100) >= 10) {
-				generateSphereDirect(world, x, y2, z, coreRadius, false, Blocks.lava, 0, false); // Lava
-				// core
-				world.setBlock(x, y2, z, Blocks.bedrock, 0, 0);
-				generateSphereDirect(world, x, y2, z, coreRadius + 1, false, Blocks.obsidian, 0, true); // Obsidian
-				// shell
-			} else {
-				coreRadius = Math.max(coreRadius, 7);
-				generateSphereDirect(world, x, y2, z, coreRadius, false, Blocks.leaves, 0, false);
-				world.setBlock(x, y2, z, Blocks.bedrock, 0, 0);
-				generateSmallShip(world, x, y2, z, coreRadius - 6);
-			}
-		}
-
-		/*
-		 * // Place bedrock blocks world.setBlock(x + coreRadius , y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x - coreRadius , y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z + coreRadius ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z - coreRadius ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 + coreRadius , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 - coreRadius , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x + moonRadius / 2 , y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x - moonRadius / 2 , y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z + moonRadius / 2 ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z - moonRadius / 2 ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 + moonRadius / 2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 - moonRadius / 2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x + moonRadius - 10, y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x - moonRadius + 10, y2 , z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z + moonRadius - 10,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 , z - moonRadius + 10,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 + moonRadius - 10, z ,
-		 * Blocks.bedrock, 0, 0); world.setBlock(x , y2 - moonRadius + 10, z ,
-		 * Blocks.bedrock, 0, 0); /*
-		 */
-
-		// Generate moon's blocks
-		generateSphereEntity(world, x, y2, z, moonRadius, false, block, 0, true);
-		// Generate moon's atmosphere
-		if (world.rand.nextBoolean()) {
-			generateGasSphereEntity(world, x, y2, z, moonRadius + 2 + world.rand.nextInt(5), true, world.rand.nextInt(12));
-		}
+		Planetoid moon = m == null ? StructureManager.getRandomMoon() : m;
+		
+		generateOrb(world, x, y, z, moon.getHeight() / 2, moon);
 	}
 
-	private static void placeStarCore(World world, int x, int y, int z, int radius) {
-		EntityStarCore core = new EntityStarCore(world, x, y, z, radius);
-		core.xCoord = x;
-		core.yCoord = y;
-		core.zCoord = z;
-		core.setPosition(x, y, z);
-		world.spawnEntityInWorld(core);
+	public void generateStar(World world, int x, int y, int z, Star s) {
+
+		Star star = s == null ? StructureManager.getRandomStar() : s;
+
+		WarpDrive.logger.info("Generating star (class " + star.toString() + ") at " + x + " " + y + " " + z);
+
+		generateOrb(world, x, y, z, star.getHeight() / 2, star);
 	}
 
-	public void generateStar(World world, int x, int y, int z, Integer type) {
-		Integer starClass = type == -1 ? world.rand.nextInt(3) : type;
-		Integer y2 = y;
-		WarpDrive.logger.info("Generating star (class " + starClass + ") at " + x + " " + y + " " + z);
-
-		switch (starClass) {
-		case 0: // red dwarf
-			y2 = Math.max(RED_DWARF_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - RED_DWARF_RADIUS - 6));
-			generateSphereEntity(world, x, y2, z, RED_DWARF_RADIUS, false, Blocks.redstone_block, 0, false);
-			// Heliosphere of red gas
-			generateGasSphereEntity(world, x, y2, z, RED_DWARF_RADIUS + 6, true, 1);
-			placeStarCore(world, x, y2, z, RED_DWARF_RADIUS + 6);
-			break;
-
-		case 1:
-			y2 = Math.max(YELLOW_GIANT_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - YELLOW_GIANT_RADIUS - 6));
-			generateSphereEntity(world, x, y2, z, YELLOW_GIANT_RADIUS, false, Blocks.glowstone, 0, false);
-			// Heliosphere of yellow gas
-			generateGasSphereEntity(world, x, y2, z, YELLOW_GIANT_RADIUS + 6, true, 3);
-			placeStarCore(world, x, y2, z, YELLOW_GIANT_RADIUS + 6);
-			break;
-
-		case 2:
-			y2 = Math.max(YELLOW_SUPERGIANT_RADIUS + 6, Math.min(y, Y_LIMIT_HARD_MAX - YELLOW_SUPERGIANT_RADIUS - 6));
-			generateSphereEntity(world, x, y2, z, YELLOW_SUPERGIANT_RADIUS, false, Blocks.glowstone, 0, false);
-			// Heliosphere of yellow gas
-			generateGasSphereEntity(world, x, y2, z, YELLOW_SUPERGIANT_RADIUS + 6, true, 3);
-			placeStarCore(world, x, y2, z, YELLOW_SUPERGIANT_RADIUS + 6);
-			break;
-		}
-	}
-
-	private static void generateSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, Block block, int i, boolean generateOres) {
-		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, block, i, hollow, true, generateOres);
-		world.spawnEntityInWorld(esg);
-	}
-
-	private static void generateGasSphereEntity(World world, int x, int y, int z, int radius, boolean hollow, int color) {
-		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, radius, WarpDrive.blockGas, color, hollow, true, false);
+	private static void generateOrb(World world, int x, int y, int z, double factor, Orb orb) {
+		EntitySphereGen esg = new EntitySphereGen(world, x, y, z, orb.getHeight() / 2, orb, true);
 		world.spawnEntityInWorld(esg);
 	}
 
@@ -344,11 +264,15 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
 			// Placing
 			if (world.rand.nextBoolean()) {
-				generateGasCloudOfColor(world, aX, aY, aZ, 12, 15, world.rand.nextInt(12));
+				generateGasCloudOfColor(world, aX, aY, aZ, 12, 15, getRandomColor(world.rand));
 			}
 		}
 
 		LocalProfiler.stop();
+	}
+
+	private static Color getRandomColor(Random rand) {
+		return Color.white;//TODO: Randomize it
 	}
 
 	/**
@@ -365,7 +289,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	 * @param centerRadiusMax
 	 *            maximum radius of central ball
 	 */
-	public static void generateGasCloudOfColor(World world, int x, int y, int z, int cloudSizeMax, int centerRadiusMax, int color) {
+	public static void generateGasCloudOfColor(World world, int x, int y, int z, int cloudSizeMax, int centerRadiusMax, Color color) {
 		int cloudSize = 1 + world.rand.nextInt(20);
 		if (cloudSizeMax != 0)
 			cloudSize = Math.min(cloudSizeMax, cloudSize);
@@ -373,15 +297,15 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		if (centerRadiusMax != 0)
 			centerRadius = Math.min(centerRadiusMax, centerRadius);
 		final int CENTER_SHIFT = 2; // Offset from center of central ball
-		// Asteroid's center
-		generateGasSphereEntity(world, x, y, z, centerRadius, false, color);
-		// Asteroids knolls
+		
+		GasCloud cloud = StructureManager.getGasCloud(color);
+		
 		for (int i = 1; i <= cloudSize; i++) {
 			int radius = 2 + world.rand.nextInt(centerRadius);
 			int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newY = y + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
 			int newZ = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
-			generateGasSphereEntity(world, newX, newY, newZ, radius, false, color);
+			generateOrb(world, newX, newY, newZ, radius, cloud);
 		}
 	}
 
