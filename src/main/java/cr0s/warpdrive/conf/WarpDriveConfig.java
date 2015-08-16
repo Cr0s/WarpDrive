@@ -2,6 +2,7 @@ package cr0s.warpdrive.conf;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -102,7 +103,8 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_LUA = false;
 	public static boolean LOGGING_RADAR = false;
 	public static boolean LOGGING_BREATHING = false;
-	
+	public static boolean LOGGING_WORLDGEN = false;
+
 	// Transition planes
 	public static TransitionPlane[] G_TRANSITIONPLANES = null;
 
@@ -319,6 +321,7 @@ public class WarpDriveConfig {
 		LOGGING_LUA = config.get("Logging", "enable_LUA_logs", LOGGING_LUA, "Detailled LUA logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_RADAR = config.get("Logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_BREATHING = config.get("Logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_WORLDGEN = config.get("Logging", "enable_worldgen_logs", LOGGING_WORLDGEN, "Detailled world generation logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		
 		// TransitionPlane
 		config.addCustomCategoryComment("TransitionPlane",
@@ -800,6 +803,75 @@ public class WarpDriveConfig {
 		}
 	}
 
+	public static Block getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
+		if (isMoon) {
+			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
+				return getModBlock("IC2", "blockBasalt");
+			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
+				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
+			else if (random.nextInt(5) == 1) {
+				return Blocks.netherrack;
+			} else if (random.nextInt(15) == 1) {
+				return Blocks.end_stone;
+			}
+		} else {
+			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
+				return getModBlock("IC2", "blockBasalt");
+			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
+				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
+			else if (random.nextInt(6) == 1) {
+				return Blocks.netherrack;
+			} else if (random.nextInt(50) == 1) {
+				return Blocks.end_stone;
+			}
+		}
+		if (corrupted && random.nextBoolean()) {
+			return Blocks.cobblestone;
+		}
+		return Blocks.stone;
+	}
+
+	public static Block getRandomSurfaceBlock(Random random, Block def, boolean bedrock) {
+		if (bedrock && (random.nextInt(1000) == 1)) {
+			return Blocks.bedrock;
+		} else if (def.isAssociatedBlock(Blocks.end_stone)) {
+			return getRandomEndBlock(random, def);
+		} else if (def.isAssociatedBlock(Blocks.netherrack)) {
+			return getRandomNetherBlock(random, def);
+		}
+		return getRandomOverworldBlock(random, def);
+	}
+
+	public static Block getRandomOverworldBlock(Random random, Block def) {
+		if (random.nextInt(25) == 5) {
+			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
+		} else if (random.nextInt(250) == 1) {
+			return Blocks.diamond_ore;
+		} else if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
+			return WarpDrive.blockIridium;
+		}
+		return def;
+	}
+
+	public static Block getRandomNetherBlock(Random random, Block def) {
+		if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
+			return WarpDrive.blockIridium;
+		} else if (random.nextInt(25) == 1) {
+			return Blocks.quartz_ore;
+		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
+			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
+		return def;
+	}
+
+	public static Block getRandomEndBlock(Random random, Block def) {
+		if (isIndustrialCraft2loaded && random.nextInt(10000) == 42) {
+			return WarpDrive.blockIridium;
+		} else if (random.nextInt(200) == 13) {
+			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
+		}
+		return def;
+	}
+	
 	public static void loadWorldGen() {
 		OreManager.loadOres("config/warpdrive/");
 		StructureManager.loadStructures("config/warpdrive/");
