@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <structure type="star" name="red_giant" radius="40" maxScaling="3.0">
-	<shell name="core" radiusInner="1" radiusOuter="10" >
-		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+	<shell name="core" radiusInner="1" radiusOuter="10">
+		<block weight="1">minecraft:iron_block</block>
 	</shell>
 	
-	<shell name="mantle" radiusInner="11" radiusOuter="30" >
-		<CompositionBlock weight="10" block="net.minecraft.blocks.sand" />
-		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+	<shell name="mantle" radiusInner="11" radiusOuter="30">
+		<block weight="10">minecraft:sand</block>
+		<block weight="1">minecraft:iron_block</block>
 	</shell>
 
-	<shell name="surface" radiusInner="31" radiusOuter="40" >
-		<CompositionBlock weight="5" block="net.minecraft.blocks.glowstone" />
-		<CompositionBlock weight="10" block="net.minecraft.blocks.lava" />
+	<shell name="surface" radiusInner="31" radiusOuter="40">
+		<block weight="5">minecraft:glowstone</block>
+		<block weight="10">minecraft:lava</block>
 	</shell>
-
 </structure>
 
 <structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
 	<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
-		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
+		<block weight="1">minecraft:iron_block</block>
 	</shell>
 	
 	<shell name="mantle" radiusInner="6" radiusOuter="20" ores="common">
-		<CompositionBlock weight="10" block="net.minecraft.blocks.stone" />
-		<CompositionBlock weight="3" block="net.minecraft.blocks.clay" />
+		<block weight="10">minecraft:stone</block>
+		<block weight="3">minecraft:clay</block>
 	</shell>
-
 </structure>
+
+<strate name="overworld">
+	<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
+	<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
+	<ore weight="4">minecraft:iron_ore</ore>
+	<ore weight="4">minecraft:gold_ore</ore>
+</strate>
+
+<strate name="overworld">
+	<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
+	<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
+	<ore weight="4">minecraft:iron_ore</ore>
+	<ore weight="4">minecraft:gold_ore</ore>
+</strate>
