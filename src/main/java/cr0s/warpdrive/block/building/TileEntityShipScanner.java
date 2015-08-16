@@ -546,13 +546,13 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 	private Object[] filename(Object[] arguments) {
 		if (isActive && !schematicFileName.isEmpty()) {
 			if (isDeploying) {
-				return new Object[] { "Deployment in progress. Please wait..." };
+				return new Object[] { false, "Deployment in progress. Please wait..." };
 			} else {
-				return new Object[] { "Scan in progress. Please wait..." };
+				return new Object[] { false, "Scan in progress. Please wait..." };
 			}
 		}
 
-		return new Object[] { schematicFileName };
+		return new Object[] { true, schematicFileName };
 	}
 
 	private Object[] deploy(Object[] arguments) {

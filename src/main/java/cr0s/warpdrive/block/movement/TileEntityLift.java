@@ -60,10 +60,8 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			tickCount = 0;
 
 			// Switching mode
-			if (computerMode == MODE_DOWN
-					|| (computerMode == MODE_REDSTONE && worldObj
-							.isBlockIndirectlyGettingPowered(xCoord, yCoord,
-									zCoord))) {
+			if (  computerMode == MODE_DOWN
+			  || (computerMode == MODE_REDSTONE && worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))) {
 				mode = MODE_DOWN;
 			} else {
 				mode = MODE_UP;
@@ -119,9 +117,9 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 		Block block = worldObj.getBlock(xCoord, yPosition, zCoord);
 		//TODO: Make configurable or less specific
 		return block.isAssociatedBlock(Blocks.air)
-				|| block.isAssociatedBlock(Blocks.wall_sign)
-				|| block.isAssociatedBlock(Blocks.standing_sign)
-				|| worldObj.isAirBlock(xCoord, yPosition, zCoord);
+			|| block.isAssociatedBlock(Blocks.wall_sign)
+			|| block.isAssociatedBlock(Blocks.standing_sign)
+			|| worldObj.isAirBlock(xCoord, yPosition, zCoord);
 	}
 
 	private void liftEntity() {
@@ -136,48 +134,36 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 
 		// Lift up
 		if (mode == MODE_UP) {
-			AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin,
-					firstUncoveredY, zmin, xmax, yCoord, zmax);
-			List list = worldObj.getEntitiesWithinAABBExcludingEntity(null,
-					aabb);
+			AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY, zmin, xmax, yCoord, zmax);
+			List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
 			if (list != null) {
 				for (Object o : list) {
-					if (o != null
-							&& o instanceof EntityLivingBase
-							&& consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY,
-									true)) {
-						((EntityLivingBase) o).setPositionAndUpdate(
-								xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D);
-						PacketHandler.sendBeamPacket(worldObj, new Vector3(
-								xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D),
-								new Vector3(xCoord + 0.5D, yCoord,
-										zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
-						worldObj.playSoundEffect(xCoord + 0.5D, yCoord,
-								zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
+					if ( o != null
+					  && o instanceof EntityLivingBase
+					  && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
+						((EntityLivingBase) o).setPositionAndUpdate(xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D);
+						PacketHandler.sendBeamPacket(worldObj,
+								new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D),
+								new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
+						worldObj.playSoundEffect(xCoord + 0.5D, yCoord, zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
 						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, false);
 					}
 				}
 			}
 		} else if (mode == MODE_DOWN) {
 			AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin,
-					Math.min(firstUncoveredY + 4.0D, yCoord), zmin, xmax,
-					yCoord + 2.0D, zmax);
-			List list = worldObj.getEntitiesWithinAABBExcludingEntity(null,
-					aabb);
+					Math.min(firstUncoveredY + 4.0D, yCoord), zmin, xmax, yCoord + 2.0D, zmax);
+			List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, aabb);
 			if (list != null) {
 				for (Object o : list) {
-					if (o != null
-							&& o instanceof EntityLivingBase
-							&& consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY,
-									true)) {
-						((EntityLivingBase) o).setPositionAndUpdate(
-								xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D);
-						PacketHandler.sendBeamPacket(worldObj, new Vector3(
-								xCoord + 0.5D, yCoord, zCoord + 0.5D),
-								new Vector3(xCoord + 0.5D, firstUncoveredY,
-										zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
-						worldObj.playSoundEffect(xCoord + 0.5D, yCoord,
-								zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
+					if ( o != null
+					  && o instanceof EntityLivingBase
+					  && consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, true)) {
+						((EntityLivingBase) o).setPositionAndUpdate(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D);
+						PacketHandler.sendBeamPacket(worldObj,
+								new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D),
+								new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
+						worldObj.playSoundEffect(xCoord + 0.5D, yCoord, zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
 						consumeEnergy(WarpDriveConfig.LL_LIFT_ENERGY, false);
 					}
 				}
