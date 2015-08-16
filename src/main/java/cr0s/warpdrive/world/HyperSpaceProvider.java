@@ -14,6 +14,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.render.RenderBlank;
 
 public class HyperSpaceProvider extends WorldProvider {
 	public int exitXCoord;
@@ -101,8 +102,8 @@ public class HyperSpaceProvider extends WorldProvider {
 
 	@Override
 	public Vec3 getSkyColor(Entity cameraEntity, float partialTicks) {
-		setCloudRenderer(new CloudRenderBlank());
-		setSkyRenderer(new CloudRenderBlank());
+		setCloudRenderer(new RenderBlank());
+		setSkyRenderer(new RenderBlank());
 		return Vec3.createVectorHelper(1.0D, 0.0D, 0.0D);
 	}
 

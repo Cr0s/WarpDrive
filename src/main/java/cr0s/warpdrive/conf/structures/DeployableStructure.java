@@ -3,6 +3,9 @@
  */
 package cr0s.warpdrive.conf.structures;
 
+import java.util.Random;
+
+import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**

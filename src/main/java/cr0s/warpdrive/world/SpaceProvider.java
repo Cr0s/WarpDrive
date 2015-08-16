@@ -12,6 +12,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.render.RenderBlank;
 
 public class SpaceProvider extends WorldProvider {
 	public int exitXCoord;
@@ -109,7 +110,7 @@ public class SpaceProvider extends WorldProvider {
 
 	@Override
 	public Vec3 getSkyColor(Entity cameraEntity, float partialTicks) {
-		setCloudRenderer(new CloudRenderBlank());
+		setCloudRenderer(new RenderBlank());
 		// setSkyRenderer(new SpaceSkyRenderer());
 		return Vec3.createVectorHelper(0.0D, 0.0D, 0.0D);
 	}
