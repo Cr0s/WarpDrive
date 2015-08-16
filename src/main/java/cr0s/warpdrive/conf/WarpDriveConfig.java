@@ -22,7 +22,6 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.structures.StructureManager;
 import cr0s.warpdrive.data.TransitionPlane;
-// FIXME import dan200.computercraft.ComputerCraft;
 
 public class WarpDriveConfig {
 	private static Configuration config;
@@ -76,6 +75,11 @@ public class WarpDriveConfig {
 	public static int G_HYPERSPACE_PROVIDER_ID = 15;
 	public static int G_HYPERSPACE_DIMENSION_ID = -3;
 	public static int G_SPACE_WORLDBORDER_BLOCKS = 100000;
+	public static int G_ENTITY_JUMP_ID = 240;
+	public static int G_ENTITY_SPHERE_GENERATOR_ID = 241;
+	public static int G_ENTITY_STAR_CORE_ID = 242;
+	public static int G_ENTITY_CAMERA_ID = 243;
+
 	public static final int LUA_SCRIPTS_NONE = 0;
 	public static final int LUA_SCRIPTS_TEMPLATES = 1;
 	public static final int LUA_SCRIPTS_ALL = 2;
@@ -283,6 +287,11 @@ public class WarpDriveConfig {
 		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID, "Hyperspace dimension world ID").getInt();
 		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS,
 				"World border applied to hyperspace & space, set to 0 to disable it").getInt();
+		G_ENTITY_JUMP_ID = config.get("General", "entity_jump_id", G_ENTITY_JUMP_ID, "Entity jump ID").getInt();
+		G_ENTITY_SPHERE_GENERATOR_ID = config.get("General", "entity_sphere_generator_id", G_ENTITY_SPHERE_GENERATOR_ID, "Entity sphere generator ID").getInt();
+		G_ENTITY_STAR_CORE_ID = config.get("General", "entity_star_core_id", G_ENTITY_STAR_CORE_ID, "Entity star core ID").getInt();
+		G_ENTITY_CAMERA_ID = config.get("General", "entity_camera_id", G_ENTITY_CAMERA_ID, "Entity camera ID").getInt();
+		
 		G_LUA_SCRIPTS = config.get("General", "lua_scripts", G_LUA_SCRIPTS,
 				"LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt();
 		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
@@ -890,6 +899,5 @@ public class WarpDriveConfig {
 		}
 		
 		return xmlDocumentBuilder;
-		
 	}
 }
