@@ -51,8 +51,8 @@ function translateXZ(oldX, oldZ, i)
   x = x + (w / 2)
   z = z + (h / 2)
   
-  x = math.floor(x);
-  z = math.floor(z);
+  x = math.floor(x)
+  z = math.floor(z)
   
   return x,z
 end
@@ -67,33 +67,33 @@ end
 function scanAndDraw()
   local energy, energyMax = radar.getEnergyLevel()
   if (energy < radius*radius) then
-    hh = math.floor(h / 2);
-    hw = math.floor(w / 2);
+    hh = math.floor(h / 2)
+    hw = math.floor(w / 2)
     
-    paintutils.drawLine(hw - 5, hh - 1, hw + 5, hh - 1, colors.red);
-    paintutils.drawLine(hw - 5, hh, hw + 5, hh, colors.red);
-    textOut(hw - 4, hh,"LOW POWER", colors.white, colors.red);
-    paintutils.drawLine(hw - 5, hh + 1, hw + 5, hh + 1, colors.red);
-    sleep(1);
+    paintutils.drawLine(hw - 5, hh - 1, hw + 5, hh - 1, colors.red)
+    paintutils.drawLine(hw - 5, hh, hw + 5, hh, colors.red)
+    textOut(hw - 4, hh,"LOW POWER", colors.white, colors.red)
+    paintutils.drawLine(hw - 5, hh + 1, hw + 5, hh + 1, colors.red)
+    sleep(1)
     
-    return 0;
-  end;  
-  radar.scanRadius(radius);
-  sleep(2);
+    return 0
+  end
+  radar.scanRadius(radius)
+  sleep(2)
   
-  redraw();
+  redraw()
   
-  numResults = radar.getResultsCount();
+  numResults = radar.getResultsCount()
   
   if (numResults ~= 0) then
     for i = 0, numResults-1 do
-      freq, cx, cy, cz = radar.getResult(i);
+      freq, cx, cy, cz = radar.getResult(i)
       
       drawContact(cx, cy, cz, freq, colors.red)
     end
   end
   
-  drawContact(radarX, radarY, radarZ, "RAD", colors.yellow);
+  drawContact(radarX, radarY, radarZ, "RAD", colors.yellow)
 end
 
 function redraw()
@@ -101,19 +101,19 @@ function redraw()
   
   paintutils.drawLine(1, 1, w, 1, colors.black)
   
-  textOut(h, 1, "= Q-Radar v0.1 =", colors.white, colors.black)
+  textOut((w / 2) - 8, 1, "= Q-Radar v0.1 =", colors.white, colors.black)
   
   textOut(w - 3, 1, "[X]", colors.white, colors.red)
   
-  paintutils.drawLine(1, h, w, h, colors.black);
+  paintutils.drawLine(1, h, w, h, colors.black)
   local energy, energyMax = radar.getEnergyLevel()
   textOut(4, h, "Energy: " .. energy .. " EU | Scan radius: " .. radius, colors.white, colors.black)
 end
 
+radarX, radarY, radarZ = radar.pos()
 mrun = true
 while (mrun) do
-  radarX, radarY, radarZ = radar.pos();
-  scanAndDraw();
+  scanAndDraw()
 end
 
-term.clear();
+term.clear()
