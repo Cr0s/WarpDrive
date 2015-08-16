@@ -9,7 +9,7 @@ public class TileEntityLaserMedium extends TileEntityAbstractEnergy {
 	private int ticks = 0;
 
 	public TileEntityLaserMedium() {
-		peripheralName = "warpdriveParticleBooster";
+		peripheralName = "warpdriveLaserMedium";
 		methodsArray = new String[] {
 			"getEnergyLevel"
 		};
