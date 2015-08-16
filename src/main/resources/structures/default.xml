@@ -17,7 +17,7 @@
 
 </structure>
 
-<structure type="planetoid" name="theMoon" radius="20" maxScaling="2.0">
+<structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
 	<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
 		<CompositionBlock weight="1" block="net.minecraft.blocks.iron_block" />
 	</shell>
