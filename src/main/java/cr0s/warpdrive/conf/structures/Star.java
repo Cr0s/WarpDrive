@@ -9,7 +9,6 @@ public class Star extends Orb {
 	
 	public Star(int diameter) {
 		super(diameter);
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
@@ -17,8 +16,12 @@ public class Star extends Orb {
 		boolean success = super.generate(p_76484_1_, p_76484_2_, p_76484_3_, p_76484_4_, p_76484_5_);
 		
 		if (success)
-			p_76484_1_.spawnEntityInWorld(new EntityStarCore(p_76484_1_, p_76484_3_, p_76484_4_, p_76484_5_, super.getHeight() / 2));
+			return placeStarCore(p_76484_1_, p_76484_3_, p_76484_4_, p_76484_5_, super.getHeight() / 2);
 		return false;
+	}
+
+	public static boolean placeStarCore(World world, int x, int y, int z, int radius) {
+		return world.spawnEntityInWorld(new EntityStarCore(world, x, y, z, radius));
 	}
 	
 }
