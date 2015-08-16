@@ -19,7 +19,7 @@ public class ClientCameraHandler {
 	public static int zoomIndex = 0;
 	public static String overlayLoggingMessage = "";
 	public static float originalFOV = 70.0F;
-	public static float originalSensitivity = 1.0F;
+	public static float originalSensitivity = 100.0F;
 	
 	public static EntityPlayer entityPlayer;
 	public static int dimensionId = -666;
@@ -159,6 +159,8 @@ public class ClientCameraHandler {
 	
 	@SubscribeEvent
 	public void onEvent(ClientDisconnectionFromServerEvent event) {
-		resetViewpoint();
+		if (isOverlayEnabled) {
+			resetViewpoint();
+		}
 	}
 }
