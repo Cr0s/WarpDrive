@@ -115,7 +115,7 @@ function CalcRealDistance()
  if IsInHyper then
   RealDistance = SData.Distance * 100
   MinimumDistance = 1
-  JumpCost = (1000 * Weight) + (1000 * SData.Distance)
+  JumpCost = (1000 * weight) + (1000 * SData.Distance)
  else
   if SData.Direction == 1 or SData.Direction == 2 then
    MinimumDistance = GUp + GDown
@@ -128,7 +128,7 @@ function CalcRealDistance()
    RealDistance = SData.Distance + MinimumDistance
   end
   MinimumDistance = MinimumDistance + 1
-  JumpCost = (10 * Weight) + (100 * SData.Distance)
+  JumpCost = (10 * weight) + (100 * SData.Distance)
  end
 end
 
@@ -175,7 +175,7 @@ function ShowInfo()
  Show("Dimensions:")
  Show(" Front, Right, Up = "..GFront..", "..GRight..", "..GUp)
  Show(" Back, Left, Down = "..GBack..", "..GLeft..", "..GDown)
- Show(" Size             = "..Weight.." blocks")
+ Show(" Size             = "..weight.." blocks")
  Show("Warp data:")
  ShowDirection()
  local dest = CalcNewCoords(X, Y, Z)
@@ -288,7 +288,7 @@ function SetDimensions()
  term.write("Setting dimensions...")
  warp.dim_positive(GFront, GRight, GUp)
  warp.dim_negative(GBack, GLeft, GDown)
- Weight = warp.getShipSize()
+ weight = warp.getShipSize()
 end
 
 function Summon()
@@ -410,13 +410,13 @@ X, Y, Z = warp.pos()
 repeat
  sleep(0.3)
  isAttached = warp.isAttached()
-until not isAttached
+until isAttached
 print("Ship core linked...")
 
 repeat
  sleep(0.3)
- Weight = warp.getShipSize()
-until Weight ~= nil
+ weight = warp.getShipSize()
+until weight ~= nil
 print("Ship weight updated...")
 
 CalcRealDistance()
