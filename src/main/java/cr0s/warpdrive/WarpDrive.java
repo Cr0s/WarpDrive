@@ -2,8 +2,6 @@ package cr0s.warpdrive;
 
 import java.util.List;
 
-import org.apache.logging.log4j.Logger;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -30,6 +28,9 @@ import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
+
+import org.apache.logging.log4j.Logger;
+
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -100,10 +101,10 @@ import cr0s.warpdrive.data.CamerasRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;
 import cr0s.warpdrive.data.ShipCoresRegistry;
-import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.item.ItemAirCanisterFull;
-import cr0s.warpdrive.item.ItemHelmet;
 import cr0s.warpdrive.item.ItemComponent;
+import cr0s.warpdrive.item.ItemHelmet;
+import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.item.ItemUpgrade;
 import cr0s.warpdrive.network.PacketHandler;
 import cr0s.warpdrive.render.ClientCameraHandler;
@@ -339,7 +340,6 @@ public class WarpDrive implements LoadingCallback {
 			GameRegistry.registerBlock(blockIC2reactorLaserMonitor, "blockIC2reactorLaserMonitor");
 			GameRegistry.registerTileEntity(TileEntityIC2reactorLaserMonitor.class, MODID + ":blockIC2reactorLaserMonitor");
 		}
-
 		// TRANSPORT BEACON
 		blockTransportBeacon = new BlockTransportBeacon();
 
@@ -372,7 +372,6 @@ public class WarpDrive implements LoadingCallback {
 			itemIC2reactorLaserFocus = new ItemIC2reactorLaserFocus();
 			GameRegistry.registerItem(itemIC2reactorLaserFocus, "itemIC2reactorLaserFocus");
 		}
-
 		// COMPONENT ITEMS
 		itemComponent = new ItemComponent();
 		GameRegistry.registerItem(itemComponent, "itemComponent");
@@ -403,7 +402,6 @@ public class WarpDrive implements LoadingCallback {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			creativeTabWarpDrive.setBackgroundImageName("items.png");
 		}
-
 		if (WarpDriveConfig.isComputerCraftLoaded) {
 			peripheralHandler = new WarpDrivePeripheralHandler();
 			peripheralHandler.register();
@@ -416,6 +414,7 @@ public class WarpDrive implements LoadingCallback {
 		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 
 		WarpDriveConfig.postInit();
+		WarpDriveConfig.loadWorldGen();
 
 		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
 			initIC2Recipes();
@@ -443,13 +442,13 @@ public class WarpDrive implements LoadingCallback {
 				'p', itemComponent.getItemStack(6),
 				'c', itemComponent.getItemStack(2),
 				'd', Items.diamond));
-
+		
 		// Controller
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipController), false, "ici", "idi", "iii",
 				'i', Items.iron_ingot,
 				'c', itemComponent.getItemStack(5),
 				'd', Items.diamond));
-
+		
 		// Radar
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockRadar), false, "ggg", "pdc", "iii",
 				'i', Items.iron_ingot,
@@ -457,13 +456,13 @@ public class WarpDrive implements LoadingCallback {
 				'p', itemComponent.getItemStack(6),
 				'g', Blocks.glass,
 				'd', Items.diamond));
-
+		
 		// Isolation Block
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockWarpIsolation), false, "igi", "geg", "igi",
 				'i', Items.iron_ingot,
 				'g', Blocks.glass,
 				'e', Items.ender_pearl));
-
+		
 		// Air generator
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockAirGenerator), false, "ibi", "i i", "ipi",
 				'i', Items.iron_ingot,
@@ -493,7 +492,7 @@ public class WarpDrive implements LoadingCallback {
 				't', itemComponent.getItemStack(1), 
 				'c', itemComponent.getItemStack(5),
 				'l', itemComponent.getItemStack(3)));
-
+		
 		// Laser Lift
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockLift), false, "ipi", "rtr", "ili",
 				'i', Items.iron_ingot,
@@ -547,7 +546,7 @@ public class WarpDrive implements LoadingCallback {
 				'd', Items.diamond,
 				'r', Items.redstone,
 				'n', Items.gold_nugget));
-
+		
 		// Power Laser
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockEnanReactorLaser), false, "iii", "ilg", "ici",
 				'i', Items.iron_ingot,
@@ -576,7 +575,7 @@ public class WarpDrive implements LoadingCallback {
 				'l', "dyeBlue",
 				'd', Items.diamond,
 				's', Items.stick));
-
+		
 		// Chunk Loader
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockChunkLoader), false, "ipi", "ici", "ifi",
 				'i', Items.iron_ingot,
@@ -943,7 +942,7 @@ public class WarpDrive implements LoadingCallback {
 			ForgeChunkManager.releaseTicket(ticket);
 		}
 	}
-	
+
 	public static void addChatMessage(final EntityPlayer player, final String message) {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
