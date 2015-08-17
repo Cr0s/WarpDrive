@@ -21,9 +21,13 @@ public class StructureManager {
 	
 	private static ArrayList<Star> stars = new ArrayList<Star>();
 	private static ArrayList<Planetoid> moons = new ArrayList<Planetoid>();
+	private static ArrayList<Planetoid> gasClouds = new ArrayList<Planetoid>();
 	
 	public static void loadStructures(String structureConfDir) {
-		File dir = new File(structureConfDir);
+		loadStructures(new File(structureConfDir));
+	}
+
+	public static void loadStructures(File dir) {
 
 		dir.mkdir();
 
