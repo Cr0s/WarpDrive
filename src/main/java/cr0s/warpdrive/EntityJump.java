@@ -658,36 +658,36 @@ public class EntityJump extends Entity {
 		try {
 			ship = new JumpBlock[shipSize];
 			JumpBlock placeAfter[] = new JumpBlock[shipSize]; // blocks and tile entities to be placed at the end, and removed first
-
+			
 			int indexPlaceNormal = 0;
 			int indexPlaceAfter = 0;
 			int xc1 = minX >> 4;
 			int xc2 = maxX >> 4;
 			int zc1 = minZ >> 4;
 			int zc2 = maxZ >> 4;
-
+			
 			for (int xc = xc1; xc <= xc2; xc++) {
 				int x1 = Math.max(minX, xc << 4);
 				int x2 = Math.min(maxX, (xc << 4) + 15);
-
+				
 				for (int zc = zc1; zc <= zc2; zc++) {
 					int z1 = Math.max(minZ, zc << 4);
 					int z2 = Math.min(maxZ, (zc << 4) + 15);
-
+					
 					for (int y = minY; y <= maxY; y++) {
 						for (int x = x1; x <= x2; x++) {
 							for (int z = z1; z <= z2; z++) {
 								Block block = worldObj.getBlock(x, y, z);
-
-							// Skip air blocks
+								
+								// Skip air blocks
 								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
 									continue;
 								}
-
-							int blockMeta = worldObj.getBlockMetadata(x, y, z);
-							TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
+								
+								int blockMeta = worldObj.getBlockMetadata(x, y, z);
+								TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
 								JumpBlock jumpBlock = new JumpBlock(block, blockMeta, tileEntity, x, y, z);
-
+								
 								if (tileEntity == null || false /* TODO: implement latePlacementBlockList configuration, including IC2 reactor chambers */ ) {
 									ship[indexPlaceNormal] = jumpBlock;
 									indexPlaceNormal++;
@@ -700,7 +700,7 @@ public class EntityJump extends Entity {
 					}
 				}
 			}
-
+			
 			for (int index = 0; index < indexPlaceAfter; index++) {
 				ship[indexPlaceNormal] = placeAfter[index];
 				indexPlaceNormal++;
@@ -711,7 +711,7 @@ public class EntityJump extends Entity {
 			LocalProfiler.stop();
 			return;
 		}
-
+		
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Ship saved as " + ship.length + " blocks");
 		}
