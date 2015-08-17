@@ -54,9 +54,8 @@ public class WarpDriveConfig {
 	public static ItemStack IC2_rubberWood;
 	public static ItemStack IC2_Resin;
 	public static Item IC2_fluidCell;
-	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Upgraded, CCT_Advanced;
+	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Expanded, CCT_Advanced;
 
-	public static Item CC_Floppy;
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
 	public static ItemStack IC2_solarPanel;
 	public static int AS_Turbine, AS_deuteriumCell;
@@ -600,7 +599,7 @@ public class WarpDriveConfig {
 		if (isComputerCraftLoaded) {
 			scannerIgnoreBlocks.add(CC_Computer);
 			scannerIgnoreBlocks.add(CCT_Turtle);
-			scannerIgnoreBlocks.add(CCT_Upgraded);
+			scannerIgnoreBlocks.add(CCT_Expanded);
 			scannerIgnoreBlocks.add(CCT_Advanced);
 		}
 		// Do not deploy ores and valuables
@@ -645,16 +644,16 @@ public class WarpDriveConfig {
 	}
 
 	private static void loadForgeMultipart() {
-		try {//TODO: Update to 1.7
+		try {
 			Class forgeMultipart_helper = Class.forName("codechicken.multipart.MultipartHelper");
 			forgeMultipart_helper_createTileFromNBT = forgeMultipart_helper.getDeclaredMethod("createTileFromNBT", World.class, NBTTagCompound.class);
 			forgeMultipart_helper_sendDescPacket = forgeMultipart_helper.getDeclaredMethod("sendDescPacket", World.class, TileEntity.class);
 			Class forgeMultipart_tileMultipart = Class.forName("codechicken.multipart.TileMultipart");
 			forgeMultipart_tileMultipart_onChunkLoad = forgeMultipart_tileMultipart.getDeclaredMethod("onChunkLoad");
-		} catch (Exception e) {
+		} catch (Exception exception) {
 			isForgeMultipartLoaded = false;
-			WarpDrive.logger.error("WarpDriveConfig Error loading ForgeMultipart classes");
-			e.printStackTrace();
+			WarpDrive.logger.error("Error loading ForgeMultipart classes");
+			exception.printStackTrace();
 		}
 	}
 
@@ -698,24 +697,21 @@ public class WarpDriveConfig {
 
 			IC2_fluidCell = getModItemStack("IC2", "itemFluidCell", -1).getItem();
 		} catch (Exception exception) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading IndustrialCraft2 classes");
+			WarpDrive.logger.error("Error loading IndustrialCraft2 classes");
 			exception.printStackTrace();
 		}
 	}
 
 	private static void loadCC() {
 		try {
-			/*
-			CC_Computer = ComputerCraft.Blocks.computer;
-			CC_peripheral = ComputerCraft.Blocks.peripheral;
-			CC_Floppy = ComputerCraft.Items.disk;
-			CCT_Turtle = ComputerCraft.Blocks.turtle;
-			CCT_Upgraded = ComputerCraft.Blocks.turtleExpanded;
-			CCT_Advanced = ComputerCraft.Blocks.turtleAdvanced;
-			/* FIXME */
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading ComputerCraft classes");
-			e.printStackTrace();
+			CC_Computer = getModBlock("ComputerCraft", "CC-Computer");
+			CC_peripheral = getModBlock("ComputerCraft", "CC-Peripheral");
+			CCT_Turtle = getModBlock("ComputerCraft", "CC-Turtle");
+			CCT_Expanded = getModBlock("ComputerCraft", "CC-TurtleExpanded");
+			CCT_Advanced = getModBlock("ComputerCraft", "CC-TurtleAdvanced");
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading ComputerCraft classes");
+			exception.printStackTrace();
 		}
 	}
 
@@ -724,9 +720,9 @@ public class WarpDriveConfig {
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:advanced_solar_helmet"));
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:hybrid_solar_helmet"));
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:ultimate_solar_helmet"));
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading ASP classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading ASP classes");
+			exception.printStackTrace();
 			isAdvancedSolarPanelLoaded = false;
 		}
 	}
@@ -740,8 +736,9 @@ public class WarpDriveConfig {
 			AS_deuteriumCell = ((Item) z.getField("itemDeuteriumCell").get(null));
 			 */
 			isAtomicScienceLoaded = false;
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading AS classes");
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading AS classes");
+			exception.printStackTrace();
 			isAtomicScienceLoaded = false;
 		}
 	}
@@ -757,9 +754,9 @@ public class WarpDriveConfig {
 			ICBM_Explosive = ((Block) z.getField("blockExplosive").get(null));
 			 */
 			isICBMLoaded = false;
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading ICBM classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading ICBM classes");
+			exception.printStackTrace();
 			isICBMLoaded = false;
 		}
 	}
@@ -768,23 +765,22 @@ public class WarpDriveConfig {
 		try {
 			forceFieldBlocks.add(Block.getBlockFromName("MFFS:FIXME_field"));	// FIXME
 			isMFFSLoaded = false;
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading MFFS classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading MFFS classes");
+			exception.printStackTrace();
 			isMFFSLoaded = false;
 		}
 	}
 
 	private static void loadGraviSuite() {
 		try {
-
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("GraviSuite.ultimateSolarHelmet")); // FIXME
 			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.advJetpack")); // FIXME
 			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.graviChestPlate")); // FIXME
 			GS_ultimateLappack = (Item) Item.itemRegistry.getObject("GraviSuite.ultimateLappack"); // FIXME
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading GS classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading GS classes");
+			exception.printStackTrace();
 			isGraviSuiteLoaded = false;
 		}
 	}
@@ -794,9 +790,9 @@ public class WarpDriveConfig {
 			// TEEnergyCell =
 			// Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
 			// TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading ThermalExpansion classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading ThermalExpansion classes");
+			exception.printStackTrace();
 			isThermalExpansionLoaded = false;
 		}
 	}
@@ -805,9 +801,9 @@ public class WarpDriveConfig {
 		try {
 
 			forceFieldBlocks.add(Block.getBlockFromName("AdvancedRepulsionSystems:field"));
-		} catch (Exception e) {
-			WarpDrive.logger.error("WarpDriveConfig Error loading AdvancedRepulsionSystems classes");
-			e.printStackTrace();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Error loading AdvancedRepulsionSystems classes");
+			exception.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}
 	}
@@ -893,8 +889,8 @@ public class WarpDriveConfig {
 			dbf.setValidating(true);
 			try {
 				xmlDocumentBuilder = dbf.newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
+			} catch (ParserConfigurationException exception) {
+				exception.printStackTrace();
 			}
 		}
 		

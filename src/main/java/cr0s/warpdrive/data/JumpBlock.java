@@ -75,7 +75,7 @@ public class JumpBlock {
 					isForgeMultipart = true;
 					newTileEntity = (TileEntity) WarpDriveConfig.forgeMultipart_helper_createTileFromNBT.invoke(null, targetWorld, oldnbt);
 
-				} else if (block == WarpDriveConfig.CC_Computer || block == WarpDriveConfig.CC_peripheral || block == WarpDriveConfig.CCT_Turtle || block == WarpDriveConfig.CCT_Upgraded
+				} else if (block == WarpDriveConfig.CC_Computer || block == WarpDriveConfig.CC_peripheral || block == WarpDriveConfig.CCT_Turtle || block == WarpDriveConfig.CCT_Expanded
 						|| block == WarpDriveConfig.CCT_Advanced) {
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
