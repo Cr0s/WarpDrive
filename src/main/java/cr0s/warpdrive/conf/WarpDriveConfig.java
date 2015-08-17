@@ -1,5 +1,9 @@
 package cr0s.warpdrive.conf;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Random;
@@ -895,5 +899,37 @@ public class WarpDriveConfig {
 		}
 		
 		return xmlDocumentBuilder;
+	}
+	
+	/*
+	 * Copy a default configuration file from the mod's resources to the specified configuration folder
+	 */
+	public static void unpackResourceToFolder(final String filename, final String sourceResourcePath, File targetFolder) {
+		String resourceName = sourceResourcePath + "/" + filename;
+		
+		boolean result = targetFolder.mkdirs();
+		if (!result) {
+			WarpDrive.logger.error("Failed to create target folder for unpacking resource \'" + resourceName + "\' into " + targetFolder);
+			return;
+		}
+		
+		File destination = new File(targetFolder, filename);
+		
+		try {
+			InputStream inputStream = WarpDrive.class.getClassLoader().getResourceAsStream(resourceName);
+			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destination));
+			
+			byte[] byteBuffer = new byte[Math.max(8192, inputStream.available())];
+			int bytesRead;
+			while ((bytesRead = inputStream.read(byteBuffer)) >= 0) {
+				outputStream.write(byteBuffer, 0, bytesRead);
+			}
+			
+			inputStream.close();
+			outputStream.close();
+		} catch (Exception exception) {
+			WarpDrive.logger.error("Failed to unpack resource \'" + resourceName + "\' into " + destination);
+			exception.printStackTrace();
+		}
 	}
 }
