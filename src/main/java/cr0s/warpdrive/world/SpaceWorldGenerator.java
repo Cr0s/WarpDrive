@@ -280,6 +280,10 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		final int CENTER_SHIFT = 2; // Offset from center of central ball
 		
 		DeployableStructure cloud = StructureManager.getGasCloud(world.rand, type);
+		if (cloud == null) {
+			WarpDrive.logger.error("No gaz cloud defined, cancelling world generation");
+			return;
+		}
 		
 		for (int i = 1; i <= cloudSize; i++) {
 			int radius = 2 + world.rand.nextInt(centerRadius);
