@@ -1,42 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
+<warpdriveWorldGeneration version="1">
 
-<structure type="star" name="red_giant" radius="40" maxScaling="3.0">
-	<shell name="core" radiusInner="1" radiusOuter="10">
-		<block weight="1">minecraft:iron_block</block>
-	</shell>
-	
-	<shell name="mantle" radiusInner="11" radiusOuter="30">
-		<block weight="10">minecraft:sand</block>
-		<block weight="1">minecraft:iron_block</block>
-	</shell>
+	<structure type="star" name="red_giant" radius="40" maxScaling="3.0">
+		<shell name="core" radiusInner="1" radiusOuter="10">
+			<block weight="1">minecraft:iron_block</block>
+		</shell>
+		
+		<shell name="mantle" radiusInner="11" radiusOuter="30">
+			<block weight="10">minecraft:sand</block>
+			<block weight="1">minecraft:iron_block</block>
+		</shell>
 
-	<shell name="surface" radiusInner="31" radiusOuter="40">
-		<block weight="5">minecraft:glowstone</block>
-		<block weight="10">minecraft:lava</block>
-	</shell>
-</structure>
+		<shell name="surface" radiusInner="31" radiusOuter="40">
+			<block weight="5">minecraft:glowstone</block>
+			<block weight="10">minecraft:lava</block>
+		</shell>
+	</structure>
 
-<structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
-	<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
-		<block weight="1">minecraft:iron_block</block>
-	</shell>
-	
-	<shell name="mantle" radiusInner="6" radiusOuter="20" ores="common">
-		<block weight="10">minecraft:stone</block>
-		<block weight="3">minecraft:clay</block>
-	</shell>
-</structure>
+	<structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
+		<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
+			<block weight="1">minecraft:iron_block</block>
+		</shell>
+		
+		<shell name="mantle" radiusInner="6" radiusOuter="20" ores="common">
+			<block weight="10">minecraft:stone</block>
+			<block weight="3">minecraft:clay</block>
+		</shell>
+	</structure>
 
-<strate name="overworld">
-	<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
-	<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
-	<ore weight="4">minecraft:iron_ore</ore>
-	<ore weight="4">minecraft:gold_ore</ore>
-</strate>
+	<strate name="overworld">
+		<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
+		<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
+		<ore weight="4">minecraft:iron_ore</ore>
+		<ore weight="4">minecraft:gold_ore</ore>
+	</strate>
 
-<strate name="overworld">
-	<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
-	<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
-	<ore weight="4">minecraft:iron_ore</ore>
-	<ore weight="4">minecraft:gold_ore</ore>
-</strate>
+	<strate name="overworld">
+		<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
+		<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
+		<ore weight="4">minecraft:iron_ore</ore>
+		<ore weight="4">minecraft:gold_ore</ore>
+	</strate>
+
+</warpdriveWorldGeneration>

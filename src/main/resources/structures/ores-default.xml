@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ore name="minecraft:iron_ore" weight="50" category="common" />
-<ore name="minecraft:gold_ore" weight="5" category="rare" />
+<warpdriveWorldGeneration version="1">
+	<ore name="minecraft:iron_ore" weight="50" category="common" />
+	<ore name="minecraft:gold_ore" weight="5" category="rare" />
+	
+	
+	
+</warpdriveWorldGeneration>
