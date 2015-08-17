@@ -607,8 +607,9 @@ public class EntityJump extends Entity {
 				}
 
 				teSuperclass = teClass.getSuperclass();
-				if (teSuperclass.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock")
-						|| teSuperclass.getName().equals("ic2.core.block.TileEntityBlock") || teSuperclass.getName().contains("ic2.core.block.generator")) {
+				if ( teSuperclass.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock")
+				  || teSuperclass.getName().equals("ic2.core.block.TileEntityBlock")
+				  || teSuperclass.getName().contains("ic2.core.block.generator") ) {
 					try {
 						Method onUnloaded = teSuperclass.getDeclaredMethod("onUnloaded");
 						Method onLoaded = teSuperclass.getDeclaredMethod("onLoaded");
@@ -621,12 +622,24 @@ public class EntityJump extends Entity {
 						e.printStackTrace();
 					}
 					te.updateContainingBlockInfo();
+					
+					/* TODO: console spam on 1.7.10, need to fix it
+					// required in SSP during same dimension jump
 					try {
 						NetworkHelper.updateTileEntityField(te, "facing");
 					} catch (Exception e) {
 						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
 						e.printStackTrace();
 					}
+					/**/
+					/* trying a different approach...
+					try {
+						NetworkHelper.initiateTileEntityEvent(te, 666, false); // object is not an instance of declaring class
+					} catch (Exception e) {
+						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
+						e.printStackTrace();
+					}
+					/**/
 				}
 			}
 
@@ -653,15 +666,15 @@ public class EntityJump extends Entity {
 			int zc1 = minZ >> 4;
 			int zc2 = maxZ >> 4;
 
-		for (int xc = xc1; xc <= xc2; xc++) {
+			for (int xc = xc1; xc <= xc2; xc++) {
 				int x1 = Math.max(minX, xc << 4);
 				int x2 = Math.min(maxX, (xc << 4) + 15);
 
-			for (int zc = zc1; zc <= zc2; zc++) {
+				for (int zc = zc1; zc <= zc2; zc++) {
 					int z1 = Math.max(minZ, zc << 4);
 					int z2 = Math.min(maxZ, (zc << 4) + 15);
 
-				for (int y = minY; y <= maxY; y++) {
+					for (int y = minY; y <= maxY; y++) {
 						for (int x = x1; x <= x2; x++) {
 							for (int z = z1; z <= z2; z++) {
 								Block block = worldObj.getBlock(x, y, z);
@@ -672,10 +685,10 @@ public class EntityJump extends Entity {
 								}
 
 							int blockMeta = worldObj.getBlockMetadata(x, y, z);
-								TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
+							TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
 								JumpBlock jumpBlock = new JumpBlock(block, blockMeta, tileEntity, x, y, z);
 
-							if (tileEntity == null || false /* TODO: implement latePlacementBlockList configuration, including IC2 reactor chambers */ ) {
+								if (tileEntity == null || false /* TODO: implement latePlacementBlockList configuration, including IC2 reactor chambers */ ) {
 									ship[indexPlaceNormal] = jumpBlock;
 									indexPlaceNormal++;
 								} else {
@@ -688,7 +701,7 @@ public class EntityJump extends Entity {
 				}
 			}
 
-		for (int index = 0; index < indexPlaceAfter; index++) {
+			for (int index = 0; index < indexPlaceAfter; index++) {
 				ship[indexPlaceNormal] = placeAfter[index];
 				indexPlaceNormal++;
 			}
