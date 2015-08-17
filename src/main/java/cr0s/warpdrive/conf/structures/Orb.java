@@ -155,29 +155,29 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 				if (radiusInner < 1 || radiusInner > radiusOuter)
 					throw new InvalidXmlException("Orb creation arguments are incorrect!");
 
-				NodeList compBlocks = e.getElementsByTagName("CompositionBlock");
+				NodeList compBlocks = e.getElementsByTagName("block");
 				for (int i = 0; i < compBlocks.getLength(); i++) {
 					Element tmp = (Element) compBlocks.item(i);
 
 					if (!tmp.hasAttribute("weight"))
 						throw new InvalidXmlException("Shell is missing weight at place " + i + "!");
 
-					if (!tmp.hasAttribute("block"))
-						throw new InvalidXmlException("Shell is missing block at place " + i + "!");
+					String blockName = tmp.getTextContent();
+
+					if (blockName.isEmpty())
+						throw new InvalidXmlException("Shell is missing block name at place " + i + "!");
 
 					int tmpWeight = Integer.parseInt(tmp.getAttribute("weight"));
 
 					if (tmpWeight < 1)
 						throw new InvalidXmlException("Weight is less than 1 at place " + i + "!");
 
-					String tmpBlock = tmp.getAttribute("block");
-
-					if (Block.getBlockFromName(tmpBlock) == null)
+					if (Block.getBlockFromName(blockName) == null)
 						throw new InvalidXmlException("Shell has unknown block at place " + i + "!");
 
 					totalWeight += tmpWeight;
 
-					compositionBlocks.put(tmpBlock, tmpWeight);
+					compositionBlocks.put(blockName, tmpWeight);
 				}
 				
 				HashMap<String, Integer> categoryTemp = new HashMap<String, Integer>();
