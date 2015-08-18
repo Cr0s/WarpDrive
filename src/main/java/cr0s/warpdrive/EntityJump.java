@@ -1,7 +1,5 @@
 package cr0s.warpdrive;
 
-import ic2.api.network.NetworkHelper;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +40,7 @@ public class EntityJump extends Entity {
 	private int moveX;
 	private int moveY;
 	private int moveZ;
-
+	
 	private int xCoord;
 	private int yCoord;
 	private int zCoord;
@@ -57,39 +55,39 @@ public class EntityJump extends Entity {
 	public int minX;
 	public int minZ;
 	public int minY;
-
+	
 	private boolean isHyperspaceJump;
-
+	
 	private World targetWorld;
 	private Ticket sourceWorldTicket;
 	private Ticket targetWorldTicket;
-
+	
 	private boolean collisionDetected = false;
 	private ArrayList<Vector3> collisionAtSource;
 	private ArrayList<Vector3> collisionAtTarget;
 	private float collisionStrength = 0;
-
+	
 	public boolean on = false;
 	private JumpBlock ship[];
 	private TileEntityShipCore reactor;
-
+	
 	private final static int STATE_IDLE = 0;
 	private final static int STATE_JUMPING = 1;
 	private final static int STATE_REMOVING = 2;
 	private int state = STATE_IDLE;
 	private int currentIndexInShip = 0;
-
+	
 	private List<MovingEntity> entitiesOnShip;
 	private List<TileEntity> ASTurbines;
-
+	
 	private boolean betweenWorlds;
-
+	
 	private int destX, destY, destZ;
 	private boolean isCoordJump;
-
+	
 	private long msCounter = 0;
 	private int ticks = 0;
-
+	
 	public EntityJump(World world) {
 		super(world);
 		targetWorld = worldObj;
@@ -97,7 +95,7 @@ public class EntityJump extends Entity {
 			WarpDrive.logger.info(this + " Entity created (empty) in dimension " + worldObj.getProviderName() + " - " + worldObj.getWorldInfo().getWorldName());
 		}
 	}
-
+	
 	public EntityJump(World world, int x, int y, int z, int _dx, int _dz, TileEntityShipCore _reactor, boolean _isHyperspaceJump, int _distance, int _direction,
 			boolean _isCoordJump, int _destX, int _destY, int _destZ) {
 		super(world);
@@ -117,26 +115,26 @@ public class EntityJump extends Entity {
 		this.destX = _destX;
 		this.destY = _destY;
 		this.destZ = _destZ;
-
+		
 		// set by reactor
 		maxX = maxZ = maxY = minX = minZ = minY = 0;
 		shipLength = 0;
-
+		
 		// set when preparing jump
 		targetWorld = null;
-
+		
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Entity created");
 		}
 	}
-
+	
 	public void killEntity(String reason) {
 		if (!on) {
 			return;
 		}
-
+		
 		on = false;
-
+		
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			if (reason == null || reason.isEmpty()) {
 				WarpDrive.logger.info(this + " Killing jump entity...");
@@ -144,22 +142,22 @@ public class EntityJump extends Entity {
 				WarpDrive.logger.info(this + " Killing jump entity... (" + reason + ")");
 			}
 		}
-
+		
 		unforceChunks();
 		worldObj.removeEntity(this);
 	}
-
+	
 	@Override
 	public boolean isEntityInvulnerable() {
 		return true;
 	}
-
+	
 	@Override
 	public void onUpdate() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		if (!on) {
 			if (WarpDriveConfig.LOGGING_JUMP) {
 				WarpDrive.logger.info(this + " Removing from onUpdate...");
@@ -167,14 +165,14 @@ public class EntityJump extends Entity {
 			worldObj.removeEntity(this);
 			return;
 		}
-
+		
 		if (minY < 0 || maxY > 256) {
 			String msg = "Invalid Y coordinate(s), check ship dimensions...";
 			messageToAllPlayersOnShip(msg);
 			killEntity(msg);
 			return;
 		}
-
+		
 		ticks++;
 		if (state == STATE_IDLE) {
 			if (WarpDriveConfig.LOGGING_JUMP) {
@@ -196,7 +194,7 @@ public class EntityJump extends Entity {
 		} else if (state == STATE_REMOVING) {
 			ASTurbines = new ArrayList<TileEntity>();
 			removeShip();
-
+			
 			if (currentIndexInShip >= ship.length - 1) {
 				finishJump();
 				state = STATE_IDLE;
@@ -208,7 +206,7 @@ public class EntityJump extends Entity {
 			return;
 		}
 	}
-
+	
 	private boolean forceChunks(StringBuilder reason) {
 		LocalProfiler.start("EntityJump.forceChunks");
 		if (WarpDriveConfig.LOGGING_JUMP) {
@@ -240,7 +238,7 @@ public class EntityJump extends Entity {
 				ForgeChunkManager.forceChunk(sourceWorldTicket, new ChunkCoordIntPair(x, z));
 			}
 		}
-
+		
 		x1 = (minX + moveX) >> 4;
 		x2 = (maxX + moveX) >> 4;
 		z1 = (minZ + moveZ) >> 4;
@@ -259,13 +257,13 @@ public class EntityJump extends Entity {
 		LocalProfiler.stop();
 		return true;
 	}
-
+	
 	private void unforceChunks() {
 		LocalProfiler.start("EntityJump.unforceChunks");
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Unforcing chunks");
 		}
-
+		
 		int x1, x2, z1, z2;
 		if (sourceWorldTicket != null) {
 			x1 = minX >> 4;
@@ -280,7 +278,7 @@ public class EntityJump extends Entity {
 			ForgeChunkManager.releaseTicket(sourceWorldTicket);
 			sourceWorldTicket = null;
 		}
-
+		
 		if (targetWorldTicket != null) {
 			x1 = (minX + moveX) >> 4;
 			x2 = (maxX + moveX) >> 4;
@@ -294,10 +292,10 @@ public class EntityJump extends Entity {
 			ForgeChunkManager.releaseTicket(targetWorldTicket);
 			targetWorldTicket = null;
 		}
-
+		
 		LocalProfiler.stop();
 	}
-
+	
 	private void messageToAllPlayersOnShip(String msg) {
 		if (entitiesOnShip == null) {
 			reactor.messageToAllPlayersOnShip(msg);
@@ -311,7 +309,7 @@ public class EntityJump extends Entity {
 			}
 		}
 	}
-
+	
 	public static String getDirectionLabel(int direction) {
 		switch (direction) {
 		case -1:
@@ -330,19 +328,19 @@ public class EntityJump extends Entity {
 			return direction + " degrees";
 		}
 	}
-
+	
 	private void prepareToJump() {
 		StringBuilder reason = new StringBuilder();
-
+		
 		LocalProfiler.start("EntityJump.prepareToJump");
 		boolean isInSpace = (worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		boolean isInHyperSpace = (worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
-
+		
 		boolean toSpace = (direction == -1) && (maxY + distance > 255) && (!isInSpace) && (!isInHyperSpace);
 		boolean fromSpace = (direction == -2) && (minY - distance < 0) && isInSpace;
 		betweenWorlds = fromSpace || toSpace || isHyperspaceJump;
 		moveX = moveY = moveZ = 0;
-
+		
 		if (toSpace) {
 			Boolean planeFound = false;
 			Boolean planeValid = false;
@@ -425,17 +423,13 @@ public class EntityJump extends Entity {
 		} else {
 			targetWorld = worldObj;
 		}
-
-		// FIXME
-		// turnOffModems();
-
+		
 		// Calculate jump vector
 		if (isCoordJump) {
 			moveX = destX - xCoord;
 			moveZ = destZ - zCoord;
 			moveY = destY - yCoord;
-			distance = 0; // FIXME: check collision in straight path, starting
-			// with getPossibleJumpDistance() ?
+			distance = 0; // FIXME: check collision in straight path, starting with getPossibleJumpDistance() ?
 		} else if (isHyperspaceJump) {
 			distance = 0;
 		} else {
@@ -450,32 +444,32 @@ public class EntityJump extends Entity {
 				if (distance < 256) {
 					distance = getPossibleJumpDistance();
 				}
-
+				
 				int movementVector[] = getVector(direction);
 				moveX = movementVector[0] * distance;
 				moveY = movementVector[1] * distance;
 				moveZ = movementVector[2] * distance;
-
+				
 				if ((maxY + moveY) > 255) {
 					moveY = 255 - maxY;
 				}
-
+				
 				if ((minY + moveY) < 5) {
 					moveY = 5 - minY;
 				}
 			}
 		}
-
+		
 		if (betweenWorlds && WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
 		}
-
+		
 		// Validate positions aren't overlapping
 		if (!betweenWorlds) {
 			if (Math.abs(moveX) <= (maxX - minX + 1) && Math.abs(moveY) <= (maxY - minY + 1) && Math.abs(moveZ) <= (maxZ - minZ + 1)) {
 				// render fake explosions
 				doCollisionDamage(false);
-
+				
 				// cancel jump
 				LocalProfiler.stop();
 				String msg = "Not enough space for jump!";
@@ -484,7 +478,7 @@ public class EntityJump extends Entity {
 				return;
 			}
 		}
-
+		
 		if (!forceChunks(reason)) {
 			String msg = reason.toString();
 			killEntity(msg);
@@ -497,7 +491,7 @@ public class EntityJump extends Entity {
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Saved " + entitiesOnShip.size() + " entities from ship");
 		}
-
+		
 		if (isHyperspaceJump && isInSpace) {
 			messageToAllPlayersOnShip("Entering HYPERSPACE...");
 		} else if (isHyperspaceJump && isInHyperSpace) {
@@ -507,7 +501,7 @@ public class EntityJump extends Entity {
 		} else {
 			messageToAllPlayersOnShip("Jumping " + getDirectionLabel(direction) + " by " + distance + " blocks");
 		}
-
+		
 		// validate ship content
 		int shipVolume = getRealShipVolume_checkBedrock(reason);
 		if (shipVolume == -1) {
@@ -517,7 +511,7 @@ public class EntityJump extends Entity {
 			LocalProfiler.stop();
 			return;
 		}
-
+		
 		saveShip(shipVolume);
 		this.currentIndexInShip = 0;
 		msCounter = System.currentTimeMillis();
@@ -526,7 +520,7 @@ public class EntityJump extends Entity {
 			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world before jump: " + targetWorld.loadedTileEntityList.size());
 		}
 	}
-
+	
 	/**
 	 * Finish jump: move entities, unlock worlds and delete self
 	 */
@@ -537,7 +531,7 @@ public class EntityJump extends Entity {
 			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, before cleanup: " + targetWorld.loadedTileEntityList.size());
 		}
 		LocalProfiler.start("EntityJump.removeDuplicates()");
-
+		
 		try {
 			targetWorld.loadedTileEntityList = this.removeDuplicates(targetWorld.loadedTileEntityList);
 		} catch (Exception exception) {
@@ -547,14 +541,14 @@ public class EntityJump extends Entity {
 		}
 		FixASTurbines();
 		doCollisionDamage(true);
-
+		
 		LocalProfiler.stop();
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, after cleanup: " + targetWorld.loadedTileEntityList.size());
 		}
 		killEntity("Jump done");
 	}
-
+	
 	/**
 	 * Removing ship from world
 	 *
@@ -580,74 +574,104 @@ public class EntityJump extends Entity {
 				currentIndexInShip++;
 				continue;
 			}
-
+			
 			if (jb.blockTileEntity != null) {
-				// WarpDrive.debugPrint("Removing tile entity at " + jb.x + ", "
-				// + jb.y + ", " + jb.z);
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Removing tile entity at " + jb.x + ", " + jb.y + ", " + jb.z);
+				}
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
-
+			
 			te = targetWorld.getTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
 			if (te != null) {
 				teClass = te.getClass();
-				// WarpDrive.debugPrint("Tile at " + jb.x + ", " + jb.y + ", " +
-				// jb.z + " is " + teClass + " derived from " +
-				// teClass.getSuperclass());
+				// WarpDrive.logger.info("Tile at " + jb.x + ", " + jb.y + ", " + jb.z + " is " + teClass + " derived from " + teClass.getSuperclass());
 				if (teClass.getName().equals("atomicscience.jiqi.TTurbine")) {
 					try {
-						if (teClass.getField("shiDa").getBoolean(te))
+						if (teClass.getField("shiDa").getBoolean(te)) {
 							ASTurbines.add(te);
-					} catch (Exception e) {
+						}
+					} catch (Exception exception) {
 						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						e.printStackTrace();
+						exception.printStackTrace();
 					}
 				} else if (te instanceof TileEntityShipCore) {
 					WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) te);
 				}
-
+				
 				teSuperclass = teClass.getSuperclass();
-				if ( teSuperclass.getName().equals("ic2.core.block.wiring.TileEntityElectricBlock")
-				  || teSuperclass.getName().equals("ic2.core.block.TileEntityBlock")
-				  || teSuperclass.getName().contains("ic2.core.block.generator") ) {
-					try {
-						Method onUnloaded = teSuperclass.getDeclaredMethod("onUnloaded");
-						Method onLoaded = teSuperclass.getDeclaredMethod("onLoaded");
-						if (onUnloaded != null && onLoaded != null) {
-							onUnloaded.invoke(te);
-							onLoaded.invoke(te);
+				// IC2 support
+				if ( teSuperclass.getName().contains("ic2.core.block")) {
+					if ( teSuperclass.getName().equals("ic2.core.block.TileEntityBlock")
+					  || teSuperclass.getName().equals("ic2.core.block.TileEntityInventory")
+					  || teSuperclass.getName().contains("ic2.core.block.generator.tileentity")
+					  || teSuperclass.getName().contains("ic2.core.block.heatgenerator.tileentity")
+					  || teSuperclass.getName().contains("ic2.core.block.kineticgenerator.tileentity")
+					  || teSuperclass.getName().contains("ic2.core.block.machine.tileentity")
+					  || teSuperclass.getName().contains("ic2.core.block.reactor.tileentity")
+					  || teSuperclass.getName().contains("ic2.core.block.wiring") ) {
+						try {
+							Method onUnloaded = teSuperclass.getDeclaredMethod("onUnloaded");
+							Method onLoaded = teSuperclass.getDeclaredMethod("onLoaded");
+							if (onUnloaded != null && onLoaded != null) {
+								// WarpDrive.logger.info("IC2 (un)loaded events found");
+								onUnloaded.invoke(te);
+								onLoaded.invoke(te);
+							}
+						} catch (Exception exception) {
+							WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
+							exception.printStackTrace();
 						}
-					} catch (Exception e) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						e.printStackTrace();
+						
+						te.updateContainingBlockInfo();
+						
+						// required in SSP during same dimension jump to update client with rotation data
+						try {
+							NetworkHelper_updateTileEntityField(te, "facing");
+						} catch (Exception exception) {
+							WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
+							exception.printStackTrace();
+						}
 					}
-					te.updateContainingBlockInfo();
-					
-					/* TODO: console spam on 1.7.10, need to fix it
-					// required in SSP during same dimension jump
-					try {
-						NetworkHelper.updateTileEntityField(te, "facing");
-					} catch (Exception e) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						e.printStackTrace();
-					}
-					/**/
-					/* trying a different approach...
-					try {
-						NetworkHelper.initiateTileEntityEvent(te, 666, false); // object is not an instance of declaring class
-					} catch (Exception e) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						e.printStackTrace();
-					}
-					/**/
 				}
 			}
-
+			
 			currentIndexInShip++;
 		}
 		LocalProfiler.stop();
 	}
-
+	
+	// FIXME: IC2 hack for 1.7.10 until they fix it, see http://bt.industrial-craft.net/view.php?id=1704
+	private static Object instance;
+	private static Method NetworkManager_updateTileEntityField;
+	
+	public static void NetworkHelper_init() {
+		try {
+			NetworkManager_updateTileEntityField = Class.forName("ic2.core.network.NetworkManager").getMethod("updateTileEntityField", new Class[] { TileEntity.class, String.class });
+			
+			instance = Class.forName("ic2.core.IC2").getDeclaredField("network").get(null);
+			if (!instance.getClass().getName().contains("NetworkManager")) {
+				instance = Class.forName("ic2.core.util.SideGateway").getMethod("get").invoke(instance);
+				WarpDrive.logger.error("Patched IC2 API, new instance is '" + instance + "'");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void NetworkHelper_updateTileEntityField(TileEntity te, String field) {
+		try {
+			if (instance == null) {
+				NetworkHelper_init();
+			}
+			NetworkManager_updateTileEntityField.invoke(instance, new Object[] { te, field });
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	// IC2 hack ends here
+	
 	/**
 	 * Saving ship to memory
 	 *
@@ -717,7 +741,7 @@ public class EntityJump extends Entity {
 		}
 		LocalProfiler.stop();
 	}
-
+	
 	/**
 	 * Ship moving
 	 */
@@ -727,12 +751,12 @@ public class EntityJump extends Entity {
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Moving ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
 		}
-
+		
 		for (int index = 0; index < blocksToMove; index++) {
 			if (currentIndexInShip >= ship.length) {
 				break;
 			}
-
+			
 			JumpBlock jb = ship[currentIndexInShip];
 			if (jb != null) {
 				jb.deploy(targetWorld, moveX, moveY, moveZ);
@@ -741,10 +765,10 @@ public class EntityJump extends Entity {
 			}
 			currentIndexInShip++;
 		}
-
+		
 		LocalProfiler.stop();
 	}
-
+	
 	/**
 	 * Checking jump possibility
 	 *
@@ -757,26 +781,26 @@ public class EntityJump extends Entity {
 		int testDistance = this.distance;
 		int blowPoints = 0;
 		collisionDetected = false;
-
+		
 		CheckMovementResult result = null;
 		while (testDistance >= 0) {
 			// Is there enough space in destination point?
 			result = checkMovement(testDistance, false);
-
+			
 			if (result == null) {
 				break;
 			}
-
+			
 			if (result.isCollision) {
 				blowPoints++;
 			}
 			testDistance--;
 		}
-
+		
 		if (distance != testDistance && WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Jump distance adjusted to " + testDistance + " after " + blowPoints + " collisions");
 		}
-
+		
 		// Register explosion(s) at collision point
 		if (blowPoints > WarpDriveConfig.WC_COLLISION_TOLERANCE_BLOCKS) {
 			result = checkMovement(Math.max(1, testDistance + 1), true);
@@ -799,10 +823,10 @@ public class EntityJump extends Entity {
 				WarpDrive.logger.error("WarpDrive error: unable to compute collision points, ignoring...");
 			}
 		}
-
+		
 		return testDistance;
 	}
-
+	
 	private void doCollisionDamage(boolean atTarget) {
 		if (!collisionDetected) {
 			if (WarpDriveConfig.LOGGING_JUMP) {
@@ -830,15 +854,13 @@ public class EntityJump extends Entity {
 				max.z = v.z;
 			}
 		}
-
+		
 		// inform players on board
 		double rx = Math.round(min.x + worldObj.rand.nextInt(Math.max(1, (int) (max.x - min.x))));
 		double ry = Math.round(min.y + worldObj.rand.nextInt(Math.max(1, (int) (max.y - min.y))));
 		double rz = Math.round(min.z + worldObj.rand.nextInt(Math.max(1, (int) (max.z - min.z))));
-		// WarpDrive.debugPrint("doCollisionDamage msg " + rx + ", " + ry + ", "
-		// + rz + " atTarget " + atTarget + " min " + min + " max " + max);
 		messageToAllPlayersOnShip("Ship collision detected around " + (int) rx + ", " + (int) ry + ", " + (int) rz + ". Damage report pending...");
-
+		
 		// randomize if too many collision points
 		int nbExplosions = Math.min(5, collisionPoints.size());
 		if (WarpDriveConfig.LOGGING_JUMP) {
@@ -858,35 +880,35 @@ public class EntityJump extends Entity {
 				}
 				current = collisionPoints.get(i);
 			}
-
+			
 			// compute explosion strength with a jitter, at least 1 TNT
 			float strength = Math.max(4.0F, collisionStrength / nbExplosions - 2.0F + 2.0F * worldObj.rand.nextFloat());
-
+			
 			(atTarget ? targetWorld : worldObj).newExplosion((Entity) null, current.x, current.y, current.z, strength, atTarget, atTarget);
 			WarpDrive.logger.info("Ship collision caused explosion at " + current.x + ", " + current.y + ", " + current.z + " with strength " + strength);
 		}
 	}
-
+	
 	private int getRealShipVolume_checkBedrock(StringBuilder reason) {
 		LocalProfiler.start("EntityJump.getRealShipVolume_checkBedrock");
 		int shipVolume = 0;
-
+		
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
 					Block block = worldObj.getBlock(x, y, z);
-
+					
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
 					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 						continue;
 					}
-
+					
 					shipVolume++;
-
+					
 					if (WarpDriveConfig.LOGGING_JUMP) {
 						WarpDrive.logger.info("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
 					}
-
+					
 					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
 						reason.append("Bedrock detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
 						LocalProfiler.stop();
@@ -895,7 +917,7 @@ public class EntityJump extends Entity {
 				}
 			}
 		}
-
+		
 		// Lem: abort jump if blocks with TE are connecting to the ship (avoid crash when splitting multi-blocks)
 		for (int x = minX - 1; x <= maxX + 1; x++) {
 			boolean xBorder = (x == minX - 1) || (x == maxX + 1);
@@ -907,24 +929,24 @@ public class EntityJump extends Entity {
 						continue;
 					if (!(xBorder || yBorder || zBorder))
 						continue;
-
+					
 					Block block = worldObj.getBlock(x, y, z);
-
+					
 					// Skipping air blocks
 					if (worldObj.isAirBlock(x, y, z)) {
 						continue;
 					}
-
+					
 					// Skipping unmovable blocks
 					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
 						continue;
 					}
-
+					
 					TileEntity te = worldObj.getTileEntity(x, y, z);
 					if (te == null) {
 						continue;
 					}
-
+					
 					reason.append("Ship snagged at " + x + ", " + y + ", " + z + ". Damage report pending...");
 					worldObj.createExplosion((Entity) null, x, y, z, Math.min(4F * 30, 4F * (shipVolume / 50)), false);
 					LocalProfiler.stop();
@@ -932,50 +954,50 @@ public class EntityJump extends Entity {
 				}
 			}
 		}
-
+		
 		LocalProfiler.stop();
 		return shipVolume;
 	}
-
+	
 	private void saveEntities() {
 		entitiesOnShip = new ArrayList<MovingEntity>();
-
+		
 		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX + 0.99D, maxY + 0.99D, maxZ + 0.99D);
-
+		
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
-
+		
 		for (Object o : list) {
 			if (o == null || !(o instanceof Entity) || (o instanceof EntityJump)) {
 				continue;
 			}
-
+			
 			Entity entity = (Entity) o;
 			MovingEntity movingEntity = new MovingEntity(entity);
 			entitiesOnShip.add(movingEntity);
 		}
 	}
-
+	
 	private boolean moveEntities(boolean restorePositions) {
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Moving entities");
 		}
 		LocalProfiler.start("EntityJump.moveEntities");
-
+		
 		if (entitiesOnShip != null) {
 			for (MovingEntity me : entitiesOnShip) {
 				Entity entity = me.entity;
-
+				
 				if (entity == null) {
 					continue;
 				}
-
+				
 				double oldEntityX = me.oldX;
 				double oldEntityY = me.oldY;
 				double oldEntityZ = me.oldZ;
 				double newEntityX;
 				double newEntityY;
 				double newEntityZ;
-
+				
 				if (restorePositions) {
 					newEntityX = oldEntityX;
 					newEntityY = oldEntityY;
@@ -985,19 +1007,21 @@ public class EntityJump extends Entity {
 					newEntityY = oldEntityY + moveY;
 					newEntityZ = oldEntityZ + moveZ;
 				}
-
-				// WarpDrive.debugPrint("Entity moving: old (" + oldEntityX +
-				// " " + oldEntityY + " " + oldEntityZ + ") -> new (" +
-				// newEntityX + " " + newEntityY + " " + newEntityZ);
-
+				
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Entity moving: old (" + oldEntityX + " " + oldEntityY + " " + oldEntityZ + ") -> new (" + newEntityX + " " + newEntityY + " " + newEntityZ);
+				}
+				
 				// Travel to another dimension if needed
 				if (betweenWorlds && !restorePositions) {
 					MinecraftServer server = MinecraftServer.getServer();
 					WorldServer from = server.worldServerForDimension(worldObj.provider.dimensionId);
 					WorldServer to = server.worldServerForDimension(targetWorld.provider.dimensionId);
-					SpaceTeleporter teleporter = new SpaceTeleporter(to, 0, MathHelper.floor_double(newEntityX), MathHelper.floor_double(newEntityY),
+					SpaceTeleporter teleporter = new SpaceTeleporter(to, 0,
+							MathHelper.floor_double(newEntityX),
+							MathHelper.floor_double(newEntityY),
 							MathHelper.floor_double(newEntityZ));
-
+					
 					if (entity instanceof EntityPlayerMP) {
 						EntityPlayerMP player = (EntityPlayerMP) entity;
 						server.getConfigurationManager().transferPlayerToDimension(player, targetWorld.provider.dimensionId, teleporter);
@@ -1005,13 +1029,13 @@ public class EntityJump extends Entity {
 						server.getConfigurationManager().transferEntityToWorld(entity, worldObj.provider.dimensionId, from, to, teleporter);
 					}
 				}
-
+				
 				// Update position
 				if (entity instanceof EntityPlayerMP) {
 					EntityPlayerMP player = (EntityPlayerMP) entity;
-
+					
 					ChunkCoordinates bedLocation = player.getBedLocation(player.worldObj.provider.dimensionId);
-
+					
 					if (bedLocation != null && minX <= bedLocation.posX && maxX >= bedLocation.posX && minY <= bedLocation.posY && maxY >= bedLocation.posY
 							&& minZ <= bedLocation.posZ && maxZ >= bedLocation.posZ) {
 						bedLocation.posX = bedLocation.posX + moveX;
@@ -1019,66 +1043,66 @@ public class EntityJump extends Entity {
 						bedLocation.posZ = bedLocation.posZ + moveZ;
 						player.setSpawnChunk(bedLocation, false);
 					}
-
+					
 					player.setPositionAndUpdate(newEntityX, newEntityY, newEntityZ);
 				} else {
 					entity.setPosition(newEntityX, newEntityY, newEntityZ);
 				}
 			}
 		}
-
+		
 		LocalProfiler.stop();
 		return true;
 	}
-
+	
 	public int[] getVector(int i) {
 		int v[] = { 0, 0, 0 };
-
+		
 		switch (i) {
 		case -1:
 			v[1] = 1;
 			break;
-
+			
 		case -2:
 			v[1] = -1;
 			break;
-
+			
 		case 0:
 			v[0] = dx;
 			v[2] = dz;
 			break;
-
+			
 		case 180:
 			v[0] = -dx;
 			v[2] = -dz;
 			break;
-
+			
 		case 90:
 			v[0] = dz;
 			v[2] = -dx;
 			break;
-
+			
 		case 270:
 			v[0] = -dz;
 			v[2] = dx;
 		}
-
+		
 		return v;
 	}
-
+	
 	class CheckMovementResult {
 		public ArrayList<Vector3> atSource;
 		public ArrayList<Vector3> atTarget;
 		public boolean isCollision = false;
 		public String reason = "";
-
+		
 		CheckMovementResult() {
 			this.atSource = new ArrayList<Vector3>(1);
 			this.atTarget = new ArrayList<Vector3>(1);
 			this.isCollision = false;
 			this.reason = "Unknown reason";
 		}
-
+		
 		public void add(double sx, double sy, double sz, double tx, double ty, double tz, boolean pisCollision, String preason) {
 			atSource.add(new Vector3(sx, sy, sz));
 			atTarget.add(new Vector3(tx, ty, tz));
@@ -1089,7 +1113,7 @@ public class EntityJump extends Entity {
 			}
 		}
 	};
-
+	
 	private CheckMovementResult checkMovement(int testDistance, boolean fullCollisionDetails) {
 		CheckMovementResult result = new CheckMovementResult();
 		if ((direction == -1 && maxY + testDistance > 255) && !betweenWorlds) {
@@ -1097,17 +1121,17 @@ public class EntityJump extends Entity {
 					"Reactor will blow due +high limit");
 			return result;
 		}
-
+		
 		if ((direction == -2 && minY - testDistance <= 8) && !betweenWorlds) {
 			result.add(xCoord, minY - testDistance, zCoord, xCoord + 0.5D, maxY - testDistance, zCoord + 0.5D, false, "Reactor will blow due -low limit");
 			return result;
 		}
-
+		
 		int movementVector[] = getVector(direction);
 		int lmoveX = movementVector[0] * testDistance;
 		int lmoveY = movementVector[1] * testDistance;
 		int lmoveZ = movementVector[2] * testDistance;
-
+		
 		int x, y, z, newX, newY, newZ;
 		Block block;
 		for (y = minY; y <= maxY; y++) {
@@ -1116,7 +1140,7 @@ public class EntityJump extends Entity {
 				newX = x + lmoveX;
 				for (z = minZ; z <= maxZ; z++) {
 					newZ = z + lmoveZ;
-
+					
 					block = worldObj.getBlock(newX, newY, newZ);
 					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
 						result.add(x, y, z,
@@ -1128,7 +1152,7 @@ public class EntityJump extends Entity {
 							return result;
 						}
 					}
-
+					
 					if ( !worldObj.isAirBlock(x, y, z)
 					  && !worldObj.isAirBlock(newX, newY, newZ)
 					  && !block.isAssociatedBlock(WarpDrive.blockAir)
@@ -1146,14 +1170,14 @@ public class EntityJump extends Entity {
 				}
 			}
 		}
-
+		
 		if (fullCollisionDetails && result.isCollision) {
 			return result;
 		} else {
 			return null;
 		}
 	}
-
+	
 	private static ArrayList<Object> removeDuplicates(List<TileEntity> l) {
 		Set<TileEntity> s = new TreeSet<TileEntity>(new Comparator<TileEntity>() {
 			@Override
@@ -1171,24 +1195,24 @@ public class EntityJump extends Entity {
 		s.addAll(l);
 		return new ArrayList<Object>(Arrays.asList(s.toArray()));
 	}
-
+	
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
 		WarpDrive.logger.error(this + " readEntityFromNBT()");
 	}
-
+	
 	@Override
 	protected void entityInit() {
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.warn(this + " entityInit()");
 		}
 	}
-
+	
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound var1) {
 		WarpDrive.logger.error(this + " writeEntityToNBT()");
 	}
-
+	
 	private void FixASTurbines() {
 		Class<?> c;
 		for (TileEntity t : ASTurbines)
@@ -1201,7 +1225,7 @@ public class EntityJump extends Entity {
 				e.printStackTrace();
 			}
 	}
-
+	
 	public void setMinMaxes(int minXV, int maxXV, int minYV, int maxYV, int minZV, int maxZV) {
 		minX = minXV;
 		maxX = maxXV;
@@ -1210,7 +1234,7 @@ public class EntityJump extends Entity {
 		minZ = minZV;
 		maxZ = maxZV;
 	}
-
+	
 	@Override
 	public String toString() {
 		return String.format("%s/%d \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] {
