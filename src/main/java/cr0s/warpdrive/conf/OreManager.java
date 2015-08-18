@@ -119,10 +119,11 @@ public class OreManager {
 			NodeList mods = ((Element) modReqList.item(i)).getElementsByTagName("mod");
 			for (int j = 0; j < mods.getLength(); j++) {
 				Element mod = (Element) mods.item(j);
-				if (!mod.hasAttribute("name"))
-					throw new InvalidXmlException("A mod requirement at " + i + ":" + j + " is missing the name attribute!");
 				
-				String name = mod.getAttribute("name");
+				String name = mod.getTextContent();
+				if (name.isEmpty())
+					throw new InvalidXmlException("A mod requirement at " + i + ":" + j + " is empty!");
+
 				if (!Loader.isModLoaded(name)) {
 					WarpDrive.logger.info("Skippping ore data file " + f.getPath() + " because the mod " + name + " is not loaded");
 				}
