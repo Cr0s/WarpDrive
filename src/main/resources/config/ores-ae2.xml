@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<warpdriveWorldGeneration version="1">
+
+    <ModRequirements>
+        <mod>ae2</mod>
+    </ModRequirements>
+
+	<ore name="ae2:quartz" weight="70" category="uncommonOre" />
+	
+</warpdriveWorldGeneration>

@@ -18,28 +18,18 @@
 	</structure>
 
 	<structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
-		<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
-			<block weight="1">minecraft:iron_block</block>
+		<shell name="core" radiusInner="1" radiusOuter="5" filler="rareOres">
+			<block weight="100">minecraft:iron_block</block>
 		</shell>
 		
-		<shell name="mantle" radiusInner="6" radiusOuter="20" ores="common">
+		<shell name="mantle" radiusInner="6" radiusOuter="20" filler="commonOres;uncommonOres">
 			<block weight="10">minecraft:stone</block>
 			<block weight="3">minecraft:clay</block>
 		</shell>
+		
+		<shell name="surface" radiusInner="21" radiusOuter="30" filler="overworld;commonOres">
+			<block weight="3">minecraft:clay</block>
+		</shell>
 	</structure>
-
-	<strate name="overworld">
-		<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
-		<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
-		<ore weight="4">minecraft:iron_ore</ore>
-		<ore weight="4">minecraft:gold_ore</ore>
-	</strate>
-
-	<strate name="overworld">
-		<filler weight="1" normal="minecraft:stone" corrupted="minecraft:cobblestone" />
-		<filler weight="3" normal="minecraft:clay" corrupted="minecraft:hardened_clay" />
-		<ore weight="4">minecraft:iron_ore</ore>
-		<ore weight="4">minecraft:gold_ore</ore>
-	</strate>
 
 </warpdriveWorldGeneration>

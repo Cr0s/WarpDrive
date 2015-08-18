@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<warpdriveWorldGeneration version="1">
+
+    <ModRequirements>
+        <mod>netherores</mod>
+    </ModRequirements>
+    
+    <ore name="netherores:nether_coal" weight="50" category="nether" />
+    <ore name="netherores:nether_iron" weight="40" category="nether" />
+    <ore name="netherores:nether_redstone" weight="30" category="nether" />
+    <ore name="netherores:nether_lapis" weight="15" category="nether" />
+    <ore name="netherores:nether_diamond" weight="5" category="nether" />
+	
+</warpdriveWorldGeneration>
