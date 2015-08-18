@@ -65,10 +65,10 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 			} else if (te instanceof TileEntityLaser) {
 				((TileEntityLaser) te).setCameraFrequency(frequency);
 			} else {
-				WarpDrive.logger.warn("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
+				WarpDrive.logger.error("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
 			}
 		} else {
-			WarpDrive.logger.warn("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
+			WarpDrive.logger.error("Received frequency packet: (" + x + ", " + y + ", " + z + ") has no tile entity");
 		}
  	}
 	
@@ -84,7 +84,7 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 			WarpDrive.logger.info("Received frequency packet: (" + frequencyMessage.x + ", " + frequencyMessage.y + ", " + frequencyMessage.z + ") frequency '" + frequencyMessage.frequency + "'");
 		}
 		
-		handle(Minecraft.getMinecraft().theWorld);
+		frequencyMessage.handle(Minecraft.getMinecraft().theWorld);
 		
 		return null;	// no response
 	}
