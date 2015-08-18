@@ -891,7 +891,7 @@ public class WarpDriveConfig {
 
 
 
-		OreManager.loadOres(baseConfFolder);
+		FillerManager.loadOres(baseConfFolder);
 		StructureManager.loadStructures(baseConfFolder);
 	}
 	
