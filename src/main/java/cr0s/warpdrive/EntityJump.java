@@ -586,7 +586,9 @@ public class EntityJump extends Entity {
 			te = targetWorld.getTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
 			if (te != null) {
 				teClass = te.getClass();
-				// WarpDrive.logger.info("Tile at " + jb.x + ", " + jb.y + ", " + jb.z + " is " + teClass + " derived from " + teClass.getSuperclass());
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info("Tile at " + jb.x + ", " + jb.y + ", " + jb.z + " is " + teClass + " derived from " + teClass.getSuperclass());
+				}
 				if (teClass.getName().equals("atomicscience.jiqi.TTurbine")) {
 					try {
 						if (teClass.getField("shiDa").getBoolean(te)) {
@@ -602,37 +604,47 @@ public class EntityJump extends Entity {
 				
 				teSuperclass = teClass.getSuperclass();
 				// IC2 support
-				if ( teSuperclass.getName().contains("ic2.core.block")) {
-					if ( teSuperclass.getName().equals("ic2.core.block.TileEntityBlock")
-					  || teSuperclass.getName().equals("ic2.core.block.TileEntityInventory")
-					  || teSuperclass.getName().contains("ic2.core.block.generator.tileentity")
-					  || teSuperclass.getName().contains("ic2.core.block.heatgenerator.tileentity")
-					  || teSuperclass.getName().contains("ic2.core.block.kineticgenerator.tileentity")
-					  || teSuperclass.getName().contains("ic2.core.block.machine.tileentity")
-					  || teSuperclass.getName().contains("ic2.core.block.reactor.tileentity")
-					  || teSuperclass.getName().contains("ic2.core.block.wiring") ) {
-						try {
-							Method onUnloaded = teSuperclass.getDeclaredMethod("onUnloaded");
-							Method onLoaded = teSuperclass.getDeclaredMethod("onLoaded");
-							if (onUnloaded != null && onLoaded != null) {
-								// WarpDrive.logger.info("IC2 (un)loaded events found");
-								onUnloaded.invoke(te);
-								onLoaded.invoke(te);
+				if (teSuperclass.getName().contains("ic2.core.block")) {
+					try {
+						Method onUnloaded = teClass.getMethod("onUnloaded");
+						Method onLoaded = teClass.getMethod("onLoaded");
+						if (onUnloaded != null && onLoaded != null) {
+							onUnloaded.invoke(te);
+							onLoaded.invoke(te);
+						} else {
+							WarpDrive.logger.error("Missing IC2 (un)loaded events for TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z + ". Please report this issue!");
+						}
+					} catch (Exception exception) {
+						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
+						exception.printStackTrace();
+					}
+					
+					te.updateContainingBlockInfo();
+					
+					// required in SSP during same dimension jump to update client with rotation data
+					try {
+						if (teClass.getName().equals("ic2.core.block.wiring.TileEntityCable")) {
+							if (WarpDriveConfig.LOGGING_JUMP) {
+								WarpDrive.logger.info("Found IC2 cable!");
 							}
-						} catch (Exception exception) {
-							WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-							exception.printStackTrace();
-						}
-						
-						te.updateContainingBlockInfo();
-						
-						// required in SSP during same dimension jump to update client with rotation data
-						try {
+							NetworkHelper_updateTileEntityField(te, "color");
+							NetworkHelper_updateTileEntityField(te, "foamColor");
+							NetworkHelper_updateTileEntityField(te, "foamed");
+						} else {
+							if (WarpDriveConfig.LOGGING_JUMP) {
+								WarpDrive.logger.info("Found IC2 block!");
+							}
+							NetworkHelper_updateTileEntityField(te, "active");
 							NetworkHelper_updateTileEntityField(te, "facing");
-						} catch (Exception exception) {
-							WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-							exception.printStackTrace();
+							if (teClass.getName().equals("ic2.core.block.reactor.TileEntityNuclearReactorElectric")) {
+								WarpDrive.logger.info("Found IC2 Reactor!");
+								NetworkHelper_updateTileEntityField(te, "heat");	// not working, probably an IC2 bug here...
+							}
+							// no needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
 						}
+					} catch (Exception exception) {
+						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
+						exception.printStackTrace();
 					}
 				}
 			}
@@ -899,7 +911,7 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) && block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
+					if (worldObj.isAirBlock(x, y, z) || block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 						continue;
 					}
 					
