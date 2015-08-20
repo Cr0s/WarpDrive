@@ -83,9 +83,9 @@ public class SpaceEventHandler {
 		  || entity.worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			Block block1 = entity.worldObj.getBlock(x, y, z);
 			Block block2 = entity.worldObj.getBlock(x, y + 1, z);
-			boolean inVacuum = (!block1.isAssociatedBlock(WarpDrive.blockAir) && !block2.isAssociatedBlock(WarpDrive.blockAir));
+			boolean notInVacuum = block1.isAssociatedBlock(WarpDrive.blockAir) || block2.isAssociatedBlock(WarpDrive.blockAir);
 			Integer air;
-			if (!inVacuum) {// In space with air blocks
+			if (notInVacuum) {// In space with air blocks
 				air = entity_airBlock.get(entity.getEntityId());
 				if (air == null) {
 					entity_airBlock.put(entity.getEntityId(), AIR_BLOCK_TICKS);

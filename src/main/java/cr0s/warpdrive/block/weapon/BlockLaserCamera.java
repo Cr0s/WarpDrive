@@ -14,7 +14,6 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
-import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CameraRegistryItem;
 import cr0s.warpdrive.render.ClientCameraHandler;
 
@@ -80,9 +79,6 @@ public class BlockLaserCamera extends BlockContainer {
 			int cameraFrequency = ((TileEntityLaser)tileEntity).getCameraFrequency();
 
 			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, cameraFrequency);
-			if (WarpDriveConfig.LOGGING_CAMERA) {
-				WarpDrive.logger.info("Camera detected as " + cam);
-			}
 			WarpDrive.addChatMessage(entityPlayer, getLocalizedName()
 					+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.")
 					+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
