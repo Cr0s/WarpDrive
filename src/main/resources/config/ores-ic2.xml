@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <warpdriveWorldGeneration version="1">
 
-    <ModRequirements>
-        <mod>ic2</mod>
-    </ModRequirements>
+    <mod name="ic2" />
 
 	<ore name="ic2:tin_ore" weight="70" category="commonOre" />
     <ore name="ic2:copper_ore" weight="70" category="commonOre" />

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <warpdriveWorldGeneration version="1">
 
-    <ModRequirements>
-        <mod>netherores</mod>
-    </ModRequirements>
+    <mod name="netherores" />
 
 	<structure type="moon" name="netherMoon" radius="20" maxScaling="2.0">
 		<shell name="core" radiusInner="1" radiusOuter="5" ores="rare">
