@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -810,75 +809,6 @@ public class WarpDriveConfig {
 			exception.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}
-	}
-	
-	public static Block getDefaultSurfaceBlock(Random random, boolean corrupted, boolean isMoon) {
-		if (isMoon) {
-			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
-				return getModBlock("IC2", "blockBasalt");
-			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
-				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
-			else if (random.nextInt(5) == 1) {
-				return Blocks.netherrack;
-			} else if (random.nextInt(15) == 1) {
-				return Blocks.end_stone;
-			}
-		} else {
-			if (isIndustrialCraft2loaded && random.nextInt(10) == 1)
-				return getModBlock("IC2", "blockBasalt");
-			else if (isAppliedEnergistics2Loaded && random.nextInt(10) == 1)
-				return getModBlock("appliedenergistics2", "tile.BlockSkyStone");
-			else if (random.nextInt(6) == 1) {
-				return Blocks.netherrack;
-			} else if (random.nextInt(50) == 1) {
-				return Blocks.end_stone;
-			}
-		}
-		if (corrupted && random.nextBoolean()) {
-			return Blocks.cobblestone;
-		}
-		return Blocks.stone;
-	}
-	
-	public static Block getRandomSurfaceBlock(Random random, Block def, boolean bedrock) {
-		if (bedrock && (random.nextInt(1000) == 1)) {
-			return Blocks.bedrock;
-		} else if (def.isAssociatedBlock(Blocks.end_stone)) {
-			return getRandomEndBlock(random, def);
-		} else if (def.isAssociatedBlock(Blocks.netherrack)) {
-			return getRandomNetherBlock(random, def);
-		}
-		return getRandomOverworldBlock(random, def);
-	}
-	
-	public static Block getRandomOverworldBlock(Random random, Block def) {
-		if (random.nextInt(25) == 5) {
-			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		} else if (random.nextInt(250) == 1) {
-			return Blocks.diamond_ore;
-		} else if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
-			return WarpDrive.blockIridium;
-		}
-		return def;
-	}
-	
-	public static Block getRandomNetherBlock(Random random, Block def) {
-		if (isIndustrialCraft2loaded && (random.nextInt(10000) == 42)) {
-			return WarpDrive.blockIridium;
-		} else if (random.nextInt(25) == 1) {
-			return Blocks.quartz_ore;
-		} else if ((!isNetherOresLoaded) && (random.nextInt(100) == 13))
-			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		return def;
-	}
-	
-	public static Block getRandomEndBlock(Random random, Block def) {
-		if (isIndustrialCraft2loaded && random.nextInt(10000) == 42) {
-			return WarpDrive.blockIridium;
-		} else if (random.nextInt(200) == 13) {
-			return commonWorldGenOres.get(random.nextInt(commonWorldGenOres.size()));
-		}
-		return def;
 	}
 
 	public static void loadWorldGen() {
