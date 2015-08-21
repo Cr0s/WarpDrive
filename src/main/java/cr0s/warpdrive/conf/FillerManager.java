@@ -126,6 +126,9 @@ public class FillerManager {
 			return;
 		}
 		
+		ModRequirementChecker.doModReqSanitation(base);
+		
+
 		NodeList ores = base.getElementsByTagName("ore");
 		for (int i = 0; i < ores.getLength(); i++) {
 			
