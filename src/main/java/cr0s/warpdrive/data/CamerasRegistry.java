@@ -107,8 +107,7 @@ public class CamerasRegistry {
 
 	public void updateInRegistry(World worldObj, ChunkPosition position, int frequency, int type) {
 		CameraRegistryItem cam = new CameraRegistryItem(worldObj, position, frequency, type);
-		// WarpDrive.debugPrint("updateInRegistry " + cam.position.x + ", " +
-		// cam.position.y + ", " + cam.position.z);
+		// WarpDrive.debugPrint("updateInRegistry " + cam.position.x + ", " + cam.position.y + ", " + cam.position.z);
 		removeDeadCams(worldObj);
 
 		if (isCamAlive(worldObj, cam)) {
