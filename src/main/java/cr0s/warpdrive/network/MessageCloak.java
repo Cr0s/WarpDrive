@@ -86,7 +86,7 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 				for (int x = minX; x <= maxX; x++) {
 					for (int z = minZ; z <= maxZ; z++) {
 						Block block = worldObj.getBlock(x, y, z);
-						if (block.isAssociatedBlock(Blocks.air)) {
+						if (!block.isAssociatedBlock(Blocks.air)) {
 							// 1.6.4 was skipping CC peripherals with metadata 2 and 4 here...
 							worldObj.setBlock(x, y, z, cloakBlockID, cloakBlockMetadata, 4);
 						}
