@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -101,7 +102,7 @@ public class CloakedArea {
 				if (Math.abs(d4) < RADIUS && Math.abs(d5) < RADIUS && Math.abs(d6) < RADIUS) {
 					if (decloak) {
 						revealChunksToPlayer(entityPlayerMP);
-						revealEntityToPlayer(entityPlayerMP);
+						revealEntitiesToPlayer(entityPlayerMP);
 					}
 
 					if (!isEntityWithinArea(entityPlayerMP) && !decloak) {
@@ -122,7 +123,7 @@ public class CloakedArea {
 				}
 				addPlayer(player.getCommandSenderName());
 				revealChunksToPlayer(player);
-				revealEntityToPlayer(player);
+				revealEntitiesToPlayer(player);
 				PacketHandler.sendCloakPacket(player, aabb, tier, false);
 			}
 		} else {
@@ -135,7 +136,7 @@ public class CloakedArea {
 						.getServer()
 						.getConfigurationManager()
 						.sendToAllNearExcept(player, player.posX, player.posY, player.posZ, 100, player.worldObj.provider.dimensionId,
-								CloakManager.getPacketForThisEntity(player));
+								PacketHandler.getPacketForThisEntity(player));
 				PacketHandler.sendCloakPacket(player, aabb, tier, false);
 			}
 		}
@@ -152,6 +153,8 @@ public class CloakedArea {
 				for (int y = minY; y <= maxY; y++) {
 					if (!player.worldObj.getBlock(x, y, z).isAssociatedBlock(Blocks.air)) {
 						player.worldObj.markBlockForUpdate(x, y, z);
+						
+						JumpBlock.refreshBlockStateOnClient(player.worldObj, x, y, z);
 					}
 				}
 			}
@@ -159,25 +162,31 @@ public class CloakedArea {
 		/*
 		 * ArrayList<Chunk> chunksToSend = new ArrayList<Chunk>();
 		 * 
-		 * for (int x = (int)aabb.minX >> 4; x <= (int)aabb.maxX >> 4; x++) for
-		 * (int z = (int)aabb.minZ >> 4; z <= (int)aabb.maxZ >> 4; z++) {
-		 * chunksToSend.add(p.worldObj.getChunkFromChunkCoords(x, z)); }
+		 * for (int x = (int)aabb.minX >> 4; x <= (int)aabb.maxX >> 4; x++)
+		 * for (int z = (int)aabb.minZ >> 4; z <= (int)aabb.maxZ >> 4; z++) {
+		 * chunksToSend.add(p.worldObj.getChunkFromChunkCoords(x, z));
+		 * }
 		 * 
-		 * //System.outprintln("[Cloak] Sending " + chunksToSend.size() +
-		 * " chunks to player " + p.username);
-		 * ((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(new
-		 * Packet56MapChunks(chunksToSend));
+		 * //System.outprintln("[Cloak] Sending " + chunksToSend.size() + " chunks to player " + p.username);
+		 * ((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(chunksToSend));
 		 * 
-		 * //System.outprintln("[Cloak] Sending decloak packet to player " +
-		 * p.username); area.sendCloakPacketToPlayer(p, true); // decloak = true
+		 * //System.outprintln("[Cloak] Sending decloak packet to player " + p.username); area.sendCloakPacketToPlayer(p, true); // decloak = true
 		 */
 	}
 
-	public void revealEntityToPlayer(EntityPlayer p) {
-		List<Entity> list = p.worldObj.getEntitiesWithinAABBExcludingEntity(p, aabb);
+	public void revealEntitiesToPlayer(EntityPlayer player) {
+		List<Entity> list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
 
-		for (Entity e : list) {
-			((EntityPlayerMP) p).playerNetServerHandler.sendPacket(CloakManager.getPacketForThisEntity(e));
+		for (Entity entity : list) {
+			Packet packet = PacketHandler.getPacketForThisEntity(entity);
+			if (packet != null) {
+				if (WarpDriveConfig.LOGGING_CLOAKING) {
+					WarpDrive.logger.warn("Revealing entity " + entity + " with packet " + packet);
+				}
+				((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+			} else if (WarpDriveConfig.LOGGING_CLOAKING) {
+				WarpDrive.logger.warn("Revealing entity " + entity + " fails: null packet");
+			}
 		}
 	}
 

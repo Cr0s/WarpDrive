@@ -1,5 +1,7 @@
 package cr0s.warpdrive.data;
 
+import java.lang.reflect.Method;
+
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -8,6 +10,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class JumpBlock {
@@ -71,16 +74,16 @@ public class JumpBlock {
 
 				TileEntity newTileEntity = null;
 				boolean isForgeMultipart = false;
-				if (oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart" && WarpDriveConfig.isForgeMultipartLoaded) {
+				if (WarpDriveConfig.isForgeMultipartLoaded && oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart") {
 					isForgeMultipart = true;
 					newTileEntity = (TileEntity) WarpDriveConfig.forgeMultipart_helper_createTileFromNBT.invoke(null, targetWorld, oldnbt);
 
-				} else if (block == WarpDriveConfig.CC_Computer || block == WarpDriveConfig.CC_peripheral || block == WarpDriveConfig.CCT_Turtle || block == WarpDriveConfig.CCT_Expanded
-						|| block == WarpDriveConfig.CCT_Advanced) {
+				} else if (block == WarpDriveConfig.CC_Computer || block == WarpDriveConfig.CC_peripheral
+						|| block == WarpDriveConfig.CCT_Turtle || block == WarpDriveConfig.CCT_Expanded || block == WarpDriveConfig.CCT_Advanced) {
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
 					newTileEntity.invalidate();
 
-				} /*else if (block == WarpDriveConfig.AS_Turbine) {
+				} /* else if (block == WarpDriveConfig.AS_Turbine) {
 					if (oldnbt.hasKey("zhuYao")) {
 						NBTTagCompound nbt1 = oldnbt.getCompoundTag("zhuYao");
 						nbt1.setDouble("x", newX);
@@ -89,7 +92,7 @@ public class JumpBlock {
 						oldnbt.setTag("zhuYao", nbt1);
 					}
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
-					}*///No 1.7.10 version
+					} /* No 1.7.10 version */
 
 				if (newTileEntity == null) {
 					newTileEntity = TileEntity.createAndLoadEntity(oldnbt);
@@ -123,7 +126,81 @@ public class JumpBlock {
 
 		return true;
 	}
-
+	
+	public static void refreshBlockStateOnClient(World world, int x, int y, int z) {
+		TileEntity tileEntity = world.getTileEntity(x, y, z);
+		if (tileEntity != null) {
+			Class<?> teClass = tileEntity.getClass();
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info("Tile at " + x + ", " + y + ", " + z + " is " + teClass + " derived from " + teClass.getSuperclass());
+			}
+			try {
+				if (tileEntity instanceof TileEntityShipCore) {// WarpDrive
+					// !!! WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) tileEntity);
+					
+				} else if (teClass.getName().contains("ic2.core.block")) {// IC2
+					Method onUnloaded = teClass.getMethod("onUnloaded");
+					Method onLoaded = teClass.getMethod("onLoaded");
+					if (onUnloaded != null && onLoaded != null) {
+						onUnloaded.invoke(tileEntity);
+						onLoaded.invoke(tileEntity);
+					} else {
+						WarpDrive.logger.error("Missing IC2 (un)loaded events for TileEntity '" + teClass.getName() + "' at " + x + ", " + y + ", " + z + ". Please report this issue!");
+					}
+					
+					tileEntity.updateContainingBlockInfo();
+					
+					// required in SSP during same dimension jump to update client with rotation data
+					if (teClass.getName().equals("ic2.core.block.wiring.TileEntityCable")) {
+						NetworkHelper_updateTileEntityField(tileEntity, "color");
+						NetworkHelper_updateTileEntityField(tileEntity, "foamColor");
+						NetworkHelper_updateTileEntityField(tileEntity, "foamed");
+					} else {
+						NetworkHelper_updateTileEntityField(tileEntity, "active");
+						NetworkHelper_updateTileEntityField(tileEntity, "facing");
+						if (teClass.getName().equals("ic2.core.block.reactor.TileEntityNuclearReactorElectric")) {
+							NetworkHelper_updateTileEntityField(tileEntity, "heat");	// not working, probably an IC2 bug here...
+						}
+						// no needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
+					}
+				}
+			} catch (Exception exception) {
+				WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + x + ", " + y + ", " + z);
+				exception.printStackTrace();
+			}
+		}
+	}
+	
+	// This code is an IC2 hack to fix an issue on 1.7.10 until industrialcraft-2-2.2.763-experimental, see http://bt.industrial-craft.net/view.php?id=1704
+	private static Object instance;
+	private static Method NetworkManager_updateTileEntityField;
+	
+	public static void NetworkHelper_init() {
+		try {
+			NetworkManager_updateTileEntityField = Class.forName("ic2.core.network.NetworkManager").getMethod("updateTileEntityField", new Class[] { TileEntity.class, String.class });
+			
+			instance = Class.forName("ic2.core.IC2").getDeclaredField("network").get(null);
+			if (!instance.getClass().getName().contains("NetworkManager")) {
+				instance = Class.forName("ic2.core.util.SideGateway").getMethod("get").invoke(instance);
+				WarpDrive.logger.error("Patched IC2 API, new instance is '" + instance + "'");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public static void NetworkHelper_updateTileEntityField(TileEntity te, String field) {
+		try {
+			if (instance == null) {
+				NetworkHelper_init();
+			}
+			NetworkManager_updateTileEntityField.invoke(instance, new Object[] { te, field });
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	// IC2 hack ends here
+	
 	// This code is a straight copy from Vanilla net.minecraft.world.World.setBlock to remove lighting computations
 	public static boolean setBlockNoLight(World w, int x, int y, int z, Block block, int blockMeta, int par6) {
 		if (x >= -30000000 && z >= -30000000 && x < 30000000 && z < 30000000) {

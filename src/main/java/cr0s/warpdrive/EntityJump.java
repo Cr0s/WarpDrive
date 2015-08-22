@@ -1,6 +1,5 @@
 package cr0s.warpdrive;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -78,7 +77,6 @@ public class EntityJump extends Entity {
 	private int currentIndexInShip = 0;
 	
 	private List<MovingEntity> entitiesOnShip;
-	private List<TileEntity> ASTurbines;
 	
 	private boolean betweenWorlds;
 	
@@ -192,7 +190,6 @@ public class EntityJump extends Entity {
 				state = STATE_REMOVING;
 			}
 		} else if (state == STATE_REMOVING) {
-			ASTurbines = new ArrayList<TileEntity>();
 			removeShip();
 			
 			if (currentIndexInShip >= ship.length - 1) {
@@ -539,7 +536,7 @@ public class EntityJump extends Entity {
 				WarpDrive.logger.info("TE Duplicates removing exception: " + exception.getMessage());
 			}
 		}
-		FixASTurbines();
+		
 		doCollisionDamage(true);
 		
 		LocalProfiler.stop();
@@ -559,9 +556,6 @@ public class EntityJump extends Entity {
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
 		}
-		TileEntity te;
-		Class<?> teClass;
-		Class<?> teSuperclass;
 		for (int index = 0; index < blocksToMove; index++) {
 			if (currentIndexInShip >= ship.length) {
 				break;
@@ -583,106 +577,12 @@ public class EntityJump extends Entity {
 			}
 			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
 			
-			te = targetWorld.getTileEntity(jb.x + moveX, jb.y + moveY, jb.z + moveZ);
-			if (te != null) {
-				teClass = te.getClass();
-				if (WarpDriveConfig.LOGGING_JUMP) {
-					WarpDrive.logger.info("Tile at " + jb.x + ", " + jb.y + ", " + jb.z + " is " + teClass + " derived from " + teClass.getSuperclass());
-				}
-				if (teClass.getName().equals("atomicscience.jiqi.TTurbine")) {
-					try {
-						if (teClass.getField("shiDa").getBoolean(te)) {
-							ASTurbines.add(te);
-						}
-					} catch (Exception exception) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						exception.printStackTrace();
-					}
-				} else if (te instanceof TileEntityShipCore) {
-					WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) te);
-				}
-				
-				teSuperclass = teClass.getSuperclass();
-				// IC2 support
-				if (teSuperclass.getName().contains("ic2.core.block")) {
-					try {
-						Method onUnloaded = teClass.getMethod("onUnloaded");
-						Method onLoaded = teClass.getMethod("onLoaded");
-						if (onUnloaded != null && onLoaded != null) {
-							onUnloaded.invoke(te);
-							onLoaded.invoke(te);
-						} else {
-							WarpDrive.logger.error("Missing IC2 (un)loaded events for TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z + ". Please report this issue!");
-						}
-					} catch (Exception exception) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						exception.printStackTrace();
-					}
-					
-					te.updateContainingBlockInfo();
-					
-					// required in SSP during same dimension jump to update client with rotation data
-					try {
-						if (teClass.getName().equals("ic2.core.block.wiring.TileEntityCable")) {
-							if (WarpDriveConfig.LOGGING_JUMP) {
-								WarpDrive.logger.info("Found IC2 cable!");
-							}
-							NetworkHelper_updateTileEntityField(te, "color");
-							NetworkHelper_updateTileEntityField(te, "foamColor");
-							NetworkHelper_updateTileEntityField(te, "foamed");
-						} else {
-							if (WarpDriveConfig.LOGGING_JUMP) {
-								WarpDrive.logger.info("Found IC2 block!");
-							}
-							NetworkHelper_updateTileEntityField(te, "active");
-							NetworkHelper_updateTileEntityField(te, "facing");
-							if (teClass.getName().equals("ic2.core.block.reactor.TileEntityNuclearReactorElectric")) {
-								WarpDrive.logger.info("Found IC2 Reactor!");
-								NetworkHelper_updateTileEntityField(te, "heat");	// not working, probably an IC2 bug here...
-							}
-							// no needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
-						}
-					} catch (Exception exception) {
-						WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + jb.x + ", " + jb.y + ", " + jb.z);
-						exception.printStackTrace();
-					}
-				}
-			}
+			JumpBlock.refreshBlockStateOnClient(targetWorld, jb.x + moveX, jb.y + moveY, jb.z + moveZ);
 			
 			currentIndexInShip++;
 		}
 		LocalProfiler.stop();
 	}
-	
-	// FIXME: IC2 hack for 1.7.10 until they fix it, see http://bt.industrial-craft.net/view.php?id=1704
-	private static Object instance;
-	private static Method NetworkManager_updateTileEntityField;
-	
-	public static void NetworkHelper_init() {
-		try {
-			NetworkManager_updateTileEntityField = Class.forName("ic2.core.network.NetworkManager").getMethod("updateTileEntityField", new Class[] { TileEntity.class, String.class });
-			
-			instance = Class.forName("ic2.core.IC2").getDeclaredField("network").get(null);
-			if (!instance.getClass().getName().contains("NetworkManager")) {
-				instance = Class.forName("ic2.core.util.SideGateway").getMethod("get").invoke(instance);
-				WarpDrive.logger.error("Patched IC2 API, new instance is '" + instance + "'");
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	
-	public static void NetworkHelper_updateTileEntityField(TileEntity te, String field) {
-		try {
-			if (instance == null) {
-				NetworkHelper_init();
-			}
-			NetworkManager_updateTileEntityField.invoke(instance, new Object[] { te, field });
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-	// IC2 hack ends here
 	
 	/**
 	 * Saving ship to memory
@@ -1223,19 +1123,6 @@ public class EntityJump extends Entity {
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound var1) {
 		WarpDrive.logger.error(this + " writeEntityToNBT()");
-	}
-	
-	private void FixASTurbines() {
-		Class<?> c;
-		for (TileEntity t : ASTurbines)
-			try {
-				c = t.getClass();
-				Method method = c.getDeclaredMethod("bianDa", (Class<?>[]) null);
-				method.invoke(t, (Object[]) null);
-				method.invoke(t, (Object[]) null);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 	}
 	
 	public void setMinMaxes(int minXV, int maxXV, int minYV, int maxYV, int minZV, int maxZV) {

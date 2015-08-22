@@ -1,10 +1,13 @@
 package cr0s.warpdrive.network;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
@@ -23,12 +26,22 @@ import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
     public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(WarpDrive.MODID);
-
+	private static Method EntityTrackerEntry_getPacketForThisEntity;
+	
     public static void init() {
+    	// Forge packets
 		simpleNetworkManager.registerMessage(MessageBeamEffect.class, MessageBeamEffect.class, 0, Side.CLIENT);
 		simpleNetworkManager.registerMessage(MessageFrequency.class , MessageFrequency.class , 1, Side.CLIENT);
 		simpleNetworkManager.registerMessage(MessageTargeting.class , MessageTargeting.class , 2, Side.SERVER);
 		simpleNetworkManager.registerMessage(MessageCloak.class     , MessageCloak.class     , 3, Side.CLIENT);
+		
+		// Entity packets for 'uncloaking' entities
+		try {
+			EntityTrackerEntry_getPacketForThisEntity = Class.forName("net.minecraft.entity.EntityTrackerEntry").getDeclaredMethod("func_151260_c"); 
+			EntityTrackerEntry_getPacketForThisEntity.setAccessible(true);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
     }
 	
 	// Beam effect sent to client side
@@ -103,5 +116,15 @@ public class PacketHandler {
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
 			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
 		}
+	}
+
+	public static Packet getPacketForThisEntity(Entity entity) {
+		EntityTrackerEntry entry = new EntityTrackerEntry(entity, 0, 0, false);
+		try {
+			return (Packet) EntityTrackerEntry_getPacketForThisEntity.invoke(entry);
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
+		return null;
 	}
 }
