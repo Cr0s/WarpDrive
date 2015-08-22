@@ -138,7 +138,7 @@ public class JumpBlock {
 				if (tileEntity instanceof TileEntityShipCore) {// WarpDrive
 					// !!! WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) tileEntity);
 					
-				} else if (teClass.getName().contains("ic2.core.block")) {// IC2
+				} else if (teClass.getSuperclass().getName().contains("ic2.core.block")) {// IC2
 					Method onUnloaded = teClass.getMethod("onUnloaded");
 					Method onLoaded = teClass.getMethod("onLoaded");
 					if (onUnloaded != null && onLoaded != null) {
