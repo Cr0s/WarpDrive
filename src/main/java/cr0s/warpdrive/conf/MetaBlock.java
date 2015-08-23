@@ -4,9 +4,15 @@ import java.util.HashMap;
 
 import net.minecraft.block.Block;
 
+/**
+ * Immutable class used to represent a block with metadata. An instance can only be retrieved with getMetaBlock(), which allows it to reuse instances
+ *
+ * @author TheNumenorean
+ *
+ */
 public class MetaBlock implements Comparable {
 	
-	private static final int MAX_METADATA = 16;//I think this is 16?
+	public static final int MAX_METADATA = 16;//I think this is 16?
 
 	private static HashMap<String, MetaBlock[]> metablocks = new HashMap<String, MetaBlock[]>();
 	
@@ -32,7 +38,19 @@ public class MetaBlock implements Comparable {
 		return metadata;
 	}
 	
+	/**
+	 * Gets an instance of a metablock with the given block and metadata information.
+	 * 
+	 * @param b
+	 *            Block to use
+	 * @param metadata
+	 *            Metadata to use. Must be less than MAX_METADATA
+	 * @return A MetaBlock
+	 */
 	public static MetaBlock getMetaBlock(Block b, int metadata) {
+		
+		if (metadata < 0 || metadata >= MAX_METADATA)
+			throw new IllegalArgumentException("Metadata to get MetaBlock must be > 0 or < " + MAX_METADATA);
 		
 		MetaBlock[] block = metablocks.get(b.getUnlocalizedName());
 		
