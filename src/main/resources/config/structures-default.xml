@@ -1,35 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <warpdriveWorldGeneration version="1">
 
-	<structure type="star" name="red_giant" radius="40" maxScaling="3.0">
-		<shell name="core" radiusInner="1" radiusOuter="10">
-			<block weight="1">minecraft:iron_block</block>
+	<structure group="star" name="red_giant">
+		<shell name="core" maxThickness="10" minThickness="3">
+			<filler weight="1" name="minecraft:iron_block" />
 		</shell>
 		
-		<shell name="mantle" radiusInner="11" radiusOuter="30">
-			<block weight="10">minecraft:sand</block>
-			<block weight="1">minecraft:iron_block</block>
+		<shell name="mantle" minThickness="10" maxThickness="25">
+			<filler weight="10" name="minecraft:sand" />
+			<filler weight="1" name="minecraft:iron_block" />
 		</shell>
 
-		<shell name="surface" radiusInner="31" radiusOuter="40">
-			<block weight="5">minecraft:glowstone</block>
-			<block weight="10">minecraft:lava</block>
+		<shell name="surface" minThickness="10" maxThickness="20">
+			<filler weight="5" name="minecraft:glowstone" />
+			<filler weight="10" name="minecraft:lava" />
 		</shell>
 	</structure>
 
-	<structure type="moon" name="theMoon" radius="20" maxScaling="2.0">
-		<shell name="core" radiusInner="1" radiusOuter="5" filler="rareOres">
-			<block weight="100">minecraft:iron_block</block>
+	<structure group="moon" name="theMoon">
+		<shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
+			<filler weight="100" name="minecraft:iron_block" />
 		</shell>
 		
-		<shell name="mantle" radiusInner="6" radiusOuter="20" filler="commonOres;uncommonOres">
-			<block weight="10">minecraft:stone</block>
-			<block weight="3">minecraft:clay</block>
+		<shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres;uncommonOres">
+			<filler weight="10" name="minecraft:stone" />
+			<filler weight="3" name="minecraft:clay" />
 		</shell>
 		
-		<shell name="surface" radiusInner="21" radiusOuter="30" filler="overworld;commonOres">
-			<block weight="3">minecraft:clay</block>
+		<shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld;commonOres">
+			<filler weight="3" name="minecraft:clay" />
 		</shell>
 	</structure>
+	
+	<structure group="corruptedMoon" name="theCorruptedMoon">
+        <shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
+            <filler weight="100" name="minecraft:iron_block" />
+        </shell>
+        
+        <shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres;uncommonOres">
+            <filler weight="10" name="minecraft:stone" />
+            <filler weight="3" name="minecraft:clay" />
+            <filler ratio=".2" name="minecraft:air" />
+            <filler ratio=".4" name="minecraft:cobblestone" />
+        </shell>
+        
+        <shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld;commonOres">
+            <filler weight="3" name="minecraft:clay" />
+            <filler ratio=".05" name="minecraft:brick" />
+            <filler ratio=".5" name="minecraft:air" />
+        </shell>
+    </structure>
 
 </warpdriveWorldGeneration>
