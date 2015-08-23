@@ -150,4 +150,14 @@ public class FillerSet implements XmlRepresentable, Comparable {
 		return name;
 	}
 
+	/**
+	 * Adds the blocks from the given fillerSet into this one. Must be pre-finishConstruction()
+	 * 
+	 * @param fillerSet
+	 *            The fillerset to add from
+	 */
+	public void loadFrom(FillerSet fillerSet) {
+		factory.addFromFactory(fillerSet.factory);
+	}
+
 }
