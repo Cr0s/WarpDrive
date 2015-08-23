@@ -15,6 +15,8 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
@@ -70,6 +72,7 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 		buffer.writeByte(tier);
 	}
 	
+	@SideOnly(Side.CLIENT)
 	private void handle(EntityClientPlayerMP player) {
 		// Hide the area
 		if (!decloak) {
@@ -135,6 +138,7 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 	}
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public IMessage onMessage(MessageCloak cloakMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {

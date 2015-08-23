@@ -7,6 +7,8 @@ import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
@@ -85,11 +87,13 @@ public class MessageBeamEffect implements IMessage, IMessageHandler<MessageBeamE
 		buffer.writeInt(energy);
 	}
 	
+	@SideOnly(Side.CLIENT)
 	private void handle(World worldObj) {
 		FMLClientHandler.instance().getClient().effectRenderer.addEffect(new EntityFXBeam(worldObj, source.clone(), target.clone(), red, green, blue, age, energy));
 	}
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public IMessage onMessage(MessageBeamEffect beamEffectMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {

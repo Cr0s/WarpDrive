@@ -7,6 +7,8 @@ import io.netty.buffer.ByteBuf;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
 import cr0s.warpdrive.block.detection.TileEntityCamera;
@@ -55,15 +57,16 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 		buffer.writeInt(frequency);
 	}
 	
+	@SideOnly(Side.CLIENT)
 	private void handle(World worldObj) {
-		TileEntity te = worldObj.getTileEntity(x, y, z);
-		if (te != null) {
-			if (te instanceof TileEntityMonitor) {
-				((TileEntityMonitor) te).setFrequency(frequency);
-			} else if (te instanceof TileEntityCamera) {
-				((TileEntityCamera) te).setFrequency(frequency);
-			} else if (te instanceof TileEntityLaser) {
-				((TileEntityLaser) te).setCameraFrequency(frequency);
+		TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
+		if (tileEntity != null) {
+			if (tileEntity instanceof TileEntityMonitor) {
+				((TileEntityMonitor) tileEntity).setFrequency(frequency);
+			} else if (tileEntity instanceof TileEntityCamera) {
+				((TileEntityCamera) tileEntity).setFrequency(frequency);
+			} else if (tileEntity instanceof TileEntityLaser) {
+				((TileEntityLaser) tileEntity).setCameraFrequency(frequency);
 			} else {
 				WarpDrive.logger.error("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
 			}
@@ -73,6 +76,7 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
  	}
 	
 	@Override
+	@SideOnly(Side.CLIENT)
 	public IMessage onMessage(MessageFrequency frequencyMessage, MessageContext context) {
 		// skip in case player just logged in
 		if (Minecraft.getMinecraft().theWorld == null) {

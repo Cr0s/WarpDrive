@@ -30,11 +30,10 @@ public class PacketHandler {
 	
     public static void init() {
     	// Forge packets
-    	if (FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT) {
-			simpleNetworkManager.registerMessage(MessageBeamEffect.class, MessageBeamEffect.class, 0, Side.CLIENT);
-			simpleNetworkManager.registerMessage(MessageFrequency.class , MessageFrequency.class , 1, Side.CLIENT);
-			simpleNetworkManager.registerMessage(MessageCloak.class     , MessageCloak.class     , 2, Side.CLIENT);
-    	}
+		simpleNetworkManager.registerMessage(MessageBeamEffect.class, MessageBeamEffect.class, 0, Side.CLIENT);
+		simpleNetworkManager.registerMessage(MessageFrequency.class , MessageFrequency.class , 1, Side.CLIENT);
+		simpleNetworkManager.registerMessage(MessageCloak.class     , MessageCloak.class     , 2, Side.CLIENT);
+		
 		simpleNetworkManager.registerMessage(MessageTargeting.class , MessageTargeting.class , 100, Side.SERVER);
 		
 		// Entity packets for 'uncloaking' entities
