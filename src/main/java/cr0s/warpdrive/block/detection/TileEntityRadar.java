@@ -12,14 +12,15 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
-import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.data.StarMapEntry;
+import cr0s.warpdrive.data.VectorI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityRadar extends TileEntityAbstractEnergy {
-	private ArrayList<TileEntityShipCore> results;
-
+	private ArrayList<StarMapEntry> results;
+	
 	private int scanRadius = 0;
 	private int cooldownTime = 0;
 	
@@ -39,7 +40,7 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
@@ -48,7 +49,7 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 			if (getBlockMetadata() == 2) {
 				cooldownTime++;
 				if (cooldownTime > (20 * ((scanRadius / 1000) + 1))) {
-					results = WarpDrive.shipCores.searchWarpCoresInRadius(xCoord, yCoord, zCoord, scanRadius);
+					results = WarpDrive.starMap.radarScan(this, scanRadius);
 					if (WarpDriveConfig.LOGGING_RADAR) {
 						WarpDrive.logger.info(this + " Scan found " + results.size() + " results in " + scanRadius + " radius...");
 					}
@@ -56,21 +57,21 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 					cooldownTime = 0;
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception exception) {
+			exception.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 	}
-
+	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 	}
-
+	
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
@@ -110,9 +111,9 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 		int radius;
 		try {
 			radius = toInt(arguments[0]);
-		} catch(Exception e) {
-           	return new Boolean[] { false };
-        }
+		} catch(Exception exception) {
+			return new Boolean[] { false };
+		}
 		if (radius <= 0 || radius > 10000) {
 			scanRadius = 0;
 			return new Boolean[] { false };
@@ -129,6 +130,7 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 		}
 		return new Boolean[] { true };
 	}
+	
 	private Object[] getResult(Object[] arguments) {
 		if (arguments.length == 1 && (results != null)) {
 			int index;
@@ -138,11 +140,10 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 				return new Object[] { "FAIL", 0, 0, 0 };
 			}
 			if (index >= 0 && index < results.size()) {
-				TileEntityShipCore res = results.get(index);
-				if (res != null)
-				{
-					int yAddition = (res.getWorldObj().provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID) ? 256 : (res.getWorldObj().provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) ? 512 : 0;
-					return new Object[] { res.coreFrequency, res.xCoord, res.yCoord + yAddition, res.zCoord };
+				StarMapEntry result = results.get(index);
+				if (result != null) {
+					VectorI spaceCoordinates = result.getSpaceCoordinates();
+					return new Object[] { result.name, spaceCoordinates.x, spaceCoordinates.y, spaceCoordinates.z };
 				}
 			}
 		}

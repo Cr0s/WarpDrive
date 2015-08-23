@@ -351,7 +351,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 
 		// Generate unique file name
 		do {
-			schematicFileName = (new StringBuilder().append(shipCore.coreFrequency).append(System.currentTimeMillis()).append(".schematic")).toString();
+			schematicFileName = (new StringBuilder().append(shipCore.shipName).append(System.currentTimeMillis()).append(".schematic")).toString();
 		} while (new File(WarpDriveConfig.G_SCHEMALOCATION + "/" + schematicFileName).exists());
 
 		if (!saveShipToSchematic(WarpDriveConfig.G_SCHEMALOCATION + "/" + schematicFileName, reason)) {

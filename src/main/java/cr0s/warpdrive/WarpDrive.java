@@ -100,7 +100,7 @@ import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.CamerasRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;
-import cr0s.warpdrive.data.ShipCoresRegistry;
+import cr0s.warpdrive.data.StarMapRegistry;
 import cr0s.warpdrive.item.ItemAirCanisterFull;
 import cr0s.warpdrive.item.ItemComponent;
 import cr0s.warpdrive.item.ItemHelmet;
@@ -176,7 +176,7 @@ public class WarpDrive implements LoadingCallback {
 	@SidedProxy(clientSide = "cr0s.warpdrive.client.ClientProxy", serverSide = "cr0s.warpdrive.CommonProxy")
 	public static CommonProxy proxy;
 
-	public static ShipCoresRegistry shipCores;
+	public static StarMapRegistry starMap;
 	public static JumpgatesRegistry jumpgates;
 	public static CloakManager cloaks;
 
@@ -426,7 +426,7 @@ public class WarpDrive implements LoadingCallback {
 			initVanillaRecipes();
 		}
 
-		shipCores = new ShipCoresRegistry();
+		starMap = new StarMapRegistry();
 		jumpgates = new JumpgatesRegistry();
 		cameras = new CamerasRegistry();
 	}

@@ -68,7 +68,7 @@ public class EntityJump extends Entity {
 	
 	public boolean on = false;
 	private JumpBlock ship[];
-	private TileEntityShipCore reactor;
+	private TileEntityShipCore shipCore;
 	
 	private final static int STATE_IDLE = 0;
 	private final static int STATE_JUMPING = 1;
@@ -105,7 +105,7 @@ public class EntityJump extends Entity {
 		this.zCoord = z;
 		this.dx = _dx;
 		this.dz = _dz;
-		this.reactor = _reactor;
+		this.shipCore = _reactor;
 		this.isHyperspaceJump = _isHyperspaceJump;
 		this.distance = _distance;
 		this.direction = _direction;
@@ -295,13 +295,13 @@ public class EntityJump extends Entity {
 	
 	private void messageToAllPlayersOnShip(String msg) {
 		if (entitiesOnShip == null) {
-			reactor.messageToAllPlayersOnShip(msg);
+			shipCore.messageToAllPlayersOnShip(msg);
 		} else {
 			WarpDrive.logger.info(this + " messageToAllPlayersOnShip: " + msg);
 			for (MovingEntity me : entitiesOnShip) {
 				if (me.entity instanceof EntityPlayer) {
 					WarpDrive.addChatMessage((EntityPlayer) me.entity, "["
-							+ ((reactor != null && reactor.coreFrequency.length() > 0) ? reactor.coreFrequency : "WarpCore") + "] " + msg);
+							+ ((shipCore != null && shipCore.shipName.length() > 0) ? shipCore.shipName : "WarpCore") + "] " + msg);
 				}
 			}
 		}
@@ -722,7 +722,7 @@ public class EntityJump extends Entity {
 				 * boom = 5 Endercrystal = 6 TNTcart = 4 to 11.5 TNT = 4
 				 */
 				float massCorrection = 0.5F + (float) Math
-						.sqrt(Math.min(1.0D, Math.max(0.0D, reactor.shipVolume - WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE)
+						.sqrt(Math.min(1.0D, Math.max(0.0D, shipCore.shipVolume - WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE)
 								/ WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE));
 				collisionDetected = true;
 				collisionStrength = (4.0F + blowPoints - WarpDriveConfig.WC_COLLISION_TOLERANCE_BLOCKS) * massCorrection;
@@ -1138,7 +1138,7 @@ public class EntityJump extends Entity {
 	public String toString() {
 		return String.format("%s/%d \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] {
 			getClass().getSimpleName(), Integer.valueOf(getEntityId()),
-			reactor == null ? "~NULL~" : reactor.coreFrequency,
+			shipCore == null ? "~NULL~" : (shipCore.uuid + ":" + shipCore.shipName),
 			worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
 			Double.valueOf(posX), Double.valueOf(posY), Double.valueOf(posZ) });
 	}

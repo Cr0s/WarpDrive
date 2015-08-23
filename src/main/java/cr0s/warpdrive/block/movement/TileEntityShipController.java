@@ -548,7 +548,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	public Object[] coreFrequency(Context context, Arguments arguments) {
-		return coreFrequency(argumentsOCtoCC(arguments));
+		return shipName(argumentsOCtoCC(arguments));
 	}
 
 	@Callback
@@ -732,14 +732,14 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 		return new Object[] { beaconFrequency };
 	}
 	
-	private Object[] coreFrequency(Object[] arguments) { 
+	private Object[] shipName(Object[] arguments) { 
 		if (core == null) {
 			return null;
 		}
 		if (arguments.length == 1) {
-			core.coreFrequency = ((String) arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
+			core.shipName = ((String) arguments[0]).replace("/", "").replace(".", "").replace("\\", ".");
 		}
-		return new Object[] { core.coreFrequency };
+		return new Object[] { core.shipName };
 	}
 	
 	private Object[] targetJumpgate(Object[] arguments) { 
@@ -812,7 +812,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 			return null;
 			
 		} else if (methodName.equals("coreFrequency")) {
-			return coreFrequency(arguments);
+			return shipName(arguments);
 			
 		} else if (methodName.equals("isInSpace")) {
 			return new Boolean[] { worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID };
@@ -851,7 +851,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 	public String toString() {
         return String.format("%s \'%s\' @ \'%s\' %d, %d, %d", new Object[] {
        		getClass().getSimpleName(),
-       		core == null ? beaconFrequency : core.coreFrequency,
+       		core == null ? beaconFrequency : core.shipName,
        		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
        		Integer.valueOf(xCoord), Integer.valueOf(yCoord), Integer.valueOf(zCoord)});
 	}

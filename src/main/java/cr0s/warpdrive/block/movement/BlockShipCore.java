@@ -16,9 +16,9 @@ import cr0s.warpdrive.WarpDrive;
 
 public class BlockShipCore extends BlockContainer {
 	private IIcon[] iconBuffer;
-
+	
 	private final int ICON_SIDE_INACTIVE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_HEATED = 4;
-
+	
 	public BlockShipCore(int texture, Material material) {
 		super(material);
 		setHardness(0.5F);
@@ -26,7 +26,7 @@ public class BlockShipCore extends BlockContainer {
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.movement.ShipCore");
 	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[5];
@@ -36,7 +36,7 @@ public class BlockShipCore extends BlockContainer {
 		iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:movement/shipCoreSideActive");
 		iconBuffer[ICON_SIDE_HEATED] = par1IconRegister.registerIcon("warpdrive:movement/shipCoreSideHeated");
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		if (side == 0) {
@@ -44,7 +44,7 @@ public class BlockShipCore extends BlockContainer {
 		} else if (side == 1) {
 			return iconBuffer[ICON_TOP];
 		}
-
+		
 		if (metadata == 0) { // Inactive state
 			return iconBuffer[ICON_SIDE_INACTIVE];
 		} else if (metadata == 1) { // Activated state
@@ -52,15 +52,15 @@ public class BlockShipCore extends BlockContainer {
 		} else if (metadata == 2) { // Heated state
 			return iconBuffer[ICON_SIDE_HEATED];
 		}
-
+		
 		return null;
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World var1, int i) {
 		return new TileEntityShipCore();
 	}
-
+	
 	/**
 	 * Returns the quantity of items to drop on block destruction.
 	 */
@@ -68,7 +68,7 @@ public class BlockShipCore extends BlockContainer {
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
+	
 	/**
 	 * Returns the ID of the items to drop on destruction.
 	 */
@@ -76,7 +76,7 @@ public class BlockShipCore extends BlockContainer {
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
 	}
-
+	
 	/**
 	 * Called upon block activation (right click on the block.)
 	 */
@@ -85,7 +85,7 @@ public class BlockShipCore extends BlockContainer {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
+		
 		if (par5EntityPlayer.getHeldItem() == null) {
 			TileEntity te = par1World.getTileEntity(par2, par3, par4);
 			if (te != null && te instanceof TileEntityShipCore) {
@@ -93,17 +93,7 @@ public class BlockShipCore extends BlockContainer {
 				return true;
 			}
 		}
-
+		
 		return false;
-	}
-
-	@Override
-	public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6) {
-		TileEntity te = par1World.getTileEntity(par2, par3, par4);
-		if (te != null && te instanceof TileEntityShipCore) {
-			WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore)te);
-		}
-
-		super.breakBlock(par1World, par2, par3, par4, par5, par6);
 	}
 }

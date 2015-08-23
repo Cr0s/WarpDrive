@@ -10,7 +10,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class JumpBlock {
@@ -135,10 +134,7 @@ public class JumpBlock {
 				WarpDrive.logger.info("Tile at " + x + ", " + y + ", " + z + " is " + teClass + " derived from " + teClass.getSuperclass());
 			}
 			try {
-				if (tileEntity instanceof TileEntityShipCore) {// WarpDrive
-					// !!! WarpDrive.shipCores.removeFromRegistry((TileEntityShipCore) tileEntity);
-					
-				} else if (teClass.getSuperclass().getName().contains("ic2.core.block")) {// IC2
+				if (teClass.getSuperclass().getName().contains("ic2.core.block")) {// IC2
 					Method onUnloaded = teClass.getMethod("onUnloaded");
 					Method onLoaded = teClass.getMethod("onLoaded");
 					if (onUnloaded != null && onLoaded != null) {
