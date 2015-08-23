@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<warpdriveWorldGeneration version="1">
+<warpdriveWorldGeneration version="1" mods="ic2" />
 
-    <mod name="ic2" />
-
-	<ore name="ic2:tin_ore" weight="70" category="commonOre" />
-    <ore name="ic2:copper_ore" weight="70" category="commonOre" />
+    <FillerSet group="commonOres" >
+    	<filler name="ic2:tin_ore" ratio=".05" />
+        <filler name="ic2:copper_ore" ratio=".06" />
+    </FillerSet>
     
-	<ore name="ic2:platinum_ore" weight="20" category="rareOre" />
+    <FillerSet group="rareOres" >
+	   <filler name="ic2:platinum_ore" ratio=".001" />
+	</FillerSet>
 	
 </warpdriveWorldGeneration>

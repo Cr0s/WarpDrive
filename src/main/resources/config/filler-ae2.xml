@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<warpdriveWorldGeneration version="1">
+<warpdriveWorldGeneration version="1" mods="ae2" >
 
-    <mod name="ae2" />
-
-	<ore name="ae2:quartz" weight="70" category="uncommonOre" />
+    <FillerSet group="uncommonOres" >
+	   <filler name="ae2:quartz" ratio=".01" />
+	</FillerSet>
 	
 </warpdriveWorldGeneration>

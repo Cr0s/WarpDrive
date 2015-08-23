@@ -1,28 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <warpdriveWorldGeneration version="1">
-	<ore name="minecraft:coal_ore" weight="100" category="commonOre" />
-    <ore name="minecraft:iron_ore" weight="70" category="commonOre" />
+
+    <FillerSet group="commonOres" >
+	   <filler name="minecraft:coal_ore" weight="100" />
+       <filler name="minecraft:iron_ore" weight="70" />
+    </FillerSet>
     
+    <FillerSet group="uncommonOres" >
+        <filler name="minecraft:redstone_ore" weight="40" />
+    </FillerSet>
     
-    <ore name="minecraft:redstone_ore" weight="40" category="uncommonOre" />
+    <FillerSet group="rareOres" >
+	   <filler name="minecraft:gold_ore" weight="20" />
+	   <filler name="minecraft:diamond_ore" weight="10" />
+	   <filler name="minecraft:lapis_ore" weight="15" />
+       <filler name="minecraft:emerald_ore" weight="15" />
+       <filler name="warpdrive:iridiumBlock" weight="1" />
+    </FillerSet>
     
-	<ore name="minecraft:gold_ore" weight="20" category="rareOre" />
-	<ore name="minecraft:diamond_ore" weight="10" category="rareOre" />
-	<ore name="minecraft:lapis_ore" weight="15" category="rareOre" />
-    <ore name="minecraft:emerald_ore" weight="15" category="rareOre" />
-    <ore name="warpdrive:iridiumBlock" weight="1" category="rareOre" />
+    <FillerSet group="overworld" >
+        <filler name="minecraft:stone" weight="200" />
+        <filler name="minecraft:sand" weight="30" />
+        <filler name="minecraft:dirt" weight="50" />
+    </FillerSet>
     
-    <ore name="minecraft:stone" weight="200" category="overworld" />
-    <ore name="minecraft:sand" weight="30" category="overworld" />
-    <ore name="minecraft:dirt" weight="50" category="overworld" />
+    <FillerSet group="end" >
+        <filler name="minecraft:end_stone" weight="200" />
+        <filler name="minecraft:sand" weight="20" />
+        <filler name="minecraft:obsidian" weight="20" />
+    </FillerSet>
     
-    <ore name="minecraft:end_stone" weight="200" category="end" />
-    <ore name="minecraft:sand" weight="20" category="end" />
-    <ore name="minecraft:obsidian" weight="20" category="end" />
-    
-    <ore name="minecraft:netherrack" weight="300" category="nether" />
-    <ore name="minecraft:quartz_ore" weight="20" category="nether" />
-    <ore name="minecraft:glowstone" weight="40" category="nether" />
+    <FillerSet group="nether" >
+        <filler name="minecraft:netherrack" weight="300" />
+        <filler name="minecraft:quartz_ore" weight="20" />
+        <filler name="minecraft:glowstone" weight="40" />
+    </FillerSet>
 	
 	
 	
