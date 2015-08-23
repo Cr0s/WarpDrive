@@ -295,9 +295,15 @@ function Summon()
  Clear()
  ShowTitle("<==== Summon players ====>")
  local playersString, playersArray = warp.getAttachedPlayers()
+ if playersArray == nil then
+  Show("- no players attached -")
+  sleep(1.0)
+  return
+ end
  for i = 1, #playersArray do
   Show(i..". "..playersArray[i])
  end
+ 
  SetColorTitle()
  ShowMenu("Enter player number")
  ShowMenu("or press enter to summon everyone")
