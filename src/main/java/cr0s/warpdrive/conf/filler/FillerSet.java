@@ -20,7 +20,7 @@ import cr0s.warpdrive.conf.XmlRepresentable;
  * @author TheNumenorean
  *
  */
-public class FillerSet implements XmlRepresentable {
+public class FillerSet implements XmlRepresentable, Comparable {
 
 	private MetaBlock[] weightedFillerBlocks;
 	private FillerFactory factory;
@@ -130,6 +130,16 @@ public class FillerSet implements XmlRepresentable {
 	public void finishContruction() {
 		weightedFillerBlocks = factory.constructWeightedMetaBlockList();
 		factory = null;
+	}
+
+	@Override
+	public int compareTo(Object obj) {
+		return name.compareTo(((FillerSet) obj).name);
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }
