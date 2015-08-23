@@ -10,12 +10,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidBlock;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
 import cr0s.warpdrive.block.TileEntityLaserMedium;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.data.VectorI;
 import cr0s.warpdrive.network.PacketHandler;
 
 public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
@@ -25,31 +27,25 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 	private int fortuneLevel = 0;
 
 	private TileEntityLaserMedium booster = null;
-	private Vector3 minerVector;
+	private Vector3 laserOutput;
 
 	abstract boolean	canSilkTouch();
 	abstract int		minFortune();
 	abstract int		maxFortune();
-	abstract double		laserBelow();
+	ForgeDirection		laserOutputSide = ForgeDirection.UP;
 
 	abstract float		getColorR();
 	abstract float		getColorG();
 	abstract float		getColorB();
 
-	public TileEntityAbstractMiner()
-	{
+	public TileEntityAbstractMiner() {
 		super();
-		fixMinerVector();
 	}
-
-	private void fixMinerVector()
-	{
-		if(minerVector == null)
-			minerVector = new Vector3(xCoord,yCoord-laserBelow(),zCoord);
-		minerVector.x = xCoord;
-		minerVector.y = yCoord - (laserBelow());
-		minerVector.z = zCoord;
-		minerVector.translate(0.5);
+	
+	@Override
+	public void validate() {
+		super.validate();
+		laserOutput = new Vector3(this).translate(0.5D).translate(laserOutputSide, 0.5D);
 	}
 
 	private List<ItemStack> getItemStackFromBlock(int i, int j, int k, Block block, int blockMeta)
@@ -78,9 +74,8 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 	private IInventory findChest() {
 		TileEntity result = null;
 
-		for(int i = 0; i < 6; i++) {
-			Vector3 sideOffset = adjacentSideOffsets[i];
-			result = worldObj.getTileEntity(xCoord + sideOffset.intX(), yCoord + sideOffset.intY(), zCoord + sideOffset.intZ());
+		for(ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+			result = worldObj.getTileEntity(xCoord + side.offsetX, yCoord + side.offsetY, zCoord + side.offsetZ);
 			if (result != null && !(result instanceof TileEntityAbstractMiner) && (result instanceof IInventory)) {
 				return (IInventory) result;
 			}
@@ -204,31 +199,30 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 
 	//MINING FUNCTIONS
 
-	protected void laserBlock(Vector3 valuable)
+	protected void laserBlock(VectorI valuable)
 	{
-		fixMinerVector();
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		PacketHandler.sendBeamPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS, 0, 50);
+		PacketHandler.sendBeamPacket(worldObj, laserOutput, valuable.getBlockCenter(), r, g, b, 2 * WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 
-	private void mineBlock(Vector3 valuable, Block block, int blockMeta)
+	private void mineBlock(VectorI valuable, Block block, int blockMeta)
 	{
 		laserBlock(valuable);
-		worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), (blockMeta << 12));
-		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
+		worldObj.playAuxSFXAtEntity(null, 2001, valuable.x, valuable.y, valuable.z, (blockMeta << 12));
+		worldObj.setBlockToAir(valuable.x, valuable.y, valuable.z);
 	}
 
-	protected boolean harvestBlock(Vector3 valuable)
+	protected boolean harvestBlock(VectorI valuable)
 	{
-		Block block = worldObj.getBlock(valuable.intX(), valuable.intY(), valuable.intZ());
-		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
+		Block block = worldObj.getBlock(valuable.x, valuable.y, valuable.z);
+		int blockMeta = worldObj.getBlockMetadata(valuable.x, valuable.y, valuable.z);
 		if (!block.isAssociatedBlock(Blocks.water) && !block.isAssociatedBlock(Blocks.lava))
 		{
 			boolean didPlace = true;
-			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), block, blockMeta);
+			List<ItemStack> stacks = getItemStackFromBlock(valuable.x, valuable.y, valuable.z, block, blockMeta);
 			if (stacks != null)
 			{
 				for (ItemStack stack : stacks)
@@ -239,10 +233,11 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 			mineBlock(valuable, block, blockMeta);
 			return didPlace;
 		}
-		else if (block.isAssociatedBlock(Blocks.water))
+		else if (block.isAssociatedBlock(Blocks.water)) {
 			// Evaporate water
-			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
-		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
+			worldObj.playSoundEffect(valuable.x + 0.5D, valuable.y + 0.5D, valuable.z + 0.5D, "random.fizz", 0.5F, 2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
+		}
+		worldObj.setBlockToAir(valuable.x, valuable.y, valuable.z);
 		return true;
 	}
 
@@ -356,11 +351,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		super.readFromNBT(tag);
 		silkTouch = tag.getBoolean("silkTouch");
 		fortuneLevel = tag.getInteger("fortuneLevel");
-
-		minerVector.x = xCoord;
-		minerVector.y = yCoord - (laserBelow());
-		minerVector.z = zCoord;
-		minerVector = minerVector.translate(0.5);
 	}
 
 	@Override

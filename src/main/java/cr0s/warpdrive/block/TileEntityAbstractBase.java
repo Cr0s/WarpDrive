@@ -5,17 +5,6 @@ import cr0s.warpdrive.data.Vector3;
 
 public abstract class TileEntityAbstractBase extends TileEntity
 {
- 	public static final Vector3[] adjacentSideOffsets = new Vector3[6];
- 	static
- 	{
- 		adjacentSideOffsets[0] = new Vector3( 0, 0, 1);
- 		adjacentSideOffsets[1] = new Vector3( 0, 0,-1);
- 		adjacentSideOffsets[2] = new Vector3( 0, 1, 0);
- 		adjacentSideOffsets[3] = new Vector3( 0,-1, 0);
- 		adjacentSideOffsets[4] = new Vector3( 1, 0, 0);
- 		adjacentSideOffsets[5] = new Vector3(-1, 0, 0);
- 	}
- 	
 	protected static int toInt(double d) {
 		return (int) Math.round(d);
 	}

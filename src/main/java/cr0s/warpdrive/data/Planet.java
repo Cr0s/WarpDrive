@@ -45,7 +45,7 @@ public class Planet implements Cloneable {
 	 * @param currentPosition current position in the planet/dimension
 	 * @return distance to transition borders, 0 if take off is possible
 	 */
-	public int isValidToSpace(Vector3 currentPosition) {
+	public int isValidToSpace(VectorI currentPosition) {
 		if ((Math.abs(currentPosition.x - dimensionCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - dimensionCenterZ) <= borderSizeZ)) {
 			return 0;
 		}
@@ -60,7 +60,7 @@ public class Planet implements Cloneable {
 	 * @param currentPosition current position in space
 	 * @return distance to transition borders, 0 if entry is possible
 	 */
-	public int isValidFromSpace(Vector3 currentPosition) {
+	public int isValidFromSpace(VectorI currentPosition) {
 		if ((Math.abs(currentPosition.x - spaceCenterX) <= borderSizeX) && (Math.abs(currentPosition.z - spaceCenterZ) <= borderSizeZ)) {
 			return 0;
 		}

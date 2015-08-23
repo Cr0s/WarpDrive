@@ -13,7 +13,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
-import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
@@ -26,15 +25,15 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 	private static final int MODE_INACTIVE = 0;
 	private static final int MODE_UP = 1;
 	private static final int MODE_DOWN = 2;
-
+	
 	private int firstUncoveredY;
 	private int mode = MODE_INACTIVE;
 	private boolean isEnabled = false;
 	private boolean computerEnabled = true;
 	private int computerMode = MODE_REDSTONE;
-
+	
 	private int tickCount = 0;
-
+	
 	public TileEntityLift() {
 		super();
 		IC2_sinkTier = 2;
@@ -43,22 +42,21 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 		methodsArray = new String[] {
 				"getEnergyLevel",
 				"mode",
-				"active",
-				"help" };
+				"active" };
 	}
-
+	
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		tickCount++;
 		if (tickCount >= WarpDriveConfig.LIFT_UPDATE_INTERVAL_TICKS) {
 			tickCount = 0;
-
+			
 			// Switching mode
 			if (  computerMode == MODE_DOWN
 			  || (computerMode == MODE_REDSTONE && worldObj.isBlockIndirectlyGettingPowered(xCoord, yCoord, zCoord))) {
@@ -66,12 +64,12 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			} else {
 				mode = MODE_UP;
 			}
-
+			
 			isEnabled = computerEnabled && isPassableBlock(yCoord + 1)
 					&& isPassableBlock(yCoord + 2)
 					&& isPassableBlock(yCoord - 1)
 					&& isPassableBlock(yCoord - 2);
-
+			
 			if (getEnergyStored() < WarpDriveConfig.LIFT_ENERGY_PER_ENTITY
 					|| !isEnabled) {
 				mode = MODE_INACTIVE;
@@ -81,12 +79,12 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 				}
 				return;
 			}
-
+			
 			if (getBlockMetadata() != mode) {
 				worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord,
 						mode, 2); // current mode
 			}
-
+			
 			// Launch a beam: search non-air blocks under lift
 			for (int ny = yCoord - 2; ny > 0; ny--) {
 				if (!isPassableBlock(ny)) {
@@ -94,7 +92,7 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 					break;
 				}
 			}
-
+			
 			if (yCoord - firstUncoveredY >= 2) {
 				if (mode == MODE_UP) {
 					PacketHandler.sendBeamPacket(worldObj, new Vector3(
@@ -107,12 +105,12 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 							xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 0f,
 							0f, 1f, 40, 0, 100);
 				}
-
+				
 				liftEntity();
 			}
 		}
 	}
-
+	
 	private boolean isPassableBlock(int yPosition) {
 		Block block = worldObj.getBlock(xCoord, yPosition, zCoord);
 		//TODO: Make configurable or less specific
@@ -121,17 +119,17 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			|| block.isAssociatedBlock(Blocks.standing_sign)
 			|| worldObj.isAirBlock(xCoord, yPosition, zCoord);
 	}
-
+	
 	private void liftEntity() {
 		final double CUBE_RADIUS = 0.4;
 		double xmax, zmax;
 		double xmin, zmin;
-
+		
 		xmin = xCoord + 0.5 - CUBE_RADIUS;
 		xmax = xCoord + 0.5 + CUBE_RADIUS;
 		zmin = zCoord + 0.5 - CUBE_RADIUS;
 		zmax = zCoord + 0.5 + CUBE_RADIUS;
-
+		
 		// Lift up
 		if (mode == MODE_UP) {
 			AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(xmin, firstUncoveredY, zmin, xmax, yCoord, zmax);
@@ -170,34 +168,34 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			}
 		}
 	}
-
+	
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 	}
-
+	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 	}
-
+	
 	@Override
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.LIFT_MAX_ENERGY_STORED;
 	}
-
+	
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;
 	}
-
+	
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	public Object[] mode(Context context, Arguments arguments) {
 		return mode(argumentsOCtoCC(arguments));
 	}
-
+	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	public Object[] active(Context context, Arguments arguments) {
@@ -206,7 +204,7 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 		}
 		return new Object[] { computerEnabled ? false : isEnabled };
 	}
-
+	
 	private Object[] mode(Object[] arguments) {
 		if (arguments.length == 1) {
 			if (arguments[0].toString().equals("up")) {
@@ -227,41 +225,23 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 		}
 		return null;
 	}
-
-	public String helpStr(Object[] args) {
-		if (args.length == 1) {
-			String methodName = args[0].toString().toLowerCase();
-			if (methodName.equals("getEnergyLevel")) {
-				return WarpDrive.defEnergyStr;
-			} else if (methodName.equals("mode")) {
-				return "mode(\"up\" or \"down\" or \"redstone\"): sets the mode\nmode(): returns the current mode";
-			} else if (methodName.equals("active")) {
-				return "active(boolean): sets whether the laser is active\nactive(): returns whether the laser is active";
-			}
-		}
-		return WarpDrive.defHelpStr;
-	}
-
+	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context,
-			int method, Object[] arguments) {
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		if (methodName.equals("getEnergyLevel")) {
 			return getEnergyLevel();
-
+			
 		} else if (methodName.equals("mode")) {
 			return mode(arguments);
-
+			
 		} else if (methodName.equals("active")) {
 			if (arguments.length == 1) {
 				computerEnabled = toBool(arguments);
 			}
 			return new Object[] { computerEnabled ? false : isEnabled };
-
-		} else if (methodName.equals("help")) {
-			return new Object[] { helpStr(arguments) };
 		}
 		return null;
 	}

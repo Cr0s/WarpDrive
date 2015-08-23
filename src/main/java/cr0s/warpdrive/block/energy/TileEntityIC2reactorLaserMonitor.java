@@ -19,63 +19,64 @@ import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.network.PacketHandler;
 
 public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractLaser {
-	private final int workRate = 10;
-	private int ticks = 0;
-
+	private int ticks = WarpDriveConfig.IC2_REACTOR_COOLING_INTERVAL_TICKS;
+	
 	public TileEntityIC2reactorLaserMonitor() {
 		super();
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
 	}
 	
-	private Set<Object> findReactors() {//returns either IReactor or IReactorChamber tile entity
-		int[] xD = {-2, 2, 0, 0, 0, 0};
-		int[] yD = { 0, 0,-2, 2, 0, 0};
-		int[] zD = { 0, 0, 0, 0,-2, 2};
-		Set<Object> output = new HashSet<Object>();
-		for(int i = 0; i < xD.length; i++) {
-			int xO = xCoord + xD[i];
-			int yO = yCoord + yD[i];
-			int zO = zCoord + zD[i];
-			TileEntity te = worldObj.getTileEntity(xO, yO, zO);
-			if(te == null)
+	private static int[] deltaX = {-2, 2, 0, 0, 0, 0};
+	private static int[] deltaY = { 0, 0,-2, 2, 0, 0};
+	private static int[] deltaZ = { 0, 0, 0, 0,-2, 2};
+	
+	// returns IReactor tile entities
+	private Set<IReactor> findReactors() {
+		Set<IReactor> output = new HashSet<IReactor>();
+		
+		for(int i = 0; i < deltaX.length; i++) {
+			TileEntity tileEntity = worldObj.getTileEntity(xCoord + deltaX[i], yCoord + deltaY[i], zCoord + deltaZ[i]);
+			if (tileEntity == null) {
 				continue;
-
-			if (te instanceof IReactor) {
-				output.add(te);
-			} else if(te instanceof IReactorChamber) {
-				IReactor reactor = ((IReactorChamber)te).getReactor();
-				if(reactor == null)
+			}
+			
+			if (tileEntity instanceof IReactor) {
+				output.add((IReactor)tileEntity);
+				
+			} else if (tileEntity instanceof IReactorChamber) {
+				IReactor reactor = ((IReactorChamber)tileEntity).getReactor();
+				if (reactor == null) {
 					continue;
-
+				}
+				
+				// ignore if we're right next to the reactor
 				ChunkCoordinates coords = reactor.getPosition();
-
-				if(Math.abs(coords.posX - xCoord) == 1)
+				if ( Math.abs(coords.posX - xCoord) == 1
+				  || Math.abs(coords.posY - yCoord) == 1
+				  || Math.abs(coords.posZ - zCoord) == 1) {
 					continue;
-				if(Math.abs(coords.posY - yCoord) == 1)
-					continue;
-				if(Math.abs(coords.posZ - zCoord) == 1)
-					continue;
-
-				output.add(te);
+				}
+				
+				output.add(reactor);
 			}
 		}
 		return output;
 	}
-
-	private boolean coolReactor(IReactor react) {
+	
+	private boolean coolReactor(IReactor reactor) {
 		boolean didCoolReactor = false;
-		for(int x = 0; x < 9; x++) {
-			for(int y = 0; y < 6; y++) {
-				ItemStack item = react.getItemAt(x, y);
+		for(int x = 0; x < 9 && !didCoolReactor; x++) {
+			for(int y = 0; y < 6 && !didCoolReactor; y++) {
+				ItemStack item = reactor.getItemAt(x, y);
 				if (item != null) {
-					if(item.getItem() instanceof ItemIC2reactorLaserFocus) {
-						int heat = item.getItemDamage();
-						int heatRemoval = (int) Math.floor(Math.min(getEnergyStored() / WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT, heat));
-						if (heatRemoval > 0) {
+					if (item.getItem() instanceof ItemIC2reactorLaserFocus) {
+						int heatInLaserFocus = item.getItemDamage();
+						int heatRemovable = (int) Math.floor(Math.min(getEnergyStored() / WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT, heatInLaserFocus));
+						if (heatRemovable > 0) {
 							didCoolReactor = true;
-							consumeEnergy((int) Math.ceil(heatRemoval * WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT), false);
-							item.setItemDamage(heat - heatRemoval);
+							consumeEnergy((int) Math.ceil(heatRemovable * WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT), false);
+							item.setItemDamage(heatInLaserFocus - heatRemovable);
 						}
 					}
 				}
@@ -83,60 +84,55 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractLaser {
 		}
 		return didCoolReactor;
 	}
-
+	
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
-		ticks++;
-		if (ticks > workRate)  {
-			ticks = 0;
+		
+		ticks--;
+		if (ticks <= 0)  {
+			ticks = WarpDriveConfig.IC2_REACTOR_COOLING_INTERVAL_TICKS;
 			Vector3 myPos = new Vector3(this).translate(0.5);
-			Set<Object> reactors = findReactors();
-			if(reactors.size() == 0)
+			Set<IReactor> reactors = findReactors();
+			if (reactors.size() == 0) {
 				return;
-
-			for(Object o : reactors)
-			{
-				IReactor react = null;
-				if(o instanceof TileEntity)
-				{
-					if(o instanceof IReactor)
-						react = (IReactor)o;
-					else if(o instanceof IReactorChamber)
-						react = ((IReactorChamber)o).getReactor();
-					if(react != null)
-					{
-						if(coolReactor(react))
-						{
-							TileEntity te = (TileEntity)o;
-							PacketHandler.sendBeamPacket(worldObj, myPos, new Vector3(te.xCoord,te.yCoord,te.zCoord).translate(0.5D), 0f, 0.8f, 1f, 20, 0, 20);
-						}
-					}
+			}
+			
+			for(IReactor reactor : reactors) {
+				if (coolReactor(reactor)) {
+					PacketHandler.sendBeamPacket(worldObj, myPos, new Vector3(reactor.getPosition()).translate(0.5D), 0.0f, 0.8f, 1.0f, 20, 0, 20);
 				}
 			}
 		}
 	}
-
+	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 	}
-
+	
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 	}
-
+	
+	@Override
+	public String getStatus() {
+		Set<IReactor> reactors = findReactors();
+		return getBlockType().getLocalizedName()
+			+ String.format(" energy level is %.0f/%.0f EU.", convertInternalToEU(getEnergyStored()), convertInternalToEU(getMaxEnergyStored()))
+			+ ((reactors == null || reactors.size() == 0) ? " No reactor found!" : " " + reactors.size() + " reactor(s) connected.");
+	}
+	
 	@Override
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.IC2_REACTOR_MAX_ENERGY_STORED;
 	}
-
+	
 	@Override
 	public boolean canInputEnergy(ForgeDirection from) {
 		return true;

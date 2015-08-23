@@ -70,6 +70,11 @@ public class VectorI implements Cloneable {
 	}
 	
 	
+	public Vector3 getBlockCenter() {
+		return new Vector3(x + 0.5D, y + 0.5D, z + 0.5D);
+	}
+	
+	
 	@Override
 	public VectorI clone() {
 		return new VectorI(x, y, z);
@@ -178,7 +183,9 @@ public class VectorI implements Cloneable {
 	
 	// modify current vector by translation of 1 block in side direction
 	public VectorI translate(final ForgeDirection side) {
-		translate(side, 1);
+		x += side.offsetX;
+		y += side.offsetY;
+		z += side.offsetZ;
 		return this;
 	}
 

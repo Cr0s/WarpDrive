@@ -8,6 +8,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
 import cr0s.warpdrive.block.TileEntityLaserMedium;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
@@ -19,55 +20,54 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 	ForgeDirection side = ForgeDirection.UNKNOWN;
 	TileEntityLaserMedium booster;
 	TileEntityEnanReactorCore reactor;
-
-	boolean useLaser = false;
-	boolean doOnce = false;
-
+	
+	private boolean isFirstUpdate = true;
+	
 	public TileEntityEnanReactorLaser() {
-		methodsArray = new String[] { "energy", "hasReactor", "side", "sendLaser", "help" };
+		methodsArray = new String[] { "energy", "hasReactor", "side", "sendLaser" };
 		peripheralName = "warpdriveEnanReactorLaser";
 	}
-
+	
 	public TileEntityEnanReactorCore scanForReactor() {
 		reactor = null;
-		TileEntity te;
+		TileEntity tileEntity;
 		// I AM ON THE NORTH SIDE
 		side = ForgeDirection.UNKNOWN;
-		te = worldObj.getTileEntity(xCoord, yCoord, zCoord + 2);
-		if (te instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord, yCoord, zCoord + 1)) {
+		tileEntity = worldObj.getTileEntity(xCoord, yCoord, zCoord + 2);
+		if (tileEntity instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord, yCoord, zCoord + 1)) {
 			side = ForgeDirection.NORTH;
-			reactor = (TileEntityEnanReactorCore) te;
+			reactor = (TileEntityEnanReactorCore) tileEntity;
 		}
-
+		
 		// I AM ON THE SOUTH SIDE
-		te = worldObj.getTileEntity(xCoord, yCoord, zCoord - 2);
-		if (te instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord, yCoord, zCoord - 1)) {
+		tileEntity = worldObj.getTileEntity(xCoord, yCoord, zCoord - 2);
+		if (tileEntity instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord, yCoord, zCoord - 1)) {
 			side = ForgeDirection.SOUTH;
-			reactor = (TileEntityEnanReactorCore) te;
+			reactor = (TileEntityEnanReactorCore) tileEntity;
 		}
-
+		
 		// I AM ON THE WEST SIDE
-		te = worldObj.getTileEntity(xCoord + 2, yCoord, zCoord);
-		if (te instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord + 1, yCoord, zCoord)) {
+		tileEntity = worldObj.getTileEntity(xCoord + 2, yCoord, zCoord);
+		if (tileEntity instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord + 1, yCoord, zCoord)) {
 			side = ForgeDirection.WEST;
-			reactor = (TileEntityEnanReactorCore) te;
+			reactor = (TileEntityEnanReactorCore) tileEntity;
 		}
-
+		
 		// I AM ON THE EAST SIDE
-		te = worldObj.getTileEntity(xCoord - 2, yCoord, zCoord);
-		if (te instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord - 1, yCoord, zCoord)) {
+		tileEntity = worldObj.getTileEntity(xCoord - 2, yCoord, zCoord);
+		if (tileEntity instanceof TileEntityEnanReactorCore && worldObj.isAirBlock(xCoord - 1, yCoord, zCoord)) {
 			side = ForgeDirection.EAST;
-			reactor = (TileEntityEnanReactorCore) te;
+			reactor = (TileEntityEnanReactorCore) tileEntity;
 		}
-
+		
 		setMetadata();
-
+		
 		if (reactor != null) {
 			reactorVec = new Vector3(reactor).translate(0.5);
 		}
 		return reactor;
 	}
-
+	
 	private void setMetadata() {
 		int metadata = 0;
 		if (side != ForgeDirection.UNKNOWN) {
@@ -77,56 +77,52 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 			worldObj.setBlockMetadataWithNotify(xCoord, yCoord, zCoord, metadata, 3);
 		}
 	}
-
+	
 	public TileEntityLaserMedium scanForBooster() {
 		booster = null;
-		TileEntity te;
-		te = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
-		if (te != null && te instanceof TileEntityLaserMedium) {
-			booster = (TileEntityLaserMedium) te;
+		TileEntity tileEntity;
+		tileEntity = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
+		if (tileEntity != null && tileEntity instanceof TileEntityLaserMedium) {
+			booster = (TileEntityLaserMedium) tileEntity;
 		}
-
-		te = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
-		if (te != null && te instanceof TileEntityLaserMedium) {
-			booster = (TileEntityLaserMedium) te;
+		
+		tileEntity = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
+		if (tileEntity != null && tileEntity instanceof TileEntityLaserMedium) {
+			booster = (TileEntityLaserMedium) tileEntity;
 		}
-
+		
 		return booster;
 	}
-
+	
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
 		
-		if (doOnce == false) {
+		if (isFirstUpdate) {
+			isFirstUpdate = false;
 			scanForReactor();
 			scanForBooster();
 			myVec = new Vector3(this).translate(0.5);
-			doOnce = true;
-		}
-
-		if (useLaser == true) {
-			PacketHandler.sendBeamPacket(worldObj, myVec, reactorVec, 0.1F, 0.2F, 1.0F, 25, 50, 100);
-			useLaser = false;
 		}
 	}
-
+	
 	public void unlink() {
 		side = ForgeDirection.UNKNOWN;
 		setMetadata();
 	}
-
+	
 	@Override
 	public void updatedNeighbours() {
+		super.updatedNeighbours();
 		scanForBooster();
 		scanForReactor();
 	}
-
+	
 	private void laserReactor(int energy) {
 		if (energy <= 0) {
 			return;
 		}
-
+		
 		scanForBooster();
 		scanForReactor();
 		if (booster == null)
@@ -134,39 +130,24 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 		if (reactor == null)
 			return;
 		if (booster.consumeEnergy(energy, false)) {
-			// WarpDrive.debugPrint("ReactorLaser on " + side.toString()
-			// +" side sending " + amount);
-			useLaser = true;
+			if (WarpDriveConfig.LOGGING_ENERGY && WarpDriveConfig.LOGGING_LUA) {
+				WarpDrive.logger.info("ReactorLaser on " + side.toString() + " side sending " + energy);
+			}
 			reactor.decreaseInstability(side, energy);
+			PacketHandler.sendBeamPacket(worldObj, myVec, reactorVec, 0.1F, 0.2F, 1.0F, 25, 50, 100);
 		}
 	}
-
+	
 	@Override
 	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 	}
-
+	
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 	}
-
-	private static String helpStr(Object[] args) {
-		if (args.length > 0) {
-			String arg = args[0].toString().toLowerCase();
-			if (arg.equals("energy")) {
-				return WarpDrive.defEnergyStr;
-			} else if (arg.equals("hasReactor")) {
-				return "hasReactor(): returns true if the laser can see a reactor and false otherwise";
-			} else if (arg.equals("sendlaser")) {
-				return "sendLaser(int): sends a laser of energy int to the reactor";
-			} else if (arg.equals("side")) {
-				return "side(): returns 0-3 depending on which side of the reactor its on";
-			}
-		}
-		return WarpDrive.defHelpStr;
-	}
-
+	
 	// ComputerCraft methods
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
@@ -179,14 +160,15 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 			} else {
 				return new Object[] { booster.getEnergyStored(), booster.getMaxEnergyStored() };
 			}
+			
 		} else if (methodName.equals("hasReactor")) {
 			return new Object[] { scanForReactor() != null };
+			
 		} else if (methodName.equals("sendLaser")) {
 			if (arguments.length >= 1) {
 				laserReactor(toInt(arguments[0]));
 			}
-		} else if (methodName.equals("help")) {
-			return new Object[] { helpStr(arguments) };
+			
 		} else if (methodName.equals("side")) {
 			return new Object[] { side.ordinal() - 2 };
 		}

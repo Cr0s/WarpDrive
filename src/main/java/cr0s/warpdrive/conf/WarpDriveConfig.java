@@ -33,7 +33,7 @@ public class WarpDriveConfig {
 	private static File configDirectory;
 	private static DocumentBuilder xmlDocumentBuilder;
 	private static final String[] defaultXMLfilenames = { "structures-default.xml" };
-
+	
 	/*
 	 * The variables which store whether or not individual mods are loaded
 	 */
@@ -51,7 +51,7 @@ public class WarpDriveConfig {
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isAdvancedRepulsionSystemsLoaded = false;
 	public static boolean isMagicalCropsLoaded = false;
-
+	
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
 	public static Method forgeMultipart_helper_sendDescPacket = null;
@@ -199,7 +199,7 @@ public class WarpDriveConfig {
 	// - overall consumption in 'ores, space' is ML_EU_PER_LAYER_SPACE + ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE * ML_EU_MUL_ORESONLY / 25 => ~ 28630 EU/layer
 	// - at radius 5, one layer takes 403 ticks (2 * ML_SCAN_DELAY_TICKS + ML_MINE_DELAY_TICKS * (ML_MAX_RADIUS * 2 + 1) ^ 2)
 	public static int MINING_LASER_MAX_MEDIUMS_COUNT = 1;
-	public static int MINING_LASER_MAX_RADIUS = 16;
+	public static int MINING_LASER_RADIUS_BLOCKS = 5;
 	public static int MINING_LASER_WARMUP_DELAY_TICKS = 20;
 	public static int MINING_LASER_SCAN_DELAY_TICKS = 20;
 	public static int MINING_LASER_MINE_DELAY_TICKS = 3;
@@ -234,26 +234,27 @@ public class WarpDriveConfig {
 	// IC2 Reactor monitor
 	public static int IC2_REACTOR_MAX_ENERGY_STORED = 1000000;
 	public static double IC2_REACTOR_ENERGY_PER_HEAT = 2;
-
+	public static int IC2_REACTOR_COOLING_INTERVAL_TICKS = 10;
+	
 	// Transporter
 	public static int TRANSPORTER_MAX_ENERGY = 1000000;
 	public static boolean TRANSPORTER_USE_RELATIVE_COORDS = true;
 	public static double TRANSPORTER_ENERGY_PER_BLOCK = 100.0;
 	public static double TRANSPORTER_MAX_BOOST_MUL = 4.0;
-
+	
 	// Enantiomorphic Power reactor
 	public static int ENAN_REACTOR_MAX_ENERGY_STORED = 100000000;
 	public static int ENAN_REACTOR_UPDATE_INTERVAL_TICKS = 5;
 	public static int ENAN_REACTOR_MAX_LASERS_PER_SECOND = 6;
-
+	
 	// Power store
 	public static int ENERGY_BANK_MAX_ENERGY_STORED = 1000000;
-
+	
 	// Laser Lift
 	public static int LIFT_MAX_ENERGY_STORED = 2400;
 	public static int LIFT_ENERGY_PER_ENTITY = 800;
 	public static int LIFT_UPDATE_INTERVAL_TICKS = 10;
-
+	
 	// Chunk Loader
 	public static int CL_MAX_ENERGY = 1000000;
 	public static int CL_MAX_DISTANCE = 2;
@@ -292,22 +293,6 @@ public class WarpDriveConfig {
 		
 		// read configuration file
 		loadWarpDriveConfig(new File(configDirectory, WarpDrive.MODID + ".cfg"));
-		
-		// read XML files
-		File[] files = configDirectory.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File file_notUsed, String name) {
-				return name.endsWith(".xml");
-			}
-		});
-		if (files.length == 0) {
-			for(String defaultXMLfilename : defaultXMLfilenames) {
-				unpackResourceToFolder(defaultXMLfilename, "config", configDirectory);
-			}
-		}
-		
-		FillerManager.loadOres(configDirectory);
-		StructureManager.loadStructures(configDirectory);
 	}
 	
 	public static void loadWarpDriveConfig(File file) {
@@ -542,8 +527,8 @@ public class WarpDriveConfig {
 		// Mining Laser
 		MINING_LASER_MAX_MEDIUMS_COUNT = clamp(1, 64,
 				config.get("mining_laser", "max_mediums_count", MINING_LASER_MAX_MEDIUMS_COUNT).getInt());
-		MINING_LASER_MAX_RADIUS = clamp(1, 64,
-				config.get("mining_laser", "max_radius", MINING_LASER_MAX_RADIUS).getInt());
+		MINING_LASER_RADIUS_BLOCKS = clamp(1, 64,
+				config.get("mining_laser", "radius_blocks", MINING_LASER_RADIUS_BLOCKS).getInt());
 		
 		MINING_LASER_WARMUP_DELAY_TICKS = clamp(1, 300,
 				config.get("mining_laser", "warmup_delay_ticks", MINING_LASER_WARMUP_DELAY_TICKS).getInt());
@@ -607,6 +592,8 @@ public class WarpDriveConfig {
 				config.get("ic2_reactor_laser", "max_energy_stored", IC2_REACTOR_MAX_ENERGY_STORED).getInt());
 		IC2_REACTOR_ENERGY_PER_HEAT = clamp(2.0D, 100000.0D,
 				config.get("ic2_reactor_laser", "energy_per_heat", IC2_REACTOR_ENERGY_PER_HEAT).getDouble(2));
+		IC2_REACTOR_COOLING_INTERVAL_TICKS = clamp(0, 1200,
+				config.get("ic2_reactor_laser", "cooling_interval_ticks", IC2_REACTOR_COOLING_INTERVAL_TICKS).getInt());
 		
 		// Transporter
 		TRANSPORTER_MAX_ENERGY = clamp(1, Integer.MAX_VALUE,
@@ -756,7 +743,24 @@ public class WarpDriveConfig {
 	}
 
 	public static void postInit() {
+		// read XML files
+		File[] files = configDirectory.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File file_notUsed, String name) {
+				return name.endsWith(".xml");
+			}
+		});
+		if (files.length == 0) {
+			for(String defaultXMLfilename : defaultXMLfilenames) {
+				unpackResourceToFolder(defaultXMLfilename, "config", configDirectory);
+			}
+		}
+		
+		FillerManager.loadOres(configDirectory);
+		StructureManager.loadStructures(configDirectory);
+		
 		LoadOreDict();
+		
 		FillerManager.finishLoading();
 	}
 

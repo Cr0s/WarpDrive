@@ -269,38 +269,15 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		}
 		return exploding;
 	}
-
-	// Takes the arguments passed by function call and returns an appropriate string
-	private static String helpStr(Object[] args) {
-		if (args.length > 0) {
-			String arg = args[0].toString().toLowerCase();
-			if (arg.equals("getactive")) {
-				return "getActive(): returns true if the reactor is active and false otherwise";
-			} else if (arg.equals("setactive")) {
-				return "setActive(bool): activates the reactor if passed true and deactivates if passed false";
-			} else if (arg.equals("energy")) {
-				return WarpDrive.defEnergyStr;
-			} else if (arg.equals("instability")) {
-				return "instability(): returns the 4 instability values (100 is the point when the reactor explodes)";
-			} else if (arg.equals("release")) {
-				return "release(bool): sets the reactor to output all energy or disables outputting of energy";
-			} else if (arg.equals("releaserate")) {
-				return "releaseRate(int): sets the reactor to try to release exactly int/tick";
-			} else if (arg.equals("releaseabove")) {
-				return "releaseAbove(int): releases all energy above stored int";
-			}
-		}
-		return WarpDrive.defHelpStr;
-	}
-
+	
 	@Override
 	public void updatedNeighbours() {
 		TileEntity te;
 		super.updatedNeighbours();
-
+		
 		int[] xo = { 0, 0, -2, 2 };
 		int[] zo = { 2, -2, 0, 0 };
-
+		
 		for (int i = 0; i < 4; i++) {
 			te = worldObj.getTileEntity(xCoord + xo[i], yCoord, zCoord + zo[i]);
 			if (te instanceof TileEntityEnanReactorLaser) {
@@ -308,10 +285,10 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			}
 		}
 	}
-
+	
 	// OpenComputer callback methods
 	// FIXME: implement OpenComputers...
-
+	
 	public Object[] active(Object[] arguments) throws Exception {
 		if (arguments.length == 1) {
 			boolean activate = false;
@@ -335,7 +312,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			return new Object[] { active, MODE_STRING[releaseMode], releaseRate };
 		}
 	}
-
+	
 	private Object[] release(Object[] arguments) throws Exception {
 		boolean doRelease = false;
 		if (arguments.length > 0) {
@@ -344,14 +321,14 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			} catch (Exception e) {
 				throw new Exception("Function expects an boolean value");
 			}
-
+			
 			releaseMode = doRelease ? MODE_MANUAL_RELEASE : MODE_DONT_RELEASE;
 			releaseAbove = 0;
 			releaseRate = 0;
 		}
 		return new Object[] { releaseMode != MODE_DONT_RELEASE };
 	}
-
+	
 	private Object[] releaseRate(Object[] arguments) throws Exception {
 		int rate = -1;
 		try {
@@ -359,7 +336,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		} catch (Exception e) {
 			throw new Exception("Function expects an integer value");
 		}
-
+		
 		if (rate <= 0) {
 			releaseMode = MODE_DONT_RELEASE;
 			releaseRate = 0;
@@ -368,10 +345,10 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			releaseRate = rate;
 			releaseMode = MODE_RELEASE_AT_RATE;
 		}
-
+		
 		return new Object[] { MODE_STRING[releaseMode], releaseRate };
 	}
-
+	
 	private Object[] releaseAbove(Object[] arguments) throws Exception {
 		int above = -1;
 		try {
@@ -379,7 +356,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		} catch (Exception e) {
 			throw new Exception("Function expects an integer value");
 		}
-
+		
 		if (above <= 0) {
 			releaseMode = 0;
 			releaseAbove = MODE_DONT_RELEASE;
@@ -387,51 +364,48 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			releaseMode = MODE_RELEASE_ABOVE;
 			releaseAbove = above;
 		}
-
+		
 		return new Object[] { MODE_STRING[releaseMode], releaseAbove };
 	}
-
+	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		// computer is alive => start updating reactor
 		hold = false;
-
+		
 		String methodName = methodsArray[method];
-
+		
 		try {
 			if (methodName.equals("active")) {
 				return active(arguments);
-
+				
 			} else if (methodName.equals("energy")) {
 				return new Object[] { containedEnergy, WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED, releasedLastCycle / WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS };
-
+				
 			} else if (methodName.equals("instability")) {
 				Object[] retVal = new Object[4];
 				for (int i = 0; i < 4; i++) {
 					retVal[i] = instabilityValues[i];
 				}
 				return retVal;
-
+				
 			} else if (methodName.equals("release")) {
 				return release(arguments);
-
+				
 			} else if (methodName.equals("releaseRate")) {
 				return releaseRate(arguments);
-
+				
 			} else if (methodName.equals("releaseAbove")) {
 				return releaseAbove(arguments);
-
-			} else if (methodName.equals("help")) {
-				return new Object[] { helpStr(arguments) };
 			}
 		} catch (Exception e) {
 			return new String[] { e.getMessage() };
 		}
-
+		
 		return null;
 	}
-
+	
 	// POWER INTERFACES
 	@Override
 	public int getPotentialEnergyOutput() {
@@ -459,7 +433,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		}
 		return convertRFtoInternal(result);
 	}
-
+	
 	@Override
 	public boolean canOutputEnergy(ForgeDirection from) {
 		if (from.equals(ForgeDirection.UP) || from.equals(ForgeDirection.DOWN)) {

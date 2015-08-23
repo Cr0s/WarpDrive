@@ -23,6 +23,7 @@ import cr0s.warpdrive.block.TileEntityAbstractInterfaced;
 import cr0s.warpdrive.block.TileEntityLaserMedium;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.data.VectorI;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -49,7 +50,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 	private boolean enoughPower = false;
 	private int currentLayer;
 
-	private ArrayList<Vector3> valuablesInLayer = new ArrayList<Vector3>();
+	private ArrayList<VectorI> valuablesInLayer = new ArrayList<VectorI>();
 	private int valuableIndex = 0;
 
 	private int layerOffset = 1;
@@ -79,7 +80,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 
 		boolean isOnEarth = (worldObj.provider.dimensionId == 0);
 
-		Vector3 minerVector = new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D);
+		Vector3 laserOutput = new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D);
 
 		if (currentState == STATE_WARMUP) { // warming up
 			delayTicksWarmup++;
@@ -104,10 +105,10 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				}
 				// show current layer
 				int age = Math.max(40, 5 * WarpDriveConfig.MINING_LASER_SCAN_DELAY_TICKS);
-				double xmax = xCoord + WarpDriveConfig.MINING_LASER_MAX_RADIUS + 1.0D;
-				double xmin = xCoord - WarpDriveConfig.MINING_LASER_MAX_RADIUS + 0.0D;
-				double zmax = zCoord + WarpDriveConfig.MINING_LASER_MAX_RADIUS + 1.0D;
-				double zmin = zCoord - WarpDriveConfig.MINING_LASER_MAX_RADIUS + 0.0D;
+				double xmax = xCoord + WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS + 1.0D;
+				double xmin = xCoord - WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS + 0.0D;
+				double zmax = zCoord + WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS + 1.0D;
+				double zmin = zCoord - WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS + 0.0D;
 				double y = currentLayer + 1.0D;
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmin, y, zmin), new Vector3(xmax, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmax, y, zmin), new Vector3(xmax, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
@@ -130,17 +131,17 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				// scan
 				scanLayer();
 				if (valuablesInLayer.size() > 0) {
-					int r = (int) Math.ceil(WarpDriveConfig.MINING_LASER_MAX_RADIUS / 2.0D);
+					int r = (int) Math.ceil(WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS / 2.0D);
 					int offset = (yCoord - currentLayer) % (2 * r);
 					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.MINING_LASER_SCAN_DELAY_TICKS));
 					double y = currentLayer + 1.0D;
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D),
+					PacketHandler.sendBeamPacket(worldObj, laserOutput, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D),
 							0.0F, 0.0F, 1.0F, age, 0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D),
+					PacketHandler.sendBeamPacket(worldObj, laserOutput, new Vector3(xCoord + r, y, zCoord + r - offset).translate(0.3D),
 							0.0F, 0.0F, 1.0F, age, 0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D),
+					PacketHandler.sendBeamPacket(worldObj, laserOutput, new Vector3(xCoord + r - offset, y, zCoord - r).translate(0.3D),
 							0.0F, 0.0F, 1.0F, age, 0, 50);
-					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D),
+					PacketHandler.sendBeamPacket(worldObj, laserOutput, new Vector3(xCoord - r, y, zCoord - r + offset).translate(0.3D),
 							0.0F, 0.0F, 1.0F, age, 0, 50);
 					worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:hilaser", 4F, 1F);
 					delayTicksMine = 0;
@@ -178,19 +179,18 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 					updateMetadata(BlockMiningLaser.ICON_MININGPOWERED);
 				}
 
-				// System.out.println("[ML] Mining: " + (valuableIndex + 1) +
-				// "/" + valuablesInLayer.size());
-				Vector3 valuable = valuablesInLayer.get(valuableIndex);
+				// System.out.println("[ML] Mining: " + (valuableIndex + 1) + "/" + valuablesInLayer.size());
+				VectorI valuable = valuablesInLayer.get(valuableIndex);
 				valuableIndex++;
 				// Mine valuable ore
-				Block block = worldObj.getBlock(valuable.intX(), valuable.intY(), valuable.intZ());
+				Block block = worldObj.getBlock(valuable.x, valuable.y, valuable.z);
 				// Skip if block is too hard or its empty block (check again in
 				// case it changed)
-				if (!canDig(block, valuable.intX(), valuable.intY(), valuable.intZ())) {
+				if (!canDig(block, valuable.x, valuable.y, valuable.z)) {
 					delayTicksMine = Math.round(WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS * 0.8F);
 				}
 				int age = Math.max(10, Math.round((4 + worldObj.rand.nextFloat()) * WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS));
-				PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).translate(0.5D), 1.0F, 1.0F,
+				PacketHandler.sendBeamPacket(worldObj, laserOutput, new Vector3(valuable.x, valuable.y, valuable.z).translate(0.5D), 1.0F, 1.0F,
 						0.0F, age, 0, 50);
 				worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 				harvestBlock(valuable);
@@ -240,15 +240,15 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		return false;
 	}
 
-	private void harvestBlock(Vector3 valuable) {
-		Block block = worldObj.getBlock(valuable.intX(), valuable.intY(), valuable.intZ());
-		int blockMeta = worldObj.getBlockMetadata(valuable.intX(), valuable.intY(), valuable.intZ());
+	private void harvestBlock(VectorI valuable) {
+		Block block = worldObj.getBlock(valuable.x, valuable.y, valuable.z);
+		int blockMeta = worldObj.getBlockMetadata(valuable.x, valuable.y, valuable.z);
 		if (block != null && (block instanceof BlockLiquid)) {
 			// Evaporate fluid
-			worldObj.playSoundEffect(valuable.intX() + 0.5D, valuable.intY() + 0.5D, valuable.intZ() + 0.5D, "random.fizz", 0.5F,
+			worldObj.playSoundEffect(valuable.x + 0.5D, valuable.y + 0.5D, valuable.z + 0.5D, "random.fizz", 0.5F,
 					2.6F + (worldObj.rand.nextFloat() - worldObj.rand.nextFloat()) * 0.8F);
 		} else {
-			List<ItemStack> stacks = getItemStackFromBlock(valuable.intX(), valuable.intY(), valuable.intZ(), block, blockMeta);
+			List<ItemStack> stacks = getItemStackFromBlock(valuable.x, valuable.y, valuable.z, block, blockMeta);
 			if (stacks != null) {
 				boolean overflow = false;
 				int qtyLeft = 0;
@@ -274,9 +274,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				}
 			}
 			// standard harvest block effect
-			worldObj.playAuxSFXAtEntity(null, 2001, valuable.intX(), valuable.intY(), valuable.intZ(), Block.getIdFromBlock(block) + (blockMeta << 12));
+			worldObj.playAuxSFXAtEntity(null, 2001, valuable.x, valuable.y, valuable.z, Block.getIdFromBlock(block) + (blockMeta << 12));
 		}
-		worldObj.setBlockToAir(valuable.intX(), valuable.intY(), valuable.intZ());
+		worldObj.setBlockToAir(valuable.x, valuable.y, valuable.z);
 	}
 
 	private IInventory findChest() {
@@ -416,10 +416,10 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		block = worldObj.getBlock(x, currentLayer, z);
 		if (canDig(block, x, currentLayer, z)) {
 			if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-				valuablesInLayer.add(new Vector3(x, currentLayer, z));
+				valuablesInLayer.add(new VectorI(x, currentLayer, z));
 			}
 		}
-		for (radius = 1; radius <= WarpDriveConfig.MINING_LASER_MAX_RADIUS; radius++) {
+		for (radius = 1; radius <= WarpDriveConfig.MINING_LASER_RADIUS_BLOCKS; radius++) {
 			xmax = xCoord + radius;
 			xmin = xCoord - radius;
 			zmax = zCoord + radius;
@@ -430,7 +430,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
 					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-						valuablesInLayer.add(new Vector3(x, currentLayer, z));
+						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
 			}
@@ -440,7 +440,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
 					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-						valuablesInLayer.add(new Vector3(x, currentLayer, z));
+						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
 			}
@@ -450,7 +450,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
 					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-						valuablesInLayer.add(new Vector3(x, currentLayer, z));
+						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
 			}
@@ -460,7 +460,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
 					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-						valuablesInLayer.add(new Vector3(x, currentLayer, z));
+						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
 			}
@@ -470,7 +470,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
 					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
-						valuablesInLayer.add(new Vector3(x, currentLayer, z));
+						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
 			}

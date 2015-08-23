@@ -5,14 +5,15 @@ import java.util.LinkedList;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.WarpDriveConfig;
-import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.data.VectorI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
-	Boolean active = false;
+	private boolean active = false;
 
 	private int mode = 0;
 	private boolean doLeaves = false;
@@ -30,11 +31,12 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	private int radiusX = radiusDefault;
 	private int radiusZ = radiusDefault;
 
-	LinkedList<Vector3> logs;
+	LinkedList<VectorI> logs;
 	private int logIndex = 0;
 
 	public TileEntityLaserTreeFarm() {
 		super();
+		laserOutputSide = ForgeDirection.UP;
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
 		peripheralName = "warpdriveLaserTreefarm";
@@ -72,8 +74,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						mode = 0;
 						return;
 					}
-					Vector3 pos = logs.get(logIndex);
-					Block block = worldObj.getBlock(pos.intX(), pos.intY(), pos.intZ());
+					VectorI pos = logs.get(logIndex);
+					Block block = worldObj.getBlock(pos.x, pos.y, pos.z);
 
 					if (mode == 1) {
 						int cost = calculateBlockCost(block);
@@ -101,7 +103,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						if (consumeEnergyFromBooster(cost, true)) {
 							if (isRoomForHarvest()) {
 								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_rubberWood.getItem()))) {
-									int metadata = worldObj.getBlockMetadata(pos.intX(), pos.intY(), pos.intZ());
+									int metadata = worldObj.getBlockMetadata(pos.x, pos.y, pos.z);
 									if (metadata >= 2 && metadata <= 5) {
 										if (WarpDriveConfig.LOGGING_COLLECTION) {
 											WarpDrive.logger.info("wetspot found");
@@ -110,7 +112,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
 											resin.stackSize = (int) Math.round(Math.random() * 4);
 											dumpToInv(resin);
-											worldObj.setBlockMetadataWithNotify(pos.intX(), pos.intY(), pos.intZ(), metadata+6, 3);
+											worldObj.setBlockMetadataWithNotify(pos.x, pos.y, pos.z, metadata + 6, 3);
 											laserBlock(pos);
 											totalHarvested++;
 											delayMul = 4;
@@ -155,33 +157,28 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		return WarpDriveConfig.minerLeaves.contains(block);
 	}
 
-	private static void addTree(LinkedList<Vector3> list, Vector3 newTree) {
+	private static void addTree(LinkedList<VectorI> list, VectorI newTree) {
 		if (WarpDriveConfig.LOGGING_COLLECTION) {
 			WarpDrive.logger.info("Adding tree position:" + newTree.x + "," + newTree.y + "," + newTree.z);
 		}
 		list.add(newTree);
 	}
 
-	private LinkedList<Vector3> scanTrees() {
-		int xmax, zmax, x1, x2, z1, z2;
+	private LinkedList<VectorI> scanTrees() {
+		int xmax, zmax;
 		int xmin, zmin;
-		x1 = xCoord + radiusX;
-		x2 = xCoord - radiusX;
-		xmin = Math.min(x1, x2);
-		xmax = Math.max(x1, x2);
-
-		z1 = zCoord + radiusZ;
-		z2 = zCoord - radiusZ;
-		zmin = Math.min(z1, z2);
-		zmax = Math.max(z1, z2);
-
-		LinkedList<Vector3> logPositions = new LinkedList<Vector3>();
-
+		xmax = xCoord + radiusX;
+		xmin = xCoord - radiusX;
+		zmax = zCoord + radiusZ;
+		zmin = zCoord - radiusZ;
+		
+		LinkedList<VectorI> logPositions = new LinkedList<VectorI>();
+		
 		for(int x = xmin; x <= xmax; x++) {
 			for(int z = zmin; z <= zmax; z++) {
 				Block block = worldObj.getBlock(x, yCoord, z);
 				if (isLog(block)) {
-					Vector3 pos = new Vector3(x, yCoord, z);
+					VectorI pos = new VectorI(x, yCoord, z);
 					logPositions.add(pos);
 					scanNearby(logPositions, x, yCoord, z, 0);
 				}
@@ -190,14 +187,14 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		return logPositions;
 	}
 
-	private void scanNearby(LinkedList<Vector3> current, int x, int y, int z, int d) {
+	private void scanNearby(LinkedList<VectorI> current, int x, int y, int z, int d) {
 		int[] deltas = {0, -1, 1};
 		for(int dx : deltas) {
 			for(int dy = 1; dy >= 0; dy--) {
 				for(int dz : deltas) {
 					Block block = worldObj.getBlock(x + dx, y + dy, z + dz);
 					if (isLog(block) || (doLeaves && isLeaf(block))) {
-						Vector3 pos = new Vector3(x + dx, y + dy, z + dz);
+						VectorI pos = new VectorI(x + dx, y + dy, z + dz);
 						if (!current.contains(pos)) {
 							addTree(current, pos);
 							if (d < 35) {
@@ -341,11 +338,6 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	protected int maxFortune() {
 		return 0;
-	}
-
-	@Override
-	protected double laserBelow() {
-		return -0.5;
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.MovingEntity;
 import cr0s.warpdrive.data.Planet;
 import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.data.VectorI;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
 public class EntityJump extends Entity {
@@ -347,7 +348,7 @@ public class EntityJump extends Entity {
 				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
 				if (worldObj.provider.dimensionId == transitionPlane.dimensionId) {
 					planeFound = true;
-					int planeDistance = transitionPlane.isValidToSpace(new Vector3(this));
+					int planeDistance = transitionPlane.isValidToSpace(new VectorI(this));
 					if (planeDistance == 0) {
 						planeValid = true;
 						moveX = transitionPlane.spaceCenterX - transitionPlane.dimensionCenterX;
@@ -386,7 +387,7 @@ public class EntityJump extends Entity {
 			Planet closestTransitionPlane = null;
 			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
 				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
-				int planeDistance = transitionPlane.isValidFromSpace(new Vector3(this));
+				int planeDistance = transitionPlane.isValidFromSpace(new VectorI(this));
 				if (planeDistance == 0) {
 					planeFound = true;
 					moveX = transitionPlane.dimensionCenterX - transitionPlane.spaceCenterX;

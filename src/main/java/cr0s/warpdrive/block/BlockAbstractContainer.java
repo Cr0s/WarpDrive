@@ -65,9 +65,9 @@ public abstract class BlockAbstractContainer extends BlockContainer {
 	@Override
 	public void onNeighborBlockChange(World w, int x, int y, int z, Block b) {
 		super.onNeighborBlockChange(w, x, y, z, b);
-		TileEntity te = w.getTileEntity(x, y, z);
-		if (te instanceof IBlockUpdateDetector) {
-			((IBlockUpdateDetector) te).updatedNeighbours();
+		TileEntity tileEntity = w.getTileEntity(x, y, z);
+		if (tileEntity instanceof IBlockUpdateDetector) {
+			((IBlockUpdateDetector) tileEntity).updatedNeighbours();
 		}
 	}
 }

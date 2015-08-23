@@ -212,7 +212,40 @@ public class Vector3 implements Cloneable {
 		this.z += par1;
 		return this;
 	}
-
+	
+	// modify current vector by translation of amount block in side direction
+	public Vector3 translate(final ForgeDirection side, final double amount) {
+		switch (side) {
+		case DOWN:
+			y -= amount;
+			break;
+		case UP:
+			y += amount;
+			break;
+		case NORTH:
+			z -= amount;
+			break;
+		case SOUTH:
+			z += amount;
+			break;
+		case WEST:
+			x -= amount;
+			break;
+		case EAST:
+			x += amount;
+		}
+		
+		return this;
+	}
+	
+	// modify current vector by translation of 1 block in side direction
+	public Vector3 translate(final ForgeDirection side) {
+		x += side.offsetX;
+		y += side.offsetY;
+		z += side.offsetZ;
+		return this;
+	}
+	
 	public static Vector3 translate(Vector3 translate, Vector3 par1) {
 		translate.x += par1.x;
 		translate.y += par1.y;
@@ -226,7 +259,7 @@ public class Vector3 implements Cloneable {
 		translate.z += par1;
 		return translate;
 	}
-
+	
 	public Vector3 subtract(Vector3 amount) {
 		return this.translate(amount.clone().invert());
 	}
