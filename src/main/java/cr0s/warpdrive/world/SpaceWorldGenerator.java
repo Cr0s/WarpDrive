@@ -9,10 +9,12 @@ import net.minecraft.world.chunk.IChunkProvider;
 import cpw.mods.fml.common.IWorldGenerator;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.MetaBlock;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.conf.structures.DeployableStructure;
 import cr0s.warpdrive.conf.structures.Orb;
 import cr0s.warpdrive.conf.structures.StructureManager;
+import cr0s.warpdrive.conf.structures.Orb.OrbShell;
 
 /**
  * @author Cr0s
@@ -345,22 +347,19 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
 					// Place blocks
 					// cheat by using axial symmetry so we don't create random numbers too frequently
-
-					world.setBlock(xCoord + x, yCoord + y, zCoord + z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord - x, yCoord + y, zCoord + z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord + x, yCoord - y, zCoord + z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord + x, yCoord + y, zCoord - z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord - x, yCoord - y, zCoord + z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord + x, yCoord - y, zCoord - z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord - x, yCoord + y, zCoord - z, orb.getBlockForRadius(rand, dSq), 0, 2);
-					world.setBlock(xCoord - x, yCoord - y, zCoord - z, orb.getBlockForRadius(rand, dSq), 0, 2);
 					
+					OrbShell orbShell = orb.getShellForRadius(dSq);
+					MetaBlock metablock = orbShell.getRandomBlock(rand);
+					world.setBlock(xCoord + x, yCoord + y, zCoord + z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord - x, yCoord + y, zCoord + z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord + x, yCoord - y, zCoord + z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord + x, yCoord + y, zCoord - z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord - x, yCoord - y, zCoord + z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord + x, yCoord - y, zCoord - z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord - x, yCoord + y, zCoord - z, metablock.block, metablock.metadata, 2);
+					world.setBlock(xCoord - x, yCoord - y, zCoord - z, metablock.block, metablock.metadata, 2);
 				}
 			}
 		}
-	}
-
-	private static double lengthSq(double x, double y, double z) {
-		return (x * x) + (y * y) + (z * z);
 	}
 }

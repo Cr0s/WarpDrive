@@ -8,7 +8,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.MetaBlock;
 import cr0s.warpdrive.conf.structures.Orb;
+import cr0s.warpdrive.conf.structures.Orb.OrbShell;
 import cr0s.warpdrive.data.JumpBlock;
 
 /*
@@ -61,7 +63,6 @@ public final class EntitySphereGen extends Entity {
 	private int pregenSize = 0;
 	
 	private ArrayList<JumpBlock> blocks;
-	private int defaultMeta;
 	private Orb orb;
 	private boolean replace;
 	
@@ -162,21 +163,30 @@ public final class EntitySphereGen extends Entity {
 					int rad = (int) Math.ceil(dSq);
 					
 					// Add blocks to memory
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord + x, yCoord + y, zCoord + z));
+					OrbShell orbShell = orb.getShellForRadius(rad);
+					MetaBlock metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord + y, zCoord + z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord - x, yCoord + y, zCoord + z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord + y, zCoord + z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord + x, yCoord - y, zCoord + z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord - y, zCoord + z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord + x, yCoord + y, zCoord - z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord + y, zCoord - z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord - x, yCoord - y, zCoord + z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord - y, zCoord + z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord + x, yCoord - y, zCoord - z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord - y, zCoord - z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord - x, yCoord + y, zCoord - z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord + y, zCoord - z));
 					
-					addBlock(new JumpBlock(orb.getBlockForRadius(rand, rad), defaultMeta, xCoord - x, yCoord - y, zCoord - z));
+					metablock = orbShell.getRandomBlock(rand);
+					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord - y, zCoord - z));
 				}
 			}
 		}

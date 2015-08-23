@@ -93,11 +93,6 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 		return shellRelative[r];
 	}
 
-	public MetaBlock getBlockForRadius(Random rand, int r) {
-		return shellRelative[r].getRandomBlock(rand);
-
-	}
-
 	public class OrbShell extends FillerSet {
 
 		private int thickness;
