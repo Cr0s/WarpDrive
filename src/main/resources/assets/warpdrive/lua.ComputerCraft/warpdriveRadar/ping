@@ -6,7 +6,7 @@ end
 function error(message)
   term.setBackgroundColor(colors.red)
   term.setTextColor(colors.white)
-  term.write("No radar detected")
+  term.write(message)
   term.setBackgroundColor(colors.black)
   term.setTextColor(colors.white)
   print()
