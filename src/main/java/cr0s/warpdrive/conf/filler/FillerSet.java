@@ -26,6 +26,14 @@ public class FillerSet implements XmlRepresentable, Comparable {
 	private FillerFactory factory;
 	private String name;
 
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return name;
+	}
+
 	public FillerSet(MetaBlock[] blocks) {
 		weightedFillerBlocks = blocks;
 	}
