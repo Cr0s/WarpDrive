@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf.structures;
+package cr0s.warpdrive.conf.filler;
 
 import java.util.Random;
 
@@ -13,6 +13,10 @@ public class FillerSet implements XmlRepresentable {
 
 	private MetaBlock[] weightedFillerBlocks;
 
+	public FillerSet(MetaBlock[] blocks) {
+		weightedFillerBlocks = blocks;
+	}
+
 	public FillerSet() {
 		//To prevent getting rand.nextInt(0)
 		weightedFillerBlocks = new MetaBlock[1];
@@ -24,15 +28,15 @@ public class FillerSet implements XmlRepresentable {
 
 	@Override
 	public void loadFromXmlElement(Element e) throws InvalidXmlException {
-		// TODO Auto-generated method stub
 		
-	}
+		FillerFactory fact = new FillerFactory();
 
-	@Override
-	public void saveToXmlElement(Element e, Document d) throws InvalidXmlException {
-		// TODO Not really needed
-		
 	}
 	
+	@Override
+	public void saveToXmlElement(Element e, Document d) throws InvalidXmlException {
+		// Unneded
+
+	}
 
 }

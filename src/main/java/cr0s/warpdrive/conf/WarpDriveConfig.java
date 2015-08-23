@@ -23,6 +23,7 @@ import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.filler.FillerManager;
 import cr0s.warpdrive.conf.structures.StructureManager;
 import cr0s.warpdrive.data.TransitionPlane;
 

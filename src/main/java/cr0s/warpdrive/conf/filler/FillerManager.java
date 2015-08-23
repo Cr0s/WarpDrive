@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf;
+package cr0s.warpdrive.conf.filler;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -17,6 +17,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.conf.InvalidXmlException;
+import cr0s.warpdrive.conf.ModRequirementChecker;
+import cr0s.warpdrive.conf.WarpDriveConfig;
 
 public class FillerManager {
 	
