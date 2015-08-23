@@ -7,6 +7,12 @@ import net.minecraft.block.Block;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.MetaBlock;
 
+/**
+ * Used for constructing FillerSets from a combination of Weights and Ratios
+ * 
+ * @author TheNumenorean
+ *
+ */
 public class FillerFactory {
 	
 	private String name;
@@ -20,6 +26,9 @@ public class FillerFactory {
 	private Object lock;
 	
 
+	/**
+	 * Initializes new FillerFactory
+	 */
 	public FillerFactory() {
 		lock = new Object();
 		init();
@@ -36,6 +45,13 @@ public class FillerFactory {
 		totalWeightNeeded = 0;
 		totalWeightWeightedBlocks = 0;
 		
+	}
+	
+	/**
+	 * Resets to how this factory was at the start, and ready to create a new FillerSet
+	 */
+	public void reset() {
+		init();
 	}
 	
 	/**
