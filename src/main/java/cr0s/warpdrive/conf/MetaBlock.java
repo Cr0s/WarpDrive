@@ -50,7 +50,8 @@ public class MetaBlock implements Comparable {
 	
 	@Override
 	public int compareTo(Object o) {
-		return block.getUnlocalizedName().compareTo(((MetaBlock) o).block.getUnlocalizedName());
+		int strComp = block.getUnlocalizedName().compareTo(((MetaBlock) o).block.getUnlocalizedName());
+		return strComp != 0 ? strComp : metadata - ((MetaBlock) o).metadata;
 	}
 
 	@Override
