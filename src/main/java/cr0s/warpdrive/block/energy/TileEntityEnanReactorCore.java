@@ -77,15 +77,15 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		}
 
 		int side = from.ordinal() - 2;
-		if (containedEnergy > WarpDriveConfig.PR_TICK_TIME * PR_MIN_GENERATION * 100) {
-			double amountToIncrease = WarpDriveConfig.PR_TICK_TIME
-					* Math.max(PR_MIN_INSTABILITY, PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.PR_MAX_ENERGY, 0.1));
+		if (containedEnergy > WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS * PR_MIN_GENERATION * 100) {
+			double amountToIncrease = WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS
+					* Math.max(PR_MIN_INSTABILITY, PR_MAX_INSTABILITY * Math.pow((worldObj.rand.nextDouble() * containedEnergy) / WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED, 0.1));
 			if (WarpDriveConfig.LOGGING_ENERGY) {
 				WarpDrive.logger.info("InsInc" + amountToIncrease);
 			}
 			instabilityValues[side] += amountToIncrease * (isNatural ? 1.0D : 0.25D);
 		} else {
-			double amountToDecrease = WarpDriveConfig.PR_TICK_TIME * Math.max(PR_MIN_INSTABILITY, instabilityValues[side] * 0.02D);
+			double amountToDecrease = WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS * Math.max(PR_MIN_INSTABILITY, instabilityValues[side] * 0.02D);
 			instabilityValues[side] = Math.max(0.0D, instabilityValues[side] - amountToDecrease);
 		}
 	}
@@ -110,7 +110,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			return;
 		}
 
-		lasersReceived = Math.min(10.0F, lasersReceived + 1F / WarpDriveConfig.PR_MAX_LASERS);
+		lasersReceived = Math.min(10.0F, lasersReceived + 1F / WarpDriveConfig.ENAN_REACTOR_MAX_LASERS_PER_SECOND);
 		double nospamFactor = 1.0;
 		if (lasersReceived > 1.0F) {
 			nospamFactor = 0.5;
@@ -145,16 +145,16 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		}
 
 		if (active) {// producing, instability increase output, you want to take the risk
-			int amountToGenerate = (int) Math.ceil(WarpDriveConfig.PR_TICK_TIME * (0.5D + stabilityOffset)
-					* (PR_MIN_GENERATION + PR_MAX_GENERATION * Math.pow(containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY, 0.6D)));
-			containedEnergy = Math.min(containedEnergy + amountToGenerate, WarpDriveConfig.PR_MAX_ENERGY);
-			lastGenerationRate = amountToGenerate / WarpDriveConfig.PR_TICK_TIME;
+			int amountToGenerate = (int) Math.ceil(WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS * (0.5D + stabilityOffset)
+					* (PR_MIN_GENERATION + PR_MAX_GENERATION * Math.pow(containedEnergy / (double) WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED, 0.6D)));
+			containedEnergy = Math.min(containedEnergy + amountToGenerate, WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED);
+			lastGenerationRate = amountToGenerate / WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS;
 			if (WarpDriveConfig.LOGGING_ENERGY) {
 				WarpDrive.logger.info("Generated " + amountToGenerate);
 			}
 		} else {// decaying over 20s without producing power, you better have
 			// power for those lasers
-			int amountToDecay = (int) (WarpDriveConfig.PR_TICK_TIME * (1.0D - stabilityOffset) * (PR_MIN_GENERATION + containedEnergy * 0.01D));
+			int amountToDecay = (int) (WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS * (1.0D - stabilityOffset) * (PR_MIN_GENERATION + containedEnergy * 0.01D));
 			containedEnergy = Math.max(0, containedEnergy - amountToDecay);
 			lastGenerationRate = 0;
 			if (WarpDriveConfig.LOGGING_ENERGY) {
@@ -179,7 +179,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 
 		lasersReceived = Math.max(0.0F, lasersReceived - 0.05F);
 		tickCount++;
-		if (tickCount < WarpDriveConfig.PR_TICK_TIME) {
+		if (tickCount < WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS) {
 			return;
 		}
 		tickCount = 0;
@@ -206,7 +206,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 
 	private void explode() {
 		// remove blocks randomly up to x blocks around (breaking whatever protection is there)
-		double normalizedEnergy = containedEnergy / (double) WarpDriveConfig.PR_MAX_ENERGY;
+		double normalizedEnergy = containedEnergy / (double) WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED;
 		int radius = (int) Math.round(PR_MAX_EXPLOSION_RADIUS * Math.pow(normalizedEnergy, 0.125));
 		double c = PR_MAX_EXPLOSION_REMOVAL_CHANCE * Math.pow(normalizedEnergy, 0.125);
 		if (WarpDriveConfig.LOGGING_ENERGY) {
@@ -245,7 +245,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			}
 		}
 		int instabilityNibble = (int) Math.max(0, Math.min(3, Math.round(maxInstability / 25.0D)));
-		int energyNibble = (int) Math.max(0, Math.min(3, Math.round(4.0D * containedEnergy / WarpDriveConfig.PR_MAX_ENERGY)));
+		int energyNibble = (int) Math.max(0, Math.min(3, Math.round(4.0D * containedEnergy / WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED)));
 
 		int metadata = 4 * instabilityNibble + energyNibble;
 		if (getBlockMetadata() != metadata) {
@@ -404,7 +404,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 				return active(arguments);
 
 			} else if (methodName.equals("energy")) {
-				return new Object[] { containedEnergy, WarpDriveConfig.PR_MAX_ENERGY, releasedLastCycle / WarpDriveConfig.PR_TICK_TIME };
+				return new Object[] { containedEnergy, WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED, releasedLastCycle / WarpDriveConfig.ENAN_REACTOR_UPDATE_INTERVAL_TICKS };
 
 			} else if (methodName.equals("instability")) {
 				Object[] retVal = new Object[4];
@@ -489,7 +489,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 
 	@Override
 	public int getMaxEnergyStored() {
-		return convertRFtoInternal(WarpDriveConfig.PR_MAX_ENERGY);
+		return convertRFtoInternal(WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED);
 	}
 
 	// Forge overrides

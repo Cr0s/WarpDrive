@@ -71,10 +71,10 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractLaser {
 				if (item != null) {
 					if(item.getItem() instanceof ItemIC2reactorLaserFocus) {
 						int heat = item.getItemDamage();
-						int heatRemoval = (int) Math.floor(Math.min(getEnergyStored() / WarpDriveConfig.RM_EU_PER_HEAT, heat));
+						int heatRemoval = (int) Math.floor(Math.min(getEnergyStored() / WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT, heat));
 						if (heatRemoval > 0) {
 							didCoolReactor = true;
-							consumeEnergy((int) Math.ceil(heatRemoval * WarpDriveConfig.RM_EU_PER_HEAT), false);
+							consumeEnergy((int) Math.ceil(heatRemoval * WarpDriveConfig.IC2_REACTOR_ENERGY_PER_HEAT), false);
 							item.setItemDamage(heat - heatRemoval);
 						}
 					}
@@ -134,7 +134,7 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractLaser {
 
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.RM_MAX_ENERGY;
+		return WarpDriveConfig.IC2_REACTOR_MAX_ENERGY_STORED;
 	}
 
 	@Override

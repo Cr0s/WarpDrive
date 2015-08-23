@@ -84,7 +84,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		if (currentState == STATE_WARMUP) { // warming up
 			delayTicksWarmup++;
 			updateMetadata(BlockMiningLaser.ICON_SCANNINGLOWPOWER);
-			if (delayTicksWarmup >= WarpDriveConfig.ML_WARMUP_DELAY_TICKS) {
+			if (delayTicksWarmup >= WarpDriveConfig.MINING_LASER_WARMUP_DELAY_TICKS) {
 				delayTicksScan = 0;
 				currentState = STATE_SCANNING;
 				updateMetadata(BlockMiningLaser.ICON_SCANNINGLOWPOWER);
@@ -94,7 +94,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			delayTicksScan++;
 			if (delayTicksScan == 1) {
 				// check power level
-				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE, true);
+				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.MINING_LASER_PLANET_ENERGY_PER_LAYER : WarpDriveConfig.MINING_LASER_SPACE_ENERGY_PER_LAYER, true);
 				if (!enoughPower) {
 					updateMetadata(BlockMiningLaser.ICON_SCANNINGLOWPOWER);
 					delayTicksScan = 0;
@@ -103,24 +103,24 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 					updateMetadata(BlockMiningLaser.ICON_SCANNINGPOWERED);
 				}
 				// show current layer
-				int age = Math.max(40, 5 * WarpDriveConfig.ML_SCAN_DELAY_TICKS);
-				double xmax = xCoord + WarpDriveConfig.ML_MAX_RADIUS + 1.0D;
-				double xmin = xCoord - WarpDriveConfig.ML_MAX_RADIUS + 0.0D;
-				double zmax = zCoord + WarpDriveConfig.ML_MAX_RADIUS + 1.0D;
-				double zmin = zCoord - WarpDriveConfig.ML_MAX_RADIUS + 0.0D;
+				int age = Math.max(40, 5 * WarpDriveConfig.MINING_LASER_SCAN_DELAY_TICKS);
+				double xmax = xCoord + WarpDriveConfig.MINING_LASER_MAX_RADIUS + 1.0D;
+				double xmin = xCoord - WarpDriveConfig.MINING_LASER_MAX_RADIUS + 0.0D;
+				double zmax = zCoord + WarpDriveConfig.MINING_LASER_MAX_RADIUS + 1.0D;
+				double zmin = zCoord - WarpDriveConfig.MINING_LASER_MAX_RADIUS + 0.0D;
 				double y = currentLayer + 1.0D;
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmin, y, zmin), new Vector3(xmax, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmax, y, zmin), new Vector3(xmax, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmax, y, zmax), new Vector3(xmin, y, zmax), 0.3F, 0.0F, 1.0F, age, 0, 50);
 				PacketHandler.sendBeamPacket(worldObj, new Vector3(xmin, y, zmax), new Vector3(xmin, y, zmin), 0.3F, 0.0F, 1.0F, age, 0, 50);
-			} else if (delayTicksScan >= WarpDriveConfig.ML_SCAN_DELAY_TICKS) {
+			} else if (delayTicksScan >= WarpDriveConfig.MINING_LASER_SCAN_DELAY_TICKS) {
 				delayTicksScan = 0;
 				if (currentLayer <= 0) {
 					stop();
 					return;
 				}
 				// consume power
-				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE, false);
+				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.MINING_LASER_PLANET_ENERGY_PER_LAYER : WarpDriveConfig.MINING_LASER_SPACE_ENERGY_PER_LAYER, false);
 				if (!enoughPower) {
 					updateMetadata(BlockMiningLaser.ICON_SCANNINGLOWPOWER);
 					return;
@@ -130,9 +130,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				// scan
 				scanLayer();
 				if (valuablesInLayer.size() > 0) {
-					int r = (int) Math.ceil(WarpDriveConfig.ML_MAX_RADIUS / 2.0D);
+					int r = (int) Math.ceil(WarpDriveConfig.MINING_LASER_MAX_RADIUS / 2.0D);
 					int offset = (yCoord - currentLayer) % (2 * r);
-					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.ML_SCAN_DELAY_TICKS));
+					int age = Math.max(20, Math.round(2.5F * WarpDriveConfig.MINING_LASER_SCAN_DELAY_TICKS));
 					double y = currentLayer + 1.0D;
 					PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(xCoord - r + offset, y, zCoord + r).translate(0.3D),
 							0.0F, 0.0F, 1.0F, age, 0, 50);
@@ -154,7 +154,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			}
 		} else if (currentState == STATE_MINING) { // mining
 			delayTicksMine++;
-			if (delayTicksMine >= WarpDriveConfig.ML_MINE_DELAY_TICKS) {
+			if (delayTicksMine >= WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS) {
 				delayTicksMine = 0;
 
 				if (valuableIndex >= valuablesInLayer.size()) {
@@ -170,7 +170,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				}
 
 				// consume power
-				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE, false);
+				enoughPower = consumeEnergyPacketFromBooster(isOnEarth ? WarpDriveConfig.MINING_LASER_PLANET_ENERGY_PER_BLOCK : WarpDriveConfig.MINING_LASER_SPACE_ENERGY_PER_BLOCK, false);
 				if (!enoughPower) {
 					updateMetadata(BlockMiningLaser.ICON_MININGLOWPOWER);
 					return;
@@ -187,9 +187,9 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				// Skip if block is too hard or its empty block (check again in
 				// case it changed)
 				if (!canDig(block, valuable.intX(), valuable.intY(), valuable.intZ())) {
-					delayTicksMine = Math.round(WarpDriveConfig.ML_MINE_DELAY_TICKS * 0.8F);
+					delayTicksMine = Math.round(WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS * 0.8F);
 				}
-				int age = Math.max(10, Math.round((4 + worldObj.rand.nextFloat()) * WarpDriveConfig.ML_MINE_DELAY_TICKS));
+				int age = Math.max(10, Math.round((4 + worldObj.rand.nextFloat()) * WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS));
 				PacketHandler.sendBeamPacket(worldObj, minerVector, new Vector3(valuable.intX(), valuable.intY(), valuable.intZ()).translate(0.5D), 1.0F, 1.0F,
 						0.0F, age, 0, 50);
 				worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
@@ -323,7 +323,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				e.printStackTrace();
 			}
 			if (isSilkHarvestable) {
-				if (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0) {
+				if (WarpDriveConfig.MINING_LASER_SILKTOUCH_DEUTERIUM_L <= 0) {
 					ArrayList<ItemStack> isBlock = new ArrayList<ItemStack>();
 					isBlock.add(new ItemStack(block, 1, blockMeta));
 					return isBlock;
@@ -419,7 +419,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 				valuablesInLayer.add(new Vector3(x, currentLayer, z));
 			}
 		}
-		for (radius = 1; radius <= WarpDriveConfig.ML_MAX_RADIUS; radius++) {
+		for (radius = 1; radius <= WarpDriveConfig.MINING_LASER_MAX_RADIUS; radius++) {
 			xmax = xCoord + radius;
 			xmin = xCoord - radius;
 			zmax = zCoord + radius;
@@ -617,7 +617,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		delayTicksWarmup = 0;
 		currentState = STATE_WARMUP;
 		currentLayer = yCoord - layerOffset - 1;
-		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.MINING_LASER_SILKTOUCH_DEUTERIUM_L <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
 		return new Boolean[] { true };
 	}
 
@@ -630,7 +630,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		delayTicksScan = 0;
 		currentState = STATE_WARMUP;
 		currentLayer = yCoord - layerOffset - 1;
-		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.ML_DEUTERIUM_MUL_SILKTOUCH <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
+		enableSilktouch = (arguments.length == 1 && (WarpDriveConfig.MINING_LASER_SILKTOUCH_DEUTERIUM_L <= 0 || FluidRegistry.isFluidRegistered("deuterium")));
 		return new Boolean[] { true };
 	}
 

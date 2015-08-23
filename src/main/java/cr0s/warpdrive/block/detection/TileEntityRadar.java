@@ -195,7 +195,7 @@ public class TileEntityRadar extends TileEntityAbstractEnergy {
 
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.WR_MAX_ENERGY_VALUE;
+		return WarpDriveConfig.RADAR_MAX_ENERGY_STORED;
 	}
 
     @Override

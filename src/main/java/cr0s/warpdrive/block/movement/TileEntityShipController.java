@@ -47,7 +47,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 
     boolean ready = false;                // Ready to operate (valid assembly)
 
-    private final int updateInterval_ticks = 20 * WarpDriveConfig.WC_CONTROLLER_UPDATE_INTERVAL_SECONDS;
+    private final int updateInterval_ticks = 20 * WarpDriveConfig.SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS;
     private int updateTicks = updateInterval_ticks;
     private int bootTicks = 20;
 
@@ -139,7 +139,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
     private void doJump() {
         if (core != null) {
             // Adding random ticks to warmup
-            core.randomWarmupAddition = worldObj.rand.nextInt(WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
+            core.randomWarmupAddition = worldObj.rand.nextInt(WarpDriveConfig.SHIP_WARMUP_RANDOM_TICKS);
         } else {
         	WarpDrive.logger.error(this + " doJump without a core");
         }
@@ -344,7 +344,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
     }
 
     private void setDistance(int distance) {
-        this.distance = Math.max(1, Math.min(WarpDriveConfig.WC_MAX_JUMP_DISTANCE, distance));
+        this.distance = Math.max(1, Math.min(WarpDriveConfig.SHIP_MAX_JUMP_DISTANCE, distance));
         if (WarpDriveConfig.LOGGING_JUMP) {
         	WarpDrive.logger.info(this + " Jump distance set to " + distance);
         }

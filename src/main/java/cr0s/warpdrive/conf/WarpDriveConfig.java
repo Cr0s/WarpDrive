@@ -19,6 +19,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Loader;
@@ -26,7 +27,7 @@ import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.conf.filler.FillerManager;
 import cr0s.warpdrive.conf.structures.StructureManager;
-import cr0s.warpdrive.data.TransitionPlane;
+import cr0s.warpdrive.data.Planet;
 
 public class WarpDriveConfig {
 	private static File configDirectory;
@@ -93,10 +94,10 @@ public class WarpDriveConfig {
 	public static String G_SCHEMALOCATION = "warpDrive_schematics";
 	public static int G_BLOCKS_PER_TICK = 3500;
 
-	public static boolean G_ENABLE_IC2_RECIPES = true;
-	public static boolean G_ENABLE_HARD_IC2_RECIPES = false;
-	public static boolean G_ENABLE_VANILLA_RECIPES = false;
-	public static boolean G_ENABLE_TDK_RECIPES = false;
+	public static boolean RECIPES_ENABLE_IC2 = true;
+	public static boolean RECIPES_ENABLE_HARD_IC2 = false;
+	public static boolean RECIPES_ENABLE_VANILLA = false;
+	public static boolean RECIPES_ENABLE_MIXED = false;
 	
 	// logging
 	public static boolean LOGGING_JUMP = false;
@@ -116,140 +117,142 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_WORLDGEN = false;
 
 	// Transition planes
-	public static TransitionPlane[] G_TRANSITIONPLANES = null;
+	public static Planet[] PLANETS = null;
 
 	// Warp Drive Core
-	public static int WC_MAX_ENERGY_VALUE = 100000000;
-	public static int WC_ENERGY_PER_BLOCK_MODE1 = 10;
-	public static int WC_ENERGY_PER_DISTANCE_MODE1 = 100;
-	public static int WC_ENERGY_PER_BLOCK_MODE2 = 1000;
-	public static int WC_ENERGY_PER_DISTANCE_MODE2 = 1000;
-	public static int WC_ENERGY_PER_ENTITY_TO_SPACE = 1000000;
-	public static int WC_MAX_JUMP_DISTANCE = 128;
-	public static int WC_MAX_SHIP_VOLUME_ON_SURFACE = 3000;
-	public static int WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = 1200;
-	public static int WC_MAX_SHIP_SIDE = 127;
-	public static int WC_COOLDOWN_INTERVAL_SECONDS = 30;
-	public static int WC_COLLISION_TOLERANCE_BLOCKS = 3;
-	public static int WC_WARMUP_SHORTJUMP_SECONDS = 10;
-	public static int WC_WARMUP_LONGJUMP_SECONDS = 30;
-	public static int WC_WARMUP_RANDOM_TICKS = 60;
-	public static int WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
-	public static int WC_CONTROLLER_UPDATE_INTERVAL_SECONDS = 2;
-	public static int WC_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
-	public static String[] WC_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
-	public static boolean WC_WARMUP_SICKNESS = true;
+	public static int SHIP_MAX_ENERGY_STORED = 100000000;
+	public static int SHIP_NORMALJUMP_ENERGY_PER_BLOCK = 10;
+	public static int SHIP_NORMALJUMP_ENERGY_PER_DISTANCE = 100;
+	public static int SHIP_HYPERJUMP_ENERGY_PER_BLOCK = 1000;
+	public static int SHIP_HYPERJUMP_ENERGY_PER_DISTANCE = 1000;
+	public static int SHIP_TELEPORT_ENERGY_PER_ENTITY = 1000000;
+	public static int SHIP_MAX_JUMP_DISTANCE = 128;
+	public static int SHIP_VOLUME_MAX_ON_PLANET_SURFACE = 3000;
+	public static int SHIP_VOLUME_MIN_FOR_HYPERSPACE = 1200;
+	public static int SHIP_MAX_SIDE_SIZE = 127;
+	public static int SHIP_COOLDOWN_INTERVAL_SECONDS = 30;
+	public static int SHIP_COLLISION_TOLERANCE_BLOCKS = 3;
+	public static int SHIP_SHORTJUMP_THRESHOLD_BLOCKS = 50;
+	public static int SHIP_SHORTJUMP_WARMUP_SECONDS = 10;
+	public static int SHIP_LONGJUMP_WARMUP_SECONDS = 30;
+	public static int SHIP_WARMUP_RANDOM_TICKS = 60;
+	public static int SHIP_CORE_REGISTRY_UPDATE_INTERVAL_SECONDS = 10;
+	public static int SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS = 2;
+	public static int SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
+	public static String[] SHIP_VOLUME_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
+	public static boolean SHIP_WARMUP_SICKNESS = true;
 
 	// Warp Radar
-	public static int WR_MAX_ENERGY_VALUE = 100000000; // 100kk eU
-	public static int WR_MAX_ISOLATION_RANGE = 2;
-	public static int WR_MIN_ISOLATION_BLOCKS = 5;
-	public static int WR_MAX_ISOLATION_BLOCKS = 132;
-	public static double WR_MIN_ISOLATION_EFFECT = 0.12;
-	public static double WR_MAX_ISOLATION_EFFECT = 1.00;
+	public static int RADAR_MAX_ENERGY_STORED = 100000000; // 100kk eU
+	public static int RADAR_MAX_ISOLATION_RANGE = 2;
+	public static int RADAR_MIN_ISOLATION_BLOCKS = 5;
+	public static int RADAR_MAX_ISOLATION_BLOCKS = 132;
+	public static double RADAR_MIN_ISOLATION_EFFECT = 0.12;
+	public static double RADAR_MAX_ISOLATION_EFFECT = 1.00;
 
 	// Ship Scanner
-	public static int SS_MAX_ENERGY_VALUE = 500000000;
+	public static int SS_MAX_ENERGY_STORED = 500000000;
 	public static int SS_EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume
 	// (including air)
 	public static int SS_EU_PER_BLOCK_DEPLOY = 5000;
 	public static int SS_MAX_DEPLOY_RADIUS_BLOCKS = 50;
 
 	// Particle Booster
-	public static int PB_MAX_ENERGY_VALUE = 100000;
+	public static int LASER_MEDIUM_MAX_ENERGY_STORED = 100000;
 
 	// Laser Emitter
-	public static int LE_MAX_BOOSTERS_NUMBER = 10;
-	public static int LE_MAX_LASER_ENERGY = 4000000;
-	public static int LE_EMIT_DELAY_TICKS = 20 * 3;
-	public static int LE_EMIT_SCAN_DELAY_TICKS = 10;
+	public static int LASER_CANNON_MAX_MEDIUMS_COUNT = 10;
+	public static int LASER_CANNON_MAX_LASER_ENERGY = 4000000;
+	public static int LASER_CANNON_EMIT_FIRE_DELAY_TICKS = 20 * 3;
+	public static int LASER_CANNON_EMIT_SCAN_DELAY_TICKS = 10;
 
-	public static double LE_COLLECT_ENERGY_MULTIPLIER = 0.60D;
-	public static int LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = 5000;
-	public static int LE_ENTITY_HIT_SET_ON_FIRE_TIME = 100;
-	public static int LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = 10000;
-	public static int LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = 1000000;
-	public static int LE_BLOCK_HIT_CONSUME_ENERGY = 70000;
-	public static int LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = 1000;
-	public static int LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = 10;
-
+	public static double LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY = 0.60D;
+	public static int LASER_CANNON_ENERGY_LOSS_PER_BLOCK = 5000;
+	public static int LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS = 100;
+	public static int LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = 10000;
+	public static int LASER_CANNON_ENTITY_HIT_MAX_DAMAGE = 100;
+	public static int LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION = 1000000;
+	public static float LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH = 4.0F;
+	public static int LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH = 125000;
+	public static float LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH = 4.0F;
+	
+	public static int LASER_CANNON_BLOCK_HIT_ENERGY = 70000;
+	public static int LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE = 1000;
+	public static int LASER_CANNON_BLOCK_HIT_ENERGY_PER_DISTANCE = 10;
+	public static double LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD = 1200.0D; // obsidian is 2000 * 3 / 5 = 1200
+	public static float LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH = 8.0F;
+	public static int LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH = 125000;
+	public static float LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH = 100F;
+	
 	// Mining Laser
 	// BuildCraft quarry values for reference
 	// - harvesting one block is 60 MJ/block = 600 RF/block = ~145 EU/block
 	// - maximum speed is 3.846 ticks per blocks
-	// - overall consumption varies from 81.801 to 184.608 MJ/block (depending
-	// on speed) = up to 1846.08 RF/block = up to ~448 EU/block
-	// - at radius 5, one layer takes ~465 ticks ((ML_MAX_RADIUS * 2 + 1) ^ 2 *
-	// 3.846)
-	// - overall consumption is ((ML_MAX_RADIUS * 2 + 1) ^ 2) * 448 => ~ 54208
-	// EU/layer
+	// - overall consumption varies from 81.801 to 184.608 MJ/block (depending on speed) = up to 1846.08 RF/block = up to ~448 EU/block
+	// - at radius 5, one layer takes ~465 ticks ((ML_MAX_RADIUS * 2 + 1) ^ 2 * 3.846)
+	// - overall consumption is ((ML_MAX_RADIUS * 2 + 1) ^ 2) * 448 => ~ 54208 EU/layer
 	// WarpDrive mining laser in comparison
 	// - each mined layer is scanned twice
 	// - default ore generation: 1 ore out of 25 blocks
-	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE /
-	// ((ML_MAX_RADIUS * 2 + 1) ^ 2) + ML_EU_PER_BLOCK_SPACE => ~ 356 EU/block
-	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE +
-	// ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE => ~ 43150 EU/layer
-	// - overall consumption in 'ores, space' is ML_EU_PER_LAYER_SPACE +
-	// ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE *
-	// ML_EU_MUL_ORESONLY / 25 => ~ 28630 EU/layer
-	// - at radius 5, one layer takes 403 ticks (2 * ML_SCAN_DELAY_TICKS +
-	// ML_MINE_DELAY_TICKS * (ML_MAX_RADIUS * 2 + 1) ^ 2)
-	public static int ML_MAX_BOOSTERS_NUMBER = 1;
-	public static int ML_WARMUP_DELAY_TICKS = 20;
-	public static int ML_SCAN_DELAY_TICKS = 20;
-	public static int ML_MINE_DELAY_TICKS = 3;
-	public static int ML_EU_PER_LAYER_SPACE = 25000;
-	public static int ML_EU_PER_LAYER_EARTH = 35000;
-	public static int ML_EU_PER_BLOCK_SPACE = 150;
-	public static int ML_EU_PER_BLOCK_EARTH = 300;
-	public static double ML_EU_MUL_ORESONLY = 5.0; // lower value encourages to
-	// keep the land 'clean'
-	public static double ML_EU_MUL_SILKTOUCH = 2.5;
-	public static double ML_DEUTERIUM_MUL_SILKTOUCH = 1.0;
-	public static double ML_EU_MUL_FORTUNE = 2.5;
-	public static int ML_MAX_RADIUS = 5;
-
+	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE / ((ML_MAX_RADIUS * 2 + 1) ^ 2) + ML_EU_PER_BLOCK_SPACE => ~ 356 EU/block
+	// - overall consumption in 'all, space' is ML_EU_PER_LAYER_SPACE + ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE => ~ 43150 EU/layer
+	// - overall consumption in 'ores, space' is ML_EU_PER_LAYER_SPACE + ((ML_MAX_RADIUS * 2 + 1) ^ 2) * ML_EU_PER_BLOCK_SPACE * ML_EU_MUL_ORESONLY / 25 => ~ 28630 EU/layer
+	// - at radius 5, one layer takes 403 ticks (2 * ML_SCAN_DELAY_TICKS + ML_MINE_DELAY_TICKS * (ML_MAX_RADIUS * 2 + 1) ^ 2)
+	public static int MINING_LASER_MAX_MEDIUMS_COUNT = 1;
+	public static int MINING_LASER_MAX_RADIUS = 16;
+	public static int MINING_LASER_WARMUP_DELAY_TICKS = 20;
+	public static int MINING_LASER_SCAN_DELAY_TICKS = 20;
+	public static int MINING_LASER_MINE_DELAY_TICKS = 3;
+	public static int MINING_LASER_SPACE_ENERGY_PER_LAYER = 25000;
+	public static int MINING_LASER_PLANET_ENERGY_PER_LAYER = 35000;
+	public static int MINING_LASER_SPACE_ENERGY_PER_BLOCK = 150;
+	public static int MINING_LASER_PLANET_ENERGY_PER_BLOCK = 300;
+	public static double MINING_LASER_ORESONLY_ENERGY_FACTOR = 5.0; // lower value encourages to keep the land 'clean'
+	public static double MINING_LASER_SILKTOUCH_ENERGY_FACTOR = 2.5;
+	public static double MINING_LASER_SILKTOUCH_DEUTERIUM_L = 1.0;
+	public static double MINING_LASER_FORTUNE_ENERGY_FACTOR = 2.5;
+	
 	// Tree farm
-	public static int TF_MAX_SIZE = 16;
-
-	// Cloaking device core
-	public static int CD_MAX_CLOAKING_FIELD_SIDE = 100;
-	public static int CD_ENERGY_PER_BLOCK_TIER1 = 125;
-	public static int CD_ENERGY_PER_BLOCK_TIER2 = 500;
-	public static int CD_FIELD_REFRESH_INTERVAL_SECONDS = 3;
-	public static int CD_COIL_CAPTURE_BLOCKS = 5;
-
+	public static int TREE_FARM_MIN_RADIUS = 5;
+	public static int TREE_FARM_MAX_RADIUS = 16;
+	
+	// Cloaking
+	public static int CLOAKING_MAX_ENERGY_STORED = 500000000;
+	public static int CLOAKING_COIL_CAPTURE_BLOCKS = 5;
+	public static int CLOAKING_MAX_FIELD_RADIUS = 100;
+	public static int CLOAKING_TIER1_ENERGY_PER_BLOCK = 125;
+	public static int CLOAKING_TIER2_ENERGY_PER_BLOCK = 500;
+	public static int CLOAKING_FIELD_REFRESH_INTERVAL_SECONDS = 3;
+	
 	// Air generator
-	public static int AG_RF_PER_CANISTER = 20;
-	public static int AG_EU_PER_NEWAIRBLOCK = 12;
-	public static int AG_EU_PER_EXISTINGAIRBLOCK = 4;
-	public static int AG_MAX_ENERGY = 4000;
-	public static int AG_AIR_GENERATION_TICKS = 40;
+	public static int AIRGEN_ENERGY_PER_CANISTER = 20;
+	public static int AIRGEN_ENERGY_PER_NEWAIRBLOCK = 12;
+	public static int AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK = 4;
+	public static int AIRGEN_MAX_ENERGY_STORED = 4000;
+	public static int AIRGEN_AIR_GENERATION_TICKS = 40;
 	
 	// IC2 Reactor monitor
-	public static int RM_MAX_ENERGY = 1000000;
-	public static double RM_EU_PER_HEAT = 2;
+	public static int IC2_REACTOR_MAX_ENERGY_STORED = 1000000;
+	public static double IC2_REACTOR_ENERGY_PER_HEAT = 2;
 
 	// Transporter
-	public static int TR_MAX_ENERGY = 1000000;
-	public static boolean TR_RELATIVE_COORDS = true;
-	public static double TR_EU_PER_METRE = 100.0;
-	// public static double TR_MAX_SCAN_RANGE = 4; FIXME: not used ?!?
-	public static double TR_MAX_BOOST_MUL = 4.0;
+	public static int TRANSPORTER_MAX_ENERGY = 1000000;
+	public static boolean TRANSPORTER_USE_RELATIVE_COORDS = true;
+	public static double TRANSPORTER_ENERGY_PER_BLOCK = 100.0;
+	public static double TRANSPORTER_MAX_BOOST_MUL = 4.0;
 
 	// Enantiomorphic Power reactor
-	public static int PR_MAX_ENERGY = 100000000;
-	public static int PR_TICK_TIME = 5;
-	public static int PR_MAX_LASERS = 6;
+	public static int ENAN_REACTOR_MAX_ENERGY_STORED = 100000000;
+	public static int ENAN_REACTOR_UPDATE_INTERVAL_TICKS = 5;
+	public static int ENAN_REACTOR_MAX_LASERS_PER_SECOND = 6;
 
 	// Power store
-	public static int PS_MAX_ENERGY = 1000000;
+	public static int ENERGY_BANK_MAX_ENERGY_STORED = 1000000;
 
 	// Laser Lift
-	public static int LL_MAX_ENERGY = 2400;
-	public static int LL_LIFT_ENERGY = 800;
-	public static int LL_TICK_RATE = 10;
+	public static int LIFT_MAX_ENERGY_STORED = 2400;
+	public static int LIFT_ENERGY_PER_ENTITY = 800;
+	public static int LIFT_UPDATE_INTERVAL_TICKS = 10;
 
 	// Chunk Loader
 	public static int CL_MAX_ENERGY = 1000000;
@@ -299,240 +302,351 @@ public class WarpDriveConfig {
 		});
 		if (files.length == 0) {
 			for(String defaultXMLfilename : defaultXMLfilenames) {
-				unpackResourceToFolder(defaultXMLfilename, "config/" + defaultXMLfilename, configDirectory);
+				unpackResourceToFolder(defaultXMLfilename, "config", configDirectory);
 			}
 		}
 		
 		FillerManager.loadOres(configDirectory);
 		StructureManager.loadStructures(configDirectory);
 	}
-
+	
 	public static void loadWarpDriveConfig(File file) {
 		Configuration config = new Configuration(file);
 		config.load();
 		
 		// General
-		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt();
-		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", G_SPACE_DIMENSION_ID, "Space dimension world ID").getInt();
-		G_HYPERSPACE_PROVIDER_ID = config.get("General", "hyperspace_provider_id", G_HYPERSPACE_PROVIDER_ID, "Hyperspace dimension provider ID").getInt();
-		G_HYPERSPACE_DIMENSION_ID = config.get("General", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID, "Hyperspace dimension world ID").getInt();
-		G_SPACE_WORLDBORDER_BLOCKS = config.get("General", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS,
-				"World border applied to hyperspace & space, set to 0 to disable it").getInt();
-		G_ENTITY_JUMP_ID = config.get("General", "entity_jump_id", G_ENTITY_JUMP_ID, "Entity jump ID").getInt();
-		G_ENTITY_SPHERE_GENERATOR_ID = config.get("General", "entity_sphere_generator_id", G_ENTITY_SPHERE_GENERATOR_ID, "Entity sphere generator ID").getInt();
-		G_ENTITY_STAR_CORE_ID = config.get("General", "entity_star_core_id", G_ENTITY_STAR_CORE_ID, "Entity star core ID").getInt();
-		G_ENTITY_CAMERA_ID = config.get("General", "entity_camera_id", G_ENTITY_CAMERA_ID, "Entity camera ID").getInt();
+		G_SPACE_PROVIDER_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt());
+		G_SPACE_DIMENSION_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "space_dimension_id", G_SPACE_DIMENSION_ID, "Space dimension world ID").getInt());
+		G_HYPERSPACE_PROVIDER_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "hyperspace_provider_id", G_HYPERSPACE_PROVIDER_ID, "Hyperspace dimension provider ID").getInt());
+		G_HYPERSPACE_DIMENSION_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "hyperspace_dimension_id", G_HYPERSPACE_DIMENSION_ID, "Hyperspace dimension world ID").getInt());
+		G_SPACE_WORLDBORDER_BLOCKS = clamp(0, 3000000,
+				config.get("general", "space_worldborder_blocks", G_SPACE_WORLDBORDER_BLOCKS,
+				"World border applied to hyperspace & space, set to 0 to disable it").getInt());
 		
-		G_LUA_SCRIPTS = config.get("General", "lua_scripts", G_LUA_SCRIPTS,
-				"LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt();
-		G_SCHEMALOCATION = config.get("General", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
-		G_BLOCKS_PER_TICK = config.get("General", "blocks_per_tick", G_BLOCKS_PER_TICK,
-				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt();
-
-		G_ENABLE_IC2_RECIPES = config.get("General", "enable_ic2_recipes", G_ENABLE_IC2_RECIPES, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
-		G_ENABLE_HARD_IC2_RECIPES = config.get("General", "enable_hard_ic2_recipes", G_ENABLE_HARD_IC2_RECIPES, "Harder recipes based on IC2 by YuRaNnNzZZ").getBoolean(false);
-		G_ENABLE_VANILLA_RECIPES = config.get("General", "enable_vanilla_recipes", G_ENABLE_VANILLA_RECIPES, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
-		G_ENABLE_TDK_RECIPES = config
-				.get("General",
-						"enable_TDK_recipes",
-						G_ENABLE_TDK_RECIPES,
-						"Mixed recipes for TDK packs by Lem'ADEC (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion")
-						.getBoolean(false);
-
+		G_ENTITY_JUMP_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "entity_jump_id", G_ENTITY_JUMP_ID, "Entity jump ID").getInt());
+		G_ENTITY_SPHERE_GENERATOR_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "entity_sphere_generator_id", G_ENTITY_SPHERE_GENERATOR_ID, "Entity sphere generator ID").getInt());
+		G_ENTITY_STAR_CORE_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "entity_star_core_id", G_ENTITY_STAR_CORE_ID, "Entity star core ID").getInt());
+		G_ENTITY_CAMERA_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "entity_camera_id", G_ENTITY_CAMERA_ID, "Entity camera ID").getInt());
+		
+		G_LUA_SCRIPTS = clamp(0, 2,
+				config.get("general", "lua_scripts", G_LUA_SCRIPTS,
+				"LUA scripts to load when connecting machines: 0 = none, 1 = templates in a subfolder, 2 = ready to roll (templates are still provided)").getInt());
+		G_SCHEMALOCATION = config.get("general", "schematic_location", G_SCHEMALOCATION, "Folder where to save ship schematics").getString();
+		G_BLOCKS_PER_TICK = clamp(100, 100000,
+				config.get("general", "blocks_per_tick", G_BLOCKS_PER_TICK,
+				"Number of blocks to move per ticks, too high will cause lag spikes on ship jumping or deployment, too low may break the ship wirings").getInt());
+		
+		// Recipes
+		RECIPES_ENABLE_VANILLA = config.get("recipes", "enable_vanilla", RECIPES_ENABLE_VANILLA, "Vanilla recipes by DarkholmeTenk").getBoolean(false);
+		RECIPES_ENABLE_IC2 = config.get("recipes", "enable_ic2", RECIPES_ENABLE_IC2, "Original recipes based on IndustrialCrat2 by Cr0s").getBoolean(true);
+		RECIPES_ENABLE_HARD_IC2 = config.get("recipes", "enable_hard_ic2", RECIPES_ENABLE_HARD_IC2, "Harder recipes based on IC2 by YuRaNnNzZZ").getBoolean(false);
+		RECIPES_ENABLE_MIXED = config.get("recipes", "enable_mixed", RECIPES_ENABLE_MIXED,
+						"Mixed recipes for Lem'ADEC's packs (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion").getBoolean(false);
+		
 		// Logging
-		LOGGING_JUMP = config.get("Logging", "enable_jump_debugLogs", LOGGING_JUMP, "Detailled jump logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_ENERGY = config.get("Logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_JUMP = config.get("logging", "enable_jump_debugLogs", LOGGING_JUMP, "Detailled jump logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_ENERGY = config.get("logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		if (WarpDrive.VERSION.contains("-dev")) {// disabled in production, for obvious reasons :)
-			LOGGING_EFFECTS = config.get("Logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
-			LOGGING_CLOAKING = config.get("Logging", "enable_cloaking_logs", LOGGING_CLOAKING, "Detailled cloaking logs to help debug the mod, will spam your console!").getBoolean(false);
-			LOGGING_FREQUENCY = config.get("Logging", "enable_frequency_logs", LOGGING_FREQUENCY, "Detailled frequency logs to help debug the mod, will spam your console!").getBoolean(false);
-			LOGGING_TARGETTING = config.get("Logging", "enable_targetting_logs", LOGGING_TARGETTING, "Detailled targetting logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_EFFECTS = config.get("logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_CLOAKING = config.get("logging", "enable_cloaking_logs", LOGGING_CLOAKING, "Detailled cloaking logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_FREQUENCY = config.get("logging", "enable_frequency_logs", LOGGING_FREQUENCY, "Detailled frequency logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_TARGETTING = config.get("logging", "enable_targetting_logs", LOGGING_TARGETTING, "Detailled targetting logs to help debug the mod, will spam your console!").getBoolean(false);
 		} else {
 			LOGGING_EFFECTS = false;
 			LOGGING_CLOAKING = false;
 			LOGGING_FREQUENCY = false;
 			LOGGING_TARGETTING = false;
 		}
-		LOGGING_WEAPON = config.get("Logging", "enable_weapon_logs", LOGGING_WEAPON, "Detailled weapon logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_CAMERA = config.get("Logging", "enable_camera_logs", LOGGING_CAMERA, "Detailled camera logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_BUILDING = config.get("Logging", "enable_building_logs", LOGGING_BUILDING, "Detailled building logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_COLLECTION = config.get("Logging", "enable_collection_logs", LOGGING_COLLECTION, "Detailled collection logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_TRANSPORTER = config.get("Logging", "enable_transporter_logs", LOGGING_TRANSPORTER, "Detailled transporter logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_LUA = config.get("Logging", "enable_LUA_logs", LOGGING_LUA, "Detailled LUA logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_RADAR = config.get("Logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_BREATHING = config.get("Logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
-		LOGGING_WORLDGEN = config.get("Logging", "enable_worldgen_logs", LOGGING_WORLDGEN, "Detailled world generation logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_WEAPON = config.get("logging", "enable_weapon_logs", LOGGING_WEAPON, "Detailled weapon logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_CAMERA = config.get("logging", "enable_camera_logs", LOGGING_CAMERA, "Detailled camera logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_BUILDING = config.get("logging", "enable_building_logs", LOGGING_BUILDING, "Detailled building logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_COLLECTION = config.get("logging", "enable_collection_logs", LOGGING_COLLECTION, "Detailled collection logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_TRANSPORTER = config.get("logging", "enable_transporter_logs", LOGGING_TRANSPORTER, "Detailled transporter logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_LUA = config.get("logging", "enable_LUA_logs", LOGGING_LUA, "Detailled LUA logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_RADAR = config.get("logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_BREATHING = config.get("logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_WORLDGEN = config.get("logging", "enable_worldgen_logs", LOGGING_WORLDGEN, "Detailled world generation logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		
-		// TransitionPlane
-		config.addCustomCategoryComment("TransitionPlane",
-				"Transition planes defines which region in space allows to go to other dimensions, default is overworld with 100k radius.\n"
-						+ "Each plane is square shaped and defined as a list of 7 integers (all measured in blocks, border is the radius from center)");
-		String[] transitionNames = { "overworld" };
-		transitionNames = config.get("TransitionPlane", "names", transitionNames, "this is the list of transition planes defined hereafter").getStringList();
-		int[] defaultPlane = { 0, 0, 0, 30000000, 30000000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
-		G_TRANSITIONPLANES = new TransitionPlane[transitionNames.length];
-		int index = 0;
-		for (String name : transitionNames) {
-			int[] plane = config.get("TransitionPlane", name, defaultPlane,
-					"dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, SpaceCenterX, SpaceCenterZ").getIntList();
-			if (plane.length != 7) {
-				WarpDrive.logger.warn("Invalid transition plane definition '" + name + "' (exactly 7 integers are expected), using default instead");
-				plane = defaultPlane.clone();
-			}
-			TransitionPlane newPlane = new TransitionPlane(plane[0], plane[1], plane[2], plane[3], plane[4], plane[5], plane[6]);
-			WarpDrive.logger.info("Adding '" + name + "' as " + newPlane.toString());
-			G_TRANSITIONPLANES[index] = newPlane;
+		// Planets
+		config.addCustomCategoryComment("planets",
+				  "Planets are other dimensions connected through the Space dimension. Default is overworld with 100k radius.\n"
+				+ "Each planet orbit is square shaped and defined as a list of 7 integers (all measured in blocks).");
+		
+		ConfigCategory cat = config.getCategory("planets");
+		String[] planetsName = cat.getValues().keySet().toArray(new String[0]);
+		if (planetsName.length == 0) {
+			planetsName = new String[] { "overworld" };
 		}
-		// FIXME: check transition planes aren't overlapping
-		// FIXME: check transition planes have valid dimension id, and ignore them
-
-		// Warp Core
-		WC_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", WC_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
-		WC_ENERGY_PER_BLOCK_MODE1 = config.get("WarpCore", "energy_per_block_mode1", WC_ENERGY_PER_BLOCK_MODE1).getInt();
-		WC_ENERGY_PER_DISTANCE_MODE1 = config.get("WarpCore", "energy_per_distance_mode1", WC_ENERGY_PER_DISTANCE_MODE1).getInt();
-		WC_ENERGY_PER_DISTANCE_MODE2 = config.get("WarpCore", "energy_per_distance_mode2", WC_ENERGY_PER_DISTANCE_MODE2).getInt();
-		WC_ENERGY_PER_BLOCK_MODE2 = config.get("WarpCore", "energy_per_block_mode2", WC_ENERGY_PER_BLOCK_MODE2).getInt();
-		WC_ENERGY_PER_ENTITY_TO_SPACE = config.get("WarpCore", "energy_per_entity_to_space", WC_ENERGY_PER_ENTITY_TO_SPACE).getInt();
-		WC_MAX_JUMP_DISTANCE = config.get("WarpCore", "max_jump_distance", WC_MAX_JUMP_DISTANCE, "Maximum jump lenght value in blocks").getInt();
-		WC_MAX_SHIP_VOLUME_ON_SURFACE = config.get("WarpCore", "max_ship_volume_on_surface", WC_MAX_SHIP_VOLUME_ON_SURFACE,
-				"Maximum ship mass (in blocks) to jump on earth").getInt();
-		WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE = config.get("WarpCore", "min_ship_volume_for_hyperspace", WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE,
-				"Minimum ship mass (in blocks) to enter or exit hyperspace without a jumpgate").getInt();
-		WC_MAX_SHIP_SIDE = config.get("WarpCore", "max_ship_side", WC_MAX_SHIP_SIDE, "Maximum ship size on each axis in blocks").getInt();
-		WC_COLLISION_TOLERANCE_BLOCKS = config.get("WarpCore", "collision_tolerance_blocks", WC_COLLISION_TOLERANCE_BLOCKS,
-				"Tolerance in block in case of collision before causing damages...").getInt();
-		WC_COOLDOWN_INTERVAL_SECONDS = config.get("WarpCore", "cooldown_interval_seconds", WC_COOLDOWN_INTERVAL_SECONDS,
-				"Cooldown seconds to wait after jumping").getInt();
-		WC_WARMUP_SHORTJUMP_SECONDS = config.get("WarpCore", "warmup_shortjump_seconds", WC_WARMUP_SHORTJUMP_SECONDS, "Short jump means less than 50 blocks")
-				.getInt();
-		WC_WARMUP_LONGJUMP_SECONDS = config.get("WarpCore", "warmup_longjump_seconds", WC_WARMUP_LONGJUMP_SECONDS, "Long jump means more than 50 blocks")
-				.getInt();
-		WC_WARMUP_SICKNESS = config.get("WarpCore", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
-
-		WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "cores_registry_update_interval", WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS,
-				"(measured in seconds)").getInt();
-		WC_CONTROLLER_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "controller_update_interval", WC_CONTROLLER_UPDATE_INTERVAL_SECONDS,
-				"(measured in seconds)").getInt();
-		WC_ISOLATION_UPDATE_INTERVAL_SECONDS = config.get("WarpCore", "isolation_update_interval", WC_ISOLATION_UPDATE_INTERVAL_SECONDS,
-				"(measured in seconds)").getInt();
-		WC_UNLIMITED_PLAYERNAMES = config.get("WarpCore", "unlimited_playernames", WC_UNLIMITED_PLAYERNAMES,
-				"List of player names which gives unlimited block counts to their ship").getStringList();
-
-		// Warp Radar
-		WR_MAX_ENERGY_VALUE = config.get("WarpRadar", "max_energy_value", WR_MAX_ENERGY_VALUE).getInt();
-		WR_MAX_ISOLATION_RANGE = config.get("WarpRadar", "max_isolation_range", WR_MAX_ISOLATION_RANGE,
-				"radius around core where isolation blocks count (2 to 8), higher is lagger").getInt();
-		WR_MAX_ISOLATION_RANGE = Math.min(8, Math.max(WR_MAX_ISOLATION_RANGE, 2));
-		WR_MIN_ISOLATION_BLOCKS = config.get("WarpRadar", "min_isolation_blocks", WR_MIN_ISOLATION_BLOCKS,
-				"number of isolation blocks required to get some isolation (0 to 20)").getInt();
-		WR_MIN_ISOLATION_BLOCKS = Math.min(20, Math.max(WR_MIN_ISOLATION_BLOCKS, 0));
-		WR_MAX_ISOLATION_BLOCKS = config.get("WarpRadar", "max_isolation_blocks", WR_MAX_ISOLATION_BLOCKS,
-				"number of isolation blocks required to reach maximum effect (5 to 100)").getInt();
-		WR_MAX_ISOLATION_BLOCKS = Math.min(100, Math.max(WR_MAX_ISOLATION_BLOCKS, 5));
-		WR_MIN_ISOLATION_EFFECT = config.get("WarpRadar", "min_isolation_effect", WR_MIN_ISOLATION_EFFECT,
-				"isolation effect achieved with min number of isolation blocks (0.01 to 0.95)").getDouble(0.12D);
-		WR_MIN_ISOLATION_EFFECT = Math.min(0.95D, Math.max(WR_MIN_ISOLATION_EFFECT, 0.01D));
-		WR_MAX_ISOLATION_EFFECT = config.get("WarpRadar", "max_isolation_effect", WR_MAX_ISOLATION_EFFECT,
-				"isolation effect achieved with max number of isolation blocks (0.01 to 1.00)").getDouble(1.00D);
-		WR_MAX_ISOLATION_EFFECT = Math.min(1.0D, Math.max(WR_MAX_ISOLATION_EFFECT, 0.01D));
-
+		
+		int[] defaultPlanet = { 0, 0, 0, 100000, 100000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
+		PLANETS = new Planet[planetsName.length];
+		int index = 0;
+		for (String name : planetsName) {
+			int[] planetInts = config.get("planets", name, defaultPlanet,
+					"dimensionId, dimensionCenterX, dimensionCenterZ, radiusX, radiusZ, spaceCenterX, spaceCenterZ").getIntList();
+			if (planetInts.length != 7) {
+				WarpDrive.logger.warn("Invalid planet definition '" + name + "' (exactly 7 integers are expected), using default instead");
+				planetInts = defaultPlanet.clone();
+			}
+			Planet planet = new Planet(planetInts[0], planetInts[1], planetInts[2], planetInts[3], planetInts[4], planetInts[5], planetInts[6]);
+			WarpDrive.logger.info("Adding '" + name + "' as " + planet.toString());
+			PLANETS[index] = planet;
+		}
+		// FIXME: check planets aren't overlapping
+		// We're not checking invalid dimension id, so they can be pre-allocated (see MystCraft)
+		
+		// Ship
+		SHIP_MAX_ENERGY_STORED = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "max_energy_stored", SHIP_MAX_ENERGY_STORED, "Maximum energy storage").getInt());
+		SHIP_NORMALJUMP_ENERGY_PER_BLOCK = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "normaljump_energy_per_block", SHIP_NORMALJUMP_ENERGY_PER_BLOCK).getInt());
+		SHIP_NORMALJUMP_ENERGY_PER_DISTANCE = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "normaljump_energy_per_distance", SHIP_NORMALJUMP_ENERGY_PER_DISTANCE).getInt());
+		SHIP_HYPERJUMP_ENERGY_PER_DISTANCE = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "hyperjump_energy_per_distance", SHIP_HYPERJUMP_ENERGY_PER_DISTANCE).getInt());
+		SHIP_HYPERJUMP_ENERGY_PER_BLOCK = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "hyperjump_energy_per_block", SHIP_HYPERJUMP_ENERGY_PER_BLOCK).getInt());
+		SHIP_TELEPORT_ENERGY_PER_ENTITY = clamp(0, Integer.MAX_VALUE,
+				config.get("ship", "teleport_energy_per_entity", SHIP_TELEPORT_ENERGY_PER_ENTITY).getInt());
+		
+		SHIP_MAX_JUMP_DISTANCE = clamp(0, 30000000,
+				config.get("ship", "max_jump_distance", SHIP_MAX_JUMP_DISTANCE, "Maximum jump lenght value in blocks").getInt());
+		
+		SHIP_VOLUME_MAX_ON_PLANET_SURFACE = clamp(0, 10000000,
+				config.get("ship", "volume_max_on_planet_surface", SHIP_VOLUME_MAX_ON_PLANET_SURFACE,
+				"Maximum ship mass (in blocks) to jump on earth").getInt());
+		SHIP_VOLUME_MIN_FOR_HYPERSPACE = clamp(0, 10000000,
+				config.get("ship", "volume_min_for_hyperspace", SHIP_VOLUME_MIN_FOR_HYPERSPACE,
+				"Minimum ship mass (in blocks) to enter or exit hyperspace without a jumpgate").getInt());
+		SHIP_VOLUME_UNLIMITED_PLAYERNAMES = config.get("ship", "volume_unlimited_playernames", SHIP_VOLUME_UNLIMITED_PLAYERNAMES,
+				"List of player names which have unlimited block counts to their ship").getStringList();
+		
+		SHIP_MAX_SIDE_SIZE = clamp(0, 30000000,
+				config.get("ship", "max_side_size", SHIP_MAX_SIDE_SIZE, "Maximum ship size on each axis in blocks").getInt());
+		SHIP_COLLISION_TOLERANCE_BLOCKS = clamp(0, 30000000,
+				config.get("ship", "collision_tolerance_blocks", SHIP_COLLISION_TOLERANCE_BLOCKS, "Tolerance in block in case of collision before causing damages...").getInt());
+		SHIP_COOLDOWN_INTERVAL_SECONDS = clamp(0, 3600,
+				config.get("ship", "cooldown_interval_seconds", SHIP_COOLDOWN_INTERVAL_SECONDS, "Cooldown seconds to wait after jumping").getInt());
+		
+		SHIP_SHORTJUMP_THRESHOLD_BLOCKS = clamp(0, 30000000,
+				config.get("ship", "shortjump_threhold_blocs", SHIP_SHORTJUMP_THRESHOLD_BLOCKS, "Short jump definition").getInt());
+		SHIP_SHORTJUMP_WARMUP_SECONDS = clamp(0, 3600,
+				config.get("ship", "shortjump_warmup_seconds", SHIP_SHORTJUMP_WARMUP_SECONDS, "(measured in seconds)").getInt());
+		SHIP_LONGJUMP_WARMUP_SECONDS = clamp(0, 3600,
+				config.get("ship", "longjump_warmup_seconds", SHIP_LONGJUMP_WARMUP_SECONDS, "(measured in seconds)").getInt());
+		SHIP_WARMUP_RANDOM_TICKS = clamp(10, 200,
+				config.get("ship", "warmp_random_ticks", SHIP_WARMUP_RANDOM_TICKS).getInt());
+		SHIP_WARMUP_SICKNESS = config.get("ship", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
+		
+		SHIP_CORE_REGISTRY_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
+				config.get("ship", "core_registry_update_interval", SHIP_CORE_REGISTRY_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
+		SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
+				config.get("ship", "core_isolation_update_interval", SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
+		SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
+				config.get("ship", "controller_update_interval", SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
+		
+		// Radar
+		RADAR_MAX_ENERGY_STORED = clamp(0, Integer.MAX_VALUE,
+				config.get("radar", "max_energy_stored", RADAR_MAX_ENERGY_STORED).getInt());
+		RADAR_MAX_ISOLATION_RANGE = clamp(2, 8,
+				config.get("radar", "max_isolation_range", RADAR_MAX_ISOLATION_RANGE, "radius around core where isolation blocks count (2 to 8), higher is lagger").getInt());
+		
+		RADAR_MIN_ISOLATION_BLOCKS = clamp(0, 20,
+				config.get("radar", "min_isolation_blocks", RADAR_MIN_ISOLATION_BLOCKS, "number of isolation blocks required to get some isolation (0 to 20)").getInt());
+		RADAR_MAX_ISOLATION_BLOCKS = clamp(5, 100,
+				config.get("radar", "max_isolation_blocks", RADAR_MAX_ISOLATION_BLOCKS, "number of isolation blocks required to reach maximum effect (5 to 100)").getInt());
+		
+		RADAR_MIN_ISOLATION_EFFECT = clamp(0.01D, 0.95D,
+				config.get("radar", "min_isolation_effect", RADAR_MIN_ISOLATION_EFFECT, "isolation effect achieved with min number of isolation blocks (0.01 to 0.95)").getDouble(0.12D));
+		RADAR_MAX_ISOLATION_EFFECT = clamp(0.01D, 1.0D,
+				config.get("radar", "max_isolation_effect", RADAR_MAX_ISOLATION_EFFECT, "isolation effect achieved with max number of isolation blocks (0.01 to 1.00)").getDouble(1.00D));
+		
 		// Ship Scanner
-		SS_MAX_ENERGY_VALUE = config.get("WarpCore", "max_energy_value", SS_MAX_ENERGY_VALUE, "Maximum energy storage").getInt();
-		SS_EU_PER_BLOCK_SCAN = config.get("ShipScanner", "energy_per_block_when_scanning", SS_EU_PER_BLOCK_SCAN,
+		SS_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("ship_scanner", "max_energy_stored", SS_MAX_ENERGY_STORED, "Maximum energy storage").getInt());
+		
+		SS_EU_PER_BLOCK_SCAN = config.get("ship_scanner", "energy_per_block_when_scanning", SS_EU_PER_BLOCK_SCAN,
 				"Energy consummed per block when scanning a ship (use -1 to consume everything)").getInt();
 		if (SS_EU_PER_BLOCK_SCAN != -1) {
-			SS_EU_PER_BLOCK_SCAN = Math.min(SS_MAX_ENERGY_VALUE, Math.max(SS_EU_PER_BLOCK_SCAN, 1));
+			SS_EU_PER_BLOCK_SCAN = clamp(1, SS_MAX_ENERGY_STORED, SS_EU_PER_BLOCK_SCAN);
 		}
-		SS_EU_PER_BLOCK_DEPLOY = config.get("ShipScanner", "energy_per_block_when_deploying", SS_EU_PER_BLOCK_DEPLOY,
+		
+		SS_EU_PER_BLOCK_DEPLOY = config.get("ship_scanner", "energy_per_block_when_deploying", SS_EU_PER_BLOCK_DEPLOY,
 				"Energy consummed per block when deploying a ship (use -1 to consume everything)").getInt();
 		if (SS_EU_PER_BLOCK_DEPLOY != -1) {
-			SS_EU_PER_BLOCK_DEPLOY = Math.min(SS_MAX_ENERGY_VALUE, Math.max(SS_EU_PER_BLOCK_DEPLOY, 1));
+			SS_EU_PER_BLOCK_DEPLOY = clamp(1, SS_MAX_ENERGY_STORED, SS_EU_PER_BLOCK_DEPLOY);
 		}
-		SS_MAX_DEPLOY_RADIUS_BLOCKS = config.get("ShipScanner", "max_deploy_radius_blocks", SS_MAX_DEPLOY_RADIUS_BLOCKS,
-				"Max distance from ship scanner to ship core, measured in blocks").getInt();
-
-		// Particle Booster
-		PB_MAX_ENERGY_VALUE = config.get("ParticleBooster", "max_energy_value", PB_MAX_ENERGY_VALUE).getInt();
-
-		// Laser Emitter
-		LE_MAX_BOOSTERS_NUMBER = config.get("LaserEmitter", "max_boosters_number", LE_MAX_BOOSTERS_NUMBER).getInt();
-		LE_MAX_LASER_ENERGY = config.get("LaserEmitter", "max_laser_energy", LE_MAX_LASER_ENERGY).getInt();
-		LE_EMIT_DELAY_TICKS = config.get("LaserEmitter", "emit_delay_ticks", LE_EMIT_DELAY_TICKS).getInt();
-		LE_EMIT_SCAN_DELAY_TICKS = config.get("LaserEmitter", "emit_scan_delay_ticks", LE_EMIT_SCAN_DELAY_TICKS).getInt();
-
-		// Laser Emitter tweaks
-		LE_COLLECT_ENERGY_MULTIPLIER = config.get("LaserEmitterTweaks", "collect_energy_multiplier", LE_COLLECT_ENERGY_MULTIPLIER).getDouble(0.6D);
-		LE_BEAM_LENGTH_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "beam_length_per_energy_divider", LE_BEAM_LENGTH_PER_ENERGY_DIVIDER).getInt();
-		LE_ENTITY_HIT_SET_ON_FIRE_TIME = config.get("LaserEmitterTweaks", "entity_hit_set_on_fire_time", LE_ENTITY_HIT_SET_ON_FIRE_TIME).getInt();
-		LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER = config.get("LaserEmitterTweaks", "entity_hit_damage_per_energy_divider",
-				LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER).getInt();
-		LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY = config.get("LaserEmitterTweaks", "entity_hit_explosion_laser_energy", LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY)
-				.getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY = config.get("LaserEmitterTweaks", "block_hit_consume_energy", LE_BLOCK_HIT_CONSUME_ENERGY).getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_block_resistance",
-				LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE).getInt();
-		LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE = config.get("LaserEmitterTweaks", "block_hit_consume_energy_per_distance",
-				LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE).getInt();
-
+		
+		SS_MAX_DEPLOY_RADIUS_BLOCKS = clamp(5, 150,
+				config.get("ship_scanner", "max_deploy_radius_blocks", SS_MAX_DEPLOY_RADIUS_BLOCKS, "Max distance from ship scanner to ship core, measured in blocks (5-150)").getInt());
+		
+		// Laser medium
+		LASER_MEDIUM_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("laser_medium", "max_energy_stored", LASER_MEDIUM_MAX_ENERGY_STORED).getInt());
+		
+		// Laser cannon
+		LASER_CANNON_MAX_MEDIUMS_COUNT = clamp(1, 64,
+				config.get("laser_cannon", "max_mediums_count", LASER_CANNON_MAX_MEDIUMS_COUNT).getInt());
+		LASER_CANNON_MAX_LASER_ENERGY = clamp(1, Integer.MAX_VALUE,
+				config.get("laser_cannon", "max_laser_energy", LASER_CANNON_MAX_LASER_ENERGY, "Maximum energy in beam after accounting for boosters beams").getInt());
+		LASER_CANNON_EMIT_FIRE_DELAY_TICKS = clamp(1, 100,
+				config.get("laser_cannon", "emit_fire_delay_ticks", LASER_CANNON_EMIT_FIRE_DELAY_TICKS, "Delay while booster beams are accepted, before actually shooting").getInt());
+		LASER_CANNON_EMIT_SCAN_DELAY_TICKS = clamp(1, 100,
+				config.get("laser_cannon", "emit_scan_delay_ticks", LASER_CANNON_EMIT_SCAN_DELAY_TICKS, "Delay while booster beams are accepted, before actually scanning").getInt());
+		
+		LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY = clamp(0.01D, 10.0D,
+				config.get("laser_cannon", "booster_beam_energy_efficiency", LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY).getDouble(0.6D));
+		LASER_CANNON_ENERGY_LOSS_PER_BLOCK = clamp(1, LASER_CANNON_MAX_LASER_ENERGY / 10,
+				config.get("laser_cannon", "energy_loss_per_block", LASER_CANNON_ENERGY_LOSS_PER_BLOCK).getInt());
+		
+		LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS = clamp(0, 300,
+				config.get("laser_cannon", "entity_hit_set_on_fire_seconds", LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS).getInt());
+		LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = clamp(0, LASER_CANNON_MAX_LASER_ENERGY,
+				config.get("laser_cannon", "entity_hit_energy_per_damage", LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE).getInt());
+		LASER_CANNON_ENTITY_HIT_MAX_DAMAGE = clamp(0, Integer.MAX_VALUE,
+				config.get("laser_cannon", "entity_hit_max_damage", LASER_CANNON_ENTITY_HIT_MAX_DAMAGE).getInt());
+		
+		LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION = clamp(0, Integer.MAX_VALUE,
+				config.get("laser_cannon", "entity_hit_energy_threshold_for_explosion", LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION, "Minimum energy to cause explosion effect").getInt());
+		LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH = (float) clamp(0.0D, 100.0D,
+				config.get("laser_cannon", "entity_hit_explosion_base_strength", LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH).getDouble());
+		LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH = clamp(1, Integer.MAX_VALUE,
+				config.get("laser_cannon", "entity_hit_explosion_energy_per_strength", LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH, "Energy per added explosion strength").getInt());
+		LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH = (float) clamp(0.0D, 1000.0D,
+				config.get("laser_cannon", "entity_hit_explosion_max_strength", LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH, "Maximum explosion strength, set to 0 to disable explosion completly").getDouble());
+		
+		LASER_CANNON_BLOCK_HIT_ENERGY = clamp(0, Integer.MAX_VALUE,
+				config.get("laser_cannon", "block_hit_energy", LASER_CANNON_BLOCK_HIT_ENERGY, "Base energy consummed from hitting a block").getInt());
+		LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE = clamp(0, Integer.MAX_VALUE,
+				config.get("laser_cannon", "block_hit_energy_per_block_resistance", LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE, "Energy consummed per explosive resistance points").getInt());
+		LASER_CANNON_BLOCK_HIT_ENERGY_PER_DISTANCE = clamp(0, Integer.MAX_VALUE,
+				config.get("laser_cannon", "block_hit_energy_per_distance", LASER_CANNON_BLOCK_HIT_ENERGY_PER_DISTANCE, "Energy consummed per distance travelled").getInt());
+		
+		LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD = clamp(0.0D, 1000000.0D,
+				config.get("laser_cannon", "block_hit_explosion_resistance_threshold", LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD, "Block explosion resistance threshold to cause an explosion").getDouble());
+		LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH = (float) clamp(0.0D, 1000.0D,
+				config.get("laser_cannon", "block_hit_explosion_base_strength", LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH, "Explosion base strength, 4 is Vanilla TNT").getDouble());
+		LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH = clamp(1, Integer.MAX_VALUE,
+				config.get("laser_cannon", "block_hit_explosion_energy_per_strength", LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH, "Energy per added explosion strength").getInt());
+		LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH = (float) clamp(0.0D, 1000.0D,
+				config.get("laser_cannon", "block_hit_explosion_max_strength", LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH, "Maximum explosion strength, set to 0 to disable explosion completly").getDouble());
+		
 		// Mining Laser
-		ML_MAX_BOOSTERS_NUMBER = config.get("MiningLaser", "max_boosters_number", ML_MAX_BOOSTERS_NUMBER).getInt();
-		ML_WARMUP_DELAY_TICKS = config.get("MiningLaser", "warmup_delay_ticks", ML_WARMUP_DELAY_TICKS).getInt();
-		ML_SCAN_DELAY_TICKS = config.get("MiningLaser", "scan_delay_ticks", ML_SCAN_DELAY_TICKS).getInt();
-		ML_MINE_DELAY_TICKS = config.get("MiningLaser", "mine_delay_ticks", ML_MINE_DELAY_TICKS).getInt();
-		ML_EU_PER_LAYER_SPACE = config.get("MiningLaser", "eu_per_layer_space", ML_EU_PER_LAYER_SPACE).getInt();
-		ML_EU_PER_LAYER_EARTH = config.get("MiningLaser", "eu_per_layer_earth", ML_EU_PER_LAYER_EARTH).getInt();
-		ML_EU_PER_BLOCK_SPACE = config.get("MiningLaser", "eu_per_block_space", ML_EU_PER_BLOCK_SPACE).getInt();
-		ML_EU_PER_BLOCK_EARTH = config.get("MiningLaser", "eu_per_block_earth", ML_EU_PER_BLOCK_EARTH).getInt();
-		ML_EU_MUL_ORESONLY = config.get("MiningLaser", "oresonly_power_mul", ML_EU_MUL_ORESONLY).getDouble(4.0);
-		ML_EU_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_power_mul", ML_EU_MUL_SILKTOUCH).getDouble(2.5);
-		ML_DEUTERIUM_MUL_SILKTOUCH = config.get("MiningLaser", "silktouch_deuterium_mul", ML_DEUTERIUM_MUL_SILKTOUCH).getDouble(1.0);
-		ML_EU_MUL_FORTUNE = config.get("MiningLaser", "fortune_power_base", ML_EU_MUL_FORTUNE).getDouble(2.5);
-		ML_MAX_RADIUS = config.get("MiningLaser", "max_radius", ML_MAX_RADIUS).getInt();
-
+		MINING_LASER_MAX_MEDIUMS_COUNT = clamp(1, 64,
+				config.get("mining_laser", "max_mediums_count", MINING_LASER_MAX_MEDIUMS_COUNT).getInt());
+		MINING_LASER_MAX_RADIUS = clamp(1, 64,
+				config.get("mining_laser", "max_radius", MINING_LASER_MAX_RADIUS).getInt());
+		
+		MINING_LASER_WARMUP_DELAY_TICKS = clamp(1, 300,
+				config.get("mining_laser", "warmup_delay_ticks", MINING_LASER_WARMUP_DELAY_TICKS).getInt());
+		MINING_LASER_SCAN_DELAY_TICKS = clamp(1, 300,
+				config.get("mining_laser", "scan_delay_ticks", MINING_LASER_SCAN_DELAY_TICKS).getInt());
+		MINING_LASER_MINE_DELAY_TICKS = clamp(1, 300,
+				config.get("mining_laser", "mine_delay_ticks", MINING_LASER_MINE_DELAY_TICKS).getInt());
+		
+		MINING_LASER_PLANET_ENERGY_PER_LAYER = clamp(1, Integer.MAX_VALUE,
+				config.get("mining_laser", "planet_energy_per_layer", MINING_LASER_PLANET_ENERGY_PER_LAYER).getInt());
+		MINING_LASER_PLANET_ENERGY_PER_BLOCK = clamp(1, Integer.MAX_VALUE,
+				config.get("mining_laser", "planet_energy_per_block", MINING_LASER_PLANET_ENERGY_PER_BLOCK).getInt());
+		MINING_LASER_SPACE_ENERGY_PER_LAYER = clamp(1, Integer.MAX_VALUE,
+				config.get("mining_laser", "space_energy_per_layer", MINING_LASER_SPACE_ENERGY_PER_LAYER).getInt());
+		MINING_LASER_SPACE_ENERGY_PER_BLOCK = clamp(1, Integer.MAX_VALUE,
+				config.get("mining_laser", "space_energy_per_block", MINING_LASER_SPACE_ENERGY_PER_BLOCK).getInt());
+		
+		MINING_LASER_ORESONLY_ENERGY_FACTOR = clamp(0.01D, 1000.0D,
+				config.get("mining_laser", "oresonly_energy_factor", MINING_LASER_ORESONLY_ENERGY_FACTOR).getDouble(4.0D));
+		MINING_LASER_SILKTOUCH_ENERGY_FACTOR = clamp(0.01D, 1000.0D,
+				config.get("mining_laser", "silktouch_energy_factor", MINING_LASER_SILKTOUCH_ENERGY_FACTOR).getDouble(2.5D));
+		MINING_LASER_SILKTOUCH_DEUTERIUM_L = clamp(0.001D, 10.0D,
+				config.get("mining_laser", "silktouch_deuterium_l", MINING_LASER_SILKTOUCH_DEUTERIUM_L).getDouble(1.0D));
+		MINING_LASER_FORTUNE_ENERGY_FACTOR = clamp(0.01D, 1000.0D,
+				config.get("mining_laser", "fortune_energy_factor", MINING_LASER_FORTUNE_ENERGY_FACTOR).getDouble(2.5D));
+		
 		// Tree Farm
-		TF_MAX_SIZE = config.get("TreeFarm", "max_treefarm_size", TF_MAX_SIZE).getInt();
-
-		// Cloaking device core
-		CD_MAX_CLOAKING_FIELD_SIDE = config.get("CloakingDevice", "max_cloaking_field_side", CD_MAX_CLOAKING_FIELD_SIDE).getInt();
-		CD_ENERGY_PER_BLOCK_TIER1 = config.get("CloakingDevice", "energy_per_block_tier1", CD_ENERGY_PER_BLOCK_TIER1).getInt();
-		CD_ENERGY_PER_BLOCK_TIER2 = config.get("CloakingDevice", "energy_per_block_tier2", CD_ENERGY_PER_BLOCK_TIER2).getInt();
-		CD_FIELD_REFRESH_INTERVAL_SECONDS = config.get("CloakingDevice", "field_refresh_interval_seconds", CD_FIELD_REFRESH_INTERVAL_SECONDS).getInt();
-		CD_COIL_CAPTURE_BLOCKS = config.get("CloakingDevice", "coil_capture_blocks", CD_COIL_CAPTURE_BLOCKS, "Extra blocks covered after the outer coils")
-				.getInt();
-
+		TREE_FARM_MIN_RADIUS = clamp(1, 30,
+				config.get("tree_farm", "min_radius", TREE_FARM_MIN_RADIUS, "Minimum radius on X and Z axis, measured in blocks").getInt());
+		TREE_FARM_MAX_RADIUS = clamp(TREE_FARM_MIN_RADIUS, 30,
+				config.get("tree_farm", "max_radius", TREE_FARM_MAX_RADIUS, "Maximum radius on X and Z axis, measured in blocks").getInt());
+		
+		// Cloaking
+		CLOAKING_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("cloaking", "max_energy_stored", CLOAKING_MAX_ENERGY_STORED, "Maximum energy storage").getInt());
+		CLOAKING_COIL_CAPTURE_BLOCKS = clamp(0, 30,
+				config.get("cloaking", "coil_capture_blocks", CLOAKING_COIL_CAPTURE_BLOCKS, "Extra blocks covered after the outer coils").getInt());
+		CLOAKING_MAX_FIELD_RADIUS = clamp(CLOAKING_COIL_CAPTURE_BLOCKS + 3, 128,
+				config.get("cloaking", "max_field_radius", CLOAKING_MAX_FIELD_RADIUS).getInt());
+		CLOAKING_TIER1_ENERGY_PER_BLOCK = clamp(0, Integer.MAX_VALUE,
+				config.get("cloaking", "tier1_energy_per_block", CLOAKING_TIER1_ENERGY_PER_BLOCK).getInt());
+		CLOAKING_TIER2_ENERGY_PER_BLOCK = clamp(CLOAKING_TIER1_ENERGY_PER_BLOCK, Integer.MAX_VALUE,
+				config.get("cloaking", "tier2_energy_per_block", CLOAKING_TIER2_ENERGY_PER_BLOCK).getInt());
+		CLOAKING_FIELD_REFRESH_INTERVAL_SECONDS = clamp(1, 30,
+				config.get("cloaking", "field_refresh_interval_seconds", CLOAKING_FIELD_REFRESH_INTERVAL_SECONDS).getInt());
+		
 		// Air generator
-		AG_RF_PER_CANISTER = config.get("Air Generator", "energy_per_canister", AG_RF_PER_CANISTER).getInt();
-		AG_EU_PER_NEWAIRBLOCK = config.get("Air Generator", "eu_per_new_air_block", AG_EU_PER_NEWAIRBLOCK).getInt();
-		AG_EU_PER_EXISTINGAIRBLOCK = config.get("Air Generator", "eu_per_existing_air_block", AG_EU_PER_EXISTINGAIRBLOCK).getInt();
-		AG_MAX_ENERGY = config.get("Air Generator", "max_energy", AG_MAX_ENERGY).getInt();
-		AG_AIR_GENERATION_TICKS = config.get("Air Generator", "air_generation_ticks", AG_AIR_GENERATION_TICKS).getInt();
+		AIRGEN_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("air_generator", "max_energy_stored", AIRGEN_MAX_ENERGY_STORED).getInt());
+		AIRGEN_ENERGY_PER_CANISTER = clamp(1, AIRGEN_MAX_ENERGY_STORED,
+				config.get("air_generator", "energy_per_canister", AIRGEN_ENERGY_PER_CANISTER).getInt());
+		AIRGEN_ENERGY_PER_NEWAIRBLOCK = clamp(1, AIRGEN_MAX_ENERGY_STORED,
+				config.get("air_generator", "energy_per_new_air_block", AIRGEN_ENERGY_PER_NEWAIRBLOCK).getInt());
+		AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK = clamp(1, AIRGEN_MAX_ENERGY_STORED,
+				config.get("air_generator", "eu_per_existing_air_block", AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK).getInt());
+		AIRGEN_AIR_GENERATION_TICKS = clamp(1, 300,
+				config.get("air_generator", "air_generation_ticks", AIRGEN_AIR_GENERATION_TICKS).getInt());
 		
 		// Reactor monitor
-		RM_MAX_ENERGY = config.get("Reactor Monitor", "max_rm_energy", RM_MAX_ENERGY).getInt();
-		RM_EU_PER_HEAT = config.get("Reactor Monitor", "eu_per_heat", RM_EU_PER_HEAT).getDouble(2);
-
+		IC2_REACTOR_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("ic2_reactor_laser", "max_energy_stored", IC2_REACTOR_MAX_ENERGY_STORED).getInt());
+		IC2_REACTOR_ENERGY_PER_HEAT = clamp(2.0D, 100000.0D,
+				config.get("ic2_reactor_laser", "energy_per_heat", IC2_REACTOR_ENERGY_PER_HEAT).getDouble(2));
+		
 		// Transporter
-		TR_MAX_ENERGY = config.get("Transporter", "max_energy", TR_MAX_ENERGY).getInt();
-		TR_RELATIVE_COORDS = config.get("Transporter", "relative_coords", TR_RELATIVE_COORDS).getBoolean(true);
-		TR_EU_PER_METRE = config.get("Transporter", "eu_per_ent_per_metre", TR_EU_PER_METRE).getDouble(100.0);
-		TR_MAX_BOOST_MUL = config.get("Transporter", "max_boost", TR_MAX_BOOST_MUL).getDouble(4.0);
-
-		// Power reactor
-		PR_MAX_ENERGY = config.get("Reactor", "max_energy", PR_MAX_ENERGY).getInt();
-		PR_TICK_TIME = config.get("Reactor", "ticks_per_update", PR_TICK_TIME).getInt();
-		PR_MAX_LASERS = config.get("Reactor", "max_lasers", PR_MAX_LASERS).getInt();
-
-		// Power store
-		PS_MAX_ENERGY = config.get("PowerStore", "max_energy", PS_MAX_ENERGY).getInt();
-
-		// Laser lift
-		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
-		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
-		LL_TICK_RATE = config.get("LaserLift", "tick_rate", LL_TICK_RATE).getInt();
+		TRANSPORTER_MAX_ENERGY = clamp(1, Integer.MAX_VALUE,
+				config.get("transporter", "max_energy", TRANSPORTER_MAX_ENERGY).getInt());
+		TRANSPORTER_USE_RELATIVE_COORDS = config.get("transporter", "use_relative_coords", TRANSPORTER_USE_RELATIVE_COORDS).getBoolean(true);
+		TRANSPORTER_ENERGY_PER_BLOCK = clamp(1.0D, TRANSPORTER_MAX_ENERGY / 10.0D,
+				config.get("transporter", "energy_per_block", TRANSPORTER_ENERGY_PER_BLOCK).getDouble(100.0D));
+		TRANSPORTER_MAX_BOOST_MUL = clamp(1.0D, 1000.0D,
+				config.get("transporter", "max_boost", TRANSPORTER_MAX_BOOST_MUL).getDouble(4.0));
+		
+		// Enantiomorphic reactor
+		ENAN_REACTOR_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("enantiomorphic_reactor", "max_energy_stored", ENAN_REACTOR_MAX_ENERGY_STORED).getInt());
+		ENAN_REACTOR_UPDATE_INTERVAL_TICKS = clamp(1, 300,
+				config.get("enantiomorphic_reactor", "update_interval_ticks", ENAN_REACTOR_UPDATE_INTERVAL_TICKS).getInt());
+		ENAN_REACTOR_MAX_LASERS_PER_SECOND = clamp(4, 80,
+				config.get("enantiomorphic_reactor", "max_lasers", ENAN_REACTOR_MAX_LASERS_PER_SECOND, "Maximum number of stabiliation laser shots per seconds before loosing effiency").getInt());
+		
+		// Energy bank
+		ENERGY_BANK_MAX_ENERGY_STORED = config.get("energy_bank", "max_energy_stored", ENERGY_BANK_MAX_ENERGY_STORED).getInt();
+		
+		// Lift
+		LIFT_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
+				config.get("lift", "max_energy_stored", LIFT_MAX_ENERGY_STORED).getInt());
+		LIFT_ENERGY_PER_ENTITY = clamp(1, Integer.MAX_VALUE,
+				config.get("lift", "energy_per_entity", LIFT_ENERGY_PER_ENTITY, "Energy consummed per entity moved").getInt());
+		LIFT_UPDATE_INTERVAL_TICKS = clamp(1, 60,
+				config.get("lift", "update_interval_ticks", LIFT_UPDATE_INTERVAL_TICKS).getInt());
 		
 		config.save();
 	}
-
+	
+	public static int clamp(final int min, final int max, final int value) {
+		return Math.min(max, Math.max(value, min));
+	}
+	
+	public static double clamp(final double min, final double max, final double value) {
+		return Math.min(max, Math.max(value, min));
+	}
+	
 	public static void load() {
 		commonWorldGenOres = new ArrayList<Block>();
 		commonWorldGenOres.add(Blocks.iron_ore);
@@ -858,26 +972,22 @@ public class WarpDriveConfig {
 	 * Copy a default configuration file from the mod's resources to the specified configuration folder
 	 */
 	public static void unpackResourceToFolder(final String filename, final String sourceResourcePath, File targetFolder) {
+		// targetFolder is already created by caller
+		
 		String resourceName = sourceResourcePath + "/" + filename;
-
-		boolean result = targetFolder.mkdirs();
-		if (!result) {
-			WarpDrive.logger.error("Failed to create target folder for unpacking resource \'" + resourceName + "\' into " + targetFolder);
-			return;
-		}
-
+		
 		File destination = new File(targetFolder, filename);
-
+		
 		try {
 			InputStream inputStream = WarpDrive.class.getClassLoader().getResourceAsStream(resourceName);
 			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(destination));
-
+			
 			byte[] byteBuffer = new byte[Math.max(8192, inputStream.available())];
 			int bytesRead;
 			while ((bytesRead = inputStream.read(byteBuffer)) >= 0) {
 				outputStream.write(byteBuffer, 0, bytesRead);
 			}
-
+			
 			inputStream.close();
 			outputStream.close();
 		} catch (Exception exception) {

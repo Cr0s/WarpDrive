@@ -135,7 +135,7 @@ public class StarMapRegistry {
 			double d5 = entry.z - core.zCoord;
 			double distance2 = d3 * d3 + d4 * d4 + d5 * d5;
 			
-			if (distance2 <= ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1) * ((2 * WarpDriveConfig.WC_MAX_SHIP_SIDE) - 1)) {
+			if (distance2 <= ((2 * WarpDriveConfig.SHIP_MAX_SIDE_SIZE) - 1) * ((2 * WarpDriveConfig.SHIP_MAX_SIDE_SIZE) - 1)) {
 				// Compare warp-fields for intersection
 				aabb2 = AxisAlignedBB.getBoundingBox(entry.minX, entry.minY, entry.minZ, entry.maxX, entry.maxY, entry.maxZ);
 				if (aabb1.intersectsWith(aabb2)) {

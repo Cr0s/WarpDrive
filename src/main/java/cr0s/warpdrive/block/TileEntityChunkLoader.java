@@ -74,12 +74,7 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 			canLoad = consumeEnergy(area * WarpDriveConfig.CL_RF_PER_CHUNKTICK, true);
 		}
 	}
-
-	private int clampDistance(int dis)
-	{
-		return clamp(dis,0,WarpDriveConfig.CL_MAX_DISTANCE);
-	}
-
+	
 	private void changedDistance()
 	{
 		if(worldObj == null) {
@@ -93,10 +88,10 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 				return;
 			}
 		}
-		negDX = -clampDistance(negDX);
-		posDX =  clampDistance(posDX);
-		negDZ = -clampDistance(negDZ);
-		posDZ =  clampDistance(posDZ);
+		negDX = - clamp(0, WarpDriveConfig.CL_MAX_DISTANCE, negDX);
+		posDX =   clamp(0, WarpDriveConfig.CL_MAX_DISTANCE, posDX);
+		negDZ = - clamp(0, WarpDriveConfig.CL_MAX_DISTANCE, negDZ);
+		posDZ =   clamp(0, WarpDriveConfig.CL_MAX_DISTANCE, posDZ);
 		minChunk = new ChunkCoordIntPair(myChunk.chunkXPos+negDX,myChunk.chunkZPos+negDZ);
 		maxChunk = new ChunkCoordIntPair(myChunk.chunkXPos+posDX,myChunk.chunkZPos+posDZ);
 		area = (posDX - negDX + 1) * (posDZ - negDZ + 1);

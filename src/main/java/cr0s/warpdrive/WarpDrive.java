@@ -24,7 +24,6 @@ import net.minecraftforge.common.ForgeChunkManager.LoadingCallback;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.oredict.ShapedOreRecipe;
 import net.minecraftforge.oredict.ShapelessOreRecipe;
@@ -412,19 +411,19 @@ public class WarpDrive implements LoadingCallback {
 	public void postInit(FMLPostInitializationEvent event) {
 		space = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
-
+		
 		WarpDriveConfig.postInit();
 		
-		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
+		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.RECIPES_ENABLE_IC2) {
 			initIC2Recipes();
 		}
-		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_HARD_IC2_RECIPES) {
+		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.RECIPES_ENABLE_HARD_IC2) {
 			initHardIC2Recipes();
 		}
-		if (WarpDriveConfig.G_ENABLE_VANILLA_RECIPES) {
+		if (WarpDriveConfig.RECIPES_ENABLE_VANILLA) {
 			initVanillaRecipes();
 		}
-
+		
 		starMap = new StarMapRegistry();
 		jumpgates = new JumpgatesRegistry();
 		cameras = new CamerasRegistry();

@@ -19,16 +19,16 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	private boolean silkTouchLeaves = false;
 	private boolean treeTap = false;
 
-	private final int defSize = 8;
+	private final int radiusDefault = 8;
 	private final int scanWait = 40;
 	private final int mineWait = 4;
 	private int delayMul = 4;
 
-	private int totalHarvested=0;
+	private int totalHarvested = 0;
 
 	private int scan = 0;
-	private int xSize = defSize;
-	private int zSize = defSize;
+	private int radiusX = radiusDefault;
+	private int radiusZ = radiusDefault;
 
 	LinkedList<Vector3> logs;
 	private int logIndex = 0;
@@ -41,7 +41,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 		methodsArray = new String[] {
 				"start",
 				"stop",
-				"area",
+				"radius",
 				"leaves",
 				"silkTouch",
 				"silkTouchLeaves",
@@ -165,13 +165,13 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	private LinkedList<Vector3> scanTrees() {
 		int xmax, zmax, x1, x2, z1, z2;
 		int xmin, zmin;
-		x1 = xCoord + xSize / 2;
-		x2 = xCoord - xSize / 2;
+		x1 = xCoord + radiusX;
+		x2 = xCoord - radiusX;
 		xmin = Math.min(x1, x2);
 		xmax = Math.max(x1, x2);
 
-		z1 = zCoord + zSize / 2;
-		z2 = zCoord - zSize / 2;
+		z1 = zCoord + radiusZ;
+		z2 = zCoord - radiusZ;
 		zmin = Math.min(z1, z2);
 		zmax = Math.max(z1, z2);
 
@@ -213,8 +213,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setInteger("xSize", xSize);
-		tag.setInteger("zSize", zSize);
+		tag.setInteger("radiusX", radiusX);
+		tag.setInteger("radiusZ", radiusZ);
 		tag.setBoolean("doLeaves", doLeaves);
 		tag.setBoolean("active", active);
 		tag.setBoolean("treetap", treeTap);
@@ -224,9 +224,17 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		xSize = tag.getInteger("xSize");
-		zSize = tag.getInteger("zSize");
-
+		radiusX = tag.getInteger("radiusX");
+		if (radiusX == 0) {
+			radiusX = radiusDefault;
+		}
+		radiusX = clamp(WarpDriveConfig.TREE_FARM_MIN_RADIUS, WarpDriveConfig.TREE_FARM_MAX_RADIUS, radiusX);
+		radiusZ = tag.getInteger("radiusZ");
+		if (radiusZ == 0) {
+			radiusZ = radiusDefault;
+		}
+		radiusZ = clamp(WarpDriveConfig.TREE_FARM_MIN_RADIUS, WarpDriveConfig.TREE_FARM_MAX_RADIUS, radiusZ);
+		
 		doLeaves = tag.getBoolean("doLeaves");
 		active   = tag.getBoolean("active");
 		treeTap  = tag.getBoolean("treetap");
@@ -247,22 +255,25 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				active = true;
 			}
 			return new Boolean[] { true };
+			
 		} else if (methodName.equals("stop")) {
 			active = false;
-		} else if (methodName.equals("area")) {
+			
+		} else if (methodName.equals("radius")) {
 			try {
 				if (arguments.length == 1) {
-					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
-					zSize = xSize;
+					radiusX = clamp(WarpDriveConfig.TREE_FARM_MIN_RADIUS, WarpDriveConfig.TREE_FARM_MAX_RADIUS, toInt(arguments[0]));
+					radiusZ = radiusX;
 				} else if (arguments.length == 2) {
-					xSize = clamp(toInt(arguments[0]),3,WarpDriveConfig.TF_MAX_SIZE);
-					zSize = clamp(toInt(arguments[1]),3,WarpDriveConfig.TF_MAX_SIZE);
+					radiusX = clamp(WarpDriveConfig.TREE_FARM_MIN_RADIUS, WarpDriveConfig.TREE_FARM_MAX_RADIUS, toInt(arguments[0]));
+					radiusZ = clamp(WarpDriveConfig.TREE_FARM_MIN_RADIUS, WarpDriveConfig.TREE_FARM_MAX_RADIUS, toInt(arguments[1]));
 				}
 			} catch(NumberFormatException e) {
-				xSize = defSize;
-				zSize = defSize;
+				radiusX = radiusDefault;
+				radiusZ = radiusDefault;
 			}
-			return new Integer[] { xSize , zSize };
+			return new Integer[] { radiusX , radiusZ };
+			
 		} else if (methodName.equals("leaves")) {
 			try {
 				if (arguments.length > 0) {
@@ -272,6 +283,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 			}
 			return new Boolean[] { doLeaves };
+			
 		} else if (methodName.equals("silkTouch")) {
 			try {
 				silkTouch(arguments[0]);
@@ -279,6 +291,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				silkTouch(false);
 			}
 			return new Object[] { silkTouch() };
+			
 		} else if (methodName.equals("silkTouchLeaves")) {
 			try {
 				if (arguments.length >= 1) {
@@ -288,6 +301,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				silkTouchLeaves = false;
 			}
 			return new Object[] { silkTouchLeaves };
+			
 		} else if (methodName.equals("treetap")) {
 			try {
 				if (arguments.length >= 1) {
@@ -297,9 +311,10 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				treeTap = false;
 			}
 			return new Object[] { treeTap };
+			
 		} else if (methodName.equals("state")) {
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
-			return new Object[] { state, xSize, zSize, energy(), totalHarvested };
+			return new Object[] { state, radiusX, radiusZ, energy(), totalHarvested };
 		}
 		return null;
 	}

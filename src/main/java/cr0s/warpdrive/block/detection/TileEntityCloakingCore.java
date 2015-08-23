@@ -21,8 +21,6 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
-	private final int MAX_ENERGY_VALUE = 500000000; // 500kk EU
-
 	public boolean isEnabled = false;
 	public byte tier = 1; // cloaking field tier, 1 or 2
 	
@@ -86,7 +84,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			if (WarpDriveConfig.LOGGING_CLOAKING) {
 				WarpDrive.logger.info(this + " Updating cloaking state...");
 			}
-			updateTicks = ((tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.CD_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
+			updateTicks = ((tier == 1) ? 20 : (tier == 2) ? 10 : 20) * WarpDriveConfig.CLOAKING_FIELD_REFRESH_INTERVAL_SECONDS; // resetting timer
 			
 			isValid = validateAssembly();
 			isCloaking = WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord); 
@@ -263,7 +261,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 					}
 				}
 			}
-			energyToConsume = volume * WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER1;
+			energyToConsume = volume * WarpDriveConfig.CLOAKING_TIER1_ENERGY_PER_BLOCK;
 		} else {// tier2 = everything counts
 			for (y = minY; y <= maxY; y++) {
 				for (x = minX; x <= maxX; x++) {
@@ -274,7 +272,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 					}
 				}
 			}
-			energyToConsume = volume * WarpDriveConfig.CD_ENERGY_PER_BLOCK_TIER2;
+			energyToConsume = volume * WarpDriveConfig.CLOAKING_TIER2_ENERGY_PER_BLOCK;
 		}
 		
 		// WarpDrive.logger.info(this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
@@ -296,7 +294,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	}
 	
 	public boolean validateAssembly() {
-		final int maxOuterCoilDistance = WarpDriveConfig.CD_MAX_CLOAKING_FIELD_SIDE - WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS; 
+		final int maxOuterCoilDistance = WarpDriveConfig.CLOAKING_MAX_FIELD_RADIUS - WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS; 
 		
 		// Directions to check (all six directions: left, right, up, down, front, back)
 		for (int direction = 0; direction < 6; direction++) {
@@ -344,12 +342,12 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		}
 		
 		// Check cloaking field parameters defining coils		
-		minX =               xCoord - outerCoilsDistance[0] - WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS;
-		maxX =               xCoord + outerCoilsDistance[1] + WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS;
-		minY = Math.max(  0, yCoord - outerCoilsDistance[2] - WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS);
-		maxY = Math.min(255, yCoord + outerCoilsDistance[3] + WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS);
-		minZ =               zCoord - outerCoilsDistance[4] - WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS;
-		maxZ =               zCoord + outerCoilsDistance[5] + WarpDriveConfig.CD_COIL_CAPTURE_BLOCKS;
+		minX =               xCoord - outerCoilsDistance[0] - WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS;
+		maxX =               xCoord + outerCoilsDistance[1] + WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS;
+		minY = Math.max(  0, yCoord - outerCoilsDistance[2] - WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS);
+		maxY = Math.min(255, yCoord + outerCoilsDistance[3] + WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS);
+		minZ =               zCoord - outerCoilsDistance[4] - WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS;
+		maxZ =               zCoord + outerCoilsDistance[5] + WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS;
 		return true;
 	}
 
@@ -415,7 +413,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	
 	@Override
 	public int getMaxEnergyStored() {
-		return MAX_ENERGY_VALUE;
+		return WarpDriveConfig.CLOAKING_MAX_ENERGY_STORED;
 	}
     
     @Override

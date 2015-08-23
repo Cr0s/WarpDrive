@@ -208,7 +208,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 		if (WarpDriveConfig.SS_EU_PER_BLOCK_SCAN > 0) {
 			return size * WarpDriveConfig.SS_EU_PER_BLOCK_SCAN;
 		} else {
-			return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
+			return WarpDriveConfig.SS_MAX_ENERGY_STORED;
 		}
 	}
 
@@ -216,7 +216,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 		if (WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY > 0) {
 			return size * WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY;
 		} else {
-			return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
+			return WarpDriveConfig.SS_MAX_ENERGY_STORED;
 		}
 	}
 
@@ -613,7 +613,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 	// IEnergySink methods implementation
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.SS_MAX_ENERGY_VALUE;
+		return WarpDriveConfig.SS_MAX_ENERGY_STORED;
 	}
 
 	@Override

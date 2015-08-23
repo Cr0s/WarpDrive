@@ -116,11 +116,11 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		return silkTouch(toBool(o));
 	}
 
-	protected int fortune(int f)
+	protected int fortune(int level)
 	{
 		try
 		{
-			fortuneLevel = clamp(f,minFortune(),maxFortune());
+			fortuneLevel = clamp(minFortune(), maxFortune(), level);
 		}
 		catch(NumberFormatException e)
 		{
@@ -131,7 +131,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 
 	protected TileEntityLaserMedium booster()
 	{
-		if(booster == null)
+		if (booster == null)
 			findFirstBooster();
 		return booster;
 	}
@@ -148,7 +148,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 
 	protected int calculateLayerCost()
 	{
-		return isOnEarth() ? WarpDriveConfig.ML_EU_PER_LAYER_EARTH : WarpDriveConfig.ML_EU_PER_LAYER_SPACE;
+		return isOnEarth() ? WarpDriveConfig.MINING_LASER_PLANET_ENERGY_PER_LAYER : WarpDriveConfig.MINING_LASER_SPACE_ENERGY_PER_LAYER;
 	}
 
 	protected int calculateBlockCost()
@@ -158,10 +158,10 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 
 	protected int calculateBlockCost(Block block)
 	{
-		int enPerBlock = isOnEarth() ? WarpDriveConfig.ML_EU_PER_BLOCK_EARTH : WarpDriveConfig.ML_EU_PER_BLOCK_SPACE;
+		int enPerBlock = isOnEarth() ? WarpDriveConfig.MINING_LASER_PLANET_ENERGY_PER_BLOCK : WarpDriveConfig.MINING_LASER_SPACE_ENERGY_PER_BLOCK;
 		if (silkTouch(block))
-			return (int) Math.round(enPerBlock * WarpDriveConfig.ML_EU_MUL_SILKTOUCH);
-		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.ML_EU_MUL_FORTUNE, fortune())));
+			return (int) Math.round(enPerBlock * WarpDriveConfig.MINING_LASER_SILKTOUCH_ENERGY_FACTOR);
+		return (int) Math.round(enPerBlock * (Math.pow(WarpDriveConfig.MINING_LASER_FORTUNE_ENERGY_FACTOR, fortune())));
 	}
 
 	protected boolean isRoomForHarvest()
@@ -210,7 +210,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		float r = getColorR();
 		float g = getColorG();
 		float b = getColorB();
-		PacketHandler.sendBeamPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.ML_MINE_DELAY_TICKS, 0, 50);
+		PacketHandler.sendBeamPacket(worldObj, minerVector, valuable.clone().translate(0.5D), r, g, b, 2 * WarpDriveConfig.MINING_LASER_MINE_DELAY_TICKS, 0, 50);
 		//worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 	}
 

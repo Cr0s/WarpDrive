@@ -78,7 +78,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	public int randomWarmupAddition = 0;
 
 	private int chestTeleportUpdateTicks = 0;
-    private final int registryUpdateInterval_ticks = 20 * WarpDriveConfig.WC_CORES_REGISTRY_UPDATE_INTERVAL_SECONDS;
+    private final int registryUpdateInterval_ticks = 20 * WarpDriveConfig.SHIP_CORE_REGISTRY_UPDATE_INTERVAL_SECONDS;
 	private int registryUpdateTicks = 0;
     private int bootTicks = 20;
     
@@ -166,7 +166,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 		
 		isolationUpdateTicks++;
-		if (isolationUpdateTicks > WarpDriveConfig.WC_ISOLATION_UPDATE_INTERVAL_SECONDS * 20) {
+		if (isolationUpdateTicks > WarpDriveConfig.SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS * 20) {
 			isolationUpdateTicks = 0;
 			updateIsolationState();
 		}
@@ -228,9 +228,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				case BASIC_JUMP:
 				case LONG_JUMP:
 					if (controller.getDistance() < 50) {
-						targetWarmup = WarpDriveConfig.WC_WARMUP_SHORTJUMP_SECONDS * 20;
+						targetWarmup = WarpDriveConfig.SHIP_SHORTJUMP_WARMUP_SECONDS * 20;
 					} else {
-						targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
+						targetWarmup = WarpDriveConfig.SHIP_LONGJUMP_WARMUP_SECONDS * 20;
 					}
 					break;
 					
@@ -238,7 +238,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				case HYPERSPACE:
 				case GATE_JUMP:
 				default:
-					targetWarmup = WarpDriveConfig.WC_WARMUP_LONGJUMP_SECONDS * 20;
+					targetWarmup = WarpDriveConfig.SHIP_LONGJUMP_WARMUP_SECONDS * 20;
 					break;
 				}
 				// Select best sound file and adjust offset
@@ -278,11 +278,11 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 						messageToAllPlayersOnShip(reason.toString());
 						return;
 					}
-					if (WarpDriveConfig.WC_WARMUP_SICKNESS) {
+					if (WarpDriveConfig.SHIP_WARMUP_SICKNESS) {
 						if (WarpDriveConfig.LOGGING_JUMP) {
 							WarpDrive.logger.info(this + " Giving warp sickness targetWarmup " + targetWarmup + " distance " + controller.getDistance());
 						}
-						makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.WC_WARMUP_RANDOM_TICKS);
+						makePlayersOnShipDrunk(targetWarmup + WarpDriveConfig.SHIP_WARMUP_RANDOM_TICKS);
 					}
 				}
 				
@@ -322,7 +322,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				}
 				
 				doJump();
-				cooldownTime = WarpDriveConfig.WC_COOLDOWN_INTERVAL_SECONDS * 20;
+				cooldownTime = WarpDriveConfig.SHIP_COOLDOWN_INTERVAL_SECONDS * 20;
 				controller.setJumpFlag(false);
 			} else {
 				warmupTime = 0;
@@ -351,16 +351,16 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		// Search block in cube around core
 		int xmax, ymax, zmax;
 		int xmin, ymin, zmin;
-		xmin = xCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
-		xmax = xCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+		xmin = xCoord - WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE;
+		xmax = xCoord + WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE;
 
-		zmin = zCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
-		zmax = zCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE;
+		zmin = zCoord - WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE;
+		zmax = zCoord + WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE;
 
 		// scan 1 block higher to encourage putting isolation block on both
 		// ground and ceiling
-		ymin = Math.max(0, yCoord - WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
-		ymax = Math.min(255, yCoord + WarpDriveConfig.WR_MAX_ISOLATION_RANGE + 1);
+		ymin = Math.max(0, yCoord - WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE + 1);
+		ymax = Math.min(255, yCoord + WarpDriveConfig.RADAR_MAX_ISOLATION_RANGE + 1);
 
 		int newCount = 0;
 
@@ -375,12 +375,12 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			}
 		}
 		isolationBlocksCount = newCount;
-		if (isolationBlocksCount >= WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS) {
-			isolationRate = WarpDriveConfig.WR_MIN_ISOLATION_EFFECT
-					+ (isolationBlocksCount - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS) // bonus
+		if (isolationBlocksCount >= WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS) {
+			isolationRate = WarpDriveConfig.RADAR_MIN_ISOLATION_EFFECT
+					+ (isolationBlocksCount - WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS) // bonus
 					// blocks
-					* (WarpDriveConfig.WR_MAX_ISOLATION_EFFECT - WarpDriveConfig.WR_MIN_ISOLATION_EFFECT)
-					/ (WarpDriveConfig.WR_MAX_ISOLATION_BLOCKS - WarpDriveConfig.WR_MIN_ISOLATION_BLOCKS);
+					* (WarpDriveConfig.RADAR_MAX_ISOLATION_EFFECT - WarpDriveConfig.RADAR_MIN_ISOLATION_EFFECT)
+					/ (WarpDriveConfig.RADAR_MAX_ISOLATION_BLOCKS - WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS);
 		} else {
 			isolationRate = 0.0D;
 		}
@@ -433,7 +433,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	}
 
 	private void summonPlayer(EntityPlayerMP player, int x, int y, int z) {
-		if (consumeEnergy(WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE, false)) {
+		if (consumeEnergy(WarpDriveConfig.SHIP_TELEPORT_ENERGY_PER_ENTITY, false)) {
 			player.setPositionAndUpdate(x, y, z);
 
 			if (player.dimension != worldObj.provider.dimensionId) {
@@ -531,9 +531,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 
 		// Ship side is too big
-		if ((shipBack + shipFront) > WarpDriveConfig.WC_MAX_SHIP_SIDE || (shipLeft + shipRight) > WarpDriveConfig.WC_MAX_SHIP_SIDE
-				|| (shipDown + shipUp) > WarpDriveConfig.WC_MAX_SHIP_SIDE) {
-			reason.append("Ship is too big (max is " + WarpDriveConfig.WC_MAX_SHIP_SIDE + " per side)");
+		if ((shipBack + shipFront) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE || (shipLeft + shipRight) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE
+				|| (shipDown + shipUp) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE) {
+			reason.append("Ship is too big (max is " + WarpDriveConfig.SHIP_MAX_SIDE_SIZE + " per side)");
 			return false;
 		}
 
@@ -546,14 +546,14 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			}
 
 			String playerName = ((EntityPlayer) o).getDisplayName();
-			for (String unlimiteName : WarpDriveConfig.WC_UNLIMITED_PLAYERNAMES) {
+			for (String unlimiteName : WarpDriveConfig.SHIP_VOLUME_UNLIMITED_PLAYERNAMES) {
 				isUnlimited = isUnlimited || unlimiteName.equals(playerName);
 			}
 		}
 
 		shipVolume = computeRealShipVolume();
-		if (!isUnlimited && shipVolume > WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE && worldObj.provider.dimensionId == 0) {
-			reason.append("Ship is too big for the overworld (max is " + WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE + " blocks)");
+		if (!isUnlimited && shipVolume > WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE && worldObj.provider.dimensionId == 0) {
+			reason.append("Ship is too big for the overworld (max is " + WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE + " blocks)");
 			return false;
 		}
 
@@ -793,7 +793,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			WarpDrive.logger.info(this + " Performing hyperspace jump of " + shipInfo);
 			
 			// Check ship size for hyper-space jump
-			if (shipVolume < WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE) {
+			if (shipVolume < WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE) {
 				Jumpgate nearestGate = null;
 				if (WarpDrive.jumpgates == null) {
 					WarpDrive.logger.warn(this + " WarpDrive.instance.jumpGates is NULL!");
@@ -803,7 +803,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				
 				StringBuilder reason = new StringBuilder();
 				if (nearestGate == null || !isShipInJumpgate(nearestGate, reason)) {
-					this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE
+					this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE
 							+ "). Insufficient ship mass to open hyperspace portal. Use a jumpgate to reach or exit hyperspace.");
 					this.controller.setJumpFlag(false);
 					return;
@@ -857,7 +857,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			
 			WorldServer spaceWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 			for (Object o : list) {
-				if (!consumeEnergy(WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE, false)) {
+				if (!consumeEnergy(WarpDriveConfig.SHIP_TELEPORT_ENERGY_PER_ENTITY, false)) {
 					return;
 				}
 				
@@ -980,19 +980,19 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	public static int calculateRequiredEnergy(ShipCoreMode currentMode, int shipVolume, int jumpDistance) {
 		switch (currentMode) {
 		case TELEPORT:
-			return WarpDriveConfig.WC_ENERGY_PER_ENTITY_TO_SPACE;
+			return WarpDriveConfig.SHIP_TELEPORT_ENERGY_PER_ENTITY;
 			
 		case BASIC_JUMP:
-			return (WarpDriveConfig.WC_ENERGY_PER_BLOCK_MODE1 * shipVolume) + (WarpDriveConfig.WC_ENERGY_PER_DISTANCE_MODE1 * jumpDistance);
+			return (WarpDriveConfig.SHIP_NORMALJUMP_ENERGY_PER_BLOCK * shipVolume) + (WarpDriveConfig.SHIP_NORMALJUMP_ENERGY_PER_DISTANCE * jumpDistance);
 			
 		case LONG_JUMP:
-			return (WarpDriveConfig.WC_ENERGY_PER_BLOCK_MODE2 * shipVolume) + (WarpDriveConfig.WC_ENERGY_PER_DISTANCE_MODE2 * jumpDistance);
+			return (WarpDriveConfig.SHIP_HYPERJUMP_ENERGY_PER_BLOCK * shipVolume) + (WarpDriveConfig.SHIP_HYPERJUMP_ENERGY_PER_DISTANCE * jumpDistance);
 			
 		case HYPERSPACE:
-			return WarpDriveConfig.WC_MAX_ENERGY_VALUE / 10; // 10% of maximum
+			return WarpDriveConfig.SHIP_MAX_ENERGY_STORED / 10; // 10% of maximum
 			
 		case BEACON_JUMP:
-			return WarpDriveConfig.WC_MAX_ENERGY_VALUE / 2; // half of maximum
+			return WarpDriveConfig.SHIP_MAX_ENERGY_STORED / 2; // half of maximum
 			
 		case GATE_JUMP:
 			return 2 * shipVolume;
@@ -1000,7 +1000,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			break;
 		}
 		
-		return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
+		return WarpDriveConfig.SHIP_MAX_ENERGY_STORED;
 	}
 	
 	private int computeRealShipVolume() {
@@ -1070,7 +1070,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.WC_MAX_ENERGY_VALUE;
+		return WarpDriveConfig.SHIP_MAX_ENERGY_STORED;
 	}
 	
 	@Override

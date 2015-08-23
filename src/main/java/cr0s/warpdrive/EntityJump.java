@@ -30,7 +30,7 @@ import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.conf.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.MovingEntity;
-import cr0s.warpdrive.data.TransitionPlane;
+import cr0s.warpdrive.data.Planet;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.world.SpaceTeleporter;
 
@@ -342,9 +342,9 @@ public class EntityJump extends Entity {
 			Boolean planeFound = false;
 			Boolean planeValid = false;
 			int closestPlaneDistance = Integer.MAX_VALUE;
-			TransitionPlane closestTransitionPlane = null;
-			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
-				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+			Planet closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
+				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
 				if (worldObj.provider.dimensionId == transitionPlane.dimensionId) {
 					planeFound = true;
 					int planeDistance = transitionPlane.isValidToSpace(new Vector3(this));
@@ -383,9 +383,9 @@ public class EntityJump extends Entity {
 		} else if (fromSpace) {
 			Boolean planeFound = false;
 			int closestPlaneDistance = Integer.MAX_VALUE;
-			TransitionPlane closestTransitionPlane = null;
-			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.G_TRANSITIONPLANES.length; iPlane++) {
-				TransitionPlane transitionPlane = WarpDriveConfig.G_TRANSITIONPLANES[iPlane];
+			Planet closestTransitionPlane = null;
+			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
+				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
 				int planeDistance = transitionPlane.isValidFromSpace(new Vector3(this));
 				if (planeDistance == 0) {
 					planeFound = true;
@@ -714,7 +714,7 @@ public class EntityJump extends Entity {
 		}
 		
 		// Register explosion(s) at collision point
-		if (blowPoints > WarpDriveConfig.WC_COLLISION_TOLERANCE_BLOCKS) {
+		if (blowPoints > WarpDriveConfig.SHIP_COLLISION_TOLERANCE_BLOCKS) {
 			result = checkMovement(Math.max(1, testDistance + 1), true);
 			if (result != null) {
 				/*
@@ -722,10 +722,10 @@ public class EntityJump extends Entity {
 				 * boom = 5 Endercrystal = 6 TNTcart = 4 to 11.5 TNT = 4
 				 */
 				float massCorrection = 0.5F + (float) Math
-						.sqrt(Math.min(1.0D, Math.max(0.0D, shipCore.shipVolume - WarpDriveConfig.WC_MAX_SHIP_VOLUME_ON_SURFACE)
-								/ WarpDriveConfig.WC_MIN_SHIP_VOLUME_FOR_HYPERSPACE));
+						.sqrt(Math.min(1.0D, Math.max(0.0D, shipCore.shipVolume - WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE)
+								/ WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE));
 				collisionDetected = true;
-				collisionStrength = (4.0F + blowPoints - WarpDriveConfig.WC_COLLISION_TOLERANCE_BLOCKS) * massCorrection;
+				collisionStrength = (4.0F + blowPoints - WarpDriveConfig.SHIP_COLLISION_TOLERANCE_BLOCKS) * massCorrection;
 				collisionAtSource = result.atSource;
 				collisionAtTarget = result.atTarget;
 				WarpDrive.logger.info(this + " Reporting " + collisionAtTarget.size() + " collisions coordinates " + blowPoints

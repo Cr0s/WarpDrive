@@ -30,7 +30,7 @@ public class TileEntityEnergyBank extends TileEntityAbstractEnergy {
 
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.PS_MAX_ENERGY;
+		return WarpDriveConfig.ENERGY_BANK_MAX_ENERGY_STORED;
 	}
 
 	@Override

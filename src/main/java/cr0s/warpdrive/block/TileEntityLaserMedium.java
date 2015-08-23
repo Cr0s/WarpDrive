@@ -47,7 +47,7 @@ public class TileEntityLaserMedium extends TileEntityAbstractEnergy {
 	// IEnergySink methods implementation
 	@Override
 	public int getMaxEnergyStored() {
-		return WarpDriveConfig.PB_MAX_ENERGY_VALUE;
+		return WarpDriveConfig.LASER_MEDIUM_MAX_ENERGY_STORED;
 	}
 
 	@Override

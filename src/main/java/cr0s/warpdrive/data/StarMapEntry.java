@@ -110,7 +110,7 @@ public class StarMapEntry {
 		if (dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
 			return new VectorI(x, y + 512, z);
 		}
-		for (TransitionPlane transitionPlane : WarpDriveConfig.G_TRANSITIONPLANES) {
+		for (Planet transitionPlane : WarpDriveConfig.PLANETS) {
 			if (transitionPlane.dimensionId == dimensionId) {
 				if ( (Math.abs(x - transitionPlane.dimensionCenterX) <= transitionPlane.borderSizeX)
 				  && (Math.abs(z - transitionPlane.dimensionCenterZ) <= transitionPlane.borderSizeZ)) {

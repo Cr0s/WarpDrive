@@ -94,13 +94,14 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		}
 		
 		delayTicks++;
-		if (isEmitting
-				&& ((beamFrequency != BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_DELAY_TICKS) || (beamFrequency == BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LE_EMIT_SCAN_DELAY_TICKS))) {
+		if ( isEmitting
+		  && ( (beamFrequency != BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LASER_CANNON_EMIT_FIRE_DELAY_TICKS)
+		    || (beamFrequency == BEAM_FREQUENCY_SCANNING && delayTicks > WarpDriveConfig.LASER_CANNON_EMIT_SCAN_DELAY_TICKS))) {
 			delayTicks = 0;
 			isEmitting = false;
 			int beamEnergy = Math.min(
-					this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LE_COLLECT_ENERGY_MULTIPLIER),
-					WarpDriveConfig.LE_MAX_LASER_ENERGY);
+					this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY),
+					WarpDriveConfig.LASER_CANNON_MAX_LASER_ENERGY);
 			emitBeam(beamEnergy);
 			energyFromOtherBeams = 0;
 			sendEvent("laserSend", new Object[] { beamFrequency, beamEnergy });
@@ -133,7 +134,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		if (findFirstBooster() != null) {
 			int newX, newY, newZ;
 			TileEntity te;
-			for (int shift = 1; shift <= WarpDriveConfig.LE_MAX_BOOSTERS_NUMBER; shift++) {
+			for (int shift = 1; shift <= WarpDriveConfig.LASER_CANNON_MAX_MEDIUMS_COUNT; shift++) {
 				newX = xCoord + (dx * shift);
 				newY = yCoord + (dy * shift);
 				newZ = zCoord + (dz * shift);
@@ -152,7 +153,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	// TODO refactor me
 	private void emitBeam(int parEnergy) {
 		int energy = parEnergy; // FIXME Beam power calculations
-		int beamLengthBlocks = energy / WarpDriveConfig.LE_BEAM_LENGTH_PER_ENERGY_DIVIDER;
+		int beamLengthBlocks = energy / WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK;
 		
 		if (energy == 0 || beamLengthBlocks < 1 || beamFrequency > 65000 || beamFrequency <= 0) {
 			return;
@@ -212,20 +213,23 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 			}
 			
 			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
-				EntityLivingBase e = (EntityLivingBase) entityHit.entityHit;
+				EntityLivingBase entity = (EntityLivingBase) entityHit.entityHit;
 				double distanceToEntity = entityHit.hitVec.distanceTo(beamVector.clone().toVec3());
 				
 				if (hit == null || (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > distanceToEntity)) {
 					if (distanceToEntity <= beamLengthBlocks) {
-						e.setFire(WarpDriveConfig.LE_ENTITY_HIT_SET_ON_FIRE_TIME);
-						e.attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER);
+						entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
+						entity.attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
 						
-						if (energy > WarpDriveConfig.LE_ENTITY_HIT_EXPLOSION_LASER_ENERGY) {
-							worldObj.newExplosion(null, e.posX, e.posY, e.posZ, 4F, true, true);
+						if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
+							float strength = Math.max(0.0F, Math.min(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
+									  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH
+									+ (energy / (float)WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH))); 
+							worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
 						}
 						
 						// consume energy
-						energy -= WarpDriveConfig.LE_ENTITY_HIT_DAMAGE_PER_ENERGY_DIVIDER + (10 * distanceToEntity);
+						energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE + (10 * distanceToEntity);
 						endPoint = new Vector3(entityHit.hitVec);
 						break;
 					}
@@ -273,8 +277,9 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 					endPoint = new Vector3(hit.hitVec);
 				}
 				
-				energy -= WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY + (resistance * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_BLOCK_RESISTANCE)
-						+ ((distance - distanceTravelled) * WarpDriveConfig.LE_BLOCK_HIT_CONSUME_ENERGY_PER_DISTANCE);
+				energy -= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY
+						+ (resistance * WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE)
+						+ ((distance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY_PER_DISTANCE);
 				distanceTravelled = distance;
 				endPoint = new Vector3(hit.hitVec);
 				
@@ -282,8 +287,11 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 					break;
 				}
 				
-				if (resistance >= Blocks.obsidian.getExplosionResistance(null)) {// TODO: choose entity
-					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, 4F * (2 + (energy / 500000)), true, true);
+				if (resistance >= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD) {
+					float strength = Math.max(0.0F, Math.min(WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH,
+							  WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH
+							+ (energy / (float)WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH))); 
+					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, strength, true, true);
 					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Blocks.fire : Blocks.air);
 				} else {
 					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);

@@ -69,13 +69,13 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		if (function != null && function.length > 0) {
 			String fun = function[0].toString().toLowerCase();
 			if (fun.equals("source")) {
-				if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+				if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 					return "source(x,y,z): sets the coordinates (relative to the transporter) to teleport from\ndest(): returns the relative x,y,z coordinates of the source";
 				} else {
 					return "source(x,y,z): sets the absolute coordinates to teleport from\ndest(): returns the x,y,z coordinates of the source";
 				}
 			} else if (fun.equals("dest")) {
-				if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+				if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 					return "dest(x,y,z): sets the coordinates (relative to the transporter) to teleport to\ndest(): returns the relative x,y,z coordinates of the destination";
 				} else {
 					return "dest(x,y,z): sets the absolute coordinates to teleport to\ndest(): returns the x,y,z coordinates of the destination";
@@ -105,7 +105,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		Vector3 vec = src ? sourceVec : destVec;
 
 		if (vec == null) {
-			Vector3 sV = WarpDriveConfig.TR_RELATIVE_COORDS ? new Vector3(this) : new Vector3(0, 0, 0);
+			Vector3 sV = WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS ? new Vector3(this) : new Vector3(0, 0, 0);
 			if (src)
 				sourceVec = sV;
 			else
@@ -121,7 +121,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 				vec.z = toDouble(arguments[2]);
 			} else if (arguments.length == 1) {
 				unlock();
-				if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+				if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 					vec.x = centreOnMe.x;
 					vec.y = centreOnMe.y;
 					vec.z = centreOnMe.z;
@@ -158,7 +158,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		} else if (methodName.equals("powerBoost")) {
 			try {
 				if (arguments.length >= 1) {
-					powerBoost = clamp(toDouble(arguments[0]), 1, WarpDriveConfig.TR_MAX_BOOST_MUL);
+					powerBoost = clamp(toDouble(arguments[0]), 1, WarpDriveConfig.TRANSPORTER_MAX_BOOST_MUL);
 				}
 			} catch (NumberFormatException e) {
 				powerBoost = 1;
@@ -175,7 +175,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	private Integer energyCost() {
 		if (sourceVec != null && destVec != null) {
-			return (int) Math.ceil(Math.pow(3, powerBoost - 1) * WarpDriveConfig.TR_EU_PER_METRE * sourceVec.distanceTo(destVec));
+			return (int) Math.ceil(Math.pow(3, powerBoost - 1) * WarpDriveConfig.TRANSPORTER_ENERGY_PER_BLOCK * sourceVec.distanceTo(destVec));
 		}
 		return null;
 	}
@@ -216,13 +216,13 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	private void transportEnt(Entity ent, Vector3 dest) {
 		if (ent instanceof EntityLivingBase) {
 			EntityLivingBase livingEnt = (EntityLivingBase) ent;
-			if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+			if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 				livingEnt.setPositionAndUpdate(xCoord + dest.x, yCoord + dest.y, zCoord + dest.z);
 			} else {
 				livingEnt.setPositionAndUpdate(dest.x, dest.y, dest.z);
 			}
 		} else {
-			if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+			if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 				ent.setPosition(xCoord + dest.x, yCoord + dest.y, zCoord + dest.z);
 			} else {
 				ent.setPosition(dest.x, dest.y, dest.z);
@@ -295,7 +295,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	}
 
 	private Vector3 absoluteVector(Vector3 a) {
-		if (WarpDriveConfig.TR_RELATIVE_COORDS)
+		if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS)
 			return a.clone().translate(new Vector3(this));
 		else
 			return a;
@@ -303,7 +303,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	private double calculatePower(Vector3 d) {
 		Vector3 myCoords;
-		if (WarpDriveConfig.TR_RELATIVE_COORDS)
+		if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS)
 			myCoords = centreOnMe;
 		else
 			myCoords = new Vector3(this).translate(centreOnMe);
@@ -359,7 +359,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		Vector3 bS = new Vector3(this);
 		Vector3 scanPos = new Vector3(scanRange / 2, 2, scanRange / 2);
 		Vector3 scanNeg = new Vector3(-scanRange / 2, -1, -scanRange / 2);
-		if (WarpDriveConfig.TR_RELATIVE_COORDS) {
+		if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 			tS.translate(sourceVec).translate(scanPos);
 			bS.translate(sourceVec).translate(scanNeg);
 		} else {
@@ -395,7 +395,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	@Override
 	public int getMaxEnergyStored() {
-		int max = WarpDriveConfig.TR_MAX_ENERGY;
+		int max = WarpDriveConfig.TRANSPORTER_MAX_ENERGY;
 		if (upgrades.containsKey(EnumUpgradeTypes.Energy)) {
 			max = (int) Math.floor(max * Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Energy)));
 		}

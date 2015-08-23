@@ -7,17 +7,17 @@ import net.minecraft.nbt.NBTTagCompound;
  *
  * @author LemADEC
  */
-public class TransitionPlane implements Cloneable {
+public class Planet implements Cloneable {
 	public int dimensionId;
 	public int dimensionCenterX, dimensionCenterZ;
 	public int borderSizeX, borderSizeZ;
 	public int spaceCenterX, spaceCenterZ;
 	
-	public TransitionPlane() {
+	public Planet() {
 		this(0, 0, 0, 5000, 5000, 0, 0);
 	}
 	
-	public TransitionPlane(int parDimensionId, int parDimensionCenterX, int parDimensionCenterZ, int parBorderSizeX, int parBorderSizeZ, int parSpaceCenterX, int parSpaceCenterZ) {
+	public Planet(int parDimensionId, int parDimensionCenterX, int parDimensionCenterZ, int parBorderSizeX, int parBorderSizeZ, int parSpaceCenterX, int parSpaceCenterZ) {
 		this.dimensionId = parDimensionId;
 		this.spaceCenterX = parSpaceCenterX;
 		this.spaceCenterZ = parSpaceCenterZ;
@@ -27,7 +27,7 @@ public class TransitionPlane implements Cloneable {
 		this.borderSizeZ = parBorderSizeZ;
 	}
 	
-	public TransitionPlane(NBTTagCompound nbt) {
+	public Planet(NBTTagCompound nbt) {
 		readFromNBT(nbt);
 	}
 	
@@ -35,8 +35,8 @@ public class TransitionPlane implements Cloneable {
 	 * Makes a new copy of this TransitionPlane. Prevents variable referencing problems.
 	 */
 	@Override
-	public TransitionPlane clone() {
-		return new TransitionPlane(dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, spaceCenterX, spaceCenterZ);
+	public Planet clone() {
+		return new Planet(dimensionId, dimensionCenterX, dimensionCenterZ, borderSizeX, borderSizeZ, spaceCenterX, spaceCenterZ);
 	}
 	
 	/**
@@ -95,8 +95,8 @@ public class TransitionPlane implements Cloneable {
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof TransitionPlane) {
-			TransitionPlane transitionPlane = (TransitionPlane) o;
+		if (o instanceof Planet) {
+			Planet transitionPlane = (Planet) o;
 			return this.dimensionId == transitionPlane.dimensionId && this.dimensionCenterX == transitionPlane.dimensionCenterX && this.dimensionCenterZ == transitionPlane.dimensionCenterZ
 					&& this.borderSizeX == transitionPlane.borderSizeX && this.borderSizeZ == transitionPlane.borderSizeZ && this.spaceCenterX == transitionPlane.spaceCenterX
 					&& this.spaceCenterZ == transitionPlane.spaceCenterZ;
