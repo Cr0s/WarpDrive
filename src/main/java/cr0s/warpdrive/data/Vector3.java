@@ -614,10 +614,7 @@ public class Vector3 implements Cloneable {
 	public MovingObjectPosition rayTraceBlocks(World world, float rotationYaw, float rotationPitch, boolean collisionFlag, double reachDistance) {
 		Vector3 lookVector = getDeltaPositionFromRotation(rotationYaw, rotationPitch);
 		Vector3 reachPoint = translate(this, this.scale(lookVector, reachDistance));
-		return world.rayTraceBlocks(this.toVec3(), reachPoint.toVec3());// TODO:
-																		// Removed
-																		// collision
-																		// flag
+		return world.rayTraceBlocks(this.toVec3(), reachPoint.toVec3());// TODO: Removed collision flag
 	}
 
 	public MovingObjectPosition rayTraceEntities(World world, float rotationYaw, float rotationPitch, boolean collisionFlag, double reachDistance) {
