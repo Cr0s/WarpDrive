@@ -29,7 +29,7 @@ public class FillerSet implements XmlRepresentable {
 	@Override
 	public void loadFromXmlElement(Element e) throws InvalidXmlException {
 		
-		FillerFactory fact = new FillerFactory();
+		// FillerFactory fact = new FillerFactory();
 
 	}
 	
