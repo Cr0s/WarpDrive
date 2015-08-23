@@ -18,7 +18,6 @@ import cr0s.warpdrive.conf.XmlRepresentable;
  *
  * If FillerSet(blocks[]) is called, that is not necessary.
  *
- * @author TheNumenorean
  *
  */
 public class FillerSet implements XmlRepresentable, Comparable {

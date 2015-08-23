@@ -10,8 +10,6 @@ import cr0s.warpdrive.conf.MetaBlock;
 /**
  * Used for constructing FillerSets from a combination of Weights and Ratios
  *
- * @author TheNumenorean
- *
  */
 public class FillerFactory {
 
