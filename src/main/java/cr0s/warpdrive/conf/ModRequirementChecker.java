@@ -7,6 +7,7 @@ import org.w3c.dom.NodeList;
 import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.WarpDrive;
 
+
 public class ModRequirementChecker {
 	
 	/**
@@ -35,8 +36,8 @@ public class ModRequirementChecker {
 	}
 
 	/**
-	 * Goes through every child node of the given node, and if it is an element and contains
-	 * 
+	 * Goes through every child node of the given node, and if it is an element and fails checkModRequirements() it is removed
+	 *
 	 * @param base
 	 * @throws InvalidXmlException
 	 */
