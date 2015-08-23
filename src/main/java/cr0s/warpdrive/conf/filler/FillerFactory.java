@@ -15,8 +15,6 @@ import cr0s.warpdrive.conf.MetaBlock;
  */
 public class FillerFactory {
 
-	private String name;
-
 	private TreeMap<MetaBlock, Integer> metaBlocksWeight;
 	private TreeMap<MetaBlock, Integer> convertedRatioMetaBlocks;
 

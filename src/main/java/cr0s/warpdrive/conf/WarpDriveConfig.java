@@ -3,6 +3,7 @@ package cr0s.warpdrive.conf;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,7 +29,9 @@ import cr0s.warpdrive.conf.structures.StructureManager;
 import cr0s.warpdrive.data.TransitionPlane;
 
 public class WarpDriveConfig {
-	private static Configuration config;
+	private static File configDirectory;
+	private static DocumentBuilder xmlDocumentBuilder;
+	private static final String[] defaultXMLfilenames = { "structures-default.xml" };
 
 	/*
 	 * The variables which store whether or not individual mods are loaded
@@ -253,8 +256,6 @@ public class WarpDriveConfig {
 	public static int CL_MAX_DISTANCE = 2;
 	public static int CL_RF_PER_CHUNKTICK = 320;
 
-	private static DocumentBuilder xmlDocumentBuilder;
-
 	public static Block getModBlock(final String mod, final String id) {
 		try {
 			return GameRegistry.findBlock(mod, id);
@@ -278,11 +279,38 @@ public class WarpDriveConfig {
 		return null;
 	}
 	
-	public static void preInit(Configuration configIn) {
-		config = configIn;
+	public static void preInit(final String stringConfigDirectory) {
+		// create mod folder
+		configDirectory = new File(stringConfigDirectory, WarpDrive.MODID);
+		configDirectory.mkdir();
+		if (!configDirectory.isDirectory()) {
+			throw new RuntimeException("Unable to create config directory " + configDirectory);
+		}
+		
+		// read configuration file
+		loadWarpDriveConfig(new File(configDirectory, WarpDrive.MODID + ".cfg"));
+		
+		// read XML files
+		File[] files = configDirectory.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File file_notUsed, String name) {
+				return name.endsWith(".xml");
+			}
+		});
+		if (files.length == 0) {
+			for(String defaultXMLfilename : defaultXMLfilenames) {
+				unpackResourceToFolder(defaultXMLfilename, "config/" + defaultXMLfilename, configDirectory);
+			}
+		}
+		
+		FillerManager.loadOres(configDirectory);
+		StructureManager.loadStructures(configDirectory);
 	}
 
-	public static void loadWarpDriveConfig() {
+	public static void loadWarpDriveConfig(File file) {
+		Configuration config = new Configuration(file);
+		config.load();
+		
 		// General
 		G_SPACE_PROVIDER_ID = config.get("General", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt();
 		G_SPACE_DIMENSION_ID = config.get("General", "space_dimension_id", G_SPACE_DIMENSION_ID, "Space dimension world ID").getInt();
@@ -501,6 +529,8 @@ public class WarpDriveConfig {
 		LL_MAX_ENERGY = config.get("LaserLift", "max_energy", LL_MAX_ENERGY).getInt();
 		LL_LIFT_ENERGY = config.get("LaserLift", "lift_energy", LL_LIFT_ENERGY, "Energy consummed per entity moved").getInt();
 		LL_TICK_RATE = config.get("LaserLift", "tick_rate", LL_TICK_RATE).getInt();
+		
+		config.save();
 	}
 
 	public static void load() {
@@ -520,7 +550,6 @@ public class WarpDriveConfig {
 		minerLogs = new ArrayList<Block>();
 		minerLeaves = new ArrayList<Block>();
 		scannerIgnoreBlocks = new ArrayList<Block>();
-		config.load();
 
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
@@ -610,13 +639,11 @@ public class WarpDriveConfig {
 		for (Block t : commonWorldGenOres) {
 			scannerIgnoreBlocks.add(t);
 		}
-
-		loadWarpDriveConfig();
-		config.save();
 	}
 
 	public static void postInit() {
 		LoadOreDict();
+		FillerManager.finishLoading();
 	}
 
 	private static void LoadOreDict() {
@@ -810,18 +837,6 @@ public class WarpDriveConfig {
 			exception.printStackTrace();
 			isAdvancedRepulsionSystemsLoaded = false;
 		}
-	}
-	
-	public static void loadWorldGen() {
-		
-		File baseConfFolder = new File("config/warpdrive/");
-		
-		baseConfFolder.mkdirs();
-		
-		FillerManager.loadOres(baseConfFolder);
-		StructureManager.loadStructures(baseConfFolder);
-
-		FillerManager.finishLoading();
 	}
 
 	public static DocumentBuilder getXmlDocumentBuilder() {

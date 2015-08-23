@@ -192,9 +192,9 @@ public class WarpDrive implements LoadingCallback {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		WarpDriveConfig.preInit(new Configuration(event.getSuggestedConfigurationFile()));
-		
 		logger = event.getModLog();
+		
+		WarpDriveConfig.preInit(event.getModConfigurationDirectory().getAbsolutePath());
 		
 		if (FMLCommonHandler.instance().getSide().isClient()) {
 			MinecraftForge.EVENT_BUS.register(new RenderOverlayCamera(Minecraft.getMinecraft()));
@@ -414,8 +414,7 @@ public class WarpDrive implements LoadingCallback {
 		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 
 		WarpDriveConfig.postInit();
-		WarpDriveConfig.loadWorldGen();
-
+		
 		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.G_ENABLE_IC2_RECIPES) {
 			initIC2Recipes();
 		}
