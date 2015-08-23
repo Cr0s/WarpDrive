@@ -76,7 +76,7 @@ public class FillerManager {
 			return;
 		}
 
-		// Remove elements based on mod reqs sanitation 
+		// Remove elements based on mod reqs sanitation
 		ModRequirementChecker.doModReqSanitation(base);
 
 		// Initially add FillerSets
@@ -96,7 +96,7 @@ public class FillerManager {
 				fillerSets.put(name, fillerSet);
 			}
 			
-			if (elementFillerSet.hasAttribute("import")) {
+			if (elementFillerSet.hasAttribute("fillerSets")) {
 				ArrayList<String> setUnresolvedDeps = fillerSetsAdditions.get(fillerSet);
 				if (setUnresolvedDeps == null) {
 					setUnresolvedDeps = new ArrayList<String>();
@@ -149,10 +149,14 @@ public class FillerManager {
 			fillerSetsDeps.remove(set);
 		}
 	}
+
+	public static FillerSet getFillerSet(String name) {
+		return fillerSets.get(name);
+	}
 	
 	/* TODO dead code?
 	public static class BlockComparator implements Comparator<Block> {
-		
+
 		@Override
 		public int compare(Block arg0, Block arg1) {
 			return arg0.getUnlocalizedName().compareTo(arg1.getUnlocalizedName());
