@@ -127,7 +127,7 @@ function CalcRealDistance()
    MinimumDistance = GLeft + GRight
    RealDistance = SData.Distance + MinimumDistance
   end
-  MinimumDistance = MinimumDistance + 1
+  MinimumDistance = MinimumDistance + 2
   JumpCost = (10 * weight) + (100 * SData.Distance)
  end
 end
