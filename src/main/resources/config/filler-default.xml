@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <warpdriveWorldGeneration version="1">
 
     <FillerSet group="commonOres" >
@@ -35,8 +35,5 @@
         <filler name="minecraft:quartz_ore" weight="20" />
         <filler name="minecraft:glowstone" weight="40" />
     </FillerSet>
-	
-	
-	
 	
 </warpdriveWorldGeneration>
