@@ -1,11 +1,11 @@
-package cr0s.warpdrive.conf.filler;
+package cr0s.warpdrive.config.filler;
 
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import net.minecraft.block.Block;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.MetaBlock;
+import cr0s.warpdrive.config.MetaBlock;
 
 /**
  * Used for constructing FillerSets from a combination of Weights and Ratios

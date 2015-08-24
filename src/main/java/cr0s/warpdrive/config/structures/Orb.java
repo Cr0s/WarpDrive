@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf.structures;
+package cr0s.warpdrive.config.structures;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -10,10 +10,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.InvalidXmlException;
-import cr0s.warpdrive.conf.XmlRepresentable;
-import cr0s.warpdrive.conf.filler.FillerManager;
-import cr0s.warpdrive.conf.filler.FillerSet;
+import cr0s.warpdrive.config.InvalidXmlException;
+import cr0s.warpdrive.config.XmlRepresentable;
+import cr0s.warpdrive.config.filler.FillerManager;
+import cr0s.warpdrive.config.filler.FillerSet;
 import cr0s.warpdrive.world.EntitySphereGen;
 
 public abstract class Orb extends DeployableStructure implements XmlRepresentable {

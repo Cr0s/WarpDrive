@@ -13,7 +13,7 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.network.PacketHandler;

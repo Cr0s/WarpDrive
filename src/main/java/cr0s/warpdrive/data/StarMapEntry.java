@@ -7,7 +7,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.common.DimensionManager;
 import cr0s.warpdrive.block.movement.TileEntityShipCore;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class StarMapEntry {
 	public StarMapEntryType type = StarMapEntryType.UNDEFINED;

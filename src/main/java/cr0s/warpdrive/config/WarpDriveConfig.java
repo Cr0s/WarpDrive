@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf;
+package cr0s.warpdrive.config;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -25,14 +25,19 @@ import net.minecraftforge.oredict.OreDictionary;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.filler.FillerManager;
-import cr0s.warpdrive.conf.structures.StructureManager;
+import cr0s.warpdrive.config.filler.FillerManager;
+import cr0s.warpdrive.config.structures.StructureManager;
 import cr0s.warpdrive.data.Planet;
 
 public class WarpDriveConfig {
 	private static File configDirectory;
 	private static DocumentBuilder xmlDocumentBuilder;
-	private static final String[] defaultXMLfilenames = { "structures-default.xml" };
+	private static final String[] defaultXMLfilenames = {
+			// fillers
+			"filler-default.xml", "filler-ae2.xml", "filler-ic2.xml", "filler-netherores.xml",
+			// structures
+			"structures-default.xml", "structures-netherores.xml",
+	};
 	
 	/*
 	 * The variables which store whether or not individual mods are loaded

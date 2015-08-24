@@ -11,7 +11,7 @@ import net.minecraft.util.IIcon;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class BlockGas extends Block {
 	private IIcon[] iconBuffer;

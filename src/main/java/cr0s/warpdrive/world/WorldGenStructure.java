@@ -4,7 +4,7 @@ import java.util.Random;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class WorldGenStructure {
 	public static Block getStoneBlock(boolean corrupted, Random rand) {

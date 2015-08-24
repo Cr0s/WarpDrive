@@ -7,7 +7,7 @@ import net.minecraft.block.Block;
 import net.minecraft.world.ChunkPosition;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class CamerasRegistry {
 	private LinkedList<CameraRegistryItem> registry;

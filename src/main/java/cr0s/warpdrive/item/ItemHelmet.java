@@ -10,7 +10,7 @@ import net.minecraft.util.IIcon;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 import cr0s.warpdrive.api.IBreathingHelmet;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class ItemHelmet extends ItemArmor implements IBreathingHelmet {
 	// private static Random ran = new Random();

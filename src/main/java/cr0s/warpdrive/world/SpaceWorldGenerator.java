@@ -9,12 +9,12 @@ import net.minecraft.world.chunk.IChunkProvider;
 import cpw.mods.fml.common.IWorldGenerator;
 import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.MetaBlock;
-import cr0s.warpdrive.conf.WarpDriveConfig;
-import cr0s.warpdrive.conf.structures.DeployableStructure;
-import cr0s.warpdrive.conf.structures.Orb;
-import cr0s.warpdrive.conf.structures.StructureManager;
-import cr0s.warpdrive.conf.structures.Orb.OrbShell;
+import cr0s.warpdrive.config.MetaBlock;
+import cr0s.warpdrive.config.WarpDriveConfig;
+import cr0s.warpdrive.config.structures.DeployableStructure;
+import cr0s.warpdrive.config.structures.Orb;
+import cr0s.warpdrive.config.structures.StructureManager;
+import cr0s.warpdrive.config.structures.Orb.OrbShell;
 
 /**
  * @author Cr0s

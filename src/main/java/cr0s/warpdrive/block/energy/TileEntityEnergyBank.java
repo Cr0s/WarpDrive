@@ -2,7 +2,7 @@ package cr0s.warpdrive.block.energy;
 
 import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 

@@ -14,7 +14,7 @@ import cr0s.warpdrive.LocalProfiler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.block.movement.TileEntityShipCore.ShipCoreMode;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.StarMapEntry.StarMapEntryType;
 
 /**

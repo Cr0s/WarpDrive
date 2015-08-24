@@ -23,7 +23,7 @@ import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.block.movement.TileEntityShipCore;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;

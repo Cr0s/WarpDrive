@@ -13,7 +13,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
 import cr0s.warpdrive.block.detection.TileEntityCamera;
 import cr0s.warpdrive.block.detection.TileEntityMonitor;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 

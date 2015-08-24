@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf.filler;
+package cr0s.warpdrive.config.filler;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -14,9 +14,9 @@ import org.xml.sax.SAXException;
 
 import scala.actors.threadpool.Arrays;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.InvalidXmlException;
-import cr0s.warpdrive.conf.ModRequirementChecker;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.InvalidXmlException;
+import cr0s.warpdrive.config.ModRequirementChecker;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class FillerManager {
 

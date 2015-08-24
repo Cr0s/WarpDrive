@@ -10,7 +10,7 @@ import org.lwjgl.input.Keyboard;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class ClientCameraHandler {
 	public static boolean isOverlayEnabled = false;

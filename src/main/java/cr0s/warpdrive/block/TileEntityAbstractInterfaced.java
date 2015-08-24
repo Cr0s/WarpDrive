@@ -18,7 +18,7 @@ import li.cil.oc.api.network.Visibility;
 import net.minecraft.nbt.NBTTagCompound;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;

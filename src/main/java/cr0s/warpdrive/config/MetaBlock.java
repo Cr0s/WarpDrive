@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf;
+package cr0s.warpdrive.config;
 
 import java.util.HashMap;
 

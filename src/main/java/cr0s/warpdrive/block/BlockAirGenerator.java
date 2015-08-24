@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class BlockAirGenerator extends BlockContainer
 {

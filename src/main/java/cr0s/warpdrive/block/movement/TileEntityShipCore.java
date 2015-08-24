@@ -25,7 +25,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.EntityJump;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Jumpgate;
 import cr0s.warpdrive.data.StarMapEntry;
 import cr0s.warpdrive.world.SpaceTeleporter;

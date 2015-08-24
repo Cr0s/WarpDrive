@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf.filler;
+package cr0s.warpdrive.config.filler;
 
 import java.util.Random;
 
@@ -9,9 +9,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.InvalidXmlException;
-import cr0s.warpdrive.conf.MetaBlock;
-import cr0s.warpdrive.conf.XmlRepresentable;
+import cr0s.warpdrive.config.InvalidXmlException;
+import cr0s.warpdrive.config.MetaBlock;
+import cr0s.warpdrive.config.XmlRepresentable;
 
 /**
  * Represents a set of fillers. Before using after construction, finishContruction() must be called.

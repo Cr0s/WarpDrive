@@ -1,4 +1,4 @@
-package cr0s.warpdrive.conf;
+package cr0s.warpdrive.config;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

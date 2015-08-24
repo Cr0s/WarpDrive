@@ -95,7 +95,7 @@ import cr0s.warpdrive.command.CommandGenerate;
 import cr0s.warpdrive.command.CommandInvisible;
 import cr0s.warpdrive.command.CommandJumpgates;
 import cr0s.warpdrive.command.CommandSpace;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.CamerasRegistry;
 import cr0s.warpdrive.data.CloakManager;
 import cr0s.warpdrive.data.JumpgatesRegistry;

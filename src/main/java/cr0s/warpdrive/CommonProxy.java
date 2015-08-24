@@ -1,7 +1,7 @@
 package cr0s.warpdrive;
 
 import cpw.mods.fml.common.registry.EntityRegistry;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.render.EntityCamera;
 import cr0s.warpdrive.world.EntitySphereGen;
 import cr0s.warpdrive.world.EntityStarCore;

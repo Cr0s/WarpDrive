@@ -8,7 +8,7 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
 import cr0s.warpdrive.block.TileEntityLaserMedium;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;

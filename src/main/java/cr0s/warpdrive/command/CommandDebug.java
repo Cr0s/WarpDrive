@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 /*
  *   /wdebug <dimension> <coordinates> <blockId> <Metadata> <actions>

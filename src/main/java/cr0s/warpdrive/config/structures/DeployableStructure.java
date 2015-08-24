@@ -1,7 +1,7 @@
 /**
  *
  */
-package cr0s.warpdrive.conf.structures;
+package cr0s.warpdrive.config.structures;
 
 import java.util.Random;
 

@@ -8,9 +8,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.conf.MetaBlock;
-import cr0s.warpdrive.conf.structures.Orb;
-import cr0s.warpdrive.conf.structures.Orb.OrbShell;
+import cr0s.warpdrive.config.MetaBlock;
+import cr0s.warpdrive.config.structures.Orb;
+import cr0s.warpdrive.config.structures.Orb.OrbShell;
 import cr0s.warpdrive.data.JumpBlock;
 
 /*

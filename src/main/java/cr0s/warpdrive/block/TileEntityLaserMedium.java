@@ -3,7 +3,7 @@ package cr0s.warpdrive.block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cr0s.warpdrive.conf.WarpDriveConfig;
+import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class TileEntityLaserMedium extends TileEntityAbstractEnergy {
 	private int ticks = 0;
