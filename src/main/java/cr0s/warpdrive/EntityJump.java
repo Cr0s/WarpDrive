@@ -588,13 +588,13 @@ public class EntityJump extends Entity {
 	/**
 	 * Saving ship to memory
 	 *
-	 * @param shipSize
+	 * @param shipVolume
 	 */
-	private void saveShip(int shipSize) {
+	private void saveShip(int shipVolume) {
 		LocalProfiler.start("EntityJump.saveShip");
 		try {
-			ship = new JumpBlock[shipSize];
-			JumpBlock placeAfter[] = new JumpBlock[shipSize]; // blocks and tile entities to be placed at the end, and removed first
+			ship = new JumpBlock[shipVolume];
+			JumpBlock placeAfter[] = new JumpBlock[shipVolume]; // blocks and tile entities to be placed at the end, and removed first
 			
 			int indexPlaceNormal = 0;
 			int indexPlaceAfter = 0;
@@ -812,7 +812,7 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) || block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
+					if (worldObj.isAirBlock(x, y, z) || block.isAssociatedBlock(WarpDrive.blockGas)) {// whitelist
 						continue;
 					}
 					
@@ -831,7 +831,7 @@ public class EntityJump extends Entity {
 			}
 		}
 		
-		// Lem: abort jump if blocks with TE are connecting to the ship (avoid crash when splitting multi-blocks)
+		// Abort jump if blocks with TE are connecting to the ship (avoid crash when splitting multi-blocks)
 		for (int x = minX - 1; x <= maxX + 1; x++) {
 			boolean xBorder = (x == minX - 1) || (x == maxX + 1);
 			for (int z = minZ - 1; z <= maxZ + 1; z++) {
