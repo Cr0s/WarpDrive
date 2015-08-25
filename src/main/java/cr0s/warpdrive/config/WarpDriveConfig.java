@@ -389,6 +389,7 @@ public class WarpDriveConfig {
 			Planet planet = new Planet(planetInts[0], planetInts[1], planetInts[2], planetInts[3], planetInts[4], planetInts[5], planetInts[6]);
 			WarpDrive.logger.info("Adding '" + name + "' as " + planet.toString());
 			PLANETS[index] = planet;
+			index++;
 		}
 		// FIXME: check planets aren't overlapping
 		// We're not checking invalid dimension id, so they can be pre-allocated (see MystCraft)

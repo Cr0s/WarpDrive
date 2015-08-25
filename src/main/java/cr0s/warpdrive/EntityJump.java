@@ -340,27 +340,27 @@ public class EntityJump extends Entity {
 		moveX = moveY = moveZ = 0;
 		
 		if (toSpace) {
-			Boolean planeFound = false;
+			Boolean planetFound = false;
 			Boolean planeValid = false;
-			int closestPlaneDistance = Integer.MAX_VALUE;
-			Planet closestTransitionPlane = null;
+			int closestPlanetDistance = Integer.MAX_VALUE;
+			Planet closestPlanet = null;
 			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
-				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
-				if (worldObj.provider.dimensionId == transitionPlane.dimensionId) {
-					planeFound = true;
-					int planeDistance = transitionPlane.isValidToSpace(new VectorI(this));
-					if (planeDistance == 0) {
+				Planet planet = WarpDriveConfig.PLANETS[iPlane];
+				if (worldObj.provider.dimensionId == planet.dimensionId) {
+					planetFound = true;
+					int planetDistance = planet.isValidToSpace(new VectorI(this));
+					if (planetDistance == 0) {
 						planeValid = true;
-						moveX = transitionPlane.spaceCenterX - transitionPlane.dimensionCenterX;
-						moveZ = transitionPlane.spaceCenterZ - transitionPlane.dimensionCenterZ;
+						moveX = planet.spaceCenterX - planet.dimensionCenterX;
+						moveZ = planet.spaceCenterZ - planet.dimensionCenterZ;
 						targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
-					} else if (closestPlaneDistance > planeDistance) {
-						closestPlaneDistance = planeDistance;
-						closestTransitionPlane = transitionPlane;
+					} else if (closestPlanetDistance > planetDistance) {
+						closestPlanetDistance = planetDistance;
+						closestPlanet = planet;
 					}
 				}
 			}
-			if (!planeFound) {
+			if (!planetFound) {
 				LocalProfiler.stop();
 				String msg = "Unable to reach space!\nThere's no valid transition plane for current dimension " + worldObj.provider.getDimensionName() + " ("
 						+ worldObj.provider.dimensionId + ")";
@@ -370,13 +370,13 @@ public class EntityJump extends Entity {
 			}
 			if (!planeValid) {
 				LocalProfiler.stop();
-				assert(closestTransitionPlane != null);
+				assert(closestPlanet != null);
 				@SuppressWarnings("null") // Eclipse derp, don't remove
-				String msg = "Ship is outside border, unable to reach space!\nClosest transition plane is ~" + closestPlaneDistance + " m away ("
-						+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
-						+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
-						+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
-						+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+				String msg = "Ship is outside border, unable to reach space!\nClosest transition plane is ~" + closestPlanetDistance + " m away ("
+						+ (closestPlanet.dimensionCenterX - closestPlanet.borderSizeX) + ", 250,"
+						+ (closestPlanet.dimensionCenterZ - closestPlanet.borderSizeZ) + ") to ("
+						+ (closestPlanet.dimensionCenterX + closestPlanet.borderSizeX) + ", 255,"
+						+ (closestPlanet.dimensionCenterZ + closestPlanet.borderSizeZ) + ")";
 				messageToAllPlayersOnShip(msg);
 				killEntity(msg);
 				return;
@@ -385,17 +385,17 @@ public class EntityJump extends Entity {
 			Boolean planeFound = false;
 			int closestPlaneDistance = Integer.MAX_VALUE;
 			Planet closestTransitionPlane = null;
-			for (int iPlane = 0; (!planeFound) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
-				Planet transitionPlane = WarpDriveConfig.PLANETS[iPlane];
-				int planeDistance = transitionPlane.isValidFromSpace(new VectorI(this));
+			for (int iPlanet = 0; (!planeFound) && iPlanet < WarpDriveConfig.PLANETS.length; iPlanet++) {
+				Planet planet = WarpDriveConfig.PLANETS[iPlanet];
+				int planeDistance = planet.isValidFromSpace(new VectorI(this));
 				if (planeDistance == 0) {
 					planeFound = true;
-					moveX = transitionPlane.dimensionCenterX - transitionPlane.spaceCenterX;
-					moveZ = transitionPlane.dimensionCenterZ - transitionPlane.spaceCenterZ;
-					targetWorld = DimensionManager.getWorld(transitionPlane.dimensionId);
+					moveX = planet.dimensionCenterX - planet.spaceCenterX;
+					moveZ = planet.dimensionCenterZ - planet.spaceCenterZ;
+					targetWorld = DimensionManager.getWorld(planet.dimensionId);
 				} else if (closestPlaneDistance > planeDistance) {
 					closestPlaneDistance = planeDistance;
-					closestTransitionPlane = transitionPlane;
+					closestTransitionPlane = planet;
 				}
 			}
 			if (!planeFound) {
