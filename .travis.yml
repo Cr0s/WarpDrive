@@ -23,5 +23,5 @@ deploy:
     branch: MC1.7
     tags: true 
     jdk: oraclejdk7
-after_deploy:
+after_success:
   "curl --ftp-create-dirs -T ${RELEASE_FILE} -u $FTP_USER:$FTP_PASSWORD ftp://thenumenorean.net/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar"
