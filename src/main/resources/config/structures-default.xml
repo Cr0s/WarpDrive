@@ -52,5 +52,13 @@
             <filler ratio=".5" block="minecraft:air" />
         </shell>
     </structure>
-
+    
+    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_block" maxCoreSize="10" minCoreSize="2">
+        
+        <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres;uncommonOres">
+            <filler weight="10" block="minecraft:stone" />
+            <filler weight="5" block="minecraft:cobblestone" />
+        </shell>
+        
+     </structure>
 </warpdriveWorldGeneration>
