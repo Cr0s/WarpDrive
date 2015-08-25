@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
 <warpdriveWorldGeneration version="1" mods="netherores">
     
     <FillerSet group="nether" >
-        <filler name="netherores:nether_coal" weight="50" />
-        <filler name="netherores:nether_iron" weight="40" />
-        <filler name="netherores:nether_redstone" weight="30" />
-        <filler name="netherores:nether_lapis" weight="15" />
-        <filler name="netherores:nether_diamond" weight="5" />
+        <filler block="netherores:ore" metadata="0" weight="50" />
+        <filler block="netherores:ore" metadata="0" weight="40" />
+        <filler block="netherores:ore" metadata="0" weight="30" />
+        <filler block="netherores:ore" metadata="0" weight="15" />
+        <filler block="netherores:ore" metadata="0" weight="5" />
     </FillerSet>
 	
 </warpdriveWorldGeneration>

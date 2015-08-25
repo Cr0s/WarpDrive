@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
 <warpdriveWorldGeneration version="1" mods="netherores" >
 
 	<structure group="moon" name="netherMoon" radius="20">
 		<shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
-			<filler weight="100" name="minecraft:iron_block" />
+			<filler weight="100" block="minecraft:iron_block" />
 		</shell>
 		
 		<shell name="mantle" minThickness="6" maxThickness="30" fillerSets="nether">
@@ -12,12 +14,12 @@
 	
 	<structure group="moon" name="netherMoonCorrupted" radius="20">
         <shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
-            <filler weight="100" name="minecraft:iron_block" />
+            <filler weight="100" block="minecraft:iron_block" />
         </shell>
         
         <shell name="mantle" minThickness="6" maxThickness="30" fillerSets="nether">
-            <filler ratio=".3" name="minecraft:air" />
-            <filler ratio=".3" name="minecraft:netherbrick" />
+            <filler ratio=".3" block="minecraft:air" />
+            <filler ratio=".3" block="minecraft:netherbrick" />
             
         </shell>
     </structure>

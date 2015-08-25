@@ -1,8 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
 <warpdriveWorldGeneration version="1" mods="appliedenergistics2" >
 
     <FillerSet group="uncommonOres" >
-	   <filler name="ae2:quartz" ratio=".01" />
+	   <filler block="ae2:quartz" ratio=".01" />
 	</FillerSet>
 	
 </warpdriveWorldGeneration>
