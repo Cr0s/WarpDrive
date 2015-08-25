@@ -21,7 +21,7 @@ import cr0s.warpdrive.config.WarpDriveConfig;
 public class FillerManager {
 
 	private static TreeMap<String, FillerSet> fillerSets = new TreeMap<String, FillerSet>();
-	
+
 	// Stores extra dependency information
 	static TreeMap<FillerSet, ArrayList<String>> fillerSetsAdditions = new TreeMap<FillerSet, ArrayList<String>>();
 
@@ -38,21 +38,21 @@ public class FillerManager {
 	public static void loadOres(String oreConfDirectory) {
 		loadOres(new File(oreConfDirectory));
 	}
-	
+
 	public static void loadOres(File dir) {
 		// directory is created by caller, so it can copy default files if any
-		
+
 		if (!dir.isDirectory()) {
 			throw new IllegalArgumentException("File path " + dir.getPath() + " must be a directory!");
 		}
-		
+
 		File[] files = dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File file_notUsed, String name) {
 				return name.startsWith("filler") && name.endsWith(".xml");
 			}
 		});
-		
+
 		for(File file : files) {
 			try {
 				WarpDrive.logger.info("Loading filler data file " + file.getPath() + "...");
@@ -64,7 +64,7 @@ public class FillerManager {
 			}
 		}
 	}
-	
+
 	private static void loadXmlFillerFile(File file) throws InvalidXmlException, SAXException, IOException {
 
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(file);
@@ -84,18 +84,18 @@ public class FillerManager {
 		for (int i = 0; i < nodesFillerSet.getLength(); i++) {
 
 			Element elementFillerSet = (Element) nodesFillerSet.item(i);
-			
-			String name = elementFillerSet.getAttribute("name");
-			if (name.isEmpty()) {
-				throw new InvalidXmlException("FillerSet " + i + " is missing a name attribute!");
+
+			String group = elementFillerSet.getAttribute("group");
+			if (group.isEmpty()) {
+				throw new InvalidXmlException("FillerSet " + i + " is missing a group attribute!");
 			}
-			
-			FillerSet fillerSet = fillerSets.get(name);
+
+			FillerSet fillerSet = fillerSets.get(group);
 			if (fillerSet == null) {
-				fillerSet = new FillerSet(name);
-				fillerSets.put(name, fillerSet);
+				fillerSet = new FillerSet(group);
+				fillerSets.put(group, fillerSet);
 			}
-			
+
 			if (elementFillerSet.hasAttribute("fillerSets")) {
 				ArrayList<String> setUnresolvedDeps = fillerSetsAdditions.get(fillerSet);
 				if (setUnresolvedDeps == null) {
@@ -104,27 +104,27 @@ public class FillerManager {
 				}
 				setUnresolvedDeps.addAll(Arrays.asList(elementFillerSet.getAttribute("import").split(",")));
 			}
-			
+
 			fillerSet.loadFromXmlElement(elementFillerSet);
 		}
 	}
-	
+
 	public static void finishLoading() {
-		
+
 		while (!fillerSetsAdditions.isEmpty()) {
 			attemptDependencyFilling(fillerSetsAdditions);
 		}
-		
+
 		// When everything is done, finalize
 		for (FillerSet fillerSet : fillerSets.values()) {
 			fillerSet.finishContruction();
 		}
 	}
-	
+
 	private static void attemptDependencyFilling(TreeMap<FillerSet, ArrayList<String>> fillerSetsDeps) {
 
 		ArrayList<FillerSet> toRemove = new ArrayList<FillerSet>();
-		
+
 		for (Entry<FillerSet, ArrayList<String>> entry : fillerSetsDeps.entrySet()) {
 
 			for (String dep : entry.getValue()) {
@@ -138,13 +138,13 @@ public class FillerManager {
 				} else if (fillerSetsDeps.containsKey(fillerSets.get(dep))) {
 					//Skip until it is loaded
 				} else {
-					
+
 					entry.getKey().loadFrom(fillerSets.get(dep));
 					toRemove.add(entry.getKey());
 				}
 			}
 		}
-		
+
 		for (FillerSet set : toRemove) {
 			fillerSetsDeps.remove(set);
 		}
@@ -153,7 +153,7 @@ public class FillerManager {
 	public static FillerSet getFillerSet(String name) {
 		return fillerSets.get(name);
 	}
-	
+
 	/* TODO dead code?
 	public static class BlockComparator implements Comparator<Block> {
 
