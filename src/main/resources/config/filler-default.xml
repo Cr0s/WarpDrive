@@ -4,10 +4,13 @@
     <FillerSet group="commonOres" >
 	   <filler name="minecraft:coal_ore" weight="100" />
        <filler name="minecraft:iron_ore" weight="70" />
+       <filler name="ic2:tin_ore" ratio=".05"  mods="IC2" />
+       <filler name="ic2:copper_ore" ratio=".06"  mods="IC2" />
     </FillerSet>
     
     <FillerSet group="uncommonOres" >
-        <filler name="minecraft:redstone_ore" weight="40" />
+       <filler name="minecraft:redstone_ore" weight="40" />
+       <filler name="ic2:platinum_ore" ratio=".001"  mods="IC2" />
     </FillerSet>
     
     <FillerSet group="rareOres" >
