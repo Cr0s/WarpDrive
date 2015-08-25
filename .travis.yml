@@ -3,6 +3,10 @@ jdk:
 - oraclejdk7
 - openjdk7
 - oraclejdk8
+env:
+  global:
+    - "FTP_USER=warpdrive"
+    - "FTP_PASSWORD=password"
 before_install:
 - chmod +x gradlew
 before_deploy:
@@ -19,3 +23,5 @@ deploy:
     branch: MC1.7
     tags: true 
     jdk: oraclejdk7
+after_deploy:
+  "curl --ftp-create-dirs -T ${RELEASE_FILE} -u $FTP_USER:$FTP_PASSWORD ftp://thenumenorean.net/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar"
