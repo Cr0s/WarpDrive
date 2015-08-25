@@ -9,7 +9,7 @@ import cr0s.warpdrive.WarpDrive;
 
 
 public class ModRequirementChecker {
-	
+
 	/**
 	 * Will check the given element for a mod attribute and return a string of all the ones that are not loaded, separated by commas
 	 *
@@ -19,12 +19,16 @@ public class ModRequirementChecker {
 	 * @throws InvalidXmlException
 	 */
 	public static String checkModRequirements(Element e) {
-		
+
 		String missingMods = "";
-		
+
 		for (String mod : e.getAttribute("mods").split(",")) {
-			
+
 			//TODO: add version check
+
+
+			if (mod.isEmpty())
+				continue;
 
 			if (!Loader.isModLoaded(mod)) {
 				missingMods = missingMods + mod + ", ";
@@ -60,10 +64,10 @@ public class ModRequirementChecker {
 					doModReqSanitation(child);
 
 				}
-				
+
 			}
 		}
 
 	}
-	
+
 }
