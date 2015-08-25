@@ -18,11 +18,11 @@ import cr0s.warpdrive.config.WarpDriveConfig;
 
 
 public class StructureManager {
-	
+
 	private static ArrayList<Star> stars = new ArrayList<Star>();
 	private static ArrayList<Planetoid> moons = new ArrayList<Planetoid>();
 	private static ArrayList<Planetoid> gasClouds = new ArrayList<Planetoid>();
-	
+
 	public static void loadStructures(String structureConfDir) {
 		loadStructures(new File(structureConfDir));
 	}
@@ -62,32 +62,33 @@ public class StructureManager {
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(f);
 
 		String res = ModRequirementChecker.checkModRequirements(base.getDocumentElement());
-		
+
 		if (!res.isEmpty()) {
 			WarpDrive.logger.info("Skippping structure data file " + f.getPath() + " because the mods " + res + " are not loaded");
 			return;
 		}
-		
+
 		ModRequirementChecker.doModReqSanitation(base);
-		
+
 		NodeList structures = base.getElementsByTagName("structure");
 		for (int i = 0; i < structures.getLength(); i++) {
-			
+
 			Element struct = (Element) structures.item(i);
-			
+
 			String group = struct.getAttribute("group");
 			String name = struct.getAttribute("name");
-			
+
 			if (group.isEmpty())
 				throw new InvalidXmlException("Structure must have a group!");
-			
-			int radius;
-			try {
+
+			int radius = 0;
+			/*try {
 				radius = Integer.parseInt(struct.getAttribute("radius"));
 			} catch(NumberFormatException e) {
 				throw new InvalidXmlException("Structure radius is invalid!");
 			}
-			
+			 */
+
 			if (group.equalsIgnoreCase("star")) {
 				Star s = new Star(radius);
 				s.loadFromXmlElement(struct);
@@ -98,7 +99,7 @@ public class StructureManager {
 			}
 		}
 	}
-	
+
 	public static DeployableStructure getStructure(Random random, final String name, final String type) {
 		if (name == null || name.length() == 0) {
 			if (type == null || type.length() == 0) {
@@ -118,15 +119,15 @@ public class StructureManager {
 		// not found or nothing defined => return null
 		return null;
 	}
-	
+
 	public static DeployableStructure getStar(Random random, final String name) {
 		return getStructure(random, name, "star");
 	}
-	
+
 	public static DeployableStructure getMoon(Random random, final String name) {
 		return getStructure(random, name, "moon");
 	}
-	
+
 	public static DeployableStructure getGasCloud(Random random, final String name) {
 		return getStructure(random, name, "cloud");
 	}
