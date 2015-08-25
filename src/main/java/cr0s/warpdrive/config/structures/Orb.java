@@ -17,11 +17,11 @@ import cr0s.warpdrive.config.filler.FillerSet;
 import cr0s.warpdrive.world.EntitySphereGen;
 
 public abstract class Orb extends DeployableStructure implements XmlRepresentable {
-	
+
 	private OrbShell[] shellRelative;
 	private ArrayList<OrbShell> shells;
 	private String name;
-	
+
 	public String getName() {
 		return name;
 	}
@@ -32,40 +32,40 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 	public Orb(int diameter) {
 		super(diameter, diameter, diameter);
-		
+
 	}
-	
+
 	@Override
 	public void loadFromXmlElement(Element e) throws InvalidXmlException {
-		
+
 		this.name = e.getAttribute("name");
-		
+
 		ArrayList<OrbShell> newShells = new ArrayList<OrbShell>();
 		int totalThickness = 0;
-		
+
 		NodeList shells = e.getElementsByTagName("shell");
 		for (int i = 0; i < shells.getLength(); i++) {
 			Element tmp = (Element) shells.item(i);
-			
+
 			OrbShell shell = new OrbShell();
 			shell.loadFromXmlElement(tmp);
 			totalThickness += shell.thickness;
 			newShells.add(shell);
-			
+
 		}
-		
+
 		int index = 0;
 		shellRelative = new OrbShell[totalThickness];
-		
+
 		for (OrbShell shell : newShells) {
-			
+
 			for (int i = 0; i < shell.thickness; i++)
 				shellRelative[index++] = shell;
 		}
-		
-		
+
+
 	}
-	
+
 	@Override
 	public void saveToXmlElement(Element e, Document d) {
 		for (OrbShell shell : shells) {
@@ -73,9 +73,9 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 			shell.saveToXmlElement(tmp, d);
 			e.appendChild(tmp);
 		}
-		
+
 	}
-	
+
 	@Override
 	public boolean generate(World world, Random p_76484_2_, int x, int y, int z) {
 		EntitySphereGen entitySphereGen = new EntitySphereGen(world, x, y, z, getHeight() / 2, this, true);
@@ -88,15 +88,15 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 		world.spawnEntityInWorld(entitySphereGen);
 		return false;
 	}
-	
+
 	public OrbShell getShellForRadius(int r) {
 		return shellRelative[r];
 	}
-	
+
 	public class OrbShell extends FillerSet {
-		
+
 		private int thickness;
-		
+
 		/**
 		 * @return the thickness
 		 */
@@ -116,10 +116,10 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 			super("");
 		}
-		
+
 		@Override
 		public void loadFromXmlElement(Element e) throws InvalidXmlException {
-			
+
 			WarpDrive.logger.info("Loading shell " + e.getAttribute("name"));
 			name = e.getAttribute("name");
 
@@ -131,18 +131,22 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 					super.loadFrom(FillerManager.getFillerSet(imp));
 				}
 			}
-			
-			thickness = Integer.parseInt(e.getAttribute("thicknessMin"));
-			
+
+			try {
+				thickness = Integer.parseInt(e.getAttribute("maxThickness"));
+			} catch (NumberFormatException ex) {
+				throw new InvalidXmlException("MaxThickness is not valid!");
+			}
+
 			//TODO: Implement random thickness
-			
+
 		}
-		
+
 		@Override
 		public void saveToXmlElement(Element e, Document d) {
 			//Not needed
 		}
-		
+
 	}
-	
+
 }
