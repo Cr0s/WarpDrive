@@ -128,7 +128,7 @@ public class WarpDriveConfig {
 	public static int SHIP_MAX_ENERGY_STORED = 100000000;
 	public static int SHIP_NORMALJUMP_ENERGY_PER_BLOCK = 10;
 	public static int SHIP_NORMALJUMP_ENERGY_PER_DISTANCE = 100;
-	public static int SHIP_HYPERJUMP_ENERGY_PER_BLOCK = 1000;
+	public static int SHIP_HYPERJUMP_ENERGY_PER_BLOCK = 100;
 	public static int SHIP_HYPERJUMP_ENERGY_PER_DISTANCE = 1000;
 	public static int SHIP_TELEPORT_ENERGY_PER_ENTITY = 1000000;
 	public static int SHIP_MAX_JUMP_DISTANCE = 128;
@@ -208,14 +208,14 @@ public class WarpDriveConfig {
 	public static int MINING_LASER_WARMUP_DELAY_TICKS = 20;
 	public static int MINING_LASER_SCAN_DELAY_TICKS = 20;
 	public static int MINING_LASER_MINE_DELAY_TICKS = 3;
-	public static int MINING_LASER_SPACE_ENERGY_PER_LAYER = 25000;
-	public static int MINING_LASER_PLANET_ENERGY_PER_LAYER = 35000;
-	public static int MINING_LASER_SPACE_ENERGY_PER_BLOCK = 150;
-	public static int MINING_LASER_PLANET_ENERGY_PER_BLOCK = 300;
-	public static double MINING_LASER_ORESONLY_ENERGY_FACTOR = 5.0; // lower value encourages to keep the land 'clean'
-	public static double MINING_LASER_SILKTOUCH_ENERGY_FACTOR = 2.5;
+	public static int MINING_LASER_SPACE_ENERGY_PER_LAYER = 20000;
+	public static int MINING_LASER_PLANET_ENERGY_PER_LAYER = 33000;
+	public static int MINING_LASER_SPACE_ENERGY_PER_BLOCK = 1500;
+	public static int MINING_LASER_PLANET_ENERGY_PER_BLOCK = 2500;
+	public static double MINING_LASER_ORESONLY_ENERGY_FACTOR = 15.0; // lower value encourages to keep the land 'clean'
+	public static double MINING_LASER_SILKTOUCH_ENERGY_FACTOR = 1.5;
 	public static double MINING_LASER_SILKTOUCH_DEUTERIUM_L = 1.0;
-	public static double MINING_LASER_FORTUNE_ENERGY_FACTOR = 2.5;
+	public static double MINING_LASER_FORTUNE_ENERGY_FACTOR = 1.5;
 
 	// Tree farm
 	public static int TREE_FARM_MIN_RADIUS = 5;
@@ -224,9 +224,9 @@ public class WarpDriveConfig {
 	// Cloaking
 	public static int CLOAKING_MAX_ENERGY_STORED = 500000000;
 	public static int CLOAKING_COIL_CAPTURE_BLOCKS = 5;
-	public static int CLOAKING_MAX_FIELD_RADIUS = 100;
-	public static int CLOAKING_TIER1_ENERGY_PER_BLOCK = 125;
-	public static int CLOAKING_TIER2_ENERGY_PER_BLOCK = 500;
+	public static int CLOAKING_MAX_FIELD_RADIUS = 63;
+	public static int CLOAKING_TIER1_ENERGY_PER_BLOCK = 32;
+	public static int CLOAKING_TIER2_ENERGY_PER_BLOCK = 128;
 	public static int CLOAKING_FIELD_REFRESH_INTERVAL_SECONDS = 3;
 
 	// Air generator
@@ -409,7 +409,7 @@ public class WarpDriveConfig {
 				config.get("ship", "teleport_energy_per_entity", SHIP_TELEPORT_ENERGY_PER_ENTITY).getInt());
 
 		SHIP_MAX_JUMP_DISTANCE = clamp(0, 30000000,
-				config.get("ship", "max_jump_distance", SHIP_MAX_JUMP_DISTANCE, "Maximum jump lenght value in blocks").getInt());
+				config.get("ship", "max_jump_distance", SHIP_MAX_JUMP_DISTANCE, "Maximum jump length value in blocks").getInt());
 
 		SHIP_VOLUME_MAX_ON_PLANET_SURFACE = clamp(0, 10000000,
 				config.get("ship", "volume_max_on_planet_surface", SHIP_VOLUME_MAX_ON_PLANET_SURFACE,
@@ -434,7 +434,7 @@ public class WarpDriveConfig {
 		SHIP_LONGJUMP_WARMUP_SECONDS = clamp(0, 3600,
 				config.get("ship", "longjump_warmup_seconds", SHIP_LONGJUMP_WARMUP_SECONDS, "(measured in seconds)").getInt());
 		SHIP_WARMUP_RANDOM_TICKS = clamp(10, 200,
-				config.get("ship", "warmp_random_ticks", SHIP_WARMUP_RANDOM_TICKS).getInt());
+				config.get("ship", "warmup_random_ticks", SHIP_WARMUP_RANDOM_TICKS, "Random variation added to warmup (measured in ticks)").getInt());
 		SHIP_WARMUP_SICKNESS = config.get("ship", "warmup_sickness", true, "Enable warp sickness during warmup").getBoolean(true);
 
 		SHIP_CORE_REGISTRY_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
