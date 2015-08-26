@@ -3,42 +3,138 @@
 
 <warpdriveWorldGeneration version="1">
 
-    <FillerSet group="commonOres" >
-	<filler block="minecraft:coal_ore" ratio=".08" />
-	<filler block="minecraft:iron_ore" ratio=".05" />
-	<filler block="ic2:tin_ore" ratio=".05"  mods="IC2" />
-	<filler block="ic2:copper_ore" ratio=".06"  mods="IC2" />
-    </FillerSet>
-    
-    <FillerSet group="uncommonOres" >
-	<filler block="minecraft:redstone_ore" ratio=".02" />
-	<filler block="ic2:platinum_ore" ratio=".001"  mods="IC2" />
-    </FillerSet>
-    
-    <FillerSet group="rareOres" >
-	<filler block="minecraft:gold_ore" ratio=".008" />
-	<filler block="minecraft:diamond_ore" ratio=".001" />
-	<filler block="minecraft:lapis_ore" ratio=".005" />
-	<filler block="minecraft:emerald_ore" ratio=".005" />
-	<filler block="warpdrive:iridiumBlock" ratio=".0001" />
-    </FillerSet>
-    
-    <FillerSet group="overworld" >
-	<filler block="minecraft:stone" weight="200" />
-	<filler block="minecraft:sand" weight="30" />
-	<filler block="minecraft:dirt" weight="50" />
-    </FillerSet>
-    
-    <FillerSet group="end" >
-	<filler block="minecraft:end_stone" weight="200" />
-	<filler block="minecraft:sand" weight="20" />
-	<filler block="minecraft:obsidian" weight="20" />
-    </FillerSet>
-    
-    <FillerSet group="nether" >
-	<filler block="minecraft:netherrack" weight="300" />
-        <filler block="minecraft:quartz_ore" weight="20" />
-	<filler block="minecraft:glowstone" weight="40" />
-    </FillerSet>
+	<FillerSet group="stone_ores">
+		<filler block="minecraft:coal_ore" ratio=".08" />
+		<filler block="minecraft:iron_ore" ratio=".05" />
+		<filler block="minecraft:redstone_ore" ratio=".05" />
+		<filler block="minecraft:gold_ore" ratio=".008" />
+		<filler block="minecraft:lapis_ore" ratio=".005" />
+		<filler block="minecraft:emerald_ore" ratio=".005" />
+		<filler block="IC2:blockOreTin" ratio=".05" />
+		<filler block="IC2:blockOreCopper" ratio=".06" />
+		<filler block="IC2:blockOreLead" ratio=".06" />
+		<filler block="IC2:blockOreUran" ratio=".001" />
+		<filler block="ImmersiveEngineering:ore" metadata="0" ratio=".001" /><!-- Copper -->
+		<filler block="ImmersiveEngineering:ore" metadata="1" ratio=".001" /><!-- Bauxite -->
+		<filler block="ImmersiveEngineering:ore" metadata="2" ratio=".001" /><!-- Lead -->
+		<filler block="ImmersiveEngineering:ore" metadata="3" ratio=".001" /><!-- Silver -->
+		<filler block="ImmersiveEngineering:ore" metadata="4" ratio=".001" /><!-- Nickel -->
+		<filler block="arsmagica2:vinteumOre" metadata="0" ratio=".001" /><!-- Vinteum -->
+		<filler block="arsmagica2:vinteumOre" metadata="1" ratio=".001" /><!-- Chimerite -->
+		<filler block="arsmagica2:vinteumOre" metadata="2" ratio=".001" /><!-- Blue topaz -->
+		<filler block="arsmagica2:vinteumOre" metadata="3" ratio=".001" /><!-- Moonstone -->
+		<filler block="arsmagica2:vinteumOre" metadata="4" ratio=".001" /><!-- Sunstone -->
+		<filler block="minecraft:diamond_ore" ratio=".004" />
+		<filler block="warpdrive:iridiumBlock" ratio=".0001" mods="!netherores" />
+		<filler block="icbm:sulfur_ore" ratio=".001" /><!-- to be confirmed -->
+		<filler block="ae2:quartz" ratio=".0013" /><!-- to be confirmed -->
+		<filler block="minecraft:water" ratio=".001" />
+		<filler block="minecraft:bedrock" ratio=".001" />
+	</FillerSet>
+	
+	<FillerSet group="igneous_ores">
+		<filler block="UndergroundBiomes:igneous_oreCoal" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreDiamond" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreEmerald" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreGold" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreIron" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreLapis" ratio=".001" />
+		<filler block="UndergroundBiomes:igneous_oreRedstone" ratio=".001" />
+	</FillerSet>
+	
+	<FillerSet group="metamorphic_ores">
+		<filler block="UndergroundBiomes:metamorphic_oreCoal" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreDiamond" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreEmerald" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreGold" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreIron" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreLapis" ratio=".001" />
+		<filler block="UndergroundBiomes:metamorphic_oreRedstone" ratio=".001" />
+	</FillerSet>
+	
+	<FillerSet group="sedimentary_ores">
+		<filler block="UndergroundBiomes:sedimentary_oreCoal" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreDiamond" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreEmerald" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreGold" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreIron" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreLapis" ratio=".001" />
+		<filler block="UndergroundBiomes:sedimentary_oreRedstone" ratio=".001" />
+	</FillerSet>
+	
+	<for variable="type" in="igneous,metamorphic,sedimentary">
+		<for variable="metadata" from="0" to="7">
+			<FillerSet group="%type%_ores@%metadata%.normal" fillerSets="%type%_ores@%metadata%">
+				<filler block="UndergroundBiomes:%type%Stone" metadata="%metadata%" weight="10" />
+			</FillerSet>
+			
+			<FillerSet group="%type%_ores@%metadata%.corrupted" fillerSets="%type%_ores@%metadata%">
+				<filler block="UndergroundBiomes:%type%Cobblestone" metadata="%metadata%" weight="10" />
+			</FillerSet>
+			
+			<FillerSet group="%type%_ores@%metadata%">
+				<filler block="UndergroundBiomes:%type%_oreCoal" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreDiamond" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreEmerald" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreGold" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreIron" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreLapis" metadata="%metadata%" ratio=".001" />
+				<filler block="UndergroundBiomes:%type%_oreRedstone" metadata="%metadata%" ratio=".001" />
+			</FillerSet>
+		</for>
+	</for>
+	
+	<FillerSet group="nether_moon" fillerSets="commonOres">
+		<filler block="minecraft:netherrack" weight="1" />
+		<filler block="minecraft:lava" ratio=".001" />
+		<filler block="minecraft:bedrock" ratio=".001" />
+	</FillerSet>
+	
+	<FillerSet group="end_moon">
+		<filler block="minecraft:whiteStone" weight="1" />
+		<filler block="minecraft:bedrock" ratio=".001" />
+	</FillerSet>
+	
+	
+	
+	
+	<FillerSet group="commonOres">
+		<filler block="minecraft:coal_ore" ratio=".08" />
+		<filler block="minecraft:iron_ore" ratio=".05" />
+		<filler block="IC2:blockOreTin" ratio=".05" />
+		<filler block="IC2:blockOreCopper" ratio=".06" />
+	</FillerSet>
+	
+	<FillerSet group="uncommonOres">
+		<filler block="minecraft:redstone_ore" ratio=".02" />
+		<filler block="IC2:blockOreUran" ratio=".001" />
+		<filler block="ae2:quartz" ratio=".01" mods="appliedenergistics2" />
+	</FillerSet>
+	
+	<FillerSet group="rareOres">
+		<filler block="minecraft:gold_ore" ratio=".008" />
+		<filler block="minecraft:diamond_ore" ratio=".001" />
+		<filler block="minecraft:lapis_ore" ratio=".005" />
+		<filler block="minecraft:emerald_ore" ratio=".005" />
+		<filler block="warpdrive:iridiumBlock" ratio=".0001" />
+	</FillerSet>
+	
+	<FillerSet group="overworld">
+		<filler block="minecraft:stone" weight="200" />
+		<filler block="minecraft:sand" weight="30" />
+		<filler block="minecraft:dirt" weight="50" />
+	</FillerSet>
+	
+	<FillerSet group="end">
+		<filler block="minecraft:end_stone" weight="200" />
+		<filler block="minecraft:sand" weight="20" />
+		<filler block="minecraft:obsidian" weight="20" />
+	</FillerSet>
+	
+	<FillerSet group="nether">
+		<filler block="minecraft:netherrack" weight="300" />
+		<filler block="minecraft:quartz_ore" weight="20" />
+		<filler block="minecraft:glowstone" weight="40" />
+	</FillerSet>
 	
 </warpdriveWorldGeneration>
