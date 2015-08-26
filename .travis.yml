@@ -6,7 +6,6 @@ jdk:
 env:
   global:
   - FTP_USER=warpdrive
-  - FTP_PASSWORD=password
   - secure: rnP6qHsQDukvZt1BeWLcK4DetcqzfmP2cRUYlNYk6lpGpgiIRP0RE4MbHJGgR0HNG93pIRcxjH7hHXKY1tbLZT7CBQBZmpAB7pTBPP1udmv7hV43vuoq5G8jYNO9lPqbFnREnM9/1b+REWfkedREenrPpbMdnIGukrYPxKJeh9UPRNrExIuBdVYCiGgleST3YrBtrWadRqRLB7I7YjhhcnxAtMG8SSea1r0tFBdD+XMeST7XBX3WPrMEfUDICpFJyReCAIKdDwJj2tgjHrWH7+h2jp6KljmRuS69Ody6ClhJ6Lsj3d+3yVAV2aqQDCxkBYqJA5bSq0rdOg8jn0qY9OD3rJtxzaZchfwXsEovs1KK2vJDEzti0zJOVm2W9ZB/KGawvD+bOnAsioOq3L4+HFJ9HfaU6gds0MvozdjydyWBWk+P1RiCdYLBOzKo4Z/LiD4KHvw9colQuJ+41mijWt7p3DQ2ijB/NrfbuBhGkRp3d1vcxLTKhTh3Q2eyqnhYgVlLyGmCVFqIsW18mXlnh5b/EptIpV9oLv3bz1MFjZtbl4p9mOaxK+nkvDV4yXgigmFAH5se/gmpKfj7wXacIdvyiQZmsBOK1sUpQAlf/kOueuJd0WXnVInZqnrjj2/JHCbb43zVb9iHd9NgHL1HkhPwdd+FDWk1LLPJMf+1PNk=
 before_install:
 - chmod +x gradlew
@@ -25,5 +24,5 @@ deploy:
     jdk: oraclejdk7
 after_success:
 - export RELEASE_FILE=$(ls build/libs/*.jar)
-- echo "curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar"
-- curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar
+- echo "curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE:0:-3}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar"
+- curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE:0:-3}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar
