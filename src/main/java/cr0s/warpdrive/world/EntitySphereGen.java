@@ -46,30 +46,30 @@ public final class EntitySphereGen extends Entity {
 	public int xCoord;
 	public int yCoord;
 	public int zCoord;
-	
+
 	private int radius;
 	private int gasColor;
-	
+
 	private final int BLOCKS_PER_TICK = 5000;
-	
+
 	private final int STATE_SAVING = 0;
 	private final int STATE_SETUP = 1;
 	private final int STATE_DELETE = 2;
 	private final int STATE_STOP = 3;
 	private int state = STATE_DELETE;
 	private int ticksDelay = 0;
-	
+
 	private int currentIndex = 0;
 	private int pregenSize = 0;
-	
+
 	private ArrayList<JumpBlock> blocks;
 	private Orb orb;
 	private boolean replace;
-	
+
 	public EntitySphereGen(World world) {
 		super(world);
 	}
-	
+
 	public EntitySphereGen(World world, int x, int y, int z, int radius, Orb orb, boolean replace) {
 		super(world);
 		this.xCoord = x;
@@ -87,23 +87,24 @@ public final class EntitySphereGen extends Entity {
 		this.orb = orb;
 		this.replace = replace;
 	}
-	
+
 	public void killEntity() {
 		this.state = STATE_STOP;
+		worldObj.markBlockRangeForRenderUpdate(xCoord - radius, yCoord - radius, zCoord - radius, xCoord + radius, yCoord + radius, zCoord + radius);
 		worldObj.removeEntity(this);
 	}
-	
+
 	@Override
 	public void onUpdate() {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-		
+
 		if (ticksDelay > 0) {
 			ticksDelay--;
 			return;
 		}
-		
+
 		switch (this.state) {
 		case STATE_SAVING:
 			tickScheduleBlocks();
@@ -121,13 +122,13 @@ public final class EntitySphereGen extends Entity {
 			break;
 		}
 	}
-	
+
 	private void tickPlaceBlocks() {
 		int blocksToMove = Math.min(BLOCKS_PER_TICK, blocks.size() - currentIndex);
 		// LocalProfiler.start("[EntitySphereGen] Placing blocks: " +
 		// currentIndex + "/" + blocks.size());
 		int notifyFlag;
-		
+
 		for (int index = 0; index < blocksToMove; index++) {
 			if (currentIndex >= blocks.size())
 				break;
@@ -136,16 +137,16 @@ public final class EntitySphereGen extends Entity {
 			JumpBlock.setBlockNoLight(worldObj, jb.x, jb.y, jb.z, jb.block, jb.blockMeta, notifyFlag);
 			currentIndex++;
 		}
-		
+
 		// LocalProfiler.stop();
 	}
-	
+
 	private void tickScheduleBlocks() {
 		radius += 0.5D; // Radius from center of block
 
 		// sphere
 		int ceilRadius = (int) Math.ceil(radius);
-		
+
 		// Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
 		for (int x = 0; x <= ceilRadius; x++) {
 			double x2 = (x + 0.5D) * (x + 0.5D);
@@ -155,36 +156,36 @@ public final class EntitySphereGen extends Entity {
 					double z2 = (z + 0.5D) * (z + 0.5D);
 					double dSq = Math.sqrt(x2 + y2 + z2); // Distance from current position
 					// to center
-					
+
 					// Skip too far blocks
 					if (dSq > radius)
 						continue;
-					
+
 					int rad = (int) Math.ceil(dSq);
-					
+
 					// Add blocks to memory
 					OrbShell orbShell = orb.getShellForRadius(rad);
 					MetaBlock metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord + y, zCoord + z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord + y, zCoord + z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord - y, zCoord + z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord + y, zCoord - z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord - y, zCoord + z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord + x, yCoord - y, zCoord - z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord + y, zCoord - z));
-					
+
 					metablock = orbShell.getRandomBlock(rand);
 					addBlock(new JumpBlock(metablock.block, metablock.metadata, xCoord - x, yCoord - y, zCoord - z));
 				}
@@ -195,7 +196,7 @@ public final class EntitySphereGen extends Entity {
 		}
 		// LocalProfiler.stop();
 	}
-	
+
 	private void addBlock(JumpBlock jb) {
 		if (blocks == null)
 			return;
@@ -213,19 +214,19 @@ public final class EntitySphereGen extends Entity {
 			return;
 		blocks.add(jb);
 	}
-	
+
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound tag) {
 	}
-	
+
 	@Override
 	protected void entityInit() {
 	}
-	
+
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound tag) {
 	}
-	
+
 	@Override
 	public boolean shouldRenderInPass(int pass) {
 		return false;
