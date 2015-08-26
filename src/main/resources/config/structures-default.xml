@@ -34,7 +34,7 @@
 		</shell>
 	</structure>
 	
-	<structure group="corruptedMoon" name="theCorruptedMoon">
+	<structure group="moon" name="theCorruptedMoon">
         <shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
             <filler weight="100" block="minecraft:iron_block" />
         </shell>
