@@ -616,8 +616,8 @@ public class EntityJump extends Entity {
 							for (int z = z1; z <= z2; z++) {
 								Block block = worldObj.getBlock(x, y, z);
 								
-								// Skip air blocks
-								if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
+								// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
+								if (worldObj.isAirBlock(x, y, z) && !block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 									continue;
 								}
 								
@@ -812,7 +812,7 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) || block.isAssociatedBlock(WarpDrive.blockGas)) {// whitelist
+					if (worldObj.isAirBlock(x, y, z) && !block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
 						continue;
 					}
 					
