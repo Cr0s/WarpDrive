@@ -42,14 +42,11 @@ public class FillerSet implements XmlRepresentable, Comparable {
 
 		this.name = name;
 
-		weightedFillerBlocks = null;
+		weightedFillerBlocks = new MetaBlock[1];
 		factory = new FillerFactory();
 	}
 
 	public MetaBlock getRandomBlock(Random rand) {
-		if (weightedFillerBlocks == null || weightedFillerBlocks.length == 0) {
-			return null;
-		}
 		return weightedFillerBlocks[rand.nextInt(weightedFillerBlocks.length)];
 	}
 
@@ -87,7 +84,7 @@ public class FillerSet implements XmlRepresentable, Comparable {
 			boolean hasWeightOrRatio = false;
 
 			// It is intentional that a filler could have both a ratio and a weight
-			
+
 			// Check for a weight and add it to the factory
 			String stringWeight = filler.getAttribute("weight");
 			int weight;
@@ -119,7 +116,7 @@ public class FillerSet implements XmlRepresentable, Comparable {
 					throw new InvalidXmlException(ex.getMessage());
 				}
 			}
-			
+
 			if (!hasWeightOrRatio) {
 				throw new InvalidXmlException("Filler " + filler.getBaseURI() + " is missing a weight or a ratio!");
 			}
@@ -137,6 +134,7 @@ public class FillerSet implements XmlRepresentable, Comparable {
 	 * Clears the memory used for construction
 	 */
 	public void finishContruction() {
+		WarpDrive.logger.info("Finishing construction of FillerSet " + name);
 		weightedFillerBlocks = factory.constructWeightedMetaBlockList();
 		factory = null;
 	}
@@ -153,7 +151,7 @@ public class FillerSet implements XmlRepresentable, Comparable {
 
 	/**
 	 * Adds the blocks from the given fillerSet into this one. Must be pre-finishConstruction()
-	 * 
+	 *
 	 * @param fillerSet
 	 *            The fillerset to add from
 	 */
