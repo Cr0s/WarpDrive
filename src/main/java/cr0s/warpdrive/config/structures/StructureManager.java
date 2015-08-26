@@ -82,12 +82,6 @@ public class StructureManager {
 				throw new InvalidXmlException("Structure must have a group!");
 
 			int radius = 0;
-			/*try {
-				radius = Integer.parseInt(struct.getAttribute("radius"));
-			} catch(NumberFormatException e) {
-				throw new InvalidXmlException("Structure radius is invalid!");
-			}
-			 */
 
 			if (group.equalsIgnoreCase("star")) {
 				Star s = new Star(radius);
