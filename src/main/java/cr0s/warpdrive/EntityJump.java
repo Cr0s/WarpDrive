@@ -341,16 +341,16 @@ public class EntityJump extends Entity {
 		
 		if (toSpace) {
 			Boolean planetFound = false;
-			Boolean planeValid = false;
+			Boolean planetValid = false;
 			int closestPlanetDistance = Integer.MAX_VALUE;
 			Planet closestPlanet = null;
-			for (int iPlane = 0; (!planeValid) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
+			for (int iPlane = 0; (!planetValid) && iPlane < WarpDriveConfig.PLANETS.length; iPlane++) {
 				Planet planet = WarpDriveConfig.PLANETS[iPlane];
 				if (worldObj.provider.dimensionId == planet.dimensionId) {
 					planetFound = true;
 					int planetDistance = planet.isValidToSpace(new VectorI(this));
 					if (planetDistance == 0) {
-						planeValid = true;
+						planetValid = true;
 						moveX = planet.spaceCenterX - planet.dimensionCenterX;
 						moveZ = planet.spaceCenterZ - planet.dimensionCenterZ;
 						targetWorld = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
@@ -368,7 +368,7 @@ public class EntityJump extends Entity {
 				killEntity(msg);
 				return;
 			}
-			if (!planeValid) {
+			if (!planetValid) {
 				LocalProfiler.stop();
 				assert(closestPlanet != null);
 				@SuppressWarnings("null") // Eclipse derp, don't remove
@@ -405,10 +405,10 @@ public class EntityJump extends Entity {
 					msg = "No transition plane defined, unable to enter atmosphere!";
 				} else {
 					msg = "No planet in range, unable to enter atmosphere!\nClosest transition plane is " + closestPlaneDistance + " m away ("
-							+ (closestTransitionPlane.dimensionCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
-							+ (closestTransitionPlane.dimensionCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
-							+ (closestTransitionPlane.dimensionCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
-							+ (closestTransitionPlane.dimensionCenterZ + closestTransitionPlane.borderSizeZ) + ")";
+							+ (closestTransitionPlane.spaceCenterX - closestTransitionPlane.borderSizeX) + ", 250,"
+							+ (closestTransitionPlane.spaceCenterZ - closestTransitionPlane.borderSizeZ) + ") to ("
+							+ (closestTransitionPlane.spaceCenterX + closestTransitionPlane.borderSizeX) + ", 255,"
+							+ (closestTransitionPlane.spaceCenterZ + closestTransitionPlane.borderSizeZ) + ")";
 				}
 				messageToAllPlayersOnShip(msg);
 				killEntity(msg);

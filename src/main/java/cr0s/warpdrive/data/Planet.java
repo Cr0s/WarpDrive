@@ -94,12 +94,16 @@ public class Planet implements Cloneable {
 	}
 	
 	@Override
-	public boolean equals(Object o) {
-		if (o instanceof Planet) {
-			Planet transitionPlane = (Planet) o;
-			return this.dimensionId == transitionPlane.dimensionId && this.dimensionCenterX == transitionPlane.dimensionCenterX && this.dimensionCenterZ == transitionPlane.dimensionCenterZ
-					&& this.borderSizeX == transitionPlane.borderSizeX && this.borderSizeZ == transitionPlane.borderSizeZ && this.spaceCenterX == transitionPlane.spaceCenterX
-					&& this.spaceCenterZ == transitionPlane.spaceCenterZ;
+	public boolean equals(Object object) {
+		if (object instanceof Planet) {
+			Planet planet = (Planet) object;
+			return this.dimensionId == planet.dimensionId
+				&& this.dimensionCenterX == planet.dimensionCenterX
+				&& this.dimensionCenterZ == planet.dimensionCenterZ
+				&& this.borderSizeX == planet.borderSizeX
+				&& this.borderSizeZ == planet.borderSizeZ
+				&& this.spaceCenterX == planet.spaceCenterX
+				&& this.spaceCenterZ == planet.spaceCenterZ;
 		}
 		
 		return false;
@@ -107,7 +111,7 @@ public class Planet implements Cloneable {
 	
 	@Override
 	public String toString() {
-		return "TransitionPlane [Planet " + dimensionId + "(" + dimensionCenterX + ", " + dimensionCenterZ + ")"
+		return "Planet [Dimension " + dimensionId + "(" + dimensionCenterX + ", " + dimensionCenterZ + ")"
 				+ " Border(" + borderSizeX + ", " + borderSizeZ + ")"
 				+ " Space(" + spaceCenterX + ", " + spaceCenterZ + ")]";
 	}
