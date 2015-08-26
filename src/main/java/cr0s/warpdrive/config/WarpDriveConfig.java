@@ -769,25 +769,25 @@ public class WarpDriveConfig {
 		String[] oreNames = OreDictionary.getOreNames();
 		for (String oreName : oreNames) {
 			String lowerOreName = oreName.toLowerCase();
-			if (oreName.substring(0, 3).equals("ore")) {
-				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for (ItemStack i : item) {
-					minerOres.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.logger.info("Added ore ID: " + i);
+			if (oreName.length() > 4 && oreName.substring(0, 3).equals("ore")) {
+				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
+				for (ItemStack itemStack : itemStacks) {
+					minerOres.add(Block.getBlockFromItem(itemStack.getItem()));
+					WarpDrive.logger.info("- added " + oreName + " to MinerOres as " + itemStack);
 				}
 			}
 			if (lowerOreName.contains("log")) {
-				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for (ItemStack i : item) {
-					minerLogs.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.logger.info("Added log ID: " + i);
+				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
+				for (ItemStack itemStack : itemStacks) {
+					minerLogs.add(Block.getBlockFromItem(itemStack.getItem()));
+					WarpDrive.logger.info("- added " + oreName + " to MinerLogs as " + itemStack);
 				}
 			}
 			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
-				ArrayList<ItemStack> item = OreDictionary.getOres(oreName);
-				for (ItemStack i : item) {
-					minerLeaves.add(Block.getBlockFromItem(i.getItem()));
-					WarpDrive.logger.info("Added leaf ID: " + i);
+				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
+				for (ItemStack itemStack : itemStacks) {
+					minerLeaves.add(Block.getBlockFromItem(itemStack.getItem()));
+					WarpDrive.logger.info("- added " + oreName + " to MinerLeaves as " + itemStack);
 				}
 			}
 		}
