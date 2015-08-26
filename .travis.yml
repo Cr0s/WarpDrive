@@ -24,4 +24,4 @@ deploy:
     jdk: oraclejdk7
 after_success:
   - export RELEASE_FILE=$(ls build/libs/*.jar)
-  - "curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar"
+  - curl --ftp-create-dirs -T ${RELEASE_FILE} --user $FTP_USER:$FTP_PASSWORD ftp://khazaddum.caltech.edu/warpdrive/files/${RELEASE_FILE}.${TRAVIS_BUILD_NUMBER}-${TRAVIS_BRANCH}.jar
