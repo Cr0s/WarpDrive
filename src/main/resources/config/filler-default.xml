@@ -4,41 +4,41 @@
 <warpdriveWorldGeneration version="1">
 
     <FillerSet group="commonOres" >
-	   <filler block="minecraft:coal_ore" weight="100" />
-       <filler block="minecraft:iron_ore" weight="70" />
-       <filler block="ic2:tin_ore" ratio=".05"  mods="IC2" />
-       <filler block="ic2:copper_ore" ratio=".06"  mods="IC2" />
+	<filler block="minecraft:coal_ore" ratio=".08" />
+	<filler block="minecraft:iron_ore" ratio=".05" />
+	<filler block="ic2:tin_ore" ratio=".05"  mods="IC2" />
+	<filler block="ic2:copper_ore" ratio=".06"  mods="IC2" />
     </FillerSet>
     
     <FillerSet group="uncommonOres" >
-       <filler block="minecraft:redstone_ore" weight="40" />
-       <filler block="ic2:platinum_ore" ratio=".001"  mods="IC2" />
+	<filler block="minecraft:redstone_ore" ratio=".02" />
+	<filler block="ic2:platinum_ore" ratio=".001"  mods="IC2" />
     </FillerSet>
     
     <FillerSet group="rareOres" >
-	   <filler block="minecraft:gold_ore" weight="20" />
-	   <filler block="minecraft:diamond_ore" weight="10" />
-	   <filler block="minecraft:lapis_ore" weight="15" />
-       <filler block="minecraft:emerald_ore" weight="15" />
-       <filler block="warpdrive:iridiumBlock" weight="1" />
+	<filler block="minecraft:gold_ore" ratio=".008" />
+	<filler block="minecraft:diamond_ore" ratio=".001" />
+	<filler block="minecraft:lapis_ore" ratio=".005" />
+	<filler block="minecraft:emerald_ore" ratio=".005" />
+	<filler block="warpdrive:iridiumBlock" ratio=".0001" />
     </FillerSet>
     
     <FillerSet group="overworld" >
-        <filler block="minecraft:stone" weight="200" />
-        <filler block="minecraft:sand" weight="30" />
-        <filler block="minecraft:dirt" weight="50" />
+	<filler block="minecraft:stone" weight="200" />
+	<filler block="minecraft:sand" weight="30" />
+	<filler block="minecraft:dirt" weight="50" />
     </FillerSet>
     
     <FillerSet group="end" >
-        <filler block="minecraft:end_stone" weight="200" />
-        <filler block="minecraft:sand" weight="20" />
-        <filler block="minecraft:obsidian" weight="20" />
+	<filler block="minecraft:end_stone" weight="200" />
+	<filler block="minecraft:sand" weight="20" />
+	<filler block="minecraft:obsidian" weight="20" />
     </FillerSet>
     
     <FillerSet group="nether" >
-        <filler block="minecraft:netherrack" weight="300" />
+	<filler block="minecraft:netherrack" weight="300" />
         <filler block="minecraft:quartz_ore" weight="20" />
-        <filler block="minecraft:glowstone" weight="40" />
+	<filler block="minecraft:glowstone" weight="40" />
     </FillerSet>
 	
 </warpdriveWorldGeneration>
