@@ -3,9 +3,6 @@
  */
 package cr0s.warpdrive.config.structures;
 
-import java.util.Random;
-
-import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 
 /**
@@ -14,9 +11,9 @@ import net.minecraft.world.gen.feature.WorldGenerator;
  */
 public abstract class DeployableStructure extends WorldGenerator {
 
-	private int height;
-	private int width;
-	private int length;
+	protected int height;
+	protected int width;
+	protected int length;
 
 	public DeployableStructure(int height, int width, int length) {
 		this.height = height;
