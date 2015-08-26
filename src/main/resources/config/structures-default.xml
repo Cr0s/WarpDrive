@@ -24,12 +24,12 @@
 			<filler weight="100" block="minecraft:iron_block" />
 		</shell>
 		
-		<shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres;uncommonOres">
+		<shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
 			<filler weight="10" block="minecraft:stone" />
 			<filler weight="3" block="minecraft:clay" />
 		</shell>
 		
-		<shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld;commonOres">
+		<shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld,commonOres">
 			<filler weight="3" block="minecraft:clay" />
 		</shell>
 	</structure>
@@ -39,14 +39,14 @@
             <filler weight="100" block="minecraft:iron_block" />
         </shell>
         
-        <shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres;uncommonOres">
+        <shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
             <filler weight="10" block="minecraft:stone" />
             <filler weight="3" block="minecraft:clay" />
             <filler ratio=".2" block="minecraft:air" />
             <filler ratio=".4" block="minecraft:cobblestone" />
         </shell>
         
-        <shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld;commonOres">
+        <shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld,commonOres">
             <filler weight="3" block="minecraft:clay" />
             <filler ratio=".05" block="minecraft:brick" />
             <filler ratio=".5" block="minecraft:air" />
@@ -55,7 +55,7 @@
     
     <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_block" maxCoreSize="10" minCoreSize="2">
         
-        <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres;uncommonOres">
+        <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres,uncommonOres">
             <filler weight="10" block="minecraft:stone" />
             <filler weight="5" block="minecraft:cobblestone" />
         </shell>
