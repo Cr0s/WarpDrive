@@ -96,6 +96,7 @@ public class StructureManager {
 			} else if (group.equalsIgnoreCase("moon")) {
 				Planetoid pl = new Planetoid(radius);
 				pl.loadFromXmlElement(struct);
+				moons.add(pl);
 			}
 		}
 	}
