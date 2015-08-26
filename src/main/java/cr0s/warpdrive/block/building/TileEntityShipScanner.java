@@ -205,16 +205,16 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 	}
 
 	private int getScanningEnergyCost(int size) {
-		if (WarpDriveConfig.SS_EU_PER_BLOCK_SCAN > 0) {
-			return size * WarpDriveConfig.SS_EU_PER_BLOCK_SCAN;
+		if (WarpDriveConfig.SS_ENERGY_PER_BLOCK_SCAN > 0) {
+			return size * WarpDriveConfig.SS_ENERGY_PER_BLOCK_SCAN;
 		} else {
 			return WarpDriveConfig.SS_MAX_ENERGY_STORED;
 		}
 	}
 
 	private int getDeploymentEnergyCost(int size) {
-		if (WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY > 0) {
-			return size * WarpDriveConfig.SS_EU_PER_BLOCK_DEPLOY;
+		if (WarpDriveConfig.SS_ENERGY_PER_BLOCK_DEPLOY > 0) {
+			return size * WarpDriveConfig.SS_ENERGY_PER_BLOCK_DEPLOY;
 		} else {
 			return WarpDriveConfig.SS_MAX_ENERGY_STORED;
 		}

@@ -157,9 +157,9 @@ public class WarpDriveConfig {
 
 	// Ship Scanner
 	public static int SS_MAX_ENERGY_STORED = 500000000;
-	public static int SS_EU_PER_BLOCK_SCAN = 100; // eU per block of ship volume
+	public static int SS_ENERGY_PER_BLOCK_SCAN = 100; // eU per block of ship volume
 	// (including air)
-	public static int SS_EU_PER_BLOCK_DEPLOY = 5000;
+	public static int SS_ENERGY_PER_BLOCK_DEPLOY = 5000;
 	public static int SS_MAX_DEPLOY_RADIUS_BLOCKS = 50;
 
 	// Particle Booster
@@ -464,16 +464,16 @@ public class WarpDriveConfig {
 		SS_MAX_ENERGY_STORED = clamp(1, Integer.MAX_VALUE,
 				config.get("ship_scanner", "max_energy_stored", SS_MAX_ENERGY_STORED, "Maximum energy storage").getInt());
 
-		SS_EU_PER_BLOCK_SCAN = config.get("ship_scanner", "energy_per_block_when_scanning", SS_EU_PER_BLOCK_SCAN,
+		SS_ENERGY_PER_BLOCK_SCAN = config.get("ship_scanner", "energy_per_block_when_scanning", SS_ENERGY_PER_BLOCK_SCAN,
 				"Energy consummed per block when scanning a ship (use -1 to consume everything)").getInt();
-		if (SS_EU_PER_BLOCK_SCAN != -1) {
-			SS_EU_PER_BLOCK_SCAN = clamp(1, SS_MAX_ENERGY_STORED, SS_EU_PER_BLOCK_SCAN);
+		if (SS_ENERGY_PER_BLOCK_SCAN != -1) {
+			SS_ENERGY_PER_BLOCK_SCAN = clamp(1, SS_MAX_ENERGY_STORED, SS_ENERGY_PER_BLOCK_SCAN);
 		}
 
-		SS_EU_PER_BLOCK_DEPLOY = config.get("ship_scanner", "energy_per_block_when_deploying", SS_EU_PER_BLOCK_DEPLOY,
+		SS_ENERGY_PER_BLOCK_DEPLOY = config.get("ship_scanner", "energy_per_block_when_deploying", SS_ENERGY_PER_BLOCK_DEPLOY,
 				"Energy consummed per block when deploying a ship (use -1 to consume everything)").getInt();
-		if (SS_EU_PER_BLOCK_DEPLOY != -1) {
-			SS_EU_PER_BLOCK_DEPLOY = clamp(1, SS_MAX_ENERGY_STORED, SS_EU_PER_BLOCK_DEPLOY);
+		if (SS_ENERGY_PER_BLOCK_DEPLOY != -1) {
+			SS_ENERGY_PER_BLOCK_DEPLOY = clamp(1, SS_MAX_ENERGY_STORED, SS_ENERGY_PER_BLOCK_DEPLOY);
 		}
 
 		SS_MAX_DEPLOY_RADIUS_BLOCKS = clamp(5, 150,
@@ -589,7 +589,7 @@ public class WarpDriveConfig {
 		AIRGEN_ENERGY_PER_NEWAIRBLOCK = clamp(1, AIRGEN_MAX_ENERGY_STORED,
 				config.get("air_generator", "energy_per_new_air_block", AIRGEN_ENERGY_PER_NEWAIRBLOCK).getInt());
 		AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK = clamp(1, AIRGEN_MAX_ENERGY_STORED,
-				config.get("air_generator", "eu_per_existing_air_block", AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK).getInt());
+				config.get("air_generator", "energy_per_existing_air_block", AIRGEN_ENERGY_PER_EXISTINGAIRBLOCK).getInt());
 		AIRGEN_AIR_GENERATION_TICKS = clamp(1, 300,
 				config.get("air_generator", "air_generation_ticks", AIRGEN_AIR_GENERATION_TICKS).getInt());
 
