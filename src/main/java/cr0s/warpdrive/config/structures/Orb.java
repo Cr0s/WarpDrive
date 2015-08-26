@@ -127,8 +127,14 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 			if (e.hasAttribute("fillerSets")) {
 				String[] imports = e.getAttribute("fillerSets").split(",");
+
 				for (String imp : imports) {
-					super.loadFrom(FillerManager.getFillerSet(imp));
+					FillerSet fillSet = FillerManager.getFillerSet(imp);
+
+					if (fillSet == null)
+						throw new InvalidXmlException("Shell loading tries to import a non-existant fillerSet!");
+
+					super.loadFrom(fillSet);
 				}
 			}
 
