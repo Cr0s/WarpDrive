@@ -22,6 +22,23 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 	private ArrayList<OrbShell> shells;
 	private String name;
 
+	/**
+	 * @return the radius
+	 */
+	public int getRadius() {
+		return super.height / 2;
+	}
+
+	/**
+	 * @param radius the radius to set
+	 */
+	public void setRadius(int radius) {
+
+		super.height = radius * 2;
+		super.length = radius * 2;
+		super.width = radius * 2;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -30,8 +47,10 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 		this.name = name;
 	}
 
-	public Orb(int diameter) {
-		super(diameter, diameter, diameter);
+	public Orb(int radius) {
+		super(radius * 2, radius * 2, radius * 2);
+
+		setRadius(radius);
 
 	}
 
@@ -49,6 +68,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 			OrbShell shell = new OrbShell();
 			shell.loadFromXmlElement(tmp);
+			shell.finishContruction();
 			totalThickness += shell.thickness;
 			newShells.add(shell);
 
@@ -62,6 +82,8 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 			for (int i = 0; i < shell.thickness; i++)
 				shellRelative[index++] = shell;
 		}
+
+		setRadius(totalThickness - 1);
 
 
 	}
@@ -78,7 +100,7 @@ public abstract class Orb extends DeployableStructure implements XmlRepresentabl
 
 	@Override
 	public boolean generate(World world, Random p_76484_2_, int x, int y, int z) {
-		EntitySphereGen entitySphereGen = new EntitySphereGen(world, x, y, z, getHeight() / 2, this, true);
+		EntitySphereGen entitySphereGen = new EntitySphereGen(world, x, y, z, getRadius(), this, true);
 		world.spawnEntityInWorld(entitySphereGen);
 		return false;
 	}
