@@ -38,7 +38,7 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	private Object[] cofhEnergyHandlers;
 	
 	protected HashMap<EnumUpgradeTypes,Integer> upgrades = new HashMap<EnumUpgradeTypes,Integer>();
- 	
+	
 	public TileEntityAbstractEnergy() {
 		super();
 		if (WarpDriveConfig.isThermalExpansionLoaded) {
@@ -162,14 +162,14 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	public Object[] getEnergyLevel() {
 		return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 	}
-
-    public String getStatus() {
-    	if (getMaxEnergyStored() != 0) {
-    		return getBlockType().getLocalizedName() + String.format(" energy level is %.0f/%.0f EU.", convertInternalToEU(getEnergyStored()), convertInternalToEU(getMaxEnergyStored()));
-    	} else {
-    		return getBlockType().getLocalizedName();
-    	}
-    }
+	
+	public String getStatus() {
+		if (getMaxEnergyStored() != 0) {
+			return getBlockType().getLocalizedName() + String.format(" energy level is %.0f/%.0f EU.", convertInternalToEU(getEnergyStored()), convertInternalToEU(getMaxEnergyStored()));
+		} else {
+			return getBlockType().getLocalizedName();
+		}
+	}
 	
 	// OpenComputer callback methods
 	@Callback
@@ -177,79 +177,78 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	public Object[] getEnergyLevel(Context context, Arguments arguments) {
 		return getEnergyLevel();
 	}
-    
+	
 	// Minecraft overrides
-    @Override
-    public void updateEntity() {
+	@Override
+	public void updateEntity() {
 		super.updateEntity();
 		
-        if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
-            return;
-        }
-        
-        // IndustrialCraft2
-        if (WarpDriveConfig.isIndustrialCraft2loaded) {
-        	IC2_addToEnergyNet();
-        }
-        
-        // Thermal Expansion
-        if (WarpDriveConfig.isThermalExpansionLoaded) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		
+		// IndustrialCraft2
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			IC2_addToEnergyNet();
+		}
+		
+		// Thermal Expansion
+		if (WarpDriveConfig.isThermalExpansionLoaded) {
 			scanTickCount++;
-			if(scanTickCount >= 20) {
+			if (scanTickCount >= 20) {
 				scanTickCount = 0;
 				scanForEnergyHandlers();
 			}
 			outputEnergy();
-        }
-    }
-
-    @Override
-    public void onChunkUnload() {
-        if (WarpDriveConfig.isIndustrialCraft2loaded) {
-        	IC2_removeFromEnergyNet();
-        }
-        
-        super.onChunkUnload();
-    }
-
-    @Override
-    public void invalidate() {
-        if (WarpDriveConfig.isIndustrialCraft2loaded) {
-        	IC2_removeFromEnergyNet();
-        }
-        
-        super.invalidate();
-    }
-    
-    
-    // IndustrialCraft IEnergySink interface
-    @Override
+		}
+	}
+	
+	@Override
+	public void onChunkUnload() {
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			IC2_removeFromEnergyNet();
+		}
+		
+		super.onChunkUnload();
+	}
+	
+	@Override
+	public void invalidate() {
+		if (WarpDriveConfig.isIndustrialCraft2loaded) {
+			IC2_removeFromEnergyNet();
+		}
+		
+		super.invalidate();
+	}
+	
+	// IndustrialCraft IEnergySink interface
+	@Override
 	@Optional.Method(modid = "IC2")
-    public double getDemandedEnergy() {
-        return Math.max(0.0D, convertInternalToEU(getMaxEnergyStored() - energyStored_internal));
-    }
-    
-    @Override
+	public double getDemandedEnergy() {
+		return Math.max(0.0D, convertInternalToEU(getMaxEnergyStored() - energyStored_internal));
+	}
+	
+	@Override
 	@Optional.Method(modid = "IC2")
-    public double injectEnergy(ForgeDirection from, double amount_EU, double voltage) {
-        int leftover_internal = 0;
-        energyStored_internal += convertEUtoInternal(amount_EU);
-        
-        if (energyStored_internal > getMaxEnergyStored()) {
-        	leftover_internal = (energyStored_internal - getMaxEnergyStored());
-            energyStored_internal = getMaxEnergyStored();
-        }
-        
-        return convertInternalToEU(leftover_internal);
-    }
-    
-    @Override
+	public double injectEnergy(ForgeDirection from, double amount_EU, double voltage) {
+		int leftover_internal = 0;
+		energyStored_internal += convertEUtoInternal(amount_EU);
+		
+		if (energyStored_internal > getMaxEnergyStored()) {
+			leftover_internal = (energyStored_internal - getMaxEnergyStored());
+			energyStored_internal = getMaxEnergyStored();
+		}
+		
+		return convertInternalToEU(leftover_internal);
+	}
+	
+	@Override
 	@Optional.Method(modid = "IC2")
-    public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection from) {
-        return canInputEnergy(from);
-    }
-    
-    // IndustrialCraft IEnergySource interface
+	public boolean acceptsEnergyFrom(TileEntity emitter, ForgeDirection from) {
+		return canInputEnergy(from);
+	}
+	
+	// IndustrialCraft IEnergySource interface
 	@Override
 	@Optional.Method(modid = "IC2")
 	public double getOfferedEnergy() {
@@ -270,35 +269,34 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	
 	@Optional.Method(modid = "IC2")
 	private void IC2_addToEnergyNet() {
-        if (!addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            addedToEnergyNet = true;
-        }
+		if (!addedToEnergyNet) {
+			MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
+			addedToEnergyNet = true;
+		}
 	}
 	
 	@Optional.Method(modid = "IC2")
 	private void IC2_removeFromEnergyNet() {
-        if (addedToEnergyNet) {
-            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
-            addedToEnergyNet = false;
-        }
+		if (addedToEnergyNet) {
+			MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+			addedToEnergyNet = false;
+		}
 	}
-
+	
 	@Override
 	@Optional.Method(modid = "IC2")
 	public int getSinkTier() {
 		return IC2_sinkTier;
 	}
-
+	
 	@Override
 	@Optional.Method(modid = "IC2")
 	public int getSourceTier() {
 		return IC2_sourceTier;
 	}
-
 	
-    
-    // ThermalExpansion IEnergyHandler interface
+	
+	// ThermalExpansion IEnergyHandler interface
 	@Override
 	@Optional.Method(modid = "CoFHCore")
 	public int receiveEnergy(ForgeDirection from, int maxReceive_RF, boolean simulate) {
@@ -392,41 +390,41 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	
 	// Forge overrides
 	@Override
-    public void readFromNBT(NBTTagCompound tag) {
-        super.readFromNBT(tag);
-        energyStored_internal = tag.getInteger("energy");
-        if (energyStored_internal > getMaxEnergyStored()) {
-        	energyStored_internal = getMaxEnergyStored();
-        }
-        if (tag.hasKey("upgrades")) {
-        	NBTTagCompound upgradeTag = tag.getCompoundTag("upgrades");
-        	for(EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
-        		if (upgradeTag.hasKey(type.toString()) && upgradeTag.getInteger(type.toString()) !=  0) {
-	        		upgrades.put(type, upgradeTag.getInteger(type.toString()));
-        		}
-        	}
-        }
-    }
+	public void readFromNBT(NBTTagCompound tag) {
+		super.readFromNBT(tag);
+		energyStored_internal = tag.getInteger("energy");
+		if (energyStored_internal > getMaxEnergyStored()) {
+			energyStored_internal = getMaxEnergyStored();
+		}
+		if (tag.hasKey("upgrades")) {
+			NBTTagCompound upgradeTag = tag.getCompoundTag("upgrades");
+			for (EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
+				if (upgradeTag.hasKey(type.toString()) && upgradeTag.getInteger(type.toString()) != 0) {
+					upgrades.put(type, upgradeTag.getInteger(type.toString()));
+				}
+			}
+		}
+	}
 	
-    @Override
-    public void writeToNBT(NBTTagCompound tag) {
-        super.writeToNBT(tag);
-        if (energyStored_internal < 0) {
-        	energyStored_internal = 0;
-        }
-        tag.setInteger("energy", this.energyStored_internal);
-        if (upgrades.size() > 0) {
-        	NBTTagCompound upgradeTag = new NBTTagCompound();
-        	for(EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
-        		if (upgrades.containsKey(type)) {
-        			upgradeTag.setInteger(type.toString(), upgrades.get(type));
-        		}
-        	}
-        	tag.setTag("upgrades", upgradeTag);
-        }
-    }
-    
-    // WarpDrive overrides
+	@Override
+	public void writeToNBT(NBTTagCompound tag) {
+		super.writeToNBT(tag);
+		if (energyStored_internal < 0) {
+			energyStored_internal = 0;
+		}
+		tag.setInteger("energy", this.energyStored_internal);
+		if (upgrades.size() > 0) {
+			NBTTagCompound upgradeTag = new NBTTagCompound();
+			for (EnumUpgradeTypes type : EnumUpgradeTypes.values()) {
+				if (upgrades.containsKey(type)) {
+					upgradeTag.setInteger(type.toString(), upgrades.get(type));
+				}
+			}
+			tag.setTag("upgrades", upgradeTag);
+		}
+	}
+	
+	// WarpDrive overrides
 	@Override
 	public void updatedNeighbours() {
 		if (WarpDriveConfig.isThermalExpansionLoaded) {
