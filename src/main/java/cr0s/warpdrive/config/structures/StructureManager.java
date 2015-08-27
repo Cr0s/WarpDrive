@@ -23,6 +23,7 @@ public class StructureManager {
 	private static ArrayList<Star> stars = new ArrayList<Star>();
 	private static ArrayList<Planetoid> moons = new ArrayList<Planetoid>();
 	private static ArrayList<Planetoid> gasClouds = new ArrayList<Planetoid>();
+	private static ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
 
 	public static void loadStructures(String structureConfDir) {
 		loadStructures(new File(structureConfDir));
@@ -94,6 +95,10 @@ public class StructureManager {
 				Planetoid pl = new Planetoid(radius);
 				pl.loadFromXmlElement(struct);
 				moons.add(pl);
+			} else if (group.equalsIgnoreCase("asteroid")) {
+				Asteroid as = new Asteroid();
+				as.loadFromXmlElement(struct);
+				asteroids.add(as);
 			}
 		}
 	}
@@ -106,6 +111,8 @@ public class StructureManager {
 				return stars.get(random.nextInt(stars.size()));
 			} else if (type.equalsIgnoreCase("moon")) {
 				return moons.get(random.nextInt(moons.size()));
+			} else if (type.equalsIgnoreCase("asteroid")) {
+				return asteroids.get(random.nextInt(asteroids.size()));
 			}
 		} else {
 			for (Star star : stars) {
@@ -124,6 +131,10 @@ public class StructureManager {
 
 	public static DeployableStructure getMoon(Random random, final String name) {
 		return getStructure(random, name, "moon");
+	}
+
+	public static DeployableStructure getAsteroid(Random random, final String name) {
+		return getStructure(random, name, "asteroid");
 	}
 
 	public static DeployableStructure getGasCloud(Random random, final String name) {

@@ -2,8 +2,6 @@ package cr0s.warpdrive.world;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
 import cpw.mods.fml.common.IWorldGenerator;
@@ -13,8 +11,8 @@ import cr0s.warpdrive.config.MetaBlock;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.config.structures.DeployableStructure;
 import cr0s.warpdrive.config.structures.Orb;
-import cr0s.warpdrive.config.structures.StructureManager;
 import cr0s.warpdrive.config.structures.Orb.OrbShell;
+import cr0s.warpdrive.config.structures.StructureManager;
 
 /**
  * @author Cr0s
@@ -59,29 +57,16 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			}
 			int y = Y_LIMIT_SOFT_MIN + random.nextInt(Y_LIMIT_SOFT_MAX - Y_LIMIT_SOFT_MIN);
 			// Moon setup
-			if (random.nextInt(700) == 1)
+			if (random.nextInt(700) == 1) {
 				generateMoon(world, x, y, z, null);
-			// Simple asteroids
-			else if (random.nextInt(150) == 1) {
-				generateAsteroidOfBlock(world, x, y, z, 6, 11, null, 0);
+				// Simple asteroids
+			} else if (random.nextInt(150) == 1) {
+				generateRandomAsteroid(world, x, y, z);
 				// Random asteroid of block
-			} else if (random.nextInt(400) == 1) {
-				generateRandomAsteroid(world, x, y, z, 6, 11);
-				if (random.nextBoolean()) {
-					generateGasCloudOfColor(world, x, y, z, 6, 11, null);
-				}
-			} else if (random.nextInt(200) == 1) {// Ice asteroid
-				generateAsteroidOfBlock(world, x, y, z, 6, 11, Blocks.ice, 0);
 			} else if (random.nextInt(500) == 1) {// Asteroid field
 				generateAsteroidField(world, x, y, z);
-			} else if (random.nextInt(1400) == 1) {// Diamond asteroid
-				generateAsteroidOfBlock(world, x, y, z, 3, 2, Blocks.diamond_ore, 0);
-				// Diamond block core
-				world.setBlock(x, y, z, Blocks.diamond_block, 0, 2);
-				if (random.nextBoolean()) {
-					generateGasCloudOfColor(world, x, y, z, 6, 11, null);
-				}
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -90,7 +75,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	public static void generateMoon(World world, int x, int y, int z, final String moonName) {
 		DeployableStructure moon = StructureManager.getMoon(world.rand, moonName);
 		WarpDrive.logger.info("Generating moon (class " + moon + ") at " + x + " " + y + " " + z);
-		
+
 		moon.generate(world, world.rand, x, y, z);
 	}
 
@@ -115,11 +100,6 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		int z2 = z + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(jitter));
 		WarpDrive.logger.info("Generating small ship at " + x2 + "," + y2 + "," + z2);
 		new WorldGenStation(world.rand.nextBoolean()).generate(world, world.rand, x2, y2, z2);
-	}
-
-	public static void generateRandomAsteroid(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax) {
-
-		generateAsteroidOfBlock(world, x, y, z, asteroidSizeMax, centerRadiusMax, null, 0);
 	}
 
 	private static float binomialRandom(World world) {
@@ -190,14 +170,14 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			int aX = (int) (x + Math.round(horizontalRange * Math.cos(bearing)));
 			int aY = (int) (y2 + Math.round(verticalRange * Math.cos(yawn)));
 			int aZ = (int) (z + Math.round(horizontalRange * Math.sin(bearing)));
-			
+
 			if (WarpDriveConfig.LOGGING_WORLDGEN) {
 				System.out.println(String.format("Big asteroid: %.3f %.3f r %.3f r makes %3d, %3d, %3d",
 						new Object[] { Double.valueOf(binomial), Double.valueOf(bearing), Double.valueOf(yawn), Integer.valueOf(aX), Integer.valueOf(aY), Integer.valueOf(aZ) }));
 			}
-			
+
 			// Place an asteroid
-			generateRandomAsteroid(world, aX, aY, aZ, 4, 6);
+			generateRandomAsteroid(world, aX, aY, aZ);
 		}
 
 		// Setting up small asteroids
@@ -214,7 +194,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
 			// Placing
 			if (world.rand.nextInt(400) != 1) {
-				generateRandomAsteroid(world, aX, aY, aZ, 3, 3);
+				generateRandomAsteroid(world, aX, aY, aZ);
 			} else {
 				if (world.rand.nextInt(20) != 1) {
 					generateSmallShip(world, aX, aY, aZ, 8);
@@ -267,13 +247,13 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		if (centerRadiusMax != 0)
 			centerRadius = Math.min(centerRadiusMax, centerRadius);
 		final int CENTER_SHIFT = 2; // Offset from center of central ball
-		
+
 		DeployableStructure cloud = StructureManager.getGasCloud(world.rand, type);
 		if (cloud == null) {
 			WarpDrive.logger.error("No gaz cloud defined, cancelling world generation");
 			return;
 		}
-		
+
 		for (int i = 1; i <= cloudSize; i++) {
 			int radius = 2 + world.rand.nextInt(centerRadius);
 			int newX = x + (((world.rand.nextBoolean()) ? -1 : 1) * world.rand.nextInt(CENTER_SHIFT + centerRadius / 2));
@@ -292,14 +272,15 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	 *            coordinate of center
 	 * @param z
 	 *            coordinate of center
-	 * @param asteroidSizeMax
-	 *            maximum asteroid size (by number of balls it consists)
-	 * @param centerRadiusMax
-	 *            maximum radius of central ball
 	 */
-	private static void generateAsteroidOfBlock(World world, int x, int y, int z, int asteroidSizeMax, int centerRadiusMax, Block ice, int meta) {
+	private static void generateRandomAsteroid(World world, int x, int y, int z) {
+
+		DeployableStructure asteroid = StructureManager.getAsteroid(world.rand, null);
+		WarpDrive.logger.info("Generating asteroid (class " + asteroid + ") at " + x + " " + y + " " + z);
+
+		asteroid.generate(world, world.rand, x, y, z);
+
 		/*
-		// FIXME: get a proper range of random instead of capping it
 		int asteroidSize = 1 + world.rand.nextInt(6);
 		if (asteroidSizeMax != 0) {
 			asteroidSize = Math.min(asteroidSizeMax, asteroidSize);
@@ -329,7 +310,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 		double radiusSq = radiusC * radiusC; // Optimization to avoid sqrts...
 		// sphere
 		int ceilRadius = (int) Math.ceil(radiusC);
-		
+
 		// Pass the cube and check points for sphere equation x^2 + y^2 + z^2 = r^2
 		for (int x = 0; x <= ceilRadius; x++) {
 			double x2 = (x + 0.5D) * (x + 0.5D);
@@ -347,7 +328,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 
 					// Place blocks
 					// cheat by using axial symmetry so we don't create random numbers too frequently
-					
+
 					OrbShell orbShell = orb.getShellForRadius(dSq);
 					MetaBlock metablock = orbShell.getRandomBlock(rand);
 					world.setBlock(xCoord + x, yCoord + y, zCoord + z, metablock.block, metablock.metadata, 2);
