@@ -5,7 +5,7 @@
 
 	<structure group="star" name="red_giant">
 		<shell name="core" maxThickness="10" minThickness="3">
-			<filler weight="1" block="minecraft:iron_block" />
+			<filler weight="1" block="minecraft:iron_ore" />
 		</shell>
 		
 		<shell name="mantle" minThickness="10" maxThickness="25">
@@ -21,7 +21,7 @@
 
 	<structure group="moon" name="theMoon">
 		<shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
-			<filler weight="100" block="minecraft:iron_block" />
+			<filler weight="100" block="minecraft:iron_ore" />
 		</shell>
 		
 		<shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
@@ -36,7 +36,7 @@
 	
 	<structure group="moon" name="theCorruptedMoon">
         <shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
-            <filler weight="100" block="minecraft:iron_block" />
+            <filler weight="100" block="minecraft:iron_ore" />
         </shell>
         
         <shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
@@ -53,7 +53,7 @@
         </shell>
     </structure>
     
-    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_block" maxCoreSize="10" minCoreSize="2">
+    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_ore" maxCoreSize="10" minCoreSize="2">
         
         <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres,uncommonOres">
             <filler weight="10" block="minecraft:stone" />
