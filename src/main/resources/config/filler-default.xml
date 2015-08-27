@@ -10,20 +10,20 @@
 		<filler block="minecraft:gold_ore" ratio=".008" />
 		<filler block="minecraft:lapis_ore" ratio=".005" />
 		<filler block="minecraft:emerald_ore" ratio=".005" />
-		<filler block="IC2:blockOreTin" ratio=".05" />
-		<filler block="IC2:blockOreCopper" ratio=".06" />
-		<filler block="IC2:blockOreLead" ratio=".06" />
-		<filler block="IC2:blockOreUran" ratio=".001" />
-		<filler block="ImmersiveEngineering:ore" metadata="0" ratio=".001" /><!-- Copper -->
-		<filler block="ImmersiveEngineering:ore" metadata="1" ratio=".001" /><!-- Bauxite -->
-		<filler block="ImmersiveEngineering:ore" metadata="2" ratio=".001" /><!-- Lead -->
-		<filler block="ImmersiveEngineering:ore" metadata="3" ratio=".001" /><!-- Silver -->
-		<filler block="ImmersiveEngineering:ore" metadata="4" ratio=".001" /><!-- Nickel -->
-		<filler block="arsmagica2:vinteumOre" metadata="0" ratio=".001" /><!-- Vinteum -->
-		<filler block="arsmagica2:vinteumOre" metadata="1" ratio=".001" /><!-- Chimerite -->
-		<filler block="arsmagica2:vinteumOre" metadata="2" ratio=".001" /><!-- Blue topaz -->
-		<filler block="arsmagica2:vinteumOre" metadata="3" ratio=".001" /><!-- Moonstone -->
-		<filler block="arsmagica2:vinteumOre" metadata="4" ratio=".001" /><!-- Sunstone -->
+		<filler block="IC2:blockOreTin" ratio=".05" mods="IC2" />
+		<filler block="IC2:blockOreCopper" ratio=".06"  mods="IC2" />
+		<filler block="IC2:blockOreLead" ratio=".06"  mods="IC2" />
+		<filler block="IC2:blockOreUran" ratio=".001"  mods="IC2" />
+		<filler block="ImmersiveEngineering:ore" metadata="0" ratio=".001" mods="ImmersiveEngineering" /><!-- Copper -->
+		<filler block="ImmersiveEngineering:ore" metadata="1" ratio=".001" mods="ImmersiveEngineering" /><!-- Bauxite -->
+		<filler block="ImmersiveEngineering:ore" metadata="2" ratio=".001" mods="ImmersiveEngineering" /><!-- Lead -->
+		<filler block="ImmersiveEngineering:ore" metadata="3" ratio=".001" mods="ImmersiveEngineering" /><!-- Silver -->
+		<filler block="ImmersiveEngineering:ore" metadata="4" ratio=".001" mods="ImmersiveEngineering" /><!-- Nickel -->
+		<filler block="arsmagica2:vinteumOre" metadata="0" ratio=".001" mods="arsmagica2" /><!-- Vinteum -->
+		<filler block="arsmagica2:vinteumOre" metadata="1" ratio=".001" mods="arsmagica2" /><!-- Chimerite -->
+		<filler block="arsmagica2:vinteumOre" metadata="2" ratio=".001" mods="arsmagica2" /><!-- Blue topaz -->
+		<filler block="arsmagica2:vinteumOre" metadata="3" ratio=".001" mods="arsmagica2" /><!-- Moonstone -->
+		<filler block="arsmagica2:vinteumOre" metadata="4" ratio=".001" mods="arsmagica2" /><!-- Sunstone -->
 		<filler block="minecraft:diamond_ore" ratio=".004" />
 		<filler block="warpdrive:iridiumBlock" ratio=".0001" mods="!netherores" />
 		<filler block="icbm:sulfur_ore" ratio=".001" /><!-- to be confirmed -->
@@ -107,7 +107,7 @@
 	
 	<FillerSet group="uncommonOres">
 		<filler block="minecraft:redstone_ore" ratio=".02" />
-		<filler block="IC2:blockOreUran" ratio=".001" />
+		<filler block="IC2:blockOreUran" ratio=".001" mods="IC2" />
 		<filler block="ae2:quartz" ratio=".01" mods="appliedenergistics2" />
 	</FillerSet>
 	
