@@ -14,7 +14,6 @@ import cr0s.warpdrive.block.TileEntityLaser;
 import cr0s.warpdrive.block.detection.TileEntityCamera;
 import cr0s.warpdrive.block.detection.TileEntityMonitor;
 import cr0s.warpdrive.config.WarpDriveConfig;
-import cr0s.warpdrive.data.Vector3;
 
 
 public class MessageFrequency implements IMessage, IMessageHandler<MessageFrequency, IMessage> {
@@ -25,13 +24,6 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 	
 	public MessageFrequency() {
 		// required on receiving side
-	}
-	
-	public MessageFrequency(final Vector3 target, final int frequency) {
-		this.x = target.intX();
-		this.y = target.intY();
-		this.z = target.intZ();
-		this.frequency = frequency;
 	}
 	
 	public MessageFrequency(final int x, final int y, final int z, final int frequency) {

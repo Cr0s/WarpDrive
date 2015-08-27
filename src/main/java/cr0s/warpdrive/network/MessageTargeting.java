@@ -9,7 +9,6 @@ import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityLaser;
 import cr0s.warpdrive.config.WarpDriveConfig;
-import cr0s.warpdrive.data.Vector3;
 
 
 public class MessageTargeting implements IMessage, IMessageHandler<MessageTargeting, IMessage> {
@@ -21,14 +20,6 @@ public class MessageTargeting implements IMessage, IMessageHandler<MessageTarget
 	
 	public MessageTargeting() {
 		// required on receiving side
-	}
-	
-	public MessageTargeting(final Vector3 target, final float yaw, final float pitch) {
-		this.x = target.intX();
-		this.y = target.intY();
-		this.z = target.intZ();
-		this.yaw = yaw;
-		this.pitch = pitch;
 	}
 	
 	public MessageTargeting(final int x, final int y, final int z, final float yaw, final float pitch) {

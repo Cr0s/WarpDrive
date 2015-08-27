@@ -575,13 +575,15 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				continue;
 			}
 
-			TileEntity te = worldObj.getTileEntity(MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY) - 1,
+			TileEntity tileEntity = worldObj.getTileEntity(
+					MathHelper.floor_double(player.posX),
+					MathHelper.floor_double(player.posY) - 1,
 					MathHelper.floor_double(player.posZ));
 
-			if (te != null && (te instanceof TileEntityShipController)) {
-				if (((TileEntityShipController) te).getBeaconFrequency().equals(freq)) {
-					beaconX = te.xCoord;
-					beaconZ = te.zCoord;
+			if (tileEntity != null && (tileEntity instanceof TileEntityShipController)) {
+				if (((TileEntityShipController) tileEntity).getBeaconFrequency().equals(freq)) {
+					beaconX = tileEntity.xCoord;
+					beaconZ = tileEntity.zCoord;
 					isBeaconFound = true;
 					break;
 				}

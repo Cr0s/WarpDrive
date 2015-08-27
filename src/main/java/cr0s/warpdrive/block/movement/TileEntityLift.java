@@ -95,14 +95,14 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			
 			if (yCoord - firstUncoveredY >= 2) {
 				if (mode == MODE_UP) {
-					PacketHandler.sendBeamPacket(worldObj, new Vector3(
-							xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D),
+					PacketHandler.sendBeamPacket(worldObj,
+							new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D),
 							new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D),
 							0f, 1f, 0f, 40, 0, 100);
 				} else if (mode == MODE_DOWN) {
-					PacketHandler.sendBeamPacket(worldObj, new Vector3(
-							xCoord + 0.5D, yCoord, zCoord + 0.5D), new Vector3(
-							xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 0f,
+					PacketHandler.sendBeamPacket(worldObj,
+							new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D),
+							new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D), 0f,
 							0f, 1f, 40, 0, 100);
 				}
 				
@@ -142,7 +142,8 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 						((EntityLivingBase) o).setPositionAndUpdate(xCoord + 0.5D, yCoord + 1.0D, zCoord + 0.5D);
 						PacketHandler.sendBeamPacket(worldObj,
 								new Vector3(xCoord + 0.5D, firstUncoveredY, zCoord + 0.5D),
-								new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D), 1F, 1F, 0F, 40, 0, 100);
+								new Vector3(xCoord + 0.5D, yCoord, zCoord + 0.5D),
+								1F, 1F, 0F, 40, 0, 100);
 						worldObj.playSoundEffect(xCoord + 0.5D, yCoord, zCoord + 0.5D, "warpdrive:hilaser", 4F, 1F);
 						consumeEnergy(WarpDriveConfig.LIFT_ENERGY_PER_ENTITY, false);
 					}
