@@ -84,19 +84,6 @@
 		</for>
 	</for>
 	
-	<FillerSet group="nether_moon" fillerSets="commonOres">
-		<filler block="minecraft:netherrack" weight="1" />
-		<filler block="minecraft:lava" ratio=".001" />
-		<filler block="minecraft:bedrock" ratio=".001" />
-	</FillerSet>
-	
-	<FillerSet group="end_moon">
-		<filler block="minecraft:whiteStone" weight="1" />
-		<filler block="minecraft:bedrock" ratio=".001" />
-	</FillerSet>
-	
-	
-	
 	
 	<FillerSet group="commonOres">
 		<filler block="minecraft:coal_ore" ratio=".08" />

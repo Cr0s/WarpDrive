@@ -53,6 +53,21 @@
         </shell>
     </structure>
     
+    <structure name="nether_moon" group="moon" > 
+        <FillerSet name="substance" fillerSets="commonOres" minThickness="10" maxThickness="30">
+            <filler block="minecraft:netherrack" weight="1" />
+            <filler block="minecraft:lava" ratio=".001" />
+            <filler block="minecraft:bedrock" ratio=".001" />
+        </FillerSet>
+    </structure>
+    
+    <structure name="end_moon" group="moon" >
+        <FillerSet name="substance"  minThickness="10" maxThickness="30">
+            <filler block="minecraft:whiteStone" weight="1"/>
+            <filler block="minecraft:bedrock" ratio=".001" />
+        </FillerSet>
+    </structure>
+    
     <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_ore" maxCoreSize="10" minCoreSize="2">
         
         <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres,uncommonOres">
