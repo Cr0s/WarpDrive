@@ -8,7 +8,7 @@ import cpw.mods.fml.common.Loader;
 import cr0s.warpdrive.WarpDrive;
 
 
-public class ModRequirementChecker {
+public class XmlPreprocessor {
 
 	/**
 	 * Will check the given element for a mod attribute and return a string of all the ones that are not loaded, separated by commas

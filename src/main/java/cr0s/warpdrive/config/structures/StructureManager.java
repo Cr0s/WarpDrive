@@ -13,7 +13,7 @@ import org.xml.sax.SAXException;
 
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.InvalidXmlException;
-import cr0s.warpdrive.config.ModRequirementChecker;
+import cr0s.warpdrive.config.XmlPreprocessor;
 import cr0s.warpdrive.config.WarpDriveConfig;
 
 
@@ -61,14 +61,14 @@ public class StructureManager {
 	private static void loadXmlStructureFile(File f) throws SAXException, IOException, InvalidXmlException {
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(f);
 
-		String res = ModRequirementChecker.checkModRequirements(base.getDocumentElement());
+		String res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
 
 		if (!res.isEmpty()) {
 			WarpDrive.logger.info("Skippping structure data file " + f.getPath() + " because the mods " + res + " are not loaded");
 			return;
 		}
 
-		ModRequirementChecker.doModReqSanitation(base);
+		XmlPreprocessor.doModReqSanitation(base);
 
 		NodeList structures = base.getElementsByTagName("structure");
 		for (int i = 0; i < structures.getLength(); i++) {

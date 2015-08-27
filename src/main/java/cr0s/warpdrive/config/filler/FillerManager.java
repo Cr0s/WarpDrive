@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 import scala.actors.threadpool.Arrays;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.InvalidXmlException;
-import cr0s.warpdrive.config.ModRequirementChecker;
+import cr0s.warpdrive.config.XmlPreprocessor;
 import cr0s.warpdrive.config.WarpDriveConfig;
 
 public class FillerManager {
@@ -69,7 +69,7 @@ public class FillerManager {
 
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(file);
 
-		String res = ModRequirementChecker.checkModRequirements(base.getDocumentElement());
+		String res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
 
 		if (!res.isEmpty()) {
 			WarpDrive.logger.info("Skippping filler data file " + file.getPath() + " because the mods " + res + " are not loaded");
@@ -77,7 +77,7 @@ public class FillerManager {
 		}
 
 		// Remove elements based on mod reqs sanitation
-		ModRequirementChecker.doModReqSanitation(base);
+		XmlPreprocessor.doModReqSanitation(base);
 
 		// Initially add FillerSets
 		NodeList nodesFillerSet = base.getElementsByTagName("FillerSet");
