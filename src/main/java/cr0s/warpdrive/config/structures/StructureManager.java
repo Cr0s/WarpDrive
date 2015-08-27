@@ -79,6 +79,8 @@ public class StructureManager {
 			String group = struct.getAttribute("group");
 			String name = struct.getAttribute("name");
 
+			WarpDrive.logger.info("Loading structure " + name);
+
 			if (group.isEmpty())
 				throw new InvalidXmlException("Structure must have a group!");
 
