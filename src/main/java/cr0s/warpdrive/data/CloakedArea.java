@@ -22,17 +22,17 @@ public class CloakedArea {
 	public AxisAlignedBB aabb;
 	private LinkedList<String> playersInArea;
 	public byte tier = 0;
-
+	
 	public boolean isPlayerListedInArea(String username) {
 		for (String playerInArea : playersInArea) {
 			if (playerInArea.equals(username)) {
 				return true;
 			}
 		}
-
+		
 		return false;
 	}
-
+	
 	private void removePlayer(String username) {
 		for (int i = 0; i < playersInArea.size(); i++) {
 			if (playersInArea.get(i).equals(username)) {
@@ -41,18 +41,19 @@ public class CloakedArea {
 			}
 		}
 	}
-
+	
 	private void addPlayer(String username) {
 		if (!isPlayerListedInArea(username)) {
 			playersInArea.add(username);
 		}
 	}
-
+	
 	public boolean isEntityWithinArea(EntityLivingBase entity) {
-		return (aabb.minX <= entity.posX && (aabb.maxX + 1) > entity.posX && aabb.minY <= (entity.posY + entity.height) && (aabb.maxY + 1) > entity.posY
-				&& aabb.minZ <= entity.posZ && (aabb.maxZ + 1) > entity.posZ);
+		return (aabb.minX <= entity.posX && (aabb.maxX + 1) > entity.posX
+			 && aabb.minY <= (entity.posY + entity.height) && (aabb.maxY + 1) > entity.posY
+			 && aabb.minZ <= entity.posZ && (aabb.maxZ + 1) > entity.posZ);
 	}
-
+	
 	public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
 		this.coreX = x;
 		this.coreY = y;
@@ -60,13 +61,13 @@ public class CloakedArea {
 		this.aabb = aabb;
 		this.tier = tier;
 		this.playersInArea = new LinkedList<String>();
-
+		
 		if (worldObj == null || aabb == null) {
 			return;
 		}
-
+		
 		this.dimensionId = worldObj.provider.dimensionId;
-
+		
 		try {
 			// Add all players currently inside the field
 			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
@@ -79,32 +80,32 @@ public class CloakedArea {
 			e.printStackTrace();
 		}
 	}
-
+	
 	// Sending only if field changes: sets up or collapsing
 	public void sendCloakPacketToPlayersEx(final boolean decloak) {
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
 			WarpDrive.logger.info("sendCloakPacketToPlayersEx " + decloak);
 		}
 		final int RADIUS = 250;
-
+		
 		double midX = this.aabb.minX + (Math.abs(this.aabb.maxX - this.aabb.minX) / 2);
 		double midY = this.aabb.minY + (Math.abs(this.aabb.maxY - this.aabb.minY) / 2);
 		double midZ = this.aabb.minZ + (Math.abs(this.aabb.maxZ - this.aabb.minZ) / 2);
-
+		
 		for (int j = 0; j < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); j++) {
 			EntityPlayerMP entityPlayerMP = (EntityPlayerMP) MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(j);
-
+			
 			if (entityPlayerMP.dimension == dimensionId) {
 				double d4 = midX - entityPlayerMP.posX;
 				double d5 = midY - entityPlayerMP.posY;
 				double d6 = midZ - entityPlayerMP.posZ;
-
+				
 				if (Math.abs(d4) < RADIUS && Math.abs(d5) < RADIUS && Math.abs(d6) < RADIUS) {
 					if (decloak) {
 						revealChunksToPlayer(entityPlayerMP);
 						revealEntitiesToPlayer(entityPlayerMP);
 					}
-
+					
 					if (!isEntityWithinArea(entityPlayerMP) && !decloak) {
 						PacketHandler.sendCloakPacket(entityPlayerMP, aabb, tier, false);
 					} else if (decloak) {
@@ -114,7 +115,7 @@ public class CloakedArea {
 			}
 		}
 	}
-
+	
 	public void updatePlayer(EntityPlayer player) {
 		if (isEntityWithinArea(player)) {
 			if (!isPlayerListedInArea(player.getCommandSenderName())) {
@@ -141,7 +142,7 @@ public class CloakedArea {
 			}
 		}
 	}
-
+	
 	public void revealChunksToPlayer(EntityPlayer player) {
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
 			 WarpDrive.logger.info(this + " Revealing cloaked blocks to player " + player.getCommandSenderName());
@@ -159,24 +160,25 @@ public class CloakedArea {
 				}
 			}
 		}
+		
 		/*
-		 * ArrayList<Chunk> chunksToSend = new ArrayList<Chunk>();
-		 * 
-		 * for (int x = (int)aabb.minX >> 4; x <= (int)aabb.maxX >> 4; x++)
-		 * for (int z = (int)aabb.minZ >> 4; z <= (int)aabb.maxZ >> 4; z++) {
-		 * chunksToSend.add(p.worldObj.getChunkFromChunkCoords(x, z));
-		 * }
-		 * 
-		 * //System.outprintln("[Cloak] Sending " + chunksToSend.size() + " chunks to player " + p.username);
-		 * ((EntityPlayerMP)p).playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(chunksToSend));
-		 * 
-		 * //System.outprintln("[Cloak] Sending decloak packet to player " + p.username); area.sendCloakPacketToPlayer(p, true); // decloak = true
-		 */
+		ArrayList<Chunk> chunksToSend = new ArrayList<Chunk>();
+		
+		for (int x = (int) aabb.minX >> 4; x <= (int) aabb.maxX >> 4; x++)
+			for (int z = (int) aabb.minZ >> 4; z <= (int) aabb.maxZ >> 4; z++) {
+				chunksToSend.add(p.worldObj.getChunkFromChunkCoords(x, z));
+			}
+		
+		//System.outprintln("[Cloak] Sending " + chunksToSend.size() + " chunks to player " + p.username);
+		((EntityPlayerMP) p).playerNetServerHandler.sendPacketToPlayer(new Packet56MapChunks(chunksToSend));
+		
+		//System.outprintln("[Cloak] Sending decloak packet to player " + p.username); area.sendCloakPacketToPlayer(p, true); // decloak = true
+		/**/
 	}
-
+	
 	public void revealEntitiesToPlayer(EntityPlayer player) {
 		List<Entity> list = player.worldObj.getEntitiesWithinAABBExcludingEntity(player, aabb);
-
+		
 		for (Entity entity : list) {
 			Packet packet = PacketHandler.getPacketForThisEntity(entity);
 			if (packet != null) {
@@ -189,7 +191,7 @@ public class CloakedArea {
 			}
 		}
 	}
-
+	
 	@Override
 	public String toString() {
 		return String.format("%s @ DIM%d %d, %d, %d %s", new Object[] { getClass().getSimpleName(), Integer.valueOf(dimensionId), Integer.valueOf(coreX),
