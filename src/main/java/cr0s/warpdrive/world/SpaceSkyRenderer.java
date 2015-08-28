@@ -71,10 +71,10 @@ public class SpaceSkyRenderer extends IRenderHandler {
 
 	@Override
 	public void render(float partialTicks, WorldClient world, Minecraft mc) {
-		SpaceProvider spaceProvider = null;
+		SpaceWorldProvider spaceProvider = null;
 
-		if (world.provider instanceof SpaceProvider) {
-			spaceProvider = (SpaceProvider) world.provider;
+		if (world.provider instanceof SpaceWorldProvider) {
+			spaceProvider = (SpaceWorldProvider) world.provider;
 		}
 
 		GL11.glDisable(GL11.GL_TEXTURE_2D);

@@ -80,6 +80,7 @@ public class WarpDriveConfig {
 	
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
+	public static int G_SPACE_BIOME_ID = 95;
 	public static int G_SPACE_PROVIDER_ID = 14;
 	public static int G_SPACE_DIMENSION_ID = -2;
 	public static int G_HYPERSPACE_PROVIDER_ID = 15;
@@ -303,6 +304,8 @@ public class WarpDriveConfig {
 		config.load();
 		
 		// General
+		G_SPACE_BIOME_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
+				config.get("general", "space_biome_id", G_SPACE_BIOME_ID, "Space biome ID").getInt());
 		G_SPACE_PROVIDER_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
 				config.get("general", "space_provider_id", G_SPACE_PROVIDER_ID, "Space dimension provider ID").getInt());
 		G_SPACE_DIMENSION_ID = clamp(Integer.MIN_VALUE, Integer.MAX_VALUE,
