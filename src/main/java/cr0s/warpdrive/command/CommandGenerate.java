@@ -61,7 +61,7 @@ public class CommandGenerate extends CommandBase {
 					new WorldGenStation(false).generate(player.worldObj, player.worldObj.rand, x, y, z);
 				} else if (struct.equals("asteroid")) {
 					WarpDrive.logger.info("/generate: generating asteroid at " + x + ", " + (y - 10) + ", " + z);
-					WarpDrive.instance.spaceWorldGenerator.generateRandomAsteroid(player.worldObj, x, y - 10, z, 6, 11);
+					WarpDrive.instance.spaceWorldGenerator.generateRandomAsteroid(player.worldObj, x, y - 10, z);
 				} else if (struct.equals("astfield")) {
 					WarpDrive.logger.info("/generate: generating asteroid field at " + x + ", " + y + ", " + z);
 					WarpDrive.instance.spaceWorldGenerator.generateAsteroidField(player.worldObj, x, y, z);

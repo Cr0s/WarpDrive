@@ -273,7 +273,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 	 * @param z
 	 *            coordinate of center
 	 */
-	private static void generateRandomAsteroid(World world, int x, int y, int z) {
+	public static void generateRandomAsteroid(World world, int x, int y, int z) {
 
 		DeployableStructure asteroid = StructureManager.getAsteroid(world.rand, null);
 		WarpDrive.logger.info("Generating asteroid (class " + asteroid + ") at " + x + " " + y + " " + z);
