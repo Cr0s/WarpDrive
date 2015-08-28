@@ -159,7 +159,7 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 			return null;
 		}
 		cloakMessage.handle(player);
-        
+		
 		return null;	// no response
 	}
 }

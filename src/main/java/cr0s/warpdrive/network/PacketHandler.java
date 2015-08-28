@@ -111,7 +111,7 @@ public class PacketHandler {
 	}
 	
 	// Sending cloaking area definition (server -> client)
-	public static void sendCloakPacket(EntityPlayer player, AxisAlignedBB aabb, int tier, boolean decloak) {
+	public static void sendCloakPacket(EntityPlayer player, final AxisAlignedBB aabb, final int tier, final boolean decloak) {
 		MessageCloak cloakMessage = new MessageCloak(aabb, tier, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
 		if (WarpDriveConfig.LOGGING_CLOAKING) {

@@ -68,13 +68,13 @@ public class BlockCloakingCore extends BlockContainer {
 			return false;
 		}
 
-		TileEntityCloakingCore te = (TileEntityCloakingCore)par1World.getTileEntity(par2, par3, par4);
-		if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-			WarpDrive.addChatMessage(par5EntityPlayer, te.getStatus()
+		TileEntityCloakingCore tileEntity = (TileEntityCloakingCore)par1World.getTileEntity(par2, par3, par4);
+		if (tileEntity != null && (par5EntityPlayer.getHeldItem() == null)) {
+			WarpDrive.addChatMessage(par5EntityPlayer, tileEntity.getStatus()
 					// + " isInvalid? " + te.isInvalid() + " Valid? " + te.isValid + " Cloaking? " + te.isCloaking + " Enabled? " + te.isEnabled
-					+ ((!te.isValid) ? "Invalid assembly!" :
-						((!te.isEnabled) ? "Cloak is disabled" :
-							((te.isCloaking) ? "A tier " + te.tier + " cloak is currently covering " + te.volume + " blocks!" : "Cloak needs more power!"))));
+					+ ((!tileEntity.isValid) ? " Invalid assembly!" :
+						((!tileEntity.isEnabled) ? " Cloak is disabled" :
+							((tileEntity.isCloaking) ? " A tier " + tileEntity.tier + " cloak is currently covering " + tileEntity.volume + " blocks!" : "Cloak needs more power!"))));
 			return true;
 		}
 
