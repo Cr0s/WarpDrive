@@ -170,20 +170,19 @@ public class WarpDrive implements LoadingCallback {
 
 	// Client settings
 	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
-
+	
 	@Instance(WarpDrive.MODID)
 	public static WarpDrive instance;
 	@SidedProxy(clientSide = "cr0s.warpdrive.client.ClientProxy", serverSide = "cr0s.warpdrive.CommonProxy")
 	public static CommonProxy proxy;
-
+	
 	public static StarMapRegistry starMap;
 	public static JumpgatesRegistry jumpgates;
 	public static CloakManager cloaks;
-
 	public static CamerasRegistry cameras;
-
+	
 	public static WarpDrivePeripheralHandler peripheralHandler = null;
-
+	
 	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
 	public static String defEnergyStr = "getEnergyLevel(): returns currently contained energy, max contained energy";
 	public static String defUpgradeStr = "upgrades(): returns a list of currently installed upgrades";
@@ -427,14 +426,19 @@ public class WarpDrive implements LoadingCallback {
 		
 		starMap = new StarMapRegistry();
 		jumpgates = new JumpgatesRegistry();
+		cloaks = new CloakManager();
 		cameras = new CamerasRegistry();
+		
+		EventListeners watcher = new EventListeners();
+		MinecraftForge.EVENT_BUS.register(watcher);
+		FMLCommonHandler.instance().bus().register(watcher);
 	}
 
 	private static void initVanillaRecipes() {
 		itemComponent.registerRecipes();
 		blockDecorative.initRecipes();
 		itemUpgrade.initRecipes();
-
+		
 		// WarpCore
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockShipCore), false, "ipi", "ici", "idi",
 				'i', Items.iron_ingot,
@@ -877,10 +881,8 @@ public class WarpDrive implements LoadingCallback {
 	}
 
 	@EventHandler
-	public void serverLoad(FMLServerStartingEvent event) {
-		cloaks = new CloakManager();
-		MinecraftForge.EVENT_BUS.register(new CloakChunkWatcher());
-
+	public void onServerStarting(FMLServerStartingEvent event) {
+		WarpDrive.logger.info("onServerStarting");
 		event.registerServerCommand(new CommandGenerate());
 		event.registerServerCommand(new CommandSpace());
 		event.registerServerCommand(new CommandInvisible());

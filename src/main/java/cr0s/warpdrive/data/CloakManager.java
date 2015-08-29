@@ -2,6 +2,7 @@ package cr0s.warpdrive.data;
 
 import java.util.LinkedList;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -9,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import cr0s.warpdrive.WarpDrive;
@@ -37,7 +37,7 @@ public class CloakManager {
 				continue;
 			}
 			
-			if (area.aabb.minX <= x && area.aabb.maxX >= x && area.aabb.minY <= y && area.aabb.maxY >= y && area.aabb.minZ <= z && area.aabb.maxZ >= z) {
+			if (area.minX <= x && area.maxX >= x && area.minY <= y && area.maxY >= y && area.minZ <= z && area.maxZ >= z) {
 				return true;
 			}
 		}
@@ -53,16 +53,16 @@ public class CloakManager {
 			}
 			
 			// force refresh if the chunk overlap the cloak
-			if ( area.aabb.minX <= (chunkPosX << 4 + 15) && area.aabb.maxX >= (chunkPosX << 4)
-			  && area.aabb.minZ <= (chunkPosZ << 4 + 15) && area.aabb.maxZ >= (chunkPosZ << 4) ) {
-				PacketHandler.sendCloakPacket(player, area.aabb, area.tier, false);
+			if ( area.minX <= (chunkPosX << 4 + 15) && area.maxX >= (chunkPosX << 4)
+			  && area.minZ <= (chunkPosZ << 4 + 15) && area.maxZ >= (chunkPosZ << 4) ) {
+				PacketHandler.sendCloakPacket(player, area, false);
 			}
 		}
 		
 		return false;
 	}
 	
-	public boolean onEntityJoinWorld(EntityPlayerMP player) {
+	public boolean onPlayerEnteringDimension(EntityPlayer player) {
 		if (WarpDriveConfig.LOGGING_CLOAKING) { WarpDrive.logger.info("onEntityJoinWorld " + player); }
 		for (CloakedArea area : this.cloaks) {
 			// skip other dimensions
@@ -71,10 +71,10 @@ public class CloakManager {
 			}
 			
 			// force refresh if player is outside the cloak
-			if ( area.aabb.minX > player.posX || area.aabb.maxX < player.posX
-			  || area.aabb.minY > player.posY || area.aabb.maxY < player.posY
-			  || area.aabb.minZ > player.posZ || area.aabb.maxZ < player.posZ ) {
-				PacketHandler.sendCloakPacket(player, area.aabb, area.tier, false);
+			if ( area.minX > player.posX || area.maxX < player.posX
+			  || area.minY > player.posY || area.maxY < player.posY
+			  || area.minZ > player.posZ || area.maxZ < player.posZ ) {
+				PacketHandler.sendCloakPacket(player, area, false);
 			}
 		}
 		
@@ -85,21 +85,49 @@ public class CloakManager {
 		return (getCloakedArea(worldObj, x, y, z) != null);
 	}
 	
-	public void addCloakedAreaWorld(World worldObj,
+	public void updateCloakedArea(
+			World worldObj,
+			final int dimensionId, final int coreX, final int coreY, final int coreZ, final byte tier,
 			final int minX, final int minY, final int minZ,
-			final int maxX, final int maxY, final int maxZ,
-			final int x, final int y, final int z, final byte tier) {
-		cloaks.add(new CloakedArea(worldObj, x, y, z, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), tier));
+			final int maxX, final int maxY, final int maxZ) {
+		CloakedArea newArea = new CloakedArea(worldObj, dimensionId, coreX, coreY, coreZ, tier, minX, minY, minZ, maxX, maxY, maxZ);
+		
+		// find existing one
+		int index = -1;
+		for (int i = 0; i < cloaks.size(); i++) {
+			CloakedArea area = cloaks.get(i);
+			if ( area.dimensionId == worldObj.provider.dimensionId
+			  && area.coreX == coreX
+			  && area.coreY == coreY
+			  && area.coreZ == coreZ ) {
+				index = i;
+				break;
+			}
+		}
+		if (index != -1) {
+			cloaks.set(index, newArea);
+		} else {
+			cloaks.add(newArea);
+		}
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			newArea.clientCloak();
+		}
+		WarpDrive.logger.info("Cloak count is " + cloaks.size());
 	}
 	
-	public void removeCloakedArea(World worldObj, int x, int y, int z) {
+	public void removeCloakedArea(final int dimensionId, final int coreX, final int coreY, final int coreZ) {
 		int index = 0;
 		for (int i = 0; i < cloaks.size(); i++) {
-			if ( cloaks.get(i).coreX == x
-			  && cloaks.get(i).coreY == y
-			  && cloaks.get(i).coreZ == z
-			  && cloaks.get(i).dimensionId == worldObj.provider.dimensionId) {
-				cloaks.get(i).sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
+			CloakedArea area = cloaks.get(i);
+			if ( area.dimensionId == dimensionId
+			  && area.coreX == coreX
+			  && area.coreY == coreY
+			  && area.coreZ == coreZ ) {
+				if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+					area.clientDecloak();
+				} else {
+					area.sendCloakPacketToPlayersEx(true); // send info about collapsing cloaking field
+				}
 				index = i;
 				break;
 			}
@@ -110,7 +138,7 @@ public class CloakManager {
 	
 	public CloakedArea getCloakedArea(World worldObj, int x, int y, int z) {
 		for (CloakedArea area : cloaks) {
-			if (area.coreX == x && area.coreY == y && area.coreZ == z && area.dimensionId == worldObj.provider.dimensionId)
+			if (area.dimensionId == worldObj.provider.dimensionId && area.coreX == x && area.coreY == y && area.coreZ == z)
 				return area;
 		}
 		
@@ -136,17 +164,13 @@ public class CloakManager {
 	
 	@SideOnly(Side.CLIENT)
 	public static boolean onBlockChange(int x, int y, int z, Block block, int metadata, int flag) {
-		if (block != Blocks.air) {
+		if (block != Blocks.air && cloaks != null) {
 			for (CloakedArea area : cloaks) {
 				if (area.isBlockWithinArea(x, y, z)) {
 					// WarpDrive.logger.info("CM block is inside");
 					if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
 						// WarpDrive.logger.info("CM player is outside");
-						if (area.tier == 1) {
-							return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, WarpDrive.blockGas, 5, flag);
-						} else {
-							return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, Blocks.air, 0, flag);
-						}
+						return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, area.fogBlock, area.fogMetadata, flag);
 					}
 				}
 			}
@@ -156,36 +180,34 @@ public class CloakManager {
 	
 	@SideOnly(Side.CLIENT)
 	public static void onFillChunk(Chunk chunk) {
-		// WarpDrive.logger.info("CM onFillChunk " + chunk.xPosition + " " + chunk.zPosition);
-		int chunkXmin = chunk.xPosition << 4;
-		int chunkXmax = chunk.xPosition << 4 + 15;
-		int chunkZmin = chunk.zPosition << 4;
-		int chunkZmax = chunk.zPosition << 4 + 15;
+		if (cloaks == null) {
+			// WarpDrive.logger.info("CM onFillChunk (" + chunk.xPosition + " " + chunk.zPosition + ") no cloaks");
+			return;
+		}
+		
+		int chunkXmin = chunk.xPosition * 16;
+		int chunkXmax = chunk.xPosition * 16 + 15;
+		int chunkZmin = chunk.zPosition * 16;
+		int chunkZmax = chunk.zPosition * 16 + 15;
+		// WarpDrive.logger.info("CM onFillChunk (" + chunk.xPosition + " " + chunk.zPosition + ") " + cloaks.size() + " cloak(s) from (" + chunkXmin + " " + chunkZmin + ") to (" + chunkXmax + " " + chunkZmax + ")");
 		
 		for (CloakedArea area : cloaks) {
-			if ( area.aabb.minX <= chunkXmax && area.aabb.maxX >= chunkXmin
-			  && area.aabb.minZ <= chunkZmax && area.aabb.maxZ >= chunkZmin ) {
+			if ( area.minX <= chunkXmax && area.maxX >= chunkXmin
+			  && area.minZ <= chunkZmax && area.maxZ >= chunkZmin ) {
 				// WarpDrive.logger.info("CM chunk is inside");
 				if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
 					// WarpDrive.logger.info("CM player is outside");
 					
-					int areaXmin = (int)Math.max(chunkXmin, area.aabb.minX) & 15;
-					int areaXmax = (int)Math.min(chunkXmax, area.aabb.maxX) & 15;
-					int areaZmin = (int)Math.max(chunkZmin, area.aabb.minZ) & 15;
-					int areaZmax = (int)Math.min(chunkZmax, area.aabb.maxZ) & 15;
-					
-					Block block = Blocks.air;
-					int metadata = 0;
-					if (area.tier == 1) {
-						block = WarpDrive.blockGas;
-						metadata = 5;
-					}
+					int areaXmin = Math.max(chunkXmin, area.minX) & 15;
+					int areaXmax = Math.min(chunkXmax, area.maxX) & 15;
+					int areaZmin = Math.max(chunkZmin, area.minZ) & 15;
+					int areaZmax = Math.min(chunkZmax, area.maxZ) & 15;
 					
 					for (int x = areaXmin; x <= areaXmax; x++) {
 						for (int z = areaZmin; z <= areaZmax; z++) {
-							for (int y = (int)area.aabb.maxY; y >= (int)area.aabb.minY; y--) {
+							for (int y = area.maxY; y >= area.minY; y--) {
 								if (chunk.getBlock(x, y, z) != Blocks.air) {
-									chunk.func_150807_a(x, y, z, block, metadata);
+									chunk.func_150807_a(x, y, z, area.fogBlock, area.fogMetadata);
 								}
 								
 							}
@@ -194,5 +216,10 @@ public class CloakManager {
 				}
 			}
 		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public void onClientChangingDimension() {
+		cloaks.clear();
 	}
 }
