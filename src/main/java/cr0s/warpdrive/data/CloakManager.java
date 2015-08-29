@@ -13,6 +13,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import cr0s.warpdrive.WarpDrive;
+import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.network.PacketHandler;
 
 /**
@@ -62,6 +63,7 @@ public class CloakManager {
 	}
 	
 	public boolean onEntityJoinWorld(EntityPlayerMP player) {
+		if (WarpDriveConfig.LOGGING_CLOAKING) { WarpDrive.logger.info("onEntityJoinWorld " + player); }
 		for (CloakedArea area : this.cloaks) {
 			// skip other dimensions
 			if (area.dimensionId != player.worldObj.provider.dimensionId) {

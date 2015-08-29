@@ -30,7 +30,6 @@ public class CloakChunkWatcher {
 	public void onEntityJoinWorld(EntityJoinWorldEvent event){
 		if (!event.world.isRemote) {
 			if (event.entity instanceof EntityPlayerMP) {
-				WarpDrive.logger.info("onEntityJoinWorld " + event.entity);
 				WarpDrive.cloaks.onEntityJoinWorld((EntityPlayerMP)event.entity);
 			}
 		}
