@@ -30,14 +30,14 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 	private int maxX;
 	private int maxY;
 	private int maxZ;
-	private int tier;
+	private byte tier;
 	private boolean decloak;
 	
 	public MessageCloak() {
 		// required on receiving side
 	}
 	
-	public MessageCloak(final AxisAlignedBB aabb, final int tier, final boolean decloak) {
+	public MessageCloak(final AxisAlignedBB aabb, final byte tier, final boolean decloak) {
 		this.minX = (int)aabb.minX;
 		this.minY = (int)aabb.minY;
 		this.minZ = (int)aabb.minZ;
@@ -149,7 +149,7 @@ public class MessageCloak implements IMessage, IMessageHandler<MessageCloak, IMe
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
 			WarpDrive.logger.info("Received cloak packet: " + ((cloakMessage.decloak) ? "DEcloaked" : "cloaked")
 				+ "area: (" + cloakMessage.minX + "; " + cloakMessage.minY + "; " + cloakMessage.minZ
-				+ ") -> (" + cloakMessage.maxX + "; " + cloakMessage.maxY + "; " + cloakMessage.maxZ + ")");
+				+ ") -> (" + cloakMessage.maxX + "; " + cloakMessage.maxY + "; " + cloakMessage.maxZ + ") tier " + cloakMessage.tier);
 		}
 		
 		EntityClientPlayerMP player = Minecraft.getMinecraft().thePlayer;
