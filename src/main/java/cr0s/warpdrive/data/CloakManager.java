@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.network.PacketHandler;
 
@@ -138,7 +139,7 @@ public class CloakManager {
 				if (area.isBlockWithinArea(x, y, z)) {
 					// WarpDrive.logger.info("CM block is inside");
 					if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
-						// WarpDrive.logger.info("CM player is inside");
+						// WarpDrive.logger.info("CM player is outside");
 						if (area.tier == 1) {
 							return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, WarpDrive.blockGas, 5, flag);
 						} else {
@@ -149,5 +150,47 @@ public class CloakManager {
 			}
 		}
 		return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, block, metadata, flag);
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public static void onFillChunk(Chunk chunk) {
+		WarpDrive.logger.info("CM onFillChunk " + chunk.xPosition + " " + chunk.zPosition);
+		int chunkXmin = chunk.xPosition << 4;
+		int chunkXmax = chunk.xPosition << 4 + 15;
+		int chunkZmin = chunk.zPosition << 4;
+		int chunkZmax = chunk.zPosition << 4 + 15;
+		
+		for (CloakedArea area : cloaks) {
+			if ( area.aabb.minX <= chunkXmax && area.aabb.maxX >= chunkXmin
+			  && area.aabb.minZ <= chunkZmax && area.aabb.maxZ >= chunkZmin ) {
+				WarpDrive.logger.info("CM chunk is inside");
+				if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
+					WarpDrive.logger.info("CM player is outside");
+					
+					int areaXmin = (int)Math.max(chunkXmin, area.aabb.minX) & 15;
+					int areaXmax = (int)Math.min(chunkXmax, area.aabb.maxX) & 15;
+					int areaZmin = (int)Math.max(chunkZmin, area.aabb.minZ) & 15;
+					int areaZmax = (int)Math.min(chunkZmax, area.aabb.maxZ) & 15;
+					
+					Block block = Blocks.air;
+					int metadata = 0;
+					if (area.tier == 1) {
+						block = WarpDrive.blockGas;
+						metadata = 5;
+					}
+					
+					for (int x = areaXmin; x <= areaXmax; x++) {
+						for (int z = areaZmin; z <= areaZmax; z++) {
+							for (int y = (int)area.aabb.maxY; y >= (int)area.aabb.minY; y--) {
+								if (chunk.getBlock(x, y, z) != Blocks.air) {
+									chunk.func_150807_a(x, y, z, block, metadata);
+								}
+								
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

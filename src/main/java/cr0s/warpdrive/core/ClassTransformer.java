@@ -37,6 +37,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		nodemap.put("func_147492_c.name", "func_147492_c");
 		nodemap.put("func_147492_c.desc", "(IIILnet/minecraft/block/Block;I)Z");
 		nodemap.put("setBlock.name", "func_147465_d");
+		
+		nodemap.put("Chunk.class", "apx");
+		nodemap.put("fillChunk.name", "func_76607_a");
+		nodemap.put("fillChunk.desc", "([BIIZ)V");
+		nodemap.put("generateHeightMap.name", "func_76590_a");
+		nodemap.put("generateHeightMap.desc", "()V");
 	}
 	
 	@Override
@@ -51,12 +57,18 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		// if (debugLog) { System.out.println("Checking " + name); }
 		if (className.equals(nodemap.get("EntityLivingBase.class")) || className.equals("net.minecraft.entity.EntityLivingBase")) {
 			bytes = transformMinecraftEntityLivingBase(bytes);
+			
 		} else if (className.equals(nodemap.get("EntityItem.class")) || className.equals("net.minecraft.entity.item.EntityItem")) {
 			bytes = transformMinecraftEntityItem(bytes);
-		} else if (className.equals(nodemap.get("WorldClient.class")) || className.equals("net.minecraft.client.multiplayer.WorldClient")) {
-			bytes = transformMinecraftWorldClient(bytes);
+			
 		} else if (className.equals("com.creativemd.itemphysic.physics.ServerPhysic")) {
 			bytes = transformItemPhysicEntityItem(bytes);
+			
+		} else if (className.equals(nodemap.get("WorldClient.class")) || className.equals("net.minecraft.client.multiplayer.WorldClient")) {
+			bytes = transformMinecraftWorldClient(bytes);
+			
+		} else if (className.equals(nodemap.get("Chunk.class")) || className.equals("net.minecraft.world.chunk.Chunk")) {
+			bytes = transformMinecraftChunk(bytes);
 		}
 		
 		return bytes;
@@ -67,7 +79,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
 		int operationCount = 1;
-		int injectionCount = 0;
+		int injectedCount = 0;
 		Iterator methods = classNode.methods.iterator();
 		
 		do {
@@ -82,10 +94,10 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			  && methodnode.desc.equals(nodemap.get("moveEntityWithHeading.desc")) ) {
 				if (debugLog) { System.out.println("Method found!"); }
 				
-				int count = 0;
+				int instructionIndex = 0;
 				
-				while (count < methodnode.instructions.size()) {
-					AbstractInsnNode abstractNode = methodnode.instructions.get(count);
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
 					
 					if (abstractNode instanceof LdcInsnNode) {
 						LdcInsnNode nodeAt = (LdcInsnNode) abstractNode;
@@ -101,17 +113,17 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 					}
 					
-					count++;
+					instructionIndex++;
 				}
 			}
 		} while (true);
 		
-		if (injectionCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		if (injectedCount != operationCount) {
+			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
@@ -126,7 +138,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
 		int operationCount = 2;
-		int injectionCount = 0;
+		int injectedCount = 0;
 		Iterator methods = classNode.methods.iterator();
 		
 		do {
@@ -141,10 +153,10 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			  && methodnode.desc.equals(nodemap.get("onUpdate.desc")) ) {
 				if (debugLog) { System.out.println("Method found!"); }
 				
-				int count = 0;
+				int instructionIndex = 0;
 				
-				while (count < methodnode.instructions.size()) {
-					AbstractInsnNode abstractNode = methodnode.instructions.get(count);
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
 					
 					if (abstractNode instanceof LdcInsnNode) {
 						LdcInsnNode nodeAt = (LdcInsnNode) abstractNode;
@@ -160,7 +172,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 						
 						if (nodeAt.cst.equals(Double.valueOf(0.98000001907348633D))) {
@@ -174,17 +186,17 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 					}
 					
-					count++;
+					instructionIndex++;
 				}
 			}
 		} while (true);
 		
-		if (injectionCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		if (injectedCount != operationCount) {
+			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
@@ -199,7 +211,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
 		int operationCount = 2;
-		int injectionCount = 0;
+		int injectedCount = 0;
 		Iterator methods = classNode.methods.iterator();
 		
 		do {
@@ -214,11 +226,10 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			  && methodnode.desc.equals("(Lnet/minecraft/entity/item/EntityItem;)V") ) {
 				if (debugLog) { System.out.println("Method found!"); }
 				
-				int count = 0;
+				int instructionIndex = 0;
 				
-				while (count < methodnode.instructions.size()) {
-					AbstractInsnNode abstractNode = methodnode.instructions.get(count);
-					if (debugLog) { deasm(abstractNode); }
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
 					
 					if (abstractNode instanceof LdcInsnNode) {
 						LdcInsnNode nodeAt = (LdcInsnNode) abstractNode;
@@ -234,7 +245,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 						
 						if (nodeAt.cst.equals(Double.valueOf(0.98D))) {
@@ -248,17 +259,17 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 					}
 					
-					count++;
+					instructionIndex++;
 				}
 			}
 		} while (true);
 		
-		if (injectionCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		if (injectedCount != operationCount) {
+			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
@@ -273,7 +284,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
 		int operationCount = 1;
-		int injectionCount = 0;
+		int injectedCount = 0;
 		Iterator methods = classNode.methods.iterator();
 		
 		do {
@@ -288,10 +299,10 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			  && methodnode.desc.equals(nodemap.get("func_147492_c.desc")) ) {
 				if (debugLog) { System.out.println("Method found!"); }
 				
-				int count = 0;
+				int instructionIndex = 0;
 				
-				while (count < methodnode.instructions.size()) {
-					AbstractInsnNode abstractNode = methodnode.instructions.get(count);
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
 					
 					if (abstractNode instanceof MethodInsnNode) {
 						MethodInsnNode nodeAt = (MethodInsnNode) abstractNode;
@@ -305,17 +316,82 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.set(nodeAt, overwriteNode);
 							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
-							injectionCount++;
+							injectedCount++;
 						}
 					}
 					
-					count++;
+					instructionIndex++;
 				}
 			}
 		} while (true);
 		
-		if (injectionCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectionCount + " / " + operationCount + "), aborting...");
+		if (injectedCount != operationCount) {
+			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+		} else {
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
+			classNode.accept(writer);
+			bytes = writer.toByteArray();
+			System.out.println("Injection successfull!");
+		}
+		return bytes;
+	}
+	
+	private byte[] transformMinecraftChunk(byte[] bytes) {
+		ClassNode classNode = new ClassNode();
+		ClassReader classReader = new ClassReader(bytes);
+		classReader.accept(classNode, 0);
+		int operationCount = 1;
+		int injectedCount = 0;
+		Iterator methods = classNode.methods.iterator();
+		
+		do {
+			if (!methods.hasNext()) {
+				break;
+			}
+			
+			MethodNode methodnode = (MethodNode) methods.next();
+			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			
+			if ( (methodnode.name.equals(nodemap.get("fillChunk.name")) || methodnode.name.equals("fillChunk"))
+			  && methodnode.desc.equals(nodemap.get("fillChunk.desc")) ) {
+				if (debugLog) { System.out.println("Method found!"); }
+				
+				int instructionIndex = 0;
+				
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
+					if (debugLog) { deasm(abstractNode); }
+					
+					if (abstractNode instanceof MethodInsnNode) {
+						MethodInsnNode nodeAt = (MethodInsnNode) abstractNode;
+						
+						if ( (nodeAt.name.equals(nodemap.get("generateHeightMap.name")) || nodeAt.name.equals("generateHeightMap"))
+						  && nodeAt.desc.equals(nodemap.get("generateHeightMap.desc")) ) {
+							MethodInsnNode insertMethodNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									CLOAK_MANAGER_CLASS,
+									"onFillChunk",
+									"(Lnet/minecraft/world/chunk/Chunk;)V",
+									false);
+							methodnode.instructions.insertBefore(nodeAt, insertMethodNode);
+							instructionIndex++;
+							
+							VarInsnNode insertVarNode = new VarInsnNode(Opcodes.ALOAD, 0);
+							methodnode.instructions.insertBefore(nodeAt, insertVarNode);
+							instructionIndex++;
+							
+							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							injectedCount++;
+						}
+					}
+					
+					instructionIndex++;
+				}
+			}
+		} while (true);
+		
+		if (injectedCount != operationCount) {
+			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
