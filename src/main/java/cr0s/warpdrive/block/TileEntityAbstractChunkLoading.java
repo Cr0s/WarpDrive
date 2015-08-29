@@ -10,7 +10,6 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import com.google.common.collect.ImmutableSet;
 
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.config.WarpDriveConfig;
 
 public abstract class TileEntityAbstractChunkLoading extends TileEntityAbstractEnergy
 {

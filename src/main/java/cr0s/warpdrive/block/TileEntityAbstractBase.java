@@ -1,7 +1,6 @@
 package cr0s.warpdrive.block;
 
 import net.minecraft.tileentity.TileEntity;
-import cr0s.warpdrive.data.Vector3;
 
 public abstract class TileEntityAbstractBase extends TileEntity
 {
