@@ -112,7 +112,7 @@ public class CloakManager {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			newArea.clientCloak();
 		}
-		WarpDrive.logger.info("Cloak count is " + cloaks.size());
+		if (WarpDriveConfig.LOGGING_CLOAKING) { WarpDrive.logger.info("Cloak count is " + cloaks.size()); }
 	}
 	
 	public void removeCloakedArea(final int dimensionId, final int coreX, final int coreY, final int coreZ) {
