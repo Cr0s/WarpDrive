@@ -26,6 +26,7 @@ public class CommandSpace extends CommandBase {
 	
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
+		if (sender == null) { return; } 
 		MinecraftServer server = MinecraftServer.getServer();
 		
 		// set defaults
@@ -88,7 +89,7 @@ public class CommandSpace extends CommandBase {
 		WarpDrive.addChatMessage(sender, message);
 		WarpDrive.logger.info(message);
 		if (sender != player) {
-			WarpDrive.addChatMessage(player, sender + " is teleporting you to dimension " + targetDimensionId); // + ":" + targetWorld.getWorldInfo().getWorldName());
+			WarpDrive.addChatMessage(player, sender.getCommandSenderName() + " is teleporting you to dimension " + targetDimensionId); // + ":" + targetWorld.getWorldInfo().getWorldName());
 		}
 		
 		// find a good spot
