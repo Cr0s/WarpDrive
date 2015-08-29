@@ -2,10 +2,16 @@ package cr0s.warpdrive.data;
 
 import java.util.LinkedList;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
+import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.network.PacketHandler;
 
 /**
@@ -17,7 +23,7 @@ import cr0s.warpdrive.network.PacketHandler;
 
 public class CloakManager {
 	
-	private LinkedList<CloakedArea> cloaks;
+	private static LinkedList<CloakedArea> cloaks;
 	
 	public CloakManager() {
 		this.cloaks = new LinkedList<CloakedArea>();
@@ -76,7 +82,10 @@ public class CloakManager {
 		return (getCloakedArea(worldObj, x, y, z) != null);
 	}
 	
-	public void addCloakedAreaWorld(World worldObj, int minX, int minY, int minZ, int maxX, int maxY, int maxZ, int x, int y, int z, byte tier) {
+	public void addCloakedAreaWorld(World worldObj,
+			final int minX, final int minY, final int minZ,
+			final int maxX, final int maxY, final int maxZ,
+			final int x, final int y, final int z, final byte tier) {
 		cloaks.add(new CloakedArea(worldObj, x, y, z, AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX, maxY, maxZ), tier));
 	}
 	
@@ -97,8 +106,19 @@ public class CloakManager {
 	}
 	
 	public CloakedArea getCloakedArea(World worldObj, int x, int y, int z) {
-		for (CloakedArea area : this.cloaks) {
+		for (CloakedArea area : cloaks) {
 			if (area.coreX == x && area.coreY == y && area.coreZ == z && area.dimensionId == worldObj.provider.dimensionId)
+				return area;
+		}
+		
+		return null;
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public CloakedArea getCloakedArea(int x, int y, int z) {
+		// client only 
+		for (CloakedArea area : cloaks) {
+			if (area.coreX == x && area.coreY == y && area.coreZ == z)
 				return area;
 		}
 		
@@ -109,5 +129,25 @@ public class CloakManager {
 		for (CloakedArea area : this.cloaks) {
 			area.updatePlayer(player);
 		}
+	}
+	
+	@SideOnly(Side.CLIENT)
+	public static boolean onBlockChange(int x, int y, int z, Block block, int metadata, int flag) {
+		if (block != Blocks.air) {
+			for (CloakedArea area : cloaks) {
+				if (area.isBlockWithinArea(x, y, z)) {
+					// WarpDrive.logger.info("CM block is inside");
+					if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
+						// WarpDrive.logger.info("CM player is inside");
+						if (area.tier == 1) {
+							return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, WarpDrive.blockGas, 5, flag);
+						} else {
+							return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, Blocks.air, 0, flag);
+						}
+					}
+				}
+			}
+		}
+		return Minecraft.getMinecraft().theWorld.setBlock(x, y, z, block, metadata, flag);
 	}
 }

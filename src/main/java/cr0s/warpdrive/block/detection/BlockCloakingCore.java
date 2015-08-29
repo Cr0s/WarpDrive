@@ -72,9 +72,9 @@ public class BlockCloakingCore extends BlockContainer {
 		if (tileEntity != null && (par5EntityPlayer.getHeldItem() == null)) {
 			WarpDrive.addChatMessage(par5EntityPlayer, tileEntity.getStatus()
 					// + " isInvalid? " + te.isInvalid() + " Valid? " + te.isValid + " Cloaking? " + te.isCloaking + " Enabled? " + te.isEnabled
-					+ ((!tileEntity.isValid) ? " Invalid assembly!" :
-						((!tileEntity.isEnabled) ? " Cloak is disabled" :
-							((tileEntity.isCloaking) ? " A tier " + tileEntity.tier + " cloak is currently covering " + tileEntity.volume + " blocks!" : "Cloak needs more power!"))));
+					+ ((!tileEntity.isValid) ? "\nInvalid assembly!" :
+						((!tileEntity.isEnabled) ? "\nCloak is disabled" :
+							((tileEntity.isCloaking) ? "\nA tier " + tileEntity.tier + " cloak is currently covering " + tileEntity.volume + " blocks!" : "\nCloak needs more power!"))));
 			return true;
 		}
 

@@ -25,11 +25,11 @@ import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
-    public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(WarpDrive.MODID);
+	public static final SimpleNetworkWrapper simpleNetworkManager = NetworkRegistry.INSTANCE.newSimpleChannel(WarpDrive.MODID);
 	private static Method EntityTrackerEntry_getPacketForThisEntity;
 	
-    public static void init() {
-    	// Forge packets
+	public static void init() {
+		// Forge packets
 		simpleNetworkManager.registerMessage(MessageBeamEffect.class, MessageBeamEffect.class, 0, Side.CLIENT);
 		simpleNetworkManager.registerMessage(MessageFrequency.class , MessageFrequency.class , 1, Side.CLIENT);
 		simpleNetworkManager.registerMessage(MessageCloak.class     , MessageCloak.class     , 2, Side.CLIENT);
@@ -43,7 +43,7 @@ public class PacketHandler {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-    }
+	}
 	
 	// Beam effect sent to client side
 	public static void sendBeamPacket(World worldObj, Vector3 source, Vector3 target, float red, float green, float blue, int age, int energy, int radius) {
@@ -62,7 +62,7 @@ public class PacketHandler {
 				int radius_square = radius * radius;
 				for (int index = 0; index < playerEntityList.size(); index++) {
 					EntityPlayerMP entityplayermp = playerEntityList.get(index);
-
+					
 					if (entityplayermp.dimension == dimensionId) {
 						Vector3 player = new Vector3(entityplayermp);
 						if (source.distanceTo_square(player) < radius_square || target.distanceTo_square(player) < radius_square) {
@@ -111,14 +111,14 @@ public class PacketHandler {
 	}
 	
 	// Sending cloaking area definition (server -> client)
-	public static void sendCloakPacket(EntityPlayer player, final AxisAlignedBB aabb, final int tier, final boolean decloak) {
+	public static void sendCloakPacket(EntityPlayer player, final AxisAlignedBB aabb, final byte tier, final boolean decloak) {
 		MessageCloak cloakMessage = new MessageCloak(aabb, tier, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
-			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + ") tier " + tier + " decloak " + decloak);
+			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + " tier " + tier + " decloak " + decloak + ")");
 		}
 	}
-
+	
 	public static Packet getPacketForThisEntity(Entity entity) {
 		EntityTrackerEntry entry = new EntityTrackerEntry(entity, 0, 0, false);
 		try {

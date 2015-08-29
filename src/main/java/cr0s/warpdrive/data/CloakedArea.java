@@ -23,6 +23,33 @@ public class CloakedArea {
 	private LinkedList<String> playersInArea;
 	public byte tier = 0;
 	
+	public CloakedArea(World worldObj, final int x, final int y, final int z, AxisAlignedBB aabb, final byte tier) {
+		this.coreX = x;
+		this.coreY = y;
+		this.coreZ = z;
+		this.aabb = aabb;
+		this.tier = tier;
+		this.playersInArea = new LinkedList<String>();
+		
+		if (worldObj == null || aabb == null) {
+			return;
+		}
+		
+		this.dimensionId = worldObj.provider.dimensionId;
+		
+		try {
+			// Add all players currently inside the field
+			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
+			for (Entity e : list) {
+				if (e instanceof EntityPlayer) {
+					addPlayer(((EntityPlayer) e).getCommandSenderName());
+				}
+			}
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
+	}
+	
 	public boolean isPlayerListedInArea(String username) {
 		for (String playerInArea : playersInArea) {
 			if (playerInArea.equals(username)) {
@@ -54,31 +81,10 @@ public class CloakedArea {
 			 && aabb.minZ <= entity.posZ && (aabb.maxZ + 1) > entity.posZ);
 	}
 	
-	public CloakedArea(World worldObj, int x, int y, int z, AxisAlignedBB aabb, byte tier) {
-		this.coreX = x;
-		this.coreY = y;
-		this.coreZ = z;
-		this.aabb = aabb;
-		this.tier = tier;
-		this.playersInArea = new LinkedList<String>();
-		
-		if (worldObj == null || aabb == null) {
-			return;
-		}
-		
-		this.dimensionId = worldObj.provider.dimensionId;
-		
-		try {
-			// Add all players currently inside the field
-			List<Entity> list = worldObj.getEntitiesWithinAABB(EntityPlayerMP.class, this.aabb);
-			for (Entity e : list) {
-				if (e instanceof EntityPlayer) {
-					addPlayer(((EntityPlayer) e).getCommandSenderName());
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public boolean isBlockWithinArea(final int x, final int y, final int z) {
+		return (aabb.minX <= x && (aabb.maxX + 1) > x
+			 && aabb.minY <= y && (aabb.maxY + 1) > y
+			 && aabb.minZ <= z && (aabb.maxZ + 1) > z);
 	}
 	
 	// Sending only if field changes: sets up or collapsing
