@@ -5,8 +5,8 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -943,10 +943,10 @@ public class WarpDrive implements LoadingCallback {
 		}
 	}
 
-	public static void addChatMessage(final EntityPlayer player, final String message) {
+	public static void addChatMessage(final ICommandSender sender, final String message) {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
-			player.addChatMessage(new ChatComponentText(line));
+			sender.addChatMessage(new ChatComponentText(line));
 		}
 	}
 	@Mod.EventHandler

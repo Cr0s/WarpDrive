@@ -434,8 +434,6 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 
 	private void summonPlayer(EntityPlayerMP player, int x, int y, int z) {
 		if (consumeEnergy(WarpDriveConfig.SHIP_TELEPORT_ENERGY_PER_ENTITY, false)) {
-			player.setPositionAndUpdate(x, y, z);
-
 			if (player.dimension != worldObj.provider.dimensionId) {
 				player.mcServer.getConfigurationManager().transferPlayerToDimension(
 					player,
@@ -444,6 +442,10 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 						DimensionManager.getWorld(worldObj.provider.dimensionId),
 						0,
 						MathHelper.floor_double(player.posX), MathHelper.floor_double(player.posY), MathHelper.floor_double(player.posZ)));
+				player.setPositionAndUpdate(x, y, z);
+				player.sendPlayerAbilities();
+			} else {
+				player.setPositionAndUpdate(x, y, z);
 			}
 		}
 	}
@@ -897,6 +899,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					}
 					
 					((EntityPlayerMP) entity).setPositionAndUpdate(x + 0.5D, newY + 2.0D, z + 0.5D);
+					((EntityPlayerMP) entity).sendPlayerAbilities();
 				}
 			}
 		}

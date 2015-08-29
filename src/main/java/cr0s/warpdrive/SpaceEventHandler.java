@@ -172,6 +172,7 @@ public class SpaceEventHandler {
 								new SpaceTeleporter(DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID), 0, x, 250, z));
 						player.setFire(30);
 						player.setPositionAndUpdate(entity.posX, 250.0D, entity.posZ);
+						player.sendPlayerAbilities();
 					}
 				} else {// (in space, no air block and not a player)
 					entity_airBlock.put(entity.getEntityId(), 0);
