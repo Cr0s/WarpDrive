@@ -154,7 +154,7 @@ public class CloakManager {
 	
 	@SideOnly(Side.CLIENT)
 	public static void onFillChunk(Chunk chunk) {
-		WarpDrive.logger.info("CM onFillChunk " + chunk.xPosition + " " + chunk.zPosition);
+		// WarpDrive.logger.info("CM onFillChunk " + chunk.xPosition + " " + chunk.zPosition);
 		int chunkXmin = chunk.xPosition << 4;
 		int chunkXmax = chunk.xPosition << 4 + 15;
 		int chunkZmin = chunk.zPosition << 4;
@@ -163,9 +163,9 @@ public class CloakManager {
 		for (CloakedArea area : cloaks) {
 			if ( area.aabb.minX <= chunkXmax && area.aabb.maxX >= chunkXmin
 			  && area.aabb.minZ <= chunkZmax && area.aabb.maxZ >= chunkZmin ) {
-				WarpDrive.logger.info("CM chunk is inside");
+				// WarpDrive.logger.info("CM chunk is inside");
 				if (!area.isEntityWithinArea(Minecraft.getMinecraft().thePlayer)) {
-					WarpDrive.logger.info("CM player is outside");
+					// WarpDrive.logger.info("CM player is outside");
 					
 					int areaXmin = (int)Math.max(chunkXmin, area.aabb.minX) & 15;
 					int areaXmax = (int)Math.min(chunkXmax, area.aabb.maxX) & 15;
