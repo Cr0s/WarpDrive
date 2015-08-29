@@ -172,7 +172,7 @@ public class SpaceWorldGenerator implements IWorldGenerator {
 			int aZ = (int) (z + Math.round(horizontalRange * Math.sin(bearing)));
 
 			if (WarpDriveConfig.LOGGING_WORLDGEN) {
-				System.out.println(String.format("Big asteroid: %.3f %.3f r %.3f r makes %3d, %3d, %3d",
+				WarpDrive.logger.info(String.format("Big asteroid: %.3f %.3f r %.3f r makes %3d, %3d, %3d",
 						new Object[] { Double.valueOf(binomial), Double.valueOf(bearing), Double.valueOf(yawn), Integer.valueOf(aX), Integer.valueOf(aY), Integer.valueOf(aZ) }));
 			}
 

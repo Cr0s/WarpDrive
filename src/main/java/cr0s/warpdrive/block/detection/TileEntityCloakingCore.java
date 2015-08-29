@@ -104,7 +104,9 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 						setCoilsState(true);
 						
 						// Register cloak
-						WarpDrive.cloaks.addCloakedAreaWorld(worldObj, minX, minY, minZ, maxX, maxY, maxZ, xCoord, yCoord, zCoord, tier);
+						WarpDrive.cloaks.updateCloakedArea(worldObj,
+								worldObj.provider.dimensionId, xCoord, yCoord, zCoord, tier,
+								minX, minY, minZ, maxX, maxY, maxZ);
 						if (!soundPlayed) {
 							soundPlayed = true;
 							worldObj.playSoundEffect(xCoord + 0.5f, yCoord + 0.5f, zCoord + 0.5f, "warpdrive:cloak", 4F, 1F);
@@ -239,7 +241,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	public void disableCloakingField() {
 		setCoilsState(false);
 		if (WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord)) {
-			WarpDrive.cloaks.removeCloakedArea(worldObj, xCoord, yCoord, zCoord);
+			WarpDrive.cloaks.removeCloakedArea(worldObj.provider.dimensionId, xCoord, yCoord, zCoord);
 			
 			if (!soundPlayed) {
 				soundPlayed = true;

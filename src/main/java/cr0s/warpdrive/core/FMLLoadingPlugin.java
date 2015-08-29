@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cpw.mods.fml.relauncher.IFMLCallHook;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 
@@ -13,6 +16,7 @@ import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
 @IFMLLoadingPlugin.SortingIndex(value = 1001) // > 1000 to work with srg names
 public class FMLLoadingPlugin implements IFMLLoadingPlugin, IFMLCallHook {
 	public static File location;
+	public static final Logger logger = LogManager.getLogger("WarpDriveCore");
 	private boolean debugLog = false;
 	
 	@Override
@@ -34,16 +38,16 @@ public class FMLLoadingPlugin implements IFMLLoadingPlugin, IFMLCallHook {
 	public void injectData(Map<String, Object> data) {
 		location = (File) data.get("coremodLocation");
 		if (debugLog) {
-			System.out.println("injectData:");
+			logger.info("injectData:");
 			for (Entry<String, Object> entry : data.entrySet()) {
-				System.out.println("- " + entry.getKey() + " = " + entry.getValue());
+				logger.info("- " + entry.getKey() + " = " + entry.getValue());
 			}
 		}
 	}
 	
 	@Override
 	public Void call() throws Exception {
-		if (debugLog) { System.out.println("call()"); }
+		if (debugLog) { logger.info("call()"); }
 		return null;
 	}
 	

@@ -48,26 +48,24 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 	@Override
 	public byte[] transform(String name, String transformedName, byte[] bytes) {
 		if (nodemap == null) {
-			System.out.println("Nodemap is null, transformation cancelled");
+			FMLLoadingPlugin.logger.info("Nodemap is null, transformation cancelled");
 			return bytes;
 		}
 		
-		String className = name.replace('/', '.');
-		
-		// if (debugLog) { System.out.println("Checking " + name); }
-		if (className.equals(nodemap.get("EntityLivingBase.class")) || className.equals("net.minecraft.entity.EntityLivingBase")) {
+		// if (debugLog) { FMLLoadingPlugin.logger.info("Checking " + name); }
+		if (transformedName.equals("net.minecraft.entity.EntityLivingBase")) {
 			bytes = transformMinecraftEntityLivingBase(bytes);
 			
-		} else if (className.equals(nodemap.get("EntityItem.class")) || className.equals("net.minecraft.entity.item.EntityItem")) {
+		} else if (transformedName.equals("net.minecraft.entity.item.EntityItem")) {
 			bytes = transformMinecraftEntityItem(bytes);
 			
-		} else if (className.equals("com.creativemd.itemphysic.physics.ServerPhysic")) {
+		} else if (transformedName.equals("com.creativemd.itemphysic.physics.ServerPhysic")) {
 			bytes = transformItemPhysicEntityItem(bytes);
 			
-		} else if (className.equals(nodemap.get("WorldClient.class")) || className.equals("net.minecraft.client.multiplayer.WorldClient")) {
+		} else if (transformedName.equals("net.minecraft.client.multiplayer.WorldClient")) {
 			bytes = transformMinecraftWorldClient(bytes);
 			
-		} else if (className.equals(nodemap.get("Chunk.class")) || className.equals("net.minecraft.world.chunk.Chunk")) {
+		} else if (transformedName.equals("net.minecraft.world.chunk.Chunk")) {
 			bytes = transformMinecraftChunk(bytes);
 		}
 		
@@ -88,11 +86,11 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			}
 			
 			MethodNode methodnode = (MethodNode) methods.next();
-			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			// if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
 			
 			if ( (methodnode.name.equals(nodemap.get("moveEntityWithHeading.name")) || methodnode.name.equals("moveEntityWithHeading"))
 			  && methodnode.desc.equals(nodemap.get("moveEntityWithHeading.desc")) ) {
-				if (debugLog) { System.out.println("Method found!"); }
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
 				
 				int instructionIndex = 0;
 				
@@ -112,7 +110,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 					}
@@ -123,12 +121,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} while (true);
 		
 		if (injectedCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			bytes = writer.toByteArray();
-			System.out.println("Injection successfull!");
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
 		}
 		return bytes;
 	}
@@ -147,11 +145,11 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			}
 			
 			MethodNode methodnode = (MethodNode) methods.next();
-			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			// if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
 			
 			if ( (methodnode.name.equals(nodemap.get("onUpdate.name")) || methodnode.name.equals("onUpdate"))
 			  && methodnode.desc.equals(nodemap.get("onUpdate.desc")) ) {
-				if (debugLog) { System.out.println("Method found!"); }
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
 				
 				int instructionIndex = 0;
 				
@@ -171,7 +169,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 						
@@ -185,7 +183,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 					}
@@ -196,12 +194,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} while (true);
 		
 		if (injectedCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			bytes = writer.toByteArray();
-			System.out.println("Injection successfull!");
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
 		}
 		return bytes;
 	}
@@ -220,11 +218,11 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			}
 			
 			MethodNode methodnode = (MethodNode) methods.next();
-			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			// if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
 			
 			if ( (methodnode.name.equals("update"))
 			  && methodnode.desc.equals("(Lnet/minecraft/entity/item/EntityItem;)V") ) {
-				if (debugLog) { System.out.println("Method found!"); }
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
 				
 				int instructionIndex = 0;
 				
@@ -244,7 +242,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 						
@@ -258,7 +256,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 					}
@@ -269,12 +267,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} while (true);
 		
 		if (injectedCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			bytes = writer.toByteArray();
-			System.out.println("Injection successfull!");
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
 		}
 		return bytes;
 	}
@@ -293,11 +291,11 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			}
 			
 			MethodNode methodnode = (MethodNode) methods.next();
-			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			// if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
 			
 			if ( (methodnode.name.equals(nodemap.get("func_147492_c.name")) || methodnode.name.equals("func_147492_c"))
 			  && methodnode.desc.equals(nodemap.get("func_147492_c.desc")) ) {
-				if (debugLog) { System.out.println("Method found!"); }
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
 				
 				int instructionIndex = 0;
 				
@@ -315,7 +313,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									"(IIILnet/minecraft/block/Block;II)Z",
 									false);
 							methodnode.instructions.set(nodeAt, overwriteNode);
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 					}
@@ -326,12 +324,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} while (true);
 		
 		if (injectedCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			bytes = writer.toByteArray();
-			System.out.println("Injection successfull!");
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
 		}
 		return bytes;
 	}
@@ -350,11 +348,11 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 			}
 			
 			MethodNode methodnode = (MethodNode) methods.next();
-			// if (debugLog) { System.out.println("- Method " + methodnode.name + " " + methodnode.desc); }
+			if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
 			
 			if ( (methodnode.name.equals(nodemap.get("fillChunk.name")) || methodnode.name.equals("fillChunk"))
 			  && methodnode.desc.equals(nodemap.get("fillChunk.desc")) ) {
-				if (debugLog) { System.out.println("Method found!"); }
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
 				
 				int instructionIndex = 0;
 				
@@ -380,7 +378,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							methodnode.instructions.insertBefore(nodeAt, insertVarNode);
 							instructionIndex++;
 							
-							if (debugLog) { System.out.println("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
 					}
@@ -391,12 +389,12 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} while (true);
 		
 		if (injectedCount != operationCount) {
-			System.out.println("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
 		} else {
 			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
 			classNode.accept(writer);
 			bytes = writer.toByteArray();
-			System.out.println("Injection successfull!");
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
 		}
 		return bytes;
 	}
@@ -404,34 +402,34 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 	private static void deasm(AbstractInsnNode abstractNode) {
 		if (abstractNode instanceof VarInsnNode) {
 			VarInsnNode node = (VarInsnNode) abstractNode;
-			System.out.println("  + Var " + node.var);
+			FMLLoadingPlugin.logger.info("  + Var " + node.var);
 			
 		} else if (abstractNode instanceof LabelNode) {
 			LabelNode node = (LabelNode) abstractNode;
-			System.out.println("  + Label " + node.getLabel());
+			FMLLoadingPlugin.logger.info("  + Label " + node.getLabel());
 			
 		} else if (abstractNode instanceof LineNumberNode) {
 			LineNumberNode node = (LineNumberNode) abstractNode;
-			System.out.println("  + Line " + node.line);
+			FMLLoadingPlugin.logger.info("  + Line " + node.line);
 			
 		} else if (abstractNode instanceof InsnNode) {
 			InsnNode node = (InsnNode) abstractNode;
-			System.out.println("  + Instruction " + node);
+			FMLLoadingPlugin.logger.info("  + Instruction " + node);
 			
 		} else if (abstractNode instanceof LdcInsnNode) {
 			LdcInsnNode node = (LdcInsnNode) abstractNode;
-			System.out.println("  + Load " + node.cst);
+			FMLLoadingPlugin.logger.info("  + Load " + node.cst);
 			
 		} else if (abstractNode instanceof FieldInsnNode) {
 			FieldInsnNode node = (FieldInsnNode) abstractNode;
-			System.out.println("  + Field " + node.owner + " " + node.name + " " + node.desc);
+			FMLLoadingPlugin.logger.info("  + Field " + node.owner + " " + node.name + " " + node.desc);
 			
 		} else if (abstractNode instanceof MethodInsnNode) {
 			MethodInsnNode node = (MethodInsnNode) abstractNode;
-			System.out.println("  + Method " + node.owner + " " + node.name + " " + node.desc);
+			FMLLoadingPlugin.logger.info("  + Method " + node.owner + " " + node.name + " " + node.desc);
 			
 		} else {
-			System.out.println("  + Instruction " + abstractNode.getOpcode() + " " + abstractNode.getType() + " " + abstractNode.toString());
+			FMLLoadingPlugin.logger.info("  + Instruction " + abstractNode.getOpcode() + " " + abstractNode.getType() + " " + abstractNode.toString());
 		}
 
 	}

@@ -22,6 +22,7 @@ import cr0s.warpdrive.network.MessageBeamEffect;
 import cr0s.warpdrive.network.MessageTargeting;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.WarpDriveConfig;
+import cr0s.warpdrive.data.CloakedArea;
 import cr0s.warpdrive.data.Vector3;
 
 public class PacketHandler {
@@ -111,11 +112,11 @@ public class PacketHandler {
 	}
 	
 	// Sending cloaking area definition (server -> client)
-	public static void sendCloakPacket(EntityPlayer player, final AxisAlignedBB aabb, final byte tier, final boolean decloak) {
-		MessageCloak cloakMessage = new MessageCloak(aabb, tier, decloak);
+	public static void sendCloakPacket(EntityPlayer player, CloakedArea area, final boolean decloak) {
+		MessageCloak cloakMessage = new MessageCloak(area, decloak);
 		simpleNetworkManager.sendTo(cloakMessage, (EntityPlayerMP) player);
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
-			WarpDrive.logger.info("Sent cloak packet (aabb " + aabb + " tier " + tier + " decloak " + decloak + ")");
+			WarpDrive.logger.info("Sent cloak packet (area " + area + " decloak " + decloak + ")");
 		}
 	}
 	
