@@ -1,17 +1,22 @@
-package cr0s.warpdrive;
+package cr0s.warpdrive.event;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent;
 import cpw.mods.fml.common.network.FMLNetworkEvent.ClientConnectedToServerEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import cr0s.warpdrive.WarpDrive;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.event.world.WorldEvent;
 
-public class EventListeners {
+/**
+*
+* @author LemADEC
+*/
+public class WorldHandler {
 	
 	//TODO: register as event receiver
 	public void onChunkLoaded(ChunkWatchEvent event) {
