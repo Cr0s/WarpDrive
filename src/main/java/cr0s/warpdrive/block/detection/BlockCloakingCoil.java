@@ -12,7 +12,7 @@ import cr0s.warpdrive.WarpDrive;
 
 public class BlockCloakingCoil extends Block {
 	private IIcon[] iconBuffer;
-
+	
 	public BlockCloakingCoil(int texture, Material material) {
 		super(material);
 		setHardness(0.5F);
@@ -20,11 +20,11 @@ public class BlockCloakingCoil extends Block {
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.detection.CloakingCoil");
 	}
-
-	static final boolean oldTextures = true;
+	
+	static final boolean oldTextures = false;
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
-		iconBuffer = new IIcon[6];
+		iconBuffer = new IIcon[4];
 		if (oldTextures) {
 			iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSide");
 			iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSideActive");
@@ -32,13 +32,11 @@ public class BlockCloakingCoil extends Block {
 		} else {
 			iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilInPassive");
 			iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutPassive");
-			iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutPassive");
-			iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilInActive");
-			iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutActive");
-			iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSideActive");
+			iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilInActive");
+			iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutActive");
 		}
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		// Metadata values
@@ -64,10 +62,8 @@ public class BlockCloakingCoil extends Block {
 			if (metadata == 0) {
 				if (side == 2) {
 					return iconBuffer[0];
-				} else if (side == 3) {
-					return iconBuffer[1];
 				} else {
-					return iconBuffer[2];
+					return iconBuffer[1];
 				}
 			}
 			
@@ -75,22 +71,20 @@ public class BlockCloakingCoil extends Block {
 			if (metadata == 1) {
 				return iconBuffer[0];
 			} else if (metadata == 9) {
-				return iconBuffer[3];
+				return iconBuffer[2];
 			}
 			
 			// outer coils
 			int direction = (metadata & 7) - 2;
 			int activeOffset = (metadata < 8) ? 0 : 2; 
-			if (direction == side) {
-				return iconBuffer[1 + activeOffset];
-			} else if (ForgeDirection.OPPOSITES[direction] == side) {
+			if (ForgeDirection.OPPOSITES[direction] == side) {
 				return iconBuffer[0 + activeOffset];
 			} else {
-				return iconBuffer[2 + activeOffset];
+				return iconBuffer[1 + activeOffset];
 			}
 		}
 	}
-
+	
 	/**
 	 * Returns the quantity of items to drop on block destruction.
 	 */
@@ -98,7 +92,7 @@ public class BlockCloakingCoil extends Block {
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
+	
 	/**
 	 * Returns the ID of the items to drop on destruction.
 	 */
