@@ -2,8 +2,6 @@ package cr0s.warpdrive.config.filler;
 
 import java.util.Random;
 
-import net.minecraft.block.Block;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -12,6 +10,8 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.InvalidXmlException;
 import cr0s.warpdrive.config.MetaBlock;
 import cr0s.warpdrive.config.XmlRepresentable;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 
 /**
  * Represents a set of fillers. Before using after construction, finishContruction() must be called.
@@ -136,6 +136,14 @@ public class FillerSet implements XmlRepresentable, Comparable {
 	public void finishContruction() {
 		WarpDrive.logger.info("Finishing construction of FillerSet " + name);
 		weightedFillerBlocks = factory.constructWeightedMetaBlockList();
+
+		//For some reason some entries are null, so replace them with air
+		for (int i = 0; i < weightedFillerBlocks.length; i++) {
+			if (weightedFillerBlocks[i] == null)
+				weightedFillerBlocks[i] = MetaBlock.getMetaBlock(Blocks.air, 0);
+
+		}
+
 		factory = null;
 	}
 

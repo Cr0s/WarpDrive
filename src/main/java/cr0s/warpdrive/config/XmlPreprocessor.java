@@ -77,6 +77,10 @@ public class XmlPreprocessor {
 
 	}
 
+	public static void doLogicPreprocessing(Element root) {
+
+	}
+
 	public static class ModCheckResults {
 
 		private TreeMap<String, String> mods;
