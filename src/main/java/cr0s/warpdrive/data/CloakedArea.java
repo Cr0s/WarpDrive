@@ -112,7 +112,6 @@ public class CloakedArea {
 	}
 	
 	// Sending only if field changes: sets up or collapsing
-	@SideOnly(Side.SERVER)
 	public void sendCloakPacketToPlayersEx(final boolean decloak) {
 		if (WarpDriveConfig.LOGGING_CLOAKING) {
 			WarpDrive.logger.info("sendCloakPacketToPlayersEx " + decloak);

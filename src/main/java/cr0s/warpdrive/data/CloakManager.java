@@ -116,7 +116,7 @@ public class CloakManager {
 	}
 	
 	public void removeCloakedArea(final int dimensionId, final int coreX, final int coreY, final int coreZ) {
-		int index = 0;
+		int index = -1;
 		for (int i = 0; i < cloaks.size(); i++) {
 			CloakedArea area = cloaks.get(i);
 			if ( area.dimensionId == dimensionId
@@ -133,7 +133,9 @@ public class CloakManager {
 			}
 		}
 		
-		cloaks.remove(index);
+		if (index != -1) {
+			cloaks.remove(index);
+		}
 	}
 	
 	public CloakedArea getCloakedArea(World worldObj, int x, int y, int z) {
