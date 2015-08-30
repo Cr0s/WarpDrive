@@ -7,6 +7,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import net.minecraft.util.IIcon;
+import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockCloakingCoil extends Block {
@@ -20,27 +21,73 @@ public class BlockCloakingCoil extends Block {
 		this.setBlockName("warpdrive.detection.CloakingCoil");
 	}
 
+	static final boolean oldTextures = true;
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
-		iconBuffer = new IIcon[3];
-		iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSide");
-		iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSideActive");
-		iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilTop");
+		iconBuffer = new IIcon[6];
+		if (oldTextures) {
+			iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSide");
+			iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSideActive");
+			iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilTop");
+		} else {
+			iconBuffer[0] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilInPassive");
+			iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutPassive");
+			iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutPassive");
+			iconBuffer[3] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilInActive");
+			iconBuffer[4] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilOutActive");
+			iconBuffer[5] = par1IconRegister.registerIcon("warpdrive:detection/cloakingCoilSideActive");
+		}
 	}
 
 	@Override
 	public IIcon getIcon(int side, int metadata) {
-		if (side == 0) {
-			return iconBuffer[2];
-		} else if (side == 1) {
-			return iconBuffer[2];
-		}
-		if (metadata == 0) {
-			return iconBuffer[0];
-		} else if (metadata == 1) {
-			return iconBuffer[1];
+		// Metadata values
+		// 0 = not linked
+		// 1 = inner coil passive
+		// 2-7 = outer coil passive
+		// 8 = (not used)
+		// 9 = inner coil active
+		// 10-15 = outer coil active
+		if (oldTextures) {
+			if (side == 0) {
+				return iconBuffer[2];
+			} else if (side == 1) {
+				return iconBuffer[2];
+			}
+			if (metadata < 8) {
+				return iconBuffer[0];
+			} else {
+				return iconBuffer[1];
+			}
 		} else {
-			return null;
+			// not linked or in inventory
+			if (metadata == 0) {
+				if (side == 2) {
+					return iconBuffer[0];
+				} else if (side == 3) {
+					return iconBuffer[1];
+				} else {
+					return iconBuffer[2];
+				}
+			}
+			
+			// inner coils
+			if (metadata == 1) {
+				return iconBuffer[0];
+			} else if (metadata == 9) {
+				return iconBuffer[3];
+			}
+			
+			// outer coils
+			int direction = (metadata & 7) - 2;
+			int activeOffset = (metadata < 8) ? 0 : 2; 
+			if (direction == side) {
+				return iconBuffer[1 + activeOffset];
+			} else if (ForgeDirection.OPPOSITES[direction] == side) {
+				return iconBuffer[0 + activeOffset];
+			} else {
+				return iconBuffer[2 + activeOffset];
+			}
 		}
 	}
 
