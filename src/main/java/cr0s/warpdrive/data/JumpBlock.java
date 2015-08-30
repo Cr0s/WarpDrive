@@ -1,6 +1,7 @@
 package cr0s.warpdrive.data;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
@@ -62,13 +63,30 @@ public class JumpBlock {
 				oldnbt.setInteger("y", newY);
 				oldnbt.setInteger("z", newZ);
 				
-				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ")) { // Mekanism 6.0.4.44
+				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ")) {// Mekanism 6.0.4.44
 					if (WarpDriveConfig.LOGGING_JUMP) {
-						WarpDrive.logger.info(this + " moveBlockSimple: TileEntity from Mekanism detected");
+						WarpDrive.logger.info(this + " deploy: TileEntity has mainXYZ");
 					}
 					oldnbt.setInteger("mainX", oldnbt.getInteger("mainX") + offsetX);
 					oldnbt.setInteger("mainY", oldnbt.getInteger("mainY") + offsetY);
 					oldnbt.setInteger("mainZ", oldnbt.getInteger("mainZ") + offsetZ);
+				}
+				
+				if (oldnbt.hasKey("screenData")) {// IC2NuclearControl 2.2.5a
+					NBTTagCompound nbtScreenData = oldnbt.getCompoundTag("screenData");
+					if ( nbtScreenData.hasKey("minX") && nbtScreenData.hasKey("minY") && nbtScreenData.hasKey("minZ")
+					  && nbtScreenData.hasKey("maxX") && nbtScreenData.hasKey("maxY") && nbtScreenData.hasKey("maxZ")) {
+						if (WarpDriveConfig.LOGGING_JUMP) {
+							WarpDrive.logger.info(this + " deploy: TileEntity has screenData.min/maxXYZ");
+						}
+						nbtScreenData.setInteger("minX", nbtScreenData.getInteger("minX") + offsetX);
+						nbtScreenData.setInteger("minY", nbtScreenData.getInteger("minY") + offsetY);
+						nbtScreenData.setInteger("minZ", nbtScreenData.getInteger("minZ") + offsetZ);
+						nbtScreenData.setInteger("maxX", nbtScreenData.getInteger("maxX") + offsetX);
+						nbtScreenData.setInteger("maxY", nbtScreenData.getInteger("maxY") + offsetY);
+						nbtScreenData.setInteger("maxZ", nbtScreenData.getInteger("maxZ") + offsetZ);
+						oldnbt.setTag("screenData", nbtScreenData);
+					}
 				}
 				
 				TileEntity newTileEntity = null;
@@ -107,7 +125,7 @@ public class JumpBlock {
 						WarpDriveConfig.forgeMultipart_helper_sendDescPacket.invoke(null, targetWorld, newTileEntity);
 					}
 				} else {
-					WarpDrive.logger.info(" moveBlockSimple failed to create new tile entity at " + x + ", " + y + ", " + z + " blockId " + block + ":" + blockMeta);
+					WarpDrive.logger.info(" deploy failed to create new tile entity at " + x + ", " + y + ", " + z + " blockId " + block + ":" + blockMeta);
 					WarpDrive.logger.info("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
 				}
 			}
@@ -157,7 +175,20 @@ public class JumpBlock {
 						if (teClass.getName().equals("ic2.core.block.reactor.TileEntityNuclearReactorElectric")) {
 							NetworkHelper_updateTileEntityField(tileEntity, "heat");	// not working, probably an IC2 bug here...
 						}
-						// no needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
+						// not needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
+					}
+				} else {// IC2 extensions without network optimization (transfering all fields) 
+					try {
+						Method getNetworkedFields = teClass.getMethod("getNetworkedFields");
+						List<String> fields = (List<String>) getNetworkedFields.invoke(tileEntity);
+						if (WarpDriveConfig.LOGGING_JUMP) {
+							WarpDrive.logger.info("Tile has " + fields.size() + " networked fields: " + fields);
+						}
+						for (String field : fields) {
+							NetworkHelper_updateTileEntityField(tileEntity, field);
+						}
+					} catch (NoSuchMethodException exception) {
+						// WarpDrive.logger.info("Tile has no getNetworkedFields method");
 					}
 				}
 			} catch (Exception exception) {
@@ -167,19 +198,21 @@ public class JumpBlock {
 		}
 	}
 	
-	// This code is an IC2 hack to fix an issue on 1.7.10 until industrialcraft-2-2.2.763-experimental, see http://bt.industrial-craft.net/view.php?id=1704
-	private static Object instance;
+	// IC2 support for updating tile entity fields
+	private static Object NetworkManager_instance;
 	private static Method NetworkManager_updateTileEntityField;
 	
 	public static void NetworkHelper_init() {
 		try {
 			NetworkManager_updateTileEntityField = Class.forName("ic2.core.network.NetworkManager").getMethod("updateTileEntityField", new Class[] { TileEntity.class, String.class });
 			
-			instance = Class.forName("ic2.core.IC2").getDeclaredField("network").get(null);
-			if (!instance.getClass().getName().contains("NetworkManager")) {
-				instance = Class.forName("ic2.core.util.SideGateway").getMethod("get").invoke(instance);
-				WarpDrive.logger.error("Patched IC2 API, new instance is '" + instance + "'");
+			NetworkManager_instance = Class.forName("ic2.core.IC2").getDeclaredField("network").get(null);
+			// This code is an IC2 hack to fix an issue on 1.7.10 up to industrialcraft-2-2.2.763-experimental, see http://bt.industrial-craft.net/view.php?id=1704
+			if (!NetworkManager_instance.getClass().getName().contains("NetworkManager")) {
+				NetworkManager_instance = Class.forName("ic2.core.util.SideGateway").getMethod("get").invoke(NetworkManager_instance);
+				WarpDrive.logger.error("Patched IC2 API, new instance is '" + NetworkManager_instance + "'");
 			}
+			// IC2 hack ends here
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -187,15 +220,15 @@ public class JumpBlock {
 	
 	public static void NetworkHelper_updateTileEntityField(TileEntity te, String field) {
 		try {
-			if (instance == null) {
+			if (NetworkManager_instance == null) {
 				NetworkHelper_init();
 			}
-			NetworkManager_updateTileEntityField.invoke(instance, new Object[] { te, field });
+			NetworkManager_updateTileEntityField.invoke(NetworkManager_instance, new Object[] { te, field });
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
-	// IC2 hack ends here
+	// IC2 support ends here
 	
 	// This code is a straight copy from Vanilla net.minecraft.world.World.setBlock to remove lighting computations
 	public static boolean setBlockNoLight(World w, int x, int y, int z, Block block, int blockMeta, int par6) {
