@@ -177,7 +177,7 @@ public class JumpBlock {
 						}
 						// not needed: if ic2.core.block.machine.tileentity.TileEntityMatter then updated "state"
 					}
-				} else {// IC2 extensions without network optimization (transfering all fields) 
+				} else {// IC2 extensions without network optimization (transferring all fields) 
 					try {
 						Method getNetworkedFields = teClass.getMethod("getNetworkedFields");
 						List<String> fields = (List<String>) getNetworkedFields.invoke(tileEntity);

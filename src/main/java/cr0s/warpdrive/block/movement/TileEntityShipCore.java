@@ -35,24 +35,25 @@ import cr0s.warpdrive.world.SpaceTeleporter;
  */
 public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	public Boolean ready;
-
+	
 	public Boolean launchState = false;
-
+	
 	public final int JUMP_UP = -1;
 	public final int JUMP_DOWN = -2;
 	public int dx, dz;
 	private int direction;
-
+	
 	public int maxX, maxY, maxZ;
 	public int minX, minY, minZ;
-
+	
 	public int shipFront, shipBack;
 	public int shipLeft, shipRight;
 	public int shipUp, shipDown;
 	public int shipLength;
+	public int shipMass;
 	public int shipVolume;
 	private ShipCoreMode currentMode = ShipCoreMode.IDLE;
-
+	
 	public enum ShipCoreMode {
 		IDLE(0),
 		BASIC_JUMP(1),		// 0-128
@@ -61,13 +62,13 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		BEACON_JUMP(4),		// Jump ship by beacon
 		HYPERSPACE(5),		// Jump to/from Hyperspace
 		GATE_JUMP(6);		// Jump via jumpgate
-
+		
 		private final int code;
-
+		
 		ShipCoreMode(int code) {
 			this.code = code;
 		}
-
+		
 		public int getCode() {
 			return code;
 		}
@@ -462,9 +463,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		shipBack = controller.getBack();
 		shipLeft = controller.getLeft();
 		shipDown = controller.getDown();
-
+		
 		int x1 = 0, x2 = 0, z1 = 0, z2 = 0;
-
+		
 		if (Math.abs(dx) > 0) {
 			if (dx == 1) {
 				x1 = xCoord - shipBack;
@@ -533,8 +534,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 
 		// Ship side is too big
-		if ((shipBack + shipFront) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE || (shipLeft + shipRight) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE
-				|| (shipDown + shipUp) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE) {
+		if ( (shipBack + shipFront) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE
+		  || (shipLeft + shipRight) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE
+		  || (shipDown + shipUp) > WarpDriveConfig.SHIP_MAX_SIDE_SIZE) {
 			reason.append("Ship is too big (max is " + WarpDriveConfig.SHIP_MAX_SIDE_SIZE + " per side)");
 			return false;
 		}
@@ -553,8 +555,8 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			}
 		}
 
-		shipVolume = computeRealShipVolume();
-		if (!isUnlimited && shipVolume > WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE && worldObj.provider.dimensionId == 0) {
+		updateShipMassAndVolume();
+		if (!isUnlimited && shipMass > WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE && worldObj.provider.dimensionId == 0) {
 			reason.append("Ship is too big for the overworld (max is " + WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE + " blocks)");
 			return false;
 		}
@@ -595,7 +597,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		// Now make jump to a beacon
 		if (isBeaconFound) {
 			// Consume energy
-			if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
+			if (consumeEnergy(calculateRequiredEnergy(currentMode, shipMass, controller.getDistance()), false)) {
 				WarpDrive.logger.info(this + " Moving ship to beacon (" + beaconX + "; " + yCoord + "; " + beaconZ + ")");
 				EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, beaconX, yCoord, beaconZ);
 				jump.maxX = maxX;
@@ -634,9 +636,14 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				for (int y = minY; y <= maxY; y++) {
 					Block block = worldObj.getBlock(x, y, z);
 					
-					if (worldObj.isAirBlock(x, y, z) && (!block.isAssociatedBlock(WarpDrive.blockAir))) {
+					// Skipping vanilla air & ignored blocks
+					if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
+					if (WarpDriveConfig.TAGGED_BLOCKS_NOMASS.contains(block)) {
+						continue;
+					}
+					
 					if (aabb.minX <= x && aabb.maxX >= x && aabb.minY <= y && aabb.maxY >= y && aabb.minZ <= z && aabb.maxZ >= z) {
 						countBlocksInside++;
 					}
@@ -646,15 +653,15 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 		
 		float percent = 0F;
-		if (shipVolume != 0) {
-			percent = Math.round((((countBlocksInside * 1.0F) / shipVolume) * 100.0F) * 10.0F) / 10.0F;
+		if (shipMass != 0) {
+			percent = Math.round((((countBlocksInside * 1.0F) / shipMass) * 100.0F) * 10.0F) / 10.0F;
 		}
 		
 		if (WarpDriveConfig.LOGGING_JUMP) {
-			if (shipVolume != countBlocksTotal) {
-				WarpDrive.logger.info(this + " Ship volume has changed from " + shipVolume + " to " + countBlocksTotal + " blocks");
+			if (shipMass != countBlocksTotal) {
+				WarpDrive.logger.info(this + " Ship mass has changed from " + shipMass + " to " + countBlocksTotal + " blocks");
 			}
-			WarpDrive.logger.info(this + "Ship has " + countBlocksInside + " / " + shipVolume + " blocks (" + percent + "%) in jumpgate '" + jumpgate.name + "'");
+			WarpDrive.logger.info(this + "Ship has " + countBlocksInside + " / " + shipMass + " blocks (" + percent + "%) in jumpgate '" + jumpgate.name + "'");
 		}
 		
 		// At least 80% of ship must be inside jumpgate
@@ -683,14 +690,16 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		for (int x = minX; x <= maxX; x++) {
 			for (int z = minZ; z <= maxZ; z++) {
 				for (int y = minY; y <= maxY; y++) {
-					if (!worldObj.isAirBlock(x, y, z)) {
-						newX = moveX + x;
-						newY = moveY + y;
-						newZ = moveZ + z;
-						
-						if (!worldObj.isAirBlock(newX, newY, newZ)) {
-							return false;
-						}
+					Block blockSource = worldObj.getBlock(x, y, z);
+					Block blockTarget = worldObj.getBlock(moveX + x, moveY + y, moveZ + z);
+					
+					// not vanilla air nor ignored blocks at source
+					// not vanilla air nor expandable blocks are target location
+					if ( blockSource != Blocks.air
+					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockSource)
+					  && blockTarget != Blocks.air
+					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockTarget)) {
+						return false;
 					}
 				}
 			}
@@ -756,7 +765,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		}
 		
 		// Consume energy
-		if (consumeEnergy(calculateRequiredEnergy(currentMode, shipVolume, controller.getDistance()), false)) {
+		if (consumeEnergy(calculateRequiredEnergy(currentMode, shipMass, controller.getDistance()), false)) {
 			WarpDrive.logger.info(this + " Moving ship to a place around gate '" + targetGate.name + "' (" + destX + "; " + destY + "; " + destZ + ")");
 			EntityJump jump = new EntityJump(worldObj, xCoord, yCoord, zCoord, dx, dz, this, false, 1, 0, true, destX, destY, destZ);
 			jump.maxX = maxX;
@@ -775,7 +784,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	
 	private void doJump() {
 		int distance = controller.getDistance();
-		int requiredEnergy = calculateRequiredEnergy(currentMode, shipVolume, distance);
+		int requiredEnergy = calculateRequiredEnergy(currentMode, shipMass, distance);
 		
 		if (!consumeEnergy(requiredEnergy, true)) {
 			messageToAllPlayersOnShip("Insufficient energy to jump! Core is currently charged with " + getEnergyStored() + " EU while jump requires "
@@ -784,7 +793,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			return;
 		}
 		
-		String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ")";
+		String shipInfo = "" + shipVolume + " blocks inside (" + minX + ", " + minY + ", " + minZ + ") to (" + maxX + ", " + maxY + ", " + maxZ + ") with an actual mass of " + shipMass + " blocks";
 		if (currentMode == ShipCoreMode.GATE_JUMP) {
 			WarpDrive.logger.info(this + " Performing gate jump of " + shipInfo);
 			doGateJump();
@@ -797,7 +806,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			WarpDrive.logger.info(this + " Performing hyperspace jump of " + shipInfo);
 			
 			// Check ship size for hyper-space jump
-			if (shipVolume < WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE) {
+			if (shipMass < WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE) {
 				Jumpgate nearestGate = null;
 				if (WarpDrive.jumpgates == null) {
 					WarpDrive.logger.warn(this + " WarpDrive.instance.jumpGates is NULL!");
@@ -807,7 +816,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				
 				StringBuilder reason = new StringBuilder();
 				if (nearestGate == null || !isShipInJumpgate(nearestGate, reason)) {
-					this.messageToAllPlayersOnShip("Ship is too small (" + shipVolume + "/" + WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE
+					this.messageToAllPlayersOnShip("Ship is too small (" + shipMass + "/" + WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE
 							+ "). Insufficient ship mass to open hyperspace portal. Use a jumpgate to reach or exit hyperspace.");
 					this.controller.setJumpFlag(false);
 					return;
@@ -982,8 +991,8 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 				: ((isolationBlocksCount > 0) ? ("\n" + isolationBlocksCount + " active isolation blocks") : ""));
 	}
 	
-	public static int calculateRequiredEnergy(ShipCoreMode currentMode, int shipVolume, int jumpDistance) {
-		switch (currentMode) {
+	public static int calculateRequiredEnergy(ShipCoreMode shipCoreMode, int shipVolume, int jumpDistance) {
+		switch (shipCoreMode) {
 		case TELEPORT:
 			return WarpDriveConfig.SHIP_TELEPORT_ENERGY_PER_ENTITY;
 			
@@ -1008,8 +1017,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		return WarpDriveConfig.SHIP_MAX_ENERGY_STORED;
 	}
 	
-	private int computeRealShipVolume() {
-		int realShipVolume = 0;
+	private void updateShipMassAndVolume() {
+		int newMass = 0;
+		int newVolume = 0;
 		
 		try {
 			for (int x = minX; x <= maxX; x++) {
@@ -1017,19 +1027,24 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					for (int y = minY; y <= maxY; y++) {
 						Block block = worldObj.getBlock(x, y, z);
 						
-						if (worldObj.isAirBlock(x, y, z) && (block != WarpDrive.blockAir)) {
+						// Skipping vanilla air & ignored blocks
+						if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
 							continue;
 						}
+						newVolume++;
 						
-						realShipVolume++;
+						if (WarpDriveConfig.TAGGED_BLOCKS_NOMASS.contains(block)) {
+							continue;
+						}
+						newMass++;
 					}
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception exception) {
+			exception.printStackTrace();
 		}
-		
-		return realShipVolume;
+		shipMass = newMass;
+		shipVolume = newVolume;
 	}
 	
 	private TileEntity findControllerBlock() {

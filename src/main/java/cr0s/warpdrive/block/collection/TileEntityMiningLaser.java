@@ -219,15 +219,12 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			return false;
 		}
 		// check blacklist
-		if (block.isAssociatedBlock(Blocks.bedrock)) {
-			return false;
-		}
-		if (WarpDriveConfig.forceFieldBlocks.contains(block)) {
+		if (WarpDriveConfig.TAGGED_BLOCKS_NOMINING.contains(block)) {
 			stop();
 			return false;
 		}
 		// check whitelist
-		if (WarpDriveConfig.minerOres.contains(block)) {
+		if (WarpDriveConfig.TAGGED_BLOCKS_MINING.contains(block) || WarpDriveConfig.minerOres.contains(block)) {
 			return true;
 		}
 		// check default (explosion resistance is used to test for force fields and reinforced blocks, basically preventing mining a base or ship) 
@@ -402,7 +399,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 	}
 
 	private void scanLayer() {
-		// System.out.println("Scanning layer");
+		// WarpDrive.logger.info("Scanning layer");
 		valuablesInLayer.clear();
 		valuableIndex = 0;
 		int radius, x, z;

@@ -7,6 +7,9 @@ import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,15 +48,12 @@ public class WarpDriveConfig {
 	public static boolean isForgeMultipartLoaded = false;
 	public static boolean isAdvancedSolarPanelLoaded = false;
 	public static boolean isAppliedEnergistics2Loaded = false;
-	public static boolean isAtomicScienceLoaded = false;
 	public static boolean isICBMLoaded = false;
-	public static boolean isMFFSLoaded = false;
 	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isIndustrialCraft2loaded = false;
 	public static boolean isComputerCraftLoaded = false;
 	public static boolean isOpenComputersLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
-	public static boolean isAdvancedRepulsionSystemsLoaded = false;
 	
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
@@ -64,15 +64,12 @@ public class WarpDriveConfig {
 	public static ItemStack IC2_empty;
 	public static ItemStack IC2_rubberWood;
 	public static ItemStack IC2_Resin;
-	public static Item IC2_fluidCell;
 	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Expanded, CCT_Advanced;
 	
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
-	public static ItemStack IC2_solarPanel;
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
 	public static Item GS_ultimateLappack;
-	public static ArrayList<Block> forceFieldBlocks;
 	
 	public static ArrayList<Block> minerOres, minerLogs, minerLeaves, scannerIgnoreBlocks;
 	public static ArrayList<Item> spaceHelmets, jetpacks;
@@ -145,6 +142,16 @@ public class WarpDriveConfig {
 	public static int SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS = 10;
 	public static String[] SHIP_VOLUME_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
 	public static boolean SHIP_WARMUP_SICKNESS = true;
+	
+	// Tagged blocks
+	private static HashMap<String, String> taggedBlocks = null;	// loaded from configuration file at PreInit, parsed at PostInit
+	public static HashSet<Block> TAGGED_BLOCKS_ANCHOR = null;
+	public static HashSet<Block> TAGGED_BLOCKS_NOMASS = null;
+	public static HashSet<Block> TAGGED_BLOCKS_LEFTBEHIND = null;
+	public static HashSet<Block> TAGGED_BLOCKS_EXPANDABLE = null;
+	public static HashSet<Block> TAGGED_BLOCKS_MINING = null;
+	public static HashSet<Block> TAGGED_BLOCKS_NOMINING = null;
+	public static HashMap<Block, Integer> TAGGED_BLOCKS_PLACE = null;
 	
 	// Radar
 	public static int RADAR_MAX_ENERGY_STORED = 100000000; // 100kk eU
@@ -282,7 +289,7 @@ public class WarpDriveConfig {
 			}
 			return item;
 		} catch (Exception exception) {
-			WarpDrive.logger.info("Failed to get mod item for " + mod + ":" + id + ":" + meta);
+			WarpDrive.logger.info("Failed to get mod item for " + mod + ":" + id + "@" + meta);
 		}
 		return null;
 	}	
@@ -367,33 +374,35 @@ public class WarpDriveConfig {
 		LOGGING_WORLDGEN = config.get("logging", "enable_worldgen_logs", LOGGING_WORLDGEN, "Detailled world generation logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		
 		// Planets
-		config.addCustomCategoryComment("planets",
-				"Planets are other dimensions connected through the Space dimension. Default is overworld with 100k radius.\n"
-						+ "Each planet orbit is square shaped and defined as a list of 7 integers (all measured in blocks).");
-		
-		ConfigCategory cat = config.getCategory("planets");
-		String[] planetsName = cat.getValues().keySet().toArray(new String[0]);
-		if (planetsName.length == 0) {
-			planetsName = new String[] { "overworld" };
-		}
-		
-		int[] defaultPlanet = { 0, 0, 0, 100000, 100000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
-		PLANETS = new Planet[planetsName.length];
-		int index = 0;
-		for (String name : planetsName) {
-			int[] planetInts = config.get("planets", name, defaultPlanet,
-					"dimensionId, dimensionCenterX, dimensionCenterZ, radiusX, radiusZ, spaceCenterX, spaceCenterZ").getIntList();
-			if (planetInts.length != 7) {
-				WarpDrive.logger.warn("Invalid planet definition '" + name + "' (exactly 7 integers are expected), using default instead");
-				planetInts = defaultPlanet.clone();
+		{
+			config.addCustomCategoryComment("planets",
+					"Planets are other dimensions connected through the Space dimension. Default is overworld with 100k radius.\n"
+							+ "Each planet orbit is square shaped and defined as a list of 7 integers (all measured in blocks).");
+			
+			ConfigCategory categoryPlanets = config.getCategory("planets");
+			String[] planetsName = categoryPlanets.getValues().keySet().toArray(new String[0]);
+			if (planetsName.length == 0) {
+				planetsName = new String[] { "overworld" };
 			}
-			Planet planet = new Planet(planetInts[0], planetInts[1], planetInts[2], planetInts[3], planetInts[4], planetInts[5], planetInts[6]);
-			WarpDrive.logger.info("Adding '" + name + "' as " + planet.toString());
-			PLANETS[index] = planet;
-			index++;
+			
+			int[] defaultPlanet = { 0, 0, 0, 100000, 100000, 0, 0 }; // 30000000 is Minecraft limit for SetBlock
+			PLANETS = new Planet[planetsName.length];
+			int index = 0;
+			for (String name : planetsName) {
+				int[] planetInts = config.get("planets", name, defaultPlanet,
+						"dimensionId, dimensionCenterX, dimensionCenterZ, radiusX, radiusZ, spaceCenterX, spaceCenterZ").getIntList();
+				if (planetInts.length != 7) {
+					WarpDrive.logger.warn("Invalid planet definition '" + name + "' (exactly 7 integers are expected), using default instead");
+					planetInts = defaultPlanet.clone();
+				}
+				Planet planet = new Planet(planetInts[0], planetInts[1], planetInts[2], planetInts[3], planetInts[4], planetInts[5], planetInts[6]);
+				WarpDrive.logger.info("Adding '" + name + "' as " + planet.toString());
+				PLANETS[index] = planet;
+				index++;
+			}
+			// FIXME: check planets aren't overlapping
+			// We're not checking invalid dimension id, so they can be pre-allocated (see MystCraft)
 		}
-		// FIXME: check planets aren't overlapping
-		// We're not checking invalid dimension id, so they can be pre-allocated (see MystCraft)
 		
 		// Ship
 		SHIP_MAX_ENERGY_STORED = clamp(0, Integer.MAX_VALUE,
@@ -444,6 +453,60 @@ public class WarpDriveConfig {
 				config.get("ship", "core_isolation_update_interval", SHIP_CORE_ISOLATION_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
 		SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
 				config.get("ship", "controller_update_interval", SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
+		
+		// Blocks dictionary
+		{
+			config.addCustomCategoryComment("block_tags",
+					  "Use this section to enable special behavior on blocks using tags.\n"
+					+ "Most blocks are already supported automatically. Only modify this section when something doesn't work!\n"
+					+ "\n"
+					+ "Tags shall be separated by at least one space, comma or tabulation.\n"
+					+ "Invalid tags will be ignored silently. Tags and block names are case sensitive.\n"
+					+ "In case of conflicts, the latest tag overwrite the previous ones.\n"
+					+ "- Anchor: ship can't move with this block aboard (default: bedrock and assimilated).\n"
+					+ "- NoMass: this block doesn't count when calculating ship volume/mass (default: all 'air' blocks).\n"
+					+ "- LeftBehind: this block won't move with your ship (default: RailCraft heat, WarpDrive gases).\n"
+					+ "- Expandable: this block will be squished/ignored in case of collision (default: leaves). All 'LeftBehind' are assumed as Expandable.\n"
+					+ "- Mining: this block is mineable (default: all 'ore' blocks from the ore dictionnary).\n"
+					+ "- NoMining: this block is non-mineable (default: forcefields).\n"
+					+ "- PlaceEarliest: this block will be removed last and placed first (default: ship hull and projectors).\n"
+					+ "- PlaceEarlier: this block will be placed fairly soon (default: forcefield blocks).\n"
+					+ "- PlaceNormal: this block will be removed and placed with non-tile entities.\n"
+					+ "- PlaceLater: this block will be placed fairly late (default: IC2 Reactor core).\n"
+					+ "- PlaceLatest: this block will be removed first and placed last (default: IC2 Reactor chamber).");
+			
+			ConfigCategory categoryBlockTags = config.getCategory("block_tags");
+			String[] taggedBlocksName = categoryBlockTags.getValues().keySet().toArray(new String[0]);
+			if (taggedBlocksName.length == 0) {
+				config.get("block_tags", "minecraft:bedrock"				, "Anchor NoMining"			).getString();
+				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor"					).getString();
+				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor"					).getString();
+				config.get("block_tags", "Artifacts:anti_anti_builder_stone", "Anchor"					).getString();
+				config.get("block_tags", "Artifacts:anti_builder"			, "Anchor"					).getString();
+				
+				config.get("block_tags", "IC2:blockReinforcedFoam"			, "PlaceEarliest NoMining"	).getString();
+				config.get("block_tags", "IC2:blockAlloy"					, "PlaceEarliest NoMining"	).getString();
+				config.get("block_tags", "IC2:blockAlloyGlass"				, "PlaceEarliest NoMining"	).getString();
+				config.get("block_tags", "minecraft:obsidian"				, "PlaceEarliest"			).getString();
+				config.get("block_tags", "AdvancedRepulsionSystems:field"	, "PlaceEarlier NoMining"	).getString();
+				// FIXME config.get("block_tags", "MFFS:field"						, "PlaceEarlier NoMining"	).getString();
+				config.get("block_tags", "IC2:blockGenerator"				, "PlaceLater"				).getString();
+				config.get("block_tags", "IC2:blockReactorChamber"			, "PlaceLatest"				).getString();
+				
+				config.get("block_tags", "WarpDrive:blockGas"				, "LeftBehind"				).getString();
+				config.get("block_tags", "Railcraft:residual.heat"			, "LeftBehind"				).getString();
+				config.get("block_tags", "InvisibLights:blockLightSource"	, "NoMass"					).getString();
+				config.get("block_tags", "WarpDrive:blockAir"				, "NoMass PlaceLatest"		).getString();
+				
+				config.get("block_tags", "WarpDrive:blockIridium"			, "Mining"					).getString();	// stronger than obsidian but can still be mined (see ender moon)
+				taggedBlocksName = categoryBlockTags.getValues().keySet().toArray(new String[0]);
+			}
+			taggedBlocks = new HashMap(taggedBlocksName.length);
+			for (String name : taggedBlocksName) {
+				String tags = config.get("block_tags", name, "").getString();
+				taggedBlocks.put(name, tags);
+			}
+		}
 		
 		// Radar
 		RADAR_MAX_ENERGY_STORED = clamp(0, Integer.MAX_VALUE,
@@ -650,8 +713,6 @@ public class WarpDriveConfig {
 		commonWorldGenOres.add(Blocks.lapis_ore);
 		commonWorldGenOres.add(Blocks.redstone_ore);
 		
-		forceFieldBlocks = new ArrayList<Block>();
-		
 		spaceHelmets = new ArrayList<Item>();
 		jetpacks = new ArrayList<Item>();
 		minerOres = new ArrayList<Block>();
@@ -679,31 +740,12 @@ public class WarpDriveConfig {
 			loadASP();
 		}
 		
-		isAtomicScienceLoaded = Loader.isModLoaded("ResonantInduction|Atomic");
-		if (isAtomicScienceLoaded) {
-			loadAtomicScience();
-		}
-		
-		isMFFSLoaded = Loader.isModLoaded("MFFS");
-		if (isMFFSLoaded) {
-			loadMFFS();
-		}
-		
 		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
 		if (isGraviSuiteLoaded) {
 			loadGraviSuite();
 		}
 		
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
-		if (isThermalExpansionLoaded) {
-			loadThermalExpansion();
-		}
-		
-		isAdvancedRepulsionSystemsLoaded = Loader.isModLoaded("AdvancedRepulsionSystems");
-		if (isAdvancedRepulsionSystemsLoaded) {
-			loadAdvancedRepulsionSystems();
-		}
-		
 		isAppliedEnergistics2Loaded = Loader.isModLoaded("appliedenergistics2");
 		isOpenComputersLoaded = Loader.isModLoaded("OpenComputers");
 		
@@ -746,7 +788,76 @@ public class WarpDriveConfig {
 		}
 	}
 	
-	public static void postInit() {
+	public static void onFMLPostInitialization() {
+		// translate tagged blocks
+		TAGGED_BLOCKS_ANCHOR = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_NOMASS = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_LEFTBEHIND = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_EXPANDABLE = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_MINING = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_NOMINING = new HashSet(taggedBlocks.size());
+		TAGGED_BLOCKS_PLACE = new HashMap(taggedBlocks.size());
+		for (Entry<String, String> taggedBlock : taggedBlocks.entrySet()) {
+			Block block = Block.getBlockFromName(taggedBlock.getKey());
+			if (block == null) {
+				WarpDrive.logger.info("Ignoring missing block " + taggedBlock.getKey());
+				continue;
+			}
+			for (String tag : taggedBlock.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
+				switch (tag) {
+				case "Anchor":
+					TAGGED_BLOCKS_ANCHOR.add(block);
+					break;
+					
+				case "NoMass":
+					TAGGED_BLOCKS_NOMASS.add(block);
+					break;
+					
+				case "LeftBehind":
+					TAGGED_BLOCKS_LEFTBEHIND.add(block);
+					TAGGED_BLOCKS_EXPANDABLE.add(block);
+					break;
+					
+				case "Expandable":
+					TAGGED_BLOCKS_EXPANDABLE.add(block);
+					break;
+					
+				case "Mining":
+					TAGGED_BLOCKS_MINING.add(block);
+					break;
+					
+				case "NoMining":
+					TAGGED_BLOCKS_NOMINING.add(block);
+					break;
+					
+				case "PlaceEarliest":
+					TAGGED_BLOCKS_PLACE.put(block, 0);
+					break;
+					
+				case "PlaceEarlier":
+					TAGGED_BLOCKS_PLACE.put(block, 1);
+					break;
+					
+				case "PlaceNormal":
+					TAGGED_BLOCKS_PLACE.put(block, 2);
+					break;
+					
+				case "PlaceLater":
+					TAGGED_BLOCKS_PLACE.put(block, 3);
+					break;
+					
+				case "PlaceLatest":
+					TAGGED_BLOCKS_PLACE.put(block, 4);
+					break;
+				}
+			}
+		}
+		WarpDrive.logger.info("Tagged blocks identified:");
+		WarpDrive.logger.info("- " + TAGGED_BLOCKS_ANCHOR.size() + " with Anchor tag: " + TAGGED_BLOCKS_ANCHOR);
+		WarpDrive.logger.info("- " + TAGGED_BLOCKS_NOMASS.size() + " with NoMass blocks defined: " + TAGGED_BLOCKS_NOMASS);
+		WarpDrive.logger.info("- " + TAGGED_BLOCKS_LEFTBEHIND.size() + " with LeftBehind blocks defined: " + TAGGED_BLOCKS_LEFTBEHIND);
+		WarpDrive.logger.info("- " + TAGGED_BLOCKS_PLACE.size() + " with Placement priority blocks defined: " + TAGGED_BLOCKS_PLACE);
+		
 		// read XML files
 		File[] files = configDirectory.listFiles(new FilenameFilter() {
 			@Override
@@ -812,8 +923,6 @@ public class WarpDriveConfig {
 	
 	private static void loadIC2() {
 		try {
-			IC2_solarPanel = getModItemStack("IC2", "blockGenerator", 3);
-			
 			spaceHelmets.add(getModItemStack("IC2", "itemArmorHazmatHelmet", -1).getItem());
 			spaceHelmets.add(getModItemStack("IC2", "itemSolarHelmet", -1).getItem());
 			spaceHelmets.add(getModItemStack("IC2", "itemArmorNanoHelmet", -1).getItem());
@@ -847,8 +956,6 @@ public class WarpDriveConfig {
 			if (ore != null) {
 				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
 			}
-			
-			IC2_fluidCell = getModItemStack("IC2", "itemFluidCell", -1).getItem();
 		} catch (Exception exception) {
 			WarpDrive.logger.error("Error loading IndustrialCraft2 classes");
 			exception.printStackTrace();
@@ -880,47 +987,6 @@ public class WarpDriveConfig {
 		}
 	}
 	
-	private static void loadAtomicScience() {
-		try {
-			/* TODO: Does not exist for 1.7
-			Class<?> z = Class.forName("resonantinduction.atomic.Atomic");
-			commonWorldGenOres.add(((Block) z.getField("blockUraniumOre").get(null)), 0 });
-			AS_Turbine = ((Block) z.getField("blockElectricTurbine").get(null));
-			AS_deuteriumCell = ((Item) z.getField("itemDeuteriumCell").get(null));
-			 */
-			isAtomicScienceLoaded = false;
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading AS classes");
-			exception.printStackTrace();
-			isAtomicScienceLoaded = false;
-		}
-	}
-	
-	private static void loadICBM() {
-		try {
-			/* TODO: Does not exist yet for 1.7
-			Class<?> z = Class.forName("icbm.core.ICBMCore");
-			commonWorldGenOres.add(((Block) z.getField("blockSulfurOre").get(null)), 0 });
-			 */
-			isICBMLoaded = false;
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading ICBM classes");
-			exception.printStackTrace();
-			isICBMLoaded = false;
-		}
-	}
-	
-	private static void loadMFFS() {
-		try {
-			forceFieldBlocks.add(Block.getBlockFromName("MFFS:FIXME_field"));	// FIXME
-			isMFFSLoaded = false;
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading MFFS classes");
-			exception.printStackTrace();
-			isMFFSLoaded = false;
-		}
-	}
-	
 	private static void loadGraviSuite() {
 		try {
 			spaceHelmets.add((Item) Item.itemRegistry.getObject("GraviSuite.ultimateSolarHelmet")); // FIXME
@@ -931,29 +997,6 @@ public class WarpDriveConfig {
 			WarpDrive.logger.error("Error loading GS classes");
 			exception.printStackTrace();
 			isGraviSuiteLoaded = false;
-		}
-	}
-	
-	private static void loadThermalExpansion() {
-		try {
-			// TEEnergyCell =
-			// Class.forName("thermalexpansion.block.energycell.BlockEnergyCell");
-			// TEFluids = Class.forName("thermalexpansion.fluid.TEFluids");
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading ThermalExpansion classes");
-			exception.printStackTrace();
-			isThermalExpansionLoaded = false;
-		}
-	}
-	
-	private static void loadAdvancedRepulsionSystems() {
-		try {
-			
-			forceFieldBlocks.add(Block.getBlockFromName("AdvancedRepulsionSystems:field"));
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading AdvancedRepulsionSystems classes");
-			exception.printStackTrace();
-			isAdvancedRepulsionSystemsLoaded = false;
 		}
 	}
 	

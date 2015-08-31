@@ -696,7 +696,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 	private Object[] getEnergyRequired(Object[] arguments) {
 		try {
 			if (arguments.length == 1 && core != null) {
-				return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipVolume, toInt(arguments[0]))) };
+				return new Object[] { (int) (core.calculateRequiredEnergy(getMode(), core.shipMass, toInt(arguments[0]))) };
 			}
 		} catch (Exception e) {
 			return new Integer[] { -1 };
@@ -716,15 +716,15 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 					return null;
 				}
 			}
-			return new Object[] { core.shipVolume };
-		} catch (Exception e) {
+			return new Object[] { core.shipMass };
+		} catch (Exception exception) {
 			if (WarpDriveConfig.LOGGING_JUMP) {// disabled by default to avoid console spam as ship size is checked quite frequently
-				e.printStackTrace();
+				exception.printStackTrace();
 			}
 			return null;
 		}
 	}
-
+	
 	private Object[] beaconFrequency(Object[] arguments) {
 		if (arguments.length == 1) {
 			setBeaconFrequency((String) arguments[0]);

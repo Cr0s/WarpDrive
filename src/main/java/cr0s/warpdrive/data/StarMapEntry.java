@@ -70,7 +70,7 @@ public class StarMapEntry {
 				core.getWorldObj().provider.dimensionId, core.xCoord, core.yCoord, core.zCoord,
 				core.maxX, core.maxY, core.maxZ,
 				core.minX, core.minY, core.minZ,
-				core.shipVolume, core.isolationRate,
+				core.shipMass, core.isolationRate,
 				core.shipName);
 	}
 	

@@ -406,7 +406,7 @@ public class WarpDrive implements LoadingCallback {
 		space = DimensionManager.getWorld(WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		hyperSpace = DimensionManager.getWorld(WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 		
-		WarpDriveConfig.postInit();
+		WarpDriveConfig.onFMLPostInitialization();
 		
 		if (WarpDriveConfig.isIndustrialCraft2loaded && WarpDriveConfig.RECIPES_ENABLE_IC2) {
 			Recipes.initIC2();

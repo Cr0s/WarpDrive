@@ -128,7 +128,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 				}
 			}
 
-			if (++scanTicks > 20 * (1 + shipCore.shipVolume / 10)) {
+			if (++scanTicks > 20 * (1 + shipCore.shipMass / 10)) {
 				setActive(false); // disable scanner
 				scanTicks = 0;
 			}
@@ -534,7 +534,7 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 
 		if (shipCore == null) {
 			return new Object[] { false, 1, "Warp-Core not found" };
-		} else if (!consumeEnergy(getScanningEnergyCost(shipCore.shipVolume), true)) {
+		} else if (!consumeEnergy(getScanningEnergyCost(shipCore.shipMass), true)) {
 			return new Object[] { false, 2, "Not enough energy!" };
 		} else {
 			StringBuilder reason = new StringBuilder();

@@ -593,11 +593,9 @@ public class EntityJump extends Entity {
 	private void saveShip(int shipVolume) {
 		LocalProfiler.start("EntityJump.saveShip");
 		try {
-			ship = new JumpBlock[shipVolume];
-			JumpBlock placeAfter[] = new JumpBlock[shipVolume]; // blocks and tile entities to be placed at the end, and removed first
+			JumpBlock[][] placeTimeJumpBlocks = { new JumpBlock[shipVolume], new JumpBlock[shipVolume], new JumpBlock[shipVolume], new JumpBlock[shipVolume], new JumpBlock[shipVolume] };
+			int[] placeTimeIndexes = { 0, 0, 0, 0, 0 }; 
 			
-			int indexPlaceNormal = 0;
-			int indexPlaceAfter = 0;
 			int xc1 = minX >> 4;
 			int xc2 = maxX >> 4;
 			int zc1 = minZ >> 4;
@@ -616,8 +614,8 @@ public class EntityJump extends Entity {
 							for (int z = z1; z <= z2; z++) {
 								Block block = worldObj.getBlock(x, y, z);
 								
-								// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-								if (worldObj.isAirBlock(x, y, z) && !block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
+								// Skipping vanilla air & ignored blocks
+								if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
 									continue;
 								}
 								
@@ -625,25 +623,30 @@ public class EntityJump extends Entity {
 								TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
 								JumpBlock jumpBlock = new JumpBlock(block, blockMeta, tileEntity, x, y, z);
 								
-								if (tileEntity == null || false /* TODO: implement latePlacementBlockList configuration, including IC2 reactor chambers */ ) {
-									ship[indexPlaceNormal] = jumpBlock;
-									indexPlaceNormal++;
-								} else {
-									placeAfter[indexPlaceAfter] = jumpBlock;
-									indexPlaceAfter++;
+								// default priority is 2 for block, 3 for tile entities
+								int placeTime = 2;
+								if (tileEntity != null) {
+									placeTime = 3;
 								}
+								
+								placeTimeJumpBlocks[placeTime][placeTimeIndexes[placeTime]] = jumpBlock;
+								placeTimeIndexes[placeTime]++;
 							}
 						}
 					}
 				}
 			}
 			
-			for (int index = 0; index < indexPlaceAfter; index++) {
-				ship[indexPlaceNormal] = placeAfter[index];
-				indexPlaceNormal++;
+			ship = new JumpBlock[shipVolume];
+			int indexShip = 0;
+			for (int placeTime = 0; placeTime < 5; placeTime++) {
+				for (int placeTimeIndex = 0; placeTimeIndex < placeTimeIndexes[placeTime]; placeTimeIndex++) {
+					ship[indexShip] = placeTimeJumpBlocks[placeTime][placeTimeIndex];
+					indexShip++;
+				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Exception exception) {
+			exception.printStackTrace();
 			killEntity("Exception during jump preparation (saveShip)!");
 			LocalProfiler.stop();
 			return;
@@ -719,11 +722,16 @@ public class EntityJump extends Entity {
 			result = checkMovement(Math.max(1, testDistance + 1), true);
 			if (result != null) {
 				/*
-				 * Strength scaling: Creeper = 3 or 6 Wither skull = 1 Wither
-				 * boom = 5 Endercrystal = 6 TNTcart = 4 to 11.5 TNT = 4
+				 * Strength scaling:
+				 * Wither skull = 1
+				 * Creeper = 3 or 6
+				 * TNT = 4
+				 * TNTcart = 4 to 11.5
+				 * Wither boom = 5
+				 * Endercrystal = 6
 				 */
-				float massCorrection = 0.5F + (float) Math
-						.sqrt(Math.min(1.0D, Math.max(0.0D, shipCore.shipVolume - WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE)
+				float massCorrection = 0.5F
+						+ (float) Math.sqrt(Math.min(1.0D, Math.max(0.0D, shipCore.shipMass - WarpDriveConfig.SHIP_VOLUME_MAX_ON_PLANET_SURFACE)
 								/ WarpDriveConfig.SHIP_VOLUME_MIN_FOR_HYPERSPACE));
 				collisionDetected = true;
 				collisionStrength = (4.0F + blowPoints - WarpDriveConfig.SHIP_COLLISION_TOLERANCE_BLOCKS) * massCorrection;
@@ -811,8 +819,8 @@ public class EntityJump extends Entity {
 				for (int y = minY; y <= maxY; y++) {
 					Block block = worldObj.getBlock(x, y, z);
 					
-					// Skipping vanilla air & WarpDrive gas blocks, keep WarpDrive air block
-					if (worldObj.isAirBlock(x, y, z) && !block.isAssociatedBlock(WarpDrive.blockAir)) {// whitelist
+					// Skipping vanilla air & ignored blocks
+					if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
 					
@@ -822,8 +830,9 @@ public class EntityJump extends Entity {
 						WarpDrive.logger.info("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
 					}
 					
-					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
-						reason.append("Bedrock detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
+					// Stop on non-movable blocks
+					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(block)) {
+						reason.append(block.getUnlocalizedName() + " detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
 						LocalProfiler.stop();
 						return -1;
 					}
@@ -838,29 +847,32 @@ public class EntityJump extends Entity {
 				boolean zBorder = (z == minZ - 1) || (z == maxZ + 1);
 				for (int y = minY - 1; y <= maxY + 1; y++) {
 					boolean yBorder = (y == minY - 1) || (y == maxY + 1);
-					if ((y < 0) || (y > 255))
+					if ((y < 0) || (y > 255)) {
 						continue;
-					if (!(xBorder || yBorder || zBorder))
+					}
+					if (!(xBorder || yBorder || zBorder)) {
 						continue;
+					}
 					
 					Block block = worldObj.getBlock(x, y, z);
 					
-					// Skipping air blocks
-					if (worldObj.isAirBlock(x, y, z)) {
+					// Skipping any air block & ignored blocks
+					if (worldObj.isAirBlock(x, y, z) || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
 					
-					// Skipping unmovable blocks
-					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
+					// Skipping non-movable blocks
+					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(block)) {
 						continue;
 					}
 					
-					TileEntity te = worldObj.getTileEntity(x, y, z);
-					if (te == null) {
+					// Skipping blocks without tile entities
+					TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
+					if (tileEntity == null) {
 						continue;
 					}
 					
-					reason.append("Ship snagged at " + x + ", " + y + ", " + z + ". Damage report pending...");
+					reason.append("Ship snagged by " + block.getLocalizedName() + " at " + x + ", " + y + ", " + z + ". Damage report pending...");
 					worldObj.createExplosion((Entity) null, x, y, z, Math.min(4F * 30, 4F * (shipVolume / 50)), false);
 					LocalProfiler.stop();
 					return -1;
@@ -879,12 +891,12 @@ public class EntityJump extends Entity {
 		
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 		
-		for (Object o : list) {
-			if (o == null || !(o instanceof Entity) || (o instanceof EntityJump)) {
+		for (Object object : list) {
+			if (object == null || !(object instanceof Entity) || (object instanceof EntityJump)) {
 				continue;
 			}
 			
-			Entity entity = (Entity) o;
+			Entity entity = (Entity) object;
 			MovingEntity movingEntity = new MovingEntity(entity);
 			entitiesOnShip.add(movingEntity);
 		}
@@ -1047,7 +1059,8 @@ public class EntityJump extends Entity {
 		int lmoveZ = movementVector[2] * testDistance;
 		
 		int x, y, z, newX, newY, newZ;
-		Block block;
+		Block blockSource;
+		Block blockTarget;
 		for (y = minY; y <= maxY; y++) {
 			newY = y + lmoveY;
 			for (x = minX; x <= maxX; x++) {
@@ -1055,28 +1068,28 @@ public class EntityJump extends Entity {
 				for (z = minZ; z <= maxZ; z++) {
 					newZ = z + lmoveZ;
 					
-					block = worldObj.getBlock(newX, newY, newZ);
-					if (block.isAssociatedBlock(Blocks.bedrock)) {// Blacklist
+					blockSource = worldObj.getBlock(x, y, z);
+					blockTarget = worldObj.getBlock(newX, newY, newZ);
+					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(blockTarget)) {
 						result.add(x, y, z,
 							newX + 0.5D - movementVector[0] * 1.0D,
 							newY + 0.5D - movementVector[1] * 1.0D,
 							newZ + 0.5D - movementVector[2] * 1.0D,
-							true, "Unpassable block " + block + " detected at destination (" + newX + ";" + newY + ";" + newZ + ")");
+							true, "Unpassable block " + blockTarget + " detected at destination (" + newX + ";" + newY + ";" + newZ + ")");
 						if (!fullCollisionDetails) {
 							return result;
 						}
 					}
 					
-					if ( !worldObj.isAirBlock(x, y, z)
-					  && !worldObj.isAirBlock(newX, newY, newZ)
-					  && !block.isAssociatedBlock(WarpDrive.blockAir)
-					  && !block.isAssociatedBlock(WarpDrive.blockGas)
-					  && !block.isAssociatedBlock(Blocks.leaves)) {
+					if ( blockSource != Blocks.air
+					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockSource)
+					  && blockTarget != Blocks.air
+					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockTarget)) {
 						result.add(x, y, z,
 							newX + 0.5D + movementVector[0] * 0.1D,
 							newY + 0.5D + movementVector[1] * 0.1D,
 							newZ + 0.5D + movementVector[2]	* 0.1D,
-							true, "Obstacle block #" + block + " detected at (" + newX + ", " + newY + ", " + newZ + ")");
+							true, "Obstacle block #" + blockTarget + " detected at (" + newX + ", " + newY + ", " + newZ + ")");
 						if (!fullCollisionDetails) {
 							return result;
 						}
