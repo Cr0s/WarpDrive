@@ -44,7 +44,7 @@ public class FillerManager {
 		// directory is created by caller, so it can copy default files if any
 
 		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("File path " + dir.getPath() + " must be a directory!");
+			throw new IllegalArgumentException("File path " + dir.getName() + " must be a directory!");
 		}
 
 		File[] files = dir.listFiles(new FilenameFilter() {
@@ -56,11 +56,11 @@ public class FillerManager {
 
 		for(File file : files) {
 			try {
-				WarpDrive.logger.info("Loading filler data file " + file.getPath() + "...");
+				WarpDrive.logger.info("Loading filler data file " + file.getName() + "...");
 				loadXmlFillerFile(file);
-				WarpDrive.logger.info("Loading filler data file " + file.getPath() + " done");
+				WarpDrive.logger.info("Loading filler data file " + file.getName() + " done");
 			} catch (Exception exception) {
-				WarpDrive.logger.error("Error loading file " + file.getPath() + ": " + exception.getMessage());
+				WarpDrive.logger.error("Error loading file " + file.getName() + ": " + exception.getMessage());
 				exception.printStackTrace();
 			}
 		}
@@ -73,7 +73,7 @@ public class FillerManager {
 		ModCheckResults res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
 
 		if (!res.isEmpty()) {
-			WarpDrive.logger.info("Skippping filler data file " + file.getPath() + " because of: " + res);
+			WarpDrive.logger.info("Skippping filler data file " + file.getName() + " because of: " + res);
 			return;
 		}
 

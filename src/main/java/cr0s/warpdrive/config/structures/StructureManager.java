@@ -47,14 +47,14 @@ public class StructureManager {
 		for (File file : files) {
 			try {
 
-				WarpDrive.logger.info("Loading structure data file " + file.getPath());
+				WarpDrive.logger.info("Loading structure data file " + file.getName());
 
 				loadXmlStructureFile(file);
 
-				WarpDrive.logger.info("Finished loading structure data file " + file.getPath());
+				WarpDrive.logger.info("Finished loading structure data file " + file.getName());
 
 			} catch (Exception e) {
-				WarpDrive.logger.error("Error loading file " + file.getPath() + ": " + e.getMessage());
+				WarpDrive.logger.error("Error loading file " + file.getName() + ": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
@@ -66,7 +66,7 @@ public class StructureManager {
 		ModCheckResults res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
 
 		if (!res.isEmpty()) {
-			WarpDrive.logger.info("Skippping structure data file " + f.getPath() + " because of: " + res);
+			WarpDrive.logger.info("Skippping structure data file " + f.getName() + " because of: " + res);
 			return;
 		}
 
