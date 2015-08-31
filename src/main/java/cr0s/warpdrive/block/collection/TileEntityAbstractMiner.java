@@ -172,28 +172,7 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		return false;
 	}
 
-	private boolean canDig(Block block, int x, int y, int z) {// not used
-		// ignore air & fluids
-		if (block == null || (worldObj.isAirBlock(x, y, z) || (block instanceof IFluidBlock))) {
-			return false;
-		}
-		// check blacklist
-		if (block.isAssociatedBlock(Blocks.bedrock)) {
-			return false;
-		}
-		if (WarpDriveConfig.forceFieldBlocks.contains(block)) {
-			//			isMining = false;
-			return false;
-		}
-		// check whitelist
-		// WarpDriveConfig.MinerOres.contains(blockID) then true ?
-		else if (block.isAssociatedBlock(WarpDrive.blockIridium)) {
-			return true;
-		}
-		// check default
-		else if (block.getExplosionResistance(null) <= Blocks.obsidian.getExplosionResistance(null)) {
-			return true;
-		}
+	private boolean canDig(Block block, int x, int y, int z) {// not used, should be abstract
 		return false;
 	}
 

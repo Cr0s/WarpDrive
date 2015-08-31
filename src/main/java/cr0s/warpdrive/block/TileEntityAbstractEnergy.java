@@ -125,17 +125,17 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	public boolean consumeEnergy(int amount_internal, boolean simulate) {
 		int amountUpgraded = amount_internal;
 		if (upgrades.containsKey(EnumUpgradeTypes.Power)) {
-			double valueMul = Math.pow(0.8,upgrades.get(EnumUpgradeTypes.Power));
+			double valueMul = Math.pow(0.8, upgrades.get(EnumUpgradeTypes.Power));
 			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
 		}
 		
 		if (upgrades.containsKey(EnumUpgradeTypes.Range)) {
-			double valueMul = Math.pow(1.2,upgrades.get(EnumUpgradeTypes.Range));
+			double valueMul = Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Range));
 			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
 		}
 		
 		if (upgrades.containsKey(EnumUpgradeTypes.Speed)) {
-			double valueMul = Math.pow(1.2,upgrades.get(EnumUpgradeTypes.Speed));
+			double valueMul = Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Speed));
 			amountUpgraded = (int) Math.ceil(valueMul * amountUpgraded);
 		}
 		// FIXME: upgrades balancing & implementation to be done...

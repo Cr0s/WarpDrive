@@ -177,16 +177,16 @@ public class Recipes {
 	}
 
 	public static void initIC2() {
-		ItemStack advancedAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartAlloy", -1).copy();
-		ItemStack iridiumAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartIridium", -1).copy();
-		ItemStack advancedMachine = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 12).copy();
-		ItemStack miner = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 7).copy();
-		ItemStack magnetizer = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 9).copy();
-		ItemStack fiberGlassCable = WarpDriveConfig.getModItemStack("IC2", "itemCable", 9).copy();
-		ItemStack circuit = WarpDriveConfig.getModItemStack("IC2", "itemPartCircuit", -1).copy();
-		ItemStack advancedCircuit = WarpDriveConfig.getModItemStack("IC2", "itemPartCircuitAdv", -1).copy();
-		ItemStack ironPlate = WarpDriveConfig.getModItemStack("IC2", "itemPlates", 4).copy();
-		ItemStack mfe = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 1).copy();
+		ItemStack advancedAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartAlloy", -1);
+		ItemStack iridiumAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartIridium", -1);
+		ItemStack advancedMachine = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 12);
+		ItemStack miner = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 7);
+		ItemStack magnetizer = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 9);
+		ItemStack fiberGlassCable = WarpDriveConfig.getModItemStack("IC2", "itemCable", 9);
+		ItemStack circuit = WarpDriveConfig.getModItemStack("IC2", "itemPartCircuit", -1);
+		ItemStack advancedCircuit = WarpDriveConfig.getModItemStack("IC2", "itemPartCircuitAdv", -1);
+		ItemStack ironPlate = WarpDriveConfig.getModItemStack("IC2", "itemPlates", 4);
+		ItemStack mfe = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 1);
 		
 		GameRegistry.addRecipe(new ItemStack(WarpDrive.blockShipCore), "ici", "cmc", "ici",
 				'i', iridiumAlloy,
@@ -296,16 +296,16 @@ public class Recipes {
 	}
 	
 	public static void initHardIC2() {
-		ItemStack advancedAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartAlloy", -1).copy();
-		ItemStack iridiumAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartIridium", -1).copy();
-		ItemStack advancedMachine = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 12).copy();
-		ItemStack magnetizer = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 9).copy();
-		ItemStack fiberGlassCable = WarpDriveConfig.getModItemStack("IC2", "itemCable", 9).copy();
-		ItemStack mfe = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 1).copy();
-		ItemStack mfsu = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 2).copy();
-		ItemStack energiumDust = WarpDriveConfig.getModItemStack("IC2", "itemDust2", 2).copy();
-		ItemStack crystalmemory = WarpDriveConfig.getModItemStack("IC2", "itemcrystalmemory", -1).copy();
-		ItemStack itemHAMachine = new ItemStack(WarpDrive.blockHighlyAdvancedMachine).copy();
+		ItemStack advancedAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartAlloy", -1);
+		ItemStack iridiumAlloy = WarpDriveConfig.getModItemStack("IC2", "itemPartIridium", -1);
+		ItemStack advancedMachine = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 12);
+		ItemStack magnetizer = WarpDriveConfig.getModItemStack("IC2", "blockMachine", 9);
+		ItemStack fiberGlassCable = WarpDriveConfig.getModItemStack("IC2", "itemCable", 9);
+		ItemStack mfe = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 1);
+		ItemStack mfsu = WarpDriveConfig.getModItemStack("IC2", "blockElectric", 2);
+		ItemStack energiumDust = WarpDriveConfig.getModItemStack("IC2", "itemDust2", 2);
+		ItemStack crystalmemory = WarpDriveConfig.getModItemStack("IC2", "itemcrystalmemory", -1);
+		ItemStack itemHAMachine = new ItemStack(WarpDrive.blockHighlyAdvancedMachine);
 		
 		GameRegistry.addRecipe(new ItemStack(WarpDrive.blockShipCore),"uau", "tmt", "uau",
 				'a', advancedAlloy,
