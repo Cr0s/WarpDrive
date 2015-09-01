@@ -68,9 +68,18 @@
         </shell>
     </structure>
     
-    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_ore" maxCoreSize="20" minCoreSize="6">
+    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_ore" maxCoreSize="10" minCoreSize="6">
         
-        <shell name="mantle" minThickness="3" maxThickness="20" fillerSets="commonOres,uncommonOres">
+        <shell name="mantle" minThickness="2" maxThickness="10" fillerSets="commonOres,uncommonOres">
+            <filler weight="10" block="minecraft:stone" />
+            <filler weight="5" block="minecraft:cobblestone" />
+        </shell>
+        
+     </structure>
+     
+     <structure group="asteroid" name="diamondGeode" coreBlock="minecraft:diamond_ore" maxCoreSize="2" minCoreSize="1">
+        
+        <shell name="mantle" minThickness="5" maxThickness="25" fillerSets="commonOres">
             <filler weight="10" block="minecraft:stone" />
             <filler weight="5" block="minecraft:cobblestone" />
         </shell>
