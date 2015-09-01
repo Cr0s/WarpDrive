@@ -243,7 +243,7 @@ public class EntityJump extends Entity {
 			for (int z = z1; z <= z2; z++) {
 				chunkCount++;
 				if (chunkCount > targetWorldTicket.getMaxChunkListDepth()) {
-					reason.append("Ship is extending over too many chunks, max is T:" + sourceWorldTicket.getMaxChunkListDepth() + ". Aborting.");
+					reason.append("Ship is extending over too many chunks, max is T:" + targetWorldTicket.getMaxChunkListDepth() + ". Aborting.");
 					return false;
 				}
 				ForgeChunkManager.forceChunk(targetWorldTicket, new ChunkCoordIntPair(x, z));
