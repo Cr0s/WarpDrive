@@ -64,7 +64,7 @@ public class JumpBlock {
 				oldnbt.setInteger("z", newZ);
 				
 				if (oldnbt.hasKey("mainX") && oldnbt.hasKey("mainY") && oldnbt.hasKey("mainZ")) {// Mekanism 6.0.4.44
-					if (WarpDriveConfig.LOGGING_JUMP) {
+					if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 						WarpDrive.logger.info(this + " deploy: TileEntity has mainXYZ");
 					}
 					oldnbt.setInteger("mainX", oldnbt.getInteger("mainX") + offsetX);
@@ -76,7 +76,7 @@ public class JumpBlock {
 					NBTTagCompound nbtScreenData = oldnbt.getCompoundTag("screenData");
 					if ( nbtScreenData.hasKey("minX") && nbtScreenData.hasKey("minY") && nbtScreenData.hasKey("minZ")
 					  && nbtScreenData.hasKey("maxX") && nbtScreenData.hasKey("maxY") && nbtScreenData.hasKey("maxZ")) {
-						if (WarpDriveConfig.LOGGING_JUMP) {
+						if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 							WarpDrive.logger.info(this + " deploy: TileEntity has screenData.min/maxXYZ");
 						}
 						nbtScreenData.setInteger("minX", nbtScreenData.getInteger("minX") + offsetX);
@@ -148,7 +148,7 @@ public class JumpBlock {
 		TileEntity tileEntity = world.getTileEntity(x, y, z);
 		if (tileEntity != null) {
 			Class<?> teClass = tileEntity.getClass();
-			if (WarpDriveConfig.LOGGING_JUMP) {
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 				WarpDrive.logger.info("Tile at " + x + ", " + y + ", " + z + " is " + teClass + " derived from " + teClass.getSuperclass());
 			}
 			try {

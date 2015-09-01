@@ -148,10 +148,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 			if (uuid == null || (uuid.getMostSignificantBits() == 0 && uuid.getLeastSignificantBits() == 0)) {
 				uuid = UUID.randomUUID();
 			}
-			// recovery registration, shouldn't be need, in theory...
+			// recovery registration, shouldn't be needed, in theory...
 			WarpDrive.starMap.updateInRegistry(new StarMapEntry(this));
 			if (WarpDriveConfig.LOGGING_JUMP) {
-				WarpDrive.starMap.printRegistry();
 				WarpDrive.logger.info(this + " controller is " + controller + ", warmupTime " + warmupTime + ", currentMode " + currentMode + ", jumpFlag "
 						+ (controller == null ? "NA" : controller.isJumpFlag()) + ", cooldownTime " + cooldownTime);
 			}
@@ -378,32 +377,31 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		isolationBlocksCount = newCount;
 		if (isolationBlocksCount >= WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS) {
 			isolationRate = WarpDriveConfig.RADAR_MIN_ISOLATION_EFFECT
-					+ (isolationBlocksCount - WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS) // bonus
-					// blocks
+					+ (isolationBlocksCount - WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS) // bonus blocks
 					* (WarpDriveConfig.RADAR_MAX_ISOLATION_EFFECT - WarpDriveConfig.RADAR_MIN_ISOLATION_EFFECT)
 					/ (WarpDriveConfig.RADAR_MAX_ISOLATION_BLOCKS - WarpDriveConfig.RADAR_MIN_ISOLATION_BLOCKS);
 		} else {
 			isolationRate = 0.0D;
 		}
-		if (WarpDriveConfig.LOGGING_JUMP) {
+		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 			WarpDrive.logger.info(this + " Isolation updated to " + isolationBlocksCount + " (" + String.format("%.1f", isolationRate * 100) + "%)");
 		}
 	}
-
+	
 	private void makePlayersOnShipDrunk(int tickDuration) {
 		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
 		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
-
+		
 		for (Object o : list) {
 			if (o == null || !(o instanceof EntityPlayer)) {
 				continue;
 			}
-
+			
 			// Set "drunk" effect
 			((EntityPlayer) o).addPotionEffect(new PotionEffect(Potion.confusion.id, tickDuration, 0, true));
 		}
 	}
-
+	
 	private void summonPlayers() {
 		AxisAlignedBB aabb = AxisAlignedBB.getBoundingBox(this.minX, this.minY, this.minZ, this.maxX, this.maxY, this.maxZ);
 
@@ -677,7 +675,7 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 	}
 	
 	private boolean isFreePlaceForShip(int destX, int destY, int destZ) {
-		int newX, newY, newZ;
+		int newX, newZ;
 		
 		if (destY + shipUp > 255 || destY - shipDown < 5) {
 			return false;
@@ -688,10 +686,12 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 		int moveZ = destZ - zCoord;
 		
 		for (int x = minX; x <= maxX; x++) {
+			newX = moveX + x;
 			for (int z = minZ; z <= maxZ; z++) {
+				newZ = moveZ + z;
 				for (int y = minY; y <= maxY; y++) {
 					Block blockSource = worldObj.getBlock(x, y, z);
-					Block blockTarget = worldObj.getBlock(moveX + x, moveY + y, moveZ + z);
+					Block blockTarget = worldObj.getBlock(newX, moveY + y, newZ);
 					
 					// not vanilla air nor ignored blocks at source
 					// not vanilla air nor expandable blocks are target location

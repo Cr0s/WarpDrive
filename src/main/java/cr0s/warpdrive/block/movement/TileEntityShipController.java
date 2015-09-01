@@ -132,7 +132,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
         	this.direction = dir;
         }
         if (WarpDriveConfig.LOGGING_JUMP) {
-        	WarpDrive.logger.info(this + " Direction set to " + this.direction);
+        	WarpDrive.logger.info(this + " Direction set to " + direction);
         }
     }
 
@@ -589,7 +589,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 					return new Integer[] { getFront(), getRight(), getUp() };
 				}
 				if (WarpDriveConfig.LOGGING_JUMP) {
-					WarpDrive.logger.info("Setting positive gabarits: f: " + argInt0 + " r: " + argInt1 + " u: " + argInt2);
+					WarpDrive.logger.info(this + " Positive dimensions set to front " + argInt0 + ", right " + argInt1 + ", up " + argInt2);
 				}
 				setFront(argInt0);
 				setRight(argInt1);
@@ -613,7 +613,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 					return new Integer[] { getBack(), getLeft(), getDown() };
 				}
 				if (WarpDriveConfig.LOGGING_JUMP) {
-					WarpDrive.logger.info("Setting negative gabarits: b: " + argInt0 + " l: " + argInt1 + " d: " + argInt2);
+					WarpDrive.logger.info(this + " Negative dimensions set to back " + argInt0 + ", left " + argInt1 + ", down " + argInt2);
 				}
 				setBack(argInt0);
 				setLeft(argInt1);
@@ -718,7 +718,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 			}
 			return new Object[] { core.shipMass };
 		} catch (Exception exception) {
-			if (WarpDriveConfig.LOGGING_JUMP) {// disabled by default to avoid console spam as ship size is checked quite frequently
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {// disabled by default to avoid console spam as ship size is checked quite frequently
 				exception.printStackTrace();
 			}
 			return null;

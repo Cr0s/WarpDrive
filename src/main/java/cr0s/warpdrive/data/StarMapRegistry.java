@@ -55,7 +55,7 @@ public class StarMapRegistry {
 			registry.set(idx, entryKey);
 		} else {
 			registry.add(entryKey);
-			printRegistry();
+			printRegistry("added");
 		}
 	}
 	
@@ -64,7 +64,7 @@ public class StarMapRegistry {
 		
 		if (idx != -1) {
 			registry.remove(idx);
-			printRegistry();
+			printRegistry("removed");
 		}
 	}
 	
@@ -90,8 +90,8 @@ public class StarMapRegistry {
 		return res;
 	}
 	
-	public void printRegistry() {
-		WarpDrive.logger.info("Starmap registry (" + registry.size() + " entries):");
+	public void printRegistry(final String trigger) {
+		WarpDrive.logger.info("Starmap registry (" + registry.size() + " entries after " + trigger + "):");
 		
 		for (StarMapEntry entry : registry) {
 			WarpDrive.logger.info("- " + entry.type.toString() + " '" + entry.name + "' @ "

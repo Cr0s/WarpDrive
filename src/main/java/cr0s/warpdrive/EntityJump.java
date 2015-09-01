@@ -165,7 +165,7 @@ public class EntityJump extends Entity {
 			return;
 		}
 		
-		if (minY < 0 || maxY > 256) {
+		if (minY < 0 || maxY > 255) {
 			String msg = "Invalid Y coordinate(s), check ship dimensions...";
 			messageToAllPlayersOnShip(msg);
 			killEntity(msg);
@@ -174,9 +174,6 @@ public class EntityJump extends Entity {
 		
 		ticks++;
 		if (state == STATE_IDLE) {
-			if (WarpDriveConfig.LOGGING_JUMP) {
-				WarpDrive.logger.info(this + " Preparing to jump...");
-			}
 			prepareToJump();
 			if (on) {
 				state = STATE_JUMPING;
@@ -328,9 +325,13 @@ public class EntityJump extends Entity {
 	}
 	
 	private void prepareToJump() {
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Preparing to jump...");
+		}
+		LocalProfiler.start("EntityJump.prepareToJump");
+		
 		StringBuilder reason = new StringBuilder();
 		
-		LocalProfiler.start("EntityJump.prepareToJump");
 		boolean isInSpace = (worldObj.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID);
 		boolean isInHyperSpace = (worldObj.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID);
 		
@@ -459,7 +460,7 @@ public class EntityJump extends Entity {
 		}
 		
 		if (betweenWorlds && WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.info(this + " Worlds: " + worldObj.provider.getDimensionName() + " -> " + targetWorld.provider.getDimensionName());
+			WarpDrive.logger.info(this + " From world " + worldObj.provider.getDimensionName() + " to " + targetWorld.provider.getDimensionName());
 		}
 		
 		// Validate positions aren't overlapping
@@ -484,7 +485,7 @@ public class EntityJump extends Entity {
 			LocalProfiler.stop();
 			return;
 		}
-		// lockWorlds();
+		
 		saveEntities();
 		if (WarpDriveConfig.LOGGING_JUMP) {
 			WarpDrive.logger.info(this + " Saved " + entitiesOnShip.size() + " entities from ship");
@@ -519,70 +520,78 @@ public class EntityJump extends Entity {
 		}
 	}
 	
-	/**
-	 * Finish jump: move entities, unlock worlds and delete self
-	 */
-	private void finishJump() {
-		// FIXME TileEntity duplication workaround
-		if (WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.info(this + " Jump done in " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds and " + ticks + " ticks");
-			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, before cleanup: " + targetWorld.loadedTileEntityList.size());
-		}
-		LocalProfiler.start("EntityJump.removeDuplicates()");
+	private int getRealShipVolume_checkBedrock(StringBuilder reason) {
+		LocalProfiler.start("EntityJump.getRealShipVolume_checkBedrock");
+		int shipVolume = 0;
 		
-		try {
-			targetWorld.loadedTileEntityList = this.removeDuplicates(targetWorld.loadedTileEntityList);
-		} catch (Exception exception) {
-			if (WarpDriveConfig.LOGGING_JUMP) {
-				WarpDrive.logger.info("TE Duplicates removing exception: " + exception.getMessage());
+		for (int x = minX; x <= maxX; x++) {
+			for (int z = minZ; z <= maxZ; z++) {
+				for (int y = minY; y <= maxY; y++) {
+					Block block = worldObj.getBlock(x, y, z);
+					
+					// Skipping vanilla air & ignored blocks
+					if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
+						continue;
+					}
+					
+					shipVolume++;
+					
+					if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+						WarpDrive.logger.info("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
+					}
+					
+					// Stop on non-movable blocks
+					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
+						reason.append(block.getUnlocalizedName() + " detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
+						LocalProfiler.stop();
+						return -1;
+					}
+				}
 			}
 		}
 		
-		doCollisionDamage(true);
+		// Abort jump if blocks with TE are connecting to the ship (avoid crash when splitting multi-blocks)
+		for (int x = minX - 1; x <= maxX + 1; x++) {
+			boolean xBorder = (x == minX - 1) || (x == maxX + 1);
+			for (int z = minZ - 1; z <= maxZ + 1; z++) {
+				boolean zBorder = (z == minZ - 1) || (z == maxZ + 1);
+				for (int y = minY - 1; y <= maxY + 1; y++) {
+					boolean yBorder = (y == minY - 1) || (y == maxY + 1);
+					if ((y < 0) || (y > 255)) {
+						continue;
+					}
+					if (!(xBorder || yBorder || zBorder)) {
+						continue;
+					}
+					
+					Block block = worldObj.getBlock(x, y, z);
+					
+					// Skipping any air block & ignored blocks
+					if (worldObj.isAirBlock(x, y, z) || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
+						continue;
+					}
+					
+					// Skipping non-movable blocks
+					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
+						continue;
+					}
+					
+					// Skipping blocks without tile entities
+					TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
+					if (tileEntity == null) {
+						continue;
+					}
+					
+					reason.append("Ship snagged by " + block.getLocalizedName() + " at " + x + ", " + y + ", " + z + ". Damage report pending...");
+					worldObj.createExplosion((Entity) null, x, y, z, Math.min(4F * 30, 4F * (shipVolume / 50)), false);
+					LocalProfiler.stop();
+					return -1;
+				}
+			}
+		}
 		
 		LocalProfiler.stop();
-		if (WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, after cleanup: " + targetWorld.loadedTileEntityList.size());
-		}
-		killEntity("Jump done");
-	}
-	
-	/**
-	 * Removing ship from world
-	 *
-	 */
-	private void removeShip() {
-		LocalProfiler.start("EntityJump.removeShip");
-		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
-		if (WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.info(this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
-		}
-		for (int index = 0; index < blocksToMove; index++) {
-			if (currentIndexInShip >= ship.length) {
-				break;
-			}
-			JumpBlock jb = ship[ship.length - currentIndexInShip - 1];
-			if (jb == null) {
-				if (WarpDriveConfig.LOGGING_JUMP) {
-					WarpDrive.logger.info(this + " Removing ship part: unexpected null found at ship[" + currentIndexInShip + "]");
-				}
-				currentIndexInShip++;
-				continue;
-			}
-			
-			if (jb.blockTileEntity != null) {
-				if (WarpDriveConfig.LOGGING_JUMP) {
-					WarpDrive.logger.info("Removing tile entity at " + jb.x + ", " + jb.y + ", " + jb.z);
-				}
-				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
-			}
-			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
-			
-			JumpBlock.refreshBlockStateOnClient(targetWorld, jb.x + moveX, jb.y + moveY, jb.z + moveZ);
-			
-			currentIndexInShip++;
-		}
-		LocalProfiler.stop();
+		return shipVolume;
 	}
 	
 	/**
@@ -624,9 +633,13 @@ public class EntityJump extends Entity {
 								JumpBlock jumpBlock = new JumpBlock(block, blockMeta, tileEntity, x, y, z);
 								
 								// default priority is 2 for block, 3 for tile entities
-								int placeTime = 2;
-								if (tileEntity != null) {
-									placeTime = 3;
+								Integer placeTime = WarpDriveConfig.BLOCKS_PLACE.get(block);
+								if (placeTime == null) {
+									if (tileEntity == null) {
+										placeTime = 2;
+									} else {
+										placeTime = 3;
+									}
 								}
 								
 								placeTimeJumpBlocks[placeTime][placeTimeIndexes[placeTime]] = jumpBlock;
@@ -675,14 +688,87 @@ public class EntityJump extends Entity {
 			
 			JumpBlock jb = ship[currentIndexInShip];
 			if (jb != null) {
+				if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+					WarpDrive.logger.info("Deploying from " + jb.x + ", " + jb.y + ", " + jb.z + " of " + jb.block + "@" + jb.blockMeta);
+				}
 				jb.deploy(targetWorld, moveX, moveY, moveZ);
-				// 1.6.4 required to keep tile entities for CC_peripheral:2 or :4
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			currentIndexInShip++;
 		}
 		
 		LocalProfiler.stop();
+	}
+	
+	/**
+	 * Removing ship from world
+	 */
+	private void removeShip() {
+		LocalProfiler.start("EntityJump.removeShip");
+		int blocksToMove = Math.min(WarpDriveConfig.G_BLOCKS_PER_TICK, ship.length - currentIndexInShip);
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Removing ship blocks " + currentIndexInShip + " to " + (currentIndexInShip + blocksToMove - 1) + " / " + (ship.length - 1));
+		}
+		for (int index = 0; index < blocksToMove; index++) {
+			if (currentIndexInShip >= ship.length) {
+				break;
+			}
+			JumpBlock jb = ship[ship.length - currentIndexInShip - 1];
+			if (jb == null) {
+				if (WarpDriveConfig.LOGGING_JUMP) {
+					WarpDrive.logger.info(this + " Removing ship part: unexpected null found at ship[" + currentIndexInShip + "]");
+				}
+				currentIndexInShip++;
+				continue;
+			}
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+				WarpDrive.logger.info("Removing block " + jb.block + "@" + jb.blockMeta + " at " + jb.x + ", " + jb.y + ", " + jb.z);
+			}
+			
+			if (jb.blockTileEntity != null) {
+				if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+					WarpDrive.logger.info("Removing tile entity at " + jb.x + ", " + jb.y + ", " + jb.z);
+				}
+				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
+			}
+			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
+			
+			JumpBlock.refreshBlockStateOnClient(targetWorld, jb.x + moveX, jb.y + moveY, jb.z + moveZ);
+			
+			currentIndexInShip++;
+		}
+		LocalProfiler.stop();
+	}
+	
+	/**
+	 * Finish jump: move entities, unlock worlds and delete self
+	 */
+	private void finishJump() {
+		// FIXME TileEntity duplication workaround
+		if (WarpDriveConfig.LOGGING_JUMP) {
+			WarpDrive.logger.info(this + " Jump done in " + ((System.currentTimeMillis() - msCounter) / 1000F) + " seconds and " + ticks + " ticks");
+		}
+		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, before cleanup: " + targetWorld.loadedTileEntityList.size());
+		}
+		LocalProfiler.start("EntityJump.removeDuplicates()");
+		
+		try {
+			targetWorld.loadedTileEntityList = this.removeDuplicates(targetWorld.loadedTileEntityList);
+		} catch (Exception exception) {
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info("TE Duplicates removing exception: " + exception.getMessage());
+				exception.printStackTrace();
+			}
+		}
+		
+		doCollisionDamage(true);
+		
+		LocalProfiler.stop();
+		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+			WarpDrive.logger.info("Removing TE duplicates: tileEntities in target world after jump, after cleanup: " + targetWorld.loadedTileEntityList.size());
+		}
+		killEntity("Jump done");
 	}
 	
 	/**
@@ -808,80 +894,6 @@ public class EntityJump extends Entity {
 			(atTarget ? targetWorld : worldObj).newExplosion((Entity) null, current.x, current.y, current.z, strength, atTarget, atTarget);
 			WarpDrive.logger.info("Ship collision caused explosion at " + current.x + ", " + current.y + ", " + current.z + " with strength " + strength);
 		}
-	}
-	
-	private int getRealShipVolume_checkBedrock(StringBuilder reason) {
-		LocalProfiler.start("EntityJump.getRealShipVolume_checkBedrock");
-		int shipVolume = 0;
-		
-		for (int x = minX; x <= maxX; x++) {
-			for (int z = minZ; z <= maxZ; z++) {
-				for (int y = minY; y <= maxY; y++) {
-					Block block = worldObj.getBlock(x, y, z);
-					
-					// Skipping vanilla air & ignored blocks
-					if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
-						continue;
-					}
-					
-					shipVolume++;
-					
-					if (WarpDriveConfig.LOGGING_JUMP) {
-						WarpDrive.logger.info("Block(" + x + ", " + y + ", " + z + ") is " + block.getUnlocalizedName() + "@" + worldObj.getBlockMetadata(x, y, z));
-					}
-					
-					// Stop on non-movable blocks
-					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
-						reason.append(block.getUnlocalizedName() + " detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
-						LocalProfiler.stop();
-						return -1;
-					}
-				}
-			}
-		}
-		
-		// Abort jump if blocks with TE are connecting to the ship (avoid crash when splitting multi-blocks)
-		for (int x = minX - 1; x <= maxX + 1; x++) {
-			boolean xBorder = (x == minX - 1) || (x == maxX + 1);
-			for (int z = minZ - 1; z <= maxZ + 1; z++) {
-				boolean zBorder = (z == minZ - 1) || (z == maxZ + 1);
-				for (int y = minY - 1; y <= maxY + 1; y++) {
-					boolean yBorder = (y == minY - 1) || (y == maxY + 1);
-					if ((y < 0) || (y > 255)) {
-						continue;
-					}
-					if (!(xBorder || yBorder || zBorder)) {
-						continue;
-					}
-					
-					Block block = worldObj.getBlock(x, y, z);
-					
-					// Skipping any air block & ignored blocks
-					if (worldObj.isAirBlock(x, y, z) || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
-						continue;
-					}
-					
-					// Skipping non-movable blocks
-					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
-						continue;
-					}
-					
-					// Skipping blocks without tile entities
-					TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
-					if (tileEntity == null) {
-						continue;
-					}
-					
-					reason.append("Ship snagged by " + block.getLocalizedName() + " at " + x + ", " + y + ", " + z + ". Damage report pending...");
-					worldObj.createExplosion((Entity) null, x, y, z, Math.min(4F * 30, 4F * (shipVolume / 50)), false);
-					LocalProfiler.stop();
-					return -1;
-				}
-			}
-		}
-		
-		LocalProfiler.stop();
-		return shipVolume;
 	}
 	
 	private void saveEntities() {
@@ -1034,7 +1046,7 @@ public class EntityJump extends Entity {
 			atTarget.add(new Vector3(tx, ty, tz));
 			isCollision = isCollision || pisCollision;
 			reason = preason;
-			if (WarpDriveConfig.LOGGING_JUMP) {
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 				WarpDrive.logger.info("CheckMovementResult " + sx + ", " + sy + ", " + sz + " -> " + tx + ", " + ty + ", " + tz + " " + isCollision + " '" + reason + "'");
 			}
 		}
@@ -1110,7 +1122,7 @@ public class EntityJump extends Entity {
 			@Override
 			public int compare(TileEntity o1, TileEntity o2) {
 				if (o1.xCoord == o2.xCoord && o1.yCoord == o2.yCoord && o1.zCoord == o2.zCoord) {
-					if (WarpDriveConfig.LOGGING_JUMP) {
+					if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 						WarpDrive.logger.info("Removed duplicated TE: " + o1 + ", " + o2);
 					}
 					return 0;
@@ -1151,10 +1163,11 @@ public class EntityJump extends Entity {
 	
 	@Override
 	public String toString() {
-		return String.format("%s/%d \'%s\' @ \'%s\' %.2f, %.2f, %.2f", new Object[] {
+		return String.format("%s/%d \'%s\' @ \'%s\' %.2f, %.2f, %.2f #%d", new Object[] {
 			getClass().getSimpleName(), Integer.valueOf(getEntityId()),
 			shipCore == null ? "~NULL~" : (shipCore.uuid + ":" + shipCore.shipName),
 			worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
-			Double.valueOf(posX), Double.valueOf(posY), Double.valueOf(posZ) });
+			Double.valueOf(posX), Double.valueOf(posY), Double.valueOf(posZ),
+			Integer.valueOf(ticks)});
 	}
 }
