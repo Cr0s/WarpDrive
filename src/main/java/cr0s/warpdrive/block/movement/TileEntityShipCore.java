@@ -637,10 +637,10 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping vanilla air & ignored blocks
-					if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
+					if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
-					if (WarpDriveConfig.TAGGED_BLOCKS_NOMASS.contains(block)) {
+					if (WarpDriveConfig.BLOCKS_NOMASS.contains(block)) {
 						continue;
 					}
 					
@@ -696,9 +696,9 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 					// not vanilla air nor ignored blocks at source
 					// not vanilla air nor expandable blocks are target location
 					if ( blockSource != Blocks.air
-					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockSource)
+					  && !WarpDriveConfig.BLOCKS_EXPANDABLE.contains(blockSource)
 					  && blockTarget != Blocks.air
-					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockTarget)) {
+					  && !WarpDriveConfig.BLOCKS_EXPANDABLE.contains(blockTarget)) {
 						return false;
 					}
 				}
@@ -1028,12 +1028,12 @@ public class TileEntityShipCore extends TileEntityAbstractEnergy {
 						Block block = worldObj.getBlock(x, y, z);
 						
 						// Skipping vanilla air & ignored blocks
-						if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
+						if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
 							continue;
 						}
 						newVolume++;
 						
-						if (WarpDriveConfig.TAGGED_BLOCKS_NOMASS.contains(block)) {
+						if (WarpDriveConfig.BLOCKS_NOMASS.contains(block)) {
 							continue;
 						}
 						newMass++;

@@ -22,7 +22,6 @@ import cr0s.warpdrive.config.filler.FillerManager;
 import cr0s.warpdrive.config.structures.StructureManager;
 import cr0s.warpdrive.data.Planet;
 import net.minecraft.block.Block;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -62,18 +61,15 @@ public class WarpDriveConfig {
 	
 	public static ItemStack IC2_air;
 	public static ItemStack IC2_empty;
-	public static ItemStack IC2_rubberWood;
+	public static Block IC2_rubberWood;
 	public static ItemStack IC2_Resin;
 	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Expanded, CCT_Advanced;
 	
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
-	public static Item GS_ultimateLappack;
 	
-	public static ArrayList<Block> minerOres, minerLogs, minerLeaves, scannerIgnoreBlocks;
 	public static ArrayList<Item> spaceHelmets, jetpacks;
-	public static ArrayList<Block> commonWorldGenOres;
 	
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
@@ -145,13 +141,18 @@ public class WarpDriveConfig {
 	
 	// Tagged blocks
 	private static HashMap<String, String> taggedBlocks = null;	// loaded from configuration file at PreInit, parsed at PostInit
-	public static HashSet<Block> TAGGED_BLOCKS_ANCHOR = null;
-	public static HashSet<Block> TAGGED_BLOCKS_NOMASS = null;
-	public static HashSet<Block> TAGGED_BLOCKS_LEFTBEHIND = null;
-	public static HashSet<Block> TAGGED_BLOCKS_EXPANDABLE = null;
-	public static HashSet<Block> TAGGED_BLOCKS_MINING = null;
-	public static HashSet<Block> TAGGED_BLOCKS_NOMINING = null;
-	public static HashMap<Block, Integer> TAGGED_BLOCKS_PLACE = null;
+	
+	// Blocks dictionary
+	public static HashSet<Block> BLOCKS_ORES;
+	public static HashSet<Block> BLOCKS_LOGS;
+	public static HashSet<Block> BLOCKS_LEAVES;
+	public static HashSet<Block> BLOCKS_ANCHOR = null;
+	public static HashSet<Block> BLOCKS_NOMASS = null;
+	public static HashSet<Block> BLOCKS_LEFTBEHIND = null;
+	public static HashSet<Block> BLOCKS_EXPANDABLE = null;
+	public static HashSet<Block> BLOCKS_MINING = null;
+	public static HashSet<Block> BLOCKS_NOMINING = null;
+	public static HashMap<Block, Integer> BLOCKS_PLACE = null;
 	
 	// Radar
 	public static int RADAR_MAX_ENERGY_STORED = 100000000; // 100kk eU
@@ -464,9 +465,9 @@ public class WarpDriveConfig {
 					+ "Invalid tags will be ignored silently. Tags and block names are case sensitive.\n"
 					+ "In case of conflicts, the latest tag overwrite the previous ones.\n"
 					+ "- Anchor: ship can't move with this block aboard (default: bedrock and assimilated).\n"
-					+ "- NoMass: this block doesn't count when calculating ship volume/mass (default: all 'air' blocks).\n"
+					+ "- NoMass: this block doesn't count when calculating ship volume/mass (default: leaves, all 'air' blocks).\n"
 					+ "- LeftBehind: this block won't move with your ship (default: RailCraft heat, WarpDrive gases).\n"
-					+ "- Expandable: this block will be squished/ignored in case of collision (default: leaves). All 'LeftBehind' are assumed as Expandable.\n"
+					+ "- Expandable: this block will be squished/ignored in case of collision.\n"
 					+ "- Mining: this block is mineable (default: all 'ore' blocks from the ore dictionnary).\n"
 					+ "- NoMining: this block is non-mineable (default: forcefields).\n"
 					+ "- PlaceEarliest: this block will be removed last and placed first (default: ship hull and projectors).\n"
@@ -478,27 +479,38 @@ public class WarpDriveConfig {
 			ConfigCategory categoryBlockTags = config.getCategory("block_tags");
 			String[] taggedBlocksName = categoryBlockTags.getValues().keySet().toArray(new String[0]);
 			if (taggedBlocksName.length == 0) {
-				config.get("block_tags", "minecraft:bedrock"				, "Anchor NoMining"			).getString();
-				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor"					).getString();
-				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor"					).getString();
-				config.get("block_tags", "Artifacts:anti_anti_builder_stone", "Anchor"					).getString();
-				config.get("block_tags", "Artifacts:anti_builder"			, "Anchor"					).getString();
+				// anchors
+				config.get("block_tags", "minecraft:bedrock"				, "Anchor NoMining"					).getString();
+				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor NoMining"					).getString();
+				config.get("block_tags", "Artifacts:invisible_bedrock"		, "Anchor NoMining"					).getString();
+				config.get("block_tags", "Artifacts:anti_anti_builder_stone", "Anchor NoMining"					).getString();
+				config.get("block_tags", "Artifacts:anti_builder"			, "Anchor NoMining"					).getString();
 				
-				config.get("block_tags", "IC2:blockReinforcedFoam"			, "PlaceEarliest NoMining"	).getString();
-				config.get("block_tags", "IC2:blockAlloy"					, "PlaceEarliest NoMining"	).getString();
-				config.get("block_tags", "IC2:blockAlloyGlass"				, "PlaceEarliest NoMining"	).getString();
-				config.get("block_tags", "minecraft:obsidian"				, "PlaceEarliest"			).getString();
-				config.get("block_tags", "AdvancedRepulsionSystems:field"	, "PlaceEarlier NoMining"	).getString();
+				// placement priorities
+				config.get("block_tags", "IC2:blockReinforcedFoam"			, "PlaceEarliest NoMining"			).getString();
+				config.get("block_tags", "IC2:blockAlloy"					, "PlaceEarliest NoMining"			).getString();
+				config.get("block_tags", "IC2:blockAlloyGlass"				, "PlaceEarliest NoMining"			).getString();
+				config.get("block_tags", "minecraft:obsidian"				, "PlaceEarliest Mining"			).getString();
+				config.get("block_tags", "AdvancedRepulsionSystems:field"	, "PlaceEarlier NoMining"			).getString();
 				// FIXME config.get("block_tags", "MFFS:field"						, "PlaceEarlier NoMining"	).getString();
-				config.get("block_tags", "IC2:blockGenerator"				, "PlaceLater"				).getString();
-				config.get("block_tags", "IC2:blockReactorChamber"			, "PlaceLatest"				).getString();
+				config.get("block_tags", "IC2:blockGenerator"				, "PlaceLater"						).getString();
+				config.get("block_tags", "IC2:blockReactorChamber"			, "PlaceLatest"						).getString();
 				
-				config.get("block_tags", "WarpDrive:blockGas"				, "LeftBehind"				).getString();
-				config.get("block_tags", "Railcraft:residual.heat"			, "LeftBehind"				).getString();
-				config.get("block_tags", "InvisibLights:blockLightSource"	, "NoMass"					).getString();
-				config.get("block_tags", "WarpDrive:blockAir"				, "NoMass PlaceLatest"		).getString();
+				// expandables, a.k.a. "don't blow my ship with this..."
+				config.get("block_tags", "WarpDrive:blockGas"				, "LeftBehind Expandable"			).getString();
+				config.get("block_tags", "Railcraft:residual.heat"			, "LeftBehind Expandable"			).getString();
+				config.get("block_tags", "InvisibLights:blockLightSource"	, "NoMass Expandable"				).getString();
+				config.get("block_tags", "WarpDrive:blockAir"				, "NoMass Expandable PlaceLatest"	).getString();
 				
-				config.get("block_tags", "WarpDrive:blockIridium"			, "Mining"					).getString();	// stronger than obsidian but can still be mined (see ender moon)
+				// mining a mineshaft...
+				config.get("block_tags", "minecraft:web"					, "Mining"							).getString();
+				config.get("block_tags", "minecraft:fence"					, "Mining"							).getString();
+				config.get("block_tags", "minecraft:torch"					, "Mining"							).getString();
+				config.get("block_tags", "minecraft:glowstone"				, "Mining"							).getString();
+				config.get("block_tags", "minecraft:redstone_block"			, "Mining"							).getString();
+				
+				// mining an 'end' moon
+				config.get("block_tags", "WarpDrive:blockIridium"			, "Mining"							).getString();	// stronger than obsidian but can still be mined (see ender moon)
 				taggedBlocksName = categoryBlockTags.getValues().keySet().toArray(new String[0]);
 			}
 			taggedBlocks = new HashMap(taggedBlocksName.length);
@@ -705,20 +717,8 @@ public class WarpDriveConfig {
 	}
 	
 	public static void onFMLInitialization() {
-		commonWorldGenOres = new ArrayList<Block>();
-		commonWorldGenOres.add(Blocks.iron_ore);
-		commonWorldGenOres.add(Blocks.gold_ore);
-		commonWorldGenOres.add(Blocks.coal_ore);
-		commonWorldGenOres.add(Blocks.emerald_ore);
-		commonWorldGenOres.add(Blocks.lapis_ore);
-		commonWorldGenOres.add(Blocks.redstone_ore);
-		
 		spaceHelmets = new ArrayList<Item>();
 		jetpacks = new ArrayList<Item>();
-		minerOres = new ArrayList<Block>();
-		minerLogs = new ArrayList<Block>();
-		minerLeaves = new ArrayList<Block>();
-		scannerIgnoreBlocks = new ArrayList<Block>();
 		
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
@@ -748,116 +748,9 @@ public class WarpDriveConfig {
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
 		isAppliedEnergistics2Loaded = Loader.isModLoaded("appliedenergistics2");
 		isOpenComputersLoaded = Loader.isModLoaded("OpenComputers");
-		
-		//
-		minerOres.add(WarpDrive.blockIridium);
-		minerOres.add(Blocks.coal_ore);
-		minerOres.add(Blocks.quartz_ore);
-		minerOres.add(Blocks.obsidian);
-		minerOres.add(Blocks.web);
-		minerOres.add(Blocks.fence);
-		minerOres.add(Blocks.torch);
-		minerOres.add(Blocks.glowstone);
-		minerOres.add(Blocks.redstone_block);
-		
-		// Ignore WarpDrive blocks (which potentially will be duplicated by
-		// cheaters using ship scan/deploy)
-		scannerIgnoreBlocks.add(WarpDrive.blockShipCore);
-		scannerIgnoreBlocks.add(WarpDrive.blockShipController);
-		scannerIgnoreBlocks.add(WarpDrive.blockIridium);
-		
-		if (isIndustrialCraft2loaded) {
-			// Metadata: 0 Batbox, 1 MFE, 2 MFSU, 3 LV transformer, 4 MV transformer, 5 HV transformer, 6 EV transformer, 7 CESU
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockElectric"));
-			
-			// Metadata: 0 Batbox, 1 CESU, 2 MFE, 3 MFSU
-			scannerIgnoreBlocks.add(Block.getBlockFromName("IC2:blockChargepad"));
-		}
-		if (isICBMLoaded) {
-			scannerIgnoreBlocks.add(Block.getBlockFromName("ICBM:explosive"));
-		}
-		if (isComputerCraftLoaded) {
-			scannerIgnoreBlocks.add(CC_Computer);
-			scannerIgnoreBlocks.add(CCT_Turtle);
-			scannerIgnoreBlocks.add(CCT_Expanded);
-			scannerIgnoreBlocks.add(CCT_Advanced);
-		}
-		// Do not deploy ores and valuables
-		for (Block t : commonWorldGenOres) {
-			scannerIgnoreBlocks.add(t);
-		}
 	}
 	
 	public static void onFMLPostInitialization() {
-		// translate tagged blocks
-		TAGGED_BLOCKS_ANCHOR = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_NOMASS = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_LEFTBEHIND = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_EXPANDABLE = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_MINING = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_NOMINING = new HashSet(taggedBlocks.size());
-		TAGGED_BLOCKS_PLACE = new HashMap(taggedBlocks.size());
-		for (Entry<String, String> taggedBlock : taggedBlocks.entrySet()) {
-			Block block = Block.getBlockFromName(taggedBlock.getKey());
-			if (block == null) {
-				WarpDrive.logger.info("Ignoring missing block " + taggedBlock.getKey());
-				continue;
-			}
-			for (String tag : taggedBlock.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
-				switch (tag) {
-				case "Anchor":
-					TAGGED_BLOCKS_ANCHOR.add(block);
-					break;
-					
-				case "NoMass":
-					TAGGED_BLOCKS_NOMASS.add(block);
-					break;
-					
-				case "LeftBehind":
-					TAGGED_BLOCKS_LEFTBEHIND.add(block);
-					TAGGED_BLOCKS_EXPANDABLE.add(block);
-					break;
-					
-				case "Expandable":
-					TAGGED_BLOCKS_EXPANDABLE.add(block);
-					break;
-					
-				case "Mining":
-					TAGGED_BLOCKS_MINING.add(block);
-					break;
-					
-				case "NoMining":
-					TAGGED_BLOCKS_NOMINING.add(block);
-					break;
-					
-				case "PlaceEarliest":
-					TAGGED_BLOCKS_PLACE.put(block, 0);
-					break;
-					
-				case "PlaceEarlier":
-					TAGGED_BLOCKS_PLACE.put(block, 1);
-					break;
-					
-				case "PlaceNormal":
-					TAGGED_BLOCKS_PLACE.put(block, 2);
-					break;
-					
-				case "PlaceLater":
-					TAGGED_BLOCKS_PLACE.put(block, 3);
-					break;
-					
-				case "PlaceLatest":
-					TAGGED_BLOCKS_PLACE.put(block, 4);
-					break;
-				}
-			}
-		}
-		WarpDrive.logger.info("Tagged blocks identified:");
-		WarpDrive.logger.info("- " + TAGGED_BLOCKS_ANCHOR.size() + " with Anchor tag: " + TAGGED_BLOCKS_ANCHOR);
-		WarpDrive.logger.info("- " + TAGGED_BLOCKS_NOMASS.size() + " with NoMass blocks defined: " + TAGGED_BLOCKS_NOMASS);
-		WarpDrive.logger.info("- " + TAGGED_BLOCKS_LEFTBEHIND.size() + " with LeftBehind blocks defined: " + TAGGED_BLOCKS_LEFTBEHIND);
-		WarpDrive.logger.info("- " + TAGGED_BLOCKS_PLACE.size() + " with Placement priority blocks defined: " + TAGGED_BLOCKS_PLACE);
-		
 		// read XML files
 		File[] files = configDirectory.listFiles(new FilenameFilter() {
 			@Override
@@ -874,37 +767,107 @@ public class WarpDriveConfig {
 		FillerManager.loadOres(configDirectory);
 		StructureManager.loadStructures(configDirectory);
 		
-		LoadOreDict();
+		loadBlockDictionnary();
 		
 		FillerManager.finishLoading();
 	}
 	
-	private static void LoadOreDict() {
+	private static void loadBlockDictionnary() {
+		// get default settings from parsing ore dictionary
+		BLOCKS_ORES = new HashSet<Block>();
+		BLOCKS_LOGS = new HashSet<Block>();
+		BLOCKS_LEAVES = new HashSet<Block>();
 		String[] oreNames = OreDictionary.getOreNames();
 		for (String oreName : oreNames) {
 			String lowerOreName = oreName.toLowerCase();
 			if (oreName.length() > 4 && oreName.substring(0, 3).equals("ore")) {
 				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
 				for (ItemStack itemStack : itemStacks) {
-					minerOres.add(Block.getBlockFromItem(itemStack.getItem()));
-					WarpDrive.logger.info("- added " + oreName + " to MinerOres as " + itemStack);
+					BLOCKS_ORES.add(Block.getBlockFromItem(itemStack.getItem()));
+					// WarpDrive.logger.info("- added " + oreName + " to ores as " + itemStack);
 				}
 			}
 			if (lowerOreName.contains("log")) {
 				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
 				for (ItemStack itemStack : itemStacks) {
-					minerLogs.add(Block.getBlockFromItem(itemStack.getItem()));
-					WarpDrive.logger.info("- added " + oreName + " to MinerLogs as " + itemStack);
+					BLOCKS_LOGS.add(Block.getBlockFromItem(itemStack.getItem()));
+					// WarpDrive.logger.info("- added " + oreName + " to logs as " + itemStack);
 				}
 			}
 			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
 				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
 				for (ItemStack itemStack : itemStacks) {
-					minerLeaves.add(Block.getBlockFromItem(itemStack.getItem()));
-					WarpDrive.logger.info("- added " + oreName + " to MinerLeaves as " + itemStack);
+					BLOCKS_LEAVES.add(Block.getBlockFromItem(itemStack.getItem()));
+					// WarpDrive.logger.info("- added " + oreName + " to leaves as " + itemStack);
 				}
 			}
 		}
+		
+		// translate tagged blocks
+		BLOCKS_ANCHOR = new HashSet(taggedBlocks.size());
+		BLOCKS_NOMASS = new HashSet(taggedBlocks.size() + BLOCKS_LEAVES.size());
+		BLOCKS_NOMASS.addAll(BLOCKS_LEAVES);
+		BLOCKS_LEFTBEHIND = new HashSet(taggedBlocks.size());
+		BLOCKS_EXPANDABLE = new HashSet(taggedBlocks.size() + BLOCKS_LEAVES.size());
+		BLOCKS_EXPANDABLE.addAll(BLOCKS_LEAVES);
+		BLOCKS_MINING = new HashSet(taggedBlocks.size());
+		BLOCKS_NOMINING = new HashSet(taggedBlocks.size());
+		BLOCKS_PLACE = new HashMap(taggedBlocks.size());
+		for (Entry<String, String> taggedBlock : taggedBlocks.entrySet()) {
+			Block block = Block.getBlockFromName(taggedBlock.getKey());
+			if (block == null) {
+				WarpDrive.logger.info("Ignoring missing block " + taggedBlock.getKey());
+				continue;
+			}
+			for (String tag : taggedBlock.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
+				switch (tag) {
+				case "Anchor"       : BLOCKS_ANCHOR.add(block); break;
+				case "NoMass"       : BLOCKS_NOMASS.add(block); break;
+				case "LeftBehind"   : BLOCKS_LEFTBEHIND.add(block); break;
+				case "Expandable"   : BLOCKS_EXPANDABLE.add(block); break;
+				case "Mining"       : BLOCKS_MINING.add(block); break;
+				case "NoMining"     : BLOCKS_NOMINING.add(block); break;
+				case "PlaceEarliest": BLOCKS_PLACE.put(block, 0); break;
+				case "PlaceEarlier" : BLOCKS_PLACE.put(block, 1); break;
+				case "PlaceNormal"  : BLOCKS_PLACE.put(block, 2); break;
+				case "PlaceLater"   : BLOCKS_PLACE.put(block, 3); break;
+				case "PlaceLatest"  : BLOCKS_PLACE.put(block, 4); break;
+				}
+			}
+		}
+		WarpDrive.logger.info("Active blocks dictionnary:");
+		WarpDrive.logger.info("- " + BLOCKS_ORES.size() + " ores: " + getHashMessage(BLOCKS_ORES));
+		WarpDrive.logger.info("- " + BLOCKS_LOGS.size() + " logs: " + getHashMessage(BLOCKS_LOGS));
+		WarpDrive.logger.info("- " + BLOCKS_LEAVES.size() + " laves: " + getHashMessage(BLOCKS_LEAVES));
+		WarpDrive.logger.info("- " + BLOCKS_ANCHOR.size() + " anchors: " + getHashMessage(BLOCKS_ANCHOR));
+		WarpDrive.logger.info("- " + BLOCKS_NOMASS.size() + " with NoMass tag: " + getHashMessage(BLOCKS_NOMASS));
+		WarpDrive.logger.info("- " + BLOCKS_LEFTBEHIND.size() + " with LeftBehind tag: " + getHashMessage(BLOCKS_LEFTBEHIND));
+		WarpDrive.logger.info("- " + BLOCKS_EXPANDABLE.size() + " expandable: " + getHashMessage(BLOCKS_EXPANDABLE));
+		WarpDrive.logger.info("- " + BLOCKS_MINING.size() + " with Mining tag: " + getHashMessage(BLOCKS_MINING));
+		WarpDrive.logger.info("- " + BLOCKS_NOMINING.size() + " with NoMining tag: " + getHashMessage(BLOCKS_NOMINING));
+		WarpDrive.logger.info("- " + BLOCKS_PLACE.size() + " with Placement priority: " + getHashMessage(BLOCKS_PLACE));
+	}
+	
+	private static String getHashMessage(HashSet<Block> hashSet) {
+		String message = "";
+		for (Block block : hashSet) {
+			if (!message.isEmpty()) {
+				message += ", ";
+			}
+			message += GameRegistry.findUniqueIdentifierFor(block);
+		}
+		return message;
+	}
+	
+	private static String getHashMessage(HashMap<Block, Integer> hashMap) {
+		String message = "";
+		for (Entry<Block, Integer> entry : hashMap.entrySet()) {
+			if (!message.isEmpty()) {
+				message += ", ";
+			}
+			message += GameRegistry.findUniqueIdentifierFor(entry.getKey()) + "=" + entry.getValue();
+		}
+		return message;
 	}
 	
 	private static void loadForgeMultipart() {
@@ -934,28 +897,8 @@ public class WarpDriveConfig {
 			IC2_empty = getModItemStack("IC2", "itemCellEmpty", -1);
 			IC2_air = getModItemStack("IC2", "itemCellEmpty", 5);
 			
-			ItemStack rubberWood = getModItemStack("IC2", "blockRubWood", -1);
+			IC2_rubberWood = getModBlock("IC2", "blockRubWood");
 			IC2_Resin = getModItemStack("IC2", "itemHarz", -1);
-			if (rubberWood != null) {
-				IC2_rubberWood = rubberWood;
-				minerOres.add(Block.getBlockFromItem(getModItemStack("IC2", "rubberWood", -1).getItem()));
-			}
-			ItemStack ore = getModItemStack("IC2", "blockOreUran", -1);
-			if (ore != null) {
-				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			}
-			ore = getModItemStack("IC2", "blockOreCopper", -1);
-			if (ore != null) {
-				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			}
-			ore = getModItemStack("IC2", "blockOreTin", -1);
-			if (ore != null) {
-				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			}
-			ore = getModItemStack("IC2", "blockOreLead", -1);
-			if (ore != null) {
-				commonWorldGenOres.add(Block.getBlockFromItem(ore.getItem()));
-			}
 		} catch (Exception exception) {
 			WarpDrive.logger.error("Error loading IndustrialCraft2 classes");
 			exception.printStackTrace();
@@ -989,10 +932,9 @@ public class WarpDriveConfig {
 	
 	private static void loadGraviSuite() {
 		try {
-			spaceHelmets.add((Item) Item.itemRegistry.getObject("GraviSuite.ultimateSolarHelmet")); // FIXME
-			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.advJetpack")); // FIXME
-			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite.graviChestPlate")); // FIXME
-			GS_ultimateLappack = (Item) Item.itemRegistry.getObject("GraviSuite.ultimateLappack"); // FIXME
+			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:advJetpack"));
+			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:advNanoChestPlate"));
+			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:graviChestPlate"));
 		} catch (Exception exception) {
 			WarpDrive.logger.error("Error loading GS classes");
 			exception.printStackTrace();

@@ -102,7 +102,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						int cost = calculateBlockCost(block);
 						if (consumeEnergyFromBooster(cost, true)) {
 							if (isRoomForHarvest()) {
-								if (block.isAssociatedBlock(Block.getBlockFromItem(WarpDriveConfig.IC2_rubberWood.getItem()))) {
+								if (block.isAssociatedBlock(WarpDriveConfig.IC2_rubberWood)) {
 									int metadata = worldObj.getBlockMetadata(pos.x, pos.y, pos.z);
 									if (metadata >= 2 && metadata <= 5) {
 										if (WarpDriveConfig.LOGGING_COLLECTION) {
@@ -150,11 +150,11 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	}
 
 	private static boolean isLog(Block block) {
-		return WarpDriveConfig.minerLogs.contains(block);
+		return WarpDriveConfig.BLOCKS_LOGS.contains(block);
 	}
 
 	private static boolean isLeaf(Block block) {
-		return WarpDriveConfig.minerLeaves.contains(block);
+		return WarpDriveConfig.BLOCKS_LEAVES.contains(block);
 	}
 
 	private static void addTree(LinkedList<VectorI> list, VectorI newTree) {

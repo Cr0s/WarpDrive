@@ -219,12 +219,12 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			return false;
 		}
 		// check blacklist
-		if (WarpDriveConfig.TAGGED_BLOCKS_NOMINING.contains(block)) {
+		if (WarpDriveConfig.BLOCKS_NOMINING.contains(block)) {
 			stop();
 			return false;
 		}
 		// check whitelist
-		if (WarpDriveConfig.TAGGED_BLOCKS_MINING.contains(block) || WarpDriveConfig.minerOres.contains(block)) {
+		if (WarpDriveConfig.BLOCKS_MINING.contains(block) || WarpDriveConfig.BLOCKS_ORES.contains(block)) {
 			return true;
 		}
 		// check default (explosion resistance is used to test for force fields and reinforced blocks, basically preventing mining a base or ship) 
@@ -412,7 +412,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 		z = zCoord;
 		block = worldObj.getBlock(x, currentLayer, z);
 		if (canDig(block, x, currentLayer, z)) {
-			if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+			if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 				valuablesInLayer.add(new VectorI(x, currentLayer, z));
 			}
 		}
@@ -426,7 +426,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			for (; x <= xmax; x++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
@@ -436,7 +436,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			for (; z <= zmax; z++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
@@ -446,7 +446,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			for (; x >= xmin; x--) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
@@ -456,7 +456,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			for (; z > zmin; z--) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}
@@ -466,7 +466,7 @@ public class TileEntityMiningLaser extends TileEntityAbstractInterfaced {
 			for (; x < xCoord; x++) {
 				block = worldObj.getBlock(x, currentLayer, z);
 				if (canDig(block, x, currentLayer, z)) {
-					if (isQuarry || WarpDriveConfig.minerOres.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
+					if (isQuarry || WarpDriveConfig.BLOCKS_ORES.contains(block)) {// Quarry collects all blocks or only collect valuables blocks
 						valuablesInLayer.add(new VectorI(x, currentLayer, z));
 					}
 				}

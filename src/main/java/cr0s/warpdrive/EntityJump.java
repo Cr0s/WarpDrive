@@ -615,7 +615,7 @@ public class EntityJump extends Entity {
 								Block block = worldObj.getBlock(x, y, z);
 								
 								// Skipping vanilla air & ignored blocks
-								if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
+								if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
 									continue;
 								}
 								
@@ -820,7 +820,7 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping vanilla air & ignored blocks
-					if (block == Blocks.air || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
+					if (block == Blocks.air || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
 					
@@ -831,7 +831,7 @@ public class EntityJump extends Entity {
 					}
 					
 					// Stop on non-movable blocks
-					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(block)) {
+					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
 						reason.append(block.getUnlocalizedName() + " detected onboard at " + x + ", " + y + ", " + z + ". Aborting.");
 						LocalProfiler.stop();
 						return -1;
@@ -857,12 +857,12 @@ public class EntityJump extends Entity {
 					Block block = worldObj.getBlock(x, y, z);
 					
 					// Skipping any air block & ignored blocks
-					if (worldObj.isAirBlock(x, y, z) || WarpDriveConfig.TAGGED_BLOCKS_LEFTBEHIND.contains(block)) {
+					if (worldObj.isAirBlock(x, y, z) || WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)) {
 						continue;
 					}
 					
 					// Skipping non-movable blocks
-					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(block)) {
+					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
 						continue;
 					}
 					
@@ -1070,7 +1070,7 @@ public class EntityJump extends Entity {
 					
 					blockSource = worldObj.getBlock(x, y, z);
 					blockTarget = worldObj.getBlock(newX, newY, newZ);
-					if (WarpDriveConfig.TAGGED_BLOCKS_ANCHOR.contains(blockTarget)) {
+					if (WarpDriveConfig.BLOCKS_ANCHOR.contains(blockTarget)) {
 						result.add(x, y, z,
 							newX + 0.5D - movementVector[0] * 1.0D,
 							newY + 0.5D - movementVector[1] * 1.0D,
@@ -1082,9 +1082,9 @@ public class EntityJump extends Entity {
 					}
 					
 					if ( blockSource != Blocks.air
-					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockSource)
+					  && !WarpDriveConfig.BLOCKS_EXPANDABLE.contains(blockSource)
 					  && blockTarget != Blocks.air
-					  && !WarpDriveConfig.TAGGED_BLOCKS_EXPANDABLE.contains(blockTarget)) {
+					  && !WarpDriveConfig.BLOCKS_EXPANDABLE.contains(blockTarget)) {
 						result.add(x, y, z,
 							newX + 0.5D + movementVector[0] * 0.1D,
 							newY + 0.5D + movementVector[1] * 0.1D,

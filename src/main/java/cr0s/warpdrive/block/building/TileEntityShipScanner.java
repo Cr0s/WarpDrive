@@ -152,22 +152,24 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 					setActive(false); // disable scanner
 					break;
 				}
-
+				
 				// Deploy single block
 				JumpBlock jb = blocksToDeploy[currentDeployIndex];
+				
+				if (jb != null && !WarpDriveConfig.BLOCKS_ANCHOR.contains(jb.block)) {
+					Block blockAtTarget = worldObj.getBlock(targetX + jb.x, targetY + jb.y, targetZ + jb.z);
+					if (blockAtTarget == Blocks.air || WarpDriveConfig.BLOCKS_EXPANDABLE.contains(blockAtTarget)) {
+						jb.deploy(worldObj, targetX, targetY, targetZ);
 
-				if (jb != null && !jb.block.isAssociatedBlock(Blocks.bedrock) && !WarpDriveConfig.scannerIgnoreBlocks.contains(jb.block)
-						&& worldObj.isAirBlock(targetX + jb.x, targetY + jb.y, targetZ + jb.z)) {
-					jb.deploy(worldObj, targetX, targetY, targetZ);
+						if (worldObj.rand.nextInt(100) <= 10) {
+							worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
 
-					if (worldObj.rand.nextInt(100) <= 10) {
-						worldObj.playSoundEffect(xCoord + 0.5f, yCoord, zCoord + 0.5f, "warpdrive:lowlaser", 4F, 1F);
-
-						PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D),
-								new Vector3(targetX + jb.x, targetY + jb.y, targetZ + jb.z).translate(0.5D), 0f, 1f, 0f, 15, 0, 100);
+							PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D),
+									new Vector3(targetX + jb.x, targetY + jb.y, targetZ + jb.z).translate(0.5D), 0f, 1f, 0f, 15, 0, 100);
+						}
 					}
 				}
-
+				
 				currentDeployIndex++;
 			}
 		}
@@ -254,10 +256,9 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 				for (int z = 0; z < length; z++) {
 					Block block = worldObj.getBlock(shipCore.minX + x, shipCore.minY + y, shipCore.minZ + z);
 
-					// Do not scan air, bedrock and specified forbidden blocks
-					// (like ore or Warp-Cores)
-					if (worldObj.isAirBlock(shipCore.minX + x, shipCore.minY + y, shipCore.minZ + z) || block.isAssociatedBlock(Blocks.bedrock)
-							|| WarpDriveConfig.scannerIgnoreBlocks.contains(block)) {
+					// Skip leftBehind and anchor blocks
+					if ( WarpDriveConfig.BLOCKS_LEFTBEHIND.contains(block)
+					  || WarpDriveConfig.BLOCKS_ANCHOR.contains(block)) {
 						block = Blocks.air;
 					}
 
