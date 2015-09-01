@@ -47,7 +47,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	
 	private boolean soundPlayed = false;
 	private int soundTicks = 0;
-
+	
 	public TileEntityCloakingCore() {
 		super();
 		peripheralName = "warpdriveCloakingCore";
@@ -130,7 +130,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 					} else {// enabled, cloaking and valid
 						if (hasEnoughPower) {// enabled, cloaking and able to
 							// IDLE
-							// Refresh the field FIXME: workaround to re-synchronize players
+							// Refresh the field (workaround to re-synchronize players since client may 'eat up' the packets)
 							CloakedArea area = WarpDrive.cloaks.getCloakedArea(worldObj, xCoord, yCoord, zCoord);
 							if (area != null) {
 								area.sendCloakPacketToPlayersEx(false); // recloak field
@@ -174,10 +174,14 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		int y = yCoord + distance * direction.offsetY;
 		int z = zCoord + distance * direction.offsetZ;
 		if (worldObj.getBlock(x, y, z).isAssociatedBlock(WarpDrive.blockCloakingCoil)) {
-			worldObj.setBlockMetadataWithNotify(x, y, z, ((enabled) ? 10 : 2) + direction.ordinal(), 2);
+			if (distance == innerCoilsDistance) {
+				worldObj.setBlockMetadataWithNotify(x, y, z, ((enabled) ? 9 : 1), 2);
+			} else {
+				worldObj.setBlockMetadataWithNotify(x, y, z, ((enabled) ? 10 : 2) + direction.ordinal(), 2);
+			}
 		}
 	}
-
+	
 	private void drawLasers() {
 		float r = 0.0f;
 		float g = 1.0f;
@@ -235,7 +239,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			}
 		}
 	}
-
+	
 	public void disableCloakingField() {
 		setCoilsState(false);
 		if (WarpDrive.cloaks.isAreaExists(worldObj, xCoord, yCoord, zCoord)) {
@@ -354,7 +358,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		maxZ =               zCoord + outerCoilsDistance[5] + WarpDriveConfig.CLOAKING_COIL_CAPTURE_BLOCKS;
 		return true;
 	}
-
+	
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
@@ -383,13 +387,13 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		}
 		return new Object[] { isEnabled };
 	}
-
+	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-    	String methodName = methodsArray[method];
-    	if (methodName.equals("tier")) {
+		String methodName = methodsArray[method];
+		if (methodName.equals("tier")) {
 			if (arguments.length == 1) {
 				if (toInt(arguments[0]) == 2) {
 					tier = 2;
@@ -399,13 +403,13 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			}
 			return new Integer[] { (int)tier };
 			
-    	} else if (methodName.equals("isAssemblyValid")) {
+		} else if (methodName.equals("isAssemblyValid")) {
 			return new Object[] { (boolean)validateAssembly() };
 			
-    	} else if (methodName.equals("getEnergyLevel")) {
+		} else if (methodName.equals("getEnergyLevel")) {
 			return getEnergyLevel();
 			
-    	} else if (methodName.equals("enable")) {
+		} else if (methodName.equals("enable")) {
 			if (arguments.length == 1) {
 				isEnabled = toBool(arguments[0]);
 			}
@@ -419,9 +423,9 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	public int getMaxEnergyStored() {
 		return WarpDriveConfig.CLOAKING_MAX_ENERGY_STORED;
 	}
-    
-    @Override
-    public boolean canInputEnergy(ForgeDirection from) {
-    	return true;
-    }
+	
+	@Override
+	public boolean canInputEnergy(ForgeDirection from) {
+		return true;
+	}
 }

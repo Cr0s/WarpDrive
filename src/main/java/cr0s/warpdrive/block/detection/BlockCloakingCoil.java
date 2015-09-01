@@ -21,7 +21,7 @@ public class BlockCloakingCoil extends Block {
 		this.setBlockName("warpdrive.detection.CloakingCoil");
 	}
 	
-	static final boolean oldTextures = false;
+	static final boolean oldTextures = true;
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[4];
