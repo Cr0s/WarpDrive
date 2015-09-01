@@ -98,6 +98,7 @@ public class WarpDriveConfig {
 	
 	// Logging
 	public static boolean LOGGING_JUMP = false;
+	public static boolean LOGGING_JUMPBLOCKS = false;
 	public static boolean LOGGING_ENERGY = false;
 	public static boolean LOGGING_EFFECTS = false;
 	public static boolean LOGGING_CLOAKING = false;
@@ -112,6 +113,7 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_RADAR = false;
 	public static boolean LOGGING_BREATHING = false;
 	public static boolean LOGGING_WORLDGEN = false;
+	public static boolean LOGGING_PROFILING = true;
 	
 	// Planets
 	public static Planet[] PLANETS = null;
@@ -351,7 +353,8 @@ public class WarpDriveConfig {
 				"Mixed recipes for Lem'ADEC's packs (currently requires at least AppliedEnergistics, Extracells, AtomicScience, IndustrialCraft2, GraviSuite and ThermalExpansion").getBoolean(false);
 		
 		// Logging
-		LOGGING_JUMP = config.get("logging", "enable_jump_logs", LOGGING_JUMP, "Detailled jump logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_JUMP = config.get("logging", "enable_jump_logs", LOGGING_JUMP, "Basic jump logs, should always be enabled").getBoolean(true);
+		LOGGING_JUMPBLOCKS = config.get("logging", "enable_jump_logs", LOGGING_JUMPBLOCKS, "Detailled jump logs to help debug the mod, will spam your logs...").getBoolean(false);
 		LOGGING_ENERGY = config.get("logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		if (WarpDrive.VERSION.contains("-dev")) {// disabled in production, for obvious reasons :)
 			LOGGING_EFFECTS = config.get("logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
@@ -373,6 +376,7 @@ public class WarpDriveConfig {
 		LOGGING_RADAR = config.get("logging", "enable_radar_logs", LOGGING_RADAR, "Detailled radar logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_BREATHING = config.get("logging", "enable_breathing_logs", LOGGING_BREATHING, "Detailled breathing logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		LOGGING_WORLDGEN = config.get("logging", "enable_worldgen_logs", LOGGING_WORLDGEN, "Detailled world generation logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
+		LOGGING_PROFILING = config.get("logging", "enable_profiling_logs", LOGGING_PROFILING, "Profiling logs, enable it to check for lag").getBoolean(true);
 		
 		// Planets
 		{
