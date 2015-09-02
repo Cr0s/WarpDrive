@@ -181,7 +181,7 @@ public class JumpBlock {
 					try {
 						Method getNetworkedFields = teClass.getMethod("getNetworkedFields");
 						List<String> fields = (List<String>) getNetworkedFields.invoke(tileEntity);
-						if (WarpDriveConfig.LOGGING_JUMP) {
+						if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 							WarpDrive.logger.info("Tile has " + fields.size() + " networked fields: " + fields);
 						}
 						for (String field : fields) {
@@ -189,10 +189,17 @@ public class JumpBlock {
 						}
 					} catch (NoSuchMethodException exception) {
 						// WarpDrive.logger.info("Tile has no getNetworkedFields method");
+					} catch (NoClassDefFoundError exception) {
+						if (WarpDriveConfig.LOGGING_JUMP) {
+							WarpDrive.logger.info("TileEntity " + teClass.getName() + " at " + x + ", " + y + ", " + z + " is missing a class definition");
+							if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+								exception.printStackTrace();
+							}
+						}
 					}
 				}
 			} catch (Exception exception) {
-				WarpDrive.logger.info("Exception involving TileEntity '" + teClass.getName() + "' at " + x + ", " + y + ", " + z);
+				WarpDrive.logger.info("Exception involving TileEntity " + teClass.getName() + " at " + x + ", " + y + ", " + z);
 				exception.printStackTrace();
 			}
 		}
