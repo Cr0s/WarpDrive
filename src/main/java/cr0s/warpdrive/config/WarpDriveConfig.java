@@ -354,7 +354,7 @@ public class WarpDriveConfig {
 		
 		// Logging
 		LOGGING_JUMP = config.get("logging", "enable_jump_logs", LOGGING_JUMP, "Basic jump logs, should always be enabled").getBoolean(true);
-		LOGGING_JUMPBLOCKS = config.get("logging", "enable_jump_logs", LOGGING_JUMPBLOCKS, "Detailled jump logs to help debug the mod, will spam your logs...").getBoolean(false);
+		LOGGING_JUMPBLOCKS = config.get("logging", "enable_jumpblocks_logs", LOGGING_JUMPBLOCKS, "Detailled jump logs to help debug the mod, will spam your logs...").getBoolean(false);
 		LOGGING_ENERGY = config.get("logging", "enable_energy_debugLogs", LOGGING_ENERGY, "Detailled energy logs to help debug the mod, enable it before reporting a bug").getBoolean(false);
 		if (WarpDrive.VERSION.contains("-dev")) {// disabled in production, for obvious reasons :)
 			LOGGING_EFFECTS = config.get("logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
