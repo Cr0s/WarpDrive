@@ -431,6 +431,13 @@ public class EntityJump extends Entity {
 			distance = 0; // FIXME: check collision in straight path, starting with getPossibleJumpDistance() ?
 		} else if (isHyperspaceJump) {
 			distance = 0;
+			if (!isInSpace && !isInHyperSpace) {
+				String msg = "Unable to reach hyperspace from a planet";
+				killEntity(msg);
+				messageToAllPlayersOnShip(msg);
+				LocalProfiler.stop();
+				return;
+			}
 		} else {
 			if (toSpace) {
 				// enter space at current altitude
