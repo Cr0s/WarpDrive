@@ -143,7 +143,7 @@ public class LivingHandler {
 							if (air == null) {// new player in space => grace period
 								player_airTank.put(playerName, AIR_TANK_TICKS);
 							} else if (air <= 1) {
-								if (consumeO2(player.inventory.mainInventory, player)) {
+								if (consumeCompressedAir(player.inventory.mainInventory, player)) {
 									player_airTank.put(playerName, AIR_TANK_TICKS);
 								} else {
 									player_airTank.put(playerName, AIR_DROWN_TICKS);
@@ -204,17 +204,16 @@ public class LivingHandler {
 		}
 	}
 	
-	private static boolean consumeO2(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
+	private static boolean consumeCompressedAir(ItemStack[] inventory, EntityPlayerMP entityPlayer) {
 		for (int j = 0; j < inventory.length; ++j) {
-			if (inventory[j] != null && inventory[j] == WarpDriveConfig.IC2_air) {
+			if (inventory[j] != null && inventory[j].isItemEqual(WarpDriveConfig.IC2_compressedAir)) {
 				inventory[j].stackSize--;
 				if (inventory[j].stackSize <= 0) {
 					inventory[j] = null;
 				}
 				
-				if (WarpDriveConfig.IC2_empty != null) {
-					// WarpDrive.debugPrint("giveEmptyCell");
-					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_empty.getItem(), 1, 0);
+				if (WarpDriveConfig.IC2_emptyCell != null) {
+					ItemStack emptyCell = new ItemStack(WarpDriveConfig.IC2_emptyCell.getItem(), 1, 0);
 					if (!entityPlayer.inventory.addItemStackToInventory(emptyCell)) {
 						World world = entityPlayer.worldObj;
 						EntityItem itemEnt = new EntityItem(world, entityPlayer.posX, entityPlayer.posY, entityPlayer.posZ, emptyCell);

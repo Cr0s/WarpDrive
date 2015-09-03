@@ -59,8 +59,8 @@ public class WarpDriveConfig {
 	public static Method forgeMultipart_helper_sendDescPacket = null;
 	public static Method forgeMultipart_tileMultipart_onChunkLoad = null;
 	
-	public static ItemStack IC2_air;
-	public static ItemStack IC2_empty;
+	public static ItemStack IC2_compressedAir;
+	public static ItemStack IC2_emptyCell;
 	public static Block IC2_rubberWood;
 	public static ItemStack IC2_Resin;
 	public static Block CC_Computer, CC_peripheral, CCT_Turtle, CCT_Expanded, CCT_Advanced;
@@ -590,6 +590,7 @@ public class WarpDriveConfig {
 				config.get("item_tags", "GraviSuite:advNanoChestPlate"				, "FlyInSpace NoFallDamage"			).getString();
 				config.get("item_tags", "GraviSuite:graviChestPlate"				, "FlyInSpace NoFallDamage"			).getString();
 				
+				config.get("item_tags", "IC2:itemArmorRubBoots"						, "NoFallDamage"					).getString();
 				config.get("item_tags", "IC2:itemArmorQuantumBoots"					, "NoFallDamage"					).getString();
 				taggedItemsName = categoryItemTags.getValues().keySet().toArray(new String[0]);
 			}
@@ -835,12 +836,12 @@ public class WarpDriveConfig {
 		FillerManager.loadOres(configDirectory);
 		StructureManager.loadStructures(configDirectory);
 		
-		loadBlockDictionnary();
+		loadDictionnary();
 		
 		FillerManager.finishLoading();
 	}
 	
-	private static void loadBlockDictionnary() {
+	private static void loadDictionnary() {
 		// get default settings from parsing ore dictionary
 		BLOCKS_ORES = new HashSet<Block>();
 		BLOCKS_LOGS = new HashSet<Block>();
@@ -947,7 +948,7 @@ public class WarpDriveConfig {
 		for (Entry<String, String> taggedItem : taggedItems.entrySet()) {
 			String itemId = taggedItem.getKey();
 			Item item = GameData.getItemRegistry().getObject(itemId); 
-			if (item != null) {
+			if (item == null) {
 				WarpDrive.logger.info("Ignoring missing item " + itemId);
 				continue;
 			}
@@ -1010,8 +1011,8 @@ public class WarpDriveConfig {
 	
 	private static void loadIC2() {
 		try {
-			IC2_empty = getModItemStack("IC2", "itemCellEmpty", -1);
-			IC2_air = getModItemStack("IC2", "itemCellEmpty", 5);
+			IC2_emptyCell = getModItemStack("IC2", "itemCellEmpty", -1);
+			IC2_compressedAir = getModItemStack("IC2", "itemCellEmpty", 5);
 			
 			IC2_rubberWood = getModBlock("IC2", "blockRubWood");
 			IC2_Resin = getModItemStack("IC2", "itemHarz", -1);
