@@ -55,7 +55,7 @@ public class LivingHandler {
 		
 		// Instant kill if entity exceeds world's limit
 		if (WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS > 0
-				&& (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)) {
+		  && (Math.abs(x) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS || Math.abs(z) > WarpDriveConfig.G_SPACE_WORLDBORDER_BLOCKS)) {
 			if (entity instanceof EntityPlayerMP) {
 				if (((EntityPlayerMP) entity).capabilities.isCreativeMode) {
 					return;
