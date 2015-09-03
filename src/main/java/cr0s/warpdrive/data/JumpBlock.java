@@ -89,6 +89,11 @@ public class JumpBlock {
 					}
 				}
 				
+				if (oldnbt.hasKey("hasValidBubble")) {// Galacticraft 3.0.11.333
+					oldnbt.setBoolean("hasValidBubble", false);
+					// old bubble will die naturally due to missing tile entity, new one will be spawned
+				}
+				
 				TileEntity newTileEntity = null;
 				boolean isForgeMultipart = false;
 				if (WarpDriveConfig.isForgeMultipartLoaded && oldnbt.hasKey("id") && oldnbt.getString("id") == "savedMultipart") {
