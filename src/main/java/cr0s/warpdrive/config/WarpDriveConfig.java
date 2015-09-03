@@ -141,8 +141,9 @@ public class WarpDriveConfig {
 	public static String[] SHIP_VOLUME_UNLIMITED_PLAYERNAMES = { "notch", "someone" };
 	public static boolean SHIP_WARMUP_SICKNESS = true;
 	
-	// Tagged blocks
-	private static HashMap<String, String> taggedBlocks = null;	// loaded from configuration file at PreInit, parsed at PostInit
+	// Tagged blocks and entities (loaded from configuration file at PreInit, parsed at PostInit)
+	private static HashMap<String, String> taggedBlocks = null;
+	private static HashMap<String, String> taggedEntities = null;
 	
 	// Blocks dictionary
 	public static HashSet<Block> BLOCKS_ORES;
@@ -155,6 +156,11 @@ public class WarpDriveConfig {
 	public static HashSet<Block> BLOCKS_MINING = null;
 	public static HashSet<Block> BLOCKS_NOMINING = null;
 	public static HashMap<Block, Integer> BLOCKS_PLACE = null;
+	
+	// Entities dictionary
+	public static HashSet<String> ENTITIES_ANCHOR = null;
+	public static HashSet<String> ENTITIES_NOMASS = null;
+	public static HashSet<String> ENTITIES_LEFTBEHIND = null;
 	
 	// Radar
 	public static int RADAR_MAX_ENERGY_STORED = 100000000; // 100kk eU
@@ -459,7 +465,7 @@ public class WarpDriveConfig {
 		SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS = clamp(0, 300,
 				config.get("ship", "controller_update_interval", SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS, "(measured in seconds)").getInt());
 		
-		// Blocks dictionary
+		// Block dictionary
 		{
 			config.addCustomCategoryComment("block_tags",
 					  "Use this section to enable special behavior on blocks using tags.\n"
@@ -521,6 +527,32 @@ public class WarpDriveConfig {
 			for (String name : taggedBlocksName) {
 				String tags = config.get("block_tags", name, "").getString();
 				taggedBlocks.put(name, tags);
+			}
+		}
+		
+		// Entity dictionary
+		{
+			config.addCustomCategoryComment("entity_tags",
+					  "Use this section to enable special behavior on entities using tags.\n"
+					+ "Most entities are already supported automatically. Only modify this section when something doesn't work!\n"
+					+ "\n"
+					+ "Tags shall be separated by at least one space, comma or tabulation.\n"
+					+ "Invalid tags will be ignored silently. Tags and block names are case sensitive.\n"
+					+ "In case of conflicts, the latest tag overwrite the previous ones.\n"
+					+ "- Anchor: ship can't move with this entity aboard (default: none).\n"
+					+ "- NoMass: this entity doesn't count when calculating ship volume/mass (default: Galacticraft air bubble).\n"
+					+ "- LeftBehind: this entity won't move with your ship (default: Galacticraft air bubble).");
+			
+			ConfigCategory categoryEntityTags = config.getCategory("entity_tags");
+			String[] taggedEntitiesName = categoryEntityTags.getValues().keySet().toArray(new String[0]);
+			if (taggedEntitiesName.length == 0) {
+				config.get("entity_tags", "GalacticraftCore.OxygenBubble"				, "NoMass LeftBehind"					).getString();
+				taggedEntitiesName = categoryEntityTags.getValues().keySet().toArray(new String[0]);
+			}
+			taggedEntities = new HashMap(taggedEntitiesName.length);
+			for (String name : taggedEntitiesName) {
+				String tags = config.get("entity_tags", name, "").getString();
+				taggedEntities.put(name, tags);
 			}
 		}
 		
@@ -842,7 +874,7 @@ public class WarpDriveConfig {
 		WarpDrive.logger.info("Active blocks dictionnary:");
 		WarpDrive.logger.info("- " + BLOCKS_ORES.size() + " ores: " + getHashMessage(BLOCKS_ORES));
 		WarpDrive.logger.info("- " + BLOCKS_LOGS.size() + " logs: " + getHashMessage(BLOCKS_LOGS));
-		WarpDrive.logger.info("- " + BLOCKS_LEAVES.size() + " laves: " + getHashMessage(BLOCKS_LEAVES));
+		WarpDrive.logger.info("- " + BLOCKS_LEAVES.size() + " leaves: " + getHashMessage(BLOCKS_LEAVES));
 		WarpDrive.logger.info("- " + BLOCKS_ANCHOR.size() + " anchors: " + getHashMessage(BLOCKS_ANCHOR));
 		WarpDrive.logger.info("- " + BLOCKS_NOMASS.size() + " with NoMass tag: " + getHashMessage(BLOCKS_NOMASS));
 		WarpDrive.logger.info("- " + BLOCKS_LEFTBEHIND.size() + " with LeftBehind tag: " + getHashMessage(BLOCKS_LEFTBEHIND));
@@ -850,15 +882,47 @@ public class WarpDriveConfig {
 		WarpDrive.logger.info("- " + BLOCKS_MINING.size() + " with Mining tag: " + getHashMessage(BLOCKS_MINING));
 		WarpDrive.logger.info("- " + BLOCKS_NOMINING.size() + " with NoMining tag: " + getHashMessage(BLOCKS_NOMINING));
 		WarpDrive.logger.info("- " + BLOCKS_PLACE.size() + " with Placement priority: " + getHashMessage(BLOCKS_PLACE));
+		
+		// translate tagged entities
+		ENTITIES_ANCHOR = new HashSet(taggedEntities.size());
+		ENTITIES_NOMASS = new HashSet(taggedEntities.size());
+		ENTITIES_LEFTBEHIND = new HashSet(taggedEntities.size());
+		for (Entry<String, String> taggedEntity : taggedEntities.entrySet()) {
+			String entityId = taggedEntity.getKey();
+			/* we can't detect missing entities, since some of them are 'hacked' in
+			if (!EntityList.stringToIDMapping.containsKey(entityId)) {
+				WarpDrive.logger.info("Ignoring missing entity " + entityId);
+				continue;
+			}
+			/**/
+			for (String tag : taggedEntity.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
+				switch (tag) {
+				case "Anchor"       : ENTITIES_ANCHOR.add(entityId); break;
+				case "NoMass"       : ENTITIES_NOMASS.add(entityId); break;
+				case "LeftBehind"   : ENTITIES_LEFTBEHIND.add(entityId); break;
+				}
+			}
+		}
+		WarpDrive.logger.info("Active entities dictionnary:");
+		WarpDrive.logger.info("- " + ENTITIES_ANCHOR.size() + " anchors: " + getHashMessage(ENTITIES_ANCHOR));
+		WarpDrive.logger.info("- " + ENTITIES_NOMASS.size() + " with NoMass tag: " + getHashMessage(ENTITIES_NOMASS));
+		WarpDrive.logger.info("- " + ENTITIES_LEFTBEHIND.size() + " with LeftBehind tag: " + getHashMessage(ENTITIES_LEFTBEHIND));
 	}
 	
-	private static String getHashMessage(HashSet<Block> hashSet) {
+	private static String getHashMessage(HashSet hashSet) {
 		String message = "";
-		for (Block block : hashSet) {
+		for (Object object : hashSet) {
 			if (!message.isEmpty()) {
 				message += ", ";
 			}
-			message += GameRegistry.findUniqueIdentifierFor(block);
+			if (object instanceof Block) {
+				message += GameRegistry.findUniqueIdentifierFor((Block)object);
+			} else if (object instanceof String) {
+				message += (String)object;
+			} else {
+				message += object;
+			}
+			
 		}
 		return message;
 	}

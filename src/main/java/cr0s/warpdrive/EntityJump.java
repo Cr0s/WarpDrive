@@ -9,6 +9,7 @@ import java.util.TreeSet;
 
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -477,10 +478,10 @@ public class EntityJump extends Entity {
 				doCollisionDamage(false);
 				
 				// cancel jump
-				LocalProfiler.stop();
 				String msg = "Not enough space for jump!";
-				messageToAllPlayersOnShip(msg);
 				killEntity(msg);
+				messageToAllPlayersOnShip(msg);
+				LocalProfiler.stop();
 				return;
 			}
 		}
@@ -493,9 +494,17 @@ public class EntityJump extends Entity {
 			return;
 		}
 		
-		saveEntities();
-		if (WarpDriveConfig.LOGGING_JUMP) {
-			WarpDrive.logger.info(this + " Saved " + entitiesOnShip.size() + " entities from ship");
+		{
+			String msg = saveEntities();
+			if (msg != null) {
+				killEntity(msg);
+				messageToAllPlayersOnShip(msg);
+				LocalProfiler.stop();
+				return;
+			}
+			if (WarpDriveConfig.LOGGING_JUMP) {
+				WarpDrive.logger.info(this + " Saved " + entitiesOnShip.size() + " entities from ship");
+			}
 		}
 		
 		if (isHyperspaceJump && isInSpace) {
@@ -903,22 +912,40 @@ public class EntityJump extends Entity {
 		}
 	}
 	
-	private void saveEntities() {
+	private String saveEntities() {
+		String result = null;
 		entitiesOnShip = new ArrayList<MovingEntity>();
 		
 		AxisAlignedBB axisalignedbb = AxisAlignedBB.getBoundingBox(minX, minY, minZ, maxX + 0.99D, maxY + 0.99D, maxZ + 0.99D);
 		
-		List list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
+		List<Entity> list = worldObj.getEntitiesWithinAABBExcludingEntity(null, axisalignedbb);
 		
-		for (Object object : list) {
-			if (object == null || !(object instanceof Entity) || (object instanceof EntityJump)) {
+		for (Entity entity : list) {
+			if (entity == null || (entity instanceof EntityJump)) {
 				continue;
 			}
 			
-			Entity entity = (Entity) object;
+			String id = EntityList.getEntityString(entity);
+			if (WarpDriveConfig.ENTITIES_ANCHOR.contains(id)) {
+				result = "Anchor entity " + id + " detected at " + Math.floor(entity.posX) + ", " + Math.floor(entity.posY) + ", " + Math.floor(entity.posZ) + ", aborting jump...";
+				// we need to continue so players are added so they can see the message...
+				continue;
+			}
+			if (WarpDriveConfig.ENTITIES_LEFTBEHIND.contains(id)) {
+				if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+					WarpDrive.logger.info("Leaving entity " + id + " behind: " + entity);
+				}
+				continue;
+			}
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+				if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+					WarpDrive.logger.info("Adding entity " + id + ": " + entity);
+				}
+			} 
 			MovingEntity movingEntity = new MovingEntity(entity);
 			entitiesOnShip.add(movingEntity);
 		}
+		return result;
 	}
 	
 	private boolean moveEntities(boolean restorePositions) {
