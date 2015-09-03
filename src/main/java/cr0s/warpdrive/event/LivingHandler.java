@@ -138,10 +138,9 @@ public class LivingHandler {
 									player_airTank.put(playerName, air - 1);
 								}
 							}
-						} else if (WarpDriveConfig.spaceHelmets.contains(helmetStack)) {
+						} else if (WarpDriveConfig.ITEMS_BREATHINGIC2.contains(helmet)) {
 							hasHelmet = true;
-							if (air == null) {// new player in space => grace
-								// period
+							if (air == null) {// new player in space => grace period
 								player_airTank.put(playerName, AIR_TANK_TICKS);
 							} else if (air <= 1) {
 								if (consumeO2(player.inventory.mainInventory, player)) {
@@ -238,9 +237,13 @@ public class LivingHandler {
 			int check = MathHelper.ceiling_float_int(distance - 3.0F);
 			
 			if (check > 0) {
-				if ( (player.getCurrentArmor(0) != null && player.getCurrentArmor(0) == WarpDriveConfig.getModItemStack("IC2", "itemArmorQuantumBoots", -1)) // FIXME cache the value
-				  || (player.getCurrentArmor(2) != null && WarpDriveConfig.jetpacks.contains(player.getCurrentArmor(2)))) {
-					event.setCanceled(true); // Don't damage player
+				for (int i = 0; i < 4; i++) {
+					ItemStack armor = player.getCurrentArmor(i);
+					if (armor != null) {
+						if (WarpDriveConfig.ITEMS_NOFALLDAMAGE.contains(armor.getItem())) {
+							event.setCanceled(true); // Don't damage player
+						}
+					}
 				}
 			}
 		}

@@ -16,6 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.filler.FillerManager;
@@ -48,7 +49,6 @@ public class WarpDriveConfig {
 	public static boolean isAdvancedSolarPanelLoaded = false;
 	public static boolean isAppliedEnergistics2Loaded = false;
 	public static boolean isICBMLoaded = false;
-	public static boolean isGraviSuiteLoaded = false;
 	public static boolean isIndustrialCraft2loaded = false;
 	public static boolean isComputerCraftLoaded = false;
 	public static boolean isOpenComputersLoaded = false;
@@ -68,8 +68,6 @@ public class WarpDriveConfig {
 	public static ItemStack GT_Ores, GT_Granite, GT_Machine;
 	public static int AS_Turbine, AS_deuteriumCell;
 	public static int ICBM_Machine, ICBM_Missile, ICBM_Explosive;
-	
-	public static ArrayList<Item> spaceHelmets, jetpacks;
 	
 	// Mod configuration (see loadWarpDriveConfig() for comments/definitions)
 	// General
@@ -144,6 +142,7 @@ public class WarpDriveConfig {
 	// Tagged blocks and entities (loaded from configuration file at PreInit, parsed at PostInit)
 	private static HashMap<String, String> taggedBlocks = null;
 	private static HashMap<String, String> taggedEntities = null;
+	private static HashMap<String, String> taggedItems = null;
 	
 	// Blocks dictionary
 	public static HashSet<Block> BLOCKS_ORES;
@@ -161,6 +160,11 @@ public class WarpDriveConfig {
 	public static HashSet<String> ENTITIES_ANCHOR = null;
 	public static HashSet<String> ENTITIES_NOMASS = null;
 	public static HashSet<String> ENTITIES_LEFTBEHIND = null;
+	
+	// Items dictionary
+	public static HashSet<Item> ITEMS_FLYINSPACE = null;
+	public static HashSet<Item> ITEMS_NOFALLDAMAGE = null;
+	public static HashSet<Item> ITEMS_BREATHINGIC2 = null;
 	
 	// Radar
 	public static int RADAR_MAX_ENERGY_STORED = 100000000; // 100kk eU
@@ -556,6 +560,46 @@ public class WarpDriveConfig {
 			}
 		}
 		
+		// Item dictionary
+		{
+			config.addCustomCategoryComment("item_tags",
+					  "Use this section to enable special behavior on items using tags.\n"
+					+ "Most items are already supported automatically. Only modify this section when something doesn't work!\n"
+					+ "\n"
+					+ "Tags shall be separated by at least one space, comma or tabulation.\n"
+					+ "Invalid tags will be ignored silently. Tags and block names are case sensitive.\n"
+					+ "In case of conflicts, the latest tag overwrite the previous ones.\n"
+					+ "- FlyInSpace: player can move without gravity effect while wearing this item (default: jetpacks).\n"
+					+ "- NoFallDamage: player doesn't take fall damage while wearing this armor item (default: IC2 rubber boots).\n"
+					+ "- BreathingIC2: player can breath IC2 compressed air while wearing this armor item (default: IC2 nano helmet and Cie).\n");
+			
+			ConfigCategory categoryItemTags = config.getCategory("item_tags");
+			String[] taggedItemsName = categoryItemTags.getValues().keySet().toArray(new String[0]);
+			if (taggedItemsName.length == 0) {
+				config.get("item_tags", "IC2:itemArmorHazmatHelmet"					, "BreathingIC2"					).getString();
+				config.get("item_tags", "IC2:itemSolarHelmet"						, "BreathingIC2"					).getString();
+				config.get("item_tags", "IC2:itemArmorNanoHelmet"					, "BreathingIC2"					).getString();
+				config.get("item_tags", "IC2:itemArmorQuantumHelmet"				, "BreathingIC2"					).getString();
+				config.get("item_tags", "AdvancedSolarPanel:advanced_solar_helmet"	, "BreathingIC2"					).getString();
+				config.get("item_tags", "AdvancedSolarPanel:hybrid_solar_helmet"	, "BreathingIC2"					).getString();
+				config.get("item_tags", "AdvancedSolarPanel:ultimate_solar_helmet"	, "BreathingIC2"					).getString();
+				
+				config.get("item_tags", "IC2:itemArmorJetpack"						, "FlyInSpace NoFallDamage"			).getString();
+				config.get("item_tags", "IC2:itemArmorJetpackElectric"				, "FlyInSpace NoFallDamage"			).getString();
+				config.get("item_tags", "GraviSuite:advJetpack"						, "FlyInSpace NoFallDamage"			).getString();
+				config.get("item_tags", "GraviSuite:advNanoChestPlate"				, "FlyInSpace NoFallDamage"			).getString();
+				config.get("item_tags", "GraviSuite:graviChestPlate"				, "FlyInSpace NoFallDamage"			).getString();
+				
+				config.get("item_tags", "IC2:itemArmorQuantumBoots"					, "NoFallDamage"					).getString();
+				taggedItemsName = categoryItemTags.getValues().keySet().toArray(new String[0]);
+			}
+			taggedItems = new HashMap(taggedItemsName.length);
+			for (String name : taggedItemsName) {
+				String tags = config.get("item_tags", name, "").getString();
+				taggedItems.put(name, tags);
+			}
+		}
+		
 		// Radar
 		RADAR_MAX_ENERGY_STORED = clamp(0, Integer.MAX_VALUE,
 				config.get("radar", "max_energy_stored", RADAR_MAX_ENERGY_STORED).getInt());
@@ -753,9 +797,6 @@ public class WarpDriveConfig {
 	}
 	
 	public static void onFMLInitialization() {
-		spaceHelmets = new ArrayList<Item>();
-		jetpacks = new ArrayList<Item>();
-		
 		isForgeMultipartLoaded = Loader.isModLoaded("ForgeMultipart");
 		if (isForgeMultipartLoaded) {
 			loadForgeMultipart();
@@ -772,15 +813,6 @@ public class WarpDriveConfig {
 		}
 		
 		isAdvancedSolarPanelLoaded = Loader.isModLoaded("AdvancedSolarPanel");
-		if (isAdvancedSolarPanelLoaded) {
-			loadASP();
-		}
-		
-		isGraviSuiteLoaded = Loader.isModLoaded("GraviSuite");
-		if (isGraviSuiteLoaded) {
-			loadGraviSuite();
-		}
-		
 		isThermalExpansionLoaded = Loader.isModLoaded("ThermalExpansion");
 		isAppliedEnergistics2Loaded = Loader.isModLoaded("appliedenergistics2");
 		isOpenComputersLoaded = Loader.isModLoaded("OpenComputers");
@@ -907,6 +939,30 @@ public class WarpDriveConfig {
 		WarpDrive.logger.info("- " + ENTITIES_ANCHOR.size() + " anchors: " + getHashMessage(ENTITIES_ANCHOR));
 		WarpDrive.logger.info("- " + ENTITIES_NOMASS.size() + " with NoMass tag: " + getHashMessage(ENTITIES_NOMASS));
 		WarpDrive.logger.info("- " + ENTITIES_LEFTBEHIND.size() + " with LeftBehind tag: " + getHashMessage(ENTITIES_LEFTBEHIND));
+		
+		// translate tagged items
+		ITEMS_FLYINSPACE = new HashSet(taggedItems.size());
+		ITEMS_NOFALLDAMAGE = new HashSet(taggedItems.size());
+		ITEMS_BREATHINGIC2 = new HashSet(taggedItems.size());
+		for (Entry<String, String> taggedItem : taggedItems.entrySet()) {
+			String itemId = taggedItem.getKey();
+			Item item = GameData.getItemRegistry().getObject(itemId); 
+			if (item != null) {
+				WarpDrive.logger.info("Ignoring missing item " + itemId);
+				continue;
+			}
+			for (String tag : taggedItem.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
+				switch (tag) {
+				case "FlyInSpace"     : ITEMS_FLYINSPACE.add(item); break;
+				case "NoFallDamage"   : ITEMS_NOFALLDAMAGE.add(item); break;
+				case "BreathingIC2"   : ITEMS_BREATHINGIC2.add(item); break;
+				}
+			}
+		}
+		WarpDrive.logger.info("Active items dictionnary:");
+		WarpDrive.logger.info("- " + ITEMS_FLYINSPACE.size() + " allowing fly in space: " + getHashMessage(ITEMS_FLYINSPACE));
+		WarpDrive.logger.info("- " + ITEMS_NOFALLDAMAGE.size() + " absorbing fall damages: " + getHashMessage(ITEMS_NOFALLDAMAGE));
+		WarpDrive.logger.info("- " + ITEMS_BREATHINGIC2.size() + " allowing breathing compressed air: " + getHashMessage(ITEMS_BREATHINGIC2));
 	}
 	
 	private static String getHashMessage(HashSet hashSet) {
@@ -954,14 +1010,6 @@ public class WarpDriveConfig {
 	
 	private static void loadIC2() {
 		try {
-			spaceHelmets.add(getModItemStack("IC2", "itemArmorHazmatHelmet", -1).getItem());
-			spaceHelmets.add(getModItemStack("IC2", "itemSolarHelmet", -1).getItem());
-			spaceHelmets.add(getModItemStack("IC2", "itemArmorNanoHelmet", -1).getItem());
-			spaceHelmets.add(getModItemStack("IC2", "itemArmorQuantumHelmet", -1).getItem());
-			
-			jetpacks.add(getModItemStack("IC2", "itemArmorJetpack", -1).getItem());
-			jetpacks.add(getModItemStack("IC2", "itemArmorJetpackElectric", -1).getItem());
-			
 			IC2_empty = getModItemStack("IC2", "itemCellEmpty", -1);
 			IC2_air = getModItemStack("IC2", "itemCellEmpty", 5);
 			
@@ -983,30 +1031,6 @@ public class WarpDriveConfig {
 		} catch (Exception exception) {
 			WarpDrive.logger.error("Error loading ComputerCraft classes");
 			exception.printStackTrace();
-		}
-	}
-	
-	private static void loadASP() {
-		try {
-			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:advanced_solar_helmet"));
-			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:hybrid_solar_helmet"));
-			spaceHelmets.add((Item) Item.itemRegistry.getObject("AdvancedSolarPanel:ultimate_solar_helmet"));
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading ASP classes");
-			exception.printStackTrace();
-			isAdvancedSolarPanelLoaded = false;
-		}
-	}
-	
-	private static void loadGraviSuite() {
-		try {
-			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:advJetpack"));
-			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:advNanoChestPlate"));
-			jetpacks.add((Item) Item.itemRegistry.getObject("GraviSuite:graviChestPlate"));
-		} catch (Exception exception) {
-			WarpDrive.logger.error("Error loading GS classes");
-			exception.printStackTrace();
-			isGraviSuiteLoaded = false;
 		}
 	}
 	
