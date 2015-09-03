@@ -62,6 +62,9 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 		} else if (transformedName.equals("com.creativemd.itemphysic.physics.ServerPhysic")) {
 			bytes = transformItemPhysicEntityItem(bytes);
 			
+		} else if (transformedName.equals("micdoodle8.mods.galacticraft.core.util.WorldUtil")) {
+			bytes = transformGalacticraftWorldUtil(bytes);
+			
 		} else if (transformedName.equals("net.minecraft.client.multiplayer.WorldClient")) {
 			bytes = transformMinecraftWorldClient(bytes);
 			
@@ -106,7 +109,7 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 									Opcodes.INVOKESTATIC,
 									GRAVITY_MANAGER_CLASS,
 									"getGravityForEntity",
-									"(L" + "net/minecraft/entity/EntityLivingBase" + ";)D",
+									"(Lnet/minecraft/entity/Entity;)D",
 									false);
 							methodnode.instructions.insertBefore(nodeAt, beforeNode);
 							methodnode.instructions.set(nodeAt, overwriteNode);
@@ -259,6 +262,113 @@ public class ClassTransformer implements net.minecraft.launchwrapper.IClassTrans
 							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
 							injectedCount++;
 						}
+					}
+					
+					instructionIndex++;
+				}
+			}
+		} while (true);
+		
+		if (injectedCount != operationCount) {
+			FMLLoadingPlugin.logger.info("Injection failed for " + classNode.name + " (" + injectedCount + " / " + operationCount + "), aborting...");
+		} else {
+			ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS); // | ClassWriter.COMPUTE_FRAMES);
+			classNode.accept(writer);
+			bytes = writer.toByteArray();
+			FMLLoadingPlugin.logger.info("Successful injection in " + classNode.name);
+		}
+		return bytes;
+	}
+	
+	private byte[] transformGalacticraftWorldUtil(byte[] bytes) {
+		ClassNode classNode = new ClassNode();
+		ClassReader classReader = new ClassReader(bytes);
+		classReader.accept(classNode, 0);
+		int operationCount = 3 + 2 + 0;
+		int injectedCount = 0;
+		Iterator methods = classNode.methods.iterator();
+		
+		do {
+			if (!methods.hasNext()) {
+				break;
+			}
+			
+			MethodNode methodnode = (MethodNode) methods.next();
+			// if (debugLog) { FMLLoadingPlugin.logger.info("- Method " + methodnode.name + " " + methodnode.desc); }
+
+			// Entities gravity
+			if ( (methodnode.name.equals("getGravityForEntity"))
+			  && methodnode.desc.equals("(Lnet/minecraft/entity/Entity;)D") ) {
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
+				
+				int instructionIndex = 0;
+				
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
+					
+					if (abstractNode instanceof LdcInsnNode) {
+						LdcInsnNode nodeAt = (LdcInsnNode) abstractNode;
+						
+						if (nodeAt.cst.equals(Double.valueOf(0.08D))) {
+							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getGravityForEntity",
+									"(Lnet/minecraft/entity/Entity;)D",
+									false);
+							methodnode.instructions.insertBefore(nodeAt, beforeNode);
+							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							injectedCount++;
+						}
+					}
+					
+					instructionIndex++;
+				}
+			}
+			
+			// Items gravity
+			if ( (methodnode.name.equals("getItemGravity"))
+			  && methodnode.desc.equals("(Lnet/minecraft/entity/item/EntityItem;)D") ) {
+				if (debugLog) { FMLLoadingPlugin.logger.info("Method found!"); }
+				
+				int instructionIndex = 0;
+				
+				while (instructionIndex < methodnode.instructions.size()) {
+					AbstractInsnNode abstractNode = methodnode.instructions.get(instructionIndex);
+					
+					if (abstractNode instanceof LdcInsnNode) {
+						LdcInsnNode nodeAt = (LdcInsnNode) abstractNode;
+						
+						if (nodeAt.cst.equals(Double.valueOf(0.03999999910593033D))) {
+							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getItemGravity",
+									"(L" + "net/minecraft/entity/item/EntityItem" + ";)D",
+									false);
+							methodnode.instructions.insertBefore(nodeAt, beforeNode);
+							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							injectedCount++;
+						}
+						/*
+						if (nodeAt.cst.equals(Double.valueOf(0.98D))) {
+							VarInsnNode beforeNode = new VarInsnNode(Opcodes.ALOAD, 0);
+							MethodInsnNode overwriteNode = new MethodInsnNode(
+									Opcodes.INVOKESTATIC,
+									GRAVITY_MANAGER_CLASS,
+									"getItemGravity2",
+									"(L" + "net/minecraft/entity/item/EntityItem" + ";)D",
+									false);
+							methodnode.instructions.insertBefore(nodeAt, beforeNode);
+							methodnode.instructions.set(nodeAt, overwriteNode);
+							if (debugLog) { FMLLoadingPlugin.logger.info("Injecting into " + classNode.name + "." + methodnode.name + " " + methodnode.desc); }
+							injectedCount++;
+						}
+						/**/
 					}
 					
 					instructionIndex++;
