@@ -113,8 +113,7 @@ import cr0s.warpdrive.world.SpaceWorldProvider;
 import cr0s.warpdrive.world.SpaceWorldGenerator;
 
 @Mod(modid = WarpDrive.MODID, name = "WarpDrive", version = WarpDrive.VERSION, dependencies = "after:IC2API;" + " after:CoFHCore;" + " after:ComputerCraft;"
-		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " after:AppliedEnergistics;" + " after:AdvancedSolarPanel;"
-		+ " after:AtomicScience;" + " after:ICBM|Explosion;" + " after:MFFS;" + " after:GraviSuite;" + " after:UndergroundBiomes;" + " after:NetherOres")
+		+ " after:OpenComputer;" + " after:CCTurtle;" + " after:gregtech_addon;" + " after:AppliedEnergistics;")
 /**
  * @author Cr0s
  */
