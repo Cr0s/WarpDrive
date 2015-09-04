@@ -37,7 +37,7 @@ public abstract class TileEntityAbstractBase extends TileEntity
 		return Math.min(max, Math.max(value, min));
 	}
 	
-	protected static double clamp(double a, double min, double max) {
-		return Math.min(max, Math.max(a, min));
+	protected static double clamp(final double min, final double max, final double value) {
+		return Math.min(max, Math.max(value, min));
 	}
 }

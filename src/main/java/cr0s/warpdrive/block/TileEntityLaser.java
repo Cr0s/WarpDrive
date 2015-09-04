@@ -1,6 +1,9 @@
 package cr0s.warpdrive.block;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
@@ -150,39 +153,39 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		return energyCollected;
 	}
 	
-	// TODO refactor me
-	private void emitBeam(int parEnergy) {
-		int energy = parEnergy; // FIXME Beam power calculations
-		int beamLengthBlocks = energy / WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK;
+	private void emitBeam(int beamEnergy) {
+		int energy = beamEnergy; // FIXME Beam power calculations
+		int beamLengthBlocks = clamp(0, WarpDriveConfig.LASER_CANNON_RANGE_MAX,
+				energy / WarpDriveConfig.LASER_CANNON_RANGE_ENERGY_PER_BLOCK);
 		
 		if (energy == 0 || beamLengthBlocks < 1 || beamFrequency > 65000 || beamFrequency <= 0) {
+			if (WarpDriveConfig.LOGGING_WEAPON) {
+				WarpDrive.logger.info(this + " Beam canceled (energy " + energy + " over " + beamLengthBlocks + " blocks, beamFrequency " + beamFrequency + ")");
+			}
 			return;
 		}
 		
-		Vector3 beamVector = new Vector3(this).translate(0.5D);
-		if (WarpDriveConfig.LOGGING_WEAPON) {
-			WarpDrive.logger.info(this + " Energy " + energy + " over " + beamLengthBlocks + " blocks, Initial beam " + beamVector);
-		}
 		float yawz = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
 		float yawx = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
 		float pitchhorizontal = -MathHelper.cos(-pitch * 0.017453292F);
 		float pitchvertical = MathHelper.sin(-pitch * 0.017453292F);
 		float directionx = yawx * pitchhorizontal;
 		float directionz = yawz * pitchhorizontal;
-		Vector3 lookVector = new Vector3(directionx, pitchvertical, directionz);
-		Vector3.translate(beamVector, lookVector);
-		Vector3 reachPoint = Vector3.translate(beamVector.clone(), Vector3.scale(lookVector.clone(), beamLengthBlocks));
+		Vector3 vDirection = new Vector3(directionx, pitchvertical, directionz);
+		Vector3 vSource = new Vector3(this).translate(0.5D).translate(vDirection);
+		Vector3 vReachPoint = Vector3.translate(vSource.clone(), Vector3.scale(vDirection.clone(), beamLengthBlocks));
 		if (WarpDriveConfig.LOGGING_WEAPON) {
-			WarpDrive.logger.info(this + " Beam " + beamVector + " Look " + lookVector + " Reach " + reachPoint + " TranslatedBeam " + beamVector);
+			WarpDrive.logger.info(this + " Energy " + energy + " over " + beamLengthBlocks + " blocks"
+					+ ", Orientation " + yaw + " " + pitch
+					+ ", Direction " + vDirection
+					+ ", From " + vSource + " to " + vReachPoint);
 		}
-		Vector3 endPoint = reachPoint.clone();
-		playSoundCorrespondsEnergy(energy);
-		int distanceTravelled = 0; // distance traveled from beam sender to
-		// previous hit if there were any
 		
-		// This is scanning beam, do not deal damage to blocks
+		playSoundCorrespondsEnergy(energy);
+		
+		// This is a scanning beam, do not deal damage to block nor entity
 		if (beamFrequency == BEAM_FREQUENCY_SCANNING) {
-			firstHit_position = worldObj.rayTraceBlocks(beamVector.toVec3(), reachPoint.toVec3());
+			firstHit_position = worldObj.rayTraceBlocks(vSource.toVec3(), vReachPoint.toVec3());
 			
 			if (firstHit_position != null) {
 				firstHit_block = worldObj.getBlock(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
@@ -191,166 +194,184 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 				if (firstHit_block != null) {
 					firstHit_blockResistance = firstHit_block.getExplosionResistance(null); // TODO: what entity should be used?
 				}
-				PacketHandler.sendBeamPacket(worldObj, beamVector, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
+				PacketHandler.sendBeamPacket(worldObj, vSource, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
 			} else {
 				firstHit_block = null;
 				firstHit_blockMeta = 0;
 				firstHit_blockResistance = -2;
-				PacketHandler.sendBeamPacket(worldObj, beamVector, reachPoint, r, g, b, 50, energy, 200);
+				PacketHandler.sendBeamPacket(worldObj, vSource, vReachPoint, r, g, b, 50, energy, 200);
 			}
 			
 			return;
 		}
 		
+		// get colliding entities
+		TreeMap<Double, MovingObjectPosition> entityHits = raytraceEntities(vSource.clone(), vDirection.clone(), true, beamLengthBlocks);
+		
+		if (WarpDriveConfig.LOGGING_WEAPON) {
+			WarpDrive.logger.info("Entity hits are " + entityHits);
+		}
+		
+		Vector3 vHitPoint = vReachPoint.clone();
+		double distanceTravelled = 0.0D; // distance traveled from beam sender to previous hit if there were any
 		for (int passedBlocks = 0; passedBlocks < beamLengthBlocks; passedBlocks++) {
 			// Get next block hit
-			MovingObjectPosition hit = worldObj.rayTraceBlocks(beamVector.toVec3(), reachPoint.toVec3());
-			// FIXME entity ray-tracing
-			MovingObjectPosition entityHit = raytraceEntities(beamVector.clone(), lookVector.clone(), true, beamLengthBlocks);
-			
-			if (WarpDriveConfig.LOGGING_WEAPON) {
-				WarpDrive.logger.info("Entity hit is " + entityHit);
+			MovingObjectPosition blockHit = worldObj.rayTraceBlocks(vSource.toVec3(), vReachPoint.toVec3());
+			double blockHitDistance = beamLengthBlocks + 0.1D;
+			if (blockHit != null) {
+				blockHitDistance = blockHit.hitVec.distanceTo(vSource.toVec3());
 			}
 			
-			if (entityHit != null && entityHit.entityHit instanceof EntityLivingBase) {
-				EntityLivingBase entity = (EntityLivingBase) entityHit.entityHit;
-				double distanceToEntity = entityHit.hitVec.distanceTo(beamVector.clone().toVec3());
-				
-				if (hit == null || (hit != null && hit.hitVec.distanceTo(beamVector.clone().toVec3()) > distanceToEntity)) {
-					if (distanceToEntity <= beamLengthBlocks) {
-						entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
-						entity.attackEntityFrom(DamageSource.inFire, energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
-						
-						if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
-							float strength = Math.max(0.0F, Math.min(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
-									  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH
-									+ (energy / (float)WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH))); 
-							worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
-						}
-						
-						// consume energy
-						energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE + (10 * distanceToEntity);
-						endPoint = new Vector3(entityHit.hitVec);
-						break;
-					}
-				}
-			}
-			
-			// Laser is missed
-			if (hit == null && entityHit == null) {
-				endPoint = reachPoint;
-				break;
-			} else if (hit != null) {
-				// We got a hit block
-				int distance = (int) new Vector3(hit.hitVec).distanceTo(beamVector);
-				
-				// Laser gone too far
-				if (distance >= beamLengthBlocks) {
-					endPoint = reachPoint;
+			// Apply effect to entities
+			for (Entry<Double, MovingObjectPosition> entityHitEntry : entityHits.entrySet()) {
+				double entityHitDistance = entityHitEntry.getKey();
+				// ignore entities behind walls
+				if (entityHitDistance >= blockHitDistance) {
 					break;
 				}
 				
-				Block block = worldObj.getBlock(hit.blockX, hit.blockY, hit.blockZ);
-				// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
-				float resistance = block.getExplosionResistance(null);
-				// TODO: choose entity
-				
-				if (block.isAssociatedBlock(Blocks.bedrock)) {
-					endPoint = new Vector3(hit.hitVec);
-					break;
-				}
-				
-				// Hit is a laser head
-				if (block.isAssociatedBlock(WarpDrive.blockLaser) || block.isAssociatedBlock(WarpDrive.blockLaserCamera)) {
-					// Compare frequencies
-					TileEntityLaser tel = (TileEntityLaser) worldObj.getTileEntity(hit.blockX, hit.blockY, hit.blockZ);
+				// only hits entities with health
+				MovingObjectPosition mopEntity = entityHitEntry.getValue();
+				if (mopEntity != null && mopEntity.entityHit instanceof EntityLivingBase) {
+					EntityLivingBase entity = (EntityLivingBase) mopEntity.entityHit;
 					
-					if (tel != null && tel.getBeamFrequency() == beamFrequency) {
-						tel.addBeamEnergy(energy);
-						endPoint = new Vector3(hit.hitVec);
+					// Consume energy
+					energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY
+							+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
+					distanceTravelled = blockHitDistance;
+					vHitPoint = new Vector3(mopEntity.hitVec);
+					if (energy <= 0) {
 						break;
 					}
+					
+					// apply effects
+					entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
+					float damage = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_MAX_DAMAGE,
+							WarpDriveConfig.LASER_CANNON_ENTITY_HIT_BASE_DAMAGE + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
+					entity.attackEntityFrom(DamageSource.inFire, damage);
+					
+					if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
+						float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
+							  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
+						worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
+					}
+					
+					// remove entity from hit list
+					entityHits.remove(entityHitDistance);
 				}
-				
-				if (block.getMaterial() == Material.glass) {
-					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
-					endPoint = new Vector3(hit.hitVec);
-				}
-				
-				energy -= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY
-						+ (resistance * WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE)
-						+ ((distance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY_PER_DISTANCE);
-				distanceTravelled = distance;
-				endPoint = new Vector3(hit.hitVec);
-				
-				if (energy <= 0) {
+			}
+			if (energy <= 0) {
+				break;
+			}
+			
+			// Laser went too far or no block hit
+			if (blockHitDistance >= beamLengthBlocks || blockHit == null) {
+				vHitPoint = vReachPoint;
+				break;
+			}
+			
+			Block block = worldObj.getBlock(blockHit.blockX, blockHit.blockY, blockHit.blockZ);
+			// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
+			float resistance = block.getExplosionResistance(null); // TODO: choose entity
+			
+			if (block.isAssociatedBlock(Blocks.bedrock)) {
+				vHitPoint = new Vector3(blockHit.hitVec);
+				break;
+			}
+			
+			// Boost a laser if it uses same beam frequency
+			if (block.isAssociatedBlock(WarpDrive.blockLaser) || block.isAssociatedBlock(WarpDrive.blockLaserCamera)) {
+				TileEntityLaser tileEntityLaser = (TileEntityLaser) worldObj.getTileEntity(blockHit.blockX, blockHit.blockY, blockHit.blockZ);
+				if (tileEntityLaser != null && tileEntityLaser.getBeamFrequency() == beamFrequency) {
+					tileEntityLaser.addBeamEnergy(energy);
+					vHitPoint = new Vector3(blockHit.hitVec);
 					break;
 				}
-				
-				if (resistance >= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD) {
-					float strength = Math.max(0.0F, Math.min(WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH,
-							  WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH
-							+ (energy / (float)WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH))); 
-					worldObj.newExplosion(null, hit.blockX, hit.blockY, hit.blockZ, strength, true, true);
-					worldObj.setBlock(hit.blockX, hit.blockY, hit.blockZ, (worldObj.rand.nextBoolean()) ? Blocks.fire : Blocks.air);
-				} else {
-					worldObj.setBlockToAir(hit.blockX, hit.blockY, hit.blockZ);
-				}
+			}
+			
+			if (block.getMaterial() == Material.glass) {
+				worldObj.setBlockToAir(blockHit.blockX, blockHit.blockY, blockHit.blockZ);
+				vHitPoint = new Vector3(blockHit.hitVec);
+			}
+			
+			// Consume energy
+			energy -= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY
+					+ (resistance * WarpDriveConfig.LASER_CANNON_BLOCK_HIT_ENERGY_PER_BLOCK_RESISTANCE)
+					+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
+			distanceTravelled = blockHitDistance;
+			vHitPoint = new Vector3(blockHit.hitVec);
+			if (energy <= 0) {
+				break;
+			}
+			
+			if (resistance >= WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_RESISTANCE_THRESHOLD) {
+				float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_MAX_STRENGTH,
+						WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_BLOCK_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
+				worldObj.newExplosion(null, blockHit.blockX, blockHit.blockY, blockHit.blockZ, strength, true, true);
+				worldObj.setBlock(blockHit.blockX, blockHit.blockY, blockHit.blockZ, (worldObj.rand.nextBoolean()) ? Blocks.fire : Blocks.air);
+			} else {
+				worldObj.setBlockToAir(blockHit.blockX, blockHit.blockY, blockHit.blockZ);
 			}
 		}
 		
-		PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D).translate(lookVector.scale(0.5D)), endPoint, r, g, b, 50, energy,
+		PacketHandler.sendBeamPacket(worldObj, new Vector3(this).translate(0.5D).translate(vDirection.scale(0.5D)), vHitPoint, r, g, b, 50, energy,
 				beamLengthBlocks);
 	}
 	
-	public MovingObjectPosition raytraceEntities(Vector3 beamVec, Vector3 lookVec, boolean collisionFlag, double reachDistance) {
-		MovingObjectPosition pickedEntity = null;
-		Vec3 playerPosition = beamVec.toVec3();
-		Vec3 playerLook = lookVec.toVec3();
-		Vec3 playerViewOffset = Vec3.createVectorHelper(
-				playerPosition.xCoord + playerLook.xCoord * reachDistance,
-				playerPosition.yCoord + playerLook.yCoord * reachDistance,
-				playerPosition.zCoord + playerLook.zCoord * reachDistance);
-		double playerBorder = 1.1 * reachDistance;
-		AxisAlignedBB boxToScan = WarpDrive.blockLaser.getCollisionBoundingBoxFromPool(worldObj, xCoord, yCoord, zCoord).expand(playerBorder, playerBorder,
-				playerBorder);
-		List entitiesHit = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
-		double closestEntity = reachDistance;
+	public TreeMap<Double, MovingObjectPosition> raytraceEntities(Vector3 vSource, Vector3 vDirection, boolean collisionFlag, double reachDistance) {
+		final double raytraceTolerance = 2.0D;
 		
-		if (entitiesHit == null || entitiesHit.isEmpty()) {
+		// Pre-computation
+		Vec3 vec3Source = vSource.toVec3();
+		Vec3 vec3Target = Vec3.createVectorHelper(
+				vec3Source.xCoord + vDirection.x * reachDistance,
+				vec3Source.yCoord + vDirection.y * reachDistance,
+				vec3Source.zCoord + vDirection.z * reachDistance);
+		
+		// Get all possible entities
+		AxisAlignedBB boxToScan = AxisAlignedBB.getBoundingBox(
+				Math.min(xCoord - raytraceTolerance, vec3Target.xCoord - raytraceTolerance),
+				Math.min(yCoord - raytraceTolerance, vec3Target.yCoord - raytraceTolerance),
+				Math.min(zCoord - raytraceTolerance, vec3Target.zCoord - raytraceTolerance),
+				Math.max(xCoord + raytraceTolerance, vec3Target.xCoord + raytraceTolerance),
+				Math.max(yCoord + raytraceTolerance, vec3Target.yCoord + raytraceTolerance),
+				Math.max(zCoord + raytraceTolerance, vec3Target.zCoord + raytraceTolerance));
+		List<Entity> entities = worldObj.getEntitiesWithinAABBExcludingEntity(null, boxToScan);
+		
+		if (entities == null || entities.isEmpty()) {
+			if (WarpDriveConfig.LOGGING_WEAPON) {
+				WarpDrive.logger.info("No entity on trajectory (box)");
+			}
 			return null;
 		}
 		
-		for (Entity entityHit : (Iterable<Entity>) entitiesHit) {
-			if (entityHit != null && entityHit.canBeCollidedWith() && entityHit.boundingBox != null) {
-				double border = entityHit.getCollisionBorderSize();
-				AxisAlignedBB aabb = entityHit.boundingBox.expand(border, border, border);
-				MovingObjectPosition hitMOP = aabb.calculateIntercept(playerPosition, playerViewOffset);
-				
+		// Pick the closest one on trajectory
+		HashMap<Double, MovingObjectPosition> entityHits = new HashMap(entities.size());
+		for (Entity entity : entities) {
+			if (entity != null && entity.canBeCollidedWith() && entity.boundingBox != null) {
+				double border = entity.getCollisionBorderSize();
+				AxisAlignedBB aabbEntity = entity.boundingBox.expand(border, border, border);
+				MovingObjectPosition hitMOP = aabbEntity.calculateIntercept(vec3Source, vec3Target);
+				if (WarpDriveConfig.LOGGING_WEAPON) {
+					WarpDrive.logger.info("Checking " + entity + " boundingBox " + entity.boundingBox + " border " + border + " aabbEntity " + aabbEntity + " hitMOP " + hitMOP);
+				}
 				if (hitMOP != null) {
-					if (aabb.isVecInside(playerPosition)) {
-						if (0.0D < closestEntity || closestEntity == 0.0D) {
-							pickedEntity = new MovingObjectPosition(entityHit);
-							
-							if (pickedEntity != null) {
-								pickedEntity.hitVec = hitMOP.hitVec;
-								closestEntity = 0.0D;
-							}
-						}
-					} else {
-						double distance = playerPosition.distanceTo(hitMOP.hitVec);
-						
-						if (distance < closestEntity || closestEntity == 0.0D) {
-							pickedEntity = new MovingObjectPosition(entityHit);
-							pickedEntity.hitVec = hitMOP.hitVec;
-							closestEntity = distance;
-						}
+					MovingObjectPosition mopEntity = new MovingObjectPosition(entity);
+					mopEntity.hitVec = hitMOP.hitVec;
+					double distance = vec3Source.distanceTo(hitMOP.hitVec);
+					if (entityHits.containsKey(distance)) {
+						distance += worldObj.rand.nextDouble() / 10.0D;
 					}
+					entityHits.put(distance, mopEntity);
 				}
 			}
 		}
 		
-		return pickedEntity;
+		if (entityHits.isEmpty()) {
+			return null;
+		}
+		
+		return new TreeMap(entityHits);
 	}
 	
 	public boolean isWithCamera() {

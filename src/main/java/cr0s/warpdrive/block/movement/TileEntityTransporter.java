@@ -158,7 +158,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 		} else if (methodName.equals("powerBoost")) {
 			try {
 				if (arguments.length >= 1) {
-					powerBoost = clamp(toDouble(arguments[0]), 1, WarpDriveConfig.TRANSPORTER_MAX_BOOST_MUL);
+					powerBoost = clamp(1, WarpDriveConfig.TRANSPORTER_MAX_BOOST_MUL, toDouble(arguments[0]));
 				}
 			} catch (NumberFormatException e) {
 				powerBoost = 1;
@@ -312,7 +312,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	private static double calculatePower(Vector3 s, Vector3 d) {
 		double dist = s.distanceTo(d);
-		return clamp(Math.pow(Math.E, -dist / 300), 0, 1);
+		return clamp(0, 1, Math.pow(Math.E, -dist / 300));
 	}
 
 	private static double min(double... ds) {
@@ -327,7 +327,7 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 			double upgradeBoost = 1;
 			if (upgrades.containsKey(EnumUpgradeTypes.Range))
 				upgradeBoost = Math.pow(1.2, upgrades.get(EnumUpgradeTypes.Range));
-			return clamp(baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost - 1) * upgradeBoost * (1 + beaconEffect), 0, 1);
+			return clamp(0, 1, baseLockStrength * lockStrengthMul * Math.pow(2, powerBoost - 1) * upgradeBoost * (1 + beaconEffect));
 		}
 		return -1;
 	}
