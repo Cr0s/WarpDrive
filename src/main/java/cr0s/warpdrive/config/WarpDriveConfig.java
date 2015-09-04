@@ -868,14 +868,14 @@ public class WarpDriveConfig {
 					// WarpDrive.logger.info("- added " + oreName + " to ores as " + itemStack);
 				}
 			}
-			if (lowerOreName.contains("log")) {
+			if (lowerOreName.startsWith("log") || lowerOreName.endsWith("log") || lowerOreName.endsWith("logs")) {
 				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
 				for (ItemStack itemStack : itemStacks) {
 					BLOCKS_LOGS.add(Block.getBlockFromItem(itemStack.getItem()));
 					// WarpDrive.logger.info("- added " + oreName + " to logs as " + itemStack);
 				}
 			}
-			if (lowerOreName.contains("leave") || lowerOreName.contains("leaf")) {
+			if (lowerOreName.startsWith("leave") || lowerOreName.endsWith("leave") || lowerOreName.endsWith("leaves")) {
 				ArrayList<ItemStack> itemStacks = OreDictionary.getOres(oreName);
 				for (ItemStack itemStack : itemStacks) {
 					BLOCKS_LEAVES.add(Block.getBlockFromItem(itemStack.getItem()));
