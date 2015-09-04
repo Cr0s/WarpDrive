@@ -2,6 +2,7 @@ package cr0s.warpdrive.block;
 
 import java.util.Map;
 
+import cpw.mods.fml.common.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
@@ -144,6 +145,7 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 	}
 
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String meth = methodsArray[method];
 

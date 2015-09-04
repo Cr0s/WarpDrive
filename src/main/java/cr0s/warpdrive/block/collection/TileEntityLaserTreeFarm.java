@@ -2,6 +2,7 @@ package cr0s.warpdrive.block.collection;
 
 import java.util.LinkedList;
 
+import cpw.mods.fml.common.Optional;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -243,6 +244,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 
 	// ComputerCraft IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		if (methodName.equals("start")) {

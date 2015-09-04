@@ -1,5 +1,6 @@
 package cr0s.warpdrive.block.energy;
 
+import cpw.mods.fml.common.Optional;
 import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.config.WarpDriveConfig;
@@ -45,6 +46,7 @@ public class TileEntityEnergyBank extends TileEntityAbstractEnergy {
 
 	// ComputerCraft IPeripheral methods implementation
 	@Override
+	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
 		String methodName = methodsArray[method];
 		if (methodName == "getEnergyLevel") {

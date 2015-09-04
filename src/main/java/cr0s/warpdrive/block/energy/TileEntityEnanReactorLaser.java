@@ -1,5 +1,8 @@
 package cr0s.warpdrive.block.energy;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
 import cpw.mods.fml.common.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -146,6 +149,29 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+	}
+	
+	// OpenComputers callback methods
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	public Object[] hasReactor(Context context, Arguments arguments) {
+		return new Object[] { scanForReactor() != null };
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	public Object[] sendLaser(Context context, Arguments arguments) {
+		if (arguments.count() >= 1) {
+			laserReactor(arguments.checkInteger(0));
+		}
+		
+		return null;
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	public Object[] side(Context context, Arguments arguments) {
+		return new Object[] { side.ordinal() - 2 };
 	}
 	
 	// ComputerCraft methods
