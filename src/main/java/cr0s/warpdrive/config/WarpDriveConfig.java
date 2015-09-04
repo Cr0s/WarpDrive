@@ -196,9 +196,9 @@ public class WarpDriveConfig {
 	public static int LASER_CANNON_ENERGY_LOSS_PER_BLOCK = 500;
 	
 	public static int LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS = 100;
-	public static int LASER_CANNON_ENTITY_HIT_ENERGY = 0;
-	public static int LASER_CANNON_ENTITY_HIT_BASE_DAMAGE = 1;
-	public static int LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = 10000;
+	public static int LASER_CANNON_ENTITY_HIT_ENERGY = 15000;
+	public static int LASER_CANNON_ENTITY_HIT_BASE_DAMAGE = 3;
+	public static int LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = 30000;
 	public static int LASER_CANNON_ENTITY_HIT_MAX_DAMAGE = 100;
 	
 	public static int LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION = 1000000;
@@ -670,7 +670,7 @@ public class WarpDriveConfig {
 		LASER_CANNON_ENTITY_HIT_ENERGY = clamp(0, LASER_CANNON_MAX_LASER_ENERGY,
 				config.get("laser_cannon", "entity_hit_energy", LASER_CANNON_ENTITY_HIT_ENERGY, "Base energy consumed from hitting an entity").getInt());
 		LASER_CANNON_ENTITY_HIT_BASE_DAMAGE = clamp(0, LASER_CANNON_MAX_LASER_ENERGY,
-				config.get("laser_cannon", "entity_hit_base_damage", LASER_CANNON_ENTITY_HIT_BASE_DAMAGE, "Minimum damage to entity hit").getInt());
+				config.get("laser_cannon", "entity_hit_base_damage", LASER_CANNON_ENTITY_HIT_BASE_DAMAGE, "Minimum damage to entity hit (measured in half hearts)").getInt());
 		LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = clamp(0, LASER_CANNON_MAX_LASER_ENERGY,
 				config.get("laser_cannon", "entity_hit_energy_per_damage", LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE, "Energy required by additional hit point (won't be consummed)").getInt());
 		LASER_CANNON_ENTITY_HIT_MAX_DAMAGE = clamp(0, Integer.MAX_VALUE,

@@ -223,45 +223,47 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 			}
 			
 			// Apply effect to entities
-			for (Entry<Double, MovingObjectPosition> entityHitEntry : entityHits.entrySet()) {
-				double entityHitDistance = entityHitEntry.getKey();
-				// ignore entities behind walls
-				if (entityHitDistance >= blockHitDistance) {
-					break;
-				}
-				
-				// only hits entities with health
-				MovingObjectPosition mopEntity = entityHitEntry.getValue();
-				if (mopEntity != null && mopEntity.entityHit instanceof EntityLivingBase) {
-					EntityLivingBase entity = (EntityLivingBase) mopEntity.entityHit;
-					
-					// Consume energy
-					energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY
-							+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
-					distanceTravelled = blockHitDistance;
-					vHitPoint = new Vector3(mopEntity.hitVec);
-					if (energy <= 0) {
+			if (entityHits != null) {
+				for (Entry<Double, MovingObjectPosition> entityHitEntry : entityHits.entrySet()) {
+					double entityHitDistance = entityHitEntry.getKey();
+					// ignore entities behind walls
+					if (entityHitDistance >= blockHitDistance) {
 						break;
 					}
 					
-					// apply effects
-					entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
-					float damage = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_MAX_DAMAGE,
-							WarpDriveConfig.LASER_CANNON_ENTITY_HIT_BASE_DAMAGE + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
-					entity.attackEntityFrom(DamageSource.inFire, damage);
-					
-					if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
-						float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
-							  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
-						worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
+					// only hits entities with health
+					MovingObjectPosition mopEntity = entityHitEntry.getValue();
+					if (mopEntity != null && mopEntity.entityHit instanceof EntityLivingBase) {
+						EntityLivingBase entity = (EntityLivingBase) mopEntity.entityHit;
+						
+						// Consume energy
+						energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY
+								+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
+						distanceTravelled = blockHitDistance;
+						vHitPoint = new Vector3(mopEntity.hitVec);
+						if (energy <= 0) {
+							break;
+						}
+						
+						// apply effects
+						entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
+						float damage = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_MAX_DAMAGE,
+								WarpDriveConfig.LASER_CANNON_ENTITY_HIT_BASE_DAMAGE + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
+						entity.attackEntityFrom(DamageSource.inFire, damage);
+						
+						if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
+							float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
+								  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
+							worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
+						}
+						
+						// remove entity from hit list
+						entityHits.put(entityHitDistance, null);
 					}
-					
-					// remove entity from hit list
-					entityHits.remove(entityHitDistance);
 				}
-			}
-			if (energy <= 0) {
-				break;
+				if (energy <= 0) {
+					break;
+				}
 			}
 			
 			// Laser went too far or no block hit
