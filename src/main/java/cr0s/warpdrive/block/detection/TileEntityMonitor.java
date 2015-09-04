@@ -94,9 +94,8 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 	
 	@Override
 	public String toString() {
-        return String.format("%s/%d \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+        return String.format("%s \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
        		getClass().getSimpleName(),
-       		Integer.valueOf(hashCode()),
        		frequency,
        		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
        		xCoord, yCoord, zCoord});

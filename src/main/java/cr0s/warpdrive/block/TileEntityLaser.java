@@ -666,7 +666,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	
 	@Override
 	public String toString() {
-		return String.format("%s/%d Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] { getClass().getSimpleName(), Integer.valueOf(hashCode()),
+		return String.format("%s Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] { getClass().getSimpleName(),
 				beamFrequency, cameraFrequency, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(), xCoord, yCoord, zCoord });
 	}
 }
