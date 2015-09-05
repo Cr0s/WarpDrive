@@ -12,9 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.IFluidBlock;
-import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
-import cr0s.warpdrive.block.TileEntityLaserMedium;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.data.VectorI;
@@ -26,7 +24,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 	private boolean silkTouch = false;
 	private int fortuneLevel = 0;
 
-	private TileEntityLaserMedium booster = null;
 	private Vector3 laserOutput;
 
 	abstract boolean	canSilkTouch();
@@ -122,21 +119,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 			fortuneLevel = minFortune();
 		}
 		return fortune();
-	}
-
-	protected TileEntityLaserMedium booster()
-	{
-		if (booster == null)
-			findFirstBooster();
-		return booster;
-	}
-
-	protected int energy() {
-		TileEntityLaserMedium te = booster();
-		if (te != null) {
-			return te.getEnergyStored();
-		}
-		return 0;
 	}
 
 	//DATA RET
@@ -284,36 +266,6 @@ public abstract class TileEntityAbstractMiner extends TileEntityAbstractLaser
 		}
 
 		return transferred;
-	}
-
-	protected boolean consumeEnergyFromBooster(int requiredEnergy, boolean simulate)
-	{
-		TileEntityLaserMedium te = booster();
-		if (te != null) {
-			return te.consumeEnergy(requiredEnergy, simulate);
-		}
-		return false;
-	}
-
-	private TileEntityLaserMedium findFirstBooster()
-	{
-		TileEntity result;
-		int[] xPos = {1,-1,0,0,0,0};
-		int[] yPos = {0,0,-1,1,0,0};
-		int[] zPos = {0,0,0,0,-1,1};
-
-		for(int i=0;i<6;i++)
-		{
-			result = worldObj.getTileEntity(xCoord + xPos[i], yCoord + yPos[i], zCoord + zPos[i]);
-
-			if (result != null && result instanceof TileEntityLaserMedium)
-			{
-				booster = (TileEntityLaserMedium) result;
-				return (TileEntityLaserMedium) result;
-			}
-		}
-		booster = null;
-		return null;
 	}
 
 	private static ItemStack copyWithSize(ItemStack itemStack, int newSize)

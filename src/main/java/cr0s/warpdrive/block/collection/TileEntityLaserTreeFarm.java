@@ -38,10 +38,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	public TileEntityLaserTreeFarm() {
 		super();
 		laserOutputSide = ForgeDirection.UP;
-		IC2_sinkTier = 2;
-		IC2_sourceTier = 2;
 		peripheralName = "warpdriveLaserTreefarm";
-		methodsArray = new String[] {
+		addMethods(new String[] {
 				"start",
 				"stop",
 				"radius",
@@ -50,7 +48,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 				"silkTouchLeaves",
 				"treetap",
 				"state"
-		};
+		});
 	}
 
 	@Override
@@ -70,21 +68,21 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 			} else {
 				if (scan >= mineWait * delayMul) {
 					scan = 0;
-
+					
 					if (logIndex >= logs.size()) {
 						mode = 0;
 						return;
 					}
 					VectorI pos = logs.get(logIndex);
 					Block block = worldObj.getBlock(pos.x, pos.y, pos.z);
-
+					
 					if (mode == 1) {
 						int cost = calculateBlockCost(block);
-						if (consumeEnergyFromBooster(cost, true)) {
+						if (consumeEnergyFromLaserMediums(cost, true)) {
 							if (isLog(block) || (doLeaves && isLeaf(block))) {
 								delayMul = 1;
 								if (isRoomForHarvest()) {
-									if (consumeEnergyFromBooster(cost, false)) {
+									if (consumeEnergyFromLaserMediums(cost, false)) {
 										if (isLog(block)) {
 											delayMul = 4;
 											totalHarvested++;
@@ -101,7 +99,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 						}
 					} else if(mode == 2) {
 						int cost = calculateBlockCost(block);
-						if (consumeEnergyFromBooster(cost, true)) {
+						if (consumeEnergyFromLaserMediums(cost, true)) {
 							if (isRoomForHarvest()) {
 								if (block.isAssociatedBlock(WarpDriveConfig.IC2_rubberWood)) {
 									int metadata = worldObj.getBlockMetadata(pos.x, pos.y, pos.z);
@@ -109,7 +107,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 										if (WarpDriveConfig.LOGGING_COLLECTION) {
 											WarpDrive.logger.info("wetspot found");
 										}
-										if (consumeEnergyFromBooster(cost, false)) {
+										if (consumeEnergyFromLaserMediums(cost, false)) {
 											ItemStack resin = WarpDriveConfig.IC2_Resin.copy();
 											resin.stackSize = (int) Math.round(Math.random() * 4);
 											dumpToInv(resin);
@@ -124,7 +122,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 										delayMul = 1;
 									}
 								} else if (isLog(block)) {
-									if (consumeEnergyFromBooster(cost, false)) {
+									if (consumeEnergyFromLaserMediums(cost, false)) {
 										delayMul = 4;
 										totalHarvested++;
 										harvestBlock(pos);
@@ -132,7 +130,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 										return;
 									}
 								} else if (isLeaf(block)) {
-									if (consumeEnergyFromBooster(cost, true)) {
+									if (consumeEnergyFromLaserMediums(cost, false)) {
 										delayMul = 1;
 										harvestBlock(pos);
 									} else {
@@ -246,7 +244,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
+		String methodName = getMethodName(method);
+		
 		if (methodName.equals("start")) {
 			if (!active) {
 				mode = 0;
@@ -279,7 +278,7 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 					doLeaves = toBool(arguments[0]);
 				}
 			} catch(Exception e) {
-
+				
 			}
 			return new Boolean[] { doLeaves };
 			
@@ -315,7 +314,8 @@ public class TileEntityLaserTreeFarm extends TileEntityAbstractMiner {
 			String state = active ? (mode==0?"scanning" : (mode == 1 ? "harvesting" : "tapping")) : "inactive";
 			return new Object[] { state, radiusX, radiusZ, energy(), totalHarvested };
 		}
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 
 	//ABSTRACT LASER IMPLEMENTATION

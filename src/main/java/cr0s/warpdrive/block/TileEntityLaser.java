@@ -14,7 +14,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -26,19 +25,19 @@ import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
+import cr0s.warpdrive.data.VectorI;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
-public class TileEntityLaser extends TileEntityAbstractInterfaced {
+public class TileEntityLaser extends TileEntityAbstractLaser {
 	private final int BEAM_FREQUENCY_SCANNING = 1420;
 	private final int BEAM_FREQUENCY_MAX = 65000;
 	
-	private int dx, dz, dy;
 	private float yaw, pitch; // laser direction
 	
 	private int beamFrequency = -1;
-	private int cameraFrequency = -1;
+	private int videoChannel = -1;
 	private float r, g, b; // beam color (corresponds to frequency)
 	
 	public boolean isEmitting = false;
@@ -46,10 +45,20 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	private int delayTicks = 0;
 	private int energyFromOtherBeams = 0;
 	
-	private MovingObjectPosition firstHit_position = null;
-	private Block firstHit_block;
-	private int firstHit_blockMeta = 0;
-	private float firstHit_blockResistance = -2;
+	public static enum ScanResultType {
+		IDLE("IDLE"), BLOCK("BLOCK"), NONE("NONE");
+		
+		public String name;
+		
+		private ScanResultType(String name) {
+			this.name = name;
+		}
+	}
+	private ScanResultType scanResult_type = ScanResultType.IDLE;
+	private VectorI scanResult_position = null;
+	private String scanResult_blockUnlocalizedName;
+	private int scanResult_blockMetadata = 0;
+	private float scanResult_blockResistance = -2;
 	
 	private final static int REGISTRY_UPDATE_INTERVAL_TICKS = 15 * 20;
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
@@ -59,15 +68,15 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	
 	public TileEntityLaser() {
 		super();
+		
 		peripheralName = "warpdriveLaser";
-		methodsArray = new String[] {
-			"emitBeam", // 0
-			"pos", // 1
-			"freq", // 2
-			"getFirstHit", // 3
-			"getBoosterDXDZ", // 4
-			"camFreq" // 5
-		};
+		addMethods(new String[] {
+			"emitBeam",
+			"beamFrequency",
+			"getScanResult",
+			"videoChannel"
+		});
+		countMaxLaserMediums = WarpDriveConfig.LASER_CANNON_MAX_MEDIUMS_COUNT;
 	}
 	
 	@Override
@@ -80,13 +89,13 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 				packetSendTicks--;
 				if (packetSendTicks <= 0) {
 					packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
-					PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, cameraFrequency);
+					PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, videoChannel);
 				}
 			} else {
 				registryUpdateTicks--;
 				if (registryUpdateTicks <= 0) {
 					registryUpdateTicks = REGISTRY_UPDATE_INTERVAL_TICKS;
-					WarpDrive.instance.cameras.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), cameraFrequency, 1);
+					WarpDrive.instance.cameras.updateInRegistry(worldObj, new ChunkPosition(xCoord, yCoord, zCoord), videoChannel, 1);
 				}
 			}
 		}
@@ -103,7 +112,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 			delayTicks = 0;
 			isEmitting = false;
 			int beamEnergy = Math.min(
-					this.consumeEnergyFromBoosters() + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY),
+					consumeCappedEnergyFromLaserMediums(Integer.MAX_VALUE, false) + MathHelper.floor_double(energyFromOtherBeams * WarpDriveConfig.LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY),
 					WarpDriveConfig.LASER_CANNON_MAX_LASER_ENERGY);
 			emitBeam(beamEnergy);
 			energyFromOtherBeams = 0;
@@ -131,30 +140,8 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		}
 	}
 	
-	private int consumeEnergyFromBoosters() {
-		int energyCollected = 0;
-		
-		if (findFirstBooster() != null) {
-			int newX, newY, newZ;
-			TileEntity te;
-			for (int shift = 1; shift <= WarpDriveConfig.LASER_CANNON_MAX_MEDIUMS_COUNT; shift++) {
-				newX = xCoord + (dx * shift);
-				newY = yCoord + (dy * shift);
-				newZ = zCoord + (dz * shift);
-				te = worldObj.getTileEntity(newX, newY, newZ);
-				if (te != null && te instanceof TileEntityLaserMedium) {
-					energyCollected += ((TileEntityLaserMedium) te).consumeAllEnergy();
-				} else {
-					break;
-				}
-			}
-		}
-		
-		return energyCollected;
-	}
-	
 	private void emitBeam(int beamEnergy) {
-		int energy = beamEnergy; // FIXME Beam power calculations
+		int energy = beamEnergy;
 		int beamLengthBlocks = clamp(0, WarpDriveConfig.LASER_CANNON_RANGE_MAX,
 				energy / WarpDriveConfig.LASER_CANNON_RANGE_ENERGY_PER_BLOCK);
 		
@@ -185,23 +172,30 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		
 		// This is a scanning beam, do not deal damage to block nor entity
 		if (beamFrequency == BEAM_FREQUENCY_SCANNING) {
-			firstHit_position = worldObj.rayTraceBlocks(vSource.toVec3(), vReachPoint.toVec3());
+			MovingObjectPosition mopResult = worldObj.rayTraceBlocks(vSource.toVec3(), vReachPoint.toVec3());
 			
-			if (firstHit_position != null) {
-				firstHit_block = worldObj.getBlock(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
-				firstHit_blockMeta = worldObj.getBlockMetadata(firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ);
-				firstHit_blockResistance = -2;
-				if (firstHit_block != null) {
-					firstHit_blockResistance = firstHit_block.getExplosionResistance(null); // TODO: what entity should be used?
+			scanResult_blockUnlocalizedName = null;
+			scanResult_blockMetadata = 0;
+			scanResult_blockResistance = -2;
+			if (mopResult != null) {
+				scanResult_type = ScanResultType.BLOCK;
+				scanResult_position = new VectorI(mopResult.blockX, mopResult.blockY, mopResult.blockZ);
+				Block block = worldObj.getBlock(scanResult_position.x, scanResult_position.y, scanResult_position.z);
+				if (block != null) {
+					scanResult_blockUnlocalizedName = block.getUnlocalizedName();
+					scanResult_blockMetadata = worldObj.getBlockMetadata(scanResult_position.x, scanResult_position.y, scanResult_position.z);
+					scanResult_blockResistance = block.getExplosionResistance(null);
 				}
-				PacketHandler.sendBeamPacket(worldObj, vSource, new Vector3(firstHit_position.hitVec), r, g, b, 50, energy, 200);
+				PacketHandler.sendBeamPacket(worldObj, vSource, new Vector3(mopResult.hitVec), r, g, b, 50, energy, 200);
 			} else {
-				firstHit_block = null;
-				firstHit_blockMeta = 0;
-				firstHit_blockResistance = -2;
+				scanResult_type = ScanResultType.NONE;
+				scanResult_position = new VectorI(vReachPoint.intX(), vReachPoint.intY(), vReachPoint.intZ());
 				PacketHandler.sendBeamPacket(worldObj, vSource, vReachPoint, r, g, b, 50, energy, 200);
 			}
 			
+			sendEvent("laserScanning", new Object[] {
+					scanResult_type.name, scanResult_position.x, scanResult_position.y, scanResult_position.z,
+					scanResult_blockUnlocalizedName, scanResult_blockMetadata, scanResult_blockResistance });
 			return;
 		}
 		
@@ -274,7 +268,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 			
 			Block block = worldObj.getBlock(blockHit.blockX, blockHit.blockY, blockHit.blockZ);
 			// int blockMeta = worldObj.getBlockMetadata(hit.blockX, hit.blockY, hit.blockZ);
-			float resistance = block.getExplosionResistance(null); // TODO: choose entity
+			float resistance = block.getExplosionResistance(null);
 			
 			if (block.isAssociatedBlock(Blocks.bedrock)) {
 				vHitPoint = new Vector3(blockHit.hitVec);
@@ -386,7 +380,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	
 	public void setBeamFrequency(int parBeamFrequency) {
 		if (beamFrequency != parBeamFrequency && (parBeamFrequency <= BEAM_FREQUENCY_MAX) && (parBeamFrequency > 0)) {
-			if (WarpDriveConfig.LOGGING_FREQUENCY) {
+			if (WarpDriveConfig.LOGGING_VIDEO_CHANNEL) {
 				WarpDrive.logger.info(this + " Beam frequency set from " + beamFrequency + " to " + parBeamFrequency);
 			}
 			beamFrequency = parBeamFrequency;
@@ -394,74 +388,20 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		updateColor();
 	}
 	
-	public int getCameraFrequency() {
-		return cameraFrequency;
+	public int getVideoChannel() {
+		return videoChannel;
 	}
 	
-	public void setCameraFrequency(int parCameraFrequency) {
-		if (cameraFrequency != parCameraFrequency) {
-			if (WarpDriveConfig.LOGGING_FREQUENCY) {
-				WarpDrive.logger.info(this + " Camera frequency set from " + cameraFrequency + " to " + parCameraFrequency);
+	public void setVideoChannel(int parVideoChannel) {
+		if (videoChannel != parVideoChannel) {
+			if (WarpDriveConfig.LOGGING_VIDEO_CHANNEL) {
+				WarpDrive.logger.info(this + " Video channel updated from " + videoChannel + " to " + parVideoChannel);
 			}
-			cameraFrequency = parCameraFrequency;
-			// force update through main thread since CC runs on server as
-			// 'client'
+			videoChannel = parVideoChannel;
+			// force update through main thread since CC runs on server as 'client'
 			packetSendTicks = 0;
 			registryUpdateTicks = 0;
 		}
-	}
-	
-	private TileEntityLaserMedium findFirstBooster() {
-		TileEntity result;
-		result = worldObj.getTileEntity(xCoord + 1, yCoord, zCoord);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = 1;
-			dy = 0;
-			dz = 0;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		result = worldObj.getTileEntity(xCoord - 1, yCoord, zCoord);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = -1;
-			dy = 0;
-			dz = 0;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		result = worldObj.getTileEntity(xCoord, yCoord, zCoord + 1);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = 0;
-			dy = 0;
-			dz = 1;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		result = worldObj.getTileEntity(xCoord, yCoord, zCoord - 1);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = 0;
-			dy = 0;
-			dz = -1;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		result = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = 0;
-			dy = 1;
-			dz = 0;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		result = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
-		if (result != null && result instanceof TileEntityLaserMedium) {
-			dx = 0;
-			dy = -1;
-			dz = 0;
-			return (TileEntityLaserMedium) result;
-		}
-		
-		return null;
 	}
 	
 	private void playSoundCorrespondsEnergy(int energy) {
@@ -519,14 +459,14 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		setBeamFrequency(tag.getInteger("beamFrequency"));
-		setCameraFrequency(tag.getInteger("cameraFrequency"));
+		setVideoChannel(tag.getInteger("cameraFrequency") + tag.getInteger("videoChannel"));
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("beamFrequency", beamFrequency);
-		tag.setInteger("cameraFrequency", cameraFrequency);
+		tag.setInteger("videoChannel", videoChannel);
 	}
 	
 	@Override
@@ -550,13 +490,7 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] pos(Context context, Arguments arguments) {
-		return new Integer[] { xCoord, yCoord, zCoord };
-	}
-	
-	@Callback
-	@Optional.Method(modid = "OpenComputers")
-	public Object[] freq(Context context, Arguments arguments) {
+	public Object[] beamFrequency(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
 			setBeamFrequency(arguments.checkInteger(0));
 		}
@@ -565,25 +499,18 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] getFirstHit(Context context, Arguments arguments) {
-		return getFirstHit();
+	public Object[] getScanResult(Context context, Arguments arguments) {
+		return getScanResult();
 	}
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] getBoosterDXDZ(Context context, Arguments arguments) {
-		findFirstBooster();
-		return new Integer[] { dx, dz };
-	}
-	
-	@Callback
-	@Optional.Method(modid = "OpenComputers")
-	public Object[] CamFreq(Context context, Arguments arguments) {
+	public Object[] videoChannel(Context context, Arguments arguments) {
 		if (isWithCamera()) {
 			if (arguments.count() == 1) {
-				setCameraFrequency(arguments.checkInteger(0));
+				setVideoChannel(arguments.checkInteger(0));
 			}
-			return new Integer[] { cameraFrequency };
+			return new Integer[] { videoChannel };
 		}
 		return null;
 	}
@@ -611,22 +538,24 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 		return new Object[] { true };
 	}
 	
-	private Object[] getFirstHit() {
-		if (firstHit_position != null) {
+	private Object[] getScanResult() {
+		if (scanResult_type != ScanResultType.IDLE) {
 			try {
-				Object[] info = { firstHit_position.blockX, firstHit_position.blockY, firstHit_position.blockZ, firstHit_block, firstHit_blockMeta,
-						firstHit_blockResistance };
-				firstHit_position = null;
-				firstHit_block = null;
-				firstHit_blockMeta = 0;
-				firstHit_blockResistance = -2;
+				Object[] info = { scanResult_type.name,
+						scanResult_position.x, scanResult_position.y, scanResult_position.z,
+						scanResult_blockUnlocalizedName, scanResult_blockMetadata, scanResult_blockResistance };
+				scanResult_type = ScanResultType.IDLE;
+				scanResult_position = null;
+				scanResult_blockUnlocalizedName = null;
+				scanResult_blockMetadata = 0;
+				scanResult_blockResistance = -2;
 				return info;
-			} catch (Exception e) {
-				e.printStackTrace();
-				return new Integer[] { 0, 0, 0, 0, 0, -3 };
+			} catch (Exception exception) {
+				exception.printStackTrace();
+				return new Object[] { COMPUTER_ERROR_TAG, 0, 0, 0, null, 0, -3 };
 			}
 		} else {
-			return new Integer[] { 0, 0, 0, 0, 0, -1 };
+			return new Object[] { scanResult_type.name, 0, 0, 0, null, 0, -1 };
 		}
 	}
 	
@@ -634,39 +563,40 @@ public class TileEntityLaser extends TileEntityAbstractInterfaced {
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName.equals("emitBeam")) { // emitBeam(yaw, pitch) or
-			// emitBeam(deltaX, deltaY,
-			// deltaZ)
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("emitBeam")) { // emitBeam(yaw, pitch) or emitBeam(deltaX, deltaY, deltaZ)
 			return emitBeam(arguments);
-		} else if (methodName.equals("pos")) {
+			
+		} else if (methodName.equals("position")) {
 			return new Integer[] { xCoord, yCoord, zCoord };
-		} else if (methodName.equals("freq")) {
+			
+		} else if (methodName.equals("beamFrequency")) {
 			if (arguments.length == 1) {
 				setBeamFrequency(toInt(arguments[0]));
 			}
 			return new Integer[] { beamFrequency };
-		} else if (methodName.equals("getFirstHit")) {
-			return getFirstHit();
-		} else if (methodName.equals("getBoosterDXDZ")) {
-			findFirstBooster();
-			return new Integer[] { dx, dz };
-		} else if (methodName.equals("camFreq")) { // camFreq (only for lasers
-			// with cam)
+			
+		} else if (methodName.equals("getScanResult")) {
+			return getScanResult();
+			
+		} else if (methodName.equals("videoChannel")) {
+			// Only valid for lasers with camera
 			if (isWithCamera()) {
 				if (arguments.length == 1) {
-					setCameraFrequency(toInt(arguments[0]));
+					setVideoChannel(toInt(arguments[0]));
 				}
-				return new Integer[] { cameraFrequency };
+				return new Integer[] { videoChannel };
 			}
 			return null;
 		}
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 	
 	@Override
 	public String toString() {
 		return String.format("%s Beam \'%d\' Camera \'%d\' @ \'%s\' %d, %d, %d", new Object[] { getClass().getSimpleName(),
-				beamFrequency, cameraFrequency, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(), xCoord, yCoord, zCoord });
+				beamFrequency, videoChannel, worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(), xCoord, yCoord, zCoord });
 	}
 }
