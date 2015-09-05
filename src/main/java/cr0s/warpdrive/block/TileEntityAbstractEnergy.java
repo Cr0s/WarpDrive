@@ -17,15 +17,16 @@ import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.config.WarpDriveConfig;
-import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.data.EnumUpgradeTypes;
+import dan200.computercraft.api.lua.ILuaContext;
+import dan200.computercraft.api.peripheral.IComputerAccess;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface = "cofh.api.energy.IEnergyHandler", modid = "CoFHCore"),
 	@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "IC2API"),
 	@Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "IC2API")
 })
-public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfaced implements IEnergyHandler, IEnergySink, IEnergySource, IBlockUpdateDetector {
+public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfaced implements IEnergyHandler, IEnergySink, IEnergySource {
 	protected boolean addedToEnergyNet = false;
 	protected int energyStored_internal = 0;
 	private static final double EU_PER_INTERNAL = 1.0D;
@@ -42,8 +43,9 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	public TileEntityAbstractEnergy() {
 		super();
 		if (WarpDriveConfig.isThermalExpansionLoaded) {
-			this.RF_initialiseAPI();
+			RF_initialiseAPI();
 		}
+		addMethods(new String[] { "energy" });
 	}
 	
 	public Object[] getUpgrades()
@@ -75,7 +77,6 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	protected static int convertEUtoInternal(double amount) {
 		return (int)Math.round(amount / EU_PER_INTERNAL);
 	}
-
 	
 	public int getEnergyStored() {
 		return energyStored_internal;
@@ -159,7 +160,7 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 		return temp;
 	}
 	
-	public Object[] getEnergyLevel() {
+	public Object[] energy() {
 		return new Object[] { getEnergyStored(), getMaxEnergyStored() };
 	}
 	
@@ -174,8 +175,21 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] getEnergyLevel(Context context, Arguments arguments) {
-		return getEnergyLevel();
+	public Object[] energy(Context context, Arguments arguments) {
+		return energy();
+	}
+	
+	// ComputerCraft methods
+	@Override
+	@Optional.Method(modid = "ComputerCraft")
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("energy")) {
+			return energy();
+		}
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 	
 	// Minecraft overrides
@@ -427,6 +441,8 @@ public abstract class TileEntityAbstractEnergy extends TileEntityAbstractInterfa
 	// WarpDrive overrides
 	@Override
 	public void updatedNeighbours() {
+		super.updatedNeighbours();
+		
 		if (WarpDriveConfig.isThermalExpansionLoaded) {
 			scanForEnergyHandlers();
 		}

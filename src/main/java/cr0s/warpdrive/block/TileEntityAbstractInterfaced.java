@@ -1,6 +1,8 @@
 package cr0s.warpdrive.block;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +36,10 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	// Common computer properties
 	private boolean interfacedFirstTick = true;
 	protected String peripheralName = null;
-	protected String[] methodsArray = {};
+	private String[] methodsArray = {};
+	
+	// String returned to LUA script in case of error
+	public static final String COMPUTER_ERROR_TAG = "!ERROR!";
 	
 	// pre-loaded scripts support
 	private volatile ManagedEnvironment OC_fileSystem = null;
@@ -48,6 +53,32 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	
 	// ComputerCraft specific properties
 	protected HashMap<Integer, IComputerAccess> connectedComputers = new HashMap<Integer, IComputerAccess>();
+	
+	public TileEntityAbstractInterfaced() {
+		addMethods(new String[] {
+				"interfaced",
+				"position",
+				"version"
+		});
+	}
+	
+	// WarpDrive abstraction layer
+	protected void addMethods(final String[] methodsToAdd) {
+		if (methodsArray == null) {
+			methodsArray = methodsToAdd;
+		} else {
+			int currentLength = methodsArray.length;
+			methodsArray = Arrays.copyOf(methodsArray, methodsArray.length + methodsToAdd.length);
+			for (String method : methodsToAdd) {
+				methodsArray[currentLength] = method;
+				currentLength++;
+			}
+		}
+	}
+	
+	protected String getMethodName(final int methodIndex) {
+		return methodsArray[methodIndex];
+	}
 	
 	private boolean assetExist(final String resourcePath) {
 		URL url = getClass().getResource(resourcePath);
@@ -146,6 +177,26 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 		return arguments;
 	}
 	
+	// Declare type
+	public Object[] interfaced(Object[] arguments) {
+		return new String[] { "I'm a WarpDrive computer interfaced tile entity." };
+	}
+	
+	// Return block coordinates
+	public Object[] position(Object[] arguments) {
+		return new Integer[] { xCoord, yCoord, zCoord };
+	}
+	
+	// Return version
+	public Object[] version(Object[] arguments) {
+		String[] strings = WarpDrive.VERSION.split(".");
+		ArrayList<Integer> integers = new ArrayList(strings.length);
+		for (String string : strings) {
+			integers.add(Integer.parseInt(string));
+		}
+		return integers.toArray();
+	}
+	
 	// ComputerCraft methods
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
@@ -162,7 +213,17 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		// empty stub
+		String methodName = getMethodName(method);
+		if (methodName.equals("interfaced")) {
+			return interfaced(arguments);
+			
+		} else if (methodName.equals("position")) {
+			return position(arguments);
+			
+		} else if (methodName.equals("version")) {
+			return version(arguments);
+			
+		}
 		return null;
 	}
 	
@@ -173,7 +234,7 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 		connectedComputers.put(id, computer);
 		if (CC_hasResource && WarpDriveConfig.G_LUA_SCRIPTS != WarpDriveConfig.LUA_SCRIPTS_NONE) {
 			computer.mount("/" + peripheralName, ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/" + peripheralName));
-	        computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/common/updater"));
+			computer.mount("/warpupdater", ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/common/updater"));
 			if (WarpDriveConfig.G_LUA_SCRIPTS == WarpDriveConfig.LUA_SCRIPTS_ALL) {
 				for(String script : CC_scripts) {
 					computer.mount("/" + script, ComputerCraftAPI.createResourceMount(WarpDrive.class, WarpDrive.MODID.toLowerCase(), "lua.ComputerCraft/" + peripheralName + "/" + script));
@@ -215,8 +276,20 @@ public abstract class TileEntityAbstractInterfaced extends TileEntityAbstractBas
 	// OpenComputers methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
+	public Object[] position(Context context, Arguments arguments) {
+		return position(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
+	public Object[] version(Context context, Arguments arguments) {
+		return version(argumentsOCtoCC(arguments));
+	}
+	
+	@Callback
+	@Optional.Method(modid = "OpenComputers")
 	public Object[] interfaced(Context context, Arguments arguments) {
-		return new String[] { "This is a WarpDrive computer interfaced tile entity." };
+		return interfaced(argumentsOCtoCC(arguments));
 	}
 	
 	@Optional.Method(modid = "OpenComputers")

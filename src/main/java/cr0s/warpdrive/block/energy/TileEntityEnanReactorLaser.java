@@ -8,27 +8,32 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.block.TileEntityAbstractLaser;
-import cr0s.warpdrive.block.TileEntityLaserMedium;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
 import cr0s.warpdrive.network.PacketHandler;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
-public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implements IBlockUpdateDetector {
+public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser {
 	Vector3 myVec;
 	Vector3 reactorVec;
 	ForgeDirection side = ForgeDirection.UNKNOWN;
-	TileEntityLaserMedium booster;
 	TileEntityEnanReactorCore reactor;
 	
 	private boolean isFirstUpdate = true;
 	
 	public TileEntityEnanReactorLaser() {
-		methodsArray = new String[] { "energy", "hasReactor", "side", "sendLaser" };
+		super();
+		
+		addMethods(new String[] {
+				"hasReactor",
+				"side",
+				"stabilize"
+		});
 		peripheralName = "warpdriveEnanReactorLaser";
+		countMaxLaserMediums = 1;
+		directionsValidLaserMedium = new ForgeDirection[] { ForgeDirection.UP, ForgeDirection.DOWN };
 	}
 	
 	public TileEntityEnanReactorCore scanForReactor() {
@@ -81,22 +86,6 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 		}
 	}
 	
-	public TileEntityLaserMedium scanForBooster() {
-		booster = null;
-		TileEntity tileEntity;
-		tileEntity = worldObj.getTileEntity(xCoord, yCoord + 1, zCoord);
-		if (tileEntity != null && tileEntity instanceof TileEntityLaserMedium) {
-			booster = (TileEntityLaserMedium) tileEntity;
-		}
-		
-		tileEntity = worldObj.getTileEntity(xCoord, yCoord - 1, zCoord);
-		if (tileEntity != null && tileEntity instanceof TileEntityLaserMedium) {
-			booster = (TileEntityLaserMedium) tileEntity;
-		}
-		
-		return booster;
-	}
-	
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
@@ -104,7 +93,6 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 		if (isFirstUpdate) {
 			isFirstUpdate = false;
 			scanForReactor();
-			scanForBooster();
 			myVec = new Vector3(this).translate(0.5);
 		}
 	}
@@ -117,22 +105,23 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 	@Override
 	public void updatedNeighbours() {
 		super.updatedNeighbours();
-		scanForBooster();
+		
 		scanForReactor();
 	}
 	
-	private void laserReactor(int energy) {
+	private void stabilize(final int energy) {
 		if (energy <= 0) {
 			return;
 		}
 		
-		scanForBooster();
 		scanForReactor();
-		if (booster == null)
+		if (directionLaserMedium == ForgeDirection.UNKNOWN) {
 			return;
-		if (reactor == null)
+		}
+		if (reactor == null) {
 			return;
-		if (booster.consumeEnergy(energy, false)) {
+		}
+		if (consumeEnergyFromLaserMediums(energy, false)) {
 			if (WarpDriveConfig.LOGGING_ENERGY && WarpDriveConfig.LOGGING_LUA) {
 				WarpDrive.logger.info("ReactorLaser on " + side.toString() + " side sending " + energy);
 			}
@@ -160,9 +149,9 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] sendLaser(Context context, Arguments arguments) {
+	public Object[] stabilize(Context context, Arguments arguments) {
 		if (arguments.count() >= 1) {
-			laserReactor(arguments.checkInteger(0));
+			stabilize(arguments.checkInteger(0));
 		}
 		
 		return null;
@@ -178,26 +167,20 @@ public class TileEntityEnanReactorLaser extends TileEntityAbstractLaser implemen
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName.equals("energy")) {
-			scanForBooster();
-			if (booster == null) {
-				return new Object[] { 0, 0 };
-			} else {
-				return new Object[] { booster.getEnergyStored(), booster.getMaxEnergyStored() };
-			}
-			
-		} else if (methodName.equals("hasReactor")) {
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("hasReactor")) {
 			return new Object[] { scanForReactor() != null };
 			
-		} else if (methodName.equals("sendLaser")) {
+		} else if (methodName.equals("stabilize")) {
 			if (arguments.length >= 1) {
-				laserReactor(toInt(arguments[0]));
+				stabilize(toInt(arguments[0]));
 			}
 			
 		} else if (methodName.equals("side")) {
 			return new Object[] { side.ordinal() - 2 };
 		}
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 }

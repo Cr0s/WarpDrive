@@ -179,10 +179,6 @@ public class WarpDrive implements LoadingCallback {
 	
 	public static WarpDrivePeripheralHandler peripheralHandler = null;
 	
-	public static String defHelpStr = "help(\"functionName\"): returns help for the function specified";
-	public static String defEnergyStr = "getEnergyLevel(): returns currently contained energy, max contained energy";
-	public static String defUpgradeStr = "upgrades(): returns a list of currently installed upgrades";
-	
 	public static Logger logger;
 	
 	@EventHandler

@@ -51,12 +51,11 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	public TileEntityCloakingCore() {
 		super();
 		peripheralName = "warpdriveCloakingCore";
-		methodsArray = new String[] {
+		addMethods(new String[] {
 			"tier",				// set field tier to 1 or 2, return field tier
 			"isAssemblyValid",	// returns true or false
-			"getEnergyLevel", 
 			"enable"			// set field enable state (true or false), return true if enabled
-		};
+		});
 		CC_scripts = Arrays.asList("cloak1", "cloak2", "uncloak");
 	}
 	
@@ -279,7 +278,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			energyToConsume = volume * WarpDriveConfig.CLOAKING_TIER2_ENERGY_PER_BLOCK;
 		}
 		
-		// WarpDrive.logger.info(this + " Consuming " + energyToConsume + " eU for " + blocksCount + " blocks");
+		// WarpDrive.logger.info(this + " Consuming " + energyToConsume + " EU for " + blocksCount + " blocks");
 		return consumeEnergy(energyToConsume, false);
 	}
 	
@@ -392,7 +391,8 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
+		String methodName = getMethodName(method);
+		
 		if (methodName.equals("tier")) {
 			if (arguments.length == 1) {
 				if (toInt(arguments[0]) == 2) {
@@ -406,9 +406,6 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 		} else if (methodName.equals("isAssemblyValid")) {
 			return new Object[] { (boolean)validateAssembly() };
 			
-		} else if (methodName.equals("getEnergyLevel")) {
-			return getEnergyLevel();
-			
 		} else if (methodName.equals("enable")) {
 			if (arguments.length == 1) {
 				isEnabled = toBool(arguments[0]);
@@ -416,7 +413,7 @@ public class TileEntityCloakingCore extends TileEntityAbstractEnergy {
 			return new Object[] { isEnabled };
 		}
 		
-		return null;
+		return super.callMethod(computer, context, method, arguments);
 	}
 	
 	@Override

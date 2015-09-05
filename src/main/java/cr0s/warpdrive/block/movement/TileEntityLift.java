@@ -39,10 +39,10 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
 		peripheralName = "warpdriveLift";
-		methodsArray = new String[] {
-				"getEnergyLevel",
+		addMethods(new String[] {
 				"mode",
-				"active" };
+				"active"
+		});
 	}
 	
 	@Override
@@ -231,11 +231,9 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName.equals("getEnergyLevel")) {
-			return getEnergyLevel();
-			
-		} else if (methodName.equals("mode")) {
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("mode")) {
 			return mode(arguments);
 			
 		} else if (methodName.equals("active")) {
@@ -244,6 +242,7 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			}
 			return new Object[] { computerEnabled ? false : isEnabled };
 		}
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 }

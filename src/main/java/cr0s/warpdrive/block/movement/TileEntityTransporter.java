@@ -42,11 +42,22 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 
 	public TileEntityTransporter() {
 		super();
+		
 		IC2_sinkTier = 2;
 		IC2_sourceTier = 2;
+		
 		peripheralName = "warpdriveTransporter";
-		methodsArray = new String[] { "source", "dest", "lock", "release", "lockStrength", "energize", "getEnergyLevel", "powerBoost", "energyCost",
-				"upgrades", "help" };
+		addMethods(new String[] {
+				"source",
+				"dest",
+				"lock",
+				"release",
+				"lockStrength",
+				"energize",
+				"powerBoost",
+				"getEnergyRequired",
+				"upgrades"
+		});
 	}
 
 	@Override
@@ -68,38 +79,34 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	// ComputerCraft IPeripheral methods implementation
 	private static String helpStr(Object[] function) {
 		if (function != null && function.length > 0) {
-			String fun = function[0].toString().toLowerCase();
-			if (fun.equals("source")) {
+			String methodName = function[0].toString().toLowerCase();
+			if (methodName.equals("source")) {
 				if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 					return "source(x,y,z): sets the coordinates (relative to the transporter) to teleport from\ndest(): returns the relative x,y,z coordinates of the source";
 				} else {
 					return "source(x,y,z): sets the absolute coordinates to teleport from\ndest(): returns the x,y,z coordinates of the source";
 				}
-			} else if (fun.equals("dest")) {
+			} else if (methodName.equals("dest")) {
 				if (WarpDriveConfig.TRANSPORTER_USE_RELATIVE_COORDS) {
 					return "dest(x,y,z): sets the coordinates (relative to the transporter) to teleport to\ndest(): returns the relative x,y,z coordinates of the destination";
 				} else {
 					return "dest(x,y,z): sets the absolute coordinates to teleport to\ndest(): returns the x,y,z coordinates of the destination";
 				}
-			} else if (fun.equals("lock")) {
+			} else if (methodName.equals("lock")) {
 				return "lock(): locks the source and dest coordinates in and returns the lock strength (float)";
-			} else if (fun.equals("release")) {
+			} else if (methodName.equals("release")) {
 				return "release(): releases the current lock";
-			} else if (fun.equals("lockstrength")) {
+			} else if (methodName.equals("lockstrength")) {
 				return "lockStrength(): returns the current lock strength (float)";
-			} else if (fun.equals("energize")) {
+			} else if (methodName.equals("energize")) {
 				return "energize(): attempts to teleport all entities at source to dest. Returns the number of entities transported (-1 indicates a problem).";
-			} else if (fun.equals("powerboost")) {
+			} else if (methodName.equals("powerboost")) {
 				return "powerBoost(boostAmount): sets the level of power to use (1 being default), returns the level of power\npowerBoost(): returns the level of power";
-			} else if (fun.equals("energycost")) {
+			} else if (methodName.equals("energycost")) {
 				return "energyCost(): returns the amount of energy it will take for a single entity to transport with the current settings";
-			} else if (fun.equals("upgrades")) {
-				return WarpDrive.defUpgradeStr;
-			} else if (fun.equals("getEnergyLevel")) {
-				return WarpDrive.defEnergyStr;
 			}
 		}
-		return WarpDrive.defHelpStr;
+		return null;
 	}
 
 	private Object[] setVec3(boolean src, Object... arguments) {
@@ -141,22 +148,27 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName.equals("getEnergyLevel")) {
-			return new Object[] { getEnergyStored(), getMaxEnergyStored() };
-		} else if (methodName.equals("source")) {
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("source")) {
 			return setVec3(true, arguments);
+			
 		} else if (methodName.equals("dest")) {
 			return setVec3(false, arguments);
+			
 		} else if (methodName.equals("lock")) {
 			return new Object[] { lock(sourceVec, destVec) };
+			
 		} else if (methodName.equals("release")) {
 			unlock();
 			return null;
+			
 		} else if (methodName.equals("lockStrength")) {
 			return new Object[] { getLockStrength() };
+			
 		} else if (methodName.equals("energize")) {
 			return new Object[] { energize() };
+			
 		} else if (methodName.equals("powerBoost")) {
 			try {
 				if (arguments.length >= 1) {
@@ -166,16 +178,18 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 				powerBoost = 1;
 			}
 			return new Object[] { powerBoost };
-		} else if (methodName.equals("energyCost")) {
-			return new Object[] { energyCost() };
+			
+		} else if (methodName.equals("getEnergyRequired")) {
+			return new Object[] { getEnergyRequired() };
+			
 		} else if (methodName.equals("help")) {
 			return new Object[] { helpStr(arguments) };
 		}
-
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 
-	private Integer energyCost() {
+	private Integer getEnergyRequired() {
 		if (sourceVec != null && destVec != null) {
 			return (int) Math.ceil(Math.pow(3, powerBoost - 1) * WarpDriveConfig.TRANSPORTER_ENERGY_PER_BLOCK * sourceVec.distanceTo(destVec));
 		}
@@ -190,13 +204,13 @@ public class TileEntityTransporter extends TileEntityAbstractEnergy implements I
 				WarpDrive.logger.info(this + " lock strength " + getLockStrength());
 			}
 			ArrayList<Entity> entitiesToTransport = findEntities(sourceVec, ls);
-			Integer energyReq = energyCost();
-			if (energyReq == null) {
+			Integer energyRequired = getEnergyRequired();
+			if (energyRequired == null) {
 				return -1;
 			}
 			Vector3 modDest = destVec.clone().translate(centreOnMe);
 			for (Entity ent : entitiesToTransport) {
-				if (consumeEnergy(energyReq, false)) {
+				if (consumeEnergy(energyRequired, false)) {
 					if (WarpDriveConfig.LOGGING_TRANSPORTER) {
 						WarpDrive.logger.info(this + " Transporting entity " + ent.getEntityId());
 					}

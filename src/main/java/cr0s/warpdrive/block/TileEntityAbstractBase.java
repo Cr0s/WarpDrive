@@ -1,9 +1,15 @@
 package cr0s.warpdrive.block;
 
+import cr0s.warpdrive.api.IBlockUpdateDetector;
 import net.minecraft.tileentity.TileEntity;
 
-public abstract class TileEntityAbstractBase extends TileEntity
-{
+public abstract class TileEntityAbstractBase extends TileEntity implements IBlockUpdateDetector {
+	
+	@Override
+	public void updatedNeighbours() {
+	}
+	
+	
 	protected static int toInt(double d) {
 		return (int) Math.round(d);
 	}

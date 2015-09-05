@@ -1,11 +1,8 @@
 package cr0s.warpdrive.block.energy;
 
-import cpw.mods.fml.common.Optional;
 import net.minecraftforge.common.util.ForgeDirection;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.config.WarpDriveConfig;
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityEnergyBank extends TileEntityAbstractEnergy {
 
@@ -14,9 +11,6 @@ public class TileEntityEnergyBank extends TileEntityAbstractEnergy {
 		IC2_sinkTier = 0;
 		IC2_sourceTier = 0;
 		peripheralName = "warpdriveEnergyBank";
-		methodsArray = new String[] {
-				"getEnergyLevel"
-		};
 	}
 
 	@Override
@@ -42,16 +36,5 @@ public class TileEntityEnergyBank extends TileEntityAbstractEnergy {
 	@Override
 	public boolean canOutputEnergy(ForgeDirection to) {
 		return true;
-	}
-
-	// ComputerCraft IPeripheral methods implementation
-	@Override
-	@Optional.Method(modid = "ComputerCraft")
-	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName == "getEnergyLevel") {
-			return getEnergyLevel();
-		}
-		return null;
 	}
 }

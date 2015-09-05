@@ -10,9 +10,6 @@ public class TileEntityLaserMedium extends TileEntityAbstractEnergy {
 
 	public TileEntityLaserMedium() {
 		peripheralName = "warpdriveLaserMedium";
-		methodsArray = new String[] {
-			"getEnergyLevel"
-		};
 	}
 	
 	@Override

@@ -24,60 +24,60 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
  * @author Cr0s
  */
 public class TileEntityShipController extends TileEntityAbstractInterfaced {
-    // Variables
-    private int distance = 0;
-    private int direction = 0;
-    private ShipCoreMode mode = ShipCoreMode.IDLE;
-
-    private boolean jumpFlag = false;
-    private boolean summonFlag = false;
-    private String toSummon = "";
-
-    private String targetJumpgateName = "";
-
-    // Gabarits
-    private int front, right, up;
-    private int back, left, down;
-
-    // Player attaching
-    public ArrayList<String> players = new ArrayList();
-    public String playersString = "";
-
-    private String beaconFrequency = "";
-
-    boolean ready = false;                // Ready to operate (valid assembly)
-
-    private final int updateInterval_ticks = 20 * WarpDriveConfig.SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS;
-    private int updateTicks = updateInterval_ticks;
-    private int bootTicks = 20;
-
-    private TileEntityShipCore core = null;
-
-    public TileEntityShipController() {
-    	super();
+	// Variables
+	private int distance = 0;
+	private int direction = 0;
+	private ShipCoreMode mode = ShipCoreMode.IDLE;
+	
+	private boolean jumpFlag = false;
+	private boolean summonFlag = false;
+	private String toSummon = "";
+	
+	private String targetJumpgateName = "";
+	
+	// Gabarits
+	private int front, right, up;
+	private int back, left, down;
+	
+	// Player attaching
+	public ArrayList<String> players = new ArrayList();
+	public String playersString = "";
+	
+	private String beaconFrequency = "";
+	
+	boolean ready = false;                // Ready to operate (valid assembly)
+	
+	private final int updateInterval_ticks = 20 * WarpDriveConfig.SHIP_CONTROLLER_UPDATE_INTERVAL_SECONDS;
+	private int updateTicks = updateInterval_ticks;
+	private int bootTicks = 20;
+	
+	private TileEntityShipCore core = null;
+	
+	public TileEntityShipController() {
+		super();
+		
 		peripheralName = "warpdriveShipController";
-    	methodsArray = new String[] {
-            "dim_positive",
-            "dim_negative",
-            "mode",
-            "distance",
-            "direction",
-            "getAttachedPlayers",
-            "summon",
-            "summonAll",
-            "pos",
-            "getEnergyLevel",
-            "jump",
-            "getShipSize",
-            "beaconFrequency",
-            "getOrientation",
-            "coreFrequency",
-            "isInSpace",
-            "isInHyperspace",
-            "targetJumpgate",
-            "isAttached",
-            "getEnergyRequired"
-        };
+		addMethods(new String[] {
+				"dim_positive",
+				"dim_negative",
+				"mode",
+				"distance",
+				"direction",
+				"energy",
+				"getAttachedPlayers",
+				"summon",
+				"summonAll",
+				"jump",
+				"getShipSize",
+				"beaconFrequency",
+				"getOrientation",
+				"coreFrequency",
+				"isInSpace",
+				"isInHyperspace",
+				"targetJumpgate",
+				"isAttached",
+				"getEnergyRequired"
+		});
 		CC_scripts = Arrays.asList("startup");
 	}
     
@@ -487,9 +487,10 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 		return null;
 	}
 	
+	@Override
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] pos(Context context, Arguments arguments) {
+	public Object[] position(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
@@ -499,12 +500,12 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] getEnergyLevel(Context context, Arguments arguments) {
+	public Object[] energy(Context context, Arguments arguments) {
 		if (core == null) {
 			return null;
 		}
 		
-		return core.getEnergyLevel();
+		return core.energy();
 	}
 	
 	@Callback
@@ -514,7 +515,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 			return null;
 		}
 		
-		return core.getEnergyLevel();
+		return getEnergyRequired(argumentsOCtoCC(arguments));
 	}
 	
 	@Callback
@@ -692,7 +693,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 		}
 		return new Object[] { false };
 	}
-
+	
 	private Object[] getEnergyRequired(Object[] arguments) {
 		try {
 			if (arguments.length == 1 && core != null) {
@@ -748,12 +749,12 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 		}
 		return new Object[] { targetJumpgateName };
 	}
-
+	
 	// ComputerCraft IPeripheral methods implementation
-    @Override
+	@Override
 	@Optional.Method(modid = "ComputerCraft")
-    public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
+	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
+		String methodName = getMethodName(method);
 		
 		if (methodName.equals("dim_positive")) {// dim_positive (front, right, up)
 			return dim_positive(arguments);
@@ -779,20 +780,20 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 		} else if (methodName.equals("summon_all")) {
 			setSummonAllFlag(true);
 			
-		} else if (methodName.equals("pos")) {
+		} else if (methodName.equals("position")) {
 			if (core == null) {
 				return null;
 			}
 			
 			return new Object[] { core.xCoord, core.yCoord, core.zCoord };
 			
-		} else if (methodName.equals("getEnergyLevel")) {
+		} else if (methodName.equals("energy")) {
 			if (core == null) {
 				return null;
 			}
 			
-			return core.getEnergyLevel();
-			
+			return core.energy();
+		
 		} else if (methodName.equals("getEnergyRequired")) {// getEnergyRequired(distance)
 			return getEnergyRequired(arguments);
 			
@@ -829,7 +830,7 @@ public class TileEntityShipController extends TileEntityAbstractInterfaced {
 			}
 		}
 		
-		return new Integer[] { 0 };
+		return super.callMethod(computer, context, method, arguments);
 	}
 
     /**

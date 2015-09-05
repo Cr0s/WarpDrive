@@ -6,19 +6,19 @@ import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.WarpDrive;
-import cr0s.warpdrive.api.IBlockUpdateDetector;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
-public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implements IBlockUpdateDetector {
+public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy {
 	private int containedEnergy = 0;
 	
 	// generation & instability is 'per tick'
@@ -63,15 +63,14 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 	public TileEntityEnanReactorCore() {
 		super();
 		peripheralName = "warpdriveEnanReactorCore";
-		methodsArray = new String[] {
+		addMethods(new String[] {
 			"active",
 			"energy",		// returns energy, max energy, energy rate
 			"instability",	// returns ins0,1,2,3
 			"release",		// releases all energy
 			"releaseRate",	// releases energy when more than arg0 is produced
-			"releaseAbove",	// releases any energy above arg0 amount
-			"help"			// returns help on arg0 function
-		};
+			"releaseAbove"	// releases any energy above arg0 amount
+		});
 		CC_scripts = Arrays.asList("startup");
 	}
 	
@@ -212,26 +211,31 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		// remove blocks randomly up to x blocks around (breaking whatever protection is there)
 		double normalizedEnergy = containedEnergy / (double) WarpDriveConfig.ENAN_REACTOR_MAX_ENERGY_STORED;
 		int radius = (int) Math.round(PR_MAX_EXPLOSION_RADIUS * Math.pow(normalizedEnergy, 0.125));
-		double c = PR_MAX_EXPLOSION_REMOVAL_CHANCE * Math.pow(normalizedEnergy, 0.125);
+		double chanceOfRemoval = PR_MAX_EXPLOSION_REMOVAL_CHANCE * Math.pow(normalizedEnergy, 0.125);
 		if (WarpDriveConfig.LOGGING_ENERGY) {
-			WarpDrive.logger.info(this + " Explosion radius is " + radius + ", Chance of removal is " + c);
+			WarpDrive.logger.info(this + " Explosion radius is " + radius + ", Chance of removal is " + chanceOfRemoval);
 		}
 		if (radius > 1) {
+			float bedrockExplosionResistance = Blocks.bedrock.getExplosionResistance(null);
 			for (int x = xCoord - radius; x <= xCoord + radius; x++) {
 				for (int y = yCoord - radius; y <= yCoord + radius; y++) {
 					for (int z = zCoord - radius; z <= zCoord + radius; z++) {
 						if (z != zCoord || y != yCoord || x != xCoord) {
-							if (worldObj.rand.nextDouble() < c) {
-								worldObj.setBlockToAir(x, y, z);
+							if (worldObj.rand.nextDouble() < chanceOfRemoval) {
+								if (worldObj.getBlock(x, y, z).getExplosionResistance(null) >= bedrockExplosionResistance) {
+									worldObj.setBlockToAir(x, y, z);
+								}
 							}
 						}
 					}
 				}
 			}
 		}
+		
 		// remove reactor
 		worldObj.setBlockToAir(xCoord, yCoord, zCoord);
-		// set a few TnT augmented around reactor
+		
+		// set a few augmented TnT around reactor core
 		for (int i = 0; i < 3; i++) {
 			worldObj.newExplosion((Entity) null,
 				xCoord + worldObj.rand.nextInt(3) - 0.5D,
@@ -276,23 +280,21 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 	
 	@Override
 	public void updatedNeighbours() {
-		TileEntity te;
 		super.updatedNeighbours();
 		
-		int[] xo = { 0, 0, -2, 2 };
-		int[] zo = { 2, -2, 0, 0 };
+		int[] offsetsX = { 0, 0, -2, 2 };
+		int[] offsetsZ = { 2, -2, 0, 0 };
 		
+		TileEntity tileEntity;
 		for (int i = 0; i < 4; i++) {
-			te = worldObj.getTileEntity(xCoord + xo[i], yCoord, zCoord + zo[i]);
-			if (te instanceof TileEntityEnanReactorLaser) {
-				((TileEntityEnanReactorLaser) te).scanForReactor();
+			tileEntity = worldObj.getTileEntity(xCoord + offsetsX[i], yCoord, zCoord + offsetsZ[i]);
+			if (tileEntity instanceof TileEntityEnanReactorLaser) {
+				((TileEntityEnanReactorLaser) tileEntity).scanForReactor();
 			}
 		}
 	}
 	
 	// OpenComputer callback methods
-	// FIXME: implement OpenComputers...
-	
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
 	public Object[] active(Context context, Arguments arguments) throws Exception {
@@ -409,7 +411,7 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 		// computer is alive => start updating reactor
 		hold = false;
 		
-		String methodName = methodsArray[method];
+		String methodName = getMethodName(method);
 		
 		try {
 			if (methodName.equals("active")) {
@@ -434,11 +436,11 @@ public class TileEntityEnanReactorCore extends TileEntityAbstractEnergy implemen
 			} else if (methodName.equals("releaseAbove")) {
 				return releaseAbove(arguments);
 			}
-		} catch (Exception e) {
-			return new String[] { e.getMessage() };
+		} catch (Exception exception) {
+			return new String[] { exception.getMessage() };
 		}
 		
-		return null;
+		return super.callMethod(computer, context, method, arguments);
 	}
 	
 	// POWER INTERFACES
