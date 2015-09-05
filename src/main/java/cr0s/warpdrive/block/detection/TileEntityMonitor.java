@@ -15,10 +15,10 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 	private int frequency = -1;
-
+	
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 	private int packetSendTicks = 20;
-
+	
 	public TileEntityMonitor() {
 		super();
 		peripheralName = "warpdriveMonitor";
@@ -30,7 +30,7 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 	@Override
 	public void updateEntity() {
 		super.updateEntity();
-
+		
 		if (FMLCommonHandler.instance().getEffectiveSide().isServer()) {
 			packetSendTicks--;
 			if (packetSendTicks <= 0) {
@@ -40,34 +40,34 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 			return;
 		}
 	}
-
+	
 	public int getFrequency() {
 		return frequency;
 	}
-
+	
 	public void setFrequency(int parFrequency) {
 		if (frequency != parFrequency) {
 			frequency = parFrequency;
 			if (WarpDriveConfig.LOGGING_FREQUENCY) {
 				WarpDrive.logger.info(this + " Monitor frequency set to " + frequency);
 			}
-	        // force update through main thread since CC runs on server as 'client'
-	        packetSendTicks = 0;
+			// force update through main thread since CC runs on server as 'client'
+			packetSendTicks = 0;
 		}
 	}
-
+	
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
 		frequency = tag.getInteger("frequency");
 	}
-
+	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
 		tag.setInteger("frequency", frequency);
 	}
-
+	
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
@@ -77,27 +77,27 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 		}
 		return new Integer[] { frequency };
 	}
-
+	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-    	String methodName = methodsArray[method];
-    	if (methodName.equals("freq")) {
+		String methodName = methodsArray[method];
+		if (methodName.equals("freq")) {
 			if (arguments.length == 1) {
 				setFrequency(toInt(arguments[0]));
 			}
 			return new Integer[] { frequency };
-    	}
-    	return null;
+		}
+		return null;
 	}
 	
 	@Override
 	public String toString() {
-        return String.format("%s \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
-       		getClass().getSimpleName(),
-       		frequency,
-       		worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
-       		xCoord, yCoord, zCoord});
+		return String.format("%s \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
+				getClass().getSimpleName(),
+				frequency,
+				worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
+						xCoord, yCoord, zCoord});
 	}
 }
