@@ -8,7 +8,6 @@ import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Optional;
-import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
@@ -114,7 +113,6 @@ public abstract class TileEntityAbstractLaser extends TileEntityAbstractInterfac
 			energyAverage = WarpDriveConfig.LASER_MEDIUM_MAX_ENERGY_STORED;
 			energyLeftOver = 0;
 		}
-		WarpDrive.logger.info(this + " !!!capped amount " + amount + " count " + count + " totalEnergy " + totalEnergy + " energyAverage " + energyAverage + " energyLeftOver " + energyLeftOver);
 		
 		// Secondary scan for laser medium below the required average
 		for (TileEntityLaserMedium laserMedium : laserMediums) {
@@ -123,7 +121,6 @@ public abstract class TileEntityAbstractLaser extends TileEntityAbstractInterfac
 				energyLeftOver += energyAverage - energyStored;
 			}
 		}
-		WarpDrive.logger.info(this + " !!! energyLeftOver2 " + energyLeftOver);
 		
 		// Third and final pass for energy consumption
 		int energyTotalConsumed = 0;
@@ -134,7 +131,6 @@ public abstract class TileEntityAbstractLaser extends TileEntityAbstractInterfac
 			laserMedium.consumeEnergy(energyToConsume, simulate);
 			energyTotalConsumed += energyToConsume;
 		}
-		WarpDrive.logger.info(this + " !!! energyTotalConsumed " + energyTotalConsumed + " energyLeftOver " + energyLeftOver);
 		return energyTotalConsumed;
 	}
 	
