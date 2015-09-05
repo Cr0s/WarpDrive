@@ -2,10 +2,12 @@ package cr0s.warpdrive.block;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IIcon;
@@ -56,5 +58,27 @@ public class BlockLaser extends BlockContainer {
 	@Override
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
+	}
+	
+	/**
+	 * Called upon block activation (right click on the block.)
+	 */
+	@Override
+	public boolean onBlockActivated(World par1World, int x, int y, int z, EntityPlayer entityPlayer, int par6, float par7, float par8, float par9) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return false;
+		}
+		
+		// Get camera frequency
+		TileEntity tileEntity = par1World.getTileEntity(x, y, z);
+		if (tileEntity != null && tileEntity instanceof TileEntityLaser && (entityPlayer.getHeldItem() == null)) {
+			int beamFrequency = ((TileEntityLaser)tileEntity).getBeamFrequency();
+			
+			WarpDrive.addChatMessage(entityPlayer, getLocalizedName()
+					+ ": Beam frequency " + beamFrequency + " is " + ((beamFrequency < 0) ? "invalid!" : "valid."));
+			return true;
+		}
+		
+		return false;
 	}
 }
