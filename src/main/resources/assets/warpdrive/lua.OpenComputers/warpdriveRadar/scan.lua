@@ -66,7 +66,7 @@ function drawContact(x, y, z, name, color)
 end
 
 function scanAndDraw()
-  local energy, energyMax = radar.getEnergyLevel()
+  local energy, energyMax = radar.energy()
   if (energy < radius * radius) then
     hh = math.floor(h / 2)
     hw = math.floor(w / 2)
@@ -77,7 +77,8 @@ function scanAndDraw()
     
     return 0
   end
-  radar.scanRadius(radius)
+  radar.radius(radius)
+  radar.start()
   os.sleep(2)
   
   redraw()
@@ -86,9 +87,9 @@ function scanAndDraw()
   
   if (numResults ~= 0) then
     for i = 0, numResults-1 do
-      freq, cx, cy, cz = radar.getResult(i)
+      success, type, name, cx, cy, cz = radar.getResult(i)
       
-      drawContact(cx, cy, cz, freq, 0xFF0000)
+      drawContact(cx, cy, cz, name, 0xFF0000)
     end
   end
   
@@ -107,11 +108,11 @@ function redraw()
   
   textOut(w - 3, 1, "[X]", 0xFFFFFF, 0xFF0000)
   
-  local energy, energyMax = radar.getEnergyLevel()
+  local energy, energyMax = radar.energy()
   textOut(4, h, "Energy: " .. energy .. " EU | Scan radius: " .. radius, 0xFFFFFF, 0x000000)
 end
 
-radarX, radarY, radarZ = radar.pos()
+radarX, radarY, radarZ = radar.position()
 
 while component.isAvailable("warpdriveRadar") do
   scanAndDraw()

@@ -454,7 +454,7 @@ function cloaking_page()
 		SetColorDefault()
 		Write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores)
 		local isAssemblyValid = cloakingcore.isAssemblyValid()
-		local energy, energyMax = cloakingcore.getEnergyLevel()
+		local energy, energyMax = cloakingcore.energy()
 		local isEnabled = cloakingcore.enable()
 		
 		if not isAssemblyValid then
@@ -716,7 +716,7 @@ function data_explode(separator, data)
 end
 
 function data_setName()
-	if warpcore ~= nil then
+	if ship ~= nil then
 		ShowTitle("<==== Set ship name ====>")
 	else
 		ShowTitle("<==== Set name ====>")
@@ -726,13 +726,13 @@ function data_setName()
 	Write("Enter ship name: ")
 	label = readInputText(label)
 	os.setComputerLabel(label)
-	if warpcore ~= nil then
-		warpcore.coreFrequency(label)
+	if ship ~= nil then
+		ship.coreFrequency(label)
 	end
 	os.reboot()
 end
 
------------ Warpcore support
+----------- Ship support
 
 core_front = 0
 core_right = 0
@@ -747,36 +747,36 @@ core_jumpCost = 0
 core_shipSize = 0
 
 function core_boot()
-	if warpcore == nil then
+	if ship == nil then
 		return
 	end
 
 	Write("Booting Warpdrive Core")
 	
 	if data.core_summon then
-		warpcore.summon_all()
+		ship.summon_all()
 	end
 	
 	Write(".")
-	core_front, core_right, core_up = warpcore.dim_positive()
-	core_back, core_left, core_down = warpcore.dim_negative()
-	core_isInHyper = warpcore.isInHyperspace()
+	core_front, core_right, core_up = ship.dim_positive()
+	core_back, core_left, core_down = ship.dim_negative()
+	core_isInHyper = ship.isInHyperspace()
 	
 	Write(".")
 	repeat
-		pos = warpcore.pos()
+		pos = ship.pos()
 		sleep(0.3)
 	until pos ~= nil
-	X, Y, Z = warpcore.pos()
+	X, Y, Z = ship.pos()
 	Write(".")
 	repeat
-		isAttached = warpcore.isAttached()
+		isAttached = ship.isAttached()
 		sleep(0.3)
 	until isAttached ~= false
 	
 	Write(".")
 	repeat
-		core_shipSize = warpcore.getShipSize()
+		core_shipSize = ship.getShipSize()
 		sleep(0.3)
 	until core_shipSize ~= nil 
 	
@@ -784,7 +784,7 @@ function core_boot()
 	core_computeRealDistance()
 	
 	Write(".")
-	warpcore.mode(1)
+	ship.mode(1)
 	WriteLn("")
 end
 
@@ -829,7 +829,7 @@ function core_computeNewCoordinates(cx, cy, cz)
 	elseif data.core_direction == 2 then
 		res.y = res.y - core_realDistance
 	end
-	local dx, dy, dz = warpcore.getOrientation()
+	local dx, dy, dz = ship.getOrientation()
 	if dx ~= 0 then
 		if data.core_direction == 0 then
 			res.x = res.x + (core_realDistance * dx)
@@ -858,14 +858,14 @@ function core_warp()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.direction(data.core_direction)
-		warpcore.distance(data.core_distance)
+		ship.direction(data.core_direction)
+		ship.distance(data.core_distance)
 		if core_isInHyper then
-			warpcore.mode(2)
+			ship.mode(2)
 		else
-			warpcore.mode(1)
+			ship.mode(1)
 		end
-		warpcore.jump()
+		ship.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
@@ -941,15 +941,15 @@ function core_page_setDimensions()
 	Write(" Down  (".. core_down ..") : ")
 	core_down = readInputNumber(core_down)
 	Write("Setting dimensions...")
-	warpcore.dim_positive(core_front, core_right, core_up)
-	warpcore.dim_negative(core_back, core_left, core_down)
-	core_shipSize = warpcore.getShipSize()
+	ship.dim_positive(core_front, core_right, core_up)
+	ship.dim_negative(core_back, core_left, core_down)
+	core_shipSize = ship.getShipSize()
 	if core_shipSize == nil then core_shipSize = 0 end
 end
 
 function core_page_summon()
 	ShowTitle("<==== Summon players ====>")
-	local playersString, playersArray = warpcore.getAttachedPlayers()
+	local playersString, playersArray = ship.getAttachedPlayers()
 	for i = 1, #playersArray do
 		Show(i..". "..playersArray[i])
 	end
@@ -961,10 +961,10 @@ function core_page_summon()
 	Write(":")
 	local input = readInputNumber("")
 	if input == "" then
-		warpcore.summon_all()
+		ship.summon_all()
 	else
 		input = tonumber(input)
-		warpcore.summon(input - 1)
+		ship.summon(input - 1)
 	end
 end
 
@@ -976,9 +976,9 @@ function core_page_jumpToBeacon()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.mode(4)
-		warpcore.beaconFrequency(freq)
-		warpcore.jump()
+		ship.mode(4)
+		ship.beaconFrequency(freq)
+		ship.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
@@ -991,23 +991,23 @@ function core_page_jumpToGate()
 	rs.setOutput(alarm_side, true)
 	if readConfirmation() then
 		rs.setOutput(alarm_side, false)
-		warpcore.mode(6)
-		warpcore.targetJumpgate(name)
-		warpcore.jump()
+		ship.mode(6)
+		ship.targetJumpgate(name)
+		ship.jump()
 	end
 	rs.setOutput(alarm_side, false)
 end
 
 function core_page()
-	ShowTitle(label .. " - Warpcore status")
-	if warpcore ~= nil then
+	ShowTitle(label .. " - Ship status")
+	if ship ~= nil then
 		WriteLn("Core:")
 		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
-		local energy, energyMax = warpcore.getEnergyLevel()
+		local energy, energyMax = ship.energy()
 		if energy == nil then energy = 0 end
 		if energyMax == nil then energyMax = 1 end
 		WriteLn(" Energy           = " .. math.floor(energy / energyMax * 100) .. " % (" .. energy .. "EU)")
-		local playersString, playersArray = warpcore.getAttachedPlayers()
+		local playersString, playersArray = ship.getAttachedPlayers()
 		if playersString == "" then players = "-" end
 		WriteLn(" Attached players = " .. playersString)
 		WriteLn("Dimensions:")
@@ -1025,7 +1025,7 @@ function core_page()
 			WriteLn(" Summon after     = No")
 		end
 	else
-		ShowWarning("No warpcore controller detected")
+		ShowWarning("No ship controller detected")
 	end
 	
 	SetCursorPos(1, 15)
@@ -1070,8 +1070,8 @@ function core_key(keycode)
 		rs.setOutput(alarm_side, true)
 		if readConfirmation() then
 			rs.setOutput(alarm_side, false)
-			warpcore.mode(5)
-			warpcore.jump()
+			ship.mode(5)
+			ship.jump()
 		end
 		rs.setOutput(alarm_side, false)
 		return true
@@ -1318,7 +1318,7 @@ end
 function reactor_laser(side)
 	for key,reactorlaser in pairs(reactorlasers) do
 		if (side == nil) or (reactorlaser.side() == side) then
-			reactorlaser.sendLaser(data.reactor_laserAmount)
+			reactorlaser.stabilize(data.reactor_laserAmount)
 		end
 	end
 end
@@ -1506,7 +1506,7 @@ function radar_page()
 		end
 
 		SetColorDefault()
-		local energy = { radar.getEnergyLevel() }
+		local energy = { radar.energy() }
 		SetCursorPos(1, 12)
 		Write("Energy: ")
 		if energy ~= nil then
@@ -1613,7 +1613,7 @@ function radar_scan()
 		draw_warning(monitor, "No radar")
 		return false
 	end
-	if radar.getEnergyLevel() < (data.radar_radius * data.radar_radius) then
+	if radar.energy() < (data.radar_radius * data.radar_radius) then
 		draw_warning(monitor, "LOW POWER")
 		return false
 	end
@@ -1622,9 +1622,11 @@ function radar_scan()
 		return false
 	end
 	radar_timerId = os.startTimer(radar_timerLength)
-
-	radar.scanRadius(data.radar_radius);
-	draw_warning(monitor, "Scanning...")
+	
+	radar.radius(data.radar_radius)
+	if radar.start() then
+		draw_warning(monitor, "Scanning...")
+	end
 	return false
 end
 
@@ -1633,11 +1635,13 @@ function radar_scanDone()
 	data.radar_results = {}
 	if (numResults ~= 0) then
 		for i = 0, numResults do
-			local frequency, x, y, z = radar.getResult(i)
-			if frequency == "default" then
-				frequency = "?"
+			local success, type, name, x, y, z = radar.getResult(i)
+			if success then
+				if name == "default" then
+					name = "?"
+				end
+				data.radar_results[i] = { x = x, y = y, z = z, name = name, type = type }
 			end
-			data.radar_results[i] = { x = x, y = y, z = z, frequency = frequency, kind = "core" }
 		end
 		data.radar_scale = data.radar_radius
 	end
@@ -1713,13 +1717,13 @@ function radar_drawContact(monitor, contact)
 	screenX = math.floor(screenX * (screenWidth  - 3) / 2 + ((screenWidth  - 1)  / 2) + 1.5)
 	screenY = math.floor(screenY * (screenHeight - 3) / 2 + ((screenHeight - 1) / 2) + 1.5)
 	
-	if contact.kind == "self" then
+	if contact.type == "self" then
 		draw_text(monitor, screenX, screenY, Style.TextRadarself, Style.CRadarself, Style.BGRadarself)
 	else
 		draw_text(monitor, screenX, screenY, Style.TextRadarother, Style.CRadarother, Style.BGRadarother)
 	end
 	if visible then
-		local text = contact.frequency
+		local text = contact.name
 		screenX = math.min(screenWidth - 1 - string.len(text), math.max(2, math.floor(screenX - string.len(text) / 2 + 0.5)))
 		if screenY == (screenHeight - 1) then
 			screenY = screenY - 1
@@ -1781,13 +1785,13 @@ function radar_drawMap()
 	-- status
 	local text = "Scan radius: " .. data.radar_radius
 	if radar ~= nil then
-		text = text .. " | Energy: " .. radar.getEnergyLevel() .. " EU"
+		text = text .. " | Energy: " .. radar.energy() .. " EU"
 	end
 	text = text .. " | Scale: " .. data.radar_scale
 	draw_centeredText(monitor, screenHeight, text)
 	-- results
 	SetCursorPos(1, 12)
-	radar_drawContact(monitor, {x = radar_x, y = radar_y, z = radar_z, frequency = "", kind = "self"})
+	radar_drawContact(monitor, {x = radar_x, y = radar_y, z = radar_z, name = "", type = "self"})
 	for i = 0, #data.radar_results - 1 do
 		radar_drawContact(monitor, data.radar_results[i])
 	end
@@ -1835,7 +1839,7 @@ reactor = nil
 mininglasers = {}
 reactorlasers = {}
 cloakingcores = {}
-warpcore = nil
+ship = nil
 radar = nil
 for key,side in pairs(sides) do
 	sleep(0)
@@ -1846,7 +1850,7 @@ for key,side in pairs(sides) do
 		lmonitor.setTextScale(monitor_textScale)
 	elseif peripheral.getType(side) == "warpdriveShipController" then
 		WriteLn("Wrapping " .. side)
-		warpcore = peripheral.wrap(side)
+		ship = peripheral.wrap(side)
 	elseif peripheral.getType(side) == "warpdriveEnanReactorCore" then
 		WriteLn("Wrapping " .. side)
 		reactor =  peripheral.wrap(side)
@@ -1866,7 +1870,7 @@ for key,side in pairs(sides) do
 end
 -- sleep(1)
 
-if not os.getComputerLabel() and (warpcore ~= nil or reactor ~= nil) then
+if not os.getComputerLabel() and (ship ~= nil or reactor ~= nil) then
 	data_setName()
 end
 
@@ -1886,12 +1890,12 @@ function connections_page()
 		WriteLn(#monitors .. " Monitors detected")
 	end
 
-	if warpcore == nil then
+	if ship == nil then
 		SetColorDisabled()
-		WriteLn("No warpcore controller detected")
+		WriteLn("No ship controller detected")
 	else
 		SetColorSuccess()
-		WriteLn("Warpcore controller detected")
+		WriteLn("Ship controller detected")
 	end
 
 	if reactor == nil then
@@ -1940,7 +1944,7 @@ function connections_page()
 		WriteLn("No radar detected")
 	else
 		SetColorSuccess()
-		WriteLn("Warpcore radar detected")
+		WriteLn("Radar detected")
 	end
 end
 

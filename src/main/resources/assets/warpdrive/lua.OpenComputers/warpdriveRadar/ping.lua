@@ -19,12 +19,13 @@ if radius < 1 or radius > 9999 then
   return
 end
 
-energy, energyMax = radar.getEnergyLevel()
+energy, energyMax = radar.energy()
 if energy < radius * radius then
   print("Low energy level... (" + energy + "/" + radius * radius + ")")
   return
 end
-radar.scanRadius(radius)
+radar.radius(radius)
+radar.start()
 os.sleep(0.5)
 
 print("Scanning...")
@@ -40,8 +41,12 @@ print("took " .. seconds .. " seconds")
 
 if count ~= nil and count > 0 then
   for i=0, count-1 do
-    freq, x, y, z = radar.getResult(i)
-    print("Ship '" .. freq .. "' @ (" .. x .. " " .. y .. " " .. z .. ")")
+    success, type, name, x, y, z = radar.getResult(i)
+	if success then
+      print(type .. " " .. name .. " @ (" .. x .. " " .. y .. " " .. z .. ")")
+	else
+	  print("Error " .. type)
+	end
   end
 else
   print("Nothing was found =(")

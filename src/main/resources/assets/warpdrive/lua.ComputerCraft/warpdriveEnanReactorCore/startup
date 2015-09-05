@@ -441,7 +441,7 @@ function cloaking_page()
 		SetColorDefault()
 		Write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores)
 		local isAssemblyValid = cloakingcore.isAssemblyValid()
-		local energy, energyMax = cloakingcore.getEnergyLevel()
+		local energy, energyMax = cloakingcore.energy()
 		local isEnabled = cloakingcore.enable()
 		
 		if not isAssemblyValid then
@@ -919,7 +919,7 @@ end
 function reactor_laser(side)
 	for key,reactorlaser in pairs(reactorlasers) do
 		if (side == nil) or (reactorlaser.side() == side) then
-			reactorlaser.sendLaser(data.reactor_laserAmount)
+			reactorlaser.stabilize(data.reactor_laserAmount)
 		end
 	end
 end

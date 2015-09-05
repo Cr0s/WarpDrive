@@ -139,7 +139,7 @@ function CalcNewCoords(cx, cy, cz)
  elseif SData.Direction == 2 then
   res.y = res.y - RealDistance
  end
- local dx, dy, dz = warp.getOrientation()
+ local dx, dy, dz = ship.getOrientation()
  if dx ~= 0 then
   if SData.Direction == 0 then
    res.x = res.x + (RealDistance * dx)
@@ -168,9 +168,9 @@ function ShowInfo()
  ShowTitle(Title)
  Show("Core:")
  Show(" x, y, z          = "..X..", "..Y..", "..Z)
- local energy, energyMax = warp.getEnergyLevel()
+ local energy, energyMax = ship.energy()
  Show(" Energy           = " .. math.floor(100 * energy / energyMax) .. " % (" .. energy .. "EU)")
- local playersString, playersArray = warp.getAttachedPlayers()
+ local playersString, playersArray = ship.getAttachedPlayers()
  Show(" Attached players = " .. playersString)
  Show("Dimensions:")
  Show(" Front, Right, Up = "..GFront..", "..GRight..", "..GUp)
@@ -201,13 +201,13 @@ end
 function Warp()
  rs.setOutput(Alarm, false)
  sleep(1)
- warp.direction(SData.Direction)
+ ship.direction(SData.Direction)
  if IsInHyper then
-  warp.mode(2)
+  ship.mode(2)
  else
-  warp.mode(1)
+  ship.mode(1)
  end
- warp.jump()
+ ship.jump()
 end
 
 function SetDistance()
@@ -233,7 +233,7 @@ function SetDistance()
   if not IsInHyper then
    SData.Distance = SData.Distance - RealDistance
   end
-  warp.distance(SData.Distance)
+  ship.distance(SData.Distance)
   CalcRealDistance()
  end
 end
@@ -286,15 +286,15 @@ function SetDimensions()
  term.write(" Down  ("..GDown..") : ")
  GDown = tonumber(read())
  term.write("Setting dimensions...")
- warp.dim_positive(GFront, GRight, GUp)
- warp.dim_negative(GBack, GLeft, GDown)
- weight = warp.getShipSize()
+ ship.dim_positive(GFront, GRight, GUp)
+ ship.dim_negative(GBack, GLeft, GDown)
+ weight = ship.getShipSize()
 end
 
 function Summon()
  Clear()
  ShowTitle("<==== Summon players ====>")
- local playersString, playersArray = warp.getAttachedPlayers()
+ local playersString, playersArray = ship.getAttachedPlayers()
  if playersArray == nil then
   Show("- no players attached -")
   sleep(1.0)
@@ -312,10 +312,10 @@ function Summon()
  term.write(":")
  local input = read()
  if input == "" then
-  warp.summonAll()
+  ship.summonAll()
  else
   input = tonumber(input)
-  warp.summon(input - 1)
+  ship.summon(input - 1)
  end
 end
 
@@ -328,9 +328,9 @@ function JumpToBeacon()
  rs.setOutput(Alarm, true)
  if Confirm() then
   rs.setOutput(Alarm, false)
-  warp.mode(4)
-  warp.beaconFrequency(freq)
-  warp.jump()
+  ship.mode(4)
+  ship.beaconFrequency(freq)
+  ship.jump()
  end
  rs.setOutput(Alarm, false)
 end
@@ -344,9 +344,9 @@ function JumpToGate()
  rs.setOutput(Alarm, true)
  if Confirm() then
   rs.setOutput(Alarm, false)
-  warp.mode(6)
-  warp.targetJumpgate(name)
-  warp.jump()
+  ship.mode(6)
+  ship.targetJumpgate(name)
+  ship.jump()
  end
  rs.setOutput(Alarm, false)
 end
@@ -358,7 +358,7 @@ function SetShipName()
  term.write("Enter ship name: ")
  SData.Shipname = tostring(read())
  os.setComputerLabel(SData.Shipname)
- warp.coreFrequency(SData.Shipname)
+ ship.coreFrequency(SData.Shipname)
  SaveData()
  os.reboot()
 end
@@ -377,14 +377,14 @@ end
 Side = { "bottom", "top", "back", "left", "right" }
 for i = 1,5 do
  if peripheral.getType(Side[i]) == "warpdriveShipController" then
-  warp = peripheral.wrap(Side[i])
+  ship = peripheral.wrap(Side[i])
   break
   else
-    warp = nil
+    ship = nil
   end
 end
 
-if warp == nil then
+if ship == nil then
  ShowWarning("No ship controller detected")
  os.pullEvent("key")
  os.reboot()
@@ -400,34 +400,34 @@ end
 Title = "<JumpShip \""..SData.Shipname.."\">"
 
 if SData.Summon then
- warp.summonAll()
+ ship.summonAll()
 end
 
-GFront, GRight, GUp = warp.dim_positive()
-GBack, GLeft, GDown = warp.dim_negative()
-IsInHyper = warp.isInHyperspace()
+GFront, GRight, GUp = ship.dim_positive()
+GBack, GLeft, GDown = ship.dim_negative()
+IsInHyper = ship.isInHyperspace()
 repeat
  sleep(0.3)
- pos = warp.pos()
+ pos = ship.position()
 until pos ~= nil
 print("Ship core detected...")
-X, Y, Z = warp.pos()
+X, Y, Z = ship.position()
 
 repeat
  sleep(0.3)
- isAttached = warp.isAttached()
+ isAttached = ship.isAttached()
 until isAttached
 print("Ship core linked...")
 
 repeat
  sleep(0.3)
- weight = warp.getShipSize()
+ weight = ship.getShipSize()
 until weight ~= nil
 print("Ship weight updated...")
 
 CalcRealDistance()
 
-warp.mode(1)
+ship.mode(1)
 
 mainloop = true
 while(mainloop) do
@@ -471,8 +471,8 @@ while(mainloop) do
   rs.setOutput(Alarm, true)
   if Confirm() then
    rs.setOutput(Alarm, false)
-   warp.mode(5)
-   warp.jump()
+   ship.mode(5)
+   ship.jump()
   end
   rs.setOutput(Alarm, false)
  elseif keycode == 45 then
@@ -488,6 +488,6 @@ if SData.Summon then
 end
 Clear()
 print("wish you good")
-warp.mode(0)
+ship.mode(0)
 sleep(0.5)
 os.shutdown()
