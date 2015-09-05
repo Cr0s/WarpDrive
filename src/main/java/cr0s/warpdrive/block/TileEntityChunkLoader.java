@@ -33,14 +33,12 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 		posDX = 0;
 		posDZ = 0;
 		peripheralName = "warpdriveChunkloader";
-		methodsArray = new String[] {
-				"getEnergyLevel",
+		addMethods(new String[] {
 				"radius",
 				"bounds",
 				"active",
-				"upgrades",
-				"help"
-		};
+				"upgrades"
+		});
 	}
 
 	@Override
@@ -124,34 +122,12 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 	// OpenComputer callback methods
 	// FIXME: implement OpenComputers...
 
-	// ComputerCraft IPeripheral methods implementation
-	private String helpStr(Object[] args)
-	{
-		if(args.length == 1)
-		{
-			String m = args[0].toString().toLowerCase();
-			if(m.equals("energy"))
-				return WarpDrive.defEnergyStr;
-			else if(m.equals("radius"))
-				return "radius(int): sets the radius in chunks";
-			else if(m.equals("bounds"))
-				return "bounds(int,int,int,int): sets the bounds of chunks to load\nbounds(): returns the 4 bounds\nFormat is -X, +X, -Z, +Z";
-			else if(m.equals("active"))
-				return "active(): returns whether active or not\nactive(boolean): sets whether it should be active or not";
-			else if(m.equals("upgrades"))
-				return WarpDrive.defUpgradeStr;
-		}
-		return WarpDrive.defHelpStr;
-	}
-
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String meth = methodsArray[method];
+		String methodName = methodsArray[method];
 
-		if(meth.equals("getEnergyLevel")) {
-			return getEnergyLevel();
-		} else if(meth.equals("radius"))
+		if(methodName.equals("radius"))
 		{
 			if(arguments.length == 1)
 			{
@@ -165,7 +141,7 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 			}
 			return new Object[] { false };
 		}
-		else if(meth.equals("bounds"))
+		else if(methodName.equals("bounds"))
 		{
 			if(arguments.length == 4)
 			{
@@ -177,22 +153,18 @@ public class TileEntityChunkLoader extends TileEntityAbstractChunkLoading implem
 			}
 			return new Object[] { negDX, posDX, negDZ, posDZ };
 		}
-		else if(meth.equals("active"))
+		else if(methodName.equals("active"))
 		{
 			if(arguments.length == 1)
 				shouldLoad = toBool(arguments[0]);
 			return new Object[] { shouldChunkLoad() };
 		}
-		else if(meth.equals("upgrades"))
+		else if(methodName.equals("upgrades"))
 		{
 			return getUpgrades();
 		}
-		else if(meth.equals("help"))
-		{
-			return new Object[] {helpStr(arguments) };
-		}
-
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 
 	@Override

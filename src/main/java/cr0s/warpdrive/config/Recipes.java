@@ -93,7 +93,7 @@ public class Recipes {
 				'c', WarpDrive.itemComponent.getItemStack(5),
 				'p', WarpDrive.itemComponent.getItemStack(6)));
 		
-		// Particle Booster
+		// Laser medium
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(WarpDrive.blockLaserMedium), false, "ipi", "rgr", "iii", 
 				'i', Items.iron_ingot,
 				'r', Items.redstone,
