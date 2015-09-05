@@ -53,7 +53,12 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 	public TileEntityShipScanner() {
 		super();
 		peripheralName = "warpdriveShipScanner";
-		methodsArray = new String[] { "scan", "fileName", "getEnergyLevel", "deploy", "state" };
+		addMethods(new String[] {
+				"scan",
+				"fileName",
+				"deploy",
+				"state"
+		});
 	}
 
 	@Override
@@ -589,26 +594,22 @@ public class TileEntityShipScanner extends TileEntityAbstractEnergy {
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
+		String methodName = getMethodName(method);
+		
 		if (methodName.equals("scan")) {
 			return scan(arguments);
-
+			
 		} else if (methodName.equals("fileName")) {
 			return filename(arguments);
-
-		} else if (methodName.equals("getEnergyLevel")) {
-			return getEnergyLevel();
-
-		} else if (methodName.equals("deploy")) {// deploy(schematicFileName,
-			// offsetX, offsetY,
-			// offsetZ)
+			
+		} else if (methodName.equals("deploy")) {// deploy(schematicFileName, offsetX, offsetY, offsetZ)
 			return deploy(arguments);
-
+			
 		} else if (methodName.equals("state")) {
 			return state(arguments);
 		}
-
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 
 	// IEnergySink methods implementation
