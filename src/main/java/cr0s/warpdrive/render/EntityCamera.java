@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import org.lwjgl.input.Keyboard;
@@ -49,6 +50,7 @@ public final class EntityCamera extends EntityLivingBase {
 		cameraY = y;
 		cameraZ = z;
 		this.player = player;
+		noClip = true;
 	}
 	
 	private void closeCamera() {
@@ -143,7 +145,7 @@ public final class EntityCamera extends EntityLivingBase {
 			}
 			
 			if (isCentered) {
-				setPosition(cameraX + 0.5D, cameraY + 0.75D, cameraZ + 0.5D);
+				setPosition(cameraX + 0.5D, cameraY + 0.5D, cameraZ + 0.5D);
 			} else {
 				setPosition(cameraX + dx, cameraY + dy, cameraZ + dz);
 			}
@@ -159,6 +161,29 @@ public final class EntityCamera extends EntityLivingBase {
 	@Override
 	public boolean shouldRenderInPass(int pass) {
 		return false;
+	}
+	
+	/*
+	// Item no clip
+	@Override
+	protected boolean func_145771_j(double par1, double par3, double par5) {
+		// Clipping is fine, don't move me
+		return false;
+	}
+	/**/
+	
+	@Override
+	public AxisAlignedBB getBoundingBox() {
+		return null;
+	}
+	
+	@Override
+	public boolean canBePushed() {
+		return false;
+	}
+	
+	@Override
+	public void moveEntity(double x, double y, double z) {
 	}
 	
 	@Override
