@@ -123,8 +123,14 @@ public class StarMapRegistry {
 				continue;
 			}
 			
-			// Skip offline warp cores
+			// Skip missing ship cores
+			TileEntity tileEntity = core.getWorldObj().getTileEntity(entry.x, entry.y, entry.z);
+			if (!(tileEntity instanceof TileEntityShipCore)) {
+				continue;
+			}
 			TileEntityShipCore shipCore = (TileEntityShipCore) core.getWorldObj().getTileEntity(entry.x, entry.y, entry.z);
+			
+			// Skip offline warp cores
 			if (shipCore.controller == null || shipCore.controller.getMode() == ShipCoreMode.IDLE || !shipCore.validateShipSpatialParameters(reason)) {
 				continue;
 			}
