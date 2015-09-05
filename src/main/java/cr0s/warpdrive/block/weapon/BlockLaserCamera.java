@@ -19,9 +19,9 @@ import cr0s.warpdrive.render.ClientCameraHandler;
 
 public class BlockLaserCamera extends BlockContainer {
 	private IIcon[] iconBuffer;
-
+	
 	private final int ICON_SIDE = 0;
-
+	
 	public BlockLaserCamera(int texture, Material material) {
 		super(material);
 		setHardness(0.5F);
@@ -29,24 +29,24 @@ public class BlockLaserCamera extends BlockContainer {
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.weapon.LaserCamera");
 	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[1];
 		// Solid textures
 		iconBuffer[ICON_SIDE] = par1IconRegister.registerIcon("warpdrive:weapon/laserCameraSide");
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		return iconBuffer[ICON_SIDE];
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World parWorld, int i) {
 		return new TileEntityLaser();
 	}
-
+	
 	/**
 	 * Returns the quantity of items to drop on block destruction.
 	 */
@@ -54,7 +54,7 @@ public class BlockLaserCamera extends BlockContainer {
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
+	
 	/**
 	 * Returns the ID of the items to drop on destruction.
 	 */
@@ -62,7 +62,7 @@ public class BlockLaserCamera extends BlockContainer {
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
 	}
-
+	
 	/**
 	 * Called upon block activation (right click on the block.)
 	 */
@@ -71,20 +71,20 @@ public class BlockLaserCamera extends BlockContainer {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
+		
 		// Get camera frequency
 		TileEntity tileEntity = par1World.getTileEntity(x, y, z);
 		if (!ClientCameraHandler.isOverlayEnabled && tileEntity != null && tileEntity instanceof TileEntityLaser && (entityPlayer.getHeldItem() == null)) {
 			int beamFrequency = ((TileEntityLaser)tileEntity).getBeamFrequency();
-			int cameraFrequency = ((TileEntityLaser)tileEntity).getCameraFrequency();
-
-			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, cameraFrequency);
+			int videoChannel = ((TileEntityLaser)tileEntity).getVideoChannel();
+			
+			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, videoChannel);
 			WarpDrive.addChatMessage(entityPlayer, getLocalizedName()
-					+ ": Beam frequency '" + beamFrequency + "' is " + ((beamFrequency < 0) ? "invalid!" : "valid.")
-					+ " Camera frequency '" + cameraFrequency + "' is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
+					+ ": Beam frequency " + beamFrequency + " is " + ((beamFrequency < 0) ? "invalid!" : "valid.")
+					+ " Video channel " + videoChannel + " is " + ((cam == null) ? "invalid!" : "valid for laser-camera at " + cam.position.chunkPosX + ", " + cam.position.chunkPosY + ", " + cam.position.chunkPosZ));
 			return true;
 		}
-
+		
 		return false;
 	}
 }

@@ -54,11 +54,11 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 		TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
 		if (tileEntity != null) {
 			if (tileEntity instanceof TileEntityMonitor) {
-				((TileEntityMonitor) tileEntity).setFrequency(frequency);
+				((TileEntityMonitor) tileEntity).setVideoChannel(frequency);
 			} else if (tileEntity instanceof TileEntityCamera) {
-				((TileEntityCamera) tileEntity).setFrequency(frequency);
+				((TileEntityCamera) tileEntity).setVideoChannel(frequency);
 			} else if (tileEntity instanceof TileEntityLaser) {
-				((TileEntityLaser) tileEntity).setCameraFrequency(frequency);
+				((TileEntityLaser) tileEntity).setVideoChannel(frequency);
 			} else {
 				WarpDrive.logger.error("Received frequency packet: (" + x + ", " + y + ", " + z + ") is not a valid tile entity");
 			}
@@ -76,7 +76,7 @@ public class MessageFrequency implements IMessage, IMessageHandler<MessageFreque
 			return null;
 		}
 		
-		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+		if (WarpDriveConfig.LOGGING_VIDEO_CHANNEL) {
 			WarpDrive.logger.info("Received frequency packet: (" + frequencyMessage.x + ", " + frequencyMessage.y + ", " + frequencyMessage.z + ") frequency '" + frequencyMessage.frequency + "'");
 		}
 		

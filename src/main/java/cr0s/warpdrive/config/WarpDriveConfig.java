@@ -100,7 +100,7 @@ public class WarpDriveConfig {
 	public static boolean LOGGING_ENERGY = false;
 	public static boolean LOGGING_EFFECTS = false;
 	public static boolean LOGGING_CLOAKING = false;
-	public static boolean LOGGING_FREQUENCY = false;
+	public static boolean LOGGING_VIDEO_CHANNEL = false;
 	public static boolean LOGGING_TARGETTING = false;
 	public static boolean LOGGING_WEAPON = false;
 	public static boolean LOGGING_CAMERA = false;
@@ -374,12 +374,12 @@ public class WarpDriveConfig {
 		if (WarpDrive.VERSION.contains("-dev")) {// disabled in production, for obvious reasons :)
 			LOGGING_EFFECTS = config.get("logging", "enable_effects_logs", LOGGING_EFFECTS, "Detailled effects logs to help debug the mod, will spam your console!").getBoolean(false);
 			LOGGING_CLOAKING = config.get("logging", "enable_cloaking_logs", LOGGING_CLOAKING, "Detailled cloaking logs to help debug the mod, will spam your console!").getBoolean(false);
-			LOGGING_FREQUENCY = config.get("logging", "enable_frequency_logs", LOGGING_FREQUENCY, "Detailled frequency logs to help debug the mod, will spam your console!").getBoolean(false);
+			LOGGING_VIDEO_CHANNEL = config.get("logging", "enable_frequency_logs", LOGGING_VIDEO_CHANNEL, "Detailled frequency logs to help debug the mod, will spam your console!").getBoolean(false);
 			LOGGING_TARGETTING = config.get("logging", "enable_targetting_logs", LOGGING_TARGETTING, "Detailled targetting logs to help debug the mod, will spam your console!").getBoolean(false);
 		} else {
 			LOGGING_EFFECTS = false;
 			LOGGING_CLOAKING = false;
-			LOGGING_FREQUENCY = false;
+			LOGGING_VIDEO_CHANNEL = false;
 			LOGGING_TARGETTING = false;
 		}
 		LOGGING_WEAPON = config.get("logging", "enable_weapon_logs", LOGGING_WEAPON, "Detailled weapon logs to help debug the mod, enable it before reporting a bug").getBoolean(false);

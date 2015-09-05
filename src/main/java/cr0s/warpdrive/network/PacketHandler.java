@@ -97,7 +97,7 @@ public class PacketHandler {
 	public static void sendFreqPacket(int dimensionId, int xCoord, int yCoord, int zCoord, int frequency) {
 		MessageFrequency frequencyMessage = new MessageFrequency(xCoord, yCoord, zCoord, frequency);
 		simpleNetworkManager.sendToAllAround(frequencyMessage, new TargetPoint(dimensionId, xCoord, yCoord, zCoord, 100));
-		if (WarpDriveConfig.LOGGING_FREQUENCY) {
+		if (WarpDriveConfig.LOGGING_VIDEO_CHANNEL) {
 			WarpDrive.logger.info("Sent frequency packet (" + xCoord + ", " + yCoord + ", " + zCoord + ") frequency " + frequency);
 		}
 	}

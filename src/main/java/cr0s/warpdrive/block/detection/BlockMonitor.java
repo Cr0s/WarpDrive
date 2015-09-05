@@ -67,10 +67,10 @@ public class BlockMonitor extends BlockContainer {
 		}
 
 		// Get camera frequency
-		TileEntity te = par1World.getTileEntity(x, y, z);
+		TileEntity tileEntity = par1World.getTileEntity(x, y, z);
 
-		if (te != null && te instanceof TileEntityMonitor && (entityPlayer.getHeldItem() == null)) {
-			int frequency = ((TileEntityMonitor)te).getFrequency();
+		if (tileEntity != null && tileEntity instanceof TileEntityMonitor && (entityPlayer.getHeldItem() == null)) {
+			int frequency = ((TileEntityMonitor)tileEntity).getVideoChannel();
 			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, frequency);
 			if (cam == null) {
 				WarpDrive.addChatMessage(entityPlayer, getLocalizedName() + " frequency '" + frequency + "' is invalid or camera is too far!");

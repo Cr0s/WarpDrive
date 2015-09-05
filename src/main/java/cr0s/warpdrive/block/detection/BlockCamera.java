@@ -64,7 +64,7 @@ public class BlockCamera extends BlockContainer {
 		// Get camera frequency
 		TileEntity te = par1World.getTileEntity(x, y, z);
 		if (te != null && te instanceof TileEntityCamera && (par5EntityPlayer.getHeldItem() == null)) {
-			int frequency = ((TileEntityCamera)te).getFrequency();
+			int frequency = ((TileEntityCamera)te).getVideoChannel();
 			
 			CameraRegistryItem cam = WarpDrive.instance.cameras.getCameraByFrequency(par1World, frequency);
 			if (cam == null) {

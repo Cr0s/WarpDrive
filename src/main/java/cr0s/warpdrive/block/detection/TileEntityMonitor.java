@@ -14,17 +14,18 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 
 public class TileEntityMonitor extends TileEntityAbstractInterfaced {
-	private int frequency = -1;
+	private int videoChannel = -1;
 	
 	private final static int PACKET_SEND_INTERVAL_TICKS = 60 * 20;
 	private int packetSendTicks = 20;
 	
 	public TileEntityMonitor() {
 		super();
+		
 		peripheralName = "warpdriveMonitor";
-		methodsArray = new String[] {
-			"freq"
-		};
+		addMethods(new String[] {
+			"videoChannel"
+		});
 	}
 	
 	@Override
@@ -35,21 +36,21 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 			packetSendTicks--;
 			if (packetSendTicks <= 0) {
 				packetSendTicks = PACKET_SEND_INTERVAL_TICKS;
-				PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, frequency);
+				PacketHandler.sendFreqPacket(worldObj.provider.dimensionId, xCoord, yCoord, zCoord, videoChannel);
 			}
 			return;
 		}
 	}
 	
-	public int getFrequency() {
-		return frequency;
+	public int getVideoChannel() {
+		return videoChannel;
 	}
 	
-	public void setFrequency(int parFrequency) {
-		if (frequency != parFrequency) {
-			frequency = parFrequency;
-			if (WarpDriveConfig.LOGGING_FREQUENCY) {
-				WarpDrive.logger.info(this + " Monitor frequency set to " + frequency);
+	public void setVideoChannel(int parVideoChannel) {
+		if (videoChannel != parVideoChannel) {
+			videoChannel = parVideoChannel;
+			if (WarpDriveConfig.LOGGING_VIDEO_CHANNEL) {
+				WarpDrive.logger.info(this + " Monitor frequency set to " + videoChannel);
 			}
 			// force update through main thread since CC runs on server as 'client'
 			packetSendTicks = 0;
@@ -59,44 +60,46 @@ public class TileEntityMonitor extends TileEntityAbstractInterfaced {
 	@Override
 	public void readFromNBT(NBTTagCompound tag) {
 		super.readFromNBT(tag);
-		frequency = tag.getInteger("frequency");
+		videoChannel = tag.getInteger("frequency") + tag.getInteger("videoChannel");
 	}
 	
 	@Override
 	public void writeToNBT(NBTTagCompound tag) {
 		super.writeToNBT(tag);
-		tag.setInteger("frequency", frequency);
+		tag.setInteger("videoChannel", videoChannel);
 	}
 	
 	// OpenComputer callback methods
 	@Callback
 	@Optional.Method(modid = "OpenComputers")
-	public Object[] freq(Context context, Arguments arguments) {
+	public Object[] videoChannel(Context context, Arguments arguments) {
 		if (arguments.count() == 1) {
-			setFrequency(arguments.checkInteger(0));
+			setVideoChannel(arguments.checkInteger(0));
 		}
-		return new Integer[] { frequency };
+		return new Integer[] { videoChannel };
 	}
 	
 	// ComputerCraft IPeripheral methods implementation
 	@Override
 	@Optional.Method(modid = "ComputerCraft")
 	public Object[] callMethod(IComputerAccess computer, ILuaContext context, int method, Object[] arguments) {
-		String methodName = methodsArray[method];
-		if (methodName.equals("freq")) {
+		String methodName = getMethodName(method);
+		
+		if (methodName.equals("videoChannel")) {
 			if (arguments.length == 1) {
-				setFrequency(toInt(arguments[0]));
+				setVideoChannel(toInt(arguments[0]));
 			}
-			return new Integer[] { frequency };
+			return new Integer[] { videoChannel };
 		}
-		return null;
+		
+		return super.callMethod(computer, context, method, arguments);
 	}
 	
 	@Override
 	public String toString() {
 		return String.format("%s \'%d\' @ \'%s\' %d, %d, %d", new Object[] {
 				getClass().getSimpleName(),
-				frequency,
+				videoChannel,
 				worldObj == null ? "~NULL~" : worldObj.getWorldInfo().getWorldName(),
 						xCoord, yCoord, zCoord});
 	}
