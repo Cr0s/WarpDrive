@@ -160,6 +160,7 @@ public class WarpDriveConfig {
 	public static HashSet<String> ENTITIES_ANCHOR = null;
 	public static HashSet<String> ENTITIES_NOMASS = null;
 	public static HashSet<String> ENTITIES_LEFTBEHIND = null;
+	public static HashSet<String> ENTITIES_NONLIVINGTARGET = null;
 	
 	// Items dictionary
 	public static HashSet<Item> ITEMS_FLYINSPACE = null;
@@ -550,12 +551,32 @@ public class WarpDriveConfig {
 					+ "In case of conflicts, the latest tag overwrite the previous ones.\n"
 					+ "- Anchor: ship can't move with this entity aboard (default: none).\n"
 					+ "- NoMass: this entity doesn't count when calculating ship volume/mass (default: Galacticraft air bubble).\n"
-					+ "- LeftBehind: this entity won't move with your ship (default: Galacticraft air bubble).");
+					+ "- LeftBehind: this entity won't move with your ship (default: Galacticraft air bubble).\n"
+					+ "- NonLivingTarget: this non-living entity can be targeted/removed by weapons (default: ItemFrame, Painting).");
 			
 			ConfigCategory categoryEntityTags = config.getCategory("entity_tags");
 			String[] taggedEntitiesName = categoryEntityTags.getValues().keySet().toArray(new String[0]);
 			if (taggedEntitiesName.length == 0) {
 				config.get("entity_tags", "GalacticraftCore.OxygenBubble"				, "NoMass LeftBehind"					).getString();
+				config.get("entity_tags", "ItemFrame"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "Painting"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "LeashKnot"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "Boat"										, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartRideable"							, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartChest"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartFurnace"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartTNT"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartHopper"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "MinecartSpawner"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "EnderCrystal"								, "NoMass NonLivingTarget"				).getString();
+				
+				config.get("entity_tags", "IC2.BoatCarbon"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.BoatRubber"								, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.BoatElectric"							, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.Nuke"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.Itnt"									, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.StickyDynamite"							, "NoMass NonLivingTarget"				).getString();
+				config.get("entity_tags", "IC2.Dynamite"								, "NoMass NonLivingTarget"				).getString();
 				taggedEntitiesName = categoryEntityTags.getValues().keySet().toArray(new String[0]);
 			}
 			taggedEntities = new HashMap(taggedEntitiesName.length);
@@ -932,6 +953,7 @@ public class WarpDriveConfig {
 		ENTITIES_ANCHOR = new HashSet(taggedEntities.size());
 		ENTITIES_NOMASS = new HashSet(taggedEntities.size());
 		ENTITIES_LEFTBEHIND = new HashSet(taggedEntities.size());
+		ENTITIES_NONLIVINGTARGET = new HashSet(taggedEntities.size());
 		for (Entry<String, String> taggedEntity : taggedEntities.entrySet()) {
 			String entityId = taggedEntity.getKey();
 			/* we can't detect missing entities, since some of them are 'hacked' in
@@ -942,9 +964,10 @@ public class WarpDriveConfig {
 			/**/
 			for (String tag : taggedEntity.getValue().replace("\t", " ").replace(",", " ").replace("  ", " ").split(" ")) {
 				switch (tag) {
-				case "Anchor"       : ENTITIES_ANCHOR.add(entityId); break;
-				case "NoMass"       : ENTITIES_NOMASS.add(entityId); break;
-				case "LeftBehind"   : ENTITIES_LEFTBEHIND.add(entityId); break;
+				case "Anchor"          : ENTITIES_ANCHOR.add(entityId); break;
+				case "NoMass"          : ENTITIES_NOMASS.add(entityId); break;
+				case "LeftBehind"      : ENTITIES_LEFTBEHIND.add(entityId); break;
+				case "NonLivingTarget" : ENTITIES_NONLIVINGTARGET.add(entityId); break;
 				}
 			}
 		}
@@ -952,6 +975,7 @@ public class WarpDriveConfig {
 		WarpDrive.logger.info("- " + ENTITIES_ANCHOR.size() + " anchors: " + getHashMessage(ENTITIES_ANCHOR));
 		WarpDrive.logger.info("- " + ENTITIES_NOMASS.size() + " with NoMass tag: " + getHashMessage(ENTITIES_NOMASS));
 		WarpDrive.logger.info("- " + ENTITIES_LEFTBEHIND.size() + " with LeftBehind tag: " + getHashMessage(ENTITIES_LEFTBEHIND));
+		WarpDrive.logger.info("- " + ENTITIES_NONLIVINGTARGET.size() + " with NonLivingTarget tag: " + getHashMessage(ENTITIES_NONLIVINGTARGET));
 		
 		// translate tagged items
 		ITEMS_FLYINSPACE = new HashSet(taggedItems.size());

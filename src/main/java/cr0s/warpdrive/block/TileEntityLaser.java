@@ -11,6 +11,7 @@ import li.cil.oc.api.machine.Context;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -203,7 +204,7 @@ public class TileEntityLaser extends TileEntityAbstractLaser {
 		TreeMap<Double, MovingObjectPosition> entityHits = raytraceEntities(vSource.clone(), vDirection.clone(), true, beamLengthBlocks);
 		
 		if (WarpDriveConfig.LOGGING_WEAPON) {
-			WarpDrive.logger.info("Entity hits are " + entityHits);
+			WarpDrive.logger.info("Entity hits are (" + ((entityHits == null) ? 0 : entityHits.size()) + ") " + entityHits);
 		}
 		
 		Vector3 vHitPoint = vReachPoint.clone();
@@ -225,35 +226,57 @@ public class TileEntityLaser extends TileEntityAbstractLaser {
 						break;
 					}
 					
-					// only hits entities with health
+					// only hits entities with health or whitelisted
 					MovingObjectPosition mopEntity = entityHitEntry.getValue();
-					if (mopEntity != null && mopEntity.entityHit instanceof EntityLivingBase) {
-						EntityLivingBase entity = (EntityLivingBase) mopEntity.entityHit;
-						
-						// Consume energy
-						energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY
-								+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
-						distanceTravelled = blockHitDistance;
-						vHitPoint = new Vector3(mopEntity.hitVec);
-						if (energy <= 0) {
-							break;
+					if (mopEntity == null) {
+						continue;
+					}
+					EntityLivingBase entity = null;
+					if (mopEntity.entityHit instanceof EntityLivingBase) {
+						entity = (EntityLivingBase) mopEntity.entityHit;
+						if (WarpDriveConfig.LOGGING_WEAPON) {
+							WarpDrive.logger.info("Entity is a valid target (living) " + entity);
 						}
-						
-						// apply effects
-						entity.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
+					} else {
+						String entityId = EntityList.getEntityString(mopEntity.entityHit);
+						if (!WarpDriveConfig.ENTITIES_NONLIVINGTARGET.contains(entityId)) {
+							if (WarpDriveConfig.LOGGING_WEAPON) {
+								WarpDrive.logger.info("Entity is an invalid target (non-living " + entityId + ") " + mopEntity.entityHit);
+							}
+							continue;
+						}
+						if (WarpDriveConfig.LOGGING_WEAPON) {
+							WarpDrive.logger.info("Entity is a valid target (non-living " + entityId + ") " + mopEntity.entityHit);
+						}
+					}
+					
+					// Consume energy
+					energy -= WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY
+							+ ((blockHitDistance - distanceTravelled) * WarpDriveConfig.LASER_CANNON_ENERGY_LOSS_PER_BLOCK);
+					distanceTravelled = blockHitDistance;
+					vHitPoint = new Vector3(mopEntity.hitVec);
+					if (energy <= 0) {
+						break;
+					}
+					
+					// apply effects
+					mopEntity.entityHit.setFire(WarpDriveConfig.LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS);
+					if (entity != null) {
 						float damage = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_MAX_DAMAGE,
 								WarpDriveConfig.LASER_CANNON_ENTITY_HIT_BASE_DAMAGE + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE);
 						entity.attackEntityFrom(DamageSource.inFire, damage);
-						
-						if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
-							float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
-								  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
-							worldObj.newExplosion(null, entity.posX, entity.posY, entity.posZ, strength, true, true);
-						}
-						
-						// remove entity from hit list
-						entityHits.put(entityHitDistance, null);
+					} else {
+						mopEntity.entityHit.setDead();
 					}
+					
+					if (energy > WarpDriveConfig.LASER_CANNON_ENTITY_HIT_ENERGY_THRESHOLD_FOR_EXPLOSION) {
+						float strength = (float)clamp(0.0D, WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_MAX_STRENGTH,
+							  WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_BASE_STRENGTH + energy / WarpDriveConfig.LASER_CANNON_ENTITY_HIT_EXPLOSION_ENERGY_PER_STRENGTH); 
+						worldObj.newExplosion(null, mopEntity.entityHit.posX, mopEntity.entityHit.posY, mopEntity.entityHit.posZ, strength, true, true);
+					}
+					
+					// remove entity from hit list
+					entityHits.put(entityHitDistance, null);
 				}
 				if (energy <= 0) {
 					break;
