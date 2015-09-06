@@ -187,15 +187,15 @@ public class WarpDriveConfig {
 	// Laser Emitter
 	public static int LASER_CANNON_MAX_MEDIUMS_COUNT = 10;
 	public static int LASER_CANNON_MAX_LASER_ENERGY = 4000000;
-	public static int LASER_CANNON_EMIT_FIRE_DELAY_TICKS = 20 * 3;
-	public static int LASER_CANNON_EMIT_SCAN_DELAY_TICKS = 10;
+	public static int LASER_CANNON_EMIT_FIRE_DELAY_TICKS = 5;
+	public static int LASER_CANNON_EMIT_SCAN_DELAY_TICKS = 1;
 	
 	public static double LASER_CANNON_BOOSTER_BEAM_ENERGY_EFFICIENCY = 0.60D;
 	public static int LASER_CANNON_RANGE_ENERGY_PER_BLOCK = 5000;
 	public static int LASER_CANNON_RANGE_MAX = 500;
 	public static int LASER_CANNON_ENERGY_LOSS_PER_BLOCK = 500;
 	
-	public static int LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS = 100;
+	public static int LASER_CANNON_ENTITY_HIT_SET_ON_FIRE_SECONDS = 20;
 	public static int LASER_CANNON_ENTITY_HIT_ENERGY = 15000;
 	public static int LASER_CANNON_ENTITY_HIT_BASE_DAMAGE = 3;
 	public static int LASER_CANNON_ENTITY_HIT_ENERGY_PER_DAMAGE = 30000;
