@@ -223,6 +223,8 @@ public class TileEntityLift extends TileEntityAbstractEnergy {
 			return new Object[] { "up" };
 		case 2:
 			return new Object[] { "down" };
+		default:
+			break;
 		}
 		return null;
 	}

@@ -200,6 +200,7 @@ public class StarMapRegistry {
 				case STAR: break;
 				case STRUCTURE: break;
 				case WARPECHO: break;
+				default: break;
 				}
 			}
 			

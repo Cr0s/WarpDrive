@@ -144,6 +144,9 @@ public class CommandDebug extends CommandBase
 						te.updateContainingBlockInfo();
 					}
 					break;
+				default:
+					WarpDrive.logger.info("[" + getCommandName() + "] " + side + ": invalid step '" + ch + "'");
+					break;
 				}
 			}
 		}

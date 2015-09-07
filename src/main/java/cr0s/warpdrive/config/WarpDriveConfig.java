@@ -934,6 +934,9 @@ public class WarpDriveConfig {
 				case "PlaceNormal"  : BLOCKS_PLACE.put(block, 2); break;
 				case "PlaceLater"   : BLOCKS_PLACE.put(block, 3); break;
 				case "PlaceLatest"  : BLOCKS_PLACE.put(block, 4); break;
+				default:
+					WarpDrive.logger.error("Unsupported tag '" + tag + "' for block " + block);
+					break;
 				}
 			}
 		}
@@ -968,6 +971,9 @@ public class WarpDriveConfig {
 				case "NoMass"          : ENTITIES_NOMASS.add(entityId); break;
 				case "LeftBehind"      : ENTITIES_LEFTBEHIND.add(entityId); break;
 				case "NonLivingTarget" : ENTITIES_NONLIVINGTARGET.add(entityId); break;
+				default:
+					WarpDrive.logger.error("Unsupported tag '" + tag + "' for entity " + entityId);
+					break;
 				}
 			}
 		}
@@ -993,6 +999,9 @@ public class WarpDriveConfig {
 				case "FlyInSpace"     : ITEMS_FLYINSPACE.add(item); break;
 				case "NoFallDamage"   : ITEMS_NOFALLDAMAGE.add(item); break;
 				case "BreathingIC2"   : ITEMS_BREATHINGIC2.add(item); break;
+				default:
+					WarpDrive.logger.error("Unsupported tag '" + tag + "' for item " + item);
+					break;
 				}
 			}
 		}

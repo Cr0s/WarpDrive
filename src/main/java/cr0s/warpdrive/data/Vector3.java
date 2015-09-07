@@ -233,6 +233,9 @@ public class Vector3 implements Cloneable {
 			break;
 		case EAST:
 			x += amount;
+			break;
+		default:
+			break;
 		}
 		
 		return this;
@@ -383,28 +386,31 @@ public class Vector3 implements Cloneable {
 		case 0:
 			this.y -= amount;
 			break;
-
+		
 		case 1:
 			this.y += amount;
 			break;
-
+		
 		case 2:
 			this.z -= amount;
 			break;
-
+		
 		case 3:
 			this.z += amount;
 			break;
-
+		
 		case 4:
 			this.x -= amount;
 			break;
-
+		
 		case 5:
 			this.x += amount;
 			break;
+		
+		default:
+			break;
 		}
-
+		
 		return this;
 	}
 

@@ -176,6 +176,9 @@ public class VectorI implements Cloneable {
 			break;
 		case EAST:
 			x += amount;
+			break;
+		default:
+			break;
 		}
 		
 		return this;

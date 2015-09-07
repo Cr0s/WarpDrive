@@ -49,21 +49,24 @@ public class WorldGenSmallShip extends WorldGenerator {
 			case 0:
 				cableType.setItemDamage(0);
 				break;
-	
+			
 			case 1:
 				cableType.setItemDamage(3);
 				break;
-	
+			
 			case 2:
 				cableType.setItemDamage(6);
 				break;
-	
+			
 			case 3:
 				cableType.setItemDamage(9);
 				break;
+			
+			default:
+				break;
 			}
 		}
-
+		
 		int i = centerX - 5, j = centerY - 4, k = centerZ - 6;
 		world.setBlock(i + 0, j + 1, k + 4, WorldGenStructure.getStoneBlock(corrupted, rand));
 		world.setBlock(i + 0, j + 1, k + 10, WorldGenStructure.getStoneBlock(corrupted, rand));
@@ -627,7 +630,7 @@ public class WorldGenSmallShip extends WorldGenerator {
 
 		while (!isDone) {
 			switch (rand.nextInt(14)) {
-			case 0:// Mass fabricator
+			case 0: // Mass fabricator
 				res = WarpDriveConfig.getModItemStack("IC2", "blockMachine", -1);
 				res.setItemDamage(14);
 				res.stackSize = 1; // + rand.nextInt(2);
@@ -653,22 +656,21 @@ public class WorldGenSmallShip extends WorldGenerator {
 				res.stackSize = 2 + rand.nextInt(12);
 				isDone = true;
 				break;
-
+			
 			case 7:// UU matter cell
 				res = WarpDriveConfig.getModItemStack("IC2", "itemCellEmpty", -1);
 				res.setItemDamage(3);
 				res.stackSize = 2 + rand.nextInt(14);
 				isDone = true;
 				break;
-
+			
 			case 8:
 				isDone = true;
 				break;// skipped
-
+			
 			case 9:
 			case 10:
-				// Rocket launcher platform Tier3
-			case 11:
+			case 11: // Rocket launcher platform Tier3
 				if (WarpDriveConfig.isICBMLoaded) {
 					// TODO: No 1.7 ICBM yet
 					// res = new ItemStack(WarpDriveConfig.ICBM_Machine, 1 +
@@ -676,9 +678,9 @@ public class WorldGenSmallShip extends WorldGenerator {
 					isDone = true;
 				}
 				break;
-
-				// Missles from conventional to hypersonic
-			case 12:
+			
+			
+			case 12: // Missiles from conventional to hypersonic
 				if (WarpDriveConfig.isICBMLoaded) {
 					// TODO: No 1.7 ICBM yet
 					// res = new ItemStack(WarpDriveConfig.ICBM_Missile, 2 +
@@ -686,13 +688,15 @@ public class WorldGenSmallShip extends WorldGenerator {
 					isDone = true;
 				}
 				break;
-
-				// Advanced solar panels
-			case 13:
+			
+			case 13: // Advanced solar panels
 				if (WarpDriveConfig.isAdvancedSolarPanelLoaded) {
 					res = new ItemStack(solarPanel_block, rand.nextInt(3), solarPanel_metadata);
 					isDone = true;
 				}
+				break;
+			
+			default:
 				break;
 			}
 		}

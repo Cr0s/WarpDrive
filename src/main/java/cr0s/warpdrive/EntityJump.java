@@ -1057,6 +1057,11 @@ public class EntityJump extends Entity {
 		case 270:
 			v[0] = -dz;
 			v[2] = dx;
+			break;
+			
+		default:
+			WarpDrive.logger.error(this + "Invalid direction " + i);
+			break;
 		}
 		
 		return v;

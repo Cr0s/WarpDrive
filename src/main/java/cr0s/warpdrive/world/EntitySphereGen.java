@@ -99,25 +99,32 @@ public final class EntitySphereGen extends Entity {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return;
 		}
-
+		
 		if (ticksDelay > 0) {
 			ticksDelay--;
 			return;
 		}
-
-		switch (this.state) {
+		
+		switch (state) {
 		case STATE_SAVING:
 			tickScheduleBlocks();
 			this.state = STATE_SETUP;
 			break;
+			
 		case STATE_SETUP:
 			if (currentIndex >= blocks.size() - 1)
 				this.state = STATE_DELETE;
 			else
 				tickPlaceBlocks();
 			break;
+			
 		case STATE_DELETE:
 			currentIndex = 0;
+			killEntity();
+			break;
+			
+		default:
+			WarpDrive.logger.error(this + " Invalid state " + state + ". Killing entity...");
 			killEntity();
 			break;
 		}
