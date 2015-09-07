@@ -6,7 +6,6 @@ import cpw.mods.fml.common.Optional;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
-import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IUpgradable;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.EnumUpgradeTypes;

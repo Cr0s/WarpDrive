@@ -33,7 +33,7 @@ public class CommandSpace extends CommandBase {
 		int targetDimensionId = Integer.MAX_VALUE;
 		
 		EntityPlayerMP player = null;
-		if (sender != null && sender instanceof EntityPlayerMP) {
+		if (sender instanceof EntityPlayerMP) {
 			player = (EntityPlayerMP) sender;
 		}
 		

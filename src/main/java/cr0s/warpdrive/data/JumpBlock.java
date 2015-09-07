@@ -131,7 +131,7 @@ public class JumpBlock {
 					}
 				} else {
 					WarpDrive.logger.info(" deploy failed to create new tile entity at " + x + ", " + y + ", " + z + " blockId " + block + ":" + blockMeta);
-					WarpDrive.logger.info("NBT data was " + ((oldnbt == null) ? "null" : oldnbt.toString()));
+					WarpDrive.logger.info("NBT data was " + oldnbt);
 				}
 			}
 		} catch (Exception exception) {
