@@ -14,54 +14,53 @@ import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.WarpDriveConfig;
 
-public class BlockAir extends Block
-{
+public class BlockAir extends Block {
 	private final boolean TRANSPARENT_AIR = true;
 	private final boolean AIR_DEBUG = false;
 	private final int AIR_BLOCK_TICKS = 40;
 	private IIcon[] iconBuffer;
-
+	
 	public BlockAir() {
 		super(Material.fire);
 		setHardness(0.0F);
 		setBlockName("warpdrive.passive.Air");
 	}
-
+	
 	@Override
 	public boolean isOpaqueCube() {
 		return false;
 	}
-
+	
 	@Override
 	public boolean isAir(IBlockAccess var1, int var2, int var3, int var4) {
 		return true;
 	}
-
+	
 	@Override
 	public AxisAlignedBB getCollisionBoundingBoxFromPool(World var1, int var2, int var3, int var4) {
 		return null;
 	}
-
+	
 	@Override
 	public boolean isReplaceable(IBlockAccess var1, int var2, int var3, int var4) {
 		return true;
 	}
-
+	
 	@Override
 	public boolean canPlaceBlockAt(World var1, int var2, int var3, int var4) {
 		return true;
 	}
-
+	
 	@Override
 	public boolean canCollideCheck(int var1, boolean var2) {
 		return false;
 	}
-
+	
 	@Override
 	public int getRenderBlockPass() {
 		return TRANSPARENT_AIR ? 1 : 0;
 	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		if (AIR_DEBUG) {
@@ -86,7 +85,7 @@ public class BlockAir extends Block
 			blockIcon = par1IconRegister.registerIcon("warpdrive:passive/airBlock");
 		}
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		if (AIR_DEBUG) {
@@ -95,12 +94,12 @@ public class BlockAir extends Block
 			return blockIcon;
 		}
 	}
-
+	
 	@Override
 	public int getMobilityFlag() {
 		return 1;
 	}
-
+	
 	@Override
 	public Item getItemDropped(int var1, Random var2, int var3) {
 		return null;
@@ -147,7 +146,7 @@ public class BlockAir extends Block
 		}
 		
 		Block sideBlock = world.getBlock(x, y, z);
-		if (sideBlock == this) {// TODO: Check if this works
+		if (sideBlock == this) {
 			return false;
 		}
 		return world.isAirBlock(x, y, z);
@@ -308,12 +307,6 @@ public class BlockAir extends Block
 					world.setBlockMetadataWithNotify(x, y, z, 1, 2);
 				} else {
 					// keep the block as a source
-					if (!WarpDriveConfig.LOGGING_BREATHING) {
-						WarpDrive.logger.info("15 + "
-								+ xp_concentration + " " + xn_concentration + " "
-								+ yp_concentration + " " + yn_concentration + " "
-								+ zp_concentration + " " + zn_concentration + " = " + sum_concentration + " total, " + empty_count + " empty / " + air_count + " -> " + new_concentration);/**/
-					}
 				}
 			} else {
 				world.setBlockMetadataWithNotify(x, y, z, new_concentration, 2);
@@ -341,7 +334,7 @@ public class BlockAir extends Block
 				world.setBlock(x - 1, y, z, this, mid_concentration, 2);
 			}
 		}
-
+		
 		if (yp_isAir) {
 			if (yp_block == this) {
 				if (yp_concentration != mid_concentration && yp_concentration != 15 && (!isGrowth || yp_concentration < mid_concentration)) {
@@ -351,7 +344,7 @@ public class BlockAir extends Block
 				world.setBlock(x, y + 1, z, this, mid_concentration, 2);
 			}
 		}
-
+		
 		if (yn_isAir) {
 			if (yn_block == this) {
 				if (yn_concentration != mid_concentration && yn_concentration != 15 && (!isGrowth || yn_concentration < mid_concentration)) {
@@ -361,7 +354,7 @@ public class BlockAir extends Block
 				world.setBlock(x, y - 1, z, this, mid_concentration, 2);
 			}
 		}
-
+		
 		if (zp_isAir) {
 			if (zp_block == this) {
 				if (zp_concentration != mid_concentration && zp_concentration != 15 && (!isGrowth || zp_concentration < mid_concentration)) {
@@ -371,7 +364,7 @@ public class BlockAir extends Block
 				world.setBlock(x, y, z + 1, this, mid_concentration, 2);
 			}
 		}
-
+		
 		if (zn_isAir) {
 			if (zn_block == this) {
 				if (zn_concentration != mid_concentration && zn_concentration != 15 && (!isGrowth || zn_concentration < mid_concentration)) {
@@ -382,7 +375,7 @@ public class BlockAir extends Block
 			}
 		}
 	}
-
+	
 	/**
 	 * Returns if this block is collidable. Args: x, y, z
 	 */
@@ -390,7 +383,7 @@ public class BlockAir extends Block
 	public boolean isCollidable() {
 		return false;
 	}
-
+	
 	@Override
 	public void onBlockAdded(World par1World, int par2, int par3, int par4) {
 		if (par1World.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || par1World.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID) {
