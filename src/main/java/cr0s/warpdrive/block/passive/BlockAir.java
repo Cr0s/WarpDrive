@@ -2,6 +2,7 @@ package cr0s.warpdrive.block.passive;
 
 import java.util.Random;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -126,6 +127,10 @@ public class BlockAir extends Block {
 	 */
 	@Override
 	public void updateTick(World par1World, int x, int y, int z, Random par5Random) {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return;
+		}
+		
 		int concentration = par1World.getBlockMetadata(x, y, z);
 		boolean isInSpaceWorld = par1World.provider.dimensionId == WarpDriveConfig.G_SPACE_DIMENSION_ID || par1World.provider.dimensionId == WarpDriveConfig.G_HYPERSPACE_DIMENSION_ID;
 		
@@ -149,6 +154,7 @@ public class BlockAir extends Block {
 		if (sideBlock == this) {
 			return false;
 		}
+		
 		return world.isAirBlock(x, y, z);
 	}
 	
