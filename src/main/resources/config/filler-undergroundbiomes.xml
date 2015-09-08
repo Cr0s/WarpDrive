@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
+<warpdriveWorldGeneration version="1" mods="UndergroundBiomes">
+    
+    
+    
+    <for variable="type" in="igneous,metamorphic,sedimentary">
+        <for variable="metadata" from="0" to="7">
+            <FillerSet group="%type%_ores@%metadata%.normal" fillerSets="%type%_ores@%metadata%">
+                <filler block="UndergroundBiomes:%type%Stone" metadata="%metadata%" weight="10" />
+            </FillerSet>
+            
+            <FillerSet group="%type%_ores@%metadata%.corrupted" fillerSets="%type%_ores@%metadata%">
+                <filler block="UndergroundBiomes:%type%Cobblestone" metadata="%metadata%" weight="10" />
+            </FillerSet>
+            
+            <FillerSet group="%type%_ores@%metadata%">
+                <filler block="UndergroundBiomes:%type%_oreCoal" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreDiamond" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreEmerald" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreGold" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreIron" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreLapis" metadata="%metadata%" ratio=".001" />
+                <filler block="UndergroundBiomes:%type%_oreRedstone" metadata="%metadata%" ratio=".001" />
+            </FillerSet>
+        </for>
+    </for>
+	
+</warpdriveWorldGeneration>

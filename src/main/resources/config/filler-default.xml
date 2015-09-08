@@ -32,59 +32,6 @@
 		<filler block="minecraft:bedrock" ratio=".001" />
 	</FillerSet>
 	
-	<FillerSet group="igneous_ores">
-		<filler block="UndergroundBiomes:igneous_oreCoal" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreDiamond" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreEmerald" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreGold" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreIron" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreLapis" ratio=".001" />
-		<filler block="UndergroundBiomes:igneous_oreRedstone" ratio=".001" />
-	</FillerSet>
-	
-	<FillerSet group="metamorphic_ores">
-		<filler block="UndergroundBiomes:metamorphic_oreCoal" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreDiamond" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreEmerald" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreGold" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreIron" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreLapis" ratio=".001" />
-		<filler block="UndergroundBiomes:metamorphic_oreRedstone" ratio=".001" />
-	</FillerSet>
-	
-	<FillerSet group="sedimentary_ores">
-		<filler block="UndergroundBiomes:sedimentary_oreCoal" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreDiamond" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreEmerald" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreGold" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreIron" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreLapis" ratio=".001" />
-		<filler block="UndergroundBiomes:sedimentary_oreRedstone" ratio=".001" />
-	</FillerSet>
-	
-	<for variable="type" in="igneous,metamorphic,sedimentary">
-		<for variable="metadata" from="0" to="7">
-			<FillerSet group="%type%_ores@%metadata%.normal" fillerSets="%type%_ores@%metadata%">
-				<filler block="UndergroundBiomes:%type%Stone" metadata="%metadata%" weight="10" />
-			</FillerSet>
-			
-			<FillerSet group="%type%_ores@%metadata%.corrupted" fillerSets="%type%_ores@%metadata%">
-				<filler block="UndergroundBiomes:%type%Cobblestone" metadata="%metadata%" weight="10" />
-			</FillerSet>
-			
-			<FillerSet group="%type%_ores@%metadata%">
-				<filler block="UndergroundBiomes:%type%_oreCoal" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreDiamond" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreEmerald" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreGold" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreIron" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreLapis" metadata="%metadata%" ratio=".001" />
-				<filler block="UndergroundBiomes:%type%_oreRedstone" metadata="%metadata%" ratio=".001" />
-			</FillerSet>
-		</for>
-	</for>
-	
-	
 	<FillerSet group="commonOres">
 		<filler block="minecraft:coal_ore" ratio=".08" />
 		<filler block="minecraft:iron_ore" ratio=".05" />
