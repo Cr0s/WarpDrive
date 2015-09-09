@@ -19,74 +19,75 @@ import cr0s.warpdrive.config.XmlPreprocessor.ModCheckResults;
 
 
 public class StructureManager {
-
+	
 	private static ArrayList<Star> stars = new ArrayList<Star>();
 	private static ArrayList<Planetoid> moons = new ArrayList<Planetoid>();
 	private static ArrayList<Planetoid> gasClouds = new ArrayList<Planetoid>();
 	private static ArrayList<Asteroid> asteroids = new ArrayList<Asteroid>();
-
+	
 	public static void loadStructures(String structureConfDir) {
 		loadStructures(new File(structureConfDir));
 	}
-
+	
 	public static void loadStructures(File dir) {
-
+		
 		dir.mkdir();
-
+		
 		if (!dir.isDirectory()) {
 			throw new IllegalArgumentException("File path " + dir.getPath() + " must be a directory!");
 		}
-
+		
 		File[] files = dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File file_notUsed, String name) {
 				return name.startsWith("structure") && name.endsWith(".xml");
 			}
 		});
-
+		
 		for (File file : files) {
 			try {
-
+				
 				WarpDrive.logger.info("Loading structure data file " + file.getName());
-
+				
 				loadXmlStructureFile(file);
-
+				
 				WarpDrive.logger.info("Finished loading structure data file " + file.getName());
-
+				
 			} catch (Exception e) {
 				WarpDrive.logger.error("Error loading file " + file.getName() + ": " + e.getMessage());
 				e.printStackTrace();
 			}
 		}
 	}
-
+	
 	private static void loadXmlStructureFile(File f) throws SAXException, IOException, InvalidXmlException {
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(f);
-
+		
 		ModCheckResults res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
-
+		
 		if (!res.isEmpty()) {
 			WarpDrive.logger.info("Skippping structure data file " + f.getName() + " because of: " + res);
 			return;
 		}
-
+		
 		XmlPreprocessor.doModReqSanitation(base);
-
+		XmlPreprocessor.doLogicPreprocessing(base);
+		
 		NodeList structures = base.getElementsByTagName("structure");
 		for (int i = 0; i < structures.getLength(); i++) {
-
+			
 			Element struct = (Element) structures.item(i);
-
+			
 			String group = struct.getAttribute("group");
 			String name = struct.getAttribute("name");
-
+			
 			WarpDrive.logger.info("Loading structure " + name);
-
+			
 			if (group.isEmpty())
 				throw new InvalidXmlException("Structure must have a group!");
-
+			
 			int radius = 0;
-
+			
 			if (group.equalsIgnoreCase("star")) {
 				Star s = new Star(radius);
 				s.loadFromXmlElement(struct);
@@ -102,7 +103,7 @@ public class StructureManager {
 			}
 		}
 	}
-
+	
 	public static DeployableStructure getStructure(Random random, final String name, final String type) {
 		if (name == null || name.length() == 0) {
 			if (type == null || type.length() == 0) {
@@ -120,23 +121,23 @@ public class StructureManager {
 					return star;
 			}
 		}
-
+		
 		// not found or nothing defined => return null
 		return null;
 	}
-
+	
 	public static DeployableStructure getStar(Random random, final String name) {
 		return getStructure(random, name, "star");
 	}
-
+	
 	public static DeployableStructure getMoon(Random random, final String name) {
 		return getStructure(random, name, "moon");
 	}
-
+	
 	public static DeployableStructure getAsteroid(Random random, final String name) {
 		return getStructure(random, name, "asteroid");
 	}
-
+	
 	public static DeployableStructure getGasCloud(Random random, final String name) {
 		return getStructure(random, name, "cloud");
 	}

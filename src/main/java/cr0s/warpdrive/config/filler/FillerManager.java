@@ -20,12 +20,12 @@ import cr0s.warpdrive.config.XmlPreprocessor;
 import cr0s.warpdrive.config.XmlPreprocessor.ModCheckResults;
 
 public class FillerManager {
-
+	
 	private static TreeMap<String, FillerSet> fillerSets = new TreeMap<String, FillerSet>();
-
+	
 	// Stores extra dependency information
 	static TreeMap<FillerSet, ArrayList<String>> fillerSetsAdditions = new TreeMap<FillerSet, ArrayList<String>>();
-
+	
 	/* TODO dead code?
 	// FillerSets that are guaranteed to exist
 	public static final String COMMON_ORES = "commonOres";
@@ -35,25 +35,25 @@ public class FillerManager {
 	public static final String NETHER = "nether";
 	public static final String END = "end";
 	/**/
-
+	
 	public static void loadOres(String oreConfDirectory) {
 		loadOres(new File(oreConfDirectory));
 	}
-
+	
 	public static void loadOres(File dir) {
 		// directory is created by caller, so it can copy default files if any
-
+		
 		if (!dir.isDirectory()) {
 			throw new IllegalArgumentException("File path " + dir.getName() + " must be a directory!");
 		}
-
+		
 		File[] files = dir.listFiles(new FilenameFilter() {
 			@Override
 			public boolean accept(File file_notUsed, String name) {
 				return name.startsWith("filler") && name.endsWith(".xml");
 			}
 		});
-
+		
 		for(File file : files) {
 			try {
 				WarpDrive.logger.info("Loading filler data file " + file.getName() + "...");
@@ -65,38 +65,39 @@ public class FillerManager {
 			}
 		}
 	}
-
+	
 	private static void loadXmlFillerFile(File file) throws InvalidXmlException, SAXException, IOException {
-
+		
 		Document base = WarpDriveConfig.getXmlDocumentBuilder().parse(file);
-
+		
 		ModCheckResults res = XmlPreprocessor.checkModRequirements(base.getDocumentElement());
-
+		
 		if (!res.isEmpty()) {
 			WarpDrive.logger.info("Skippping filler data file " + file.getName() + " because of: " + res);
 			return;
 		}
-
+		
 		// Remove elements based on mod reqs sanitation
 		XmlPreprocessor.doModReqSanitation(base);
-
+		XmlPreprocessor.doLogicPreprocessing(base);
+		
 		// Initially add FillerSets
 		NodeList nodesFillerSet = base.getElementsByTagName("FillerSet");
 		for (int i = 0; i < nodesFillerSet.getLength(); i++) {
-
+			
 			Element elementFillerSet = (Element) nodesFillerSet.item(i);
-
+			
 			String group = elementFillerSet.getAttribute("group");
 			if (group.isEmpty()) {
 				throw new InvalidXmlException("FillerSet " + i + " is missing a group attribute!");
 			}
-
+			
 			FillerSet fillerSet = fillerSets.get(group);
 			if (fillerSet == null) {
 				fillerSet = new FillerSet(group);
 				fillerSets.put(group, fillerSet);
 			}
-
+			
 			if (elementFillerSet.hasAttribute("fillerSets")) {
 				ArrayList<String> setUnresolvedDeps = fillerSetsAdditions.get(fillerSet);
 				if (setUnresolvedDeps == null) {
@@ -105,56 +106,56 @@ public class FillerManager {
 				}
 				setUnresolvedDeps.addAll(Arrays.asList(elementFillerSet.getAttribute("import").split(",")));
 			}
-
+			
 			fillerSet.loadFromXmlElement(elementFillerSet);
 		}
 	}
-
+	
 	public static void finishLoading() {
-
+		
 		while (!fillerSetsAdditions.isEmpty()) {
 			attemptDependencyFilling(fillerSetsAdditions);
 		}
-
+		
 		// When everything is done, finalize
 		for (FillerSet fillerSet : fillerSets.values()) {
 			fillerSet.finishContruction();
 		}
 	}
-
+	
 	private static void attemptDependencyFilling(TreeMap<FillerSet, ArrayList<String>> fillerSetsDeps) {
-
+		
 		ArrayList<FillerSet> toRemove = new ArrayList<FillerSet>();
-
+		
 		for (Entry<FillerSet, ArrayList<String>> entry : fillerSetsDeps.entrySet()) {
-
+			
 			for (String dep : entry.getValue()) {
-
+				
 				if (!fillerSets.containsKey(dep)) {
-
+					
 					WarpDrive.logger.error("A fillerSet " + entry.getKey() + " has a dependency that doesnt exist!");
 					fillerSets.remove(entry.getKey().getName());
 					toRemove.add(entry.getKey());
-
+					
 				} else if (fillerSetsDeps.containsKey(fillerSets.get(dep))) {
 					//Skip until it is loaded
 				} else {
-
+					
 					entry.getKey().loadFrom(fillerSets.get(dep));
 					toRemove.add(entry.getKey());
 				}
 			}
 		}
-
+		
 		for (FillerSet set : toRemove) {
 			fillerSetsDeps.remove(set);
 		}
 	}
-
+	
 	public static FillerSet getFillerSet(String name) {
 		return fillerSets.get(name);
 	}
-
+	
 	/* TODO dead code?
 	public static class BlockComparator implements Comparator<Block> {
 
