@@ -111,13 +111,13 @@ public class ItemComponent extends Item implements IAirCanister {
 		// WarpDrive.logger.info(data);
 		return data.equals(unlocalised);
 	}
-
+	
 	@Override
 	public void registerIcons(IIconRegister par1IconRegister) {
 		for(int i = 0; i < potentialUnlocalized.length; i++) {
 			potentialIcons[i] = par1IconRegister.registerIcon("warpdrive:component" + potentialUnlocalized[i]);
 		}
-    }
+	}
 	
 	@Override
 	public String getUnlocalizedName(ItemStack itemSt) {
@@ -126,7 +126,7 @@ public class ItemComponent extends Item implements IAirCanister {
 			return "item.warpdrive.crafting." + potentialUnlocalized[damage];
 		}
 		return getUnlocalizedName();
-    }
+	}
 	
 	@Override
 	public IIcon getIconFromDamage(int damage) {
@@ -137,13 +137,13 @@ public class ItemComponent extends Item implements IAirCanister {
 	}
 	
 	@Override
-    public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
+	public void getSubItems(Item par1, CreativeTabs par2CreativeTabs, List par3List) {
 		for(int i = 0; i < potentialUnlocalized.length; i++) {
 			par3List.add(new ItemStack(par1, 1, i));
 		}
-    }
+	}
 	
-	//For empty air cans
+	// For empty air cans
 	@Override
 	public ItemStack fullDrop(ItemStack is) {
 		if (doesMatch(is, "AirCanisterEmpty")) {

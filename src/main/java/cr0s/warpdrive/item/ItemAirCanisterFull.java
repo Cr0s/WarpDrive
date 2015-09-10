@@ -20,8 +20,8 @@ public class ItemAirCanisterFull extends Item implements IAirCanister {
 	}
 	
 	@Override
-	public void registerIcons(IIconRegister ir) {
-		icon = ir.registerIcon("warpdrive:componentAirCanisterFull");
+	public void registerIcons(IIconRegister iconRegister) {
+		icon = iconRegister.registerIcon("warpdrive:componentAirCanisterFull");
 	}
 	
 	@Override
