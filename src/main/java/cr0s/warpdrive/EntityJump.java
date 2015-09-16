@@ -210,12 +210,12 @@ public class EntityJump extends Entity {
 		}
 		sourceWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, worldObj, Type.NORMAL); // Type.ENTITY);
 		if (sourceWorldTicket == null) {
-			reason.append("Chunkloading rejected in S:" + worldObj.getWorldInfo().getWorldName() + ". Aborting.");
+			reason.append("Chunkloading rejected in source world " + worldObj.getWorldInfo().getWorldName() + ". Aborting.");
 			return false;
 		}
 		targetWorldTicket = ForgeChunkManager.requestTicket(WarpDrive.instance, targetWorld, Type.NORMAL);
 		if (targetWorldTicket == null) {
-			reason.append("Chunkloading rejected in T:" + worldObj.getWorldInfo().getWorldName() + ". Aborting.");
+			reason.append("Chunkloading rejected in target world " + worldObj.getWorldInfo().getWorldName() + ". Aborting.");
 			return false;
 		}
 		// sourceWorldTicket.bindEntity(this);
@@ -228,7 +228,7 @@ public class EntityJump extends Entity {
 			for (int z = z1; z <= z2; z++) {
 				chunkCount++;
 				if (chunkCount > sourceWorldTicket.getMaxChunkListDepth()) {
-					reason.append("Ship is extending over too many chunks, max is S:" + sourceWorldTicket.getMaxChunkListDepth() + ". Aborting.");
+					reason.append("Ship is extending over too many chunks in source world. Max is currently set to " + sourceWorldTicket.getMaxChunkListDepth() + " in forgeChunkLoading.cfg. Aborting.");
 					return false;
 				}
 				ForgeChunkManager.forceChunk(sourceWorldTicket, new ChunkCoordIntPair(x, z));
@@ -244,7 +244,7 @@ public class EntityJump extends Entity {
 			for (int z = z1; z <= z2; z++) {
 				chunkCount++;
 				if (chunkCount > targetWorldTicket.getMaxChunkListDepth()) {
-					reason.append("Ship is extending over too many chunks, max is T:" + targetWorldTicket.getMaxChunkListDepth() + ". Aborting.");
+					reason.append("Ship is extending over too many chunks in target world. Max is currently set to " + targetWorldTicket.getMaxChunkListDepth() + " in forgeChunkLoading.cfg. Aborting.");
 					return false;
 				}
 				ForgeChunkManager.forceChunk(targetWorldTicket, new ChunkCoordIntPair(x, z));
