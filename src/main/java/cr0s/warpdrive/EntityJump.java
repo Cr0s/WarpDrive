@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import am2.api.power.IPowerNode;
+import am2.power.PowerNodeRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -14,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -26,7 +29,9 @@ import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
+import net.minecraftforge.common.util.Constants;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.block.movement.TileEntityShipCore;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.JumpBlock;
@@ -648,6 +653,11 @@ public class EntityJump extends Entity {
 								TileEntity tileEntity = worldObj.getTileEntity(x, y, z);
 								JumpBlock jumpBlock = new JumpBlock(block, blockMeta, tileEntity, x, y, z);
 								
+								// save energy network
+								if (WarpDriveConfig.isArsMagica2loaded) {
+									arsMagica2_energySave(tileEntity, jumpBlock);
+								}
+								
 								// default priority is 2 for block, 3 for tile entities
 								Integer placeTime = WarpDriveConfig.BLOCKS_PLACE.get(block);
 								if (placeTime == null) {
@@ -708,6 +718,9 @@ public class EntityJump extends Entity {
 					WarpDrive.logger.info("Deploying from " + jb.x + ", " + jb.y + ", " + jb.z + " of " + jb.block + "@" + jb.blockMeta);
 				}
 				jb.deploy(targetWorld, moveX, moveY, moveZ);
+				if (jb.nbtArsMagica2 != null) {
+					arsMagica2_energyRemove(jb);
+				}
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			currentIndexInShip++;
@@ -745,6 +758,9 @@ public class EntityJump extends Entity {
 				if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
 					WarpDrive.logger.info("Removing tile entity at " + jb.x + ", " + jb.y + ", " + jb.z);
 				}
+				if (jb.nbtArsMagica2 != null) {
+					arsMagica2_energyPlace(jb);
+				}
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
@@ -754,6 +770,66 @@ public class EntityJump extends Entity {
 			currentIndexInShip++;
 		}
 		LocalProfiler.stop();
+	}
+	
+	@Optional.Method(modid = "arsmagica2")
+	private void arsMagica2_energySave(TileEntity tileEntity, JumpBlock jumpBlock) {
+		if (tileEntity instanceof IPowerNode) {
+			jumpBlock.nbtArsMagica2 = PowerNodeRegistry.For(worldObj).getDataCompoundForNode((IPowerNode) tileEntity);
+		}
+	}
+	
+	@Optional.Method(modid = "arsmagica2")
+	private void arsMagica2_energyRemove(JumpBlock jumpBlock) {
+		PowerNodeRegistry.For(jumpBlock.blockTileEntity.getWorldObj()).removePowerNode((IPowerNode) jumpBlock.blockTileEntity);
+	}
+	
+	@Optional.Method(modid = "arsmagica2")
+	private void arsMagica2_energyPlace(JumpBlock jumpBlock) {
+		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+			WarpDrive.logger.info("Removing ArsMagica2 tile entity at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtArsMagica2);
+		}
+		NBTTagCompound nbtTagCompound = (NBTTagCompound) jumpBlock.nbtArsMagica2.copy();
+		
+		// powerAmounts
+		// (no changes)
+		
+		// powerPathList
+		NBTTagList powerPathList = nbtTagCompound.getTagList("powerPathList", Constants.NBT.TAG_COMPOUND);
+		if (powerPathList != null) {
+			for (int powerPathIndex = 0; powerPathIndex < powerPathList.tagCount(); powerPathIndex++) {
+				NBTTagCompound powerPathEntry = (NBTTagCompound) powerPathList.removeTag(0);
+				
+				// powerPathList[powerPathIndex].powerType
+				// (no change)
+				
+				// powerPathList[powerPathIndex].nodePaths
+				NBTTagList nodePaths = powerPathEntry.getTagList("nodePaths", Constants.NBT.TAG_LIST);
+				if (nodePaths != null) {
+					for (int nodePathIndex = 0; nodePathIndex < nodePaths.tagCount(); nodePathIndex++) {
+						// we can't directly access it, hence removing then adding back later on
+						NBTTagList nodeList = (NBTTagList) nodePaths.removeTag(0);
+						if (nodeList != null) {
+							for (int nodeIndex = 0; nodeIndex < nodeList.tagCount(); nodeIndex++) {
+								NBTTagCompound node = (NBTTagCompound) nodeList.removeTag(0);
+								// read coordinates
+								node.setFloat("Vec3_x", node.getFloat("Vec3_x") + moveX);
+								node.setFloat("Vec3_y", node.getFloat("Vec3_y") + moveY);
+								node.setFloat("Vec3_z", node.getFloat("Vec3_z") + moveZ);
+								//tack the node on to the power path
+								nodeList.appendTag(node);
+							}
+							nodePaths.appendTag(nodeList);
+						}
+					}
+					powerPathEntry.setTag("nodePaths", nodePaths);
+				}
+				powerPathList.appendTag(powerPathEntry);
+			}
+			nbtTagCompound.setTag("powerPathList", powerPathList);
+		}
+		
+		PowerNodeRegistry.For(targetWorld).setDataCompoundForNode((IPowerNode) targetWorld.getTileEntity(jumpBlock.x + moveX, jumpBlock.y + moveY, jumpBlock.z + moveZ), nbtTagCompound);
 	}
 	
 	/**

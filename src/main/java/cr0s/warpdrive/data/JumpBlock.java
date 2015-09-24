@@ -21,6 +21,7 @@ public class JumpBlock {
 	public int x;
 	public int y;
 	public int z;
+	public NBTTagCompound nbtArsMagica2;
 	
 	public JumpBlock() {
 	}
