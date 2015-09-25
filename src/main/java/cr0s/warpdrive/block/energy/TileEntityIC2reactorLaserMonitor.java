@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraftforge.common.util.ForgeDirection;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Optional;
 import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 import cr0s.warpdrive.config.WarpDriveConfig;
 import cr0s.warpdrive.data.Vector3;
@@ -32,6 +33,7 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractEnergy {
 	private static int[] deltaZ = { 0, 0, 0, 0,-2, 2};
 	
 	// returns IReactor tile entities
+	@Optional.Method(modid = "IC2")
 	private Set<IReactor> findReactors() {
 		Set<IReactor> output = new HashSet<IReactor>();
 		
@@ -64,6 +66,7 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractEnergy {
 		return output;
 	}
 	
+	@Optional.Method(modid = "IC2")
 	private boolean coolReactor(IReactor reactor) {
 		boolean didCoolReactor = false;
 		for(int x = 0; x < 9 && !didCoolReactor; x++) {
@@ -87,6 +90,7 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractEnergy {
 	}
 	
 	@Override
+	@Optional.Method(modid = "IC2")
 	public void updateEntity() {
 		super.updateEntity();
 		
@@ -122,6 +126,7 @@ public class TileEntityIC2reactorLaserMonitor extends TileEntityAbstractEnergy {
 	}
 	
 	@Override
+	@Optional.Method(modid = "IC2")
 	public String getStatus() {
 		Set<IReactor> reactors = findReactors();
 		return getBlockType().getLocalizedName()

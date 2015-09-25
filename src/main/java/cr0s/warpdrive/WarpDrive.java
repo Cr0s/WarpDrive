@@ -321,7 +321,7 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(blockTransporter, "blockTransporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class, MODID + ":blockTransporter");
 		
-		// REACTOR MONITOR
+		// IC2 REACTOR LASER MONITOR
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
 			blockIC2reactorLaserMonitor = new BlockIC2reactorLaserMonitor(Material.rock);
 			
