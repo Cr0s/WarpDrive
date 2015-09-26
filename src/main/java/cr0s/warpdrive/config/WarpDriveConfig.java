@@ -55,6 +55,7 @@ public class WarpDriveConfig {
 	public static boolean isOpenComputersLoaded = false;
 	public static boolean isThermalExpansionLoaded = false;
 	public static boolean isArsMagica2loaded = false;
+	public static boolean isImmersiveEngineeringloaded = false;
 	
 	// ForgeMultipart (microblocks) support
 	public static Method forgeMultipart_helper_createTileFromNBT = null;
@@ -837,6 +838,7 @@ public class WarpDriveConfig {
 		isAppliedEnergistics2Loaded = Loader.isModLoaded("appliedenergistics2");
 		isOpenComputersLoaded = Loader.isModLoaded("OpenComputers");
 		isArsMagica2loaded = Loader.isModLoaded("arsmagica2");
+		isImmersiveEngineeringloaded = Loader.isModLoaded("ImmersiveEngineering");
 	}
 	
 	public static void onFMLPostInitialization() {

@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import blusunrize.immersiveengineering.api.energy.IImmersiveConnectable;
+import blusunrize.immersiveengineering.api.energy.ImmersiveNetHandler;
+import blusunrize.immersiveengineering.api.energy.ImmersiveNetHandler.Connection;
+
 import am2.api.power.IPowerNode;
 import am2.power.PowerNodeRegistry;
+
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -657,6 +662,9 @@ public class EntityJump extends Entity {
 								if (WarpDriveConfig.isArsMagica2loaded) {
 									arsMagica2_energySave(tileEntity, jumpBlock);
 								}
+								if (WarpDriveConfig.isImmersiveEngineeringloaded) {
+									immersiveEngineering_energySave(tileEntity, jumpBlock);
+								}
 								
 								// default priority is 2 for block, 3 for tile entities
 								Integer placeTime = WarpDriveConfig.BLOCKS_PLACE.get(block);
@@ -721,6 +729,9 @@ public class EntityJump extends Entity {
 				if (jb.nbtArsMagica2 != null) {
 					arsMagica2_energyRemove(jb);
 				}
+				if (jb.nbtImmersiveEngineering != null) {
+					immersiveEngineering_energyRemove(jb);
+				}
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			currentIndexInShip++;
@@ -761,6 +772,9 @@ public class EntityJump extends Entity {
 				if (jb.nbtArsMagica2 != null) {
 					arsMagica2_energyPlace(jb);
 				}
+				if (jb.nbtImmersiveEngineering != null) {
+					immersiveEngineering_energyPlace(jb);
+				}
 				worldObj.removeTileEntity(jb.x, jb.y, jb.z);
 			}
 			worldObj.setBlock(jb.x, jb.y, jb.z, Blocks.air, 0, 2);
@@ -776,6 +790,9 @@ public class EntityJump extends Entity {
 	private void arsMagica2_energySave(TileEntity tileEntity, JumpBlock jumpBlock) {
 		if (tileEntity instanceof IPowerNode) {
 			jumpBlock.nbtArsMagica2 = PowerNodeRegistry.For(worldObj).getDataCompoundForNode((IPowerNode) tileEntity);
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+				WarpDrive.logger.info("Saved ArsMagica2 energy at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtArsMagica2);
+			}
 		}
 	}
 	
@@ -787,7 +804,7 @@ public class EntityJump extends Entity {
 	@Optional.Method(modid = "arsmagica2")
 	private void arsMagica2_energyPlace(JumpBlock jumpBlock) {
 		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
-			WarpDrive.logger.info("Removing ArsMagica2 tile entity at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtArsMagica2);
+			WarpDrive.logger.info("Restoring ArsMagica2 energy at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtArsMagica2);
 		}
 		NBTTagCompound nbtTagCompound = (NBTTagCompound) jumpBlock.nbtArsMagica2.copy();
 		
@@ -830,6 +847,53 @@ public class EntityJump extends Entity {
 		}
 		
 		PowerNodeRegistry.For(targetWorld).setDataCompoundForNode((IPowerNode) targetWorld.getTileEntity(jumpBlock.x + moveX, jumpBlock.y + moveY, jumpBlock.z + moveZ), nbtTagCompound);
+	}
+	
+	@Optional.Method(modid = "ImmersiveEngineering")
+	private void immersiveEngineering_energySave(TileEntity tileEntity, JumpBlock jumpBlock) {
+		if (tileEntity instanceof IImmersiveConnectable) {
+			ChunkCoordinates node = new ChunkCoordinates(jumpBlock.blockTileEntity.xCoord, jumpBlock.blockTileEntity.yCoord, jumpBlock.blockTileEntity.zCoord);
+			List<Connection> connections = ImmersiveNetHandler.INSTANCE.getConnections(tileEntity.getWorldObj(), node);
+			if (connections != null) {
+				jumpBlock.nbtImmersiveEngineering = new NBTTagList();
+				for (Connection connection : connections) {
+					jumpBlock.nbtImmersiveEngineering.appendTag(connection.writeToNBT());
+				}
+				ImmersiveNetHandler.INSTANCE.clearConnectionsOriginatingFrom(node, worldObj);
+			}
+			if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+				WarpDrive.logger.info("Saved ImmersiveEngineering energy at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtImmersiveEngineering);
+			}
+		}
+	}
+	
+	@Optional.Method(modid = "ImmersiveEngineering")
+	private void immersiveEngineering_energyRemove(JumpBlock jumpBlock) {
+		// needs to be done while saving
+	}
+	
+	@Optional.Method(modid = "ImmersiveEngineering")
+	private void immersiveEngineering_energyPlace(JumpBlock jumpBlock) {
+		if (jumpBlock.nbtImmersiveEngineering == null) {
+			return;
+		}
+		if (WarpDriveConfig.LOGGING_JUMPBLOCKS) {
+			WarpDrive.logger.info("Restoring ImmersiveEngineering energy at " + jumpBlock.x + ", " + jumpBlock.y + ", " + jumpBlock.z + " " + jumpBlock.nbtImmersiveEngineering);
+		}
+		
+		// powerPathList
+		for (int connectionIndex = 0; connectionIndex < jumpBlock.nbtImmersiveEngineering.tagCount(); connectionIndex++) {
+			Connection connection = Connection.readFromNBT(jumpBlock.nbtImmersiveEngineering.getCompoundTagAt(connectionIndex));
+			
+			connection.start.posX += moveX;
+			connection.start.posY += moveY;
+			connection.start.posZ += moveZ;
+			connection.end.posX += moveX;
+			connection.end.posY += moveY;
+			connection.end.posZ += moveZ;
+			
+			ImmersiveNetHandler.INSTANCE.addConnection(targetWorld, new ChunkCoordinates(connection.start.posX, connection.start.posY, connection.start.posZ), connection);
+		}
 	}
 	
 	/**

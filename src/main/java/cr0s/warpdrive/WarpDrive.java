@@ -149,23 +149,23 @@ public class WarpDrive implements LoadingCallback {
 	public static Block blockTransportBeacon;
 	public static Block blockChunkLoader;
 	public static BlockDecorative blockDecorative;
-
+	
 	public static Item itemIC2reactorLaserFocus;
 	public static ItemComponent itemComponent;
 	public static ItemUpgrade itemUpgrade;
-
+	
 	public static ArmorMaterial armorMaterial = EnumHelper.addArmorMaterial("WARP", 5, new int[] { 1, 3, 2, 1 }, 15);
 	public static ItemHelmet itemHelmet;
 	public static ItemAirCanisterFull itemAirCanisterFull;
-
+	
 	public static BiomeGenBase spaceBiome;
 	public SpaceWorldGenerator spaceWorldGenerator;
 	public HyperSpaceWorldGenerator hyperSpaceWorldGenerator;
 	public World space;
 	public World hyperSpace;
-
+	
 	// Client settings
-	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("Warpdrive", "Warpdrive").setBackgroundImageName("warpdrive:creativeTab");
+	public static CreativeTabs creativeTabWarpDrive = new CreativeTabWarpDrive("WarpDrive", "WarpDrive").setBackgroundImageName("warpdrive:creativeTab");
 	
 	@Instance(WarpDrive.MODID)
 	public static WarpDrive instance;

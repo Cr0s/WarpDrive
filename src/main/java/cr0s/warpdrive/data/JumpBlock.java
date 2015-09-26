@@ -6,6 +6,7 @@ import java.util.List;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -22,6 +23,7 @@ public class JumpBlock {
 	public int y;
 	public int z;
 	public NBTTagCompound nbtArsMagica2;
+	public NBTTagList nbtImmersiveEngineering;
 	
 	public JumpBlock() {
 	}
