@@ -17,8 +17,8 @@ import cr0s.warpdrive.WarpDrive;
 public class BlockLaserMedium extends BlockContainer {
 	private IIcon[] iconBuffer;
 	
-	public BlockLaserMedium(int texture, Material material) {
-		super(material);
+	public BlockLaserMedium() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

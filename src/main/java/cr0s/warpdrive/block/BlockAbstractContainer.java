@@ -9,26 +9,21 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IBlockUpdateDetector;
 
 public abstract class BlockAbstractContainer extends BlockContainer {
-	protected BlockAbstractContainer() {
-		super(Material.iron);
-	}
-
-	protected BlockAbstractContainer(Material m) {
-		super(m);
+	protected BlockAbstractContainer(Material material) {
+		super(material);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 	}
-
+	
 	@Override
-	public void onBlockAdded(World w, int x, int y, int z) {
-		super.onBlockAdded(w, x, y, z);
-		TileEntity tileEntity = w.getTileEntity(x, y, z);
+	public void onBlockAdded(World world, int x, int y, int z) {
+		super.onBlockAdded(world, x, y, z);
+		TileEntity tileEntity = world.getTileEntity(x, y, z);
 		if (tileEntity instanceof IBlockUpdateDetector) {
 			((IBlockUpdateDetector) tileEntity).updatedNeighbours();
 		}
 	}
-
 	
 	// FIXME untested
 	 /*
@@ -37,7 +32,7 @@ public abstract class BlockAbstractContainer extends BlockContainer {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
+	
 		boolean hasResponse = false;
 		TileEntity te = world.getBlockTileEntity(x, y, z);
 		if (te != null && te instanceof IUpgradable) {
@@ -57,15 +52,15 @@ public abstract class BlockAbstractContainer extends BlockContainer {
 				}
 			}
 		}
-
+		
 		return hasResponse;
 	}
 	/**/
-
+	
 	@Override
-	public void onNeighborBlockChange(World w, int x, int y, int z, Block b) {
-		super.onNeighborBlockChange(w, x, y, z, b);
-		TileEntity tileEntity = w.getTileEntity(x, y, z);
+	public void onNeighborBlockChange(World world, int x, int y, int z, Block block) {
+		super.onNeighborBlockChange(world, x, y, z, block);
+		TileEntity tileEntity = world.getTileEntity(x, y, z);
 		if (tileEntity instanceof IBlockUpdateDetector) {
 			((IBlockUpdateDetector) tileEntity).updatedNeighbours();
 		}

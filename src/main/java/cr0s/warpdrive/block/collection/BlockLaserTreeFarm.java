@@ -15,8 +15,8 @@ import cr0s.warpdrive.WarpDrive;
 public class BlockLaserTreeFarm extends BlockContainer {
 	private IIcon[] iconBuffer;
 
-	public BlockLaserTreeFarm(int texture, Material material) {
-		super(material);
+	public BlockLaserTreeFarm() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

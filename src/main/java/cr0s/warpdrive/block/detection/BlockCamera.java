@@ -20,8 +20,8 @@ public class BlockCamera extends BlockContainer {
 	
 	private final int ICON_SIDE = 0;
 	
-	public BlockCamera(int texture, Material material) {
-		super(material);
+	public BlockCamera() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

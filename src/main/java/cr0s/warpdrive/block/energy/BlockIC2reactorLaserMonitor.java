@@ -11,29 +11,24 @@ import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
 
 public class BlockIC2reactorLaserMonitor extends BlockContainer {
-	public BlockIC2reactorLaserMonitor(int texture, Material material) {
-		super(material);
+	public BlockIC2reactorLaserMonitor() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		this.setBlockName("warpdrive.energy.IC2ReactorLaserMonitor");
 	}
-
-	public BlockIC2reactorLaserMonitor(Material material) {
-		this(0, material);
-	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
-		// Solid textures
 		blockIcon = par1IconRegister.registerIcon("warpdrive:energy/IC2reactorLaserMonitor");
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World var1, int i) {
 		return new TileEntityIC2reactorLaserMonitor();
 	}
-
+	
 	/**
 	 * Called upon block activation (right click on the block.)
 	 */

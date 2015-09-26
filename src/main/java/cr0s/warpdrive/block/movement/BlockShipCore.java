@@ -19,8 +19,8 @@ public class BlockShipCore extends BlockContainer {
 	
 	private final int ICON_SIDE_INACTIVE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3, ICON_SIDE_HEATED = 4;
 	
-	public BlockShipCore(int texture, Material material) {
-		super(material);
+	public BlockShipCore() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

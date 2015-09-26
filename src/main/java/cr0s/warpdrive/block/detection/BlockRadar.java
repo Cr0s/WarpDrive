@@ -25,8 +25,8 @@ public class BlockRadar extends BlockContainer
 	private final int ICON_SIDE_ACTIVATED = 3;
 	private final int ICON_SIDE_ACTIVATED_SCAN = 4;
 
-	public BlockRadar(int texture, Material material) {
-		super(material);
+	public BlockRadar() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

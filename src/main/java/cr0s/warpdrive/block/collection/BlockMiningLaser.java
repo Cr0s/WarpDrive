@@ -23,8 +23,8 @@ public class BlockMiningLaser extends BlockContainer {
 	public final static int ICON_SCANNINGLOWPOWER = 3;
 	public final static int ICON_SCANNINGPOWERED = 4;
 
-	public BlockMiningLaser(int texture, Material material) {
-		super(material);
+	public BlockMiningLaser() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

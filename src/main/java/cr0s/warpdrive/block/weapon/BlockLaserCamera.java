@@ -22,8 +22,8 @@ public class BlockLaserCamera extends BlockContainer {
 	
 	private final int ICON_SIDE = 0;
 	
-	public BlockLaserCamera(int texture, Material material) {
-		super(material);
+	public BlockLaserCamera() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

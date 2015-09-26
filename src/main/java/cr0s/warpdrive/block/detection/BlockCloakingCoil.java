@@ -13,8 +13,8 @@ import cr0s.warpdrive.WarpDrive;
 public class BlockCloakingCoil extends Block {
 	private IIcon[] iconBuffer;
 	
-	public BlockCloakingCoil(int texture, Material material) {
-		super(material);
+	public BlockCloakingCoil() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

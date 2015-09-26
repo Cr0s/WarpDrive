@@ -3,7 +3,6 @@ package cr0s.warpdrive;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.creativetab.CreativeTabs;
@@ -201,30 +200,30 @@ public class WarpDrive implements LoadingCallback {
 		WarpDriveConfig.onFMLInitialization();
 		
 		// CORE CONTROLLER
-		blockShipController = new BlockShipController(0, Material.rock);
+		blockShipController = new BlockShipController();
 		
 		GameRegistry.registerBlock(blockShipController, "blockShipController");
 		GameRegistry.registerTileEntity(TileEntityShipController.class, MODID + ":blockShipController");
 		
 		// WARP CORE
-		blockShipCore = new BlockShipCore(0, Material.rock);
+		blockShipCore = new BlockShipCore();
 		
 		GameRegistry.registerBlock(blockShipCore, "blockShipCore");
 		GameRegistry.registerTileEntity(TileEntityShipCore.class, MODID + ":blockShipCore");
 		
 		// WARP RADAR
-		blockRadar = new BlockRadar(0, Material.rock);
+		blockRadar = new BlockRadar();
 		
 		GameRegistry.registerBlock(blockRadar, "blockRadar");
 		GameRegistry.registerTileEntity(TileEntityRadar.class, MODID + ":blockRadar");
 		
 		// WARP ISOLATION
-		blockWarpIsolation = new BlockWarpIsolation(0, Material.rock);
+		blockWarpIsolation = new BlockWarpIsolation();
 		
 		GameRegistry.registerBlock(blockWarpIsolation, "blockWarpIsolation");
 		
 		// AIR GENERATOR
-		blockAirGenerator = new BlockAirGenerator(0, Material.rock);
+		blockAirGenerator = new BlockAirGenerator();
 		
 		GameRegistry.registerBlock(blockAirGenerator, "blockAirGenerator");
 		GameRegistry.registerTileEntity(TileEntityAirGenerator.class, MODID + ":blockAirGenerator");
@@ -240,18 +239,18 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerBlock(blockGas, "blockGas");
 		
 		// LASER EMITTER
-		blockLaser = new BlockLaser(0, Material.rock);
+		blockLaser = new BlockLaser();
 		
 		GameRegistry.registerBlock(blockLaser, "blockLaser");
 		GameRegistry.registerTileEntity(TileEntityLaser.class, MODID + ":blockLaser");
 		
 		// LASER EMITTER WITH CAMERA
-		blockLaserCamera = new BlockLaserCamera(0, Material.rock);
+		blockLaserCamera = new BlockLaserCamera();
 		
 		GameRegistry.registerBlock(blockLaserCamera, "blockLaserCamera");
 		
 		// CAMERA
-		blockCamera = new BlockCamera(0, Material.rock);
+		blockCamera = new BlockCamera();
 		
 		GameRegistry.registerBlock(blockCamera, "blockCamera");
 		GameRegistry.registerTileEntity(TileEntityCamera.class, MODID + ":blockCamera");
@@ -263,25 +262,25 @@ public class WarpDrive implements LoadingCallback {
 		GameRegistry.registerTileEntity(TileEntityMonitor.class, MODID + ":blockMonitor");
 		
 		// MINING LASER
-		blockMiningLaser = new BlockMiningLaser(0, Material.rock);
+		blockMiningLaser = new BlockMiningLaser();
 		
 		GameRegistry.registerBlock(blockMiningLaser, "blockMiningLaser");
 		GameRegistry.registerTileEntity(TileEntityMiningLaser.class, MODID + ":blockMiningLaser");
 		
 		// LASER TREE FARM
-		blockLaserTreeFarm = new BlockLaserTreeFarm(0, Material.rock);
+		blockLaserTreeFarm = new BlockLaserTreeFarm();
 		
 		GameRegistry.registerBlock(blockLaserTreeFarm, "blockLaserTreeFarm");
 		GameRegistry.registerTileEntity(TileEntityLaserTreeFarm.class, MODID + ":blockLaserTreeFarm");
 		
 		// LASER MEDIUM
-		blockLaserMedium = new BlockLaserMedium(0, Material.rock);
+		blockLaserMedium = new BlockLaserMedium();
 		
 		GameRegistry.registerBlock(blockLaserMedium, "blockLaserMedium");
 		GameRegistry.registerTileEntity(TileEntityLaserMedium.class, MODID + ":blockLaserMedium");
 		
 		// LIFT
-		blockLift = new BlockLift(0, Material.rock);
+		blockLift = new BlockLift();
 		
 		GameRegistry.registerBlock(blockLift, "blockLift");
 		GameRegistry.registerTileEntity(TileEntityLift.class, MODID + ":blockLift");
@@ -299,31 +298,31 @@ public class WarpDrive implements LoadingCallback {
 		}
 		
 		// SHIP SCANNER
-		blockShipScanner = new BlockShipScanner(0, Material.rock);
+		blockShipScanner = new BlockShipScanner();
 		
 		GameRegistry.registerBlock(blockShipScanner, "blockShipScanner");
 		GameRegistry.registerTileEntity(TileEntityShipScanner.class, MODID + ":blockShipScanner");
 		
 		// CLOAKING DEVICE CORE
-		blockCloakingCore = new BlockCloakingCore(0, Material.rock);
+		blockCloakingCore = new BlockCloakingCore();
 		
 		GameRegistry.registerBlock(blockCloakingCore, "blockCloakingCore");
 		GameRegistry.registerTileEntity(TileEntityCloakingCore.class, MODID + ":blockCloakingCore");
 		
 		// CLOAKING DEVICE COIL
-		blockCloakingCoil = new BlockCloakingCoil(0, Material.rock);
+		blockCloakingCoil = new BlockCloakingCoil();
 		
 		GameRegistry.registerBlock(blockCloakingCoil, "blockCloakingCoil");
 		
 		// TRANSPORTER
-		blockTransporter = new BlockTransporter(Material.rock);
+		blockTransporter = new BlockTransporter();
 		
 		GameRegistry.registerBlock(blockTransporter, "blockTransporter");
 		GameRegistry.registerTileEntity(TileEntityTransporter.class, MODID + ":blockTransporter");
 		
 		// IC2 REACTOR LASER MONITOR
 		if (WarpDriveConfig.isIndustrialCraft2loaded) {
-			blockIC2reactorLaserMonitor = new BlockIC2reactorLaserMonitor(Material.rock);
+			blockIC2reactorLaserMonitor = new BlockIC2reactorLaserMonitor();
 			
 			GameRegistry.registerBlock(blockIC2reactorLaserMonitor, "blockIC2reactorLaserMonitor");
 			GameRegistry.registerTileEntity(TileEntityIC2reactorLaserMonitor.class, MODID + ":blockIC2reactorLaserMonitor");
@@ -445,12 +444,12 @@ public class WarpDrive implements LoadingCallback {
 	public Ticket registerChunkLoadTE(TileEntityAbstractChunkLoading tileEntity, boolean refreshLoading) {
 		World worldObj = tileEntity.getWorldObj();
 		if (ForgeChunkManager.ticketCountAvailableFor(this, worldObj) > 0) {
-			Ticket t = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
-			if (t != null) {
-				tileEntity.giveTicket(t); // FIXME calling the caller is a bad idea
+			Ticket ticket = ForgeChunkManager.requestTicket(this, worldObj, Type.NORMAL);
+			if (ticket != null) {
+				tileEntity.giveTicket(ticket); // FIXME calling the caller is a bad idea
 				if (refreshLoading)
 					tileEntity.refreshLoading();
-				return t;
+				return ticket;
 			} else {
 				WarpDrive.logger.error("Ticket not granted");
 			}

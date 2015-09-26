@@ -19,8 +19,8 @@ public class BlockLift extends BlockContainer
 {
 	private IIcon[] iconBuffer;
 
-	public BlockLift(int texture, Material material) {
-		super(material);
+	public BlockLift() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

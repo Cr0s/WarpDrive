@@ -17,15 +17,15 @@ import cr0s.warpdrive.block.TileEntityAbstractEnergy;
 
 public class BlockShipScanner extends BlockContainer {
 	private IIcon[] iconBuffer;
-
-	public BlockShipScanner(int texture, Material material) {
-		super(material);
+	
+	public BlockShipScanner() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.building.ShipScanner");
 	}
-
+	
 	@Override
 	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[3];
@@ -33,7 +33,7 @@ public class BlockShipScanner extends BlockContainer {
 		iconBuffer[1] = par1IconRegister.registerIcon("warpdrive:building/shipScannerSide");
 		iconBuffer[2] = par1IconRegister.registerIcon("warpdrive:building/shipScannerBottom");
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		if (side == 1) { // UP
@@ -41,15 +41,15 @@ public class BlockShipScanner extends BlockContainer {
 		} else if (side == 0) { // DOWN
 			return iconBuffer[2];
 		}
-
+		
 		return iconBuffer[1];
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World var1, int i) {
 		return new TileEntityShipScanner();
 	}
-
+	
 	/**
 	 * Returns the quantity of items to drop on block destruction.
 	 */
@@ -57,7 +57,7 @@ public class BlockShipScanner extends BlockContainer {
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
+	
 	/**
 	 * Returns the ID of the items to drop on destruction.
 	 */
@@ -65,22 +65,22 @@ public class BlockShipScanner extends BlockContainer {
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
 	}
-
+	
 	/**
 	 * Called upon block activation (right click on the block.)
 	 */
 	@Override
-	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer par5EntityPlayer, int par6, float par7, float par8, float par9) {
+	public boolean onBlockActivated(World world, int x, int y, int z, EntityPlayer entityPlayer, int par6, float par7, float par8, float par9) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
-		TileEntityAbstractEnergy te = (TileEntityAbstractEnergy)par1World.getTileEntity(par2, par3, par4);
-		if (te != null && (par5EntityPlayer.getHeldItem() == null)) {
-			WarpDrive.addChatMessage(par5EntityPlayer, te.getStatus());
+		
+		TileEntityAbstractEnergy te = (TileEntityAbstractEnergy)world.getTileEntity(x, y, z);
+		if (te != null && (entityPlayer.getHeldItem() == null)) {
+			WarpDrive.addChatMessage(entityPlayer, te.getStatus());
 			return true;
 		}
-
+		
 		return false;
 	}
 }

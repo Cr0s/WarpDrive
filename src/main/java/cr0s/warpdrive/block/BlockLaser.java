@@ -19,8 +19,8 @@ public class BlockLaser extends BlockContainer {
 
 	private final int ICON_SIDE = 0;
 
-	public BlockLaser(int texture, Material material) {
-		super(material);
+	public BlockLaser() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);

@@ -18,30 +18,27 @@ import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.api.IAirCanister;
 import cr0s.warpdrive.config.WarpDriveConfig;
 
-public class BlockAirGenerator extends BlockContainer
-{
+public class BlockAirGenerator extends BlockContainer {
 	private IIcon[] iconBuffer;
-
+	
 	private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_SIDE_ACTIVATED = 2;
-
-	public BlockAirGenerator(int texture, Material material)
-	{
-		super(material);
+	
+	public BlockAirGenerator() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
 		setBlockName("warpdrive.machines.AirGenerator");
 	}
-
+	
 	@Override
-	public void registerBlockIcons(IIconRegister par1IconRegister)
-	{
+	public void registerBlockIcons(IIconRegister par1IconRegister) {
 		iconBuffer = new IIcon[3];
 		iconBuffer[ICON_INACTIVE_SIDE] = par1IconRegister.registerIcon("warpdrive:airGeneratorSideInactive");
 		iconBuffer[ICON_BOTTOM] = par1IconRegister.registerIcon("warpdrive:airGeneratorBottom");
 		iconBuffer[ICON_SIDE_ACTIVATED] = par1IconRegister.registerIcon("warpdrive:airGeneratorSideActive");
 	}
-
+	
 	@Override
 	public IIcon getIcon(int side, int metadata) {
 		if (side == 0) {
@@ -53,21 +50,21 @@ public class BlockAirGenerator extends BlockContainer
 				return iconBuffer[ICON_SIDE_ACTIVATED];
 			}
 		}
-
+		
 		if (metadata == 0) { // Inactive state
 			return iconBuffer[ICON_INACTIVE_SIDE];
 		} else if (metadata == 1) {
 			return iconBuffer[ICON_SIDE_ACTIVATED];
 		}
-
+		
 		return null;
 	}
-
+	
 	@Override
 	public TileEntity createNewTileEntity(World var1, int i) {
 		return new TileEntityAirGenerator();
 	}
-
+	
 	/**
 	 * Returns the quantity of items to drop on block destruction.
 	 */
@@ -75,7 +72,7 @@ public class BlockAirGenerator extends BlockContainer
 	public int quantityDropped(Random par1Random) {
 		return 1;
 	}
-
+	
 	/**
 	 * Returns the ID of the items to drop on destruction.
 	 */
@@ -83,14 +80,14 @@ public class BlockAirGenerator extends BlockContainer
 	public Item getItemDropped(int par1, Random par2Random, int par3) {
 		return Item.getItemFromBlock(this);
 	}
-
+	
 	@Override
 	public boolean onBlockActivated(World par1World, int par2, int par3, int par4, EntityPlayer player, int par6, float par7, float par8, float par9) {
 		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
 			return false;
 		}
-
-		TileEntityAbstractEnergy te = (TileEntityAbstractEnergy)par1World.getTileEntity(par2, par3, par4);
+		
+		TileEntityAbstractEnergy te = (TileEntityAbstractEnergy) par1World.getTileEntity(par2, par3, par4);
 		if (te != null) {
 			ItemStack heldItemStack = player.getHeldItem();
 			if (heldItemStack == null) {
@@ -99,7 +96,7 @@ public class BlockAirGenerator extends BlockContainer
 			} else {
 				Item heldItem = heldItemStack.getItem();
 				if (heldItem != null && (heldItem instanceof IAirCanister)) {
-					IAirCanister airCanister = (IAirCanister)heldItem;
+					IAirCanister airCanister = (IAirCanister) heldItem;
 					if (airCanister.canContainAir(heldItemStack) && te.consumeEnergy(WarpDriveConfig.AIRGEN_ENERGY_PER_CANISTER, true)) {
 						player.inventory.decrStackSize(player.inventory.currentItem, 1);
 						ItemStack toAdd = airCanister.fullDrop(heldItemStack);
@@ -114,7 +111,7 @@ public class BlockAirGenerator extends BlockContainer
 				}
 			}
 		}
-
+		
 		return false;
 	}
 }

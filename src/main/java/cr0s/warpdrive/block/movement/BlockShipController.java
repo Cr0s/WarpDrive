@@ -21,8 +21,8 @@ public class BlockShipController extends BlockContainer {
 
 	private final int ICON_INACTIVE_SIDE = 0, ICON_BOTTOM = 1, ICON_TOP = 2, ICON_SIDE_ACTIVATED = 3;
 
-	public BlockShipController(int id, Material material) {
-		super(material);
+	public BlockShipController() {
+		super(Material.rock);
 		setHardness(0.5F);
 		setStepSound(Block.soundTypeMetal);
 		setCreativeTab(WarpDrive.creativeTabWarpDrive);
