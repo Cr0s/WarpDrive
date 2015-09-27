@@ -46,7 +46,7 @@ tile.warpdrive.detection.Radar.name=Radar
 tile.warpdrive.detection.WarpIsolation.name=Warp-field Isolation Block
 
 tile.warpdrive.energy.EnanReactorCore.name=Enantiomorphic Reactor Core
-tile.warpdrive.energy.EnanReactorLaser.name=Aurbis Reactor Stabilisation Laser
+tile.warpdrive.energy.EnanReactorLaser.name=Enantiomorphic Reactor Stabilisation Laser
 tile.warpdrive.energy.EnergyBank.name=Anuic Energy Bank
 tile.warpdrive.energy.IC2ReactorLaserMonitor.name=IC2 Reactor Laser Monitor
 
