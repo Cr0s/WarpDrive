@@ -25,6 +25,7 @@ import net.minecraftforge.common.util.EnumHelper;
 
 import org.apache.logging.log4j.Logger;
 
+import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -105,6 +106,7 @@ import cr0s.warpdrive.item.ItemIC2reactorLaserFocus;
 import cr0s.warpdrive.item.ItemUpgrade;
 import cr0s.warpdrive.network.PacketHandler;
 import cr0s.warpdrive.render.ClientCameraHandler;
+import cr0s.warpdrive.render.RenderBlockStandard;
 import cr0s.warpdrive.render.RenderOverlayCamera;
 import cr0s.warpdrive.world.BiomeSpace;
 import cr0s.warpdrive.world.HyperSpaceWorldProvider;
@@ -191,6 +193,9 @@ public class WarpDrive implements LoadingCallback {
 			MinecraftForge.EVENT_BUS.register(new RenderOverlayCamera(Minecraft.getMinecraft()));
 			
 			FMLCommonHandler.instance().bus().register(new ClientCameraHandler());
+			
+			RenderBlockStandard.renderId = RenderingRegistry.getNextAvailableRenderId();
+			RenderingRegistry.registerBlockHandler(RenderBlockStandard.instance);
 		}
 	}
 	
@@ -360,6 +365,7 @@ public class WarpDrive implements LoadingCallback {
 			itemIC2reactorLaserFocus = new ItemIC2reactorLaserFocus();
 			GameRegistry.registerItem(itemIC2reactorLaserFocus, "itemIC2reactorLaserFocus");
 		}
+		
 		// COMPONENT ITEMS
 		itemComponent = new ItemComponent();
 		GameRegistry.registerItem(itemComponent, "itemComponent");

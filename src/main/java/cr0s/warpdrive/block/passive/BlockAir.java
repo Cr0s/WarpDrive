@@ -14,6 +14,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import cr0s.warpdrive.WarpDrive;
 import cr0s.warpdrive.config.WarpDriveConfig;
+import cr0s.warpdrive.render.RenderBlockStandard;
 
 public class BlockAir extends Block {
 	private final boolean TRANSPARENT_AIR = true;
@@ -156,6 +157,11 @@ public class BlockAir extends Block {
 		}
 		
 		return world.isAirBlock(x, y, z);
+	}
+	
+	@Override
+	public int getRenderType() {
+		return RenderBlockStandard.renderId;
 	}
 	
 	private void spreadAirBlock(World world, int x, int y, int z, int concentration) {
