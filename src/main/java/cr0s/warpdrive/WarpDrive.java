@@ -22,6 +22,7 @@ import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.EnumHelper;
+
 import org.apache.logging.log4j.Logger;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -458,15 +459,15 @@ public class WarpDrive implements LoadingCallback {
 		}
 		return null;
 	}
-
+	
 	public Ticket registerChunkLoadTE(TileEntityAbstractChunkLoading te) {
 		return registerChunkLoadTE(te, true);
 	}
-
+	
 	public Ticket getTicket(TileEntityAbstractChunkLoading te) {
 		return registerChunkLoadTE(te, false);
 	}
-
+	
 	@Override
 	public void ticketsLoaded(List<Ticket> tickets, World world) {
 		for (Ticket ticket : tickets) {
@@ -491,11 +492,11 @@ public class WarpDrive implements LoadingCallback {
 					}
 				}
 			}
-
+			
 			ForgeChunkManager.releaseTicket(ticket);
 		}
 	}
-
+	
 	public static void addChatMessage(final ICommandSender sender, final String message) {
 		String[] lines = message.split("\n");
 		for (String line : lines) {
