@@ -1,0 +1,2048 @@
+monitor_textScale = 0.5
+
+-- set alarm side if you need this
+alarm_side = "top"
+
+Style = {
+	CDefault = colors.white,
+	BGDefault = colors.blue,
+
+	CTitle = colors.black,
+	BGTitle = colors.cyan,
+
+	CWarning = colors.white,
+	BGWarning = colors.red,
+
+	CSuccess = colors.white,
+	BGSuccess = colors.lime,
+
+	CDisabled = colors.gray,
+	BGDisabled = colors.blue,
+
+	CRadarmap = colors.gray,
+	BGRadarmap = colors.green,
+
+	CRadarborder = colors.white,
+	BGRadarborder = colors.black,
+
+	CRadarself = colors.white,
+	BGRadarself = colors.lime,
+	TextRadarself = "R",
+	
+	CRadarother = colors.black,
+	BGRadarother = colors.red,
+	TextRadarother = "#"
+}
+
+if not term.isColor() then
+	print("Advanced computer required")
+	exit()
+end
+
+----------- Monitor support
+
+function SetMonitorColorFrontBack(frontColor, backgroundColor)
+	term.setBackgroundColor(backgroundColor)
+	term.setTextColor(frontColor)
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			monitor.setTextColor(frontColor)
+			monitor.setBackgroundColor(backgroundColor)
+		end
+	end
+end
+
+function Write(text)
+	term.write(text)
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			if key ~= data.radar_monitorIndex then
+				monitor.write(text)
+			end
+		end
+	end
+end
+
+function SetCursorPos(x, y)
+	term.setCursorPos(x, y)
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			if key ~= data.radar_monitorIndex then
+				monitor.setCursorPos(x, y)
+			end
+		end
+	end
+end
+
+function SetColorDefault()
+	SetMonitorColorFrontBack(Style.CDefault, Style.BGDefault)
+end
+
+function SetColorTitle()
+	SetMonitorColorFrontBack(Style.CTitle, Style.BGTitle)
+end
+
+function SetColorWarning()
+	SetMonitorColorFrontBack(Style.CWarning, Style.BGWarning)
+end
+
+function SetColorSuccess()
+	SetMonitorColorFrontBack(Style.CSuccess, Style.BGSuccess)
+end
+
+function SetColorDisabled()
+	SetMonitorColorFrontBack(Style.CDisabled, Style.BGDisabled)
+end
+
+function SetColorRadarmap()
+	SetMonitorColorFrontBack(Style.CRadarmap, Style.BGRadarmap)
+end
+
+function SetColorRadarborder()
+	SetMonitorColorFrontBack(Style.CRadarborder, Style.BGRadarborder)
+end
+
+function Clear()
+	clearWarningTick = -1
+	SetColorDefault()
+	term.clear()
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			if key ~= data.radar_monitorIndex then
+				monitor.clear()
+			end
+		end
+	end
+	SetCursorPos(1, 1)
+end
+
+function ClearLine()
+	SetColorDefault()
+	term.clearLine()
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			if key ~= data.radar_monitorIndex then
+				monitor.clearLine()
+			end
+		end
+	end
+	SetCursorPos(1, 1)
+end
+
+function WriteLn(Text)
+	Write(Text)
+	local x, y = term.getCursorPos()
+	local width, height = term.getSize()
+	if y > height - 1 then
+		y = 1
+	end
+	SetCursorPos(1, y + 1)
+end
+
+function WriteCentered(y, text)
+	SetCursorPos((51 - text:len()) / 2, y)
+	term.write(text)
+	if monitors ~= nil then
+		for key,monitor in pairs(monitors) do
+			if key ~= data.radar_monitorIndex then
+				local sizeX, sizeY = monitor.getSize()
+				monitor.setCursorPos((sizeX - text:len()) / 2, y)
+				monitor.write(text)
+			end
+		end
+	end
+	local xt, yt = term.getCursorPos()
+	SetCursorPos(1, yt + 1)
+end
+
+function ShowTitle(text)
+	Clear()
+	SetColorTitle()
+	WriteCentered(1, text)
+	SetColorDefault()
+end
+
+function ShowMenu(Text)
+	Write(Text)
+	local xt, yt = term.getCursorPos()
+	for i = xt, 51 do
+		Write(" ")
+	end
+	SetCursorPos(1, yt+1)
+end
+
+local clearWarningTick = -1
+function ShowWarning(Text)
+	SetColorWarning()
+	SetCursorPos((51 - Text:len() - 2) / 2, 19)
+	Write(" "..Text.." ")
+	SetColorDefault()
+	clearWarningTick = 5
+end
+function ClearWarning(Text)
+	if clearWarningTick > 0 then
+		clearWarningTick = clearWarningTick - 1
+	elseif clearWarningTick == 0 then
+		SetColorDefault()
+		SetCursorPos(1, 19)
+		ClearLine()
+	end
+end
+
+----------- Formatting & popups
+
+function FormatFloat(value, nbchar)
+	local str = "?"
+	if value ~= nil then
+		str = string.format("%f", value)
+	end
+	if nbchar ~= nil then
+		str = string.sub("               " .. str, -nbchar)
+	end
+	return str
+end
+function FormatInteger(value, nbchar)
+	local str = "?"
+	if value ~= nil then
+		str = string.format("%d", value)
+	end
+	if nbchar ~= nil then
+		str = string.sub("               " .. str, -nbchar)
+	end
+	return str
+end
+
+function boolToYesNo(bool)
+	if bool then
+		return "YES"
+	else
+		return "no"
+	end
+end
+
+function readInputNumber(currentValue)
+	local inputAbort = false
+	local input = string.format(currentValue)
+	if input == "0" then
+		input = ""
+	end
+	local x, y = term.getCursorPos()
+	repeat
+		ClearWarning()
+		SetColorDefault()
+		SetCursorPos(x, y)
+		Write(input .. "            ")
+		input = string.sub(input, -9)
+		
+		local params = { os.pullEventRaw() }
+		local eventName = params[1]
+		local side = params[2]
+		if side == nil then side = "none" end
+		if eventName == "key" then
+			local keycode = params[2]
+			if keycode >= 2 and keycode <= 10 then -- 1 to 9
+				input = input .. string.format(keycode - 1)
+			elseif keycode == 11 or keycode == 82 then -- 0 & keypad 0
+				input = input .. "0"
+			elseif keycode >= 79 and keycode <= 81 then -- keypad 1 to 3
+				input = input .. string.format(keycode - 78)
+			elseif keycode >= 75 and keycode <= 87 then -- keypad 4 to 6
+				input = input .. string.format(keycode - 71)
+			elseif keycode >= 71 and keycode <= 73 then -- keypad 7 to 9
+				input = input .. string.format(keycode - 64)
+			elseif keycode == 14 then -- Backspace
+				input = string.sub(input, 1, string.len(input) - 1)
+			elseif keycode == 211 then -- Delete
+				input = ""
+			elseif keycode == 28 then -- Enter
+				inputAbort = true
+			else
+				ShowWarning("Key " .. keycode .. " is invalid")
+			end
+		elseif eventName == "char" then
+			-- drop it
+		elseif eventName == "key_up" then
+			-- drop it
+		elseif eventName == "terminate" then
+			inputAbort = true
+		elseif not common_event(eventName, params[2]) then
+			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		end
+	until inputAbort
+	SetCursorPos(1, y + 1)
+	if input == "" then
+		return currentValue
+	else
+		return tonumber(input)
+	end
+end
+
+function readInputText(currentValue)
+	local inputAbort = false
+	local input = string.format(currentValue)
+	local x, y = term.getCursorPos()
+	repeat
+		ClearWarning()
+		SetColorDefault()
+		SetCursorPos(x, y)
+		Write(input .. "                              ")
+		input = string.sub(input, -30)
+		
+		local params = { os.pullEventRaw() }
+		local eventName = params[1]
+		local side = params[2]
+		if side == nil then side = "none" end
+		if eventName == "key" then
+			local keycode = params[2]
+			if keycode == 14 then -- Backspace
+				input = string.sub(input, 1, string.len(input) - 1)
+			elseif keycode == 211 then -- Delete
+				input = ""
+			elseif keycode == 28 then -- Enter
+				inputAbort = true
+			else
+				-- ShowWarning("Key " .. keycode .. " is invalid")
+			end
+		elseif eventName == "char" then
+			local char = params[2]
+			if char >= ' ' and char <= '~' then -- 1 to 9
+				input = input .. char
+			else
+				ShowWarning("Char #" .. string.byte(char) .. " is invalid")
+			end
+		elseif eventName == "key_up" then
+			-- drop it
+		elseif eventName == "terminate" then
+			inputAbort = true
+		elseif not common_event(eventName, params[2]) then
+			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		end
+	until inputAbort
+	SetCursorPos(1, y + 1)
+	if input == "" then
+		return currentValue
+	else
+		return input
+	end
+end
+
+function readConfirmation()
+	ShowWarning("Are you sure? (y/n)")
+	repeat
+		local params = { os.pullEventRaw() }
+		local eventName = params[1]
+		local side = params[2]
+		if side == nil then side = "none" end
+		if eventName == "key" then
+			local keycode = params[2]
+			if keycode == 21 then -- Y
+				return true
+			else
+				return false
+			end
+		elseif eventName == "char" then
+			-- drop it
+		elseif eventName == "key_up" then
+			-- drop it
+		elseif eventName == "terminate" then
+			return false
+		elseif not common_event(eventName, params[2]) then
+			ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		end
+	until false
+end
+
+----------- commons: menu, event handlers, etc.
+
+function common_event(eventName, param)
+	if eventName == "redstone" then
+		redstone_event(param)
+	elseif eventName == "timer" then
+		if param == radar_timerId then
+			radar_timerEvent()
+		end
+	elseif eventName == "reactorPulse" then
+		reactor_pulse(param)
+--	elseif eventName == "reactorDeactivation" then
+--		ShowWarning("Reactor deactivated")
+--	elseif eventName == "reactorActivation" then
+--		ShowWarning("Reactor activated")
+	else
+		return false
+	end
+	return true
+end
+
+function menu_common()
+	SetCursorPos(1, 18)
+	SetColorTitle()
+	ShowMenu("1 Reactor, 2 Cloak, 3 Mining, 4 Core, 5 Radar, eXit")
+end
+
+----------- Redstone support
+
+local tblRedstoneState = {-- Remember redstone state on each side
+	["top"] = rs.getInput("top"),
+	["front"] = rs.getInput("front"),
+	["left"] = rs.getInput("left"),
+	["right"] = rs.getInput("right"),
+	["back"] = rs.getInput("back"),
+	["bottom"] = rs.getInput("bottom"),
+}
+local tblSides = {-- list all sides and offset coordinates
+	["top"   ] = { 3, 1},
+	["front" ] = { 1, 3},
+	["left"  ] = { 3, 3},
+	["right" ] = { 5, 3},
+	["back"  ] = { 5, 5},
+	["bottom"] = { 3, 5},
+}
+
+function redstone_event()
+	-- Event only returns nil so we need to check sides manually
+	local message = ""
+	for side, state in pairs(tblRedstoneState) do
+		if rs.getInput(side) ~= state then
+			-- print(side .. " is now " .. tostring(rs.getInput(side)))
+			message = message .. side .. " "
+			tblRedstoneState[side] = rs.getInput(side)
+		end
+	end
+	if message ~= "" then
+		message = "Redstone changed on " .. message
+		showWarning(message)
+	end
+end
+
+----------- Cloaking support
+
+cloaking_highTier = false
+cloaking_currentKey = 1
+function cloaking_key(keycode)
+	if keycode == 31 then -- S
+		cloaking_start()
+		return true
+	elseif keycode == 25 then -- P
+		cloaking_stop()
+		return true
+	elseif keycode == 20 then -- T
+		cloaking_highTier = not cloaking_highTier
+		return true
+	end
+	return false
+end
+
+function cloaking_page()
+	ShowTitle(label .. " - Cloaking status")
+
+	local cloakingcore = nil
+	if cloakingcores ~= nil then
+		if cloaking_currentKey > #cloakingcores then
+			cloaking_currentKey = 1
+		end
+		cloakingcore = cloakingcores[cloaking_currentKey]
+	end
+	
+	SetCursorPos(1, 2)
+	if #cloakingcores == 0 then
+		SetColorDisabled()
+		Write("No cloaking core detected...")
+	elseif cloakingcore == nil then
+		SetColorWarning()
+		Write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores .. " is invalid")
+	else
+		SetColorDefault()
+		Write("Cloaking core " .. cloaking_currentKey .. " of " .. #cloakingcores)
+		local isAssemblyValid = cloakingcore.isAssemblyValid()
+		local energy, energyMax = cloakingcore.energy()
+		local isEnabled = cloakingcore.enable()
+		
+		if not isAssemblyValid then
+			SetColorWarning()
+			SetCursorPos(1, 3)
+			Write("Invalid assembly!")
+			SetColorDefault()
+			SetCursorPos(1, 4)
+			print("In each direction, you need to place exactly 2 Cloaking device coils, for a total of 12 coils.")
+			print("The 6 inner coils shall be exactly one block away from the core.")
+			print("The cloaking field will extend 5 blocks past the outer 6 coils.")
+			print("Power consumption scales with the amount of cloaked blocks.")
+		else
+			SetCursorPos(1, 4)
+			Write("Assembly is valid")
+			
+			if energy < 50000 then
+				SetColorWarning()
+			else
+				SetColorDefault()
+			end
+			SetCursorPos(1, 6)
+			Write("Energy level is " .. energy .. " EU")
+
+			SetCursorPos(1, 8)
+			if isEnabled then
+				if energy <= 100 then
+					SetColorWarning()
+				else
+					SetColorSuccess()
+				end
+				Write("Cloak is enabled")
+			else
+				SetColorNormal()
+				Write("Cloak is disabled")
+			end
+		end
+	end
+	sleep(0.1)
+	cloaking_currentKey = cloaking_currentKey + 1
+	
+	SetColorDefault()
+	SetCursorPos(1, 12)
+	Write("  -----------------------------------------------")
+	SetCursorPos(1, 13)
+	if cloaking_highTier then
+		Write("Cloak tier: HIGH")
+	else
+		Write("Cloak tier: low")
+	end
+
+	SetColorTitle()
+	SetCursorPos(1, 16)
+	ShowMenu("S - Start cloaking, P - stoP cloaking")
+	SetCursorPos(1, 17)
+	ShowMenu("T - change low/high Tier")
+end
+
+function cloaking_start()
+	for key,cloakingcore in pairs(cloakingcores) do
+		cloakingcore.enable(false)
+		if cloaking_highTier then
+			cloakingcore.tier(2)
+		else
+			cloakingcore.tier(1)
+		end
+		cloakingcore.enable(true)
+	end
+end
+
+function cloaking_stop()
+	for key,cloakingcore in pairs(cloakingcores) do
+		cloakingcore.enable(false)
+	end
+end
+
+----------- Mining lasers support
+
+mining_currentKey = 1
+mining_layerOffset = 1
+mining_mineAll = true
+mining_useDeuterium = false
+function mining_key(keycode)
+	if keycode == 31 then -- S
+		mining_start()
+		return true
+	elseif keycode == 25 then -- P
+		mining_stop()
+		return true
+	elseif keycode == 30 then -- A
+		mining_mineAll = not mining_mineAll
+		return true
+	elseif keycode == 32 then -- D
+		mining_useDeuterium = not mining_useDeuterium
+		return true
+	elseif keycode == 74 then -- -
+		mining_layerOffset = mining_layerOffset - 1
+		if mining_layerOffset < 1 then
+			mining_layerOffset = 1
+		end
+		return true
+	elseif keycode == 78 then -- +
+		mining_layerOffset = mining_layerOffset + 1
+		return true
+	elseif keycode == 46 then -- C
+		mining_page_config()
+		return true
+	end
+	return false
+end
+
+function mining_page()
+	ShowTitle(label .. " - Mining status")
+
+	local mininglaser = nil
+	if mininglasers ~= nil then
+		if mining_currentKey > #mininglasers then
+			mining_currentKey = 1
+		end
+		mininglaser = mininglasers[mining_currentKey]
+	end
+	
+	SetCursorPos(1, 2)
+	if #mininglasers == 0 then
+		SetColorDisabled()
+		Write("No mining laser detected...")
+	elseif mininglaser == nil then
+		SetColorWarning()
+		Write("Mining laser " .. mining_currentKey .. " of " .. #mininglasers .. " is invalid")
+	else
+		SetColorDefault()
+		Write("Mining laser " .. mining_currentKey .. " of " .. #mininglasers)
+		local status, energy, currentLayer, mined, total = mininglaser.state()
+		SetCursorPos(1, 3)
+		Write("Status: " .. status .. "   ")
+		SetCursorPos(1, 5)
+		Write("Energy level is " .. energy .. " EU")
+		SetCursorPos(1, 7)
+		Write("Mined " .. mined .. " out of " .. total .. " blocks at layer " .. currentLayer .. "   ")
+	end
+	sleep(0.1)
+	mining_currentKey = mining_currentKey + 1
+	
+	SetColorDefault()
+	SetCursorPos(1, 11)
+	Write("  -----------------------------------------------")
+	SetCursorPos(1, 12)
+	Write("Layer offset: " .. mining_layerOffset)
+	SetCursorPos(1, 13)
+	Write("Mine all: " .. boolToYesNo(mining_mineAll))
+	SetCursorPos(1, 14)
+	Write("Use Deuterium: " .. boolToYesNo(mining_useDeuterium))
+
+	SetColorTitle()
+	SetCursorPos(1, 16)
+	ShowMenu("S - Start mining, P - stoP mining, A - mine All")
+	SetCursorPos(1, 17)
+	ShowMenu("D - use Deuterium, +/-/C - adjust offset")
+end
+
+function mining_page_config()
+	ShowTitle(label .. " - Mining configuration")
+	Write(" Layer offset (".. mining_layerOffset ..") : ")
+	mining_layerOffset = readInputNumber(mining_layerOffset)
+	if mining_layerOffset < 1 then
+		mining_layerOffset = 1
+	end
+end
+
+function mining_start()
+	for key,mininglaser in pairs(mininglasers) do
+		if not mininglaser.isMining() then
+			mininglaser.offset(mining_layerOffset)
+			if mining_mineAll then
+				if mining_useDeuterium then
+					mininglaser.quarry(mining_useDeuterium)
+				else
+					mininglaser.quarry()
+				end
+			else
+				if mining_useDeuterium then
+					mininglaser.mine(mining_useDeuterium)
+				else
+					mininglaser.mine()
+				end
+			end
+		end
+	end
+end
+
+function mining_stop()
+	if #mininglasers == 0 then
+		SetColorWarning()
+		Write("No mining laser detected")
+	else
+		for key,mininglaser in pairs(mininglasers) do
+			SetCursorPos(1, 2 + key)
+			if not mininglaser.isMining() then
+				SetColorDisabled()
+				Write("Mining laser " .. key .. " of " .. #mininglasers .. " is already stopped")
+			else
+				mininglaser.stop()
+				SetColorSuccess()
+				Write("Mining laser " .. key .. " of " .. #mininglasers .. " has been stopped")
+			end
+		end
+	end
+end
+
+----------- Configuration
+
+function data_save()
+	local file = fs.open("shipdata.txt", "w")
+	file.writeLine(textutils.serialize(data))
+	file.close()
+end
+
+function data_read()
+	if fs.exists("shipdata.txt") then
+		local file = fs.open("shipdata.txt", "r")
+		data = textutils.unserialize(file.readAll())
+		file.close()
+	else
+		data = { }
+	end
+	if data.core_summon == nil then data.core_summon = false; end
+	if data.core_distance == nil then data.core_distance = 0; end
+	if data.core_direction == nil then data.core_direction = 0; end
+	if data.reactor_mode == nil then data.reactor_mode = 0; end
+	if data.reactor_rate == nil then data.reactor_rate = 100; end
+	if data.reactor_targetStability == nil then data.reactor_targetStability = 50; end
+	if data.reactor_laserAmount == nil then data.reactor_laserAmount = 10000; end
+	if data.radar_monitorIndex == nil then data.radar_monitorIndex = 0; end
+	if data.radar_radius == nil then data.radar_radius = 500; end
+	if data.radar_autoscan == nil then data.radar_autoscan = false; end
+	if data.radar_autoscanDelay == nil then data.radar_autoscanDelay = 3; end
+	if data.radar_results == nil then data.radar_results = {}; end
+	if data.radar_scale == nil then data.radar_scale = 500; end
+	if data.radar_offsetX == nil then data.radar_offsetX = 0; end
+	if data.radar_offsetY == nil then data.radar_offsetY = 0; end
+end
+
+function data_explode(separator, data)
+	local result, iCurrent, iNext
+	result = {}
+	iCurrent = 0
+	if(#data == 1) then return {data} end
+	while true do
+		iNext = string.find(data, separator, iCurrent, true)
+		if iNext ~= nil then 
+			table.insert(result, string.sub(data, iCurrent, iNext - 1))
+			iCurrent = iNext + 1
+		else
+			table.insert(result, string.sub(data, iCurrent))
+			break
+		end
+	end
+	return result
+end
+
+function data_setName()
+	if ship ~= nil then
+		ShowTitle("<==== Set ship name ====>")
+	else
+		ShowTitle("<==== Set name ====>")
+	end
+	
+	SetCursorPos(1, 2)
+	Write("Enter ship name: ")
+	label = readInputText(label)
+	os.setComputerLabel(label)
+	if ship ~= nil then
+		ship.coreFrequency(label)
+	end
+	os.reboot()
+end
+
+----------- Ship support
+
+core_front = 0
+core_right = 0
+core_up = 0
+core_back = 0
+core_left = 0
+core_down = 0
+core_isInHyper = false
+core_shipLength = 0
+core_realDistance = 0
+core_jumpCost = 0
+core_shipSize = 0
+
+function core_boot()
+	if ship == nil then
+		return
+	end
+
+	Write("Booting Warpdrive Core")
+	
+	if data.core_summon then
+		ship.summon_all()
+	end
+	
+	Write(".")
+	core_front, core_right, core_up = ship.dim_positive()
+	core_back, core_left, core_down = ship.dim_negative()
+	core_isInHyper = ship.isInHyperspace()
+	
+	Write(".")
+	repeat
+		pos = ship.pos()
+		sleep(0.3)
+	until pos ~= nil
+	X, Y, Z = ship.pos()
+	Write(".")
+	repeat
+		isAttached = ship.isAttached()
+		sleep(0.3)
+	until isAttached ~= false
+	
+	Write(".")
+	repeat
+		core_shipSize = ship.getShipSize()
+		sleep(0.3)
+	until core_shipSize ~= nil 
+	
+	Write(".")
+	core_computeRealDistance()
+	
+	Write(".")
+	ship.mode(1)
+	WriteLn("")
+end
+
+function core_writeDirection()
+	if data.core_direction == 1 then
+		WriteLn(" Direction        = Up")
+	elseif data.core_direction == 2 then
+		WriteLn(" Direction        = Down")
+	elseif data.core_direction == 0 then
+		WriteLn(" Direction        = Front")
+	elseif data.core_direction == 180 then
+		WriteLn(" Direction        = Back")
+	elseif data.core_direction == 90 then
+		WriteLn(" Direction        = Left")
+	elseif data.core_direction == 255 then
+		WriteLn(" Direction        = Right")
+	end
+end
+
+function core_computeRealDistance()
+	if core_isInHyper then
+		core_shipLength = 0
+		core_realDistance = data.core_distance * 100 + core_shipLength
+		core_jumpCost = (1000 * core_shipSize) + (1000 * data.core_distance)
+	else
+		if data.core_direction == 1 or data.core_direction == 2 then
+			core_shipLength = core_up + core_down + 1
+		elseif data.core_direction == 0 or data.core_direction == 180 then
+			core_shipLength = core_front + core_back + 1
+		elseif data.core_direction == 90 or data.core_direction == 255 then
+			core_shipLength = core_left + core_right + 1
+		end
+		core_realDistance = data.core_distance + core_shipLength - 1
+		core_jumpCost = (10 * core_shipSize) + (100 * data.core_distance)
+	end
+end
+
+function core_computeNewCoordinates(cx, cy, cz)
+	local res = { x = cx, y = cy, z = cz }
+	if data.core_direction == 1 then
+		res.y = res.y + core_realDistance
+	elseif data.core_direction == 2 then
+		res.y = res.y - core_realDistance
+	end
+	local dx, dy, dz = ship.getOrientation()
+	if dx ~= 0 then
+		if data.core_direction == 0 then
+			res.x = res.x + (core_realDistance * dx)
+		elseif data.core_direction == 180 then
+			res.x = res.x - (core_realDistance * dx)
+		elseif data.core_direction == 90 then
+			res.z = res.z + (core_realDistance * dx)
+		elseif data.core_direction == 255 then
+			res.z = res.z - (core_realDistance * dx)
+		end
+	else
+		if data.core_direction == 0 then
+			res.z = res.z + (core_realDistance * dz)
+		elseif data.core_direction == 180 then
+			res.z = res.z - (core_realDistance * dz)
+		elseif data.core_direction == 90 then
+			res.x = res.x + (core_realDistance * dz)
+		elseif data.core_direction == 255 then
+			res.x = res.x - (core_realDistance * dz)
+		end
+	end
+	return res
+end
+
+function core_warp()
+	rs.setOutput(alarm_side, true)
+	if readConfirmation() then
+		rs.setOutput(alarm_side, false)
+		ship.direction(data.core_direction)
+		ship.distance(data.core_distance)
+		if core_isInHyper then
+			ship.mode(2)
+		else
+			ship.mode(1)
+		end
+		ship.jump()
+	end
+	rs.setOutput(alarm_side, false)
+end
+
+function core_page_setDistance()
+	ShowTitle("<==== Set distance ====>")
+	
+	core_computeRealDistance()
+	local maximumDistance = core_shipLength + 127
+	local userEntry = core_realDistance
+	if userEntry <= 1 then
+		userEntry = 0
+	end
+	repeat
+		SetCursorPos(1, 2)
+		if core_isInHyper then
+			Write("Distance * 100 (min " .. core_shipLength .. ", max " .. maximumDistance .. "): ")
+		else
+			Write("Distance (min " .. (core_shipLength + 1) .. ", max " .. maximumDistance .. "): ")
+		end
+		userEntry = readInputNumber(userEntry)
+		if userEntry <= core_shipLength or userEntry > maximumDistance then
+			ShowWarning("Wrong distance. Try again.")
+		end
+	until userEntry > core_shipLength and userEntry <= maximumDistance
+	
+	data.core_distance = userEntry - core_shipLength + 1
+	core_computeRealDistance()
+end
+
+function core_page_setDirection()
+	local drun = true
+	while(drun) do
+		ShowTitle("<==== Set direction ====>")
+		core_writeDirection()
+		term.setCursorPos(1, 16)
+		SetColorTitle()
+		ShowMenu("Use directional keys")
+		ShowMenu("W/S keys for Up/Down")
+		ShowMenu("Enter - confirm")
+		SetColorDefault()
+		local event, keycode = os.pullEvent("key")
+		if keycode == 200 then
+			data.core_direction = 0
+		elseif keycode == 17 then
+			data.core_direction = 1
+		elseif keycode == 203 then
+			data.core_direction = 90
+		elseif keycode == 205 then
+			data.core_direction = 255
+		elseif keycode == 208 then
+			data.core_direction = 180
+		elseif keycode == 31 then
+			data.core_direction = 2
+		elseif keycode == 28 then
+			drun = false
+		end
+	end
+end
+
+function core_page_setDimensions()
+	ShowTitle("<==== Set dimensions ====>")
+	Write(" Front (".. core_front ..") : ")
+	core_front = readInputNumber(core_front)
+	Write(" Right (".. core_right ..") : ")
+	core_right = readInputNumber(core_right)
+	Write(" Up    (".. core_up ..") : ")
+	core_up = readInputNumber(core_up)
+	Write(" Back  (".. core_back ..") : ")
+	core_back = readInputNumber(core_back)
+	Write(" Left  (".. core_left ..") : ")
+	core_left = readInputNumber(core_left)
+	Write(" Down  (".. core_down ..") : ")
+	core_down = readInputNumber(core_down)
+	Write("Setting dimensions...")
+	ship.dim_positive(core_front, core_right, core_up)
+	ship.dim_negative(core_back, core_left, core_down)
+	core_shipSize = ship.getShipSize()
+	if core_shipSize == nil then core_shipSize = 0 end
+end
+
+function core_page_summon()
+	ShowTitle("<==== Summon players ====>")
+	local playersString, playersArray = ship.getAttachedPlayers()
+	for i = 1, #playersArray do
+		Show(i..". "..playersArray[i])
+	end
+	SetColorTitle()
+	ShowMenu("Enter player number")
+	ShowMenu("or press enter to summon everyone")
+	SetColorDefault()
+	
+	Write(":")
+	local input = readInputNumber("")
+	if input == "" then
+		ship.summon_all()
+	else
+		input = tonumber(input)
+		ship.summon(input - 1)
+	end
+end
+
+function core_page_jumpToBeacon()
+	ShowTitle("<==== Jump to beacon ====>")
+	
+	Write("Enter beacon frequency: ")
+	local freq = readInputText("")
+	rs.setOutput(alarm_side, true)
+	if readConfirmation() then
+		rs.setOutput(alarm_side, false)
+		ship.mode(4)
+		ship.beaconFrequency(freq)
+		ship.jump()
+	end
+	rs.setOutput(alarm_side, false)
+end
+
+function core_page_jumpToGate()
+	ShowTitle("<==== Jump to Jumpgate ====>")
+	
+	Write("Enter jumpgate name: ")
+	local name = readInputText("")
+	rs.setOutput(alarm_side, true)
+	if readConfirmation() then
+		rs.setOutput(alarm_side, false)
+		ship.mode(6)
+		ship.targetJumpgate(name)
+		ship.jump()
+	end
+	rs.setOutput(alarm_side, false)
+end
+
+function core_page()
+	ShowTitle(label .. " - Ship status")
+	if ship ~= nil then
+		WriteLn("Core:")
+		WriteLn(" x, y, z          = " .. X .. ", " .. Y .. ", " .. Z)
+		local energy, energyMax = ship.energy()
+		if energy == nil then energy = 0 end
+		if energyMax == nil then energyMax = 1 end
+		WriteLn(" Energy           = " .. math.floor(energy / energyMax * 100) .. " % (" .. energy .. "EU)")
+		local playersString, playersArray = ship.getAttachedPlayers()
+		if playersString == "" then players = "-" end
+		WriteLn(" Attached players = " .. playersString)
+		WriteLn("Dimensions:")
+		WriteLn(" Front, Right, Up = " .. FormatInteger(core_front) .. ", " .. FormatInteger(core_right) .. ", " .. FormatInteger(core_up))
+		WriteLn(" Back, Left, Down = " .. FormatInteger(core_back) .. ", " .. FormatInteger(core_left) .. ", " .. FormatInteger(core_down))
+		WriteLn(" Size             = " .. core_shipSize .. " blocks")
+		WriteLn("Warp data:")
+		core_writeDirection()
+		local dest = core_computeNewCoordinates(X, Y, Z)
+		WriteLn(" Distance         = " .. core_realDistance .. " (" .. core_jumpCost .. "EU, " .. math.floor(energy / core_jumpCost) .. " jumps)")
+		WriteLn(" Dest.coordinates = " .. FormatInteger(dest.x) .. ", " .. FormatInteger(dest.y) .. ", " .. FormatInteger(dest.z))
+		if data.core_summon then
+			WriteLn(" Summon after     = Yes")
+		else
+			WriteLn(" Summon after     = No")
+		end
+	else
+		ShowWarning("No ship controller detected")
+	end
+	
+	SetCursorPos(1, 15)
+	SetColorTitle()
+	ShowMenu("D - Dimensions, M - Toggle summon, N - Ship name")
+	ShowMenu("S - Set Warp Data, J - Jump, G - Jump to JumpGate")
+	ShowMenu("B - Jump to Beacon, H - Jump to Hyperspace")
+	ShowMenu("C - core_page_summon crew")
+end
+
+function core_key(keycode)
+	if keycode == 31 then -- S
+		core_page_setDirection()
+		core_page_setDistance()
+		data_save()
+		return true
+	elseif keycode == 50 then -- M
+		if data.core_summon then
+			data.core_summon = false
+		else
+			data.core_summon = true
+		end
+		data_save()
+		return true
+	elseif keycode == 32 then -- D
+		core_page_setDimensions()
+		data_save()
+		return true
+	elseif keycode == 36 then -- J
+		core_warp()
+		return true
+	elseif keycode == 46 then -- C
+		core_page_summon()
+		return true
+	elseif keycode == 48 then -- B
+		core_page_jumpToBeacon()
+		return true
+	elseif keycode == 34 then -- G
+		core_page_jumpToGate()
+		return true
+	elseif keycode == 35 then -- H
+		rs.setOutput(alarm_side, true)
+		if readConfirmation() then
+			rs.setOutput(alarm_side, false)
+			ship.mode(5)
+			ship.jump()
+		end
+		rs.setOutput(alarm_side, false)
+		return true
+	elseif keycode == 49 then
+		data_setName()
+		return true
+	end
+	return false
+end
+
+----------- Reactor support
+
+reactor_output = 0
+
+function reactor_boot()
+	if reactor ~= nil then
+		WriteLn("Booting Reactor...")
+		local isActive, strMode, releaseRate = reactor.active()
+		if strMode == "OFF" then
+			data.reactor_mode = 0
+		elseif strMode == "MANUAL" then
+			data.reactor_mode = 1
+		elseif strMode == "ABOVE" then
+			data.reactor_mode = 2
+		elseif strMode == "RATE" then
+			data.reactor_mode = 3
+		else
+			data.reactor_mode = 0
+		end
+	end
+end
+
+function reactor_key(keycode)
+	if keycode == 31 then -- S
+		reactor_start()
+		return true
+	elseif keycode == 25 then -- P
+		reactor_stop()
+		return true
+	elseif keycode == 38 then -- L
+		reactor_laser()
+		return true
+	elseif keycode == 24 then -- O
+		data.reactor_mode = (data.reactor_mode + 1) % 4
+		reactor_setMode()
+		data_save()
+		return true
+	elseif keycode == 34 then -- G
+		data.reactor_rate = data.reactor_rate / 10
+		reactor_setMode()
+		data_save()
+		return true
+	elseif keycode == 20 then -- T
+		data.reactor_rate = data.reactor_rate * 10
+		reactor_setMode()
+		data_save()
+		return true
+	elseif keycode == 36 then -- J
+		data.reactor_laserAmount = data.reactor_laserAmount / 10
+		reactor_setLaser()
+		data_save()
+		return true
+	elseif keycode == 22 then -- U
+		data.reactor_laserAmount = data.reactor_laserAmount * 10
+		reactor_setLaser()
+		data_save()
+		return true
+	elseif keycode == 74 then -- -
+		data.reactor_targetStability = data.reactor_targetStability - 1
+		reactor_setTargetStability()
+		data_save()
+		return true
+	elseif keycode == 78 then -- +
+		data.reactor_targetStability = data.reactor_targetStability + 1
+		reactor_setTargetStability()
+		data_save()
+		return true
+	elseif keycode == 46 then -- C
+		reactor_config()
+		data_save()
+		return true
+	end
+	return false
+end
+
+function reactor_page()
+	ShowTitle(label .. " - Reactor status")
+
+	SetCursorPos(1, 2)
+	if reactor == nil then
+		SetColorDisabled()
+		Write("Reactor not detected")
+	else
+		SetColorDefault()
+		Write("Reactor stability")
+		instabilities = { reactor.instability() }
+		average = 0
+		for key,instability in pairs(instabilities) do
+			SetCursorPos(12, 2 + key)
+			stability = math.floor((100.0 - instability) * 10) / 10
+			if stability >= data.reactor_targetStability then
+				SetColorSuccess()
+			else
+				SetColorWarning()
+			end
+			Write(FormatFloat(stability, 5) .. " %")
+			average = average + instability
+		end
+		average = average / #instabilities
+
+		SetColorDefault()
+		local energy = { reactor.energy() }
+		SetCursorPos(1, 7)
+		Write("Energy   : ")
+		if energy[1] ~= nil then
+			Write(FormatInteger(energy[1], 10) .. " / " .. energy[2] .. " RF +" .. FormatInteger(reactor_output, 5) .. " RF/t")
+		else
+			Write("???")
+		end
+		SetCursorPos(1, 8)
+		Write("Outputing: ")
+		if energy[1] ~= nil then
+			Write(energy[3] .. " RF/t")
+		end
+
+		SetColorDefault()
+		SetCursorPos(1, 9)
+		Write("Activated: ")
+		isActive = reactor.active()
+		if isActive then SetColorSuccess() else SetColorDefault() end
+		Write(boolToYesNo(isActive))
+	end
+
+	if #reactorlasers == 0 then
+		SetColorDisabled()
+		SetCursorPos(30, 2)
+		Write("Lasers not detected")
+	else
+		SetColorDefault()
+		SetCursorPos(30, 2)
+		Write("Lasers")
+
+		for key,reactorlaser in pairs(reactorlasers) do
+			local side = reactorlaser.side()
+			if side ~= nil then
+				side = side % 4
+				SetColorDefault()
+				SetCursorPos(4, 3 + side)
+				Write("Side " .. side .. ":")
+				SetCursorPos(30, 3 + side)
+				local energy = reactorlaser.energy()
+				if not reactorlaser.hasReactor() then
+					SetColorDisabled()
+				elseif energy > 3 * data.reactor_laserAmount then
+					SetColorSuccess()
+				else
+					SetColorWarning()
+				end
+				Write(FormatInteger(reactorlaser.energy(), 6))
+			end
+		end
+	end
+
+	SetColorDefault()
+	SetCursorPos(1, 10)
+	Write("  -----------------------------------------------")
+	SetCursorPos(1, 11)
+	Write("Output mode     : ")
+	if data.reactor_mode == 0 then
+		SetColorDisabled()
+		Write("hold")
+	elseif data.reactor_mode == 1 then
+		Write("manual/unlimited")
+	elseif data.reactor_mode == 2 then
+		Write("surplus above " .. data.reactor_rate .. " RF")
+	else
+		Write("rated at " .. data.reactor_rate .. " RF")
+	end
+	SetColorDefault()
+	SetCursorPos( 1, 12)
+	Write("Target stability: " .. data.reactor_targetStability .. "%")
+	SetCursorPos(30, 12)
+	Write("Laser amount: " .. data.reactor_laserAmount)
+	
+	SetColorTitle()
+	SetCursorPos(1, 14)
+	ShowMenu("S - Start reactor, P - Stop reactor, L - Use lasers")
+	SetCursorPos(1, 15)
+	ShowMenu("O - Output mode, C - Configuration")
+	SetCursorPos(1, 16)
+	ShowMenu("+/- - Target stability, U/J - Laser amount")
+	SetCursorPos(1, 17)
+	ShowMenu("G/T - Output rate/threshold")
+end
+
+function reactor_setMode()
+	if data.reactor_rate < 1 then
+		data.reactor_rate = 1
+	elseif data.reactor_rate > 100000 then
+		data.reactor_rate = 100000
+	end
+	if reactor ~= nil then
+		if data.reactor_mode == 0 then
+			reactor.release(false)
+		elseif data.reactor_mode == 1 then
+			reactor.release(true)
+		elseif data.reactor_mode == 2 then
+			reactor.releaseAbove(data.reactor_rate)
+		else
+			reactor.releaseRate(data.reactor_rate)
+		end
+	end
+end
+
+function reactor_setLaser()
+	if data.reactor_laserAmount < 1 then
+		data.reactor_laserAmount = 1
+	elseif data.reactor_laserAmount > 100000 then
+		data.reactor_laserAmount = 100000
+	end
+end
+
+function reactor_setTargetStability()
+	if data.reactor_targetStability < 1 then
+		data.reactor_targetStability = 1
+	elseif data.reactor_targetStability > 100 then
+		data.reactor_targetStability = 100
+	end
+end
+
+function reactor_start()
+	if reactor ~= nil then
+		reactor_setMode()
+		reactor.active(true)
+	end
+end
+
+function reactor_stop()
+	if reactor ~= nil then
+		reactor.active(false)
+	end
+end
+
+function reactor_laser(side)
+	for key,reactorlaser in pairs(reactorlasers) do
+		if (side == nil) or (reactorlaser.side() == side) then
+			reactorlaser.stabilize(data.reactor_laserAmount)
+		end
+	end
+end
+
+function reactor_pulse(output)
+	reactor_output = output
+	if reactor == nil then
+		os.reboot()
+	end
+	local instabilities = { reactor.instability() }
+	for key,instability in pairs(instabilities) do
+		local stability = math.floor((100.0 - instability) * 10) / 10
+		if stability < data.reactor_targetStability then
+			reactor_laser(key - 1)
+		end
+	end
+end
+
+function reactor_config()
+	ShowTitle(label .. " - Reactor configuration")
+	
+	SetCursorPos(1, 2)
+	if reactor == nil then
+		SetColorDisabled()
+		Write("Reactor not detected")
+	else
+		SetColorDefault()
+		SetCursorPos(1, 4)
+		Write("Reactor output rate (" .. data.reactor_rate .. " RF): ")
+		data.reactor_rate = readInputNumber(data.reactor_rate)
+		reactor_setMode()
+		SetCursorPos(1, 5)
+		Write("Reactor output rate set")
+		
+		SetCursorPos(1, 7)
+		Write("Laser energy level (" .. data.reactor_laserAmount .. "): ")
+		data.reactor_laserAmount = readInputNumber(data.reactor_laserAmount)
+		reactor_setLaser()
+		SetCursorPos(1, 8)
+		Write("Laser energy level set")
+		
+		SetCursorPos(1, 10)
+		Write("Reactor target stability (" .. data.reactor_targetStability .. "%): ")
+		data.reactor_targetStability = readInputNumber(data.reactor_targetStability)
+		reactor_setTargetStability()
+		SetCursorPos(1, 11)
+		Write("Reactor target stability set")
+	end
+end
+
+----------- Radar support
+
+radar_listOffset = 0
+radar_timerId = -1
+radar_timerLength = 1
+radar_x = 0
+radar_y = 0
+radar_z = 0
+
+function radar_boot()
+	if radar ~= nil then
+		WriteLn("Booting Radar...")
+		if data.radar_monitorIndex > 0 then
+			radar_x, radar_y, radar_z = radar.pos()
+			radar_drawMap()
+		end
+		if data.radar_autoscan then
+			radar_scan()
+		end
+	end
+end
+
+function radar_key(keycode)
+	if keycode == 31 then -- S
+		data.radar_autoscan = false
+		radar_scan()
+		return true
+	elseif keycode == 30 then -- A
+		data.radar_autoscan = true
+		radar_scan()
+		return true
+	elseif keycode == 25 then -- P
+		data.radar_autoscan = false
+		return true
+	elseif keycode == 49 then -- N
+		radar_setMonitorIndex(data.radar_monitorIndex + 1)
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 34 then -- G
+		radar_setRadius(data.radar_radius - 100)
+		data_save()
+		return true
+	elseif keycode == 20 then -- T
+		if data.radar_radius < 100 then
+			radar_setRadius(100)
+		else
+			radar_setRadius(data.radar_radius + 100)
+		end
+		data_save()
+		return true
+	elseif keycode == 36 then -- J
+		radar_listOffset = math.max(0, radar_listOffset - 3)
+		return true
+	elseif keycode == 22 then -- U
+		radar_listOffset = math.min(#data.radar_results - 1, radar_listOffset + 3)
+		return true
+	elseif keycode == 74 then -- -
+		data.radar_scale = math.min(10000, math.floor(data.radar_scale * 1.2 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 78 then -- +
+		data.radar_scale = math.max(20, math.floor(data.radar_scale * 0.8 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 199 then -- home
+		data.radar_offsetX = 0;
+		data.radar_offsetY = 0;
+		data.radar_scale = 20
+		for i = 0, #data.radar_results - 1 do
+			data.radar_scale = math.max(data.radar_scale, math.max(math.abs(radar_x - data.radar_results[i].x), math.abs(radar_z - data.radar_results[i].z)))
+		end
+		data.radar_scale = math.min(10000, math.floor(data.radar_scale * 1.1 + 0.5))
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 203 then -- left
+		data.radar_offsetX = data.radar_offsetX - 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 205 then -- right
+		data.radar_offsetX = data.radar_offsetX + 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 200 then -- up
+		data.radar_offsetY = data.radar_offsetY - 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 208 then -- down
+		data.radar_offsetY = data.radar_offsetY + 0.20 * data.radar_scale;
+		data_save()
+		radar_drawMap()
+		return true
+	elseif keycode == 46 then -- C
+		radar_page_config()
+		data_save()
+		return true
+	end
+	return false
+end
+
+function radar_page()
+	local radar_resultsPerPage = 9
+	
+	ShowTitle(label .. " - Radar map")
+
+	SetCursorPos(1, 2)
+	if radar == nil then
+		SetColorDisabled()
+		Write("Radar not detected")
+	else
+		SetColorDefault()
+		if #data.radar_results == 0 then
+			Write("No contacts in range...")
+		else
+			local lastResultShown = radar_listOffset + radar_resultsPerPage - 1
+			if lastResultShown >= #data.radar_results then
+				lastResultShown = #data.radar_results - 1
+			end
+			Write("Displaying results " .. (radar_listOffset + 1) .. " to " .. (lastResultShown + 1) .. " of " .. #data.radar_results)
+			for i = radar_listOffset, lastResultShown do
+				SetCursorPos(4, 3 + i - radar_listOffset)
+				if data.radar_results ~= nil then
+					Write(FormatInteger(data.radar_results[i].x, 7) .. ", " .. FormatInteger(data.radar_results[i].y, 4) .. ", " .. FormatInteger(data.radar_results[i].z, 7))
+					Write(": " .. data.radar_results[i].frequency)
+				else
+					Write("~nil~")
+				end
+			end
+		end
+
+		SetColorDefault()
+		local energy = { radar.energy() }
+		SetCursorPos(1, 12)
+		Write("Energy: ")
+		if energy ~= nil then
+			if energy[1] > (data.radar_radius * data.radar_radius) then
+				SetColorSuccess()
+			else
+				SetColorWarning()
+			end
+			Write(FormatInteger(energy[1], 10) .. " EU")
+		else
+			SetColorDisabled()
+			Write("???")
+		end
+		SetColorDefault()
+		SetCursorPos(1, 13)
+		Write("Radius: " .. data.radar_radius)
+
+		SetCursorPos(30, 13)
+		Write("Monitor# " .. data.radar_monitorIndex .. "/" .. #monitors)
+
+		SetCursorPos(1, 14)
+		Write("Autoscan: ")
+		if data.radar_autoscan then SetColorSuccess() else SetColorDefault() end
+		Write(boolToYesNo(data.radar_autoscan))
+
+		SetColorDefault()
+		SetCursorPos(30, 14)
+		Write("Delay " .. data.radar_autoscanDelay .. "s")
+	end
+	
+	SetColorTitle()
+	SetCursorPos(1, 15)
+	ShowMenu("S - Scan once, A - Autoscan, P - Stop autoscan")
+	SetCursorPos(1, 16)
+	ShowMenu("T/G - Scan radius, U/J - Scroll list")
+	SetCursorPos(1, 17)
+	ShowMenu("+/- - Scale, N - Next monitor, C - Configuration")
+end
+
+function radar_page_config()
+	ShowTitle(label .. " - Radar configuration")
+	
+	SetCursorPos(1, 2)
+	if radar == nil then
+		SetColorDisabled()
+		Write("No radar detected")
+	else
+		SetColorDefault()
+		SetCursorPos(1, 3)
+		Write("Radar scan radius (" .. data.radar_radius .. " blocks): ")
+		radar_setRadius(readInputNumber(data.radar_radius))
+		
+		SetCursorPos(1, 5)
+		Write("Autoscan delay in seconds (" .. data.radar_autoscanDelay .. "): ")
+		radar_setAutoscanDelay(readInputNumber(data.radar_autoscanDelay))
+		
+		SetCursorPos(1, 7)
+		Write("Output monitor (" .. data.radar_monitorIndex .. "/" .. #monitors .. "): ")
+		radar_setMonitorIndex(readInputNumber(data.radar_monitorIndex))
+		
+		data_save()
+	end
+end
+
+function radar_setRadius(newRadius)
+	if newRadius < 1 then
+		data.radar_radius = 1
+	elseif newRadius >= 10000 then
+		data.radar_radius = 10000
+	else
+		data.radar_radius = newRadius
+	end
+end
+
+function radar_setAutoscanDelay(newAutoscanDelay)
+	if newAutoscanDelay < 1 then
+		data.radar_autoscanDelay = 1
+	elseif newAutoscanDelay >= 3600 then	-- 1 hour
+		data.radar_autoscanDelay = 3600
+	else
+		data.radar_autoscanDelay = newAutoscanDelay
+	end
+end
+
+function radar_setMonitorIndex(newIndex)
+	if #monitors == 0 or newIndex < 0 or newIndex > #monitors then
+		data.radar_monitorIndex = 0
+	else
+		data.radar_monitorIndex = newIndex
+	end
+end
+
+function radar_getMonitor()
+	if data.radar_monitorIndex > 0 and data.radar_monitorIndex <= #monitors then
+		return monitors[data.radar_monitorIndex]
+	else
+		return nil
+	end
+end
+
+function radar_scan()
+	local monitor = radar_getMonitor()
+	if radar == nil then
+		draw_warning(monitor, "No radar")
+		return false
+	end
+	if radar.energy() < (data.radar_radius * data.radar_radius) then
+		draw_warning(monitor, "LOW POWER")
+		return false
+	end
+	if radar_timerId ~= -1 and radar.getResultsCount() == -1 then
+		draw_warning(monitor, "Already scanning...")
+		return false
+	end
+	radar_timerId = os.startTimer(radar_timerLength)
+	
+	radar.radius(data.radar_radius)
+	if radar.start() then
+		draw_warning(monitor, "Scanning...")
+	end
+	return false
+end
+
+function radar_scanDone()
+	local numResults = radar.getResultsCount();
+	data.radar_results = {}
+	if (numResults ~= 0) then
+		for i = 0, numResults do
+			local success, type, name, x, y, z = radar.getResult(i)
+			if success then
+				if name == "default" then
+					name = "?"
+				end
+				data.radar_results[i] = { x = x, y = y, z = z, name = name, type = type }
+			end
+		end
+		data.radar_scale = data.radar_radius
+	end
+	data_save()
+	radar_drawMap()
+end
+
+function draw_text(monitor, x, y, text, textColor, backgroundColor)
+	if monitor == nil then
+		term.setCursorPos(x, y)
+		if textColor ~= nil then term.setTextColor(textColor) end
+		if backgroundColor ~= nil then term.setBackgroundColor(backgroundColor) end
+		term.write(text)
+		local xt, yt = term.getCursorPos()
+		term.setCursorPos(1, yt + 1)
+	else
+		monitor.setCursorPos(x, y)
+		if textColor ~= nil then monitor.setTextColor(textColor) end
+		if backgroundColor ~= nil then monitor.setBackgroundColor(backgroundColor) end
+		monitor.write(text)
+		local xt, yt = monitor.getCursorPos()
+		monitor.setCursorPos(1, yt + 1)
+	end
+end	
+
+function draw_warning(monitor, text)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	local centerX = math.floor(screenWidth / 2);
+	local centerY = math.floor(screenHeight / 2);
+	local halfWidth = math.ceil(string.len(text) / 2);
+	local blank = string.sub("                              ", - (string.len(text) + 2))
+
+	draw_text(monitor, centerX - halfWidth - 1, centerY - 1, blank, colors.white, colors.red);
+	draw_text(monitor, centerX - halfWidth - 1, centerY    , " " .. text .. " ", colors.white, colors.red);
+	draw_text(monitor, centerX - halfWidth - 1, centerY + 1, blank, colors.white, colors.red);
+end
+
+function draw_centeredText(monitor, y, text)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	local x = math.floor(screenWidth / 2 - string.len(text) / 2 + 0.5);
+
+	draw_text(monitor, x, y, text, nil, nil);
+end
+
+function radar_drawContact(monitor, contact)
+	local screenWidth, screenHeight
+	if monitor == nil then
+		screenWidth, screenHeight = term.getSize()
+	else
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	
+	local screenX = (radar_x + data.radar_offsetX - contact.x) / data.radar_scale
+	local screenY = (radar_z + data.radar_offsetY - contact.z) / data.radar_scale
+	local visible = true
+	
+	if screenX <= -1 or screenX >= 1 or screenY <= -1 or screenY >= 1 then
+		screenX = math.min(1, math.max(-1, screenX))
+		screenY = math.min(1, math.max(-1, screenY))
+		visible = false
+	end
+	
+	screenX = math.floor(screenX * (screenWidth  - 3) / 2 + ((screenWidth  - 1)  / 2) + 1.5)
+	screenY = math.floor(screenY * (screenHeight - 3) / 2 + ((screenHeight - 1) / 2) + 1.5)
+	
+	if contact.type == "self" then
+		draw_text(monitor, screenX, screenY, Style.TextRadarself, Style.CRadarself, Style.BGRadarself)
+	else
+		draw_text(monitor, screenX, screenY, Style.TextRadarother, Style.CRadarother, Style.BGRadarother)
+	end
+	if visible then
+		local text = contact.name
+		screenX = math.min(screenWidth - 1 - string.len(text), math.max(2, math.floor(screenX - string.len(text) / 2 + 0.5)))
+		if screenY == (screenHeight - 1) then
+			screenY = screenY - 1
+		else
+			screenY = screenY + 1
+		end
+		draw_text(monitor, screenX, screenY, text, Style.CRadarother, Style.BGRadarother)
+	end
+end
+
+function radar_drawMap()
+	local screenWidth, screenHeight, x, y
+	local monitor = radar_getMonitor()
+	-- center area
+	SetColorRadarmap()
+	if monitor == nil then
+		term.clear()
+		screenWidth, screenHeight = term.getSize()
+	else
+		monitor.clear()
+		screenWidth, screenHeight = monitor.getSize()
+	end
+	-- borders
+	SetColorRadarborder()
+	for x = 1, screenWidth do
+		if monitor == nil then
+			term.setCursorPos(x, 1)
+			term.write(" ")
+			term.setCursorPos(x, screenHeight)
+			term.write(" ")
+		else
+			monitor.setCursorPos(x, 1)
+			monitor.write(" ")
+			monitor.setCursorPos(x, screenHeight)
+			monitor.write(" ")
+		end
+	end
+	for y = 2, screenHeight - 1 do
+		if monitor == nil then
+			term.setCursorPos(1, y)
+			term.write(" ")
+			term.setCursorPos(screenWidth, y)
+			term.write(" ")
+		else
+			monitor.setCursorPos(1, y)
+			monitor.write(" ")
+			monitor.setCursorPos(screenWidth, y)
+			monitor.write(" ")
+		end
+	end
+	-- title
+	local text = label .. " - Radar map"
+	if #data.radar_results == 0 then
+		text = text .. " (no contacts)"
+	else
+		text = text .. " (" .. #data.radar_results .. " contacts)"
+	end
+   	draw_centeredText(monitor, 1, text)
+	-- status
+	local text = "Scan radius: " .. data.radar_radius
+	if radar ~= nil then
+		text = text .. " | Energy: " .. radar.energy() .. " EU"
+	end
+	text = text .. " | Scale: " .. data.radar_scale
+	draw_centeredText(monitor, screenHeight, text)
+	-- results
+	SetCursorPos(1, 12)
+	radar_drawContact(monitor, {x = radar_x, y = radar_y, z = radar_z, name = "", type = "self"})
+	for i = 0, #data.radar_results - 1 do
+		radar_drawContact(monitor, data.radar_results[i])
+	end
+	
+	-- restore defaults
+	SetColorDefault()
+end
+
+radar_waitingNextScan = false
+function radar_timerEvent()
+	radar_timerId = -1
+	if radar_waitingNextScan then
+		radar_waitingNextScan = false
+		radar_scan() -- will restart timer
+	else
+		local numResults = radar.getResultsCount();
+		if numResults ~= -1 then
+			radar_scanDone()
+			if data.radar_autoscan then
+				radar_waitingNextScan = true
+				radar_timerId = os.startTimer(data.radar_autoscanDelay)
+			end
+		else -- still scanning
+			radar_timerId = os.startTimer(radar_timerLength)
+		end
+	end
+end
+
+----------- Boot sequence 
+label = os.getComputerLabel()
+if not label then
+	label = "" .. os.getComputerID()
+end
+
+-- read configuration
+data_read()
+
+-- initial scanning
+monitors = {}
+ShowTitle(label .. " - Connecting...")
+WriteLn("")
+
+sides = peripheral.getNames()
+reactor = nil
+mininglasers = {}
+reactorlasers = {}
+cloakingcores = {}
+ship = nil
+radar = nil
+for key,side in pairs(sides) do
+	sleep(0)
+	if peripheral.getType(side) == "monitor" then
+		WriteLn("Wrapping " .. side)
+		lmonitor = peripheral.wrap(side)
+		table.insert(monitors, lmonitor)
+		lmonitor.setTextScale(monitor_textScale)
+	elseif peripheral.getType(side) == "warpdriveShipController" then
+		WriteLn("Wrapping " .. side)
+		ship = peripheral.wrap(side)
+	elseif peripheral.getType(side) == "warpdriveEnanReactorCore" then
+		WriteLn("Wrapping " .. side)
+		reactor =  peripheral.wrap(side)
+	elseif peripheral.getType(side) == "warpdriveEnanReactorLaser" then
+		WriteLn("Wrapping " .. side)
+		table.insert(reactorlasers, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "warpdriveMiningLaser" then
+		WriteLn("Wrapping " .. side)
+		table.insert(mininglasers, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "warpdriveCloakingCore" then
+		WriteLn("Wrapping " .. side)
+		table.insert(cloakingcores, peripheral.wrap(side))
+	elseif peripheral.getType(side) == "warpdriveRadar" then
+		WriteLn("Wrapping " .. side)
+		radar = peripheral.wrap(side);
+	end
+end
+-- sleep(1)
+
+if not os.getComputerLabel() and (ship ~= nil or reactor ~= nil) then
+	data_setName()
+end
+
+-- peripherals status
+function connections_page()
+	ShowTitle(label .. " - Connections")
+
+	WriteLn("")
+	if #monitors == 0 then
+		SetColorDisabled()
+		WriteLn("No Monitor detected")
+	elseif #monitors == 1 then
+		SetColorSuccess()
+		WriteLn("1 monitor detected")
+	else
+		SetColorSuccess()
+		WriteLn(#monitors .. " Monitors detected")
+	end
+
+	if ship == nil then
+		SetColorDisabled()
+		WriteLn("No ship controller detected")
+	else
+		SetColorSuccess()
+		WriteLn("Ship controller detected")
+	end
+
+	if reactor == nil then
+		SetColorDisabled()
+		WriteLn("No Enantiomorphic reactor detected")
+	else
+		SetColorSuccess()
+		WriteLn("Enantiomorphic reactor detected")
+	end
+
+	if #reactorlasers == 0 then
+		SetColorDisabled()
+		WriteLn("No reactor stabilisation laser detected")
+	elseif #reactorlasers == 1 then
+		SetColorSuccess()
+		WriteLn("1 reactor stabilisation laser detected")
+	else
+		SetColorSuccess()
+		WriteLn(#reactorlasers .. " reactor stabilisation lasers detected")
+	end
+
+	if #mininglasers == 0 then
+		SetColorDisabled()
+		WriteLn("No mining laser detected")
+	elseif #mininglasers == 1 then
+		SetColorSuccess()
+		WriteLn("1 mining laser detected")
+	else
+		SetColorSuccess()
+		WriteLn(#mininglasers .. " mining lasers detected")
+	end
+
+	if #cloakingcores == 0 then
+		SetColorDisabled()
+		WriteLn("No cloaking core detected")
+	elseif #cloakingcores == 1 then
+		SetColorSuccess()
+		WriteLn("1 cloaking core detected")
+	else
+		SetColorSuccess()
+		WriteLn(#cloakingcores .. " cloaking cores detected")
+	end
+
+	if radar == nil then
+		SetColorDisabled()
+		WriteLn("No radar detected")
+	else
+		SetColorSuccess()
+		WriteLn("Radar detected")
+	end
+end
+
+-- peripheral boot up
+Clear()
+connections_page()
+SetColorDefault()
+WriteLn("")
+sleep(0)
+radar_boot()
+core_boot()
+reactor_boot()
+sleep(0)
+
+-- main loop
+abort = false
+refresh = true
+page = connections_page
+keyHandler = nil
+repeat
+	ClearWarning()
+	if refresh then
+		Clear()
+		page()
+		menu_common()
+		refresh = false
+	end
+	params = { os.pullEventRaw() }
+	eventName = params[1]
+	side = params[2]
+	if side == nil then side = "none" end
+	if eventName == "key" then
+		keycode = params[2]
+		if keycode == 45 then -- x for eXit
+			os.pullEventRaw()
+			abort = true
+		elseif keycode == 11 or keycode == 82 then -- 0
+			page = connections_page
+			keyHandler = nil
+			refresh = true
+		elseif keycode == 2 or keycode == 79 then -- 1
+			page = reactor_page
+			keyHandler = reactor_key
+			refresh = true
+		elseif keycode == 3 or keycode == 80 then -- 2
+			page = cloaking_page
+			keyHandler = cloaking_key
+			refresh = true
+		elseif keycode == 4 or keycode == 81 then -- 3
+			page = mining_page
+			keyHandler = mining_key
+			refresh = true
+		elseif keycode == 5 or keycode == 75 then -- 4
+			page = core_page
+			keyHandler = core_key
+			refresh = true
+		elseif keycode == 6  or keycode == 76 then -- 5
+			page = radar_page
+			keyHandler = radar_key
+			refresh = true
+		elseif keyHandler ~= nil and keyHandler(keycode) then
+			refresh = true
+			os.sleep(0)
+		else
+			ShowWarning("Key " .. keycode .. " is invalid")
+			os.sleep(0.2)
+		end
+		-- func(unpack(params))
+		-- abort, refresh = false, false
+	elseif eventName == "char" then
+		-- drop it
+	elseif eventName == "key_up" then
+		-- drop it
+	elseif eventName == "reactorPulse" then
+		reactor_pulse(params[2])
+		refresh = (page == reactor_page)
+	elseif eventName == "terminate" then
+		abort = true
+	elseif not common_event(eventName, params[2]) then
+		ShowWarning("Event '" .. eventName .. "', " .. side .. " is unsupported")
+		refresh = true
+		os.sleep(0.2)
+	end
+until abort
+
+-- deactivate summon all on exit
+if data.core_summon then
+	data.core_summon = false
+	data_save()
+end
+
+-- clear screens on exit
+SetMonitorColorFrontBack(colors.white, colors.black)
+term.clear()
+if monitors ~= nil then
+	for key,monitor in pairs(monitors) do
+		monitor.clear()
+	end
+end
+SetCursorPos(1, 1)
+Write("")

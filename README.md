@@ -1,24 +1,20 @@
-WarpDrive
+WarpDrive for 1.7
 =========
+[![Build Status](https://travis-ci.org/LemADEC/WarpDrive.svg?branch=MC1.7)](https://travis-ci.org/LemADEC/WarpDrive)
 
-A warp drive mod for minecraft
+An update to the warp drive mod. Currently in progress.
+Will work almost exactly like the original, but with improvements!
 
-Minecraft forum:
-   http://www.minecraftforum.net/topic/1938578-164-warpdrive-mod-ships-space-lasers
-   
-Mod Showcase:
-   https://www.youtube.com/watch?v=9pUSZPEMc1g
-   
-Wiki:
-   http://wiki.kubach.tk/
+
+If you would like to help, find an issue and then fork the repository. If you can fix it, submit a pull request and we will accept it! This is valid even if you dont know how to code, modifications to textures, resources, wikis, and everything else are up for improvment.
+
+See mcmod.info for credits
+
+
+
+
 
 Installation
 ============
-1. Download fresh build: http://kubach.tk/1.6.4/WarpDrive.zip
-2. Download fresh Core build: http://kubach.tk/1.6.4/WarpDriveCore.jar
-3. Install last version of IC2 and Computer Craft
-
-Contact Us
-=============
-* Visit our IRC channel on EsperNet: irc://chaos.esper.net/WarpDrive
-* Or PM me: http://www.minecraftforum.net/user/1133830-anon1644/
+1. Download WarpDrive.jar from Downloads and put it in your mods folder
+3. You need to have either CoFHCore or IC2 installed to run. You also need either ComputerCraft or OpenComputers

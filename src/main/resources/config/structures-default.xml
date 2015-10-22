@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
+<warpdriveWorldGeneration version="1">
+
+	<structure group="star" name="red_giant">
+		<shell name="core" maxThickness="10" minThickness="3">
+			<filler weight="1" block="minecraft:iron_ore" />
+		</shell>
+		
+		<shell name="mantle" minThickness="10" maxThickness="25">
+			<filler weight="10" block="minecraft:sand" />
+			<filler weight="1" block="minecraft:iron_block" />
+		</shell>
+
+		<shell name="surface" minThickness="10" maxThickness="20">
+			<filler weight="5" block="minecraft:glowstone" />
+			<filler weight="10" block="minecraft:lava" />
+		</shell>
+	</structure>
+
+	<structure group="moon" name="theMoon">
+		<shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
+			<filler weight="100" block="minecraft:iron_ore" />
+		</shell>
+		
+		<shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
+			<filler weight="10" block="minecraft:stone" />
+			<filler weight="3" block="minecraft:clay" />
+		</shell>
+		
+		<shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld,commonOres">
+			<filler weight="3" block="minecraft:clay" />
+		</shell>
+	</structure>
+	
+	<structure group="moon" name="theCorruptedMoon">
+        <shell name="core" minThickness="1" maxThickness="5" fillerSets="rareOres">
+            <filler weight="100" block="minecraft:iron_ore" />
+        </shell>
+        
+        <shell name="mantle" minThickness="6" maxThickness="20" fillerSets="commonOres,uncommonOres">
+            <filler weight="10" block="minecraft:stone" />
+            <filler weight="3" block="minecraft:clay" />
+            <filler ratio=".2" block="minecraft:air" />
+            <filler ratio=".4" block="minecraft:cobblestone" />
+        </shell>
+        
+        <shell name="surface" minThickness="10" maxThickness="20" fillerSets="overworld,commonOres">
+            <filler weight="3" block="minecraft:clay" />
+            <filler ratio=".05" block="minecraft:brick" />
+            <filler ratio=".5" block="minecraft:air" />
+        </shell>
+    </structure>
+    
+    <structure name="nether_moon" group="moon" > 
+        <shell name="substance" fillerSets="commonOres" minThickness="10" maxThickness="30">
+            <filler block="minecraft:netherrack" weight="1" />
+            <filler block="minecraft:lava" ratio=".001" />
+            <filler block="minecraft:bedrock" ratio=".001" />
+        </shell>
+    </structure>
+    
+    <structure name="end_moon" group="moon" >
+        <shell name="substance"  minThickness="10" maxThickness="30">
+            <filler block="minecraft:whiteStone" weight="1"/>
+            <filler block="minecraft:bedrock" ratio=".001" />
+        </shell>
+    </structure>
+    
+    <structure group="asteroid" name="asteroid" coreBlock="minecraft:iron_ore" maxCoreSize="10" minCoreSize="6">
+        
+        <shell name="mantle" minThickness="2" maxThickness="10" fillerSets="commonOres,uncommonOres">
+            <filler weight="10" block="minecraft:stone" />
+            <filler weight="5" block="minecraft:cobblestone" />
+        </shell>
+        
+     </structure>
+     
+     <structure group="asteroid" name="diamondGeode" coreBlock="minecraft:diamond_ore" maxCoreSize="2" minCoreSize="1">
+        
+        <shell name="mantle" minThickness="5" maxThickness="25" fillerSets="commonOres">
+            <filler weight="10" block="minecraft:stone" />
+            <filler weight="5" block="minecraft:cobblestone" />
+        </shell>
+        
+     </structure>
+</warpdriveWorldGeneration>

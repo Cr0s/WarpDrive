@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE warpdriveWorldGeneration>
+
+<warpdriveWorldGeneration version="1">
+
+	<FillerSet group="stone_ores">
+		<filler block="minecraft:coal_ore" ratio=".08" />
+		<filler block="minecraft:iron_ore" ratio=".05" />
+		<filler block="minecraft:redstone_ore" ratio=".05" />
+		<filler block="minecraft:gold_ore" ratio=".008" />
+		<filler block="minecraft:lapis_ore" ratio=".005" />
+		<filler block="minecraft:emerald_ore" ratio=".005" />
+		<filler block="IC2:blockOreTin" ratio=".05" mods="IC2" />
+		<filler block="IC2:blockOreCopper" ratio=".06"  mods="IC2" />
+		<filler block="IC2:blockOreLead" ratio=".06"  mods="IC2" />
+		<filler block="IC2:blockOreUran" ratio=".001"  mods="IC2" />
+		<filler block="ImmersiveEngineering:ore" metadata="0" ratio=".001" mods="ImmersiveEngineering" /><!-- Copper -->
+		<filler block="ImmersiveEngineering:ore" metadata="1" ratio=".001" mods="ImmersiveEngineering" /><!-- Bauxite -->
+		<filler block="ImmersiveEngineering:ore" metadata="2" ratio=".001" mods="ImmersiveEngineering" /><!-- Lead -->
+		<filler block="ImmersiveEngineering:ore" metadata="3" ratio=".001" mods="ImmersiveEngineering" /><!-- Silver -->
+		<filler block="ImmersiveEngineering:ore" metadata="4" ratio=".001" mods="ImmersiveEngineering" /><!-- Nickel -->
+		<filler block="arsmagica2:vinteumOre" metadata="0" ratio=".001" mods="arsmagica2" /><!-- Vinteum -->
+		<filler block="arsmagica2:vinteumOre" metadata="1" ratio=".001" mods="arsmagica2" /><!-- Chimerite -->
+		<filler block="arsmagica2:vinteumOre" metadata="2" ratio=".001" mods="arsmagica2" /><!-- Blue topaz -->
+		<filler block="arsmagica2:vinteumOre" metadata="3" ratio=".001" mods="arsmagica2" /><!-- Moonstone -->
+		<filler block="arsmagica2:vinteumOre" metadata="4" ratio=".001" mods="arsmagica2" /><!-- Sunstone -->
+		<filler block="minecraft:diamond_ore" ratio=".004" />
+		<filler block="warpdrive:iridiumBlock" ratio=".0001" mods="!netherores" />
+		<filler block="icbm:sulfur_ore" ratio=".001" /><!-- to be confirmed -->
+		<filler block="ae2:quartz" ratio=".0013" /><!-- to be confirmed -->
+		<filler block="minecraft:water" ratio=".001" />
+		<filler block="minecraft:bedrock" ratio=".001" />
+	</FillerSet>
+	
+	<FillerSet group="commonOres">
+		<filler block="minecraft:coal_ore" ratio=".08" />
+		<filler block="minecraft:iron_ore" ratio=".05" />
+		<filler block="IC2:blockOreTin" ratio=".05" />
+		<filler block="IC2:blockOreCopper" ratio=".06" />
+	</FillerSet>
+	
+	<FillerSet group="uncommonOres">
+		<filler block="minecraft:redstone_ore" ratio=".02" />
+		<filler block="IC2:blockOreUran" ratio=".001" mods="IC2" />
+		<filler block="ae2:quartz" ratio=".01" mods="appliedenergistics2" />
+	</FillerSet>
+	
+	<FillerSet group="rareOres">
+		<filler block="minecraft:gold_ore" ratio=".008" />
+		<filler block="minecraft:diamond_ore" ratio=".001" />
+		<filler block="minecraft:lapis_ore" ratio=".005" />
+		<filler block="minecraft:emerald_ore" ratio=".005" />
+		<filler block="warpdrive:iridiumBlock" ratio=".0001" />
+	</FillerSet>
+	
+	<FillerSet group="overworld">
+		<filler block="minecraft:stone" weight="200" />
+		<filler block="minecraft:sand" weight="30" />
+		<filler block="minecraft:dirt" weight="50" />
+	</FillerSet>
+	
+	<FillerSet group="end">
+		<filler block="minecraft:end_stone" weight="200" />
+		<filler block="minecraft:sand" weight="20" />
+		<filler block="minecraft:obsidian" weight="20" />
+	</FillerSet>
+	
+	<FillerSet group="nether">
+		<filler block="minecraft:netherrack" weight="300" />
+		<filler block="minecraft:quartz_ore" weight="20" />
+		<filler block="minecraft:glowstone" weight="40" />
+	</FillerSet>
+	
+</warpdriveWorldGeneration>

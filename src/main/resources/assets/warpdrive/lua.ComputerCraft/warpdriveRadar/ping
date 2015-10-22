@@ -1,0 +1,71 @@
+if not term.isColor() then
+  print("Advanced computer required")
+  exit()
+end
+
+function error(message)
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write(message)
+  term.setBackgroundColor(colors.black)
+  term.setTextColor(colors.white)
+  print()
+end
+
+sides = peripheral.getNames()
+for key,side in pairs(sides) do
+  if peripheral.getType(side) == "warpdriveRadar" then
+    print("Radar found on " .. side)
+    radar = peripheral.wrap(side)
+  end
+end
+if radar == nil then
+  error("No radar detected")
+  return
+end
+
+local argv = { ... }
+if #argv ~= 1 then
+  error("Usage: ping <scanRadius>")
+  return
+end
+
+local radius = tonumber(argv[1])
+
+if radius < 1 or radius > 9999 then
+  error("Radius must be between 1 and 9999")
+  return
+end
+
+energy, energyMax = radar.energy()
+if energy < radius * radius then
+  error("Low energy level... (" + energy + "/" + radius * radius + ")")
+  return
+end
+radar.radius(radius)
+radar.start()
+sleep(0.5)
+
+print("Scanning...")
+
+local seconds = 0
+local count = nil
+repeat
+  count = radar.getResultsCount()
+  sleep(1)
+  seconds = seconds + 1
+until (count ~= nil and count ~= -1) or seconds > 10
+print("took " .. seconds .. " seconds")
+
+if count ~= nil and count > 0 then
+  for i=0, count-1 do
+    success, type, name, x, y, z = radar.getResult(i)
+	if success then
+      print(type .. " " .. name .. " @ (" .. x .. " " .. y .. " " .. z .. ")")
+	else
+	  print("Error " .. type)
+	end
+  end
+else
+  print("Nothing was found =(")
+end

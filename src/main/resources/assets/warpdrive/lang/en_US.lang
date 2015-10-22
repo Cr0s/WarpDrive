@@ -1,0 +1,58 @@
+item.warpdrive.crafting.Malformed.name=Bad Item
+item.warpdrive.crafting.EmptyCore.name=Empty Core
+item.warpdrive.crafting.TeleCore.name=Teleportation Core
+item.warpdrive.crafting.WarpCore.name=Warp Core
+item.warpdrive.crafting.LaserCore.name=Laser Core
+item.warpdrive.crafting.ReactorCore.name=Reactor Core
+item.warpdrive.crafting.InterfaceComputer.name=Computer Interface
+item.warpdrive.crafting.InterfacePower.name=Power Interface
+item.warpdrive.crafting.PowerCore.name=Energy Core
+item.warpdrive.crafting.AirCanisterEmpty.name=Empty Air Canister
+
+item.warpdrive.energy.IC2reactorLaserFocus.name=IC2 Reactor Laser Focus
+item.warpdrive.armor.AirCanisterFull.name=Air Canister
+item.warpdrive.armor.Helmet.name=Warp Helmet
+
+item.warpdrive.upgrade.Power.name=Power Upgrade
+item.warpdrive.upgrade.Speed.name=Speed Upgrade
+item.warpdrive.upgrade.Range.name=Range Upgrade
+item.warpdrive.upgrade.Energy.name=Energy Upgrade
+
+
+tile.warpdrive.passive.Air.name=Air Block
+tile.warpdrive.passive.Energized.name=Energized Block
+tile.warpdrive.passive.Gas.name=Gas Block
+tile.warpdrive.passive.IridiumBlock.name=Iridium Block
+tile.warpdrive.passive.HighlyAdvancedMachine.name=Highly Advanced Machine Block
+tile.warpdrive.passive.Network.name=Network Block
+tile.warpdrive.passive.Plain.name=Plain Block
+tile.warpdrive.passive.TransportBeacon.name=Transport Beacon
+
+tile.warpdrive.machines.AirGenerator.name=Air Generator
+tile.warpdrive.machines.ChunkLoader.name=Chunk Loader
+tile.warpdrive.machines.Laser.name=Laser
+tile.warpdrive.machines.LaserMedium.name=Laser Medium (Particle Booster)
+
+tile.warpdrive.building.ShipScanner.name=Ship Scanner
+
+tile.warpdrive.collection.LaserTreeFarm.name=Laser Tree Farm
+tile.warpdrive.collection.MiningLaser.name=Mining Laser
+
+tile.warpdrive.detection.Camera.name=Camera
+tile.warpdrive.detection.CloakingCoil.name=Cloaking Coil
+tile.warpdrive.detection.CloakingCore.name=Cloaking Core
+tile.warpdrive.detection.Monitor.name=Monitor
+tile.warpdrive.detection.Radar.name=Radar
+tile.warpdrive.detection.WarpIsolation.name=Warp-field Isolation Block
+
+tile.warpdrive.energy.EnanReactorCore.name=Enantiomorphic Reactor Core
+tile.warpdrive.energy.EnanReactorLaser.name=Enantiomorphic Reactor Stabilisation Laser
+tile.warpdrive.energy.EnergyBank.name=Anuic Energy Bank
+tile.warpdrive.energy.IC2ReactorLaserMonitor.name=IC2 Reactor Laser Monitor
+
+tile.warpdrive.movement.Lift.name=Lift
+tile.warpdrive.movement.ShipController.name=Ship Controller
+tile.warpdrive.movement.ShipCore.name=Ship Core
+tile.warpdrive.movement.Transporter.name=Transporter
+
+tile.warpdrive.weapon.LaserCamera.name=Laser + Camera

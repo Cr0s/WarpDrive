@@ -1,0 +1,48 @@
+if not term.isColor() then
+  print("Advanced computer required")
+  exit()
+end
+
+sides = peripheral.getNames()
+mininglasers = {}
+for key,side in pairs(sides) do
+  if peripheral.getType(side) == "warpdriveMiningLaser" then
+    print("Wrapping " .. side)
+    table.insert(mininglasers, peripheral.wrap(side))
+  end
+end
+
+label = os.getComputerLabel()
+if label then
+else
+  label = "" .. os.getComputerID()
+end
+term.setBackgroundColor(colors.black)
+term.clear()
+term.setBackgroundColor(colors.lime)
+term.setCursorPos(1, 1)
+term.write(label)
+
+if #mininglasers == 0 then
+  term.setBackgroundColor(colors.red)
+  term.setTextColor(colors.white)
+  term.write("No mining laser detected")
+else
+  for key,mininglaser in pairs(mininglasers) do
+    term.setCursorPos(1, 2 + key)
+    if not mininglaser.isMining() then
+      term.setBackgroundColor(colors.red)
+      term.setTextColor(colors.white)
+      term.write("Mining laser " .. key .. " of " .. #mininglasers .. " is already stopped")
+    else
+      mininglaser.stop()
+      term.setBackgroundColor(colors.lime)
+      term.setTextColor(colors.blue)
+      term.write("Mining laser " .. key .. " of " .. #mininglasers .. " has been stopped")
+	end
+  end
+end
+
+term.setBackgroundColor(colors.black)
+term.setTextColor(colors.white)
+print()
