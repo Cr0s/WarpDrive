@@ -42,7 +42,9 @@ public class BlockLaserMedium extends BlockContainer {
 			return iconBuffer[8];
 		}
 		
-		return iconBuffer[metadata];
+		int index = metadata >= iconBuffer.length ? iconBuffer.length - 1 : metadata;
+
+		return iconBuffer[index];
 	}
 	
 	@Override
